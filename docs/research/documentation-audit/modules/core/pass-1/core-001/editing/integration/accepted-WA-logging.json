@@ -1,0 +1,127 @@
+{
+  "scope": "Reviewed logging accessibility correction; WA changes one documentation body, root changes prose only",
+  "patch_sha256": "fb137a493fb4eac7b02b6592a9fc9d2abf74e1ef69d23f43015d7f76c5e4ad57",
+  "product_files": [
+    {
+      "path": "src/WebAuthn/CLAUDE.md",
+      "previous_sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a",
+      "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/before.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/before.snapshot",
+      "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a",
+      "bytes": 36508
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-1.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-1.snapshot",
+      "sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+      "bytes": 2258
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-2.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-2.snapshot",
+      "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+      "bytes": 3088
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-3.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-3.snapshot",
+      "sha256": "b921fa801d7425bc87fd67beda89f2135b243affe1aa77ced1c464250c5e430d",
+      "bytes": 1051
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-4.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/isolated-source-4.snapshot",
+      "sha256": "5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52",
+      "bytes": 5480
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-1.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-1.snapshot",
+      "sha256": "a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b",
+      "bytes": 3155
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-2.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-2.snapshot",
+      "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+      "bytes": 3088
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-3.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-3.snapshot",
+      "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60",
+      "bytes": 1050
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-4.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/PRIMARY-read-only-source-4.snapshot",
+      "sha256": "5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52",
+      "bytes": 5480
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/preserved-inputs.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/preserved-inputs.json",
+      "sha256": "de13c4fcad1825c7cee98d7fe88f27c6985cca34a1ae6c5a2b778155bd2e2862",
+      "bytes": 64045
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/LoggerFactoryExtensions-v10.0.0.cs.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/LoggerFactoryExtensions-v10.0.0.cs.snapshot",
+      "sha256": "e48c259aa175f273e99652dd335889aaafdd59ae3da01a319fd2e9b8e7f26a77",
+      "bytes": 1609
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/handoff.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/handoff.md",
+      "sha256": "a247157fc9d74fc689fe595099ad091b08da53d9c7b2073f9594538785792978",
+      "bytes": 5494
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/after.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/after.snapshot",
+      "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b",
+      "bytes": 37568
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/before-body.cs.fragment",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/before-body.cs.fragment",
+      "sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+      "bytes": 166
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/after-body.cs.fragment",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/after-body.cs.fragment",
+      "sha256": "692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860",
+      "bytes": 180
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/focused.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/focused.patch",
+      "sha256": "fb137a493fb4eac7b02b6592a9fc9d2abf74e1ef69d23f43015d7f76c5e4ad57",
+      "bytes": 3116
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/verification.json",
+      "sha256": "ef459be584bceb2136e8c8ac09ce8c368c3c3ab8e943ef9a2286fabe664eb2bb",
+      "bytes": 5434
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/review.md",
+      "sha256": "c099ce8b186359a4121948a2051ad5e2b88daa2716691bf554c8ed03e6249547",
+      "bytes": 5420
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/compiler-logging-correction/review-identities.json",
+      "sha256": "a5be64b8f2a7db0d5755fa00070ae9ccad4cbefd46cb86e17896c9f916160fc8",
+      "bytes": 5790
+    }
+  ]
+}

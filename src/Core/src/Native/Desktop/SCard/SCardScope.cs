@@ -20,15 +20,17 @@ namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
 internal enum SCARD_SCOPE
 {
     /// <summary>
-    ///     Database operations are performed within the domain of the user.
+    ///     User database scope on Windows. pcsc-lite documents this scope as unused.
     /// </summary>
     USER,
 
+    /// <summary>Terminal scope; unused by pcsc-lite.</summary>
     TERMINAL,
 
     /// <summary>
     ///     Database operations are performed within the domain of the system. The calling
     ///     application must have appropriate access permissions for any database actions.
+    ///     On pcsc-lite this selects the local resource-manager service.
     /// </summary>
     SYSTEM
 }

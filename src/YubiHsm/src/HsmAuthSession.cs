@@ -125,6 +125,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
+    /// <remarks>
+    ///     An override does not skip SELECT; malformed response framing can still fail before version
+    ///     fallback. Keep borrowed inputs and prompt services alive through complete public tasks,
+    ///     including policy lookup, CALCULATE and callbacks, before disposing the session.
+    /// </remarks>
     public static Task<HsmAuthSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
@@ -512,7 +517,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        // Reuse the current protocol so its PC/SC transaction remains owned and disposable.
+        // Reuse the protocol; this path owns no PC/SC transaction and starts no fresh SCP handshake.
+        // Under SCP the re-SELECT passes through unprotected, retaining old host state and public flags;
+        // it does not establish that the next protected operation will succeed.
         // Reselect after reset while retaining the resolved feature-version policy. Discarding the
         // returned version keeps caller overrides and later feature gates consistent within this session.
         _ = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
@@ -945,6 +952,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     internal static void ZeroApduResponse(ApduResponse response)
     {
+        // This legacy helper reaches the final response's actual array, including status bytes.
+        // Core now exposes Clear() for that owner. Earlier transport/fragment/decrypted copies remain
+        // separate; retry/backend failures before the caller's try are outside this cleanup scope.
         if (MemoryMarshal.TryGetArray(response.RawData, out var rawData))
             CryptographicOperations.ZeroMemory(rawData.AsSpan());
     }

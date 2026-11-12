@@ -1,0 +1,67 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/R1-comment-delta.patch",
+    "bytes": 4883,
+    "sha256": "831334afe0df7a602624b425cd4632c233dce05c411da2b337ab4f0b45910f07"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/allowlist.json",
+    "bytes": 8471,
+    "sha256": "414c4547ed0d12138ee55aabd6927815d9c55cbe22b200a0133aa869fc86fda2"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/candidate-decisions.json",
+    "bytes": 22917,
+    "sha256": "5b325d9320ad0c36e3efaf7f523bde968365145fbdee10c895e2d4ab0510a71d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/example-classification-overlay.json",
+    "bytes": 24600,
+    "sha256": "fae1694ca3434fb18ff84f6ca6c8e2965c1e358cc7b25bd8fd2ac08cb3b2c84e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/example-inventory.json",
+    "bytes": 294006,
+    "sha256": "41651e0a9234a531424386be290e5670ace41f6f2dc3b5568a499ab850ada1bb"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/final-checks.json",
+    "bytes": 901,
+    "sha256": "b914cdea0adf517e01d376b4e9d82bf7b1fe6eb8ceb989440571c6cbd99ee4df"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/final-successor-source.patch",
+    "bytes": 92857,
+    "sha256": "4738181238db7103d65e47addac0a96c8a936e8c4a464a991885abd8ea788d68"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/focused-review-return.md",
+    "bytes": 8796,
+    "sha256": "515d483244d4c238594a1ccd87050b460e33ea9bb975e8ede43bda4fb520cab3"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/history-preservation.json",
+    "bytes": 15241,
+    "sha256": "e1c9ff8879bb2fd0fc10d91f19ad9433f5e908c8e4d7f340195d70979a992100"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/path-decisions.json",
+    "bytes": 4742752,
+    "sha256": "51e4677c67750e030de575ded60e9ad460f71f4a87a700e4e852c10bfd332c96"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/record.py",
+    "bytes": 17359,
+    "sha256": "f6423b5f3adfe6e2beb299a40f81bfb9907ba80cf9e913d1a6bf0ecdf58eff99"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/remaining-referrals.json",
+    "bytes": 277555,
+    "sha256": "cd4ae61d8d0f8456eda6d3fdba33be2b7961462b74679ec88cb3ac3cdd70618e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/static-preservation.json",
+    "bytes": 3999,
+    "sha256": "ba9c2376dd0f9908c2e4035f255716bf7bad46911c6b088b7d32b66994c30031"
+  }
+]

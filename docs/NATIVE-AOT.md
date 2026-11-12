@@ -32,6 +32,11 @@ The research records preserve the environment, commands, and observations behind
 - [`native-aot-readiness.md`](research/native-aot-readiness.md)
 - [`native-aot-readiness-data.md`](research/native-aot-readiness-data.md)
 
+These are historical execution claims for their recorded source/host artifacts, not fresh execution
+of every current path. Earlier monitor evidence does not exercise the present owned-monitor replay,
+fan-out, or disposal contract. Historical Windows output/binary provenance also has retained gaps;
+successful source compilation or later Linux runs do not reconstruct those missing artifacts.
+
 ## Evidence terms
 
 | Term | Meaning |
@@ -147,6 +152,15 @@ The pinned `Yubico.NativeShims` 1.18.1 package automatically links its RID-speci
 when `PublishAot=true` and removes the shared shim from the publish output. Non-AOT deployments
 continue to use the shared library. Static shim linking does not make the entire application
 fully static: operating-system libraries such as Linux PC/SC remain runtime dependencies.
+
+Qualify the native producer independently of the managed package version. Published NativeShims
+source, local headers, equal asset hashes, and a successful link do not identify a deployed binary's
+compiler flags, patches, exports, or ABI. The inspected NativeShims 1.18.1 Linux LP64 PC/SC path forwards
+the PCI pointer to a header shape with two `unsigned long` fields, whereas the current managed PCI
+carrier uses two four-byte fields. That selected-route discrepancy still needs exact producer/ABI and
+transmit qualification; it is not evidence that every installed Linux path failed. Windows DWORD and
+macOS framework layouts require their own platform evidence. See [Linux setup](linux-setup.md) for
+PC/SC, libudev loader names, and account permissions.
 
 Core must guard macOS-only shim calls with `OperatingSystem.IsMacOS()` so Native AOT eliminates
 them on Linux and Windows. This is an SDK responsibility, not a consumer linker configuration

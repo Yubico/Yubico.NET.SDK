@@ -1,0 +1,4 @@
+  using (SHA512 sha512Object = CryptographyProviders.Sha512Creator())
+  {
+      // Use the hash object within this disposal scope.
+  }

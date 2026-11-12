@@ -1,0 +1,38 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-protocols.md",
+    "sha256": "5084a4637a0005d1f8053e2ddb41fb102227d41aad570b12d77fd9b92a95683c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/candidate-decisions.json",
+    "sha256": "3f67aade37e54e741e44461a2480d610542b89c91ed9d949f9a9ef0276cf4fb6"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/citations.md",
+    "sha256": "3e5a693f3905b4a7fa1f2cd4b88221045aa47dad67a089e7a5a17f9a46c0b626"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/examples.json",
+    "sha256": "03f6a50201591bcdd0df192e2ee544764ec206a5afec9760861bf792594a9366"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/full-product.diff",
+    "sha256": "4a89837083fd34826639a55d1bd988574565bc8a4da508975820e0acfa3755d1"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/outside-owner-handoffs.json",
+    "sha256": "4888d6f64b07a2b7d3f84301decb1e54fc92c5c2b14307748219386a06eb08af"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/path-decisions.json",
+    "sha256": "691127ced67913859f5ddc2a469dbbda17a6b4f22f602777094d46128671fda0"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/receipt.json",
+    "sha256": "1dee31f152c73c6b6dd806cc93751308823909e135e7e59e6c54e3d13259d1ce"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/write-return.py",
+    "sha256": "07b02e261056386f8d28d6c537e31e76a1c64c8b92fb624a5afcb8fa8ec13733"
+  }
+]

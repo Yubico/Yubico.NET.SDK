@@ -44,15 +44,15 @@ public class CoreCredentialReaderAuditReproTests
 
     /// <summary>
     ///     h) If the confirmation read is cancelled, the already-read first credential must still be
-    ///     disposed (zeroed), per the class contract "Clears intermediate buffers on all code paths".
-    ///     The first credential's backing array is identified by pre-seeding this thread's
-    ///     <see cref="ArrayPool{T}.Shared" /> slot with a sentinel-filled array.
+    ///     disposed and cleared. The sentinel probe relies on shared-pool reuse; its precondition
+    ///     observes sentinel mutation, rather than proving the rented array's identity. It does not
+    ///     establish portable pool reuse or erasure of unobserved input/runtime storage.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_ConfirmationCancelled_FirstCredentialIsCleared()
     {
-        // Seed: the next Rent(6) on this thread returns this exact array (thread-local bucket 16).
+        // Seed a likely reusable bucket; shared-pool reuse is an assumption of this probe, not a guarantee.
         var seeded = ArrayPool<byte>.Shared.Rent(16);
         seeded.AsSpan().Fill(0xEE);
         ArrayPool<byte>.Shared.Return(seeded);

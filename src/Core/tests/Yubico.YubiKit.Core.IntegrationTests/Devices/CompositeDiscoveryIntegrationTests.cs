@@ -23,17 +23,17 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
 ///     Key-count-agnostic composite-discovery invariants; the guarantees under test are specified in
-///     docs/architecture/device-discovery-guarantees.md. Requires one or more allow-listed composite USB
-///     YubiKeys; no touch / user-presence required. The invariants hold for any number of keys, so
+///     docs/architecture/device-discovery-guarantees.md. Requires one or more dedicated composite USB
+///     YubiKeys; no touch / user-presence required. The checks adapt to the enumerated key count, so
 ///     single-key rigs keep passing while multi-key rigs exercise the same contracts.
 /// </summary>
 /// <remarks>
-///     Expectations are computed from an independent raw USB enumeration (PC/SC reader names + HID
-///     descriptors) taken by the test itself, so no assertion hard-codes a key count. The rig is assumed
-///     USB-only (no NFC reader attached) and idle (no other process holding interfaces exclusively).
-///     Per Phase 0, zero-orphans / completeness / stability are EXPECTED RED on multi-same-PID-key rigs in
-///     fresh-process single-scan conditions until Phase 2 lands; conservation (interface count) is expected
-///     to hold today.
+///     Expectations use production PC/SC and HID enumerators with a local copy of PID/name policy. This
+///     oracle is independent of the merger, not an independent hardware census. The rig must be USB-only
+///     (no NFC reader attached), fully enumerated, idle, and free of competing interface owners. Several
+///     tests scan every returned key, and the typed-connect test opens every advertised interface directly;
+///     those paths do not apply the shared fixture allow list. Attach only dedicated authorized test keys.
+///     Serial-correlation cases select expected serials from AuthorizedDevices, after discovery has run.
 /// </remarks>
 [Trait(TestCategories.Category, TestCategories.Discovery)]
 public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
@@ -58,9 +58,8 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     public async Task FindAllAsync_Conservation_EveryEnumeratedUsbInterfaceAppearsExactlyOnce()
     {
-        // Conservation: for every concrete interface type, the number of independently enumerated USB
-        // YubiKey interfaces equals the number of returned physical devices exposing that type — no
-        // interface is lost and none is double-attributed, regardless of how grouping went.
+        // Compare per-type counts from raw enumeration and merged results. Equal counts can still hide
+        // an equal-count substitution; member-level attribution is covered by managed merger vectors.
         var raw = await EnumerateRawUsbInterfacesAsync();
         Assert.NotEmpty(raw);
 
@@ -82,9 +81,8 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     public async Task FindAllAsync_ZeroOrphansWhenIdle_DeviceCountEqualsPhysicalKeyCount()
     {
-        // Zero orphans when idle: on an idle rig every interface groups into its physical key, so the
-        // number of returned devices equals the number of physical keys (derived per PID as the maximum
-        // per-interface-type count, mirroring the USB truth that one key appears once per transport).
+        // On this fully enumerated idle rig, compare result count with the per-PID maximum interface-type
+        // count estimate. The estimate alone cannot identify physical membership under partial visibility.
         var raw = await EnumerateRawUsbInterfacesAsync();
         Assert.NotEmpty(raw);
         var expectedKeyCount = KeyCountPerPid(raw).Values.Sum();
@@ -310,14 +308,14 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Independent raw USB enumeration (the oracle the invariants are computed from)
+    // Raw enumeration independent of the merger (using production transport enumerators).
     // ---------------------------------------------------------------------------------------------
 
     private const short YubicoVendorId = 0x1050;
 
     // Mirror of ReaderNamePidParser.ExpectedConnectionsForPid (internal to Core): the USB Product ID's
-    // advertised interface set. Kept locally so the integration oracle stays independent of the
-    // implementation under test.
+    // advertised interface set. Keeping a local copy separates the shape oracle from merger execution,
+    // while retaining a shared PID-policy assumption.
     private static readonly IReadOnlyDictionary<ushort, ConnectionType> ExpectedConnectionsByPid =
         new Dictionary<ushort, ConnectionType>
         {
@@ -383,8 +381,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         return interfaces;
     }
 
-    // Mirror of the Rust reference / ReaderNamePidParser: the USB YubiKey PC/SC reader name encodes the
-    // enabled interface set, which maps deterministically to a PID.
+    // Local mirror of ReaderNamePidParser: infer a PID from the interface names in a USB reader label.
     private static ushort? PidFromReaderName(string readerName)
     {
         var lower = readerName.ToLowerInvariant();

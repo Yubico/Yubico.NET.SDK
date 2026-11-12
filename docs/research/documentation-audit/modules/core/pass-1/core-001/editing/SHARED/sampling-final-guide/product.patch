@@ -1,0 +1,177 @@
+--- a/docs/usage/device-discovery.md
++++ b/docs/usage/device-discovery.md
+@@ -299,10 +299,12 @@
+ ### Several consumers: a host-owned singleton
+ 
+ Applications using `Microsoft.Extensions.Hosting` can register one initialized monitor. The SDK itself
+-does not depend on hosting. The three-line adapter below stops monitoring at graceful host shutdown;
+-`await using` also cleans up if host startup or execution fails. Register consumers after this adapter.
+-Their watch loops may still be enumerating when `StopAsync` disposes the monitor; those enumerations end
+-normally, so consumers need no extra coordination beyond handling the end of the stream.
++does not depend on hosting. The three-line adapter below awaits monitor disposal at graceful host
++shutdown; `await using` also awaits disposal if host startup or execution fails. Register consumers
++after this adapter. Watch loops may still be enumerating when `StopAsync` disposes the monitor.
++When cleanup reaches feed completion, healthy uncanceled streams can drain and end normally;
++existing terminal-failure or overflow errors remain observable. Consumers still handle their own
++errors and queued application work. The ordered-cleanup conditions below also apply to this adapter.
+ 
+ ```csharp
+ using Microsoft.Extensions.DependencyInjection;
+@@ -324,8 +326,10 @@
+ }
+ ```
+ 
+-The factory starts listeners and awaits the loop's first publication. Empty success is ready; first-scan
+-failure fails fast and cleans up partial ownership. Its token cancels initialization only. After return,
++The factory starts listeners and awaits the loop's first publication. Empty success is ready. A failed
++first scan prevents successful creation; failure or cancellation of the first-publication wait awaits
++constructed-monitor disposal before rethrowing. Cleanup failure can replace the earlier error and
++prevent later cleanup stages. Its token cancels initialization only. After return,
+ the monitor runs even without subscribers until disposed. There is no pause/restart: create a new instance.
+ 
+ On first enumeration, capture and subscription registration are atomic. Replay does not occupy the
+@@ -333,17 +337,23 @@
+ with `InvalidOperationException`: clear its projection and re-enumerate the same monitor. Cancellation
+ or disposing a subscription does not stop a shared monitor. Consumer code never runs inline on publication.
+ 
+-Disposal is sequential: stop/dispose listeners, cancel and await the scan loop, retire discovery, complete
+-the feed. There is no disposal timeout or abandoned managed loop. In-flight scan waits are bounded by the
+-discovery budgets, not a hard total wall-clock limit; already-open native work keeps its lease until actual
+-teardown. Healthy streams can drain committed history and end normally; new enumerations after disposal
+-end empty. Disposal is idempotent and does not dispose caller-owned sessions or connections.
++Disposal caches one task and follows an ordered path: attempt listener callback-clear/stop/dispose,
++cancel and await the scan loop, retire discovery, then complete the feed. Later stages depend on earlier
++calls returning. Listener cleanup exceptions are caught and logged, but a throwing logger can interrupt
++those attempts or signal-channel completion before loop cancellation/join, retirement, and feed completion.
++Logging after feed completion can also fault disposal even though earlier stages ran. The loop-await
++stage has no separate drain timeout. Discovery budgets bound individual waits, not total disposal;
++already-open native work keeps its lease until actual teardown. If cleanup reaches feed completion,
++healthy uncanceled streams can drain committed history and end normally, existing subscription errors
++remain observable, and later enumerations end empty. Caller-owned sessions and connections retain
++their own lifetimes.
+ 
+ ### Technical troubleshooting
+ 
+ - Logger category: `Yubico.YubiKit.Core.Devices.YubiKeyMonitor`; see [logging setup](../LOGGING.md).
+-- Listener startup failure is logged and cleaned up independently. The other listener and five-second
+-  interval fallback continue; listeners are hints, not physical-device truth.
++- Listener startup failure is logged, followed by callback-clear/stop/dispose attempts. Later listener
++  attempts depend on logging returning; a throwing logger can interrupt startup or cleanup. If construction
++  completes without listeners, the five-second interval fallback remains; listeners are hints, not device truth.
+ - A monitor never publishes a partial scan. If a transport's enumeration exceeds its budget during creation,
+   `CreateMonitorAsync` fails with `TimeoutException`; after initialization the scan is logged and the previous
+   snapshot stands until a later scan succeeds. Successful initialization does not prove that every interface
+@@ -532,6 +542,8 @@
+ - `Find*` operations are fully thread-safe and use fresh evidence per call.
+ - Concurrent `WatchAsync` enumerations are safe; manager enumerations own independent producers,
+   monitor enumerations share one producer with independent buffers.
+-- `DisposeAsync` may overlap active `WatchAsync` enumerations; they end normally. It must not be called
+-  concurrently with itself, and a monitor is not reusable after it.
++- `DisposeAsync` may overlap active `WatchAsync` enumerations. If cleanup reaches feed completion,
++  healthy uncanceled streams can drain and end normally; existing terminal/overflow errors remain
++  observable, and later enumerations end empty. Do not call disposal concurrently with itself or reuse
++  the disposed monitor.
+ - Changes may be consumed on any thread; marshal application state changes as needed.
+--- a/src/Core/README.md
++++ b/src/Core/README.md
+@@ -85,19 +85,24 @@
+ 
+ `YubiKeyMonitor` owns one continuous tracking lifetime: `WatchAsync` replays `DeviceAdded`, emits
+ `SnapshotComplete` (including empty discovery), then streams `DeviceAdded`, `DeviceRemoved`, and
+-`DeviceUpdated` changes. Maintain a consumer projection for cached membership; disposal ends tracking
+-without disposing application-owned sessions/connections, and later enumerations complete empty.
++`DeviceUpdated` changes. Maintain a consumer projection for cached membership. Application-owned
++sessions/connections retain their own lifetimes; reaching feed completion makes later enumerations
++end empty. The cleanup conditions below apply to this tracking lifetime.
+ 
+ Create it with `await YubiKeyManager.CreateMonitorAsync(cancellationToken)` and dispose with `await using`.
+ Initialization registers listeners before the loop's single initial scan and waits for publication,
+-including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
+-creation token does not control the monitor after successful creation. The monitor performs all
++including successful empty discovery. If the first-publication wait fails or is canceled, the factory
++awaits constructed-monitor disposal before rethrowing; cleanup failure can replace the earlier error
++or prevent later cleanup stages. The creation token does not control the monitor after successful
++creation. The monitor performs all
+ initial, listener-triggered, and five-second fallback scans sequentially. There is no manual refresh or
+ stop/restart mode: dispose the monitor and create a new one to recover from terminal failure. There is no
+ process-global monitoring lifetime or device cache.
+ 
+ Transport listeners share payload-less `IDeviceChangeListener.Changed` hints, not physical-device truth.
+-The monitor reconciles scans; listener failure falls back to interval discovery. An enumeration timeout is
++The monitor reconciles scans. Listener startup failure leads to logging and cleanup attempts; later
++listener attempts depend on logging returning. If construction completes without listeners, interval
++discovery remains available. An enumeration timeout is
+ handled per path: one-shot `Find…Async` logs a warning and returns the other transport's results for that
+ call; a monitor never publishes a partial scan, so the timeout fails `CreateMonitorAsync` on the first scan
+ and, after initialization, keeps the previous snapshot until a later scan succeeds.
+@@ -111,15 +116,21 @@
+ completed publication, so there is no snapshot/subscription gap. Initial replay does not occupy the
+ independent 256-change delta buffer; changes arriving while replay is consumed can still overflow it.
+ Overflow faults only that watcher: **clear its device projection and re-enumerate the same monitor's
+-`WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. Disposal allows already
+-captured replay and published deltas to drain, but new enumerations complete empty.
++`WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. If disposal reaches
++feed completion, healthy uncanceled streams can drain captured replay and published deltas; existing
++terminal/overflow errors remain observable, and later enumerations end empty.
+ 
+ Use the replaying stream to initialize a UI projection, or independent `FindAllAsync` for a one-shot lookup.
+-Disposal sequentially stops listeners, cancels and awaits the loop with no drain timeout, retires discovery,
+-and completes `DeviceChangeFeed`; native discovery budgets bound waits, while already-open native work
+-retains its leases until actual teardown. Already-published replay and changes may still drain.
+-Concurrent watch enumerations are safe, and disposal may overlap them: they end normally. Disposal must
+-not be called concurrently with itself. See the
++Disposal caches one task and follows an ordered path: attempt listener callback-clear/stop/dispose,
++cancel and await the loop, retire discovery, then complete `DeviceChangeFeed`. Later stages depend on
++earlier calls returning. A throwing logger during listener cleanup can interrupt its loops or
++signal-channel completion before loop cancellation/join, retirement, and feed completion. Final
++diagnostic logging can also fault disposal after feed completion. The loop-await stage has no separate
++drain timeout; discovery budgets bound individual waits, while already-open native work retains leases
++until actual teardown. Concurrent watch enumerations are safe, and disposal may overlap them. When
++cleanup reaches feed completion, healthy uncanceled streams can drain and end normally; previously
++faulted subscriptions keep their terminal/overflow errors, and later enumerations end empty. Disposal
++must not be called concurrently with itself. See the
+ [usage guide](../../docs/usage/device-discovery.md#device-monitoring) for picker and generic-host samples.
+ 
+ ### Discover selected interfaces once
+--- a/docs/TESTING.md
++++ b/docs/TESTING.md
+@@ -14,7 +14,7 @@
+ 
+ | Runner | Command | Filter Syntax |
+ |--------|---------|---------------|
+-| xUnit v3 (Microsoft.Testing.Platform) | `dotnet run --project <proj>` | `-- --filter "..."` |
++| xUnit v3 (Microsoft.Testing.Platform) | `dotnet run --project <proj>` | `-- --filter-method "*TestName*"` |
+ | xUnit v2 (traditional) | `dotnet test <proj>` | `--filter "..."` |
+ 
+ If you use the wrong command or filter syntax, tests will fail with confusing errors like:
+@@ -136,16 +136,21 @@
+ 
+ ### xUnit v2 vs v3 Filter Differences
+ 
+-When running filtered tests **outside** the build script (ad-hoc debugging), syntax differs by xUnit version:
+-
+-| Version | Detection | Filter Syntax |
++When inspecting a filtered invocation **outside** the build script (ad-hoc debugging), distinguish the
++runner's CLI mode as well as the xUnit generation. This repository uses the following modes; the MTP
++row is not the native xUnit console CLI:
++
++| Framework / runner | Project opt-in | Runner filter arguments |
+ |---------|-----------|---------------|
+-| xUnit v2 | No `UseMicrosoftTestingPlatformRunner` | `--filter "FullyQualifiedName~TestName"` |
+-| xUnit v3 | Has `UseMicrosoftTestingPlatformRunner` | `-m TestName` or `--method TestName` |
+-
+-**Check version:** Look for `<PackageReference Include="xunit"` in the `.csproj`:
+-- `3.x.x` → xUnit v3 syntax
+-- `2.x.x` → xUnit v2 syntax
++| xUnit v2 / VSTest | No `UseMicrosoftTestingPlatformRunner` | `--filter "FullyQualifiedName~TestName"` |
++| xUnit v3 / Microsoft.Testing.Platform | `UseMicrosoftTestingPlatformRunner=true` | `--filter-method "*TestName*"` after `dotnet run ... --` |
++
++**Check framework and runner separately.** Projects reference `xunit` for v2 or `xunit.v3` for v3;
++versions come from central `Directory.Packages.props`, currently 2.9.3 and 3.0.0 respectively, rather
++than inline project `Version` attributes. The toolchain selects its runner branch from the project's
++`UseMicrosoftTestingPlatformRunner` opt-in. A package version alone does not determine the CLI mode.
++`TestTargets` emits MTP `--filter-method` arguments for method terms; native xUnit console options
++such as `-method` are a different command-line interface.
+ 
+ **Recommendation:** Use `dotnet toolchain.cs -- test --filter "..."` which handles this automatically.
+ 

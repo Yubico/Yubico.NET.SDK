@@ -1,0 +1,197 @@
+{
+  "review_kind": "fresh independent full external documentation batch content/citation review",
+  "decision": "BOUNDED-MANDATORY-CORRECTIONS",
+  "mandatory_corrections": ["R1", "R2"],
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-external",
+  "base_and_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "paths_relative_to": "repository root unless explicitly absolute",
+  "report": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/review.md",
+    "bytes": 16095,
+    "sha256": "ae2ed83fab2a0271148a06b49d74562c20bda6aa353de619cd6fbcc88cd6d3f7"
+  },
+  "reviewed_patch": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/final-successor-source.patch",
+    "bytes": 87278,
+    "sha256": "76244276822b64598a78ab11b2db94d116da4bf021b555a73d4e02acaca836db",
+    "actual_product_paths": 35,
+    "fresh_git_diff_with_explicit_a_b_prefixes_equals_patch": true
+  },
+  "bound_population": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/path-decisions.json",
+    "bytes": 4725030,
+    "sha256": "6414715321998642765d3b5abde812ddf3368629301f17f9699847982435c6f6",
+    "unique_paths": 164,
+    "current_raw_hashes_recomputed": 164,
+    "hash_mismatches": [],
+    "recorded_dispositions": {"EDIT": 35, "RETAIN": 101, "HOLD-HISTORICAL": 22, "HOLD": 6},
+    "content_disposition_acceptance": "R1 identifies source-supported missed D facets on existing rows; hash/population equality does not accept their current RETAIN decisions"
+  },
+  "bound_inputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/allowlist.json",
+      "sha256": "b7393815bfce7bf18c34eb12ed2bc2d65bb9a4fd68a77715396e06a09c9e22c8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/output-identities.json",
+      "sha256": "cf2d9fdeba9c31c2a7eceedb8a200fb3a139070684657e100d5a9395446e29f3",
+      "entries_verified": 14,
+      "mismatches": []
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/full-successor-candidate-decisions.json",
+      "sha256": "a089953241799102e7c4ed4ea48fe66246e4edcb97a284efdb235c524ff90260"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/example-bodies.json",
+      "sha256": "9dd8d13ac9144cc1505e1b590d46759f7f26c98ea3651616963bc3c26cbb1109",
+      "acceptance": "R2 requires a bounded successor classification correction; frozen bytes must remain unchanged"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/remaining-referrals.json",
+      "sha256": "b9bb0f41744f294a1e4142fdcd0b91f1fd0d1629516b51e63c97f5598f1eb515"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/history-preservation.json",
+      "sha256": "13d4e5f3fec55b432eb9565d352b1ec34e49d32bd140015e4076d9a692b34275",
+      "initial_history_entries_verified": 16,
+      "revision2_history_entries_verified": 16,
+      "original_edited_product_hashes_verified": 19,
+      "revision2_edited_product_hashes_verified": 32,
+      "mismatches": []
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+      "sha256": "38713a34c4785b427f5b90d1aa1442f23f1b07d38827f3aa6d61fecf20335b83",
+      "use": "read-only current primary editing ownership and stopping instructions"
+    }
+  ],
+  "primary_verification_benchmark_ownership": {
+    "B2-linux-lifetimes": {"count": 9, "packet_sha256": "aa364f6920bfd967cd976327bcf0d836c865e98317652d2402ebbcade28e01ea"},
+    "B3-macos-lifetimes": {"count": 10, "packet_sha256": "87f2675195fdf101b58055c1353da0d2a8b4e0b57c69293665823a408d7bef2b"},
+    "B4-windows-support": {"count": 7},
+    "packet_file_hashes_match_expanded_allowlist": true,
+    "union_count": 26,
+    "overlap_count": 0,
+    "missing_from_final_path_manifest": [],
+    "edited": 12,
+    "retained": 13,
+    "historical_hold": 1,
+    "content_review": "complete affected units/assertions and relevant retained controls; no hardware or native execution"
+  },
+  "script_comment_proof": {
+    "algorithm": "SHA-256 of exact raw lines after removing only lines whose left-trimmed bytes start with //; all remaining bytes including blank lines retained",
+    "old_source": "git show HEAD:<path> at fixed base",
+    "rows": [
+      {
+        "path": "scripts/toolchain/Process.cs",
+        "old_raw_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+        "new_raw_sha256": "84fe870fabdf44a6033c514722bcc256f73a5cf7ef9268c6b0e5c433be4cf133",
+        "old_raw_bytes": 7654,
+        "new_raw_bytes": 7940,
+        "old_noncomment_sha256": "7f96abb76db0ec0ad4aac597d6f54a76b5bff6db7da93183d82797d138ba410d",
+        "new_noncomment_sha256": "7f96abb76db0ec0ad4aac597d6f54a76b5bff6db7da93183d82797d138ba410d",
+        "noncomment_bytes": 6034,
+        "equal": true,
+        "ids": ["CORE-B4-C007", "CORE-B4-C008", "FPT-054", "FPT-055"]
+      },
+      {
+        "path": "scripts/toolchain/Results.cs",
+        "old_raw_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+        "new_raw_sha256": "90a595695e19a88a1f0e55a60708ffebcae8ee12a2753662b5444b3fecf48abe",
+        "old_raw_bytes": 6826,
+        "new_raw_bytes": 7157,
+        "old_noncomment_sha256": "efd56a36bc35d68165b4e7f50432f8d9d400f559b1d35a259bedd74620188440",
+        "new_noncomment_sha256": "efd56a36bc35d68165b4e7f50432f8d9d400f559b1d35a259bedd74620188440",
+        "noncomment_bytes": 4976,
+        "equal": true,
+        "ids": ["CORE-B4-C008", "FPT-055"]
+      },
+      {
+        "path": "scripts/toolchain/TestTargets.cs",
+        "old_raw_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+        "new_raw_sha256": "b257b57172bbd9967b7ec46754deffdaa3f044f2288ea7d22ed3f3b3c7593337",
+        "old_raw_bytes": 14282,
+        "new_raw_bytes": 13989,
+        "old_noncomment_sha256": "fad7d9d694d6f73038b2b0639386020df6c24ff1416a37be6b16c46eaf8f6b69",
+        "new_noncomment_sha256": "fad7d9d694d6f73038b2b0639386020df6c24ff1416a37be6b16c46eaf8f6b69",
+        "noncomment_bytes": 10687,
+        "equal": true,
+        "ids": ["CORE-A-C018", "FPT-018"]
+      }
+    ],
+    "comment_content_review": "no mandatory correction in the three released script comment changes",
+    "qualified_input_binding": "raw compiler/toolchain input hashes changed; coordinator reconciliation remains required, no old profile binding is claimed current"
+  },
+  "independent_static_checks": {
+    "changed_csharp_files": 30,
+    "protected_line_comparison_mismatches": [],
+    "protected_line_comparison_limits": "remove full-line comments and preserve the code prefix on the two known inline return []; comment changes; text identity, not Roslyn semantic binding",
+    "xml_documentation_blocks_parsed": 111,
+    "xml_documentation_parse_failures": [],
+    "supporting_csproj": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+    "csproj_normalized_text_outside_comments_equal": true,
+    "csproj_actual_parsed_element_attribute_text_structure_equal": true,
+    "csproj_representation": "CRLF/LF normalization disclosed; configuration values unchanged",
+    "git_diff_check_exit_code": 0,
+    "sdk_build_test_formatter": "NOT-RUN",
+    "example_compilation": "NOT-RUN",
+    "native_device_crypto_provider_execution": "NOT-RUN",
+    "semantic_binding": "NOT-RUN"
+  },
+  "edited_product_identities": [
+    {"path": "TOOLCHAIN.md", "sha256": "6bb043914b7e4b6b10a306ddd1f005577dd80038c71482519dd20984517880bc"},
+    {"path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs", "sha256": "fb1f5d1c0c952e7aae43c120ffe261d95e0445c1e13170c0b90513a858e63d08"},
+    {"path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs", "sha256": "3970aa710e5fe538bc871459e7eaa9c1636275247e634d2d500a4862aea0615f"},
+    {"path": "docs/migration/v1-to-v2.md", "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"},
+    {"path": "scripts/toolchain/Process.cs", "sha256": "84fe870fabdf44a6033c514722bcc256f73a5cf7ef9268c6b0e5c433be4cf133"},
+    {"path": "scripts/toolchain/Results.cs", "sha256": "90a595695e19a88a1f0e55a60708ffebcae8ee12a2753662b5444b3fecf48abe"},
+    {"path": "scripts/toolchain/TestTargets.cs", "sha256": "b257b57172bbd9967b7ec46754deffdaa3f044f2288ea7d22ed3f3b3c7593337"},
+    {"path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs", "sha256": "f37278b4f43deea2015746d1786fcbf7d1a1a8f2328bd5c9e430c45d247d0f01"},
+    {"path": "src/Cli.Commands/src/Otp/OtpCommands.cs", "sha256": "a63fd0d90987929519c69e37f6d189001ea67ff73ec57136c686987469f62ba0"},
+    {"path": "src/Cli.Shared/src/Device/DeviceSelector.cs", "sha256": "11eae9d558df0673c0aa47365f6d32044d84a32d9cf561fbfc00fd0afc67c20a"},
+    {"path": "src/Cli.Shared/src/Device/FormFactorFormatter.cs", "sha256": "7f0d92f60394cd665f59b0536065e4b96902e062f8e5879fad979c236c82a1d4"},
+    {"path": "src/Cli.Shared/src/Output/PinPrompt.cs", "sha256": "1534e933163b496f857df300184dee76f2de7401e668047da5d4b425eac52382"},
+    {"path": "src/Cli.Shared/src/Output/SecureCredential.cs", "sha256": "2d043c73349cb63bd24bfa058f9333a310783ccd8d98e5b85025af7371b3dba1"},
+    {"path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs", "sha256": "cb814522ab3ce7212d2848b3f8cbb201bd4878f223ebc0d491967331f57e0ce3"},
+    {"path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs", "sha256": "d124ace259665ee216d33bd9d0b7ce30482f981d3536694bd0adee29c1b24cf7"},
+    {"path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs", "sha256": "b0d92eb5261a9f74e85a45ef84084b8c100ab77fc9b3bfd578b40add76b57a1e"},
+    {"path": "src/Tests.Shared/CLAUDE.md", "sha256": "bf5121b4117a8657ecd5ba98fccb2c36d4b6caa42b52e1688cc0bbdbf9aaba6f"},
+    {"path": "src/Tests.Shared/IYubiKeyFilter.cs", "sha256": "eae08ac681f5f486da9ab9116bb9ca1e5825374adc1b4197082eaf0c89e30f33"},
+    {"path": "src/Tests.Shared/Infrastructure/OperatorCue.cs", "sha256": "820f9f2ebed195d1fabf36c200df937bc1d9fd096df261663a71da73dcf7f32f"},
+    {"path": "src/Tests.Shared/Infrastructure/TestCategories.cs", "sha256": "2fa737b315df81137b73f495045d4689f8ad166daa7f72264ce683167bd64ee0"},
+    {"path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs", "sha256": "982b9bc5c2656974ab291ef78b0d43393f8f5fc035c8ea294073f5f9d5e1eb77"},
+    {"path": "src/Tests.Shared/README.md", "sha256": "ac76332e3643fa62ce6ad5dffaeb4369ca2cbe319e91f5f990dd03edceb65157"},
+    {"path": "src/Tests.Shared/RecordingSmartCardConnection.cs", "sha256": "cf28fd54950dca187c7ac9c8428998ce7866a73c9b06d01eab67958d80557c30"},
+    {"path": "src/Tests.Shared/YubiKeyTestState.cs", "sha256": "b30d3dd8249b5bc6e1112ee4de828c4044d7c55f4e6a2e936c4dff2e5d2af39e"},
+    {"path": "verification/LinuxHidRouteVerification/Evidence.cs", "sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5"},
+    {"path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs", "sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e"},
+    {"path": "verification/MacOSHidBoundaryComparison/Program.cs", "sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c"},
+    {"path": "verification/MacOSHidInputVerification/Program.cs", "sha256": "ef4c55ace3a7ab0185b678de84d8d276c9adb5d819ae952dc03c2939ca621963"},
+    {"path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs", "sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd"},
+    {"path": "verification/MacOSHidRouteVerification/Program.cs", "sha256": "d5b99076bac9be69231db6de26f9ba69f27d4f33027de7a246edf226545f4a2b"},
+    {"path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs", "sha256": "109ae75b5018807486140d4bf0fb144075484b2971b9a3724d44d7fedf975272"},
+    {"path": "verification/NativeAotVerification/Program.cs", "sha256": "a4ccfef7152cc440c2eba998e7225cfc7e9f3932d66fe17eeafd9434857e39fb"},
+    {"path": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj", "sha256": "ce565faa26c8221ef8d3679a4f4ee6f0313fb720cf9208dc3b04c0d25a7b3298"},
+    {"path": "verification/NativeCompatibilityVerification/Program.cs", "sha256": "bec35657a48d4f1ad104cf043797b83a9f7e75ce1919b28612d604e8222bbee8"},
+    {"path": "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs", "sha256": "ebca9ba8179574d90066a152d778a02bd8f7e3d35f0902be6a57d28ddf4b9e09"}
+  ],
+  "review_write_scope": [
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/review.md",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/review-identities.json"
+  ],
+  "no_product_or_editor_record_mutation": true,
+  "no_git_index_ref_commit_push": true,
+  "no_subagents": true,
+  "remaining_qualifications": [
+    "runtime guards/assertions/help/output/configuration values unchanged",
+    "original historical evidence and both frozen history sets preserved",
+    "no hardware PASSED evidence from compilation or outer timeout",
+    "native producer/header/loaded-path and final profile gaps remain",
+    "Windows concurrency remains UNREADY/UNREVIEWED",
+    "PIV physical touch/hotplug and touch-dependent cancellation/recovery remain deferred",
+    "serial9681620 historical cause unexplained; serial125 setup6A88-before-RESET gives no protected reset result",
+    "publish Core Pass1 and deferred handoff after acceptance and separately owned gates, then stop"
+  ]
+}

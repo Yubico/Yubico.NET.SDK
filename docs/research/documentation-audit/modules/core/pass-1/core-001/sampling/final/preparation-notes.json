@@ -1,0 +1,26 @@
+{
+  "scope": "Preparation-tool diagnostics only; no source-content or sampler verdicts.",
+  "attempts": [
+    {
+      "attempt": 1,
+      "error": "Unified-diff path-prefix assertion on reviewed WA patch",
+      "cause": "The exact hash-bound WA patch uses i/ and w/ prefixes rather than a/ and b/. The other four reviewed patches use a/ and b/.",
+      "correction": "Accept either exact paired prefix while requiring identical repository-relative source/destination paths.",
+      "impact": "Generation stopped before candidate counts or records were published. No primary or predecessor record writes."
+    },
+    {
+      "attempt": 2,
+      "error": "Actual read has no preserved proposal provenance for 4c48c7d8d8d2e37a",
+      "cause": "Seven B2 conditional replacements use conditional-history-replacements.json and their repeated B3 activation uses activated-history-replacements.json, outside the initial selection filename set.",
+      "correction": "Include conditional and activated predecessor proposal files and the canonical non-SW successor subset; preserve all occurrences but count actual read IDs only once.",
+      "impact": "Generation stopped before publishing candidate records. Actual verdicts and population/selection histories remain unchanged."
+    },
+    {
+      "attempt": 3,
+      "error": "Missing population key while extending queued-file reconciliation outside the broad admitted population",
+      "cause": "The raw inventory also includes inherited/non-assigned units outside the 14,044 assigned population. The supplemental queued-file walk initially included those unassigned rows.",
+      "correction": "Restrict supplemental queued-file rows to the immutable assigned population. Preserve already-excluded assigned units without admitting unassigned inherited remainder.",
+      "impact": "No denominator, verdict, target, or selected-unit change; no blanket claim that all raw inventory units were sampled or clean."
+    }
+  ]
+}

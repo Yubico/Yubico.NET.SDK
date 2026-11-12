@@ -16,7 +16,7 @@ namespace Yubico.YubiKit.Tests.Shared;
 
 /// <summary>
 ///     Interface for custom YubiKey device filtering logic.
-///     Implement this interface to create custom filters for YubiKeyTheoryAttribute.
+///     Implement this interface for <see cref="Infrastructure.WithYubiKeyAttribute.CustomFilter"/>.
 /// </summary>
 /// <remarks>
 ///     <para>
@@ -26,24 +26,37 @@ namespace Yubico.YubiKit.Tests.Shared;
 ///     <para>
 ///         Example usage:
 ///         <code>
-///     public class OnlyProductionKeysFilter : IYubiKeyFilter
+///     using System.Threading.Tasks;
+///     using Yubico.YubiKit.Tests.Shared;
+///     using Yubico.YubiKit.Tests.Shared.Infrastructure;
+///     using Xunit;
+///
+///     public sealed class SerialRangeFilter : IYubiKeyFilter
 ///     {
 ///         public bool Matches(YubiKeyTestState device)
 ///         {
-///             // Only match devices with serial numbers above 10000000
+///             // Narrow the already authorized fixture list; never authorize production keys.
 ///             return device.SerialNumber > 10_000_000;
 ///         }
 ///
 ///         public string GetDescription()
 ///         {
-///             return "Production keys only (SN > 10000000)";
+///             return "Dedicated test keys with SN > 10000000";
 ///         }
 ///     }
 ///
-///     [YubiKeyTheory(CustomFilter = typeof(OnlyProductionKeysFilter))]
-///     public async Task TestOnProductionKeys(YubiKeyTestDevice device)
+///     public sealed class MetadataTests
 ///     {
-///         // Test runs only on production keys
+///         [SkippableTheory]
+///         [WithYubiKey(CustomFilter = typeof(SerialRangeFilter))]
+///         public async Task ReadMetadata(YubiKeyTestState state)
+///         {
+///             await state.WithManagementAsync(async (session, cachedInfo) =>
+///             {
+///                 var freshInfo = await session.GetDeviceInfoAsync();
+///                 Assert.Equal(cachedInfo.SerialNumber, freshInfo.SerialNumber);
+///             });
+///         }
 ///     }
 ///         </code>
 ///     </para>

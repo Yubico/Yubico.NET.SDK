@@ -1,0 +1,594 @@
+{
+  "manifest": "editing/integration/current-products.json",
+  "manifest_sha256": "45ca220e401ba48082e14f138d703df0e29a969dd7ae7d5edc89d2ad805075c2",
+  "accepted_paths": 361,
+  "target_paths": [
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "src/SecurityDomain/CLAUDE.md",
+    "src/SecurityDomain/README.md"
+  ],
+  "command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--no-renames",
+    "--unified=3",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+    "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "--",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "src/SecurityDomain/CLAUDE.md",
+    "src/SecurityDomain/README.md"
+  ],
+  "diff_sha256": "f3eab50fdfbb518f6fbf5f7ba8f28a3be4f734b18fcc9d570a0e86e16a3dd485",
+  "diff_bytes": 43873,
+  "original_changed_spans": {
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs": [
+      {
+        "start_character": 1113,
+        "end_character_exclusive": 1175,
+        "old_first_line": 27,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1206,
+        "end_character_exclusive": 1751,
+        "old_first_line": 30,
+        "old_line_count": 8,
+        "added_lines": 25,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2650,
+        "end_character_exclusive": 2696,
+        "old_first_line": 65,
+        "old_line_count": 1,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3570,
+        "end_character_exclusive": 3571,
+        "old_first_line": 84,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs": [
+      {
+        "start_character": 765,
+        "end_character_exclusive": 765,
+        "old_first_line": 20,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 5533,
+        "end_character_exclusive": 5534,
+        "old_first_line": 142,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs": [
+      {
+        "start_character": 791,
+        "end_character_exclusive": 791,
+        "old_first_line": 23,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3693,
+        "end_character_exclusive": 3694,
+        "old_first_line": 100,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs": [
+      {
+        "start_character": 7521,
+        "end_character_exclusive": 7521,
+        "old_first_line": 198,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12044,
+        "end_character_exclusive": 12045,
+        "old_first_line": 282,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs": [
+      {
+        "start_character": 659,
+        "end_character_exclusive": 758,
+        "old_first_line": 18,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 773,
+        "end_character_exclusive": 773,
+        "old_first_line": 20,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1215,
+        "end_character_exclusive": 1286,
+        "old_first_line": 37,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1305,
+        "end_character_exclusive": 1372,
+        "old_first_line": 39,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1673,
+        "end_character_exclusive": 1674,
+        "old_first_line": 48,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs": [
+      {
+        "start_character": 753,
+        "end_character_exclusive": 840,
+        "old_first_line": 21,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 855,
+        "end_character_exclusive": 855,
+        "old_first_line": 23,
+        "old_line_count": 0,
+        "added_lines": 12,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1355,
+        "end_character_exclusive": 1454,
+        "old_first_line": 33,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3313,
+        "end_character_exclusive": 3374,
+        "old_first_line": 81,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3508,
+        "end_character_exclusive": 3569,
+        "old_first_line": 87,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3715,
+        "end_character_exclusive": 3789,
+        "old_first_line": 93,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4474,
+        "end_character_exclusive": 4475,
+        "old_first_line": 121,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs": [
+      {
+        "start_character": 659,
+        "end_character_exclusive": 733,
+        "old_first_line": 18,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 748,
+        "end_character_exclusive": 748,
+        "old_first_line": 20,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1059,
+        "end_character_exclusive": 1060,
+        "old_first_line": 29,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs": [
+      {
+        "start_character": 1239,
+        "end_character_exclusive": 1337,
+        "old_first_line": 38,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1393,
+        "end_character_exclusive": 1394,
+        "old_first_line": 41,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs": [
+      {
+        "start_character": 1679,
+        "end_character_exclusive": 1795,
+        "old_first_line": 46,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2924,
+        "end_character_exclusive": 3008,
+        "old_first_line": 67,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3055,
+        "end_character_exclusive": 3567,
+        "old_first_line": 70,
+        "old_line_count": 5,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3682,
+        "end_character_exclusive": 3782,
+        "old_first_line": 80,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6646,
+        "end_character_exclusive": 6805,
+        "old_first_line": 139,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7267,
+        "end_character_exclusive": 7637,
+        "old_first_line": 156,
+        "old_line_count": 4,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7969,
+        "end_character_exclusive": 8273,
+        "old_first_line": 168,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9218,
+        "end_character_exclusive": 9219,
+        "old_first_line": 198,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs": [
+      {
+        "start_character": 1033,
+        "end_character_exclusive": 1208,
+        "old_first_line": 26,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1443,
+        "end_character_exclusive": 1536,
+        "old_first_line": 32,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2702,
+        "end_character_exclusive": 2784,
+        "old_first_line": 59,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3153,
+        "end_character_exclusive": 3325,
+        "old_first_line": 70,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10234,
+        "end_character_exclusive": 10336,
+        "old_first_line": 243,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11056,
+        "end_character_exclusive": 11228,
+        "old_first_line": 265,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11875,
+        "end_character_exclusive": 12036,
+        "old_first_line": 287,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12153,
+        "end_character_exclusive": 12153,
+        "old_first_line": 292,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12667,
+        "end_character_exclusive": 12730,
+        "old_first_line": 305,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13008,
+        "end_character_exclusive": 13009,
+        "old_first_line": 312,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs": [
+      {
+        "start_character": 770,
+        "end_character_exclusive": 770,
+        "old_first_line": 22,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2916,
+        "end_character_exclusive": 3011,
+        "old_first_line": 76,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3659,
+        "end_character_exclusive": 3660,
+        "old_first_line": 109,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs": [
+      {
+        "start_character": 850,
+        "end_character_exclusive": 850,
+        "old_first_line": 24,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3416,
+        "end_character_exclusive": 3511,
+        "old_first_line": 81,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5446,
+        "end_character_exclusive": 5589,
+        "old_first_line": 136,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7966,
+        "end_character_exclusive": 7967,
+        "old_first_line": 189,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/SecurityDomain/CLAUDE.md": [
+      {
+        "start_character": 5721,
+        "end_character_exclusive": 5721,
+        "old_first_line": 94,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 7533,
+        "end_character_exclusive": 7645,
+        "old_first_line": 128,
+        "old_line_count": 1,
+        "added_lines": 9,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8207,
+        "end_character_exclusive": 8207,
+        "old_first_line": 137,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 8886,
+        "end_character_exclusive": 8886,
+        "old_first_line": 148,
+        "old_line_count": 0,
+        "added_lines": 9,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 11830,
+        "end_character_exclusive": 11953,
+        "old_first_line": 219,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/SecurityDomain/README.md": [
+      {
+        "start_character": 2340,
+        "end_character_exclusive": 2340,
+        "old_first_line": 38,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6327,
+        "end_character_exclusive": 6651,
+        "old_first_line": 133,
+        "old_line_count": 3,
+        "added_lines": 26,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10325,
+        "end_character_exclusive": 10325,
+        "old_first_line": 183,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 10843,
+        "end_character_exclusive": 10843,
+        "old_first_line": 191,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 11280,
+        "end_character_exclusive": 11493,
+        "old_first_line": 200,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12983,
+        "end_character_exclusive": 13027,
+        "old_first_line": 220,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13698,
+        "end_character_exclusive": 13698,
+        "old_first_line": 230,
+        "old_line_count": 0,
+        "added_lines": 12,
+        "kind": "insertion-point"
+      }
+    ]
+  },
+  "parser_reuse_sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+  "scope": "Exact known accepted B6 XML/SD narrative spans; no global population rewrite"
+}

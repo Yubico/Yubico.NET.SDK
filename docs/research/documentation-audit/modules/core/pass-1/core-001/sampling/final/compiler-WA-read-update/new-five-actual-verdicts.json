@@ -1,0 +1,112 @@
+[
+  {
+    "id": "core-001:unit:9b2b20dfbae1bf78",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/WebAuthn/CLAUDE.md",
+    "source_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "range_sha256": "b154a5468ed10a47872f312b07129c2640cb1c9ff44b903b83bfee2f07e470b9",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "suffix": "9b2b20dfbae1bf78",
+      "verdict_text": "Supported module pointers and one-way dependency. Mentioning Core logging does not grant access to its internal helper."
+    },
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/compiler-WA-expansion-verdicts.md",
+    "authority_sha256": "b0356d708708f0fcd27ddf06d9330edabbd86ded3aff7ae10c4990ef0d8aa340",
+    "actually_read_by": "Astra",
+    "original_proposal": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/new-proposals.json#core-001:unit:9b2b20dfbae1bf78",
+    "original_rank": 6,
+    "logical_candidate_credit_before_final_range_refresh": 1,
+    "final_accepted_clean_credit": null,
+    "preparer_content_verdict": null,
+    "identity_state": "Exact prior proposal/range identities retained; final transferred-product/hash/range reconciliation still pending"
+  },
+  {
+    "id": "core-001:unit:761f1552c9ab4aaf",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/WebAuthn/README.md",
+    "source_sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",
+    "range_sha256": "b333625fd649e5c1645caf8574cce9fbd98423d218c7a7c700118da1561e38d3",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "suffix": "761f1552c9ab4aaf",
+      "verdict_text": "Supported further-reading/package pointers and FidoTool location. Links do not establish browser conformance or a new module-owned sample."
+    },
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/compiler-WA-expansion-verdicts.md",
+    "authority_sha256": "b0356d708708f0fcd27ddf06d9330edabbd86ded3aff7ae10c4990ef0d8aa340",
+    "actually_read_by": "Astra",
+    "original_proposal": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/new-proposals.json#core-001:unit:761f1552c9ab4aaf",
+    "original_rank": 7,
+    "logical_candidate_credit_before_final_range_refresh": 1,
+    "final_accepted_clean_credit": null,
+    "preparer_content_verdict": null,
+    "identity_state": "Exact prior proposal/range identities retained; final transferred-product/hash/range reconciliation still pending"
+  },
+  {
+    "id": "core-001:unit:6afae0cb3a2a58c7",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/WebAuthn/README.md",
+    "source_sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",
+    "range_sha256": "117ca8ca58f168cfa7e22b978d81d03aba1466cfaf11cf1962ce16c31b983775",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "suffix": "6afae0cb3a2a58c7",
+      "verdict_text": "Supported extension limitations. Directly read retained CTAP2.3 lines18973\u201318993: platform SHOULD NOT create without requested policy2/3 protection when enforcement is true. This is distinguished from the SDK's missing enforcement. Large-blob and min-PIN input/result limitations remain explicit."
+    },
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/compiler-WA-expansion-verdicts.md",
+    "authority_sha256": "b0356d708708f0fcd27ddf06d9330edabbd86ded3aff7ae10c4990ef0d8aa340",
+    "actually_read_by": "Astra",
+    "original_proposal": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/new-proposals.json#core-001:unit:6afae0cb3a2a58c7",
+    "original_rank": 8,
+    "logical_candidate_credit_before_final_range_refresh": 1,
+    "final_accepted_clean_credit": null,
+    "preparer_content_verdict": null,
+    "identity_state": "Exact prior proposal/range identities retained; final transferred-product/hash/range reconciliation still pending"
+  },
+  {
+    "id": "core-001:unit:9dc7ab5953064c3f",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/WebAuthn/CLAUDE.md",
+    "source_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "range_sha256": "8f985043e31587867c3c7a7ee4e1561fe38302816ee585f7c7dfae5d264ee9d4",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "suffix": "9dc7ab5953064c3f",
+      "verdict_text": "Supported processor/session architecture and per-attempt ownership. The sample uses WebAuthn extension input types, with actual generated-key/credential/input prerequisites; no parity or universal output guarantee."
+    },
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/compiler-WA-expansion-verdicts.md",
+    "authority_sha256": "b0356d708708f0fcd27ddf06d9330edabbd86ded3aff7ae10c4990ef0d8aa340",
+    "actually_read_by": "Astra",
+    "original_proposal": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/new-proposals.json#core-001:unit:9dc7ab5953064c3f",
+    "original_rank": 9,
+    "logical_candidate_credit_before_final_range_refresh": 1,
+    "final_accepted_clean_credit": null,
+    "preparer_content_verdict": null,
+    "identity_state": "Exact prior proposal/range identities retained; final transferred-product/hash/range reconciliation still pending"
+  },
+  {
+    "id": "core-001:unit:13efa480557b5601",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/WebAuthn/CLAUDE.md",
+    "source_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "range_sha256": "17352ee4923e1d362b505e1314c41fda129f707de0de2c193ce57d77663bb9c9",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "suffix": "13efa480557b5601",
+      "verdict_text": "Supported as security-handling guidance plus explicit existing implementation limits. PIN/payload handling bullets are requirements on code and callers, not proof that the SDK erases borrowed inputs or every intermediate copy. The exception, attestation, parser/default-value and versioned descriptor gaps remain open."
+    },
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/compiler-WA-expansion-verdicts.md",
+    "authority_sha256": "b0356d708708f0fcd27ddf06d9330edabbd86ded3aff7ae10c4990ef0d8aa340",
+    "actually_read_by": "Astra",
+    "original_proposal": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/new-proposals.json#core-001:unit:13efa480557b5601",
+    "original_rank": 10,
+    "logical_candidate_credit_before_final_range_refresh": 1,
+    "final_accepted_clean_credit": null,
+    "preparer_content_verdict": null,
+    "identity_state": "Exact prior proposal/range identities retained; final transferred-product/hash/range reconciliation still pending"
+  }
+]

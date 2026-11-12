@@ -1,0 +1,12 @@
+
+/// static async Task ReadAndVerifyPinAsync(
+///     Yubico.YubiKit.Piv.IPivSession pivSession, CancellationToken cancellationToken)
+/// {
+///     var reader = new ConsoleCredentialReader();
+///     using var credential = reader.ReadCredential(CredentialReaderOptions.ForPin(), cancellationToken);
+///     if (credential is not null)
+///     {
+///         await pivSession.VerifyPinAsync(credential.Memory, cancellationToken);
+///     }
+/// }
+/// 

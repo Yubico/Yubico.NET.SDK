@@ -29,7 +29,7 @@ public static class TlvHelper
     /// <returns>A disposable collection of <see cref="Tlv" /> objects that must be disposed to securely clear sensitive data.</returns>
     /// <remarks>
     ///     The returned collection must be disposed using a <c>using</c> declaration to ensure
-    ///     all TLV objects are properly disposed and their sensitive data is securely zeroed.
+    ///     all contained TLV encodings are cleared. The input is borrowed and remains caller-owned.
     /// </remarks>
     public static DisposableTlvList DecodeList(ReadOnlySpan<byte> tlvData)
     {
@@ -76,6 +76,11 @@ public static class TlvHelper
     /// </summary>
     /// <param name="tlvData">Sequence of TLV encoded data</param>
     /// <returns>Dictionary of Tag-Value pairs</returns>
+    /// <remarks>
+    ///     Values are independent copies exposed through read-only views, without a disposable clearing
+    ///     owner. For sensitive sequences, prefer <see cref="DecodeList(ReadOnlySpan{byte})"/> and dispose
+    ///     its result. Dictionary decoding does not clear discarded duplicates or partial results on failure.
+    /// </remarks>
     public static IDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlySpan<byte> tlvData)
     {
         var tlvs = new Dictionary<int, ReadOnlyMemory<byte>>();
@@ -201,6 +206,9 @@ public static class TlvHelper
     /// <remarks>
     ///     When this method returns <see langword="true" />, <paramref name="value" /> is a caller-owned buffer.
     ///     The caller must securely clear it when it contains sensitive data.
+    ///     This clears only the returned copy. The current search also allocates intermediate value
+    ///     copies that it leaves uncleared; for sensitive sequences, prefer <see cref="DecodeList(ReadOnlySpan{byte})"/>
+    ///     and dispose the returned list. The input remains caller-owned in either case.
     /// </remarks>
     public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value)
     {

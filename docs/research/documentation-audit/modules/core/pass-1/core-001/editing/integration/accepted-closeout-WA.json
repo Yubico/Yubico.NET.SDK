@@ -1,0 +1,56 @@
+{
+  "scope": "Independently reviewed queued correction transferred after compiler sequence stopped; previous checkpoints retained",
+  "admission_note": "Initial preflight expected b/ patch header and rejected the accepted WA w/ header before any file mutation; exact patch hashes and safe stripped paths were then verified.",
+  "patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+  "product_files": [
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+      "previous_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+      "sha256": "9223a2299f63cd2f8ceb5479cf5cc56ed5fb99463c084db60590cf3123f4cff1"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/before.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/before.snapshot",
+      "sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+      "bytes": 21149
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/preserved-inputs.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/preserved-inputs.json",
+      "sha256": "4bc20f811930bbed393cdbd1916a0cf3bdd017c4a8d97fc094ca3cabb6196613",
+      "bytes": 61840
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/handoff.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/handoff.md",
+      "sha256": "b194f1d5e2f88839f48d344cef6e08f587327c4081d5de44647c9d1482d0217b",
+      "bytes": 2710
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/focused.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/focused.patch",
+      "sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+      "bytes": 1339
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/verification.json",
+      "sha256": "8edccea5c860717efafcaa8746fc9cdccd68ba637e5026fe6770de5388966567",
+      "bytes": 1597
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review.md",
+      "sha256": "5ef89fc49d43309f7068a07a4d2bfb7cbd75f8e56854714929add2d03377cbd0",
+      "bytes": 3443
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review-identities.json",
+      "sha256": "dae83e2ddcb167b364433a9defc70b9f3d8a8195ad8db561fc8709b3e310343d",
+      "bytes": 3124
+    }
+  ]
+}

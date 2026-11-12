@@ -1,0 +1,51 @@
+{
+  "receipt": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-format-external-EOF.json",
+    "bytes": 817,
+    "sha256": "6e67a839602dfd789667c5102d4da163e1d02119b1488da20336369177ba7276"
+  },
+  "review": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/review.md",
+    "bytes": 5471,
+    "sha256": "263f0e43da638dd5b815a2058dca659e9b9d4f10444b3dde96374e1597ba8916"
+  },
+  "review_identities": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/review-identities.json",
+    "bytes": 2954,
+    "sha256": "d865acbe220e19873b66726aaf8693c8e174843d62380f47db3d2bb84e28e8ed"
+  },
+  "text_bundle": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/source-snapshots.json",
+    "bytes": 23485,
+    "sha256": "fb60b98283f685a1b30e9d0d1262942855b2ea667fc710adf14bed72e4a36cd9"
+  },
+  "patch": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/eof-only.patch",
+    "bytes": 892,
+    "sha256": "f5c82111cb86e52a8c5a0de620f487efff3f934d28e529389243aa5c5105e818"
+  },
+  "rows": [
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "before_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "after_sha256": "faba33e119d3ea2361dd390943adc57fbb36ae1741a31283c817c56658d476a1",
+      "before_bytes": 3213,
+      "after_bytes": 3212,
+      "removed_hex": "0a",
+      "all_nontrailing_bytes_exact": true
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "before_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "after_sha256": "194b29775d29323ae1ce2d94ccc35abbf162ac15de858ca58a63295c90e4652d",
+      "before_bytes": 7419,
+      "after_bytes": 7418,
+      "removed_hex": "0a",
+      "all_nontrailing_bytes_exact": true
+    }
+  ],
+  "paths": 2,
+  "removed_bytes": 2,
+  "all_other_14_eof_and_73_whitespace_findings_remain_qualified_untouched": true,
+  "qualified_toolchain_inputs_unchanged": true
+}

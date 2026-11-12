@@ -81,6 +81,12 @@ Console.WriteLine($"Configuration locked: {info.IsLocked}");
 applications. After a configuration write, reported persisted values need not mean the active interfaces
 have already changed.
 
+Each call performs device I/O, but the firmware field also uses the version captured during session
+initialization: that default takes precedence over the ordinary firmware tag, while a non-final qualifier
+can replace it. A firmware override changes session policy, not this returned value. Live reads and writes
+do not refresh `IYubiKey.CachedDeviceInfo` or a test fixture's initial snapshot. The current `DeviceInfo`
+also contains memory-backed timeout data; copying the record or a result wrapper does not clone those bytes.
+
 The current Core decoder has two metadata limitations: FIPS capability/approval tags use the wrong bit
 mapping, so `FipsCapabilities`, `FipsApproved` and derived filters must not be used to establish application
 approval. `IsFips` is a separate manufacturing indicator, not an operating mode. Also, product flag bits
@@ -202,6 +208,10 @@ If SmartCard is not exposed, session creation throws `NotSupportedException`. On
 Passing the check does not guarantee that the device implements whole-device reset; a device rejection
 propagates as `ApduException` rather than `NotSupportedException`.
 
+The current reset path does not invalidate managed readiness, refresh metadata, or perform a fresh SCP
+handshake. After reset or an uncertain outcome, end old scopes and rediscover/reopen the intended key;
+unchanged readiness/authentication flags do not establish device or channel recovery.
+
 ## User interaction
 
 Management commands do not require touch, a PIN or a PIV management key. Configuration protection uses
@@ -214,6 +224,9 @@ Pass a `cancellationToken` to request cancellation; an admitted SmartCard
 exchange drains before returning, and cancellation does not roll back configuration already sent. HID wait
 cancellation has transport-specific behavior. Await operations sequentially: overlapping exchanges are
 refused, not queued. A multi-page read contains separate exchanges; it is not one atomic public operation.
+Await the complete public task before disposal or input cleanup. On the current Windows HID path, report
+calls run synchronously and a blocked native call must return before protocol cancellation can advance.
+Disposing a connection concurrently with I/O is not a way to prove native completion or release.
 
 Configuration can change how the device behaves afterwards. `DeviceFlags.TouchEject` makes the CCID smart card
 absent until the user touches the key, affecting every SmartCard session that follows, but it only takes effect
@@ -260,8 +273,15 @@ device does not expose throws `NotSupportedException`.
   options object is not retained. Keep source buffers valid and unchanged until the awaited operation
   completes, then zero owned secrets with `CryptographicOperations.ZeroMemory` in a `finally`.
 - The session zeroes the encoded configuration buffer, lock-code copies included, after transmitting it.
+  This clears that encoding, not every downstream formatter, transport or SCP temporary.
 - A lost lock code cannot be read back. Do not assume device reset removes it, even on Bio MPE.
 - Never log lock codes.
+
+Successful SCP creation records channel setup and performs no later protected Management command inside
+the factory. `IsAuthenticated` does not authorize a configuration-lock write or monitor ongoing channel
+health. SCP11b authenticates the device, not the host. For SCP11a/c, the August 2023 **1.3.0.13 Public Review**
+draft §4.3 includes the first correct-MAC command after setup in host authentication; final SCP11 1.4 and
+the complete YubiKey profile remain unverified. Keep these actor/phase limits distinct from lock-code checks.
 
 ## Example
 

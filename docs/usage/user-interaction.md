@@ -9,8 +9,9 @@ SDK-to-application callbacks, but they have different contracts:
   take credentials directly unless their documentation says otherwise.
 - `IUserPresencePrompt` reports that an operation requires or may require a physical touch. It never
   supplies a credential and does not report that the user touched the device. Configure it once in
-  `SessionCreationOptions.UserPresencePrompt` for any applet session or one-shot operation that
-  accepts session options.
+  `SessionCreationOptions.UserPresencePrompt` for participating applet sessions and one-shot operations.
+  Management and Security Domain paths remain silent; accepting shared session options does not imply
+  that an applet retains or uses the prompt.
 
 ```csharp
 using Yubico.YubiKit.Cli.Shared.Output;
@@ -34,6 +35,53 @@ which may contain a relying-party identifier, credential label, or key slot. Ins
 `UserPresenceIntent` scope it writes `Touch your YubiKey to {intent}.` instead.
 
 ## Request and resolution contract
+
+### Acquiring credentials
+
+Keep acquisition and verification in separate scopes. `ConsoleCredentialReader` is a synchronous Core
+reader, while `ICredentialPrompt` is the asynchronous SDK callback contract. A prompt adapter must
+return an exactly sized owned byte buffer and translate the consuming applet's length/encoding rules;
+the generic reader presets are not universal PIN policy.
+
+Interactive Core input uses pooled UTF-16 characters and clears that buffer when reading finishes.
+Its text limits count UTF-16 code units before encoding, rather than Unicode code points or encoded
+bytes. Disallowed characters are ignored interactively; redirected text is rejected if it fails the
+policy. Redirected input uses `Console.ReadLine` and therefore creates an immutable managed string
+that the reader cannot zero. The separate CLI reader has different byte/Rune handling. Choose an input
+path appropriate to the credential's requirements rather than assuming these paths are equivalent.
+
+Hex mode strips spaces, colons, and hyphens and checks `ExpectedByteLength` on decoded bytes. Redirected
+hex does not apply the same text-length/filter path as interactive input. Default UTF-8 conversion uses
+replacement fallback; callers needing strict Unicode validation must select and validate that policy.
+Allowing zero characters is also insufficient to promise a valid empty result: the current pooled
+result owner requires positive allocation length.
+
+Confirmation retains the first entry while reading the second, compares them, clears the second, and
+returns the first owner only on a match. Dispose the returned owner after the complete awaited use,
+including failure. This method borrows an already-open PIV session; its caller owns session disposal:
+
+```csharp
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Piv;
+
+static async Task ReadAndVerifyPinAsync(
+    IPivSession session, ISecureCredentialReader reader, CancellationToken cancellationToken)
+{
+    using var credential = reader.ReadCredential(
+        CredentialReaderOptions.ForPin(), cancellationToken);
+    if (credential is null)
+        return;
+
+    await session.VerifyPinAsync(credential.Memory, cancellationToken);
+}
+```
+
+The example's six-to-eight ASCII-digit preset is an input choice for that task, not a claim about all
+PIV credential forms. Interactive cancellation is checked while waiting for an available key; queued
+keystrokes and redirected `ReadLine` do not supply the same prompt cancellation responsiveness. Keep
+blocking console reads off a UI dispatcher and use a genuinely asynchronous UI adapter for callbacks.
+
+### Reporting presence
 
 For each notification, the SDK calls `OnUserPresenceRequestedAsync` before or while the device
 operation waits. Only after that callback completes successfully does the SDK pair it with
@@ -143,7 +191,8 @@ public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, Cance
   that does not match what they expected.
 - Write the intent as a lowercase verb phrase, such as `"approve the transfer"`, so it reads naturally after
   "Touch your YubiKey to", which is how `ConsoleUserPresencePrompt` shows it.
-- `Intent` is application-supplied display text. The SDK never logs it, and `ToString` omits it.
+- `Intent` is application-supplied display text, and `ToString` omits it. Keep secrets out of it:
+  an application callback can include that text in an exception that reaches a logging provider.
 
 The SDK coordinates each operation through one internal lifecycle handle. A transport can request that
 handle when it observes a live wait, while the applet layer that understands the complete response resolves
@@ -224,6 +273,10 @@ Callbacks may run on background threads and must marshal to the application's us
 dispatcher before touching controls. Dispatch asynchronously and return; do not synchronously wait
 for the user-interface thread. Prompt callbacks must not make re-entrant calls into the session that
 raised them, because the session operation is still in progress.
+This includes sync or async disposal: a callback that disposes its own session can wait for the
+operation that is waiting for that callback. Schedule shutdown outside the callback and await the
+complete operation before disposing. The protocol's per-exchange drain does not cover every later
+exchange, parse, or cache update in a public workflow.
 
 Session factories snapshot `SessionCreationOptions`, but the session retains the
 `IUserPresencePrompt` reference for its lifetime. The caller owns that service and must keep it alive

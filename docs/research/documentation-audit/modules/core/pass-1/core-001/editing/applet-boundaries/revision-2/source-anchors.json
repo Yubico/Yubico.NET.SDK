@@ -1,0 +1,92 @@
+[
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+    "source_sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "line_convention": "Python str.splitlines(), including form-feed boundaries",
+    "lines": [
+      1177,
+      1194
+    ],
+    "LF_only_lines": [
+      1149,
+      1166
+    ],
+    "UTF8_byte_range_half_open": [
+      76417,
+      77722
+    ],
+    "excerpt": "6.2.6          APDU Command C-MAC and C-DECRYPTION Generation and Verification\n\nThis section applies when both command confidentiality (C-DECRYPTION) and integrity (C-MAC) are\nrequired.\nDepending on the security level defined in the initiation of the Secure Channel, all subsequent APDU\ncommands within the Secure Channel may require secure messaging and such as use of a C-MAC (integrity)\nand encryption (confidentiality).\nFor each APDU command sent within the secure channel session, the off-card entity shall increment an\nencryption counter:\n   • The encryption counter’s start value shall be set to 1 for the first command following a successful\n     EXTERNAL AUTHENTICATE command.\n   • The encryption counter’s binary value shall be left padded with zeroes to form a full block.\n   • This block shall be encrypted with S-ENC to produce the ICV for command encryption.\n   Note: This scheme fulfils the requirements described in [NIST 800-38A] for unpredictable ICVs when using\n   CBC mode.\nNo encryption shall be applied to a command where there is no command data field. In this case, the encryption\ncounter shall still be incremented as described above, and the message shall be protected as defined in\nsection 6.2.4. Otherwise the off-card entity performs the process detailed hereafter.\n"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+    "source_sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "line_convention": "Python str.splitlines(), including form-feed boundaries",
+    "lines": [
+      1048,
+      1055
+    ],
+    "LF_only_lines": [
+      1023,
+      1030
+    ],
+    "UTF8_byte_range_half_open": [
+      68963,
+      69606
+    ],
+    "excerpt": "6.2.5      APDU Response R-MAC Generation and Verification\n\nNo R-MAC shall be generated and no protection shall be applied to a response that includes an error status\nword: in this case only the status word shall be returned in the response. All status words except '9000' and\nwarning status words (i.e. '62xx' and '63xx') shall be interpreted as error status words.\nThe EXTERNAL AUTHENTICATE command/response doesn’t return R-MAC.\nThe R-MAC is made of the first 8 bytes of the CMAC computed on the message made of the MAC chaining\nvalue, the response data field (if present) and the status bytes. The R-MAC calculation uses the S-RMAC key.\n"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+    "source_sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "line_convention": "Python str.splitlines(), including form-feed boundaries",
+    "lines": [
+      1084,
+      1086
+    ],
+    "LF_only_lines": [
+      1059,
+      1061
+    ],
+    "UTF8_byte_range_half_open": [
+      70640,
+      70859
+    ],
+    "excerpt": "The off-card entity shall perform the same CMAC calculation on the response and use the same R-MAC\nsession key employed by the card in order to verify the R-MAC.\nThe computed R-MAC becomes part of the response message.\n"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+    "source_sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "line_convention": "Python str.splitlines(), including form-feed boundaries",
+    "lines": [
+      1158,
+      1164
+    ],
+    "LF_only_lines": [
+      1131,
+      1137
+    ],
+    "UTF8_byte_range_half_open": [
+      75412,
+      75921
+    ],
+    "excerpt": "Via the MAC changing value, consecutive commands are chained to each other, protecting their sequence.\nResponses are linked to the respective command via the MAC changing value. As R-MAC uses a different\nsession key than C-MAC, the same MAC chaining value can be used for the response and the next command.\nThe scheme is adapted to the features of SCP03, where:\n   • R-MAC is optional, and\n   • R-MAC may be switched on and off during a secure channel session (see BEGIN/END R-MAC\n     SESSION commands).\n"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.txt",
+    "source_sha256": "59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543",
+    "line_convention": "Python str.splitlines(), including form-feed boundaries",
+    "lines": [
+      1108,
+      1134
+    ],
+    "LF_only_lines": [
+      1085,
+      1111
+    ],
+    "UTF8_byte_range_half_open": [
+      88509,
+      90742
+    ],
+    "excerpt": "4.3           Authentication\nAuthentication is achieved through the process of initiating a Secure Channel and provides assurance to an\nentity that it is communicating with an authenticated entity.\nFor SCP11a and SCP11c only: The OCE authenticates itself to the SD by providing a certificate signed by\nthe CA-KLOC and by providing the first APDU after secure channel establishment with a correct MAC. If an\nallowlist with one or more Certificate Serial Number entries exists in the SD for the CA-KLOC’s public key, the\nSD also verifies that the certificate is contained in an allowlist. Else the SD accepts all certificates signed by\nthe CA-KLOC.\nUse of the allowlist can provide the following benefits:\n   • A strong binding to one (or multiple) OCE(s)\n   • Protection against compromised OCEs\nIt is recommended to use the allowlist also as a revocation mechanism for OCE certificates. However, if the\nallowlist is used in this way, special care shall be taken never to empty/remove the allowlist (i.e. if created, the\nallowlist shall always contain at least one certificate) because no restrictions apply (i.e. all certificates are\naccepted) once an allowlist is removed.\nThe SD authenticates to the OCE by providing a certificate signed by the CA-KLCC and by generating a receipt\nat the end of the key establishment procedure. Implementation of a revocation mechanism for the SD’s\ncertificate is recommended (e.g. by the OCE using an allowlist or a denylist of the SD certificates), but out of\nscope of this specification. Such a mechanism can protect the system against compromised SD keys.\nSCP11a and SCP11c provide Mutual Authentication between the OCE and the SD.\nSCP11b provides Authentication of the SD to the OCE only.\nApplications can retrieve the current Security Level via the API method getSecurityLevel() to find out which\nvariant is used during a session. A current Security Level of AUTHENTICATED or ANY_AUTHENTICATED\nindicates that mutual authentication was successful and that SCP11a or SCP11c is currently in use (see\nsection 4.7).\n       Note: When executing the MUTUAL AUTHENTICATE command, the SD will be able to distinguish\n       between SCP11a and SCP11c by evaluating tag '90' in the command data.\n"
+  }
+]

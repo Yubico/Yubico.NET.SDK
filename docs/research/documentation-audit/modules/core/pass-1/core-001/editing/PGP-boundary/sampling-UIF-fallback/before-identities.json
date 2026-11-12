@@ -1,0 +1,14 @@
+[
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.cs",
+    "before_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "accepted_primary_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "exact_raw_match": true
+  },
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "before_sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "accepted_primary_sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "exact_raw_match": true
+  }
+]

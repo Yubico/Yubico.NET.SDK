@@ -49,10 +49,17 @@ SmartCard path:
 5. Construct the SmartCard backend once with the effective protocol, firmware, and SELECT programming sequence
 
 OTP HID path:
-1. `ReadStatusAsync()` → store status bytes
-2. Extract firmware version from protocol or status bytes
+1. `ReadStatusAsync()` → Core's first report initializes protocol firmware, with the NEO refresh if needed;
+   a second report supplies the returned cached status
+2. Prefer protocol firmware over the second status version; retain the raw status separately
 3. `ConfigureProtocolAsync` → configure protocol
 4. Construct the HID backend with the effective protocol
+
+The override is applied after discovery. ConfigState gates and the SmartCard touch heuristic still use
+raw status. Core's local readiness/touch windows are checked between awaited native calls, not hard
+call-duration bounds. Custom IOtpHidConnection providers must supply eight-byte reports; built-in length
+checks do not establish central defensive handling for malformed custom input. Keep Core report/NEO
+failure classification and polling policy separate from applet sequence/CRC interpretation.
 
 ## User-presence notifications
 
@@ -132,6 +139,11 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
 
 - Configurations copy inputs; Dispose clears private fixed/UID/key fields, not source buffers or GetConfig results.
 - Caller owns source buffers, every GetConfig array, and successful calculation output. Clear them separately.
+- One-shot HMAC returns only after hidden-session disposal. A teardown exception after calculation can
+  strand the transferred backend result without exposing it to the caller; no runtime fix is implied.
+- Clearing returned prefixes/owned encodings does not clear every incoming report, Windows report-ID
+  staging array, APDU owner, fragment or decrypted temporary. Ordinary callback-failure cleanup is narrower
+  than all-path erasure when a logging provider itself throws.
 - HMAC clears its padded copy; AES borrows the unpadded six-byte input. Keep borrowed inputs stable until await ends.
 - Immutable password/CLI strings cannot be deterministically erased. Raw translated scan codes permit mutable-source cleanup.
 - Normal WriteConfig cleanup clears assembled blocks, but invalid new/current-code paths allocate secret copies
@@ -139,6 +151,11 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
 - Never log keys, access codes, or challenge data
 
 ## Current implementation constraints
+
+Await complete workflows before disposal: write/status fallback, CRC/sequence checks, cached publication
+and terminal callbacks extend beyond guarded exchanges. Borrowed configurations/services remain alive
+through actual completion, not an outer cancelled wait. Grouped connection exclusion is process-local
+and limited to overlapping known member IDs.
 
 - Updates send complete masked values, not patches. Defaults are SerialApiVisible/AllowUpdate, other update
   flags clear. New code omission sends zeros; repeat current code in both code arguments to retain protection.

@@ -1,0 +1,56 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.SecurityDomain;
+using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
+namespace Audit20261111.DocExamples.Test303;
+public sealed class DocumentationBody303
+{
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
+public async Task GeneratedKey_IsListedInNextSession(YubiKeyTestState state)
+{
+    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));
+    CancellationToken ct = timeout.Token;
+    using var parameters = Scp03KeyParameters.Default;
+    var keyRef = new KeyReference(ScpKid.SCP11b, 0x03);
+    try
+    {
+        await state.WithSecurityDomainSessionAsync(
+            resetBeforeUse: true,
+            async session => { await session.GenerateKeyAsync(keyRef, cancellationToken: ct); },
+            scpKeyParams: parameters,
+            cancellationToken: ct);
+
+        await state.WithSecurityDomainSessionAsync(
+            resetBeforeUse: false,
+            async session =>
+            {
+                var keys = await session.ListKeyInformationAsync(ct);
+                Assert.Contains(keys, entry => entry.KeyReference.Kid == keyRef.Kid &&
+                    entry.KeyReference.Kvn == keyRef.Kvn);
+            },
+            cancellationToken: ct);
+    }
+    finally
+    {
+        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        await state.ResetSecurityDomainAsync(cleanup.Token);
+    }
+}
+}

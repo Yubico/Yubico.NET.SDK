@@ -1,0 +1,39 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_record_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "metadata_checkpoint": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "packet_paths": 91,
+  "disposition_paths": 93,
+  "packet_file_count": 93,
+  "assigned_units": 328,
+  "states": {
+    "READ-CLEAN": 209,
+    "READ-CANDIDATE": 34,
+    "READ-RELATED-CONTEXT": 85
+  },
+  "unread": 0,
+  "provisional_local_groups": 8,
+  "accepted_core_ids": 0,
+  "run_qualified_inherited_rows": 15,
+  "separate_documentation_dependencies": 21,
+  "clean_nominees": 8,
+  "source_lines_in_disposition_files": 12927,
+  "source_raw_range_hashes_match": true,
+  "pin_normalized_all_equal": true,
+  "read_completion": "Complete assigned source/assertion packet; independent content/citation review, edits, sampling, compilation and execution remain later gates.",
+  "inventory_qualification": "Literal paths has91, disposition_paths93, file_count93. Extra disposition-only paths PublicAPI.Shipped.txt and tests/CLAUDE.md retained; no fabricated semantic units.",
+  "execution": {
+    "sdk_build": false,
+    "sdk_test": false,
+    "formatter": false,
+    "native_device_crypto": false,
+    "git_mutation": false,
+    "subagents": false,
+    "static_source_record_checks_only": true
+  },
+  "scratch_environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/OpenPgp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/OpenPgp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/OpenPgp"
+  }
+}

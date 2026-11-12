@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose
     public enum CoseEcCurve
     {
         /// <summary>
-        /// The EC curve could not be determined.
+        /// Local sentinel for an undetermined curve. Zero is reserved in the IANA registry.
         /// </summary>
         Unknown = 0,
 

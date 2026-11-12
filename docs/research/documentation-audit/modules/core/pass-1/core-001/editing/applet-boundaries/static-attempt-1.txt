@@ -1,0 +1,19 @@
+Command: python3 docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/collect-static.py
+Exit: 1
+
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/collect-static.py", line 44, in <module>
+    assert raw == baseline, (row['path'], 'outside-scope path changed')
+           ^^^^^^^^^^^^^^^
+AssertionError: ('src/Management/examples/ManagementTool/ManagementTool.csproj', 'outside-scope path changed')
+
+Collector correction, not a product change:
+The newly added outside-scope check compared raw checked-out csproj bytes with Git blob bytes.
+The unchanged checked-out project uses CRLF: 1,160 bytes, SHA-256
+78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373.
+Git stores LF: 1,129 bytes, SHA-256
+c626ed23567cc748c694a9d092f781d6a6a1f2f724748a60307febd1bf125d47.
+The primary's final file ledger and raw file match the checked-out bytes. Explicit BOM/CRLF
+normalization matches Git. The corrected collector checks raw equality against the final ledger,
+and checks Git with explicit BOM/CRLF normalization. It changes no csproj bytes or original evidence.
+Earlier successful collector runs checked the 233 eligible .cs/.md files, not these excluded paths.

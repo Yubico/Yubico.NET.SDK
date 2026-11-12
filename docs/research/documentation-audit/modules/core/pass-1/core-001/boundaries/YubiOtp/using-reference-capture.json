@@ -1,0 +1,9 @@
+{
+  "url": "https://raw.githubusercontent.com/dotnet/docs/399ea4a18a9312379c5b3306bbffcc753491c628/docs/csharp/language-reference/statements/using.md",
+  "status": 200,
+  "accessed_utc": "2026-11-12T00:41:44.420331+00:00",
+  "sha256": "9d7f81b54120af6653ca7c8272ad143b004274da05bc9e91e9ae6afa3360ac87",
+  "bytes": 4290,
+  "revision": "399ea4a18a9312379c5b3306bbffcc753491c628",
+  "role": "Original Microsoft language-reference prose; awaited disposal/return ordering guidance, not an executed C# probe"
+}

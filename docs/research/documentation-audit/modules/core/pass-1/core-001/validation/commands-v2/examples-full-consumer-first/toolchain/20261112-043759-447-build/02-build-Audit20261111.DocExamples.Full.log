@@ -1,0 +1,21 @@
+$ dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release --no-incremental
+  Determining projects to restore...
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Hosting will not be pruned. This package is automatically available and does not need to be referenced explicitly. Remove the PackageReference item.
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Logging.Console will not be pruned. This package is automatically available and does not need to be referenced explicitly. Remove the PackageReference item.
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/examples/ManagementTool/ManagementTool.csproj (in 639 ms).
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/PivTool.csproj (in 639 ms).
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/NuGet.targets(198,5): warning : Unable to delete temporary file '/home/rupicola/.nuget/packages/serilog/4.3.0/ukghhub5.cnj'. Error: 'Could not find a part of the path '/home/rupicola/.nuget/packages/serilog'.'. [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/NuGet.targets(198,5): warning : Unable to delete temporary file '/home/rupicola/.nuget/packages/serilog/4.2.0/cg11pftq.mx0'. Error: 'Could not find a part of the path '/home/rupicola/.nuget/packages/serilog'.'. [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]
+  Failed to restore /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj (in 863 ms).
+  12 of 15 projects are up-to-date for restore.
+
+Build FAILED.
+
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/NuGet.targets(198,5): warning : Unable to delete temporary file '/home/rupicola/.nuget/packages/serilog/4.3.0/ukghhub5.cnj'. Error: 'Could not find a part of the path '/home/rupicola/.nuget/packages/serilog'.'. [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/NuGet.targets(198,5): warning : Unable to delete temporary file '/home/rupicola/.nuget/packages/serilog/4.2.0/cg11pftq.mx0'. Error: 'Could not find a part of the path '/home/rupicola/.nuget/packages/serilog'.'. [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Hosting will not be pruned. This package is automatically available and does not need to be referenced explicitly. Remove the PackageReference item.
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Logging.Console will not be pruned. This package is automatically available and does not need to be referenced explicitly. Remove the PackageReference item.
+    2 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:01.61

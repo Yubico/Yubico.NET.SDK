@@ -1,0 +1,18 @@
+{
+  "issue": "SAMPLE-PGP-001",
+  "selected_unit_misses": 2,
+  "unique_bug_allocation": 0,
+  "focused_product_paths": 2,
+  "before_exactly_matches_accepted_primary": true,
+  "primary_product_still_byte_identical_to_captured_before": true,
+  "CSharp_noncomment_lines_exactly_preserved": true,
+  "XML_comment_blocks_well_formed": 20,
+  "unchanged_other_accepted_product_files": 28,
+  "prior_files_byte_preserved": 99,
+  "unchanged_Markdown_example_bodies": 36,
+  "unchanged_XML_example_bodies": 28,
+  "focused_patch_added_line_whitespace": "PASS",
+  "focused_patch_sha256": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5",
+  "review_status": "READY FOR OWNER/SAMPLER REVIEW; NO INDEPENDENT ACCEPTANCE CLAIM",
+  "SDK_tests_build_formatter_crypto_native_device_Git_mutation_subagents": "NOT RUN"
+}

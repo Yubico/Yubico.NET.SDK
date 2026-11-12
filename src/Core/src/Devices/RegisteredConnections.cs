@@ -19,11 +19,12 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     Transparent connection decorators that release a <see cref="DeviceConnectionRegistry" /> ownership lease
-///     exactly once when the wrapped connection is disposed. Disposal runs through a <see cref="DisposalGate" />,
-///     so the inner connection is torn down exactly once, the lease is released only afterwards, and every
-///     disposal call — sync or async, concurrent or repeated — returns only once teardown has finished. Pure
-///     passthrough otherwise — behavior of the inner connection is unchanged.
+///     Connection decorators that share one disposal attempt and outcome through <see cref="DisposalGate" />.
+///     SmartCard disposal releases the registration after successful inner disposal; failure retains and
+///     quarantines it. The FIDO and OTP compatibility wrappers release it after the attempt even when inner
+///     disposal throws. Every sync or async caller observes the shared outcome, rather than a new attempt.
+///     Inner disposal completion is not independent proof that concurrent native calls have drained.
+///     Built-in macOS/Linux HID connections instead transfer the registration directly to their native owner.
 /// </summary>
 internal sealed class RegisteredSmartCardConnection(
     ISmartCardConnection inner,

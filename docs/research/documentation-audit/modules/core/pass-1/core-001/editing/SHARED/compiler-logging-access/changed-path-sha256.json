@@ -1,0 +1,13 @@
+{
+  "path": "CLAUDE.md",
+  "compiler_refs": [
+    "SAMPLE-WA002",
+    "FULL032"
+  ],
+  "before_sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+  "primary_accepted_before_sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+  "after_sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264",
+  "focused_patch_sha256": "b43c9a1da1416b45971f25e81b25bc46705158066e474d214e506f7909b452bd",
+  "scope": "Exactly one prose bullet; no fence or other line changed",
+  "independent_review": "pending"
+}

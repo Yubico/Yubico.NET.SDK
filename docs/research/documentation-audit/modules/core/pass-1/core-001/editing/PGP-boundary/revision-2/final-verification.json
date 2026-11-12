@@ -1,0 +1,36 @@
+{
+  "PGP-boundary": {
+    "prior_files_preserved": 16,
+    "full_patch_files": 17,
+    "current_path_decisions": 93,
+    "candidate_groups": 8,
+    "Markdown_bodies": 17,
+    "XML_bodies": 5,
+    "changed_fences": 0,
+    "full_patch_sha256": "7766e7411dd9847aaaf57b86937a61c720fe0c1a02a8ba7c790f711b61ce47b4",
+    "all_current_product_hashes_match": true,
+    "all_actual_CSharp_bytes_match_reviewed_predecessor": true
+  },
+  "PIV-boundary": {
+    "prior_files_preserved": 15,
+    "full_patch_files": 13,
+    "current_path_decisions": 121,
+    "candidate_groups": 6,
+    "Markdown_bodies": 19,
+    "XML_bodies": 23,
+    "changed_fences": 2,
+    "full_patch_sha256": "dc35e1032236c9363640a280dc722b9c10c33c8c2567433946d5521da514a8ce",
+    "all_current_product_hashes_match": true,
+    "all_actual_CSharp_bytes_match_reviewed_predecessor": true
+  },
+  "combined": {
+    "Markdown": 36,
+    "XML": 28,
+    "changed_Markdown_fences": 2,
+    "unchanged_bodies": 62,
+    "git_diff_check": "PASS",
+    "Git_index_refs": "No mutation; no staged files; checkpoint unchanged",
+    "independent_correction_review": "PENDING",
+    "builds_tests_formatter_crypto_native_device": "NOT RUN"
+  }
+}

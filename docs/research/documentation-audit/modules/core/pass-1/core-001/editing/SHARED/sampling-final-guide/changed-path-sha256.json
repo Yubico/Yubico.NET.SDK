@@ -1,0 +1,35 @@
+{
+  "paths": [
+    {
+      "path": "docs/usage/device-discovery.md",
+      "finding": "SAMPLE-A003 propagation",
+      "original_unit_id": "core-001:unit:0b5f8163f489c670",
+      "before_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+      "primary_accepted_before_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+      "after_sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09",
+      "independent_review": "pending",
+      "sampling_credit": "edited exclusion; coordinator handles expansion/quota replacement"
+    },
+    {
+      "path": "src/Core/README.md",
+      "finding": "SAMPLE-A003 propagation",
+      "original_unit_id": "core-001:unit:c2de2d6f26065229",
+      "before_sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c",
+      "primary_accepted_before_sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c",
+      "after_sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e",
+      "independent_review": "pending",
+      "sampling_credit": "edited exclusion; coordinator handles expansion/quota replacement"
+    },
+    {
+      "path": "docs/TESTING.md",
+      "finding": "SAMPLE-TESTING001",
+      "original_unit_id": "core-001:unit:287e6410db16f0e7",
+      "before_sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe",
+      "primary_accepted_before_sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe",
+      "after_sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339",
+      "independent_review": "pending",
+      "sampling_credit": "edited exclusion; coordinator handles expansion/quota replacement"
+    }
+  ],
+  "focused_patch_sha256": "2e5a12d5c057f999a67c46a89836b899f29615943b278ee09a1d120d4eda30f9"
+}

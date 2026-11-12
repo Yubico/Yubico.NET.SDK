@@ -1,0 +1,16 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/sources/Logger-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.2/src/libraries/Microsoft.Extensions.Logging/src/Logger.cs",
+    "sha256": "e55dfdcffc528b0f08ffe50ada8ad54d5ef192814df0e13fcb2e6e508ad08692",
+    "bytes": 10849,
+    "scope": "Retained immutable-tag source; reading only, no assembly/provider execution or installed-binary claim"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/sources/LoggerExtensions-v10.0.2.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.2/src/libraries/Microsoft.Extensions.Logging.Abstractions/src/LoggerExtensions.cs",
+    "sha256": "33da05f947734950bf28fcdbea3c744963cf05d27474727c3d038cd089703b39",
+    "bytes": 27366,
+    "scope": "Retained immutable-tag source; reading only, no assembly/provider execution or installed-binary claim"
+  }
+]

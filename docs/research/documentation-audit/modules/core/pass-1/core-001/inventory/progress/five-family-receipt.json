@@ -1,0 +1,39 @@
+{
+  "result": "PASS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_record_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "completed_families": [
+    "A",
+    "B1",
+    "B2",
+    "B3",
+    "C"
+  ],
+  "completed_units": 7135,
+  "remaining_units": 6909,
+  "completed_primary": 6381,
+  "completed_shared": 754,
+  "current_C_source_paths_checked": 135,
+  "prior_four_family_qualified_source_paths": 336,
+  "prior_qualification_mode": "Exact preserved ledger/packet/inventory input hashes; old source qualification reused without rerunning it.",
+  "historical_snapshot_receipt": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/receipt.json",
+  "historical_snapshot_receipt_sha256": "f34acec6643c446dd44ff9206164ba27f06cb7d399d481609225736892846ddb",
+  "report_lines": 29,
+  "partial_B4_B5_B6_records_read_or_credited": 0,
+  "missing_extra_or_overlapping_assigned_IDs": 0,
+  "review_edit_runtime": "PENDING",
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/coverage-progress.json",
+      "sha256": "87f8604acc7760337acd130a6a1b403f2fd3e348d4019e6219e4dcf86cc415b7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/coverage-progress.md",
+      "sha256": "650bfbd45447f67d3a1007d5cd0b24f6daf229fb8ac1056bf37f7c29dbca93af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/aggregate.py",
+      "sha256": "43977eb5724f585a89fa992119ce043df295c43ba096d2545d5262bda6711292"
+    }
+  ]
+}

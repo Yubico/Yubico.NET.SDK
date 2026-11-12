@@ -22,9 +22,10 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         The physical FIDO HID interface admits exactly one live SDK connection and native HID handle.
-///         A second connection attempt is refused with <see cref="Devices.ConnectionInUseException" />
-///         before the native interface is opened. Dispose the current connection before reopening it.
+///         Device-managed opens use an in-process registry to admit one live connection across known physical
+///         members. A conflicting open is refused with <see cref="Devices.ConnectionInUseException" /> before
+///         native acquisition. Direct expert report opens and external implementations have separate ownership
+///         contracts; this registry provides no cross-process exclusion. Dispose the current connection before reopening it.
 ///     </para>
 /// </remarks>
 public interface IFidoHidConnection : IConnection

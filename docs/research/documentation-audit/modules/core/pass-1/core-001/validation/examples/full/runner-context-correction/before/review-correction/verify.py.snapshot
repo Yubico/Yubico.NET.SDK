@@ -1,0 +1,80 @@
+"""Pure selected-project descriptor and literal resource/import wrapper regression oracles."""
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+HERE=Path(__file__).resolve().parent
+FULL=HERE.parent
+V=FULL.parents[1]
+sys.path.insert(0,str(V))
+from foundation import ROOT,require,sha
+
+
+def load(name,path):
+    spec=importlib.util.spec_from_file_location(name,path);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
+
+
+def main():
+    adapter=load('full_selected_project_adapter',FULL/'capture.py')
+    helper=load('private_unchanged_qualified_parser',V/'checker-binding/bind.py')
+    original_project,original_root=helper.PROJECT,helper.ROOT
+    cases=[]
+    projects=[ROOT/'src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj',
+              ROOT/'src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj',
+              FULL/'host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj']
+    lines=['/sourcelink:obj/Release/net10.0/example.sourcelink.json',
+           '/embed:"obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs"',
+           '/embed:"/home/rupicola/Code/y/Yubico.Yubikit.NET/shared comma,file.cs"',
+           '/resource:"obj/payload, with space.bin",payload,private']
+    relative=['obj/Release/net10.0/example.sourcelink.json','obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs',
+              '/home/rupicola/Code/y/Yubico.Yubikit.NET/shared comma,file.cs','obj/payload, with space.bin']
+    for project in projects:
+        rows=adapter.full_descriptors(helper,lines,project)
+        expected=[str((project.parent/value).resolve()) for value in relative]
+        assert [row['path'] for row in rows]==expected
+        assert [row['raw'] for row in rows]==lines
+        assert helper.PROJECT==original_project and helper.ROOT==original_root
+        kernel=adapter.kernel(project)
+        assert kernel.PROJECT==project and kernel.ROOT==ROOT and 'full_descriptors' in kernel.compiler.__code__.co_names
+        cases.append(dict(project=str(project),paths=expected,raw_arguments_unchanged=True))
+    rejected=[]
+    for label,project in [('relative-project',Path('project.csproj')),('foreign-project',Path('/tmp/unrelated.csproj')),('non-project',ROOT/'README.md')]:
+        try:adapter.full_descriptors(helper,lines,project)
+        except ValueError:rejected.append(label)
+        else:raise AssertionError('Invalid selected project accepted: '+label)
+    # A legitimate parse is insufficient when the caller uses the wrong project's before population.
+    allowed={str((projects[0].parent/value).resolve()) for value in relative}
+    for label,rows in [('old-doccheck-base',helper.compiler_file_arguments(lines)),
+                       ('wrong-selected-project',adapter.full_descriptors(helper,lines,projects[1]))]:
+        try:require(all(row['path'] in allowed for row in rows),'Descriptor outside the actual selected source/input population')
+        except ValueError:rejected.append(label)
+        else:raise AssertionError('Wrong-base descriptor membership accepted')
+    generator=load('literal_test_import_splitter',FULL/'test-contexts.py')
+    assert generator.import_prefix('using System;\nusing static System.Math;\n\nclass C {}').group(1)=='using System;\nusing static System.Math;\n'
+    for body in ('using var owner = Acquire();\n\nUse(owner);','using (var owner = Acquire()) { }\n\nUse();'):
+        assert generator.import_prefix(body) is None
+    manifest=json.loads((FULL/'manifest-contexts-fixed.json').read_bytes())
+    sources={row['id']:row for row in manifest['records']}
+    for id in ('FULL-027','FULL-211','FULL-238','FULL-244'):
+        row=sources[id];compiled=row['compiled'];path=FULL/compiled['path'];code=path.read_text()
+        assert sha(path.read_bytes())==compiled['generated_sha256']
+        prefix,suffix=compiled['prefix'],compiled['suffix']
+        body=code[len(prefix):len(code)-len(suffix)]
+        assert code.startswith(prefix) and code.endswith(suffix) and body==row['decoded_body'],id
+    body211=(FULL/sources['FULL-211']['compiled']['path']).read_text()
+    assert 'using var fakeConnection' not in body211.split('CompileOnly()',1)[0]
+    assert 'CompileOnly()\n{\nusing var fakeConnection = new FakeSmartCardConnection();' in body211
+    alias=sources['FULL-238']['compiled'];canonical=sources['FULL-211']['compiled']
+    assert alias['compilation_alias_of']=='FULL-211' and alias['path']==canonical['path'] and alias['generated_sha256']==canonical['generated_sha256']
+    body244=(FULL/sources['FULL-244']['compiled']['path']).read_text()
+    assert 'public void CompileOnly(YubiKeyTestState state)' in body244 and 'async Task CompileOnly' not in body244
+    assert 'using System.Text;\n' in (FULL/sources['FULL-027']['compiled']['path']).read_text()
+    return dict(scope='Pure metadata/path/import/resource-layout checks only; no Csc/capture/build/test/example execution.',
+                descriptor_positive_contexts=cases,rejected_project_or_membership_cases=rejected,
+                qualified_parser_project_and_root_unchanged=True,using_directive_and_resource_declaration_distinguished=True,
+                literal_body_reconstructions=['FULL-027','FULL-211','FULL-238','FULL-244'],
+                alias_238_same_real_context=True,synchronous_244=True,framework_import_027=True)
+
+
+if __name__=='__main__':print(json.dumps(main(),indent=2))

@@ -1,0 +1,14 @@
+{
+  "product_files_changed": 17,
+  "file_dispositions": 93,
+  "outside_owner_referrals": 25,
+  "Markdown_example_bodies_preserved": 17,
+  "XML_protocol_fragments_preserved": 2,
+  "XML_blocks_well_formed": 146,
+  "local_links_resolve": 11,
+  "cs_changed_lines_only_standalone_comments": true,
+  "cs_noncomment_lines_exactly_preserved_ignoring_final_newline": true,
+  "git_diff_check": "PASS",
+  "build_test_formatter_crypto_native_device": "NOT RUN",
+  "independent_review_compiler_binding_runtime_qualification": "PENDING; no credit claimed"
+}

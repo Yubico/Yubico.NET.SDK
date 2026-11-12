@@ -39,7 +39,7 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 public class ManagementSessionAdvancedTests
 {
     /// <summary>
-    ///     Compares a fresh query with cached discovery metadata for one authorized device row.
+    ///     Compares a fresh query with the shared fixture's initial live-read snapshot for one authorized row.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey]
@@ -49,7 +49,7 @@ public class ManagementSessionAdvancedTests
             // Act
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
-            // Assert - Verify device info matches what was cached during discovery
+            // Compare against shared fixture initialization, not the Core discovery snapshot.
             Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
             Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
             Assert.Equal(state.FormFactor, deviceInfo.FormFactor);

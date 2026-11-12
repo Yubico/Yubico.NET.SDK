@@ -1,0 +1,26 @@
+{
+  "scope": "Preparation-tool failures only; no source or sampling-content verdicts.",
+  "attempts": [
+    {
+      "attempt": 1,
+      "error": "FileNotFoundError: sampling-UIF-fallback/before/OpenPgpSession.cs",
+      "cause": "The queued PGP snapshot layout retains full repository-relative paths, rather than basename-only captures.",
+      "correction": "Use before/<repository-relative-path> and after/<repository-relative-path>, bound to the exact review manifest hashes.",
+      "impact": "No primary product changes, sampler credit, quota or source-correctness claim. The first generation stopped before publishing a completed-read tally."
+    },
+    {
+      "attempt": 2,
+      "error": "AssertionError: base.endswith('\\n') and successor.endswith('\\n')",
+      "cause": "Pinned OpenPgpSession.cs has no final newline (16035 bytes); reviewed before/after snapshots do. CLAUDE.md is terminated in all three captures.",
+      "correction": "Preserve exact source EOF and frame unterminated unified-diff data lines with the explicit No newline at end of file marker; reuse the original-coordinate parser.",
+      "impact": "Generation stopped before tally publication. No source bytes normalized or changed; no final quota or sampler pass claimed."
+    },
+    {
+      "attempt": 3,
+      "error": "NameError: byid is not defined in AST-extracted predecessor pool_reason",
+      "cause": "Isolated helper namespace omitted the population lookup required only when an exclusion row is emitted.",
+      "correction": "Supply the immutable loaded population lookup to that helper namespace.",
+      "impact": "Generation stopped before completed-tally publication. No source edits or sampler credit."
+    }
+  ]
+}

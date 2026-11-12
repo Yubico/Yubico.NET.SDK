@@ -23,6 +23,12 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     for the slot and the private key template. Owns the padded or reordered copies it makes and
 ///     clears them on dispose.
 /// </summary>
+/// <remarks>
+///     The caller retains the original private key through the complete import task and disposes it afterward.
+///     Ed25519 templates borrow its seed directly; padded components and reversed X25519 scalars are separate
+///     import-owned copies. Template serialization and APDU processing create additional owners with their own
+///     cleanup scopes.
+/// </remarks>
 internal sealed class PrivateKeyImport : IDisposable
 {
     private static readonly byte[] PublicExponent65537 = [0x01, 0x00, 0x01];

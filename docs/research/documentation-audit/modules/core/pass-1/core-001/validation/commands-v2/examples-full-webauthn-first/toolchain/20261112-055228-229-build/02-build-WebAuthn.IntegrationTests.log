@@ -1,0 +1,18 @@
+$ dotnet build src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj (in 210 ms).
+  5 of 6 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.WebAuthn -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs(29,42): error CS1929: 'YubiKitLogging' does not contain a definition for 'CreateLogger' and the best extension method overload 'LoggerFactoryExtensions.CreateLogger<PreviewSignProcessor>(ILoggerFactory)' requires a receiver of type 'Microsoft.Extensions.Logging.ILoggerFactory' [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj]
+
+Build FAILED.
+
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs(29,42): error CS1929: 'YubiKitLogging' does not contain a definition for 'CreateLogger' and the best extension method overload 'LoggerFactoryExtensions.CreateLogger<PreviewSignProcessor>(ILoggerFactory)' requires a receiver of type 'Microsoft.Extensions.Logging.ILoggerFactory' [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:06.91

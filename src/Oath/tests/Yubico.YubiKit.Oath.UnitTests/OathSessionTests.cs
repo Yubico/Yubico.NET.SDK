@@ -115,8 +115,8 @@ public class OathSessionTests
     [Fact]
     public void DeriveKey_WithKnownInputs_ProducesDeterministicOutput()
     {
-        // DeriveKey is an instance method that uses the session's salt.
-        // We can verify the PBKDF2 algorithm independently.
+        // Direct BCL PBKDF2 parameter/shape and repeatability check. This does not call session.DeriveKey
+        // or compare against an independently supplied known-answer vector.
         string password = "test_password";
         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 
@@ -143,6 +143,7 @@ public class OathSessionTests
     [Fact]
     public void DeriveKey_DifferentPasswords_ProduceDifferentKeys()
     {
+        // Compare direct BCL calls, not the session method or its salt handling.
         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 
         byte[] key1 = Rfc2898DeriveBytes.Pbkdf2(
@@ -165,6 +166,7 @@ public class OathSessionTests
     [Fact]
     public void DeriveKey_DifferentSalts_ProduceDifferentKeys()
     {
+        // Compare direct BCL calls with different salts; no independent expected key is asserted.
         byte[] salt1 = [0x01, 0x02, 0x03, 0x04];
         byte[] salt2 = [0x05, 0x06, 0x07, 0x08];
 
@@ -626,9 +628,9 @@ public class OathSessionTests
     }
 
     /// <summary>
-    ///     A session that fails to initialize must release its claim on the connection. The connection
-    ///     outlives the failure and belongs to the caller, so a retry — or a different applet — must not be
-    ///     refused by a ghost holder that no reference points at any more.
+    ///     Checks guard release and borrowed-connection reuse after this fake's first SELECT returns 6A82.
+    ///     The second scripted SELECT succeeds. This does not establish recovery after every factory
+    ///     failure, an uncertain secure-channel state, or an actual device/native failure.
     /// </summary>
     [Fact]
     public async Task CreateAsync_InitializationFails_LeavesTheConnectionUsableByTheNextSession()

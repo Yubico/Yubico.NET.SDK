@@ -14,6 +14,8 @@
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
+// Emits a trailing Le byte even when the API value is zero; explicit 256 is rejected here.
+// The returned heap encoding and temporary stack copy have separate cleanup scopes.
 internal class ApduFormatterShort : IApduFormatter
 {
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;

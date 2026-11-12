@@ -1,0 +1,56 @@
+--- a/src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs
++++ b/src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs
+@@ -25,7 +25,7 @@
+ /// <see cref="HidDeviceListener.Changed"/> callback.
+ /// </para>
+ /// <para>
+-/// Each <see cref="Start"/> creates an independent session that owns its native resources
++/// Each new listener session owns its native resources
+ /// (udev context, monitor, shutdown event fd). The session's listener thread disposes those
+ /// resources when its loop exits. If <see cref="Stop"/> times out waiting for a wedged thread,
+ /// the cancelled session is abandoned rather than torn down, so a late-exiting thread can never
+@@ -58,8 +58,8 @@
+     /// fake <see cref="ILinuxHidEventSource"/> for no-hardware fault injection.
+     /// </summary>
+     /// <param name="eventSourceFactory">
+-    /// Factory invoked once per <see cref="Start"/> to create the session's event source,
+-    /// or null to use the udev-backed production source.
++    /// Factory invoked once when <see cref="Start"/> creates a new session's event source. Calls that return
++    /// because the listener is already started do not invoke it. Use null for the udev-backed production source.
+     /// </param>
+     internal LinuxHidDeviceListener(Func<ILinuxHidEventSource>? eventSourceFactory)
+     {
+--- a/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs
++++ b/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs
+@@ -57,12 +57,13 @@
+ /// <summary>
+ /// Abstraction over the native udev monitor, poll(), and shutdown eventfd used by
+ /// <see cref="LinuxHidDeviceListener"/>. Enables no-hardware fault-injection tests of the
+-/// listener's loop policy (bounded exit, error transitions, hint emission).
++/// listener's loop policy (error transitions, hint emission and caller-requested stop).
+ /// </summary>
+ /// <remarks>
+ /// Ownership: the listener session's thread owns the source and disposes it when the loop
+ /// exits. <see cref="SignalShutdown"/> may be called concurrently from other threads and
+ /// must tolerate a source that is concurrently disposing.
++/// Fake-driven loop-policy and caller-stop tests do not establish native poll completion or a shutdown deadline.
+ /// </remarks>
+ internal interface ILinuxHidEventSource : IDisposable
+ {
+@@ -86,9 +87,13 @@
+     LinuxHidUdevEvent? ReceiveEvent();
+ 
+     /// <summary>
+-    /// Wakes a thread blocked in <see cref="WaitForEvent"/> so it can observe cancellation.
+-    /// Safe to call from any thread, including concurrently with <see cref="IDisposable.Dispose"/>.
+-    /// </summary>
++    /// Attempts a shutdown wake so a thread blocked in <see cref="WaitForEvent"/> can observe cancellation.
++    /// </summary>
++    /// <remarks>
++    /// May be called from any thread and must tolerate concurrent <see cref="IDisposable.Dispose"/>.
++    /// A missing, invalid or concurrently disposed shutdown handle, or a failed signal write, can leave the
++    /// native wait unwoken. A normal return does not acknowledge a wake, loop termination, drain or release.
++    /// </remarks>
+     void SignalShutdown();
+ 
+     /// <summary>

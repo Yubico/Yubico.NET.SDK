@@ -1,0 +1,154 @@
+[
+  {
+    "key": "yubiotp-001:OTP-IMP-001",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "HOTP divisor remains applet-owned; no Core catalog or codec fix",
+    "candidates": [
+      "CORE-OTP-X006",
+      "CORE-OTP-X009"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-002",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "38-byte scan-map API versus vendor 45 remains applet-owned",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-003",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "Configuration/response/parser owners rechecked; shared copies remain family-owned and new outer one-shot transfer concern is X004",
+    "candidates": [
+      "CORE-OTP-X003",
+      "CORE-OTP-X004",
+      "CORE-OTP-X005"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-004",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "Cached keyboard trigger still drives SmartCard heuristic; historical status matrix and current call sites retained",
+    "candidates": [
+      "CORE-OTP-X006"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-005",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "SmartCard short fallback, bypass and zero acceptance remain applet-owned; HID polling/reset are separate Core mechanisms",
+    "candidates": [
+      "CORE-OTP-X002",
+      "CORE-OTP-X006",
+      "CORE-OTP-X009"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-006",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "Type/operation gates remain incomplete per-flag/length support checks; raw/effective provenance traced",
+    "candidates": [
+      "CORE-OTP-X006"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-007",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "Full masked update and omitted new-code semantics remain applet-owned; legacy code-change interval enforcement still absent",
+    "candidates": [
+      "CORE-OTP-X005",
+      "CORE-OTP-X006"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-008",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "NDEF null/empty/enum/language/UTF8/read-back remain applet-owned; Core framing adds no NFC capability proof",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-009",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "Standalone OtpTool still bypasses translator, while unified CLI uses working string route; historical N3 preserved separately",
+    "candidates": [
+      "CORE-OTP-X007"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-010",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "CLI parser/help/JSON/secret-output/transport behavior remains sample-owned, with narrow unified CLI early config cleanup referral",
+    "candidates": [
+      "CORE-OTP-X005",
+      "CORE-OTP-X007"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-011",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "Actual weak/strong oracles and failure cleanup scopes rechecked without changing assertions",
+    "candidates": [
+      "CORE-OTP-X009"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  },
+  {
+    "key": "yubiotp-001:OTP-IMP-012",
+    "outcome": "RETAIN-ORIGINAL-APPLET-SCOPE",
+    "observation": "HMAC marker/AES/challenge transport qualification retains historical serial 103 successes and CCID rejection; no broader support inferred",
+    "candidates": [
+      "CORE-OTP-X006",
+      "CORE-OTP-X009"
+    ],
+    "source_authority": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md:43–54",
+    "implementation": "DEFERRED-PASS-2",
+    "documentation": "EXISTING-QUALIFICATIONS-RETAINED; mapped future reopening",
+    "verification": "NO-NEW-EXECUTION"
+  }
+]

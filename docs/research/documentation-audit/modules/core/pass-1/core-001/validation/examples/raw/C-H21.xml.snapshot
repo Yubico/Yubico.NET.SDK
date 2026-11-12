@@ -1,0 +1,7 @@
+
+//         ///   00 || masked salt || masked DB
+//         ///     MGF1(maskedDB)
+//         ///   00 || salt || masked DB
+//         ///     MGF1(salt)
+//         ///   00 || salt || lHash || PS || 01 || output data
+//         /// 

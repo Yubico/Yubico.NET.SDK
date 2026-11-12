@@ -200,8 +200,8 @@ public class ReconfigurationDiscoveryInvariantTests
 
     /// <summary>
     ///     Finds the physical key carrying <paramref name="serial" /> via a fresh scan, matching by the
-    ///     serial-form id when discovery minted one and by a Management read otherwise (single-key rigs
-    ///     merge by PID and never read serials — cost discipline, not a gap).
+    ///     serial-form id when discovery minted one and by a Management read otherwise. Discovery attempts
+    ///     metadata reads even on single-key rigs, but missing serial evidence can still require this fallback.
     /// </summary>
     private static async Task<IYubiKey?> TryFindBySerialAsync(int serial)
     {

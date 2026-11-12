@@ -1,0 +1,31 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "9d72160375862dfd9d09793538f64a7d4f96e398",
+  "packet": "inventory/packets/BOUNDARY-SecurityDomain.json",
+  "packet_sha256": "164948e7c21a85786ce6770c7c550574370b1d9a9fafbb587b460ef68bc1e0d9",
+  "assigned_ids": 193,
+  "disposition_paths": 36,
+  "packet_primary_paths": 31,
+  "supplemental_complete_paths": 5,
+  "actual_lines_read": 5607,
+  "dispositions": {
+    "READ-CLEAN": 108,
+    "READ-CANDIDATE": 74,
+    "READ-CONTEXT": 11
+  },
+  "inherited_assigned": 16,
+  "local_candidates": 8,
+  "accepted_core_ids": 0,
+  "unread": 0,
+  "awaiting_source_context": 0,
+  "investigation": "COMPLETE FOR PINNED ASSIGNMENT",
+  "independent_review": "PENDING",
+  "documentation_edits": "NOT AUTHORIZED",
+  "implementation": "UNCHANGED",
+  "examples": "UNCOMPILED / VALID-NOT-CHECKED",
+  "sdk_builds": 0,
+  "sdk_tests": 0,
+  "native_device_crypto_executions": 0,
+  "scratch": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/BOUNDARY-SecurityDomain",
+  "constraints": "No central/product/assertion/index/ref/archive/user work edits, no subagents; metadata HEAD may advance; Windows ready handoff pending, PIV physical deferrals preserved."
+}

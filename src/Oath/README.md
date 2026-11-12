@@ -44,19 +44,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Oath;
 
-IYubiKey device = await YubiKeyManager.FindFirstAsync();
+IYubiKey device = await YubiKeyManager.FindFirstAsync(
+    predicate: key => key.SupportsConnection(ConnectionType.SmartCard));
 await using var session = await device.CreateOathSessionAsync();
 IReadOnlyList<Credential> credentials = await session.ListCredentialsAsync();
 Console.WriteLine(string.Join('\n', credentials.Select(c => $"{c.Issuer}:{c.Name} ({c.OathType})")));
 ```
 
-Later snippets assume these directives and a `device` obtained the same way. The one-shot
+This uses default All discovery, then selects a SmartCard-capable result. SmartCard-scoped discovery
+is a different census choice; it omits other interfaces rather than merely filtering a full result.
+Later snippets are independent alternatives, each assuming these directives and a `device` obtained
+the same way, after the previous session/connection scope has ended. The one-shot
 `device.ListOathCredentialsAsync()` extension does the same listing and owns its own session.
 
 ## Common operations
@@ -224,11 +230,17 @@ The context uses application `OATH`, basis `PolicyRequires`, and the public `iss
 `CalculateAllAsync` is silent. Cancelling the token before the calculation's SmartCard exchange is admitted
 resolves a requested notification as cancelled; once admitted, the exchange runs to completion and cancellation
 does not interrupt the device or necessarily change the notification outcome.
+Await the complete public task before disposal or clearing inputs. `CalculateAllAsync` can issue followup
+calculations; `AuthenticateAndRetryAsync` includes password acquisition, VALIDATE and retry; presence
+callbacks can run after an exchange. Keep prompt/provider resources alive until the workflow finishes,
+and avoid reentering or disposing the session from a callback.
 
 ## Constraints
 
-- SmartCard transport only. A physical YubiKey admits one live connection and one session per connection; a second
-  attempt throws `ConnectionInUseException`. Whoever opens a connection disposes it.
+- SmartCard transport only. Within this process, grouped views admit one live connection across known
+  member IDs, and each connection admits one session. Disjoint scoped views are not coordinated solely
+  by matching serials. See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
+  Whoever opens a connection disposes it.
 - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
 - `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
   `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
@@ -243,11 +255,20 @@ does not interrupt the device or necessarily change the notification outcome.
   as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
   While the applet is locked, protected operations fail with an `OathException`
   whose `Reason` is `OathFailureReason.Locked` until `ValidateAsync` succeeds.
+- `IsAuthenticated` records SCP setup, not OATH unlock or ongoing channel health. Cached applet properties
+  describe this session's observations and can remain readable after disposal. `Salt` borrows session-owned
+  storage that disposal clears. Use a fresh session after RESET to obtain the new salt and identity.
+- Synthetic secure-reset tests establish terminal state, key-array cleanup and command order, not outbound
+  encryption/MAC correctness or live SCP reset. Empty LIST/RESET and protected continuations also depend
+  on Core's APDU/SCP profile; passing the synthetic cleanup test is not wire-conformance qualification.
 
 ### Migrating reset callers
 
 Do not call LIST, derive a key, or inspect a refreshed identity on the old session after `ResetAsync`.
 With the convenience factory, successful reset closes the hidden owned connection; explicitly open a new session:
+
+This composable fragment assumes the selected `IYubiKey device` above and a caller-supplied
+`CancellationToken ct`. Both scopes own their connections; no earlier session remains open.
 
 ```csharp
 await using (var reset = await device.CreateOathSessionAsync(cancellationToken: ct))
@@ -274,6 +295,9 @@ retains the original creation parameters. This terminal contract replaces same-s
 - `ParseUri` clears decoded temporary buffers on success and failure. Immutable URI/Base32 strings and literal
   demo seeds cannot be erased; avoid retaining or logging them and prefer securely acquired byte input in production.
 - `DeriveKey` takes a borrowed UTF-8 password and returns a 16-byte key you own and must zero; `AuthenticateAndRetryAsync` zeroes the key it derives, not the bytes your callback returned.
+- `OathCredentialOptions.ForOathPassword` configures the console reader's 1..128 **UTF-16 code-unit** UI
+  limit before UTF-8 encoding, not a firmware/password-byte limit. Direct byte inputs bypass that preset.
+  Immutable redirected strings have a different cleanup lifetime from returned mutable password buffers.
 - Never log secrets, passwords, derived access keys, or calculated codes.
 
 ## Example

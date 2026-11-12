@@ -1,0 +1,146 @@
+[
+  {
+    "body_number": 1,
+    "before": {
+      "opening_line": 20,
+      "closing_line": 35,
+      "body": "flowchart LR\n    App[\"Your .NET App<br/>(desktop / service / CLI)\"]\n    subgraph SDK[\"Yubico Yubikit .NET SDK v2\"]\n        direction TB\n        Apps[\"App modules<br/>PIV \u00b7 OATH \u00b7 CTAP2 \u00b7 WebAuthn<br/>OpenPGP \u00b7 Mgmt \u00b7 YubiOTP \u00b7 HSM \u00b7 SD\"]\n        Core[\"Core<br/>discovery \u00b7 connections \u00b7 APDU \u00b7 SCP \u00b7 crypto\"]\n        Apps --> Core\n    end\n    OS[\"OS transport layer<br/>PC/SC \u00b7 HID (USB/NFC)\"]\n    HW[\"YubiKey hardware<br/>(one or many)\"]\n\n    App -->|\"typed C# API<br/>(async)\"| SDK\n    Core -->|\"native interop<br/>Win / macOS / Linux\"| OS\n    OS -->|\"APDU \u00b7 CTAPHID \u00b7 OTP frames\"| HW\n",
+      "body_sha256": "db57c0dc9a0e2214e8b3ece5419847058baae2b8b8ace308b0a848ed77d2167b",
+      "language": "mermaid"
+    },
+    "after": {
+      "opening_line": 20,
+      "closing_line": 35,
+      "body": "flowchart LR\n    App[\"Your .NET App<br/>(desktop / service / CLI)\"]\n    subgraph SDK[\"Yubico Yubikit .NET SDK v2\"]\n        direction TB\n        Apps[\"App modules<br/>PIV \u00b7 OATH \u00b7 CTAP2 \u00b7 WebAuthn<br/>OpenPGP \u00b7 Mgmt \u00b7 YubiOTP \u00b7 HSM \u00b7 SD\"]\n        Core[\"Core<br/>discovery \u00b7 connections \u00b7 APDU \u00b7 SCP \u00b7 crypto\"]\n        Apps --> Core\n    end\n    OS[\"OS transport layer<br/>PC/SC \u00b7 HID (USB/NFC)\"]\n    HW[\"YubiKey hardware<br/>(one or many)\"]\n\n    App -->|\"typed C# API<br/>(async)\"| SDK\n    Core -->|\"native interop<br/>Win / macOS / Linux\"| OS\n    OS -->|\"APDU \u00b7 CTAPHID \u00b7 OTP frames\"| HW\n",
+      "body_sha256": "db57c0dc9a0e2214e8b3ece5419847058baae2b8b8ace308b0a848ed77d2167b",
+      "language": "mermaid"
+    },
+    "body_unchanged": true
+  },
+  {
+    "body_number": 2,
+    "before": {
+      "opening_line": 47,
+      "closing_line": 76,
+      "body": "flowchart TD\n    Core[\"Yubico.YubiKit.Core<br/><i>the hub \u2014 everything depends on it</i>\"]\n\n    Mgmt[\"Management\"]\n    Piv[\"Piv\"]\n    Oath[\"Oath\"]\n    OpenPgp[\"OpenPgp\"]\n    SD[\"SecurityDomain\"]\n    Hsm[\"YubiHsm\"]\n    Otp[\"YubiOtp\"]\n    Ctap2[\"Ctap2\"]\n    WebAuthn[\"WebAuthn\"]\n\n    Mgmt --> Core\n    Piv --> Core\n    Oath --> Core\n    OpenPgp --> Core\n    SD --> Core\n    Hsm --> Core\n    Otp --> Core\n    Ctap2 --> Core\n    WebAuthn -->|\"one-way<br/>(Ctap2 has no ref back)\"| Ctap2\n    Ctap2 --> Core\n\n    classDef hub fill:#1f6feb,color:#fff,stroke:#0b3d91,stroke-width:2px;\n    classDef second fill:#8957e5,color:#fff,stroke:#4c2889;\n    class Core hub;\n    class WebAuthn second;\n",
+      "body_sha256": "5f1164ccfa0d2ac0a8a4ad19d054fee9869ce8d1fe6a1141e87969d9890271bb",
+      "language": "mermaid"
+    },
+    "after": {
+      "opening_line": 47,
+      "closing_line": 76,
+      "body": "flowchart TD\n    Core[\"Yubico.YubiKit.Core<br/><i>the hub \u2014 everything depends on it</i>\"]\n\n    Mgmt[\"Management\"]\n    Piv[\"Piv\"]\n    Oath[\"Oath\"]\n    OpenPgp[\"OpenPgp\"]\n    SD[\"SecurityDomain\"]\n    Hsm[\"YubiHsm\"]\n    Otp[\"YubiOtp\"]\n    Ctap2[\"Ctap2\"]\n    WebAuthn[\"WebAuthn\"]\n\n    Mgmt --> Core\n    Piv --> Core\n    Oath --> Core\n    OpenPgp --> Core\n    SD --> Core\n    Hsm --> Core\n    Otp --> Core\n    Ctap2 --> Core\n    WebAuthn -->|\"one-way<br/>(Ctap2 has no ref back)\"| Ctap2\n    Ctap2 --> Core\n\n    classDef hub fill:#1f6feb,color:#fff,stroke:#0b3d91,stroke-width:2px;\n    classDef second fill:#8957e5,color:#fff,stroke:#4c2889;\n    class Core hub;\n    class WebAuthn second;\n",
+      "body_sha256": "5f1164ccfa0d2ac0a8a4ad19d054fee9869ce8d1fe6a1141e87969d9890271bb",
+      "language": "mermaid"
+    },
+    "body_unchanged": true
+  },
+  {
+    "body_number": 3,
+    "before": {
+      "opening_line": 93,
+      "closing_line": 158,
+      "body": "flowchart TD\n    subgraph AppLayer[\"Application layer (per module)\"]\n        Sess[\"PivSession : ApplicationSession, IPivSession<br/><i>sealed facade \u2014 public API</i>\"]\n    end\n\n    subgraph BaseLayer[\"Session base (Core.Sessions)\"]\n        Base[\"ApplicationSession (abstract)<br/>owns IProtocol \u00b7 FirmwareVersion \u00b7 Init \u00b7 Auth<br/>IsSupported(Feature) / EnsureSupports(Feature)\"]\n    end\n\n    subgraph ProtoLayer[\"Protocol (Core.Protocols)\"]\n        SCProto[\"ISmartCardProtocol<br/>(PIV/OATH/OpenPGP/SD/HSM)\"]\n        FidoProto[\"IFidoHidProtocol<br/>(shared FIDO CTAPHID)\"]\n        OtpProto[\"IOtpHidProtocol<br/>(YubiOTP)\"]\n    end\n\n    subgraph PipeLayer[\"APDU decorator pipeline (SmartCard path)\"]\n        Recv[\"ChainedResponseReceiver<br/>(reassembles 0x61xx more-data)\"]\n        Xmit[\"ApduTransmitter / ChainedApduTransmitter\"]\n        Fmt[\"IApduFormatter<br/>(Short vs Extended)\"]\n        Scp[\"(optional) ScpProcessor<br/>SCP03 / SCP11 encrypt+MAC\"]\n        Recv --> Xmit --> Fmt\n        Scp -.wraps.- Xmit\n    end\n\n    subgraph CtapLayer[\"CTAP2 path (beside APDU, not below it)\"]\n        CborB[\"Ctap2SessionRequestEncoding \u2192 request bytes<br/>MakeCredentialResponse / GetAssertionResponse.Decode \u2190 response bytes\"]\n        FBack[\"ICtap2Backend\"]\n        HidB[\"HidBackend<br/>CTAPHID_CBOR (0x10) frames\"]\n        ScB[\"SmartCardBackend<br/>wraps CTAP in APDU (CLA 0x80, INS 0x10)\"]\n        CborB --> FBack\n        FBack --> HidB\n        FBack --> ScB\n    end\n\n    subgraph ConnLayer[\"Connection (Core.Transports)\"]\n        SCConn[\"ISmartCardConnection\"]\n        FidoConn[\"IFidoHidConnection\"]\n        OtpConn[\"IOtpHidConnection\"]\n    end\n\n    subgraph NativeLayer[\"Transports + Native interop\"]\n        Pcsc[\"PC/SC (SmartCard/CCID)\"]\n        Hid[\"HID (FIDO + OTP)\"]\n        Nat[\"Native: Windows \u00b7 macOS \u00b7 Linux\"]\n    end\n\n    Sess --> Base\n    Base --> SCProto\n    Base -.-> FidoProto\n    Base -.-> OtpProto\n    SCProto --> Recv\n    Fmt --> SCConn\n    FidoProto --> FidoConn\n    OtpProto --> OtpConn\n    SCConn --> Pcsc\n    FidoConn --> Hid\n    OtpConn --> Hid\n    Pcsc --> Nat\n    Hid --> Nat\n\n    %% CTAP2 path wiring \u2014 note ScB rejoins the SmartCard pipeline\n    FidoSess[\"Ctap2Session\"] --> CborB\n    ScB -->|\"reuses ISmartCardProtocol<br/>(same APDU pipeline)\"| SCProto\n    HidB --> FidoProto\n",
+      "body_sha256": "27a07de60a0d7db46e5fada4aa78b5371b38207bbe330b221000bb59573b3c1a",
+      "language": "mermaid"
+    },
+    "after": {
+      "opening_line": 93,
+      "closing_line": 158,
+      "body": "flowchart TD\n    subgraph AppLayer[\"Application layer (per module)\"]\n        Sess[\"PivSession : ApplicationSession, IPivSession<br/><i>sealed facade \u2014 public API</i>\"]\n    end\n\n    subgraph BaseLayer[\"Session base (Core.Sessions)\"]\n        Base[\"ApplicationSession (abstract)<br/>owns IProtocol \u00b7 FirmwareVersion \u00b7 Init \u00b7 Auth<br/>IsSupported(Feature) / EnsureSupports(Feature)\"]\n    end\n\n    subgraph ProtoLayer[\"Protocol (Core.Protocols)\"]\n        SCProto[\"ISmartCardProtocol<br/>(PIV/OATH/OpenPGP/SD/HSM)\"]\n        FidoProto[\"IFidoHidProtocol<br/>(shared FIDO CTAPHID)\"]\n        OtpProto[\"IOtpHidProtocol<br/>(YubiOTP)\"]\n    end\n\n    subgraph PipeLayer[\"APDU decorator pipeline (SmartCard path)\"]\n        Recv[\"ChainedResponseReceiver<br/>(reassembles 0x61xx more-data)\"]\n        Xmit[\"ApduTransmitter / ChainedApduTransmitter\"]\n        Fmt[\"IApduFormatter<br/>(Short vs Extended)\"]\n        Scp[\"(optional) ScpProcessor<br/>SCP03 / SCP11 encrypt+MAC\"]\n        Recv --> Xmit --> Fmt\n        Scp -.wraps.- Xmit\n    end\n\n    subgraph CtapLayer[\"CTAP2 path (beside APDU, not below it)\"]\n        CborB[\"Ctap2SessionRequestEncoding \u2192 request bytes<br/>MakeCredentialResponse / GetAssertionResponse.Decode \u2190 response bytes\"]\n        FBack[\"ICtap2Backend\"]\n        HidB[\"HidBackend<br/>CTAPHID_CBOR (0x10) frames\"]\n        ScB[\"SmartCardBackend<br/>wraps CTAP in APDU (CLA 0x80, INS 0x10)\"]\n        CborB --> FBack\n        FBack --> HidB\n        FBack --> ScB\n    end\n\n    subgraph ConnLayer[\"Connection (Core.Transports)\"]\n        SCConn[\"ISmartCardConnection\"]\n        FidoConn[\"IFidoHidConnection\"]\n        OtpConn[\"IOtpHidConnection\"]\n    end\n\n    subgraph NativeLayer[\"Transports + Native interop\"]\n        Pcsc[\"PC/SC (SmartCard/CCID)\"]\n        Hid[\"HID (FIDO + OTP)\"]\n        Nat[\"Native: Windows \u00b7 macOS \u00b7 Linux\"]\n    end\n\n    Sess --> Base\n    Base --> SCProto\n    Base -.-> FidoProto\n    Base -.-> OtpProto\n    SCProto --> Recv\n    Fmt --> SCConn\n    FidoProto --> FidoConn\n    OtpProto --> OtpConn\n    SCConn --> Pcsc\n    FidoConn --> Hid\n    OtpConn --> Hid\n    Pcsc --> Nat\n    Hid --> Nat\n\n    %% CTAP2 path wiring \u2014 note ScB rejoins the SmartCard pipeline\n    FidoSess[\"Ctap2Session\"] --> CborB\n    ScB -->|\"reuses ISmartCardProtocol<br/>(same APDU pipeline)\"| SCProto\n    HidB --> FidoProto\n",
+      "body_sha256": "27a07de60a0d7db46e5fada4aa78b5371b38207bbe330b221000bb59573b3c1a",
+      "language": "mermaid"
+    },
+    "body_unchanged": true
+  },
+  {
+    "body_number": 4,
+    "before": {
+      "opening_line": 198,
+      "closing_line": 228,
+      "body": "sequenceDiagram\n    autonumber\n    actor Caller as Your code\n    participant Sess as PivSession\n    participant Proto as ISmartCardProtocol<br/>(PcscProtocol)\n    participant Recv as ChainedResponseReceiver\n    participant Xmit as ApduTransmitter\n    participant Fmt as IApduFormatter\n    participant Conn as ISmartCardConnection\n    participant HW as YubiKey\n\n    Caller->>Sess: GetSerialNumberAsync()\n    Sess->>Sess: build ApduCommand inline\n    Sess->>Proto: TransmitAndReceiveAsync(ApduCommand, throwOnError)\n    Proto->>Recv: TransmitAsync(cmd)\n    Recv->>Xmit: TransmitAsync(cmd)\n    Xmit->>Fmt: Format(cla,ins,p1,p2,data,le)\n    Fmt-->>Xmit: wire bytes\n    Xmit->>Conn: TransmitAndReceiveAsync(bytes)\n    Conn->>HW: SCardTransmit (PC/SC)\n    HW-->>Conn: raw response bytes\n    Conn-->>Xmit: bytes\n    Xmit-->>Recv: ApduResponse\n    Note over Recv: loop while SW1==0x61<br/>(send 0xC0, accumulate Data)\n    Recv-->>Proto: full ApduResponse\n    Note over Proto: if !IsOK() && throwOnError<br/>\u2192 throw ApduException\n    Proto-->>Sess: ApduResponse\n    Sess->>Sess: parse response.Data \u2192 typed result\n    Sess-->>Caller: int serial\n",
+      "body_sha256": "1171447ba5041fa7d7202db784c83a37edf6b202448ed27510e60988d2767c67",
+      "language": "mermaid"
+    },
+    "after": {
+      "opening_line": 198,
+      "closing_line": 228,
+      "body": "sequenceDiagram\n    autonumber\n    actor Caller as Your code\n    participant Sess as PivSession\n    participant Proto as ISmartCardProtocol<br/>(PcscProtocol)\n    participant Recv as ChainedResponseReceiver\n    participant Xmit as ApduTransmitter\n    participant Fmt as IApduFormatter\n    participant Conn as ISmartCardConnection\n    participant HW as YubiKey\n\n    Caller->>Sess: GetSerialNumberAsync()\n    Sess->>Sess: build ApduCommand inline\n    Sess->>Proto: TransmitAndReceiveAsync(ApduCommand, throwOnError)\n    Proto->>Recv: TransmitAsync(cmd)\n    Recv->>Xmit: TransmitAsync(cmd)\n    Xmit->>Fmt: Format(cla,ins,p1,p2,data,le)\n    Fmt-->>Xmit: wire bytes\n    Xmit->>Conn: TransmitAndReceiveAsync(bytes)\n    Conn->>HW: SCardTransmit (PC/SC)\n    HW-->>Conn: raw response bytes\n    Conn-->>Xmit: bytes\n    Xmit-->>Recv: ApduResponse\n    Note over Recv: loop while SW1==0x61<br/>(send 0xC0, accumulate Data)\n    Recv-->>Proto: full ApduResponse\n    Note over Proto: if !IsOK() && throwOnError<br/>\u2192 throw ApduException\n    Proto-->>Sess: ApduResponse\n    Sess->>Sess: parse response.Data \u2192 typed result\n    Sess-->>Caller: int serial\n",
+      "body_sha256": "1171447ba5041fa7d7202db784c83a37edf6b202448ed27510e60988d2767c67",
+      "language": "mermaid"
+    },
+    "body_unchanged": true
+  },
+  {
+    "body_number": 5,
+    "before": {
+      "opening_line": 246,
+      "closing_line": 274,
+      "body": "sequenceDiagram\n    autonumber\n    actor Caller as Your code\n    participant Sess as Ctap2Session\n    participant Build as Ctap2SessionRequestEncoding\n    participant Back as ICtap2Backend\n    participant Parse as MakeCredentialResponse\n    participant HW as YubiKey\n\n    Caller->>Sess: MakeCredentialAsync(params)\n    Sess->>Build: BuildMakeCredentialRequest(params)\n    Build-->>Sess: command byte + CBOR payload\n    alt HID transport (USB)\n        Sess->>Back: SendCborAsync(request) [HidBackend]\n        Back->>HW: CTAPHID_CBOR (0x10) frames\n        HW-->>Back: status byte + CBOR\n    else SmartCard transport (NFC / USB FW\u22655.8.0)\n        Sess->>Back: SendCborAsync(request) [SmartCardBackend]\n        Note over Back: wrap in APDU CLA=0x80 INS=0x10<br/>then reuse the L3 APDU pipeline\n        Back->>HW: APDU (via ISmartCardProtocol)\n        HW-->>Back: APDU response (status byte + CBOR)\n    end\n    Back->>Back: check CtapStatus, strip status byte\n    Back-->>Sess: CBOR response bytes\n    Sess->>Parse: Decode(CBOR response)\n    Parse-->>Sess: MakeCredentialResponse\n    Sess-->>Caller: typed credential\n",
+      "body_sha256": "341bebbd45c58bd897464ef5f6addc4718bad5785742f5f791dd3b7272b65932",
+      "language": "mermaid"
+    },
+    "after": {
+      "opening_line": 251,
+      "closing_line": 279,
+      "body": "sequenceDiagram\n    autonumber\n    actor Caller as Your code\n    participant Sess as Ctap2Session\n    participant Build as Ctap2SessionRequestEncoding\n    participant Back as ICtap2Backend\n    participant Parse as MakeCredentialResponse\n    participant HW as YubiKey\n\n    Caller->>Sess: MakeCredentialAsync(params)\n    Sess->>Build: BuildMakeCredentialRequest(params)\n    Build-->>Sess: command byte + CBOR payload\n    alt HID transport (USB)\n        Sess->>Back: SendCborAsync(request) [HidBackend]\n        Back->>HW: CTAPHID_CBOR (0x10) frames\n        HW-->>Back: status byte + CBOR\n    else SmartCard transport (NFC / USB FW\u22655.8.0)\n        Sess->>Back: SendCborAsync(request) [SmartCardBackend]\n        Note over Back: wrap in APDU CLA=0x80 INS=0x10<br/>then reuse the L3 APDU pipeline\n        Back->>HW: APDU (via ISmartCardProtocol)\n        HW-->>Back: APDU response (status byte + CBOR)\n    end\n    Back->>Back: check CtapStatus, strip status byte\n    Back-->>Sess: CBOR response bytes\n    Sess->>Parse: Decode(CBOR response)\n    Parse-->>Sess: MakeCredentialResponse\n    Sess-->>Caller: typed credential\n",
+      "body_sha256": "341bebbd45c58bd897464ef5f6addc4718bad5785742f5f791dd3b7272b65932",
+      "language": "mermaid"
+    },
+    "body_unchanged": true
+  },
+  {
+    "body_number": 6,
+    "before": {
+      "opening_line": 294,
+      "closing_line": 331,
+      "body": "flowchart TD\n    Start([\"YubiKeyManager.Find\u2026Async(interfaces=All)\"])\n    Watch([\"await foreach YubiKeyManager.WatchAsync()\"])\n    Create([\"await YubiKeyManager.CreateMonitorAsync()\"])\n    Owner[\"YubiKeyMonitor<br/><i>one lifetime: listeners + one sequential scan loop</i>\"]\n    Signals[\"HotplugSignals<br/><i>IDeviceChangeListener per transport \u2192 one rescan hint channel</i>\"]\n    Sched[\"RescanScheduler<br/><i>initial \u00b7 200 ms quiet / 1 s cap \u00b7 5 s fallback</i>\"]\n    Feed[\"DeviceChangeFeed<br/>snapshot + revision \u00b7 SnapshotDiff \u00b7 bounded buffer per subscriber\"]\n    Views([\"monitor.WatchAsync: DeviceAdded replay \u00b7 SnapshotComplete \u00b7 ordered changes\"])\n    Find[\"FindYubiKeys<br/><i>independent per-call or per-monitor evidence, bounded by DiscoveryBudgets</i>\"]\n\n    FPcsc[\"IFindPcscDevices<br/>(PC/SC readers)\"]\n    FHid[\"IFindHidInterfaces<br/>(FIDO + OTP HID)\"]\n    Merge{\"Conservatively merge interfaces<br/>using topology, serial and PID evidence\"}\n\n    Slot[\"PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>\"]\n    Flat[\"YubiKeyDevice<br/>optional SmartCard \u00b7 FIDO \u00b7 OTP slots\"]\n\n    Result([\"IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous\"])\n\n    Start -->|fresh scoped call| Find\n    Watch -->|private monitor per enumeration| Owner\n    Create -->|await first published scan| Owner\n    Owner --> Signals\n    Signals -->|hint| Sched\n    Sched -->|trigger| Owner\n    Owner -->|invalidate evidence on hotplug, then scan All| Find\n    Find --> FPcsc\n    Find --> FHid\n    FPcsc --> Slot\n    FHid --> Slot\n    Slot --> Merge\n    Merge --> Flat\n    Flat --> Result\n    Owner -->|\"Apply(scan)\"| Feed\n    Feed -->|atomic snapshot + tail per subscriber| Views\n",
+      "body_sha256": "dacfe23615b01f4c1087009fe35d12f7dcb00afb24b2983bfce0bf4c6fc453d3",
+      "language": "mermaid"
+    },
+    "after": {
+      "opening_line": 299,
+      "closing_line": 336,
+      "body": "flowchart TD\n    Start([\"YubiKeyManager.Find\u2026Async(interfaces=All)\"])\n    Watch([\"await foreach YubiKeyManager.WatchAsync()\"])\n    Create([\"await YubiKeyManager.CreateMonitorAsync()\"])\n    Owner[\"YubiKeyMonitor<br/><i>one lifetime: listeners + one sequential scan loop</i>\"]\n    Signals[\"HotplugSignals<br/><i>IDeviceChangeListener per transport \u2192 one rescan hint channel</i>\"]\n    Sched[\"RescanScheduler<br/><i>initial \u00b7 200 ms quiet / 1 s cap \u00b7 5 s fallback</i>\"]\n    Feed[\"DeviceChangeFeed<br/>snapshot + revision \u00b7 SnapshotDiff \u00b7 bounded buffer per subscriber\"]\n    Views([\"monitor.WatchAsync: DeviceAdded replay \u00b7 SnapshotComplete \u00b7 ordered changes\"])\n    Find[\"FindYubiKeys<br/><i>independent per-call or per-monitor evidence, bounded by DiscoveryBudgets</i>\"]\n\n    FPcsc[\"IFindPcscDevices<br/>(PC/SC readers)\"]\n    FHid[\"IFindHidInterfaces<br/>(FIDO + OTP HID)\"]\n    Merge{\"Conservatively merge interfaces<br/>using topology, serial and PID evidence\"}\n\n    Slot[\"PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>\"]\n    Flat[\"YubiKeyDevice<br/>optional SmartCard \u00b7 FIDO \u00b7 OTP slots\"]\n\n    Result([\"IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous\"])\n\n    Start -->|fresh scoped call| Find\n    Watch -->|private monitor per enumeration| Owner\n    Create -->|await first published scan| Owner\n    Owner --> Signals\n    Signals -->|hint| Sched\n    Sched -->|trigger| Owner\n    Owner -->|invalidate evidence on hotplug, then scan All| Find\n    Find --> FPcsc\n    Find --> FHid\n    FPcsc --> Slot\n    FHid --> Slot\n    Slot --> Merge\n    Merge --> Flat\n    Flat --> Result\n    Owner -->|\"Apply(scan)\"| Feed\n    Feed -->|atomic snapshot + tail per subscriber| Views\n",
+      "body_sha256": "dacfe23615b01f4c1087009fe35d12f7dcb00afb24b2983bfce0bf4c6fc453d3",
+      "language": "mermaid"
+    },
+    "body_unchanged": true
+  },
+  {
+    "body_number": 7,
+    "before": {
+      "opening_line": 344,
+      "closing_line": 388,
+      "body": "flowchart TD\n    Direct[\"direct typed<br/>ConnectAsync&lt;TConnection&gt;()\"]\n    Default[\"parameterless ConnectAsync()\"]\n    Q{\"parameterless<br/>ConnectAsync()?\"}\n    Throw[\"throw if multi-interface\"]\n    Typed[\"one typed connect:<br/>&lt;ISmartCardConnection&gt; etc.\"]\n    AppletEntry[\"applet session extension\"]\n    AppletKind{\"application\"}\n\n    subgraph Applet[\"Applet transport selection\"]\n        M[\"Management: SmartCard \u2192 HidFido \u2192 HidOtp\"]\n        O[\"YubiOTP: SmartCard \u2192 HidOtp\"]\n        F[\"CTAP2 / WebAuthn: select HidFido if exposed,<br/>otherwise SmartCard; no contention fallback\"]\n        S[\"PIV\u00b7OATH\u00b7OpenPGP\u00b7SD\u00b7HSM: SmartCard only\"]\n    end\n\n    Select[\"ResolveSessionTransport:<br/>select exactly one transport\"]\n    Attempt[\"claim all known member interface IDs<br/>and open selected connection\"]\n    Refuse[\"ConnectionInUseException<br/>before physical open\"]\n    Conn[\"open IConnection\"]\n    Caller[\"direct caller owns/disposes IConnection\"]\n    Session[\"ApplicationSession<br/>holds/disposes IProtocol<br/>borrows caller connection\"]\n    Own{\"convenience API opened<br/>hidden connection?\"}\n    Ready[\"session ready\"]\n\n    Direct --> Typed\n    Default --> Q\n    Q -->|yes, multi| Throw\n    Q -->|single interface| Typed\n    AppletEntry --> AppletKind\n    AppletKind --> M\n    AppletKind --> O\n    AppletKind --> F\n    AppletKind --> S\n    M & O & F & S --> Select\n    Select --> Typed\n    Typed --> Attempt\n    Attempt -->|held| Refuse\n    Attempt -->|available| Conn\n    Conn -->|direct typed call returns| Caller\n    Conn -->|applet extension continues| Session --> Own\n    Own -->|yes: internal OwnConnection| Ready\n    Own -->|no: caller disposes connection| Ready\n",
+      "body_sha256": "9fc90dabfe4f5ff3135c69273d3acb226ddb075ba8358ff0069003c8bf7e5ac7",
+      "language": "mermaid"
+    },
+    "after": {
+      "opening_line": 354,
+      "closing_line": 398,
+      "body": "flowchart TD\n    Direct[\"direct typed<br/>ConnectAsync&lt;TConnection&gt;()\"]\n    Default[\"parameterless ConnectAsync()\"]\n    Q{\"parameterless<br/>ConnectAsync()?\"}\n    Throw[\"throw if multi-interface\"]\n    Typed[\"one typed connect:<br/>&lt;ISmartCardConnection&gt; etc.\"]\n    AppletEntry[\"applet session extension\"]\n    AppletKind{\"application\"}\n\n    subgraph Applet[\"Applet transport selection\"]\n        M[\"Management: SmartCard \u2192 HidFido \u2192 HidOtp\"]\n        O[\"YubiOTP: SmartCard \u2192 HidOtp\"]\n        F[\"CTAP2 / WebAuthn: select HidFido if exposed,<br/>otherwise SmartCard; no contention fallback\"]\n        S[\"PIV\u00b7OATH\u00b7OpenPGP\u00b7SD\u00b7HSM: SmartCard only\"]\n    end\n\n    Select[\"ResolveSessionTransport:<br/>select exactly one transport\"]\n    Attempt[\"claim all known member interface IDs<br/>and open selected connection\"]\n    Refuse[\"ConnectionInUseException<br/>before physical open\"]\n    Conn[\"open IConnection\"]\n    Caller[\"direct caller owns/disposes IConnection\"]\n    Session[\"ApplicationSession<br/>holds/disposes IProtocol<br/>borrows caller connection\"]\n    Own{\"convenience API opened<br/>hidden connection?\"}\n    Ready[\"session ready\"]\n\n    Direct --> Typed\n    Default --> Q\n    Q -->|yes, multi| Throw\n    Q -->|single interface| Typed\n    AppletEntry --> AppletKind\n    AppletKind --> M\n    AppletKind --> O\n    AppletKind --> F\n    AppletKind --> S\n    M & O & F & S --> Select\n    Select --> Typed\n    Typed --> Attempt\n    Attempt -->|held| Refuse\n    Attempt -->|available| Conn\n    Conn -->|direct typed call returns| Caller\n    Conn -->|applet extension continues| Session --> Own\n    Own -->|yes: internal OwnConnection| Ready\n    Own -->|no: caller disposes connection| Ready\n",
+      "body_sha256": "9fc90dabfe4f5ff3135c69273d3acb226ddb075ba8358ff0069003c8bf7e5ac7",
+      "language": "mermaid"
+    },
+    "body_unchanged": true
+  },
+  {
+    "body_number": 8,
+    "before": {
+      "opening_line": 442,
+      "closing_line": 445,
+      "body": "npm ci  # installs the pinned Mermaid CLI from package-lock.json\nscripts/architecture/render-architecture.sh\n",
+      "body_sha256": "b623089998ab696db42823c5cf4deb59a0b4736890405a975b2d9e796e3ba5d1",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 452,
+      "closing_line": 455,
+      "body": "npm ci  # installs the pinned Mermaid CLI from package-lock.json\nscripts/architecture/render-architecture.sh\n",
+      "body_sha256": "b623089998ab696db42823c5cf4deb59a0b4736890405a975b2d9e796e3ba5d1",
+      "language": "bash"
+    },
+    "body_unchanged": true
+  }
+]

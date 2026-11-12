@@ -1,0 +1,1321 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "metadata_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+  "classification": "failed compiler-input capture; no successful seal/checker invocation",
+  "old_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-second.json",
+    "bytes": 70779,
+    "sha256": "51b733852da256846483d805fe54be3f9a4b2bc77ff50a95ba3d3dedaaac02e2"
+  },
+  "original_sources": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/hook.targets",
+        "bytes": 5631,
+        "sha256": "b0349f6a024743671a775294374d62dbeba43157b296dfbd4e10fd45b3fe0db1"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/correction-file-inputs/hook.targets.snapshot",
+        "bytes": 5631,
+        "sha256": "b0349f6a024743671a775294374d62dbeba43157b296dfbd4e10fd45b3fe0db1"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/bind.py",
+        "bytes": 27267,
+        "sha256": "3fc6ef62901b40229f8e76fb6d8635e7c3ded4e370716ce8069e35d88ee1c90d"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/correction-file-inputs/bind.py.snapshot",
+        "bytes": 27267,
+        "sha256": "3fc6ef62901b40229f8e76fb6d8635e7c3ded4e370716ce8069e35d88ee1c90d"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/selfcheck.py",
+        "bytes": 5885,
+        "sha256": "ce244f2572d6cd680728d58719a35f12069d6cdd61d6716bdb16887d5f920af8"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/correction-file-inputs/selfcheck.py.snapshot",
+        "bytes": 5885,
+        "sha256": "ce244f2572d6cd680728d58719a35f12069d6cdd61d6716bdb16887d5f920af8"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/handoff.md",
+        "bytes": 9891,
+        "sha256": "c1044b05c1c126de0c37c792480b7f46186f5d2685947af68ede7e3b164dd6bf"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/correction-file-inputs/handoff.md.snapshot",
+        "bytes": 9891,
+        "sha256": "c1044b05c1c126de0c37c792480b7f46186f5d2685947af68ede7e3b164dd6bf"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/provenance.json",
+        "bytes": 2676,
+        "sha256": "c8978d0f58333b76d294c85887ca003a275389119c367f271c1a6c91a3231a03"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/correction-file-inputs/provenance.json.snapshot",
+        "bytes": 2676,
+        "sha256": "c8978d0f58333b76d294c85887ca003a275389119c367f271c1a6c91a3231a03"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation-preparation.md",
+        "bytes": 16841,
+        "sha256": "b67786dd94f964fe0687cddf0aa8fcbfd056e8f5b3d0ba88f8f0278a0cc8ebe9"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/correction-file-inputs/validation-preparation.md.snapshot",
+        "bytes": 16841,
+        "sha256": "b67786dd94f964fe0687cddf0aa8fcbfd056e8f5b3d0ba88f8f0278a0cc8ebe9"
+      }
+    }
+  ],
+  "retained_failed_records": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/additional-actual.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/additional.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/analyzers-actual.txt",
+      "bytes": 1165,
+      "sha256": "55f5f8cd2c5a6e061d8ce12cb2af018aabdab69a274e79e62fe8a87965a58364"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/analyzers.txt",
+      "bytes": 1165,
+      "sha256": "55f5f8cd2c5a6e061d8ce12cb2af018aabdab69a274e79e62fe8a87965a58364"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/before.json",
+      "bytes": 248041,
+      "sha256": "2be0738485986ee85e584c112efe40d4db240c1479133dbb0981b9069afa4b54"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/configs-actual.txt",
+      "bytes": 397,
+      "sha256": "51a49b7d752ed0abb65300bead7cd31e37c3a0a7c0868792d6bbde29c6feb795"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/configs.txt",
+      "bytes": 397,
+      "sha256": "51a49b7d752ed0abb65300bead7cd31e37c3a0a7c0868792d6bbde29c6feb795"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/csc-arguments.txt",
+      "bytes": 27532,
+      "sha256": "1ba810c855064c60b83e7eff63eff27932a9124f8ae905b693dae17ba59c5da9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/01a642658ee0dc4be94d72887418947fbb7b0052c6a31b481e54222095116c8b-Microsoft.SourceLink.Bitbucket.Git.targets.snapshot",
+      "bytes": 3980,
+      "sha256": "01a642658ee0dc4be94d72887418947fbb7b0052c6a31b481e54222095116c8b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/0309171d90b9bc226ec0db60625b0222d279a8eceaed03be557a3ef4e3a99b11-System.Windows.Forms.Analyzers.props.snapshot",
+      "bytes": 1330,
+      "sha256": "0309171d90b9bc226ec0db60625b0222d279a8eceaed03be557a3ef4e3a99b11"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/040a6500989718c91615eff7857ad1cb6d3fe7c28813a7d73959d0408b228293-Microsoft.NET.ConflictResolution.targets.snapshot",
+      "bytes": 5917,
+      "sha256": "040a6500989718c91615eff7857ad1cb6d3fe7c28813a7d73959d0408b228293"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937-Output.cs.snapshot",
+      "bytes": 10241,
+      "sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/059107ba3e4670028b0c038b19c606f3ae9d26d007b3939c54441def8a946984-Microsoft.SourceLink.GitHub.targets.snapshot",
+      "bytes": 3786,
+      "sha256": "059107ba3e4670028b0c038b19c606f3ae9d26d007b3939c54441def8a946984"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/05e6e19f639b3466884e451b22884aa52f68d3a6a9b4c7720a44410f031bb568-InitializeSourceControlInformation.targets.snapshot",
+      "bytes": 2550,
+      "sha256": "05e6e19f639b3466884e451b22884aa52f68d3a6a9b4c7720a44410f031bb568"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/076dda9413fd4cc5bfbf049c571314374af267d6d6ee8b5e71fb6fc56e46e3ee-Microsoft.SourceLink.Common.targets.snapshot",
+      "bytes": 4482,
+      "sha256": "076dda9413fd4cc5bfbf049c571314374af267d6d6ee8b5e71fb6fc56e46e3ee"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/0a7da1dd76b9a8b851b783eda60b622de89d95711507a8a5fca24c9b4159a6b4-Microsoft.NET.Sdk.SourceLink.targets.snapshot",
+      "bytes": 2202,
+      "sha256": "0a7da1dd76b9a8b851b783eda60b622de89d95711507a8a5fca24c9b4159a6b4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/0b82000b2258cd1b85346d8642dba49f268947c2f6b31231485ba009b2400f9d-Microsoft.SourceLink.AzureRepos.Git.props.snapshot",
+      "bytes": 437,
+      "sha256": "0b82000b2258cd1b85346d8642dba49f268947c2f6b31231485ba009b2400f9d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/0bd56dea541dd607af6287264e4f5aa3dd223e42d2ffcac9a5230d41bbac3d7e-NuGet.props.snapshot",
+      "bytes": 2523,
+      "sha256": "0bd56dea541dd607af6287264e4f5aa3dd223e42d2ffcac9a5230d41bbac3d7e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/0fdd515e0e53002ac8c6d112c7eaadc4cbb79d9a2c8176b1190f41492966f5a9-Microsoft.NET.DisableStandardFrameworkResolution.targets.snapshot",
+      "bytes": 1881,
+      "sha256": "0fdd515e0e53002ac8c6d112c7eaadc4cbb79d9a2c8176b1190f41492966f5a9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/116bb1116af0c844ac3e75abf93d06889ad411837fc65424695417090f835d34-Microsoft.NET.Sdk.Shared.targets.snapshot",
+      "bytes": 5470,
+      "sha256": "116bb1116af0c844ac3e75abf93d06889ad411837fc65424695417090f835d34"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f-Directory.Packages.props.snapshot",
+      "bytes": 3227,
+      "sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/14e38f5552ac3ce43879b6612ee015f7815440a092ae875e12b13729c9860cf7-Microsoft.Managed.After.targets.snapshot",
+      "bytes": 4342,
+      "sha256": "14e38f5552ac3ce43879b6612ee015f7815440a092ae875e12b13729c9860cf7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/16c102bf01b63fd8fa228dc6dbc7b9c3970f51edd3b54cc92f779453a0109e39-Microsoft.NET.ComposeStore.targets.snapshot",
+      "bytes": 20592,
+      "sha256": "16c102bf01b63fd8fa228dc6dbc7b9c3970f51edd3b54cc92f779453a0109e39"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b-Yubico.YubiKit.Audit20261111.DocCheck.csproj.snapshot",
+      "bytes": 516,
+      "sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/1e7407b6e5dd178d1c7978c9d9b1d0fad12f321736b8238cdbfcb855ba6fb0b0-Microsoft.SourceLink.Bitbucket.Git.props.snapshot",
+      "bytes": 344,
+      "sha256": "1e7407b6e5dd178d1c7978c9d9b1d0fad12f321736b8238cdbfcb855ba6fb0b0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/1fde10e25a61a9f66d6e12616bb79c2eb878657bccfcff2a74d9155c345a0440-Microsoft.NET.DefaultAssemblyInfo.targets.snapshot",
+      "bytes": 1283,
+      "sha256": "1fde10e25a61a9f66d6e12616bb79c2eb878657bccfcff2a74d9155c345a0440"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/211a5f89b3eb6076516cee71001baad4d822ab8e4143c1d656db278c7977f356-Microsoft.NET.Sdk.props.snapshot",
+      "bytes": 12243,
+      "sha256": "211a5f89b3eb6076516cee71001baad4d822ab8e4143c1d656db278c7977f356"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/24d18d6b4c8d4f2833b0e86a24016cdf4cae1b79607fc83bf052b28ace6f4711-vbc.deps.json.snapshot",
+      "bytes": 5874,
+      "sha256": "24d18d6b4c8d4f2833b0e86a24016cdf4cae1b79607fc83bf052b28ace6f4711"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/28a4d9d4e026def969af30c96d79d6f1813a1df68c7fe68a008dd7d4fd67a8a4-VBCSCompiler.deps.json.snapshot",
+      "bytes": 7832,
+      "sha256": "28a4d9d4e026def969af30c96d79d6f1813a1df68c7fe68a008dd7d4fd67a8a4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/290c31810dbed0cef90fbc1586d654460c13fbef748cc2871abf91c93cd4e67e-project.assets.json.snapshot",
+      "bytes": 86634,
+      "sha256": "290c31810dbed0cef90fbc1586d654460c13fbef748cc2871abf91c93cd4e67e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/2b7f80e3a32595da852e5cb14da532f7b477e643675567c477918c7ff888f0c9-Microsoft.NET.ApiCompat.Common.targets.snapshot",
+      "bytes": 3894,
+      "sha256": "2b7f80e3a32595da852e5cb14da532f7b477e643675567c477918c7ff888f0c9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/2c0d3ac867ba958ce316a9b554c74d74828007c1f065019cccddd573b70854b9-Microsoft.NET.Windows.props.snapshot",
+      "bytes": 1517,
+      "sha256": "2c0d3ac867ba958ce316a9b554c74d74828007c1f065019cccddd573b70854b9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003-PackageTargets.cs.snapshot",
+      "bytes": 5121,
+      "sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/2deb7485b3183b6e47d0010ab95cbe24dffe444c2667fed427b93c0e7876881c-Microsoft.NET.Sdk.ImportWorkloads.targets.snapshot",
+      "bytes": 3548,
+      "sha256": "2deb7485b3183b6e47d0010ab95cbe24dffe444c2667fed427b93c0e7876881c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/30c2b92c9dd157d211238bf502802e6a8c55dac1eab0125f1e006d456a9eb75d-Microsoft.SourceLink.GitLab.props.snapshot",
+      "bytes": 310,
+      "sha256": "30c2b92c9dd157d211238bf502802e6a8c55dac1eab0125f1e006d456a9eb75d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba-TargetRegistry.cs.snapshot",
+      "bytes": 1444,
+      "sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/33a63870665f8eb019f43da5effa450f6c8000089a879bc5373061e870bd3780-Microsoft.CSharp.Core.targets.snapshot",
+      "bytes": 12655,
+      "sha256": "33a63870665f8eb019f43da5effa450f6c8000089a879bc5373061e870bd3780"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/34408c2759a463aee4df6ef3e689765c2ea263f04d0a52dc05db3a780fe35022-Microsoft.NET.SupportedPlatforms.props.snapshot",
+      "bytes": 897,
+      "sha256": "34408c2759a463aee4df6ef3e689765c2ea263f04d0a52dc05db3a780fe35022"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/39edebe465572be739491bc8d9cedd451cdf84a7db7cba44426ecbfc168c1942-Microsoft.NET.ObsoleteReferences.targets.snapshot",
+      "bytes": 1703,
+      "sha256": "39edebe465572be739491bc8d9cedd451cdf84a7db7cba44426ecbfc168c1942"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/3bca80662b9ccd999001dc03e1231954fa5245f3225356cea2ca43d74d1e795d-Microsoft.NET.ApiCompat.targets.snapshot",
+      "bytes": 1752,
+      "sha256": "3bca80662b9ccd999001dc03e1231954fa5245f3225356cea2ca43d74d1e795d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/3d418368ebf2bf593fb3d6fab01fd033ad8038ea92edc13a89ef8684c3f2f0f6-WorkloadManifest.targets.snapshot",
+      "bytes": 5764,
+      "sha256": "3d418368ebf2bf593fb3d6fab01fd033ad8038ea92edc13a89ef8684c3f2f0f6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/3f093f2c6aff089aade8ca40d82cbe92536be5f68a42d0fc7760b28ce496d1d0-Microsoft.NET.PackProjectTool.targets.snapshot",
+      "bytes": 946,
+      "sha256": "3f093f2c6aff089aade8ca40d82cbe92536be5f68a42d0fc7760b28ce496d1d0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/3fc6ef62901b40229f8e76fb6d8635e7c3ded4e370716ce8069e35d88ee1c90d-bind.py.snapshot",
+      "bytes": 27267,
+      "sha256": "3fc6ef62901b40229f8e76fb6d8635e7c3ded4e370716ce8069e35d88ee1c90d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/406fa2fe316cde8ce5da9878a3e68a81e33fcd194850626155f045ee18887a2b-WorkloadManifest.targets.snapshot",
+      "bytes": 2696,
+      "sha256": "406fa2fe316cde8ce5da9878a3e68a81e33fcd194850626155f045ee18887a2b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/41dc552e294cd1f0c6e640c302c112b0788fa8776ecac73e7fa013382a3bf713-Sdk.props.snapshot",
+      "bytes": 2487,
+      "sha256": "41dc552e294cd1f0c6e640c302c112b0788fa8776ecac73e7fa013382a3bf713"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/42d6f1d2cdb89520f877fcacf3dfc4217b2aa21ec61f4e50d0452d79eb210160-Microsoft.NET.PackProjectTool.props.snapshot",
+      "bytes": 1300,
+      "sha256": "42d6f1d2cdb89520f877fcacf3dfc4217b2aa21ec61f4e50d0452d79eb210160"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/435487667eff98890768f67c154fa1d51fb1e47df5d45a50442d978231601a98-Sdk.targets.snapshot",
+      "bytes": 4444,
+      "sha256": "435487667eff98890768f67c154fa1d51fb1e47df5d45a50442d978231601a98"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133-Microsoft.CodeAnalysis.NetAnalyzers.props.snapshot",
+      "bytes": 3677,
+      "sha256": "444c0c1114b75f0a22fde1d835ada6e483b5bb1e526dcd24e69656eb7ac25133"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/45abcf0b2f74be686ed1d9096df3b9a52b68fc3a8962827b55e642ac5aa1a993-Microsoft.NET.CrossGen.targets.snapshot",
+      "bytes": 29193,
+      "sha256": "45abcf0b2f74be686ed1d9096df3b9a52b68fc3a8962827b55e642ac5aa1a993"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/460a6c06701db3436999d022aa785c9f590a47cc5233fa12f3b0ec250504bd27-Microsoft.NETCoreSdk.BundledVersions.props.snapshot",
+      "bytes": 64292,
+      "sha256": "460a6c06701db3436999d022aa785c9f590a47cc5233fa12f3b0ec250504bd27"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5-TestTargets.cs.snapshot",
+      "bytes": 14282,
+      "sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/50a3cbc4713594f9d58b47fc44073f024cefdf03afd4a620f38f0a8f84a12ea6-WorkloadManifest.targets.snapshot",
+      "bytes": 836,
+      "sha256": "50a3cbc4713594f9d58b47fc44073f024cefdf03afd4a620f38f0a8f84a12ea6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43-Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.targets.snapshot",
+      "bytes": 538,
+      "sha256": "56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/59f057b17096067a5c394ccee2a829429cd8e34f8ecfbdde7d68b01a661d90d5-Microsoft.Managed.Core.CurrentVersions.targets.snapshot",
+      "bytes": 113,
+      "sha256": "59f057b17096067a5c394ccee2a829429cd8e34f8ecfbdde7d68b01a661d90d5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/5a330e5e80636d3d5eb7db06469abf33c0cf0620379ffe79c787fba2b652946d-csc.deps.json.snapshot",
+      "bytes": 5789,
+      "sha256": "5a330e5e80636d3d5eb7db06469abf33c0cf0620379ffe79c787fba2b652946d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/641c488d3f6fdca384ff00692271817ea47a5be386369615fc30d8bbb65df063-UseArtifactsOutputPath.props.snapshot",
+      "bytes": 2397,
+      "sha256": "641c488d3f6fdca384ff00692271817ea47a5be386369615fc30d8bbb65df063"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf-run-command.py.snapshot",
+      "bytes": 1670,
+      "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861-Usage.cs.snapshot",
+      "bytes": 3124,
+      "sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/69575430fa6bc797d299dfbcff7321f471fba1af33a8dfe19b0c80bae0e10459-Microsoft.NET.PreserveCompilationContext.targets.snapshot",
+      "bytes": 4736,
+      "sha256": "69575430fa6bc797d299dfbcff7321f471fba1af33a8dfe19b0c80bae0e10459"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/6c0f262cf3a0d3bad3293adbfbddf21994fd590348b2d886e1b2f55e5e1c4f8d-Microsoft.NET.TargetFrameworkInference.targets.snapshot",
+      "bytes": 19746,
+      "sha256": "6c0f262cf3a0d3bad3293adbfbddf21994fd590348b2d886e1b2f55e5e1c4f8d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/6f743d1cf32799d46e6e1c001f4066e934c51d72e78e95a421870a6f9d97a7ba-Microsoft.NET.Sdk.DefaultItems.Shared.targets.snapshot",
+      "bytes": 13914,
+      "sha256": "6f743d1cf32799d46e6e1c001f4066e934c51d72e78e95a421870a6f9d97a7ba"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/70346b311ad470b605689362a10c0f3b2294e99492376ce827a5bb261214fcac-Microsoft.NET.Sdk.Common.targets.snapshot",
+      "bytes": 3735,
+      "sha256": "70346b311ad470b605689362a10c0f3b2294e99492376ce827a5bb261214fcac"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90-Process.cs.snapshot",
+      "bytes": 7654,
+      "sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/743f90acdf2f3744d4d208cc620cf9120ac3a191e19f0c4f502fcf0235788712-Microsoft.NET.EolTargetFrameworks.targets.snapshot",
+      "bytes": 2349,
+      "sha256": "743f90acdf2f3744d4d208cc620cf9120ac3a191e19f0c4f502fcf0235788712"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/751bdb7b6e865a33e74cf32ab0dc4e52f35c65ce3c6a42bb33de8f3bf01aa273-Microsoft.NETCore.App.deps.json.snapshot",
+      "bytes": 66573,
+      "sha256": "751bdb7b6e865a33e74cf32ab0dc4e52f35c65ce3c6a42bb33de8f3bf01aa273"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/752fbaf9e95210dd420c20cc620982e318c491cc4677652342bc4a3f6705e8d0-Microsoft.NET.Sdk.ImportWorkloads.props.snapshot",
+      "bytes": 754,
+      "sha256": "752fbaf9e95210dd420c20cc620982e318c491cc4677652342bc4a3f6705e8d0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/756dc130cb63c753c0c3e165b6dab8f955cecb5b22e0d34d47c7ff5b726034fe-Microsoft.TestPlatform.ImportAfter.targets.snapshot",
+      "bytes": 1180,
+      "sha256": "756dc130cb63c753c0c3e165b6dab8f955cecb5b22e0d34d47c7ff5b726034fe"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/76590c9893d1d056a1b24d2ce46b8c653a6ad18bbfc262ce8c2f8db6f18ef88f-Microsoft.NET.Sdk.CSharp.targets.snapshot",
+      "bytes": 2792,
+      "sha256": "76590c9893d1d056a1b24d2ce46b8c653a6ad18bbfc262ce8c2f8db6f18ef88f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7709fca99f1e00b4c4088d37bd41d81cd95811b573b8eb8df3a94a5cb87a0595-Microsoft.Build.Tasks.Git.targets.snapshot",
+      "bytes": 3277,
+      "sha256": "7709fca99f1e00b4c4088d37bd41d81cd95811b573b8eb8df3a94a5cb87a0595"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7889dcdd9b667f93a1fa70a99c37117a4a032995687a7faea1f89efacf63442a-Microsoft.NET.Sdk.BeforeCommon.targets.snapshot",
+      "bytes": 26512,
+      "sha256": "7889dcdd9b667f93a1fa70a99c37117a4a032995687a7faea1f89efacf63442a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/78bb5f21044cbde721fb8793e2c9a31d85ae20dfd441b056fdb024f742a5d683-Microsoft.NET.ApiCompat.ValidatePackage.targets.snapshot",
+      "bytes": 5523,
+      "sha256": "78bb5f21044cbde721fb8793e2c9a31d85ae20dfd441b056fdb024f742a5d683"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7958c0c5010ec8d9092c079ccafac6eb7289db34829b6e2a33ba6eaefaaaa770-Microsoft.NET.Sdk.targets.snapshot",
+      "bytes": 90936,
+      "sha256": "7958c0c5010ec8d9092c079ccafac6eb7289db34829b6e2a33ba6eaefaaaa770"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7987b62e5cf1709f1318d38791fa05b9e87f9e9c4dd8d9be7333f47bfa0cef4c-Microsoft.NETCoreSdk.BundledMSBuildInformation.props.snapshot",
+      "bytes": 979,
+      "sha256": "7987b62e5cf1709f1318d38791fa05b9e87f9e9c4dd8d9be7333f47bfa0cef4c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/798c0afd43ed5827ce4cab371ccfca636e71cd562f7dcdb8ab83c6e9b7162c10-Microsoft.NET.AspireWorkloadDeprecation.targets.snapshot",
+      "bytes": 1892,
+      "sha256": "798c0afd43ed5827ce4cab371ccfca636e71cd562f7dcdb8ab83c6e9b7162c10"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7a54e00724d8afe42e72482878de7b152369441e76eac7c543b35e83aa11ce09-Microsoft.NET.RuntimeIdentifierInference.targets.snapshot",
+      "bytes": 25566,
+      "sha256": "7a54e00724d8afe42e72482878de7b152369441e76eac7c543b35e83aa11ce09"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b-Program.cs.snapshot",
+      "bytes": 7700,
+      "sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7e8bc3f503cd1d0c547a9f286aca95083941eda37458467da399a6f42f6e77ec-Microsoft.NET.Sdk.WindowsDesktop.WindowsForms.props.snapshot",
+      "bytes": 1138,
+      "sha256": "7e8bc3f503cd1d0c547a9f286aca95083941eda37458467da399a6f42f6e77ec"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7e992ae947dc7f459c75c5b1fea3955201ad0b8ab0d27ff84caaf21dc16fa472-Microsoft.Managed.Before.targets.snapshot",
+      "bytes": 1145,
+      "sha256": "7e992ae947dc7f459c75c5b1fea3955201ad0b8ab0d27ff84caaf21dc16fa472"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/7f48487fb82462b5cff21891ff4ddc8d73e304b01717b98396af2b7e22765543-Microsoft.NET.Sdk.WindowsDesktop.props.snapshot",
+      "bytes": 9055,
+      "sha256": "7f48487fb82462b5cff21891ff4ddc8d73e304b01717b98396af2b7e22765543"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279-Results.cs.snapshot",
+      "bytes": 6826,
+      "sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/811013bb3fcb87286bf9dc941f535d5d26144757db25a2e6f5c971352d7e71c3-NuGet.Build.Tasks.Pack.targets.snapshot",
+      "bytes": 28406,
+      "sha256": "811013bb3fcb87286bf9dc941f535d5d26144757db25a2e6f5c971352d7e71c3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/81aebde1b2108609a0e0500c95645ab5bba23e9c47b53852a949e11e98fb680d-Microsoft.NET.DefaultPackageConflictOverrides.targets.snapshot",
+      "bytes": 10626,
+      "sha256": "81aebde1b2108609a0e0500c95645ab5bba23e9c47b53852a949e11e98fb680d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/81b28346851f41d20d643d63ec8ab6389c285b1cb43345312f4942eaa9f6c726-Microsoft.CSharp.CurrentVersion.targets.snapshot",
+      "bytes": 22411,
+      "sha256": "81b28346851f41d20d643d63ec8ab6389c285b1cb43345312f4942eaa9f6c726"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/825da447fff4e47d196b41bea5c2453178d5db4ad06f526d9fd671feab4134d8-Microsoft.PackageDependencyResolution.targets.snapshot",
+      "bytes": 27745,
+      "sha256": "825da447fff4e47d196b41bea5c2453178d5db4ad06f526d9fd671feab4134d8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/82e516bbd6189617c23d3288b3012a9dea0163f5da750a32dbde20279a716e0e-Microsoft.NET.DefaultArtifactsPath.props.snapshot",
+      "bytes": 2691,
+      "sha256": "82e516bbd6189617c23d3288b3012a9dea0163f5da750a32dbde20279a716e0e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252-DisableNETAnalyzersForNuGetPackage.props.snapshot",
+      "bytes": 468,
+      "sha256": "83fe2cae0a46132ad1f1bfa3b8048a8dab4830e87f71dfafb2bc5b5022468252"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/84f074cc1dda8b50dc79ff191c92f16587e3c0351c23b084383483eac642fb77-Microsoft.NET.PackTool.props.snapshot",
+      "bytes": 653,
+      "sha256": "84f074cc1dda8b50dc79ff191c92f16587e3c0351c23b084383483eac642fb77"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f-Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.props.snapshot",
+      "bytes": 1814,
+      "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/879d9742497730b1c8bac7b90c3b14bcb3d4280a87c50b651a1c4430744207ba-Microsoft.Common.CurrentVersion.targets.snapshot",
+      "bytes": 387120,
+      "sha256": "879d9742497730b1c8bac7b90c3b14bcb3d4280a87c50b651a1c4430744207ba"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48-Microsoft.Common.props.snapshot",
+      "bytes": 11765,
+      "sha256": "87a2707df41f5abbbd8ad5678715c169ba40ee7543fef4a98d7852ff17e94e48"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/8bef6ff47a81a7145d6a5743b9b64645b6949338e092cf63f1ed75bd2a57497c-WorkloadManifest.targets.snapshot",
+      "bytes": 1155,
+      "sha256": "8bef6ff47a81a7145d6a5743b9b64645b6949338e092cf63f1ed75bd2a57497c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/8e7036c73aa93eef90d38969bb1309920cfe38c78db42b218f6b3fcc8313ff84-Microsoft.TestPlatform.targets.snapshot",
+      "bytes": 9051,
+      "sha256": "8e7036c73aa93eef90d38969bb1309920cfe38c78db42b218f6b3fcc8313ff84"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592-Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs.snapshot",
+      "bytes": 231,
+      "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e-Context.cs.snapshot",
+      "bytes": 4681,
+      "sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/95cb9c7a8dd56a4e40d5806438e56ce0c0f383f2837d57d4c38d904f208f47d2-Microsoft.NET.DesignerSupport.targets.snapshot",
+      "bytes": 6968,
+      "sha256": "95cb9c7a8dd56a4e40d5806438e56ce0c0f383f2837d57d4c38d904f208f47d2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/9793c0c6d35bcc41564ec7999df58c2690639cbf4a8ee7dfc7d57944bcf11c75-Microsoft.CodeAnalysis.CSharp.CodeStyle.targets.snapshot",
+      "bytes": 6762,
+      "sha256": "9793c0c6d35bcc41564ec7999df58c2690639cbf4a8ee7dfc7d57944bcf11c75"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7-Discovery.cs.snapshot",
+      "bytes": 5896,
+      "sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/99a2b26dfb4c898b3542b5eb862eba657b7f5eccb50644ea60ae6e1399b13e12-WorkloadManifest.targets.snapshot",
+      "bytes": 3175,
+      "sha256": "99a2b26dfb4c898b3542b5eb862eba657b7f5eccb50644ea60ae6e1399b13e12"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03-Directory.Build.props.snapshot",
+      "bytes": 575,
+      "sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/9b273ac98144ab6cf19feca2dc271a474eeab1534e39115f6496bdb4b07ffc67-WorkloadManifest.targets.snapshot",
+      "bytes": 576,
+      "sha256": "9b273ac98144ab6cf19feca2dc271a474eeab1534e39115f6496bdb4b07ffc67"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/9b7e0ede5dd02620ae41fe35f2a659c1426eb63b92fc3de80d2ad2190400de9a-Microsoft.Build.Tasks.Git.props.snapshot",
+      "bytes": 663,
+      "sha256": "9b7e0ede5dd02620ae41fe35f2a659c1426eb63b92fc3de80d2ad2190400de9a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/9df5347692908a2624b0d19459d143f27f5abe71d22557470d83f2ba01979fe2-Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props.snapshot",
+      "bytes": 2387,
+      "sha256": "9df5347692908a2624b0d19459d143f27f5abe71d22557470d83f2ba01979fe2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162-BenchmarkTargets.cs.snapshot",
+      "bytes": 725,
+      "sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/9f30b51d8a0ebbee598e96c869ae29f7fd8b4d3b66b0ad6a98ad2bbe7893013b-Microsoft.NET.NuGetOfflineCache.targets.snapshot",
+      "bytes": 2252,
+      "sha256": "9f30b51d8a0ebbee598e96c869ae29f7fd8b4d3b66b0ad6a98ad2bbe7893013b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/a06f44fc5a2dba7769c946437ea59905332b4428f49f4af35ab3293773a3057d-Microsoft.CodeAnalysis.NetAnalyzers.props.snapshot",
+      "bytes": 3710,
+      "sha256": "a06f44fc5a2dba7769c946437ea59905332b4428f49f4af35ab3293773a3057d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/a21d7ac8aabdc5fe698ce886e7ef1d90b128880cb8b9bed26bea95407668e2a8-WorkloadManifest.targets.snapshot",
+      "bytes": 18568,
+      "sha256": "a21d7ac8aabdc5fe698ce886e7ef1d90b128880cb8b9bed26bea95407668e2a8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/a691ac127e3f048d116f0088908caa4a7b413e7580a1e8e283a3889885d4b2b1-Microsoft.NET.Sdk.ImportPublishProfile.targets.snapshot",
+      "bytes": 2894,
+      "sha256": "a691ac127e3f048d116f0088908caa4a7b413e7580a1e8e283a3889885d4b2b1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/a8387a9040ccbe0a74143ae5697dc9de8c1c6fe9f7ce116a14324b77309a9776-Microsoft.NET.Build.Extensions.targets.snapshot",
+      "bytes": 1982,
+      "sha256": "a8387a9040ccbe0a74143ae5697dc9de8c1c6fe9f7ce116a14324b77309a9776"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/a88a3a9671ab32ae807e8a7411d9e690a7fb57daf2b0b95d72fdf42a49f11c0e-Microsoft.CSharp.targets.snapshot",
+      "bytes": 1457,
+      "sha256": "a88a3a9671ab32ae807e8a7411d9e690a7fb57daf2b0b95d72fdf42a49f11c0e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ab6670d9b270238ad50cb624add948f49627801fcd531bfaec1ce71aad6f4a25-Microsoft.NET.SupportedTargetFrameworks.props.snapshot",
+      "bytes": 7193,
+      "sha256": "ab6670d9b270238ad50cb624add948f49627801fcd531bfaec1ce71aad6f4a25"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/abfb2a1102797342aafbe019f1a6b36c2d789a98f9c642bc89416a9c72160c06-Microsoft.NET.GenerateSupportedRuntime.targets.snapshot",
+      "bytes": 2798,
+      "sha256": "abfb2a1102797342aafbe019f1a6b36c2d789a98f9c642bc89416a9c72160c06"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/adb3452951768ef6f279fbb118d089c3d302715c4c7bcbb449785c5d11192df0-Microsoft.NET.Build.Containers.targets.snapshot",
+      "bytes": 33328,
+      "sha256": "adb3452951768ef6f279fbb118d089c3d302715c4c7bcbb449785c5d11192df0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/adfac98c6e2cfd41b4eb9b4f1e076edff64b0b7b99f65b82252a432f9f7e036e-WorkloadManifest.targets.snapshot",
+      "bytes": 2523,
+      "sha256": "adfac98c6e2cfd41b4eb9b4f1e076edff64b0b7b99f65b82252a432f9f7e036e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/aed5db2d53cb2517edb7cae09dfd543b177ae733d5331536bd044d772bad18e8-Microsoft.NET.GenerateAssemblyInfo.targets.snapshot",
+      "bytes": 16252,
+      "sha256": "aed5db2d53cb2517edb7cae09dfd543b177ae733d5331536bd044d772bad18e8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89-Conventions.cs.snapshot",
+      "bytes": 2485,
+      "sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/b0349f6a024743671a775294374d62dbeba43157b296dfbd4e10fd45b3fe0db1-hook.targets.snapshot",
+      "bytes": 5631,
+      "sha256": "b0349f6a024743671a775294374d62dbeba43157b296dfbd4e10fd45b3fe0db1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/b0389faed3531f74a620de69039790f308c6e08affe1ebd21bc51c3b80cde8b5-Microsoft.NETCore.App.runtimeconfig.json.snapshot",
+      "bytes": 50,
+      "sha256": "b0389faed3531f74a620de69039790f308c6e08affe1ebd21bc51c3b80cde8b5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e-toolchain.cs.snapshot",
+      "bytes": 4176,
+      "sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/b2290b8ea7eda548da38278cb8db64a284b5fb3a8f0ff2fc3dc75eb64a13d148-Microsoft.SourceLink.AzureRepos.Git.targets.snapshot",
+      "bytes": 3588,
+      "sha256": "b2290b8ea7eda548da38278cb8db64a284b5fb3a8f0ff2fc3dc75eb64a13d148"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/b7818806a224741b051fb1395dcd6c74e436dd46a904e015fdad226dcb34713a-Microsoft.NET.Build.Extensions.targets.snapshot",
+      "bytes": 1024,
+      "sha256": "b7818806a224741b051fb1395dcd6c74e436dd46a904e015fdad226dcb34713a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/b816016bda1f80d0b0e5b53f8bde074f715a99224681f33333952e2cc4f74cd2-WorkloadManifest.targets.snapshot",
+      "bytes": 2508,
+      "sha256": "b816016bda1f80d0b0e5b53f8bde074f715a99224681f33333952e2cc4f74cd2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ba1e06fba8d467e835c01432c670885306d724ca096c236766b19089fce2b135-Microsoft.NET.Build.Containers.props.snapshot",
+      "bytes": 1702,
+      "sha256": "ba1e06fba8d467e835c01432c670885306d724ca096c236766b19089fce2b135"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/bc5e99f15cb4f9f9817c9bdb793b9120cd31320da5655e3a1fbc49556ae92374-Microsoft.SourceLink.Common.props.snapshot",
+      "bytes": 1251,
+      "sha256": "bc5e99f15cb4f9f9817c9bdb793b9120cd31320da5655e3a1fbc49556ae92374"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e-Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7-global.json.snapshot",
+      "bytes": 81,
+      "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/be057de236be34bbafa0382f3d622bc31b9e36cabeb95a7f1c178472132c59f6-WorkloadManifest.targets.snapshot",
+      "bytes": 836,
+      "sha256": "be057de236be34bbafa0382f3d622bc31b9e36cabeb95a7f1c178472132c59f6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/beb81779fada920f819b75c749e3f7433f83a382bb07f8d7d39f72ecda588815-Microsoft.NET.Sdk.SourceLink.props.snapshot",
+      "bytes": 1820,
+      "sha256": "beb81779fada920f819b75c749e3f7433f83a382bb07f8d7d39f72ecda588815"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c25bf275c966978f5a468eecbe2a09b7192f530389e52d1ea167c4f31469e09e-Microsoft.Managed.Core.targets.snapshot",
+      "bytes": 19323,
+      "sha256": "c25bf275c966978f5a468eecbe2a09b7192f530389e52d1ea167c4f31469e09e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c3ec35eff46045c63e1166cb10380fe1beee5e3de219d179b619268a13943ecd-WorkloadManifest.targets.snapshot",
+      "bytes": 5747,
+      "sha256": "c3ec35eff46045c63e1166cb10380fe1beee5e3de219d179b619268a13943ecd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c46367f32817df0e4d3a953e7f836d256db8f569d78763b39f67e5c3eb5f94e9-.version.snapshot",
+      "bytes": 49,
+      "sha256": "c46367f32817df0e4d3a953e7f836d256db8f569d78763b39f67e5c3eb5f94e9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c4e371c48ea73ec7f055919d6d13c20521aaad73df2130b1342d308d3ad4c99d-Microsoft.NET.Sdk.WindowsDesktop.WPF.props.snapshot",
+      "bytes": 353,
+      "sha256": "c4e371c48ea73ec7f055919d6d13c20521aaad73df2130b1342d308d3ad4c99d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa-foundation.py.snapshot",
+      "bytes": 3241,
+      "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c6d64abd6d24a6a67fb307de15da8c58352b55dd092ea9203e56c858cf3cba4a-Microsoft.NET.DefaultOutputPaths.targets.snapshot",
+      "bytes": 11682,
+      "sha256": "c6d64abd6d24a6a67fb307de15da8c58352b55dd092ea9203e56c858cf3cba4a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c708182482beb469a330d5865068e9af779a2a600547ae277983d2dadc37da31-Microsoft.SourceLink.GitLab.targets.snapshot",
+      "bytes": 3833,
+      "sha256": "c708182482beb469a330d5865068e9af779a2a600547ae277983d2dadc37da31"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c83ac956024f908121d1302addf6859b55acf766bcef63f8d8ab49144d020af0-Microsoft.NET.Sdk.DefaultItems.props.snapshot",
+      "bytes": 7201,
+      "sha256": "c83ac956024f908121d1302addf6859b55acf766bcef63f8d8ab49144d020af0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/c91a5350f1f22962444e65827bc8eec93e24a16f669843a2eae40606ca9fc383-Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs.snapshot",
+      "bytes": 1660,
+      "sha256": "c91a5350f1f22962444e65827bc8eec93e24a16f669843a2eae40606ca9fc383"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/cc647d2f94c75c3a691ce8b6878cdd59267f3e7083e0fd01a8b13412b4465559-VBCSCompiler.runtimeconfig.json.snapshot",
+      "bytes": 391,
+      "sha256": "cc647d2f94c75c3a691ce8b6878cdd59267f3e7083e0fd01a8b13412b4465559"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/cc647d2f94c75c3a691ce8b6878cdd59267f3e7083e0fd01a8b13412b4465559-csc.runtimeconfig.json.snapshot",
+      "bytes": 391,
+      "sha256": "cc647d2f94c75c3a691ce8b6878cdd59267f3e7083e0fd01a8b13412b4465559"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/cc647d2f94c75c3a691ce8b6878cdd59267f3e7083e0fd01a8b13412b4465559-vbc.runtimeconfig.json.snapshot",
+      "bytes": 391,
+      "sha256": "cc647d2f94c75c3a691ce8b6878cdd59267f3e7083e0fd01a8b13412b4465559"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ce10b22f349503468546cd445e3e0ed7637e6b759b90a225a6c96ba2759bd0fb-NuGet.targets.snapshot",
+      "bytes": 75474,
+      "sha256": "ce10b22f349503468546cd445e3e0ed7637e6b759b90a225a6c96ba2759bd0fb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/d5442ad54dbc954440fb344eceb5ae8b3c61cf76971c1b6943e14befcd00098e-Microsoft.NET.Sdk.Analyzers.targets.snapshot",
+      "bytes": 12850,
+      "sha256": "d5442ad54dbc954440fb344eceb5ae8b3c61cf76971c1b6943e14befcd00098e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95-DocsTargets.cs.snapshot",
+      "bytes": 14435,
+      "sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa-RunLog.cs.snapshot",
+      "bytes": 21004,
+      "sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/dbe0853385907c883af2e4ce401f71822666fdc0525a48376aaf7a99a8e9d3ec-Microsoft.NET.Sdk.DefaultItems.targets.snapshot",
+      "bytes": 13829,
+      "sha256": "dbe0853385907c883af2e4ce401f71822666fdc0525a48376aaf7a99a8e9d3ec"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/dc531ced0614e581ebd7431f08a2bd781fca8cf57b390bd6afdfb8b46e46dc41-Microsoft.NETCoreSdk.BundledCliTools.props.snapshot",
+      "bytes": 601,
+      "sha256": "dc531ced0614e581ebd7431f08a2bd781fca8cf57b390bd6afdfb8b46e46dc41"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100-Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/dfcc2b56c74e971cd3acda711227c8f5e96e9a3d7490694173781d5a23a9bf27-Microsoft.SourceLink.GitHub.props.snapshot",
+      "bytes": 356,
+      "sha256": "dfcc2b56c74e971cd3acda711227c8f5e96e9a3d7490694173781d5a23a9bf27"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/e12b6035ccd44a05cf1f1595b34eb04898b058512c547d138e95fc01e9c408a7-Yubico.YubiKit.Audit20261111.DocCheck.GeneratedMSBuildEditorConfig.editorconfig.snapshot",
+      "bytes": 782,
+      "sha256": "e12b6035ccd44a05cf1f1595b34eb04898b058512c547d138e95fc01e9c408a7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77-Options.cs.snapshot",
+      "bytes": 4425,
+      "sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831-CoverageTargets.cs.snapshot",
+      "bytes": 11548,
+      "sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/e7b0bdb12309142f15fbb751b29f606977a5631097862b0d3635195d8066696a-Microsoft.Common.targets.snapshot",
+      "bytes": 3969,
+      "sha256": "e7b0bdb12309142f15fbb751b29f606977a5631097862b0d3635195d8066696a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/e91ca1277b7930d2a15906f0c95787298cf50e9b877a786128e8337ed7451b28-WorkloadManifest.targets.snapshot",
+      "bytes": 5696,
+      "sha256": "e91ca1277b7930d2a15906f0c95787298cf50e9b877a786128e8337ed7451b28"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ea5fe130702f2fc8a4a8cceb81c42d72ceeddb800f615934ee25eedbf7d0bbac-Microsoft.NET.Publish.targets.snapshot",
+      "bytes": 84607,
+      "sha256": "ea5fe130702f2fc8a4a8cceb81c42d72ceeddb800f615934ee25eedbf7d0bbac"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d-analysislevelstyle_all.globalconfig.snapshot",
+      "bytes": 19880,
+      "sha256": "eac2678eed1cf2461d441cd0fdcaa7331c33ab30b44708e5c49c77f09208321d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ecc2c65a5435f4ae28a71cd224250dfba5d8b1cec342a24e032bbd6970cad79b-WorkloadManifest.targets.snapshot",
+      "bytes": 2613,
+      "sha256": "ecc2c65a5435f4ae28a71cd224250dfba5d8b1cec342a24e032bbd6970cad79b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ecde6efe033ff19f05aeaedef96a1e34ee7595c48c68b4bf9299fedb413049bb-Microsoft.NET.GenerateGlobalUsings.targets.snapshot",
+      "bytes": 2598,
+      "sha256": "ecde6efe033ff19f05aeaedef96a1e34ee7595c48c68b4bf9299fedb413049bb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ef88d9d0f6109495a5e1fa98b26ca0189704e16e87135ab88d4940272e19fb93-Microsoft.NET.props.snapshot",
+      "bytes": 2102,
+      "sha256": "ef88d9d0f6109495a5e1fa98b26ca0189704e16e87135ab88d4940272e19fb93"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/f35ea6f129c18865aed8c1d6b550c1448564970185152c2ea925bff500018e73-microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512.snapshot",
+      "bytes": 88,
+      "sha256": "f35ea6f129c18865aed8c1d6b550c1448564970185152c2ea925bff500018e73"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/f4fe8a31200874a8c75e13caa173c33b10ea42a5257917db9640d9deddcc9449-WorkloadManifest.targets.snapshot",
+      "bytes": 7120,
+      "sha256": "f4fe8a31200874a8c75e13caa173c33b10ea42a5257917db9640d9deddcc9449"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da-Microsoft.CodeAnalysis.NetAnalyzers.targets.snapshot",
+      "bytes": 90446,
+      "sha256": "f5b273987a0c6ec6f6db5b378a37d801b65a61099a1cb7d27e694b30f86958da"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/f5c9c75fc62d743bc5d37324d77569453c900abbfca87eb0cf39e9417fe6bb38-microsoft.codeanalysis.netanalyzers.nuspec.snapshot",
+      "bytes": 1193,
+      "sha256": "f5c9c75fc62d743bc5d37324d77569453c900abbfca87eb0cf39e9417fe6bb38"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs.snapshot",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/f87d2992560b148e39c472da8ffb352d979bdafd6d2e7ee05aed842ad3d3e53c-Microsoft.NET.Sdk.CSharp.props.snapshot",
+      "bytes": 1569,
+      "sha256": "f87d2992560b148e39c472da8ffb352d979bdafd6d2e7ee05aed842ad3d3e53c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867-BuildTargets.cs.snapshot",
+      "bytes": 19267,
+      "sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/fb7d1aa700cf41cbde4864fb70aaa6d3a75eebdb0d5bf51e7c0447587f5b6b8e-WorkloadManifest.targets.snapshot",
+      "bytes": 748,
+      "sha256": "fb7d1aa700cf41cbde4864fb70aaa6d3a75eebdb0d5bf51e7c0447587f5b6b8e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/fdb968488afb9f50e880d2a461476aaba48f0f0aefe1a4f829d96008766a22ca-WorkloadManifest.targets.snapshot",
+      "bytes": 2585,
+      "sha256": "fdb968488afb9f50e880d2a461476aaba48f0f0aefe1a4f829d96008766a22ca"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327-nuget.config.snapshot",
+      "bytes": 782,
+      "sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/inputs/ffd9fabffb90c1a1827ed5523656153f1cd4075a25abf8b55c72da09f013aa13-Microsoft.NET.Sdk.FrameworkReferenceResolution.targets.snapshot",
+      "bytes": 33734,
+      "sha256": "ffd9fabffb90c1a1827ed5523656153f1cd4075a25abf8b55c72da09f013aa13"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/other-actual.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/other.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/preprocess-command.json",
+      "bytes": 552,
+      "sha256": "3d3c3bbd21e319f781ff2242a4e12355135073b76e056b89f35dde5bfed408e3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/preprocess.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/preprocess.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/preprocessed.xml.snapshot",
+      "bytes": 1540193,
+      "sha256": "07ed363e0da3717ce4f0ba92029d00624f764dbe725203ff2e66f83baf6f587a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/projectrefs-actual.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/projectrefs.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/properties.txt",
+      "bytes": 1133,
+      "sha256": "922152ba04610446113a1497f0ddfe30c2e58f5d66d4141a24ac7fed085abced"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/references-actual.txt",
+      "bytes": 21360,
+      "sha256": "ac3afb4e15072d49e229996fee1badfcd0df97bde272db8549cca2ca8975b004"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/references.txt",
+      "bytes": 21360,
+      "sha256": "ac3afb4e15072d49e229996fee1badfcd0df97bde272db8549cca2ca8975b004"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/sources-actual.txt",
+      "bytes": 653,
+      "sha256": "8167791228493e918e8fa9528dd6ef6fc55b40727a034f5e8530c06ece9edf19"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/sources.txt",
+      "bytes": 653,
+      "sha256": "8167791228493e918e8fa9528dd6ef6fc55b40727a034f5e8530c06ece9edf19"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-second/started.json",
+      "bytes": 1589,
+      "sha256": "4ed5c14af2f023c5af751f2a25f3e3df5f836b2313ae20d0c6b95986ea57e1de"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/invocation.json",
+      "bytes": 2311,
+      "sha256": "202156fba637848d32e8f656c30f1b901fe7da1c78a1c19e2682961e412c83fd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/receipt.json",
+      "bytes": 6743,
+      "sha256": "7704d8cabffb0b11d44407fc8b4fea872698758bfe43e86dda29fa99e2dabbec"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/stdout.log",
+      "bytes": 3009,
+      "sha256": "b6210e9fdb0e85e66f9f81b3abfec9ddd79c424052516279ae6968abe4f9c5cc"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/toolchain/20261112-001148-534-build/01-clean-Audit20261111.DocCheck.log",
+      "bytes": 2745,
+      "sha256": "52b060b5492872aaca9b9ada7a73aa60f1d5e7025e99c2bfd52145e4ba7819c1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/toolchain/20261112-001148-534-build/02-build-Audit20261111.DocCheck.log",
+      "bytes": 1866,
+      "sha256": "a6eef9830e250335210127c18abb0da94587c288706aa07c1c94945295ce5f70"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/toolchain/20261112-001148-534-build/result.json",
+      "bytes": 1003,
+      "sha256": "849ebedb5e4c0e747ca0cf81b060793358cf319e29554f976c8c71f4fdd4c377"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/toolchain/20261112-001148-534-build/result.txt",
+      "bytes": 734,
+      "sha256": "9d46cc45211571141fa64ce78b9858cdf33f3c8fefff54e2c533fcc5529a72ca"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/toolchain/20261112-001148-534-build/run.log",
+      "bytes": 3332,
+      "sha256": "2297082a5d213c72763134f629a2a2843931b494005ab8b3a6dde7560a778a0f"
+    }
+  ],
+  "external_preservation_root": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second",
+  "external_job_files": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs",
+        "bytes": 1660,
+        "sha256": "c91a5350f1f22962444e65827bc8eec93e24a16f669843a2eae40606ca9fc383"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs",
+        "bytes": 1660,
+        "sha256": "c91a5350f1f22962444e65827bc8eec93e24a16f669843a2eae40606ca9fc383"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfoInputs.cache",
+        "bytes": 65,
+        "sha256": "d71c88736c0e5e6c509ff02e8b242284ceb9e4bdd584c688dc4238479d6385d8"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfoInputs.cache",
+        "bytes": 65,
+        "sha256": "d71c88736c0e5e6c509ff02e8b242284ceb9e4bdd584c688dc4238479d6385d8"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 782,
+        "sha256": "e12b6035ccd44a05cf1f1595b34eb04898b058512c547d138e95fc01e9c408a7"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 782,
+        "sha256": "e12b6035ccd44a05cf1f1595b34eb04898b058512c547d138e95fc01e9c408a7"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.assets.cache",
+        "bytes": 801,
+        "sha256": "b244ec3de648660eb107e32a852716fb0b3e6647d3380a732fa31f8ba0ae9bb7"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.assets.cache",
+        "bytes": 801,
+        "sha256": "b244ec3de648660eb107e32a852716fb0b3e6647d3380a732fa31f8ba0ae9bb7"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.AssemblyReference.cache",
+        "bytes": 4952,
+        "sha256": "c4d0b1559df77c18494ad44c9a7173c28e9b1097ae601c2d477183423260a1f5"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.AssemblyReference.cache",
+        "bytes": 4952,
+        "sha256": "c4d0b1559df77c18494ad44c9a7173c28e9b1097ae601c2d477183423260a1f5"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.CoreCompileInputs.cache",
+        "bytes": 65,
+        "sha256": "4ac90ae0a3656803d66fa594385c82a331c5a7a5f0a48fec2e605d473c2deca9"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.CoreCompileInputs.cache",
+        "bytes": 65,
+        "sha256": "4ac90ae0a3656803d66fa594385c82a331c5a7a5f0a48fec2e605d473c2deca9"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.FileListAbsolute.txt",
+        "bytes": 1754,
+        "sha256": "f0617186ddc8d390bf83d97e95b99b3e673384d59fb92b857f0c6ccfc56cc8d2"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.FileListAbsolute.txt",
+        "bytes": 1754,
+        "sha256": "f0617186ddc8d390bf83d97e95b99b3e673384d59fb92b857f0c6ccfc56cc8d2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 21504,
+        "sha256": "6849f11ece46e7cee76195a885133cc7513f35b3882097efbe87ef2d3504849f"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 21504,
+        "sha256": "6849f11ece46e7cee76195a885133cc7513f35b3882097efbe87ef2d3504849f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.pdb",
+        "bytes": 14704,
+        "sha256": "62bce4329970486ee2d829b04bfd684dfc99a430b71c1b645687166178286fe1"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.pdb",
+        "bytes": 14704,
+        "sha256": "62bce4329970486ee2d829b04bfd684dfc99a430b71c1b645687166178286fe1"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json",
+        "bytes": 161,
+        "sha256": "579acca20afc059a3e099900cd9843cf5dc21f08daeec8e7c37957a6ed3b04d2"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json",
+        "bytes": 161,
+        "sha256": "579acca20afc059a3e099900cd9843cf5dc21f08daeec8e7c37957a6ed3b04d2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.xml",
+        "bytes": 154,
+        "sha256": "5e73399ed8001acb3b68f1d70b59fb1d28cc2c8b8669b6af29e912927d4b265d"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.xml",
+        "bytes": 154,
+        "sha256": "5e73399ed8001acb3b68f1d70b59fb1d28cc2c8b8669b6af29e912927d4b265d"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/refint/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 10240,
+        "sha256": "457886223960698438340c3644ca7c700e71f1f196539baeb63c8b169593c264"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Release/net10.0/refint/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 10240,
+        "sha256": "457886223960698438340c3644ca7c700e71f1f196539baeb63c8b169593c264"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.dgspec.json",
+        "bytes": 23962,
+        "sha256": "afeb4bb24a23989e2feb1bddde154b6b62f9b9797e8ec0a52ae1a708222dc56a"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.dgspec.json",
+        "bytes": 23962,
+        "sha256": "afeb4bb24a23989e2feb1bddde154b6b62f9b9797e8ec0a52ae1a708222dc56a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.props",
+        "bytes": 1814,
+        "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.props",
+        "bytes": 1814,
+        "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.targets",
+        "bytes": 538,
+        "sha256": "56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.targets",
+        "bytes": 538,
+        "sha256": "56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/project.assets.json",
+        "bytes": 86634,
+        "sha256": "290c31810dbed0cef90fbc1586d654460c13fbef748cc2871abf91c93cd4e67e"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/project.assets.json",
+        "bytes": 86634,
+        "sha256": "290c31810dbed0cef90fbc1586d654460c13fbef748cc2871abf91c93cd4e67e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/project.nuget.cache",
+        "bytes": 446,
+        "sha256": "f45f093c5ce1266ce893953ce6e42c9391fbec203a6e885c472cba854d25ae1c"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-binding-failures/checker-bound-build-second/obj/project.nuget.cache",
+        "bytes": 446,
+        "sha256": "f45f093c5ce1266ce893953ce6e42c9391fbec203a6e885c472cba854d25ae1c"
+      }
+    }
+  ],
+  "actual_argument_count": 214,
+  "file_argument_diagnosis": [
+    {
+      "raw": "/sourcelink:/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json",
+      "switch": "/sourcelink:",
+      "literal_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json",
+      "old_classified_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json",
+      "literal_in_before": false,
+      "old_path_in_before": false,
+      "exists": true
+    },
+    {
+      "raw": "/embed:/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs",
+      "switch": "/embed:",
+      "literal_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs",
+      "old_classified_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs",
+      "literal_in_before": true,
+      "old_path_in_before": true,
+      "exists": true
+    },
+    {
+      "raw": "/embed:\"/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs\"",
+      "switch": "/embed:",
+      "literal_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "old_classified_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/.NETCoreApp",
+      "literal_in_before": true,
+      "old_path_in_before": false,
+      "exists": true
+    },
+    {
+      "raw": "/embed:/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs",
+      "switch": "/embed:",
+      "literal_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs",
+      "old_classified_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs",
+      "literal_in_before": true,
+      "old_path_in_before": true,
+      "exists": true
+    }
+  ],
+  "build_receipt": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-second/receipt.json",
+    "bytes": 6743,
+    "sha256": "7704d8cabffb0b11d44407fc8b4fea872698758bfe43e86dda29fa99e2dabbec"
+  }
+}

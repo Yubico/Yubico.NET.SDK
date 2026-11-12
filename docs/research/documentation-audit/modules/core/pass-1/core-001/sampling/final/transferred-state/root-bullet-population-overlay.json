@@ -1,0 +1,60 @@
+[
+  {
+    "id": "core-001:unit:b05cbf7f92ab5484",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "path": "CLAUDE.md",
+    "original_population_state": "provisionally-excluded-pending-edit-overlap",
+    "original_selected": false,
+    "actual_verdict_authority": null,
+    "current_mapping": {
+      "id": "core-001:unit:b05cbf7f92ab5484",
+      "path": "CLAUDE.md",
+      "original_first_line": 31,
+      "original_last_line": 136,
+      "original_range_sha256": "7f3b5caca2d1c3fb06dc4fd85e710a1fd39e4f49bac6931c5e7c67ad322f5df2",
+      "current_file_sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264",
+      "semantic_original_span_overlap": [
+        {
+          "start_character": 4208,
+          "end_character_exclusive": 4437,
+          "old_first_line": 64,
+          "old_line_count": 1,
+          "added_lines": 1
+        },
+        {
+          "start_character": 8385,
+          "end_character_exclusive": 8460,
+          "old_first_line": 114,
+          "old_line_count": 1,
+          "added_lines": 1
+        }
+      ],
+      "reviewed_EOF_only_file": false,
+      "state": "SUBSTANTIVE-RANGE-CHANGED",
+      "semantic_interval_match": false
+    },
+    "latest_logging_patch_original_overlap": [
+      {
+        "start_character": 8385,
+        "end_character_exclusive": 8460,
+        "projection": "EXACT-PINNED-LINE-PROJECTION",
+        "before_first_line": 114,
+        "before_line_count": 1,
+        "after_first_line": 114,
+        "after_line_count": 1
+      }
+    ],
+    "historical_withholding_reasons_retained": [
+      "Final substantive original-unit span overlap (EOF-only deltas excluded)",
+      "Final substantive interval no longer matches original",
+      "Outside historical9352 admitted population; preserve original disposition"
+    ],
+    "logical_pretransfer_credit": 0,
+    "final_candidate_credit": 0,
+    "conservative_denominator_member": false,
+    "conservative_population_delta": 0,
+    "whole_file_exclusion": false,
+    "accepted_clean_credit": null
+  }
+]

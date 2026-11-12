@@ -79,7 +79,7 @@ internal static class AsnUtilities
     /// <see cref="CryptographicException"/>, never an argument exception.
     /// </summary>
     /// <exception cref="CryptographicException">
-    /// The point is not a valid uncompressed point, or the curve is not a supported prime curve.
+    /// The point has unsupported framing or width, or the curve is not a modeled ordinary short-Weierstrass curve.
     /// </exception>
     public static void ValidateDecodedEcPoint(ReadOnlySpan<byte> point, string curveOid)
     {
@@ -97,7 +97,7 @@ internal static class AsnUtilities
     /// <see cref="ArgumentException"/>, never a <see cref="CryptographicException"/>.
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// The point is not a valid uncompressed point, or the curve is not a supported prime curve.
+    /// The point has unsupported framing or width, or the curve is not a modeled ordinary short-Weierstrass curve.
     /// </exception>
     public static void ValidateEcPointArgument(ReadOnlySpan<byte> point, string curveOid, string paramName)
     {
@@ -130,7 +130,7 @@ internal static class AsnUtilities
     /// an oversized X paired with an undersized Y produces a correctly sized but silently wrong point.
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// A coordinate does not match the curve, or the curve is not a supported prime curve.
+    /// A coordinate has the wrong width, or the curve is not a modeled ordinary short-Weierstrass curve.
     /// </exception>
     public static byte[] BuildUncompressedEcPoint(
         ReadOnlySpan<byte> xCoordinate,
@@ -182,9 +182,10 @@ internal static class AsnUtilities
     /// The scalar of an RFC 5915 <c>ECPrivateKey</c> is a fixed-width, left-padded integer of the
     /// curve's subgroup-order width. Any other width contradicts the curve parameter sitting in the same
     /// structure. The message reports lengths only: the value being rejected is key material.
+    /// This checks the encoded width, rather than proving that the scalar is in the valid mathematical range.
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// The scalar does not match the curve, or the curve is not a supported prime curve.
+    /// The scalar has the wrong width, or the curve is not a modeled ordinary short-Weierstrass curve.
     /// </exception>
     public static void ValidateEcPrivateScalarArgument(
         ReadOnlySpan<byte> privateScalar,
@@ -215,7 +216,7 @@ internal static class AsnUtilities
     /// exception type, so the throwing branch is a backstop that no production caller reaches. See
     /// the remarks on <see cref="InspectUncompressedEcPoint"/>.
     /// </remarks>
-    /// <exception cref="CryptographicException">The curve is not a supported prime curve.</exception>
+    /// <exception cref="CryptographicException">The curve is not a modeled ordinary short-Weierstrass curve.</exception>
     public static int GetDecodedCoordinateLengthBytes(string curveOid) =>
         TryGetCoordinateLengthBytes(curveOid, out var coordinateLengthBytes)
             ? coordinateLengthBytes
@@ -224,14 +225,14 @@ internal static class AsnUtilities
     /// <summary>
     /// Resolves the coordinate size for a curve OID supplied by a caller of an encoder.
     /// </summary>
-    /// <exception cref="ArgumentException">The curve is not a supported prime curve.</exception>
+    /// <exception cref="ArgumentException">The curve is not a modeled ordinary short-Weierstrass curve.</exception>
     private static int GetCoordinateLengthBytesArgument(string curveOid, string paramName) =>
         TryGetCoordinateLengthBytes(curveOid, out var coordinateLengthBytes)
             ? coordinateLengthBytes
             : throw new ArgumentException(UnsupportedCurveMessage(curveOid), paramName);
 
     /// <summary>
-    /// Resolves the coordinate size of one of the EC prime curves this SDK supports.
+    /// Resolves the coordinate size of a modeled ordinary short-Weierstrass named curve.
     /// </summary>
     /// <remarks>
     /// Only the named-curve index is consulted. A key algorithm or CBC operation OID must never

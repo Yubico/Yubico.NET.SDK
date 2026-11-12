@@ -1,0 +1,9 @@
+
+//         ///   length(PS) = block size - (input data length + (2 * digest length) + 2)
+//         ///<br/>
+//         ///   For example, if the block size is 128 (1024-bit RSA key), the input
+//         ///   data is 16 bytes, and the digest algorithm is SHA-256, then
+//         ///<br/>
+//         ///   length(PS) = 128 - (16 + (2 * 32) + 2)
+//         ///              = 128 - 82 = 46
+//         /// 

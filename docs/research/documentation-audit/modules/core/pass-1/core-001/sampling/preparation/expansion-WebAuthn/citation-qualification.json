@@ -1,0 +1,12 @@
+{
+  "reader": "Astra",
+  "authority": "sampling/coordinator/read-boundary-WebAuthn-verdicts.md",
+  "dated_original_URL": "https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension",
+  "section": "10.1.4",
+  "status": "Dated W3C WebAuthn Level 3 Recommendation as recorded by coordinator",
+  "actor": "Client PRF extension",
+  "condition": "When implemented over hmac-secret",
+  "strength": "MUST",
+  "requirement": "Exposed single PRF is the one used when user verification is performed, overriding UserVerificationRequirement if necessary.",
+  "limits": "Coordinator passage read retained; not a blanket authenticator claim, full conformance, erasure or fresh ceremony result. No new external research or passage verification by preparer."
+}

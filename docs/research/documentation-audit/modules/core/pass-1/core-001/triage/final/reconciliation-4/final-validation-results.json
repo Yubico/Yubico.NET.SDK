@@ -1,0 +1,1499 @@
+{
+  "state": "VERIFICATION COMPLETE; fresh final evidence review/freeze/publication pending",
+  "authority": {
+    "closeout.md": "# Whole-Core Pass 1 — verification closeout\n\n**Verification complete; final evidence review, record freeze and GitHub publication pending.**\nThis is a documentation milestone. It does not close the engineering, standards-source or physical\nqualification findings in [deferred-findings.md](deferred-findings.md).\n\n## Scope and preservation\n\n- Fixed source baseline: `fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef`.\n- Eight Core families and all nine applet/Core boundaries have explicit source dispositions:\n  **14,044 IDs**—9,020 Core and 5,024 external—with no missing, extra or overlapping assignments.\n- **185 original candidates**, 100 inherited rows, 70 nonadditive groups and 21 OpenPGP documentation\n  dependency labels remain traceable. Resolutions and retractions are preserved, not renumbered away.\n- **363 accepted product paths** at current map SHA-256\n  `2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b`.\n  Main batches and focused successors have independent content/citation reviews and exact transfer\n  receipts. Executable structure, imports, directives, declarations, assertions and API snapshots remain\n  unchanged. Formatting removes 241 specifically reviewed terminal LF bytes.\n- B4's qualified whole-snapshot support/type reconciliation remains distinct from all-member binding.\n  Historical evidence, protected prior archives and the four original user files retain separate checks.\n\n## Final gates\n\n| Gate | Recorded result |\n| --- | --- |\n| Token/directive/import preservation | `source-tokens-final-after-eof`: 1,320 C# files, zero failures; accepted checker profile `db8347bc…`, seal `b3583ce0…`, matching pre/post bindings. |\n| API snapshots | `api-final-after-eof`: 20 snapshots, zero differences. |\n| Example compilation | 17 pilot + 300 additional unique preparations = **317**. The additional 302 body IDs include two aliases; all 11 real contexts compiled with zero warnings. FULL-032's genuine logging-access defect was corrected and compiled. No example/injected assembly was executed. |\n| Normal output restoration | Ordinary clean solution build; all ten test DLLs lacked injected namespace markers while their preserved positive controls contained them. Capture overrides were unset before SDK tests. |\n| Clean solution build | `build-pack-final`: Release solution clean/rebuild, zero warnings/errors. |\n| Hardware-free unit suite | `unit-tests-final-tree`: **4,442 executed**, 13 projects passed, zero failures, five existing skips, zero warnings. |\n| Documentation/package pages | `docs-complexity-final`: 74 active documents and 10 package READMEs validated. |\n| Architecture | Same invocation: six evidence-map entries resolve; seven diagrams/images remain fresh. |\n| Complexity | Same invocation: no new/worsened violation; nine existing threshold exceedances retained as baseline debt. |\n| Documentation patch tooling | `docs-patch-final-first`: six isolated regression tests passed. |\n| Docs-inclusive packaging | Ten exact `2.0.0-alpha.2` packages created; archive integrity, IDs/version, current README bytes, DLL presence and XML documentation checked. The directory's 20-package total includes retained earlier versions. |\n| Source sampling | **PASS:** 1,134 actual reads, 1,071 counted unchanged supported units across 94 roles/17 owners, conservative 9,352 basis, 63 withheld. Final successor seal `9ac3da81…`; independent and coordinator acceptance recorded. |\n| Current native C/C++ guard | Not applicable: no current native C/C++ source files in the audited product set. Managed interop remains covered by source preservation and scoped reviews. |\n\nSource snapshot: `validation/source-final-first.json`. Command receipts and original logs are under\n`validation/commands-v2/`. Package detail is in `validation/final-packages.md`; ordinary test-output\nrestoration is in `validation/normal-output-restoration.md`. Example attempts retain failed restore,\nwrapper, runner and source-admission outcomes alongside their successful successors and preserved outputs.\n\n## Formatting qualification\n\nThe full solution formatter and the 310-file folder whitespace check remain **failed historical checks**,\nnot blanket clean results. The 241 introduced EOF differences were corrected with reviewed byte-only\npatches. Ten source-pinned import/declaration diagnostics would violate the explicit preservation scope;\n14 pre-existing EOFs and 73 baseline/context-sensitive whitespace diagnostics remain unchanged.\nThe solution's 241/1426 summary was not treated as full requested-file coverage. The folder check covers\nthe 310-file whitespace population, not semantic/project coverage. Exact evidence and independent\nreviews are in `editing/format-final/`; no diagnostic suppression or style configuration was added.\n\n## Deferred handoff and stopping point\n\nThe handoff preserves implementation and qualification facets, including PIN/KDF/X25519/ATT and\nPIVIMP-005 findings, layered response/secret ownership, native producer/header identity, exact ISO and\nSCP edition/profile gaps, the HSM response-length uncertainty, and missing deterministic disposal at\nspecific callers. Missing deterministic cleanup is not claimed to demonstrate a permanent leak.\nThe HSM retry-message observation remains retracted. OATH's historical scoped resolutions remain closed.\n\nPIV touch, hotplug and touch-dependent cancellation/recovery remain deferred. The user's separate Windows\nconcurrency work remains unready/unreviewed pending their handoff. No new physical test or state change\nwas performed by this documentation closeout.\n\nAfter fresh final evidence acceptance: freeze/check records and staged bytes, commit/push and verify the\nremote identity, publish the external Core handoff with the frozen commit, then stop. This authorizes\nno separate Pass-2 planning or implementation project.\n",
+    "status.md": "# Core core-001 status\n\n## Latest verification closeout\n\nSee [closeout.md](closeout.md) for the authoritative current gate summary. All 317 unique example\npreparations compiled, the final clean solution build and ten docs-inclusive packages passed, and the\nfinal hardware-free unit run passed 4,442 executions across 13 projects with five existing skips and zero\nwarnings. Source sampling and final token/API/documentation/architecture/complexity checks are accepted\nat their recorded scopes. Formatting's explicit baseline qualifications remain, not a blanket clean claim.\nFresh whole-campaign review, freeze, commit/push and external handoff publication remain pending.\nThe older checkpoints below preserve the chronology and are superseded by this closeout summary.\n\n## Current checkpoint — final validation and sampling\n\n### Consumer retry and sample closeout progression\n\n`examples-full-consumer-fourth` is accepted: **244 consumer bodies compiled with zero warnings**,\nwith exact source/compiler/output evidence and 26 preserved mutable files. Acceptance receipt SHA-256:\n`e044ba23cd4a0a55caa6cf0679716c6aba98c15f82adc292e05361bdf186c357`.\nThe nine remaining compile-only test contexts are now running serially for 56 prepared bodies;\nexecution stops on the first failed context. No example or injected test assembly is executed.\n\nThe fourth full-consumer attempt is now running with independently accepted profile\n`3e40cb440ddd872de8bfba3ae3c0e45166ff5dbcb3a44aad890b968c97885228`. The third attempt's 21\ndiagnostics were traced to generated contexts; its 11 prefix/signature corrections preserve all\naccepted bodies and 56 test preparations. All three earlier failed attempts remain retained. No\nfull-consumer acceptance is implied until the actual compiler/capture/output checks return.\n\nThe full consumer's second attempt passed the earlier restore blocker and reached Csc, then failed\non invalid/duplicate imports in generated compilation contexts. Both attempts remain preserved under\ntheir original labels. The validation owner is tracing the complete diagnostic set and correcting\nwrapper inputs; accepted documentation bodies and executable product code remain unchanged. The\nfresh restore-fixed profile `54170dee…` and its independent review are retained as that attempt's inputs.\n\nAstra has now read all **983 original proposed selections**, including every boundary packet, and has\nbegun recording the expansion/replacement reads. This is not 983 final clean credits: administrative,\nhistorical, unresolved-source and edited overlaps retain zero-credit dispositions. The exact PRF\npassage in WebAuthn Level3 §10.1.4 was read; its client requirement and the SDK's limitation remain\ndistinct. The queued WebAuthn test-oracle patch remains outside primary during the compile reservation.\nAn additional OpenPGP advisory-UIF logging qualification and a udev receive-frequency clarification\nare being handled as bounded isolated documentation corrections.\n\nThe deferred handoff is being reconciled with all accepted editor batches and sampling observations.\nSource-only missing deterministic certificate disposal and known pre-try CLI secret cleanup remain\nengineering findings; no permanent-leak or new physical-failure claim is made.\n\n**Core Pass 1 remains active; publication is pending.** All main documentation batches have passed\nindependent content/citation review and are integrated. The current accepted-product map contains\n361 paths, including reviewed sampling corrections. Original and successor patches/reviews remain\npreserved in `editing/`; `editing/integration/current-products.json` identifies the current bytes.\n\n- All eight Core families and nine boundary packets reconcile 14,044 source dispositions, with\n  historical/context and B4 API-snapshot qualifications retained.\n- The hardware-free unit run passed 4,442 executions across 13 projects, five existing skips and zero\n  warnings. Core's clean build, documentation QA and architecture checks have passed at their retained\n  integration checkpoints; later comment-only transfers still require the final combined checks.\n- The accepted A/C example pilot compiled 17 bodies with zero warnings and bound source/compiler/output\n  evidence. No example was executed. Remaining accepted examples are being prepared in the same pattern.\n- Astra has read the original A/B1/B2/B3 selections (517 units). Verdicts, misses and exclusions are in\n  `sampling/coordinator/`; expanded and remaining selections are still pending. Read counts are not final\n  clean-credit counts. The reviewed A/lifecycle and Linux wake/factory corrections are integrated; the\n  sampled IOKit seam description is receiving a bounded correction.\n- Three accepted toolchain-comment edits change recorded validator inputs. A fresh profile using the\n  existing binder/checker is being prepared, preserving prior source/output evidence. No new validation\n  framework or runtime implementation is authorized.\n\nFinish example compilation, the stratified sample, final combined validation/evidence reconciliation,\nthen publish Core Pass 1 with its deferred-findings handoff and stop. Windows readiness remains a future\nuser-provided handoff; PIV physical deferrals remain unchanged.\n\n## Preserved chronological phase history\n\n**Active: baseline inventory and inherited-finding preparation.** The user approved execution;\nthe prerequisite upstream integration is complete and published as\n`fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef`. The actual audit checkout has been fast-forwarded to that\nverified GitHub checkpoint and contains both pinned parent histories.\n\n## Initial state\n\n- Primary tracked/index state was clean after the fast-forward; four original untracked files remain.\n- All 5,366 earlier frozen artifacts, 114 prior PIV integration files and four original user files\n  passed preservation checks. All 8,325 new frozen integration records materialized byte-identically.\n- Integration code/native and compiler qualification remains scoped in the external Core handoff.\n  It supplies a tested baseline, not completed whole-Core documentation coverage or device qualification.\n- Whole-Core semantic counts, new finding IDs and review coverage are pending the fresh inventory.\n  The integration's 515 Core files / 498 C# paths and 1,442 API entries are orientation counts.\n- Detailed investigation/editing/reviews belong to fresh Sol 6.1 owners. Astra coordinates, samples,\n  validates and publishes. No new Core audit product edit or device operation has run yet.\n\n## Late input\n\nWindows CCID/HID concurrency work is in progress elsewhere. The user will provide its readiness\nhandoff; current work continues. PIV physical tests remain deferred, and any new attended Core work\nwill be coordinated explicitly.\n\n## Active assignments\n\n- Inventory/public-surface and dispatch map: fresh Sol\n  `ses_e335b7c3cffev6VY5asy7Nw5z6`, owning `inventory/`, `coverage.json`, `inventory.md` and\n  `dispatch-map.md`. Structural inventory is distinct from completed semantic investigation.\n- Inherited finding/dependency registry: fresh Sol `ses_e335addb6ffeFoitbWHommS5Ns`, owning\n  `inherited-findings/` and `inherited-findings.md`. It preserves source-run/ID provenance and\n  re-baselines current paths, evidence and reopening triggers without claiming new hardware outcomes.\n\nBoth assignments are record-only. No worker may build, run devices, edit product code or alter frozen\nintegration/app audits. Detailed family investigation follows the reconciled ownership map.\n\nStartup records and documentation QA were committed and pushed as\n`d9cf31a17c7580ab580917ce201c4855c3cf89b4`; local/GitHub identity matched. The source baseline remains\n`fe342fb0…`. QA passed 74 active documents and ten package pages with zero warnings.\n\nA third fresh Sol, `ses_e3356e18affeAvxcDVoh94MpC6`, owns `validation/` and\n`validation-preparation.md`: compact run-owned logging, preservation and source/API checker preparation.\nIt has no build/device permission and will preserve frozen integration tools rather than writing new\nlogs into those historical directories. Its tooling is separate from the inventory owner's optional\ninventory helper.\n\n## Inherited registry milestone\n\nThe registry owner completed 100 run-qualified provenance rows (95 numbered identities and five\nexplicit historical unkeyed observations), grouped into 70 nonadditive questions/dependencies. The\n21 PGP-DEP documentation labels remain separate. Records-only verification checked 125 unique source\nhashes and 133 reopening targets. All nine boundary packets are defined but unexecuted.\n\nThese are initial source/history dispositions for the family reviewers, not accepted bug counts or\nnew hardware results. Fifteen exact-scope source-resolution rows, the separately scoped OATH reset\nresolution, changed native/discovery behavior and remaining interpretation/ownership questions retain\ntheir original evidence and limits. The old serial-9681620 failure remains unexplained; serial 125's\nSCP 6A88 responses remain pre-RESET observations. No new Core finding IDs were allocated.\n\nThe inventory owner received the registry for inclusion in the family dispatch map. Detailed\nfull-unit/assertion investigation and independent boundary acceptance remain pending.\n\n## Validation foundation milestone\n\nThe validation preparer completed run-owned logger/preservation/record adapters and the prepared\n`Audit20261111.DocCheck` Roslyn host. Static checks found 1,608 source/document paths unchanged in\nGit-clean form; 57 raw differences are checkout newline differences. Protected artifacts and nine\nnon-text identities are preserved, 23 static negative boundaries passed, and canonical test selectors\nremain unambiguous. No current C/C++ source lane exists outside archives; native C# remains in scope.\n\nFresh Sol `ses_e3348c546ffeV4wzLgGulR1Qlg` is independently reviewing the foundation. Actual logger\nqualification, checker compilation and compiled selfcheck/token/API modes remain unexecuted until\nthat review and coordinator assignment. The inventory owner received the normalization and checker\ninformation to avoid duplicate tooling and false source-drift findings.\n\n## Inventory accepted for investigation dispatch\n\nThe structural inventory reconciles 515 Core files: 312 shipping and 186 test C# files, including\n57 native C# files. All 1,442 API snapshot entries map to source declaration-group candidates; 171\neffective-public declarations reduce to 160 families after combining partials. The former 159-family\nestimate omitted a public delegate. Precise compiler overload/generated-member binding remains a\nseparate `VALID-NOT-CHECKED` dimension.\n\nThe full scoped inventory contains 1,526 files and 25,728 disjoint partition records. Its 9,020\nsubstantive Core units remain unread. Astra releases exact packets A, B1 and C from `dispatch-map.md`\nfor full investigation; later B stages and all nine boundary packets retain their explicit queues.\nThis dispatch accepts structural ownership, not semantic correctness or completed audit coverage.\n\nFresh validation review accepted the logger adapter for separately assigned qualification and\nrequested R1: bind the executable checker DLL to reviewed source/configuration before accepting its\nresults. The preparer owns that bounded correction. Actual checker compilation and source-audit gates\nremain pending its acceptance; investigation can proceed independently.\n\n## First investigation wave active\n\n- **A — discovery/metadata/monitoring:** `ses_e3342fda9ffeWC046tWdZxWv5M`, exact packet A,\n  91 primary files / 16,728 lines plus its assigned shared ranges.\n- **B1 — portable connection lifetimes:** `ses_e334263c1ffec20I8VZgLtKD2K`, exact B1 packet,\n  49 primary files / 9,747 lines plus assigned shared ranges.\n- **C — crypto/credentials/utilities/logging:** `ses_e3341b842ffefefRDvxBZMe6nL`, exact packet C,\n  104 primary files / 17,050 lines plus assigned shared ranges. C also establishes the shared pinned\n  Python comparator context under `sources/python/`.\n\nAll three are fresh Sol investigators with exclusive result paths and no product-edit, build or\ndevice permission. Later B stages remain queued; the shared editor and nine boundary investigators\nare later assignments. Per-unit semantic status changes only on supported investigator return.\n\nThe accepted Core logger adapter passed actual disposable-Python qualification: nonzero/orphan,\nretention and receipt failures were captured with quiescent owned processes; atomic overwrite and\nfsync-failure behavior passed. Thirty-eight raw qualification records are retained. Historical parser\ntest totals remain historical input, not new SDK executions. Actual SDK-info capture reports\n10.0.404 / runtime 10.0.15. Checker compilation/results still await the R1 source-to-binary binding.\n\n## Investigation progression — November 12\n\n- **A complete for triage:** 91 primary files, all 376 shared IDs and 2,006 unit dispositions;\n  21 local candidate groups, with no accepted finding IDs or product changes.\n- **B1 complete for triage:** 49 primary files, 1,078 primary and 126 shared units; 1,104 clean,\n  99 candidate-associated and one platform-scope exclusion. Twelve local candidate groups and\n  portable ownership states are ready for later B stages.\n- **C continues:** its checkpoint read 95/104 primary files and 66/176 shared units. Astra explicitly\n  returned the nine remaining tests, shared units and source qualifications for completion. Its 20\n  candidate groups are provisional; the checkpoint is not a completed packet.\n- **B2 Linux active:** fresh Sol `ses_e332ea329ffeQpsTbRmUYtc194`, exact B2 packet, 63 primary files.\n- **B3 macOS active:** fresh Sol `ses_e332bf51cffe8m6Pn86rZ56Dq2`, exact B3 packet, 41 primary files.\n\nThe inventory owner corrected stale dispatch prose from A/C shared counts 374/174 to **376/176**.\nJSON IDs, source populations and ownership were already correct and remain unchanged. The correction\nand exact added caller units are retained in `inventory/corrections/shared-count.md`.\n\nR1's checker binding passed independent review. Its first actual build then failed in the post-Csc\ncapture hook, which reported missing/unsupported command-line arguments. No checker selfcheck/token/\nAPI result or successful seal is claimed. The preparer is diagnosing the captured invocation shape\nand will preserve the failed attempt before a bounded correction and fresh build. Investigation remains\nindependent of that tooling gate; source and product files remain unchanged.\n\nThe checker-hook diagnosis established an empty argument file caused by `CallTarget` lookup scope;\n`ProvideCommandLineArgs` and the SDK output-item name were already correct. The bounded correction\nuses `AfterTargets=\"CoreCompile\"`. Independent review accepted the new profile at\n`51b733852da256846483d805fe54be3f9a4b2bc77ff50a95ba3d3dedaaac02e2`; only the hook and its evidence\ndescription changed. The original failed attempt's 192 records and 19 unsealed job files remain\npreserved. Astra started `checker-bound-build-second`; a successful new seal and checker results\nare still required before this gate is accepted.\n\n## Platform progression and checker follow-up\n\n- **B2 complete for triage:** all 63 files, 1,148 primary plus 71 shared units; 1,187 clean,\n  31 candidate-associated and one historical exclusion. Six local candidate groups; no runtime or\n  device execution.\n- **B3 complete for triage:** all 41 files, 1,139 primary plus five shared units; 1,087 clean and\n  57 candidate-associated. Nine local candidate groups; published NativeShims source was inspected,\n  while installed-binary producer correspondence remains a separate gap.\n- **B4 Windows/support active:** `ses_e331a9380ffer22jAb1m8sXV1Z`, exact 106-file packet, using the\n  pinned source while retaining the user's later concurrency handoff.\n- **B5 session/framing active:** `ses_e3319d55affeT2ngF3HayZiKQJ`, exact 43-file packet, consuming\n  completed portable/platform ownership evidence. C remains the third active investigator.\n\nThe inventory owner is reconciling completed A/B1/B2/B3 results into a separate progress view,\npreserving original unread baseline records and separate review/validation statuses.\n\nThe second checker build reached the corrected late hook but failed a different membership check:\nan actual Csc file input was absent from the before-capture set. No successful seal or checker\nresult was accepted. The preparer is identifying the exact input/origin and retaining this second\nfailed attempt before a narrowly scoped correction; actual source investigations continue.\n\nCompleted A/B1/B2/B3 records are being checkpointed independently of the still-active investigators\nand validation work. Their original source bytes are protected by a run-local Git attribute rule.\nThe retained PC/SC Part 5 original PDF is registered by exact path, size, SHA-256 and source URL in\n`sources/primary-binaries.json`; it is citation evidence, distinct from generated runtime artifacts.\n\n## Crypto completion and final family release\n\nPacket C completed all 104 primary files and all 176 shared IDs: 1,562 final semantic dispositions,\n20 stable provisional concern groups, 207 substantive clean nominees and 85 candidate-associated\nunchanged paths for later editing/review. Eighteen inherited provenance rows / 13 nonadditive groups\nretain their original registry authority. Bounded normative/provider/generator-provenance gaps remain.\n\n**B6 APDU/SCP is active**, owned by fresh Sol `ses_e33107603ffecd1Qe5QFgzPgW3` on the exact 50-file\npacket. B4 and B5 are the other active investigators. The inventory owner is adding completed C to\nthe structural roll-up; incomplete or mutable returns remain uncredited.\n\nC's original SEC 2 and X.690 PDFs and ISO-8859-1 X.690 metadata page are registered by exact source\nidentity. The HTML's original encoding declaration is retained; it is encoded text, not an executable\nbinary. Original bytes are preserved rather than silently transcoded for archive validation.\n\n## Session completion and first boundary packet\n\nB5 completed all 43 files, 893 primary units and 39 shared units: 716 clean, 212 candidate-linked,\nfour explicit exclusions and zero unread. Its nine local candidate groups and 15 inherited provenance\nkeys are ready for B6 and the boundary reviewers. No runtime or device verification was performed.\n\nB4 returned an incomplete checkpoint (77/106 files; 1,462 outstanding/context-pending IDs) and was\nexplicitly sent back to finish. Its partial progress is not credited as a completed return.\n\nFresh Sol `ses_e3305b41fffe4nq6c2dNMG6QUL` owns the exact Management/Core boundary packet under\n`boundaries/Management/` and `boundary-Management.md`. It reviews actual caller/resource/metadata/\nrediscovery/cancellation contracts, with any B4/B6-dependent conclusion left explicit until those\nowners return. B4, B6 and this boundary are the three active source investigators.\n\nA separate records-only triage owner is preparing a provisional map of the five earlier completed\nfamilies. It assigns no accepted Core finding IDs or editing authority. The latest structural roll-up\ncredits 7,135 units across A/B1/B2/B3/C; B5 and later completions will be added by exact ID reconciliation.\n\n## Bound checker accepted\n\nThe third checker build passed with zero warnings. The late hook now observes Source Link after its\nSDK producer, and the argument parser retains the complete comma-containing embedded filename.\nBoth earlier failed attempts remain preserved. Astra verified the accepted profile, successful build,\n214 actual compiler arguments and 585 captured input/output identities, then accepted seal\n`4618133ddeccbc07b1b8ab583611775bd29e8f93b97a806c98b146d8ba1e3101`.\n\nBound selfcheck, source-token and API modes passed with matching original command receipts and\nbefore/after binding sidecars. The token guard compared **1,320 C# files** to `fe342fb0`, preserving\nexecutable structure, directives and import order; all **20 API snapshots** remain unchanged. These\nare preservation/tool checks, not new SDK test or semantic-audit completion claims.\n\n## Boundary and triage progression\n\nThe Management/Core static pass returned all 331 assigned units (204 clean, 127 candidate-context),\n55 candidate-file dispositions, nine inherited provenance rows and three local candidates. Its B4\nWindows and B6 SCP follow-ups remain mandatory, so the boundary is not yet closed independently.\n\nFresh Sol `ses_e32f872d8ffeNF6qGssDheSRKG` now owns `boundaries/Ctap2/` and `boundary-Ctap2.md`.\nB4, B6 and CTAP2 are the three active source investigators. B6's 48/50-file checkpoint was explicitly\nreturned for its two vector files, provenance checks and final per-unit refinement; no incomplete\npacket receives completion credit.\n\nThe provisional five-family triage maps 68 local candidates to 67 proposal groups, with no accepted\nIDs or editing release. New C and B1 owner addenda clarify final source authority while preserving\noriginal checkpoint/candidate bytes and the triage map's input hashes.\n\n## All family returns available; boundary queue advanced\n\nB6 completed all 50 files / 684 IDs, including both vector files: 278 clean, 137 candidate,\n267 finalized-context and two historical dispositions. No vector outputs were recomputed. Its 16\nlocal concerns and source-version qualifications remain provisional inputs for triage and review.\n\nB4 completed all 2,350 IDs with zero unread/context-pending outcomes. Its read scope is **105 full\nprimary-file reads plus one qualified support/type reconciliation of the whole API snapshot**, not\na claim that B4 semantically reviewed every other family's signature. Its ten local concerns,\nconditional PCI producer/header route and five external gaps remain explicit.\n\nManagement's B4 and B6 follow-ups are now source-reconciled, completing that boundary's pinned\nsource investigation. Independent review, implementation/hardware qualification and the user's new\nWindows delta remain open. CTAP2's B4/B6 follow-ups are also source-reconciled; its mandatory\nWebAuthn handoff remains open.\n\nThree boundary investigators are active:\n- Security Domain: `ses_e32e5600affexw699602ZAfc4M`.\n- OATH: `ses_e32ddb8bdffezxUBhleYJWKH3x`.\n- WebAuthn: `ses_e32dd3ac8ffejgNVAu7UVltiqp`.\n\nThe inventory owner is extending exact coverage accounting to all completed families and returned\nboundary units, keeping read depth and closure status separate. The triage owner is extending the\nledger-only proposal map to all Core families; accepted finding IDs and editing remain later gates.\nFour additional original USB/GlobalPlatform PDFs are registered without upgrading draft/final claims.\n\n## Reconciled source-investigation coverage\n\nThe completed eight families plus Management/CTAP2 returns reconcile **12,022 distinct assigned IDs**:\n10,319 primary and 1,703 shared. Core has **9,020/9,020 dispositions**, external scope has\n**3,002/5,024**, leaving **2,022 external units**. There are no missing, extra or overlapping IDs.\n\nThis is disposition coverage, with B4's qualified API-snapshot scope and historical/context outcomes\npreserved. It is not all-member compiler binding, independent review, editing completion or hardware\nqualification. CTAP2's mandatory WebAuthn follow-up remains open; active and unstarted boundaries\nreceive no partial credit. The original inventory and prior roll-ups remain preserved as history.\n\n## Source-supported editing released\n\nThe full-family map reconciles 103 local IDs into 102 provisional groups. Astra released its\nsource-supported documentation facets for fresh, isolated Core editing, with policy/implementation,\nunrun-experiment, qualification and caller-boundary facets still explicit. See\n`triage/editing-release.md`. Initial A/C editors will own disjoint primary source/test documentation;\nthe primary source remains unchanged while boundary investigators finish.\n\nThe user clarified the stopping point: finish and publish Core Pass 1 with its deferred-finding\nhandoff, then stop. No separate Pass-2 planning or implementation work will start in this cycle.\n\n## Fresh Core editing active\n\n- Discovery/metadata/monitoring editor `ses_e32ceb84effev4y7oOf5POD6dm` owns packet-A primary Core\n  C# documentation in `/home/rupicola/Code/y/yubikit-core-docs-edit-discovery`.\n- Crypto/credentials/utilities editor `ses_e32ce437cffej5lyXcHVdxiKHc` owns packet-C primary Core\n  C# documentation in `/home/rupicola/Code/y/yubikit-core-docs-edit-crypto`.\n\nBoth fresh editors start from record checkpoint `da66f5d…`, whose product source matches `fe342fb0`.\nTheir file sets are disjoint; shared narratives, applet documentation and the primary checkout remain\noutside their edit scope. They preserve executable code/assertions/APIs and return exact patches and\ncandidate dispositions for independent review before integration.\n\nOATH's boundary source pass completed all 239 assigned units and preserved its historical resolutions\nand SCP/device gaps. Security Domain is also source-complete. YubiOTP, WebAuthn and YubiHSM Auth\n(`ses_e32cdc859ffeM4vkgkPIAA3mPo`) are the active boundary investigations; OpenPGP and PIV remain queued.\n\n## WebAuthn and YubiOTP returns\n\nEditing-release checkpoint `da66f5d01ba594993974ddd26723e8c300c0a454` is pushed and its remote\nidentity verified. The user reiterated the focus on completing Core Pass 1 and the existing stopping point.\n\nWebAuthn returned 265 assigned units, 12 provisional concerns and 31 inherited keys. The CTAP2 owner\nis reconciling its named WebAuthn dependency in an additive follow-up; that follow-up remains pending.\nYubiOTP returned 324 assigned units (269 clean, 55 candidate), nine local concerns and 62 disposition\npaths. Its report explicitly records the 61-primary-path discrepancy for final accounting.\n\nOpenPGP/Core is now assigned to `ses_e32c87b35ffeLssgQMT1XVzTJf`, owning only its boundary records.\nThe other source assignments are YubiHSM Auth and CTAP2's bounded follow-up. PIV remains queued.\nThe existing discovery and crypto editors continue in their isolated worktrees. These source returns\ndo not complete independent content review, documentation editing or runtime qualification.\n\n## Final boundary dispatched; remaining Core C# editing active\n\nCTAP2's WebAuthn follow-up returned source-reconciled with qualifications. All its named B4/B6/\nWebAuthn source dependencies have dispositions; independent review and the preserved recovery,\ndisclosure, runtime and future Windows-delta questions remain open.\n\nPIV, the final queued boundary, is assigned to `ses_e32c65dcfffewTznVh2rvAJz8v`. OpenPGP and\nYubiHSM Auth are the other active source investigators. PIV's physical deferrals remain in force.\n\nTwo more isolated editors cover the remaining primary Core C# documentation: B1–B4 transports\n(`ses_e32c5d493ffe1DFjUNaIkhXiDe`) and B5–B6 protocols (`ses_e32c5867effeFBPTcF9rJ8dRnQ`). Their\nexact worktrees and ownership are recorded in `triage/editing-release.md`. Existing A/C editors\ncontinue their disjoint assignments. All edits require independent review and preservation checks.\n\n## Discovery edits returned; shared guide editing active\n\nThe discovery editor returned 36 edited and 54 retained Core C# paths, covering all 21 candidates and\nthree current example bodies. The uncommitted patch remains in its isolated worktree. Fresh reviewer\n`ses_e32c3943cffepFxv8SAczMQUSz` owns independent content/citation review; integration is pending.\n\nSHARED editor `ses_e32c2d340ffekCDq2zeCLqbxMJ` now owns the explicit active Core/shared Markdown scope\nin `/home/rupicola/Code/y/yubikit-core-docs-edit-guides`. It consumes source-supported family findings\nand completed editor/boundary recommendations. Other editors continue their disjoint C# work.\n\n## Crypto edits returned for review\n\nThe C editor returned 54 edited and 50 retained primary C# paths, with all 20 candidates and 144\ncandidate/path decisions recorded. Sixteen active XML examples/fragments and 22 historical exclusions\nhave exact classifications. C019 remains held; C020 remains referred to B6/shared/applet ownership.\n\nFresh reviewer `ses_e32c0b707ffeC4tyJpmukdKivj` owns the independent content/citation review in the\ncrypto worktree. The SHARED editor received its completed guide recommendations. Both A and C edit\nbatches remain uncommitted and unintegrated pending review and coordinator preservation checks.\n\n## HSM return and boundary editing release\n\nYubiHSM Auth returned all 160 units across 53 files: 79 clean, eight candidate and 73 context. Seven\nlocal concerns and 15 inherited keys retain their qualifications. The preliminary retry-message\nmismatch was retracted because helper and test agree; HSM-IMP-008 remains an applet/profile question.\nOpenPGP and PIV are the remaining source investigations.\n\nFresh editors now own completed boundary documentation: Ctap2/WebAuthn\n(`ses_e32be5944ffefeOZlCfKBaj92v`) and Management/SD/OATH/OTP/HSM\n(`ses_e32bdec56ffeqNnv1B5IIoPmkT`). Exact isolated worktrees and path restrictions are in the editing\nrelease. Core/shared files stay with their existing owners.\n\nDiscovery review requires two bounded corrections: remove unsupported one-scan convergence promises\nand narrow a retained topology-test comment to the SDK's null resolver. The editor is verifying and\ncorrecting those claims in a successor revision, preserving the first patch and review. The other\n34 edited paths and 12 candidate-associated retained paths received content acceptance at their hashes.\n\nCrypto review requires one documentation correction, C-REVIEW-001: qualify AES local-copy cleanup\nbecause CBC key/IV copies are allocated before entry to `try`. Astra verified both control flows;\nthe editor is preparing a bounded successor revision. The allocation-failure runtime concern remains\ndeferred. C019/C020 dispositions and the final BER/supplied-Q/AsnWriter qualifications were supported.\n\n## Corrected discovery and protocol reviews; OpenPGP return\n\nDiscovery revision 2 contains a full 37-file transfer patch with the three R1/R2 comment corrections.\nOriginal editor/reviewer records and the other accepted hashes are preserved. Its focused re-review\nis underway with the original independent reviewer.\n\nThe protocol editor returned 56 edited, 23 retained and 12 held C# paths. Fresh reviewer\n`ses_e32ba5167ffe5tH4IIvbI6idOa` owns its independent content/citation review. SHARED received the\ncompleted protocol recommendations.\n\nOpenPGP returned all 328 units and 93 paths with eight local proposals and preserved inherited\nengineering/documentation identities. Editor `ses_e32b9574dffeX8rKjOrBYJOEav` now owns its bounded\ndocumentation corrections in the explicitly recorded isolated worktree. PIV is the only remaining\nsource investigation; its physical deferrals remain unchanged.\n\n## Discovery successor accepted\n\nFocused independent review passed discovery revision 2 at patch SHA-256\n`028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228`: all 37 edited files are\ncontent-accepted with no further corrections required. Astra verified that exact patch applies cleanly\nto the primary checkout and that primary `src/` still matches `fe342fb0`. Transfer waits for the last\npinned PIV source read; final bound preservation, compiler/cref and example checks remain pending.\n\nCrypto revision 2 corrects the AES cleanup scope and preserves all other 103 product identities.\nIts original independent reviewer is checking the bounded successor; acceptance remains pending.\n\nExternal commentary editor `ses_e32b75d32ffe5qNAM7mKRvkLx9` now owns the remaining explicit shared\nCLI/test/verification/benchmark `.cs`/`.md` scope in an isolated worktree. Existing Core, applet and\nguide ownership is excluded. This completes editing assignment coverage for the known active surfaces;\nPIV documentation release still waits for its source return.\n\n## Accepted crypto successor and additional reviews\n\nCrypto revision 2 passed focused independent review at full-patch SHA-256\n`159a59af1d631f1199e60510f0f85319c3ff58230c168d2a842058096d7b2047`. Astra verified clean patch\napplicability to primary without modifying source. Discovery and crypto are ready for transfer after\nPIV's pinned read, followed by final compiler/preservation/example validation.\n\nThe transport editor returned 62 edited, 135 retained and 16 held C# paths. Fresh reviewer\n`ses_e32b6d0d1ffeYESAuTlotgwEdA` owns its content/citation review. The FIDO boundary editor returned\n14 edited product files, 35 candidate decisions and 47 unchanged fenced bodies; reviewer\n`ses_e32b67871ffeRgyTkAh16dfOTm` owns that review. Their completed external/shared referrals were\npassed to the existing guide and external commentary owners.\n\n## All boundary source passes returned; first edits integrated\n\nPIV returned all 513 units across 121 files, six local proposals and preserved historical findings.\nAll nine boundary source investigations and named CTAP/Management follow-ups have now returned.\nThe PGP/PIV editor received the final PIV documentation scope; physical deferrals remain unchanged.\n\nAstra transferred the exact accepted discovery/crypto successor patches: 91 Core C# files and 48\nbyte-preserved editor/review records. `editing/integration/accepted-A-C.json` records the transfer.\nBound token verification passed all 1,320 C# files and all 20 API snapshots matched. The Core library,\nCore integration-test project and Core unit-test project then compiled cleanly with zero warnings.\nNo test or device operation was executed by that build. Full examples and final combined validation\nremain pending later edits.\n\nProtocol review requires four bounded corrections (GP locators/variant roles, null-firmware test\nadmission, selected-security-level conditions, and 64-byte agreement versus 80-byte KDF output).\nFIDO review requires correcting a PIN-peer validation overclaim and two token-acceptance comments.\nTheir original editors are verifying/correcting these in successor revisions. Shared-guide review\nis active with `ses_e32b230ccffeC5HPEWU31O48Oy` and has received the relevant cross-owner limits.\n\nThe existing coverage and triage owners are reconciling all final source returns and the deferred\nfinding handoff. They preserve original IDs, retractions, qualified read depth and pending edit/review\nstates; this is closeout accounting, not a separate implementation plan.\n\nProtocol revision 2 corrects all four review items in eight comment-only files, yielding a full\n57-file edit patch. Its original independent reviewer is performing focused re-review. Transport\nreview found three bounded wording corrections (pre-open IOKit queries, Windows metadata fallback,\nand listener cleanup attempts); that editor is verifying and correcting them in a successor batch.\n\n## Core C# editing integrated; remaining document reviews\n\nAll four Core C# batches have passed independent content/citation review and transferred byte-exactly:\nA 37, C 54, protocols 57 and transports 62 changed files, totaling **210 Core C# paths**. The accepted\n15-path FIDO boundary batch is also integrated. Each transfer retains original and successor reviews,\npatches and identities. Combined bound token/API checks and the next clean Core build are running.\n\nAll 14,044 source IDs (9,020 Core / 5,024 external) have exact final dispositions, with zero missing,\nextra or overlapping IDs. This keeps qualified/context/history outcomes separate from clean sampling.\nYubiOTP's 61 selected paths / 62 dispositions discrepancy is resolved as an extra directive-only API\nsnapshot with no additional semantic unit.\n\nShared-guide review requires six bounded corrections, including outdated API examples, incremental\ngroup acquisition, PIN-peer validation limits, late logging-provider lifetime, CBOR-byte conditions\nand example classification. Its editor is preparing a successor. Five-applet review requires corrected\nGP citation ranges and two SD reset-attempt comments; its editor is likewise preparing a successor.\nOpenPGP/PIV edits are complete and under independent review with `ses_e32ad058dffe8hrStIBfAS5Y55`.\n\nThe external editor is completing the explicitly assigned primary verification/benchmark commentary\nand reconciling comment-only referrals after its initial shared-ledger batch. Example compilation\npreparation now uses the accepted integrated batches; the original qualified checker/logger is reused.\n\nThe combined Core edit checks passed: all 1,320 C# executable structures/imports/directives and all\n20 API snapshots match the source baseline. The clean build of Core and both Core test projects\npassed with zero warnings after all 210 Core C# documentation edits were integrated. This build\nexecuted no tests or device operations; final examples, remaining documentation and publication gates\nare still pending.\n\n## Final handoff draft and guide/example progression\n\nThe final source-finding draft reconciles 185 original candidates (103 Core / 82 boundary), all\n14,044 unit IDs and 859 associated paths. It preserves inherited resolutions, retractions and\nqualifications, and remains explicitly pending final edit/review reconciliation and publication.\n\nShared-guide revision 2 has corrected the six required items and is in focused independent review.\nOpenPGP/PIV review returned bounded reset/member-name/example-inventory and cleanup-scope corrections\nto their editor. PIV documentation example setup may be minimally moved inside its protective scope;\nany changed fenced body receives fresh identity and compilation classification.\n\nThe accepted A/C example pilot is prepared (17 bodies in typed compile contexts); its narrow readiness\nreview is active before coordinator compilation. The existing record checker's inability to read the\nregistered B4/B6 authority schemas is a demonstrated final-freeze blocker. A bounded additive schema\ncorrection is being prepared separately; it changes no qualified checker/logger or example participant.\n"
+  },
+  "ordinary_clean_build_pack": {
+    "command": {
+      "receipt": {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "pack",
+          "--clean",
+          "--include-docs",
+          "--package-version",
+          "2.0.0-alpha.2"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T05:34:15.826327+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [
+          "build",
+          "pack"
+        ],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/build-pack-final",
+        "qualification_faults": [],
+        "exit_code": 0,
+        "status": "passed",
+        "errors": [],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3782402,
+          "sid": 3782402,
+          "leader_start_ticks": 83944567,
+          "before": {
+            "members": [
+              {
+                "pid": 3782530,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782531,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782532,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782533,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782534,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782535,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782536,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782538,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944634
+              },
+              {
+                "pid": 3782575,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782576,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782580,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782582,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782585,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782588,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782591,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782592,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782594,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782595,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3782598,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944635
+              },
+              {
+                "pid": 3783140,
+                "state": "S",
+                "ppid": 3782375,
+                "pgid": 3782402,
+                "sid": 3782402,
+                "start_ticks": 83944998
+              }
+            ],
+            "escaped": []
+          },
+          "signals": [
+            {
+              "signal": "SIGTERM",
+              "proven_members": [
+                {
+                  "pid": 3782530,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782531,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782532,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782533,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782534,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782535,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782536,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782538,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944634
+                },
+                {
+                  "pid": 3782575,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782576,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782580,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782582,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782585,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782588,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782591,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782592,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782594,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782595,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3782598,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944635
+                },
+                {
+                  "pid": 3783140,
+                  "state": "S",
+                  "ppid": 3782375,
+                  "pgid": 3782402,
+                  "sid": 3782402,
+                  "start_ticks": 83944998
+                }
+              ]
+            }
+          ],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": {
+          "targets": [
+            "test-infrastructure-qa",
+            "native-aot-contract-qa",
+            "build",
+            "pack"
+          ],
+          "projects": 0,
+          "executed": 0,
+          "skipped": 0,
+          "failed": 0,
+          "warnings": 0
+        },
+        "retained": [
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/01-clean.log",
+              "bytes": 646889,
+              "sha256": "a4e25516bb6c0d8a87a210f314a2fcb721874411aba04a19099cc1c059f4c747"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/01-clean.log",
+              "bytes": 646889,
+              "sha256": "a4e25516bb6c0d8a87a210f314a2fcb721874411aba04a19099cc1c059f4c747"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/02-build.log",
+              "bytes": 8147,
+              "sha256": "f74806233c2936b81d6373437984dbaabec17d162f9603a20acfe315c605d62f"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/02-build.log",
+              "bytes": 8147,
+              "sha256": "f74806233c2936b81d6373437984dbaabec17d162f9603a20acfe315c605d62f"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/03-pack-Core.log",
+              "bytes": 435,
+              "sha256": "fedfbcd167e01b6aff1e5cd507b8d18edeeedc29fd6e707683ed60f0624f2296"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/03-pack-Core.log",
+              "bytes": 435,
+              "sha256": "fedfbcd167e01b6aff1e5cd507b8d18edeeedc29fd6e707683ed60f0624f2296"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/04-pack-Ctap2.log",
+              "bytes": 439,
+              "sha256": "4af2779c039a3e70f34fab88fb171e58ddd3c756154af19a66410b0b473d825a"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/04-pack-Ctap2.log",
+              "bytes": 439,
+              "sha256": "4af2779c039a3e70f34fab88fb171e58ddd3c756154af19a66410b0b473d825a"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/05-pack-Management.log",
+              "bytes": 459,
+              "sha256": "a6ab16c550a937c934ee1498d432db60f58083ccc52b84d35bfcfdb1b465c42c"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/05-pack-Management.log",
+              "bytes": 459,
+              "sha256": "a6ab16c550a937c934ee1498d432db60f58083ccc52b84d35bfcfdb1b465c42c"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/06-pack-Oath.log",
+              "bytes": 435,
+              "sha256": "1b4575ccb94226905880513bd64fb1cccd426245e1189d30552d8c52d7cecb73"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/06-pack-Oath.log",
+              "bytes": 435,
+              "sha256": "1b4575ccb94226905880513bd64fb1cccd426245e1189d30552d8c52d7cecb73"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/07-pack-OpenPgp.log",
+              "bytes": 447,
+              "sha256": "80130c24dac0dc36282696766f137856918364b7ef858aaeb1b30212a39025e6"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/07-pack-OpenPgp.log",
+              "bytes": 447,
+              "sha256": "80130c24dac0dc36282696766f137856918364b7ef858aaeb1b30212a39025e6"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/08-pack-Piv.log",
+              "bytes": 431,
+              "sha256": "d8ed8b7b16220636df64035c807a58051ae1224dd2ea51cd56eef70019efbec1"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/08-pack-Piv.log",
+              "bytes": 431,
+              "sha256": "d8ed8b7b16220636df64035c807a58051ae1224dd2ea51cd56eef70019efbec1"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/09-pack-SecurityDomain.log",
+              "bytes": 475,
+              "sha256": "51d87a49de830c016183f1bb88a75c4b0cbad1bcb26288a3a4162cd4a943df02"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/09-pack-SecurityDomain.log",
+              "bytes": 475,
+              "sha256": "51d87a49de830c016183f1bb88a75c4b0cbad1bcb26288a3a4162cd4a943df02"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/10-pack-WebAuthn.log",
+              "bytes": 451,
+              "sha256": "de0fc5cb72a155725c85be64c666143b63fc6e793bfd3197ffa3d158e6818eed"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/10-pack-WebAuthn.log",
+              "bytes": 451,
+              "sha256": "de0fc5cb72a155725c85be64c666143b63fc6e793bfd3197ffa3d158e6818eed"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/11-pack-YubiHsm.log",
+              "bytes": 447,
+              "sha256": "326e045c544b24b85d95ec9d8913863b81279dfd18ca41217685c575e142d7ff"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/11-pack-YubiHsm.log",
+              "bytes": 447,
+              "sha256": "326e045c544b24b85d95ec9d8913863b81279dfd18ca41217685c575e142d7ff"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/12-pack-YubiOtp.log",
+              "bytes": 447,
+              "sha256": "288f4f12bbc63d75dbf2e6113a9356ff1fdd80a01b2ee7c4ff0a42276f86fd08"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/12-pack-YubiOtp.log",
+              "bytes": 447,
+              "sha256": "288f4f12bbc63d75dbf2e6113a9356ff1fdd80a01b2ee7c4ff0a42276f86fd08"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/result.json",
+              "bytes": 851,
+              "sha256": "007c043ce2232a8e3d34a95d6f730bb9c6d4569d5814408562c38c58c2f1f85a"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/result.json",
+              "bytes": 851,
+              "sha256": "007c043ce2232a8e3d34a95d6f730bb9c6d4569d5814408562c38c58c2f1f85a"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/result.txt",
+              "bytes": 501,
+              "sha256": "fd5235bdc77d8ce26af356b10706a65c52c84e515c0aef435023a7c5f9b1d061"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/result.txt",
+              "bytes": 501,
+              "sha256": "fd5235bdc77d8ce26af356b10706a65c52c84e515c0aef435023a7c5f9b1d061"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063416-179-build+pack/run.log",
+              "bytes": 4872,
+              "sha256": "ed842e54233b8313759d578c80a5dd4a9c6d711d72efee7e499ebb95f3624d51"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/toolchain/20261112-063416-179-build+pack/run.log",
+              "bytes": 4872,
+              "sha256": "ed842e54233b8313759d578c80a5dd4a9c6d711d72efee7e499ebb95f3624d51"
+            }
+          }
+        ],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/stdout.log",
+            "bytes": 4530,
+            "sha256": "0d2d3d8209cfc291a5ccf68a7978cc0647b4dd102b45ea3919a888b08b21d124"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/build-pack-final/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T05:34:44.006711+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "0d2d3d8209cfc291a5ccf68a7978cc0647b4dd102b45ea3919a888b08b21d124",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": [
+        "✓ Packed Piv",
+        "▶ RUN dotnet pack src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj -c Release --no-build -o /home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages /p:Version=2.0.0-alpha.2  ",
+        "  output: artifacts/toolchain/runs/20261112-063416-179-build+pack/09-pack-SecurityDomain.log",
+        "✓ Packed SecurityDomain",
+        "▶ RUN dotnet pack src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj -c Release --no-build -o /home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages /p:Version=2.0.0-alpha.2  ",
+        "  output: artifacts/toolchain/runs/20261112-063416-179-build+pack/10-pack-WebAuthn.log",
+        "✓ Packed WebAuthn",
+        "▶ RUN dotnet pack src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj -c Release --no-build -o /home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages /p:Version=2.0.0-alpha.2  ",
+        "  output: artifacts/toolchain/runs/20261112-063416-179-build+pack/11-pack-YubiHsm.log",
+        "✓ Packed YubiHsm",
+        "▶ RUN dotnet pack src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj -c Release --no-build -o /home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages /p:Version=2.0.0-alpha.2  ",
+        "  output: artifacts/toolchain/runs/20261112-063416-179-build+pack/12-pack-YubiOtp.log",
+        "✓ Packed YubiOtp",
+        "✓ Created 20 package(s) in /home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages",
+        "",
+        "============================================================",
+        "RESULT: PASSED  (dotnet toolchain.cs -- build pack --clean --include-docs --package-version 2.0.0-alpha.2)",
+        "Targets:",
+        "  ✓ test-infrastructure-qa     0.0s",
+        "  ✓ native-aot-contract-qa     0.0s",
+        "  ✓ build                     19.2s",
+        "  ✓ pack                       8.2s",
+        "Warnings: 0",
+        "Run log: artifacts/toolchain/runs/20261112-063416-179-build+pack/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)",
+        "============================================================"
+      ],
+      "stderr_tail": []
+    },
+    "result": {
+      "status": "passed",
+      "command": "dotnet toolchain.cs -- build pack --clean --include-docs --package-version 2.0.0-alpha.2",
+      "started": "2026-11-12T06:34:16.1796096+01:00",
+      "durationSeconds": 27.5,
+      "runDirectory": "artifacts/toolchain/runs/20261112-063416-179-build+pack",
+      "targets": [
+        {
+          "name": "test-infrastructure-qa",
+          "status": "passed",
+          "durationSeconds": 0,
+          "error": null
+        },
+        {
+          "name": "native-aot-contract-qa",
+          "status": "passed",
+          "durationSeconds": 0,
+          "error": null
+        },
+        {
+          "name": "build",
+          "status": "passed",
+          "durationSeconds": 19.2,
+          "error": null
+        },
+        {
+          "name": "pack",
+          "status": "passed",
+          "durationSeconds": 8.2,
+          "error": null
+        }
+      ],
+      "projects": [],
+      "warningCount": 0,
+      "warnings": [],
+      "next": []
+    },
+    "solution_projects": 42,
+    "warnings": 0,
+    "errors": 0
+  },
+  "normal_output_restoration": {
+    "record": "validation/normal-output-restoration.md",
+    "text": "# Ordinary output restoration before final SDK tests\n\nThe final `build-pack-final` invocation ran the ordinary Release clean solution build with zero\nwarnings. All ten compile-only test contexts are members of that42-project solution. Before starting\nSDK tests, Astra checked each current test DLL as bytes: the unique injected namespace marker\n`Audit20261111.DocExamples` was absent. It was present in that same context's preserved injected\nruntime DLL, providing a positive control for the check. No assembly was loaded or executed by this check.\n\n`DirectoryBuildTargetsPath`, `DocExamplesInjectionFiles`, `DocExamplesCapture` and\n`DocExamplesSelectedProject` were unset. The normal project files and their imports retain their\naccepted source identities; injection sources live outside those project trees.\n\n| Normal Release/net10.0 test DLL | SHA-256 at restoration check |\n| --- | --- |\n| Core.IntegrationTests | `5fa3a5205f78ef62bcf33b7b2dcf972a7ce2caa8a1367f517823ccd9e4fce039` |\n| Core.UnitTests | `7fe2ef471cd9c23adaafa9a3c205d797a137fbb360713c1a95085033a34bb806` |\n| Ctap2.IntegrationTests | `1a03acf8dc401dc6d4e3238f7cda2a3d4292f44b64bdd32d1f921878d5270907` |\n| Ctap2.UnitTests | `9f8dc3ec0a361a8162e9fa81ce679b5d76454c877c75a370ef50da88e3971284` |\n| Management.IntegrationTests | `a3878378e2cabe0d7edf8c6707fec5d5c772e576363922cce303c0f21b072031` |\n| Management.UnitTests | `d1e1cf9bf64d8210cc59ebb2b4a3e8da7f917f443b3e7288b257fbaee468bbce` |\n| Oath.IntegrationTests | `ba121a0ec06c6011a697ae38e2cc32489a4cc38895c1f2e7d83394aaceba8bd6` |\n| Piv.IntegrationTests | `655e89b44550f6ea617170006dbd6921c82b98abf1ba34a893af7d45fb5584b8` |\n| SecurityDomain.IntegrationTests | `0b40578dcf303ce4340fc8944f57d26c9dcee9710959224053fe49089719eb45` |\n| WebAuthn.IntegrationTests | `85a4decfa07f17860768fa6456690a349f5381ebbad853348022f718cf2b959f` |\n\nEach DLL is `bin/Release/net10.0/<project-stem>.dll` under the actual context's project directory.\nIts earlier injected counterpart is located through that context's accepted compilation receipt and\n`mutable-output-preservation.json`, not assumed to remain at its former live path. This proves the\nspecific restoration check before ordinary tests, not general binary equivalence or device behavior.\n",
+    "test_DLL_hashes_at_check": {
+      "Core.IntegrationTests": "5fa3a5205f78ef62bcf33b7b2dcf972a7ce2caa8a1367f517823ccd9e4fce039",
+      "Core.UnitTests": "7fe2ef471cd9c23adaafa9a3c205d797a137fbb360713c1a95085033a34bb806",
+      "Ctap2.IntegrationTests": "1a03acf8dc401dc6d4e3238f7cda2a3d4292f44b64bdd32d1f921878d5270907",
+      "Ctap2.UnitTests": "9f8dc3ec0a361a8162e9fa81ce679b5d76454c877c75a370ef50da88e3971284",
+      "Management.IntegrationTests": "a3878378e2cabe0d7edf8c6707fec5d5c772e576363922cce303c0f21b072031",
+      "Management.UnitTests": "d1e1cf9bf64d8210cc59ebb2b4a3e8da7f917f443b3e7288b257fbaee468bbce",
+      "Oath.IntegrationTests": "ba121a0ec06c6011a697ae38e2cc32489a4cc38895c1f2e7d83394aaceba8bd6",
+      "Piv.IntegrationTests": "655e89b44550f6ea617170006dbd6921c82b98abf1ba34a893af7d45fb5584b8",
+      "SecurityDomain.IntegrationTests": "0b40578dcf303ce4340fc8944f57d26c9dcee9710959224053fe49089719eb45",
+      "WebAuthn.IntegrationTests": "85a4decfa07f17860768fa6456690a349f5381ebbad853348022f718cf2b959f"
+    },
+    "injected_marker_absent": 10,
+    "preserved_positive_controls_present": 10,
+    "capture_overrides_unset_before_tests": true,
+    "scope": "Coordinator recorded byte checks before ordinary tests, not present-live-DLL equivalence or execution of injected assemblies; no new DLL load or execution by this reconciliation."
+  },
+  "final_SDK_units": {
+    "command": {
+      "receipt": {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "test",
+          "--filter",
+          "Category!=RequiresHardware&Category!=RequiresUserPresence"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T05:36:43.813194+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [
+          "test"
+        ],
+        "expected_projects": [
+          "test:Cli.Commands.UnitTests",
+          "test:Cli.Shared.UnitTests",
+          "test:Core.UnitTests",
+          "test:Ctap2.UnitTests",
+          "test:Management.UnitTests",
+          "test:Oath.UnitTests",
+          "test:OpenPgp.UnitTests",
+          "test:Piv.UnitTests",
+          "test:PublicApi.UnitTests",
+          "test:SecurityDomain.UnitTests",
+          "test:WebAuthn.UnitTests",
+          "test:YubiHsm.UnitTests",
+          "test:YubiOtp.UnitTests"
+        ],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/unit-tests-final-tree",
+        "qualification_faults": [],
+        "exit_code": 0,
+        "status": "passed",
+        "errors": [],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3784483,
+          "sid": 3784483,
+          "leader_start_ticks": 83959365,
+          "before": {
+            "members": [
+              {
+                "pid": 3784611,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784612,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784613,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784614,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784615,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784617,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784620,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784621,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959455
+              },
+              {
+                "pid": 3784798,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959539
+              },
+              {
+                "pid": 3784902,
+                "state": "S",
+                "ppid": 3784611,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83959654
+              },
+              {
+                "pid": 3787063,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83965601
+              },
+              {
+                "pid": 3787065,
+                "state": "S",
+                "ppid": 3784456,
+                "pgid": 3784483,
+                "sid": 3784483,
+                "start_ticks": 83965601
+              }
+            ],
+            "escaped": []
+          },
+          "signals": [
+            {
+              "signal": "SIGTERM",
+              "proven_members": [
+                {
+                  "pid": 3784611,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784612,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784613,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784614,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784615,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784617,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784620,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784621,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959455
+                },
+                {
+                  "pid": 3784798,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959539
+                },
+                {
+                  "pid": 3784902,
+                  "state": "S",
+                  "ppid": 3784611,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83959654
+                },
+                {
+                  "pid": 3787063,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83965601
+                },
+                {
+                  "pid": 3787065,
+                  "state": "S",
+                  "ppid": 3784456,
+                  "pgid": 3784483,
+                  "sid": 3784483,
+                  "start_ticks": 83965601
+                }
+              ]
+            }
+          ],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": {
+          "targets": [
+            "test-infrastructure-qa",
+            "test"
+          ],
+          "projects": 13,
+          "executed": 4442,
+          "skipped": 5,
+          "failed": 0,
+          "warnings": 0
+        },
+        "retained": [
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/01-test-Cli.Commands.UnitTests.log",
+              "bytes": 813,
+              "sha256": "678bf816c9ebd978d5c25586aec99d7828a33f67953a883a8b344620910994fe"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/01-test-Cli.Commands.UnitTests.log",
+              "bytes": 813,
+              "sha256": "678bf816c9ebd978d5c25586aec99d7828a33f67953a883a8b344620910994fe"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/02-test-Cli.Shared.UnitTests.log",
+              "bytes": 595,
+              "sha256": "ef7496b05a8c4add5c03cf21e5eb452c3940c6c4242b90c86e7e69afc82d6a28"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/02-test-Cli.Shared.UnitTests.log",
+              "bytes": 595,
+              "sha256": "ef7496b05a8c4add5c03cf21e5eb452c3940c6c4242b90c86e7e69afc82d6a28"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/03-test-Core.UnitTests.log",
+              "bytes": 4403,
+              "sha256": "73a1724e27e7a68a4fe203a64b99d12fe82c510f2e06b8498633dc46b0b1acc6"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/03-test-Core.UnitTests.log",
+              "bytes": 4403,
+              "sha256": "73a1724e27e7a68a4fe203a64b99d12fe82c510f2e06b8498633dc46b0b1acc6"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/04-test-Ctap2.UnitTests.log",
+              "bytes": 567,
+              "sha256": "c8e03ebdc028d5e12e205cd32c084c17ef7e14eb617758824d883d25b828511d"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/04-test-Ctap2.UnitTests.log",
+              "bytes": 567,
+              "sha256": "c8e03ebdc028d5e12e205cd32c084c17ef7e14eb617758824d883d25b828511d"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/05-test-Management.UnitTests.log",
+              "bytes": 595,
+              "sha256": "35c509b688b2b10f5e77e1f786e2578d8c6d33eeddf7f920b3a324b849e20fa8"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/05-test-Management.UnitTests.log",
+              "bytes": 595,
+              "sha256": "35c509b688b2b10f5e77e1f786e2578d8c6d33eeddf7f920b3a324b849e20fa8"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/06-test-Oath.UnitTests.log",
+              "bytes": 39309,
+              "sha256": "0b2ded339118badfb38d8e1a84634d603553708459872ecd0589059339e51673"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/06-test-Oath.UnitTests.log",
+              "bytes": 39309,
+              "sha256": "0b2ded339118badfb38d8e1a84634d603553708459872ecd0589059339e51673"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/07-test-OpenPgp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "d2491d4acd4938b990b1987c7d90ddae30185fde46c93cff14c110cfce8e8c10"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/07-test-OpenPgp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "d2491d4acd4938b990b1987c7d90ddae30185fde46c93cff14c110cfce8e8c10"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/08-test-Piv.UnitTests.log",
+              "bytes": 555,
+              "sha256": "e3714093fad5552b1c1fd50e143a4aa3d69ffdaaf0bfdc526fabd98575ace0b8"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/08-test-Piv.UnitTests.log",
+              "bytes": 555,
+              "sha256": "e3714093fad5552b1c1fd50e143a4aa3d69ffdaaf0bfdc526fabd98575ace0b8"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/09-test-PublicApi.UnitTests.log",
+              "bytes": 589,
+              "sha256": "9f466acf9327d56d7d8072ba2f123dafec7c986f6c6cd82e1b538910d649a685"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/09-test-PublicApi.UnitTests.log",
+              "bytes": 589,
+              "sha256": "9f466acf9327d56d7d8072ba2f123dafec7c986f6c6cd82e1b538910d649a685"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/10-test-SecurityDomain.UnitTests.log",
+              "bytes": 619,
+              "sha256": "84b716fcf6cfda0c39e2d598decae95718db971f78d7831e110f22de70db7cf8"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/10-test-SecurityDomain.UnitTests.log",
+              "bytes": 619,
+              "sha256": "84b716fcf6cfda0c39e2d598decae95718db971f78d7831e110f22de70db7cf8"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/11-test-WebAuthn.UnitTests.log",
+              "bytes": 585,
+              "sha256": "b6e7358afbc87b5bb3d69ac879369f28925801d7d82d59fd2eda9eb9b0b0b0c3"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/11-test-WebAuthn.UnitTests.log",
+              "bytes": 585,
+              "sha256": "b6e7358afbc87b5bb3d69ac879369f28925801d7d82d59fd2eda9eb9b0b0b0c3"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/12-test-YubiHsm.UnitTests.log",
+              "bytes": 577,
+              "sha256": "f3c2f4021630b25457e54849c646d3bccaec2f89a67b05af6663033607609ef6"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/12-test-YubiHsm.UnitTests.log",
+              "bytes": 577,
+              "sha256": "f3c2f4021630b25457e54849c646d3bccaec2f89a67b05af6663033607609ef6"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/13-test-YubiOtp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "986ea728c78f20d82727193133e1a1b48c4e9019bb8fd79f3be255ccc9e108a5"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/13-test-YubiOtp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "986ea728c78f20d82727193133e1a1b48c4e9019bb8fd79f3be255ccc9e108a5"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/result.json",
+              "bytes": 4877,
+              "sha256": "3ab9bc2bc4bb146cc6c9ce214687a09115f7e27f9c130fcbfaace788bcfe0008"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/result.json",
+              "bytes": 4877,
+              "sha256": "3ab9bc2bc4bb146cc6c9ce214687a09115f7e27f9c130fcbfaace788bcfe0008"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/result.txt",
+              "bytes": 1404,
+              "sha256": "7f5e0a395924b5b1f69af71b23d300ae5f1cc3226a44d7da87bc90d1a1e04c28"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/result.txt",
+              "bytes": 1404,
+              "sha256": "7f5e0a395924b5b1f69af71b23d300ae5f1cc3226a44d7da87bc90d1a1e04c28"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/run.log",
+              "bytes": 7265,
+              "sha256": "1c5dae19be5430141b03f6a928643c3668a0e3f38ac5cba6d7dbd3bd2ca1bedd"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/run.log",
+              "bytes": 7265,
+              "sha256": "1c5dae19be5430141b03f6a928643c3668a0e3f38ac5cba6d7dbd3bd2ca1bedd"
+            }
+          }
+        ],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/stdout.log",
+            "bytes": 6915,
+            "sha256": "096f8f15e4704e46e483ffddaaf186beb6d63681523d1dd51f2fa063c2040186"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T05:38:02.297836+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "096f8f15e4704e46e483ffddaaf186beb6d63681523d1dd51f2fa063c2040186",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": [
+        "✓ PASS (205 executed, 0 skipped)",
+        "",
+        "============================================================",
+        "RESULT: PASSED  (dotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence\")",
+        "Targets:",
+        "  ✓ test-infrastructure-qa     0.0s",
+        "  ✓ test                      77.7s",
+        "Projects (test):",
+        "  ✓ PASS      Cli.Commands.UnitTests    48 executed, 1 skipped",
+        "  ✓ PASS      Cli.Shared.UnitTests      78 executed, 0 skipped",
+        "  ✓ PASS      Core.UnitTests            2065 executed, 4 skipped",
+        "  ✓ PASS      Ctap2.UnitTests           495 executed, 0 skipped",
+        "  ✓ PASS      Management.UnitTests      96 executed, 0 skipped",
+        "  ✓ PASS      Oath.UnitTests            436 executed, 0 skipped",
+        "  ✓ PASS      OpenPgp.UnitTests         193 executed, 0 skipped",
+        "  ✓ PASS      Piv.UnitTests             289 executed, 0 skipped",
+        "  ✓ PASS      PublicApi.UnitTests       25 executed, 0 skipped",
+        "  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped",
+        "  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped",
+        "  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped",
+        "  ✓ PASS      YubiOtp.UnitTests         205 executed, 0 skipped",
+        "Totals: projects: 13 passed, 0 failed, 0 with no tests executed; tests: 4442 executed, 0 failed, 5 skipped",
+        "Warnings: 0",
+        "Run log: artifacts/toolchain/runs/20261112-063644-180-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)",
+        "============================================================"
+      ],
+      "stderr_tail": []
+    },
+    "result": {
+      "status": "passed",
+      "command": "dotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+      "started": "2026-11-12T06:36:44.1800089+01:00",
+      "durationSeconds": 77.8,
+      "runDirectory": "artifacts/toolchain/runs/20261112-063644-180-test",
+      "targets": [
+        {
+          "name": "test-infrastructure-qa",
+          "status": "passed",
+          "durationSeconds": 0,
+          "error": null
+        },
+        {
+          "name": "test",
+          "status": "passed",
+          "durationSeconds": 77.7,
+          "error": null
+        }
+      ],
+      "projects": [
+        {
+          "target": "test",
+          "project": "Cli.Commands.UnitTests",
+          "outcome": "passed",
+          "reason": "48 executed, 1 skipped",
+          "executed": 48,
+          "failed": 0,
+          "skipped": 1,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/01-test-Cli.Commands.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "Cli.Shared.UnitTests",
+          "outcome": "passed",
+          "reason": "78 executed, 0 skipped",
+          "executed": 78,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/02-test-Cli.Shared.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "Core.UnitTests",
+          "outcome": "passed",
+          "reason": "2065 executed, 4 skipped",
+          "executed": 2065,
+          "failed": 0,
+          "skipped": 4,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/03-test-Core.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "Ctap2.UnitTests",
+          "outcome": "passed",
+          "reason": "495 executed, 0 skipped",
+          "executed": 495,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/04-test-Ctap2.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "Management.UnitTests",
+          "outcome": "passed",
+          "reason": "96 executed, 0 skipped",
+          "executed": 96,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/05-test-Management.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "Oath.UnitTests",
+          "outcome": "passed",
+          "reason": "436 executed, 0 skipped",
+          "executed": 436,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/06-test-Oath.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "OpenPgp.UnitTests",
+          "outcome": "passed",
+          "reason": "193 executed, 0 skipped",
+          "executed": 193,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/07-test-OpenPgp.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "Piv.UnitTests",
+          "outcome": "passed",
+          "reason": "289 executed, 0 skipped",
+          "executed": 289,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/08-test-Piv.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "PublicApi.UnitTests",
+          "outcome": "passed",
+          "reason": "25 executed, 0 skipped",
+          "executed": 25,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/09-test-PublicApi.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "SecurityDomain.UnitTests",
+          "outcome": "passed",
+          "reason": "50 executed, 0 skipped",
+          "executed": 50,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/10-test-SecurityDomain.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "WebAuthn.UnitTests",
+          "outcome": "passed",
+          "reason": "371 executed, 0 skipped",
+          "executed": 371,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/11-test-WebAuthn.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "YubiHsm.UnitTests",
+          "outcome": "passed",
+          "reason": "91 executed, 0 skipped",
+          "executed": 91,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/12-test-YubiHsm.UnitTests.log"
+        },
+        {
+          "target": "test",
+          "project": "YubiOtp.UnitTests",
+          "outcome": "passed",
+          "reason": "205 executed, 0 skipped",
+          "executed": 205,
+          "failed": 0,
+          "skipped": 0,
+          "failedTests": [],
+          "log": "artifacts/toolchain/runs/20261112-063644-180-test/13-test-YubiOtp.UnitTests.log"
+        }
+      ],
+      "warningCount": 0,
+      "warnings": [],
+      "next": []
+    },
+    "executed": 4442,
+    "projects": 13,
+    "skipped": 5,
+    "failed": 0,
+    "warnings": 0
+  },
+  "docs_inclusive_packages": {
+    "record": "validation/final-packages.md",
+    "text": "# Final docs-inclusive package check\n\n`build-pack-final` completed the ordinary clean Release solution build and ten pack commands with\nzero warnings. The output directory contains20 packages because earlier versions were retained;\nthe exact requested version `2.0.0-alpha.2` produced the ten packages below.\n\nAstra opened every package as ZIP data without loading its assemblies: archive integrity passed,\nnuspec ID/version matched, packaged README bytes matched the current module `PACKAGE_README.md`,\nand `lib/net10.0` contained the expected DLL and parseable XML documentation with the correct assembly\nname and nonempty member set. All ten package bytes were copied and hash-verified under\n`/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/final-packages/` before further artifact cleanup.\n\nEach filename is `Yubico.YubiKit.<Module>.2.0.0-alpha.2.nupkg`.\n\n| Module | Bytes | XML members | SHA-256 |\n| --- | ---: | ---: | --- |\n| Core | 440230 | 1688 | `f77c0a72fac8ce1289c1d75f8b8104b81fcf993d221ae926622c91d562e37837` |\n| Ctap2 | 162788 | 779 | `f73a279c22863854712c0a74f5d94866a8299c4de2d17f9868c70ce4e9a491c8` |\n| Management | 27546 | 38 | `3fe89fabb5b242135ea567f5d092eeabbe94d9c7cef9e61da3fc069b08004bc3` |\n| Oath | 48515 | 128 | `5a9bcd824ff07714e350e0a0a6a198d8cf8eac10c30136f0fb321e0075d0ad94` |\n| OpenPgp | 80066 | 331 | `2685f74c6b23b676b1dae1751b719115611be4c58cd0c68adea099403193d606` |\n| Piv | 88753 | 340 | `6dedb1a9b6570528fc56b2882e1a4cb86a578ea1fdf8797f5dbd6ae24ad3dc4a` |\n| SecurityDomain | 36624 | 69 | `93253292b5e120e2b804ad1dc41fbd0387e4260fe251526a882abe6de7129b69` |\n| WebAuthn | 107269 | 429 | `957c9eae9b8d6a2130b15fc0451fcd2d9ea4b5459b278ef19e14adfc34005f6b` |\n| YubiHsm | 34460 | 78 | `da802a246470a83f4cb2e1339d16635e27d9c2c15a443e208a3aa11d65667a5d` |\n| YubiOtp | 43401 | 129 | `e3d336e6523896b642e43005545067c79f8109d7cd2408323fe0d2166c1a215d` |\n\nThis is local packaging/documentation evidence, not a package-registry publication, signing claim,\nprovider/native conformance result or device test.\n",
+    "exact_version": "2.0.0-alpha.2",
+    "exact_version_count": 10,
+    "directory_count_including_earlier_versions": 20,
+    "packages": [
+      {
+        "module": "Core",
+        "bytes": 440230,
+        "XML_members": 1688,
+        "sha256": "f77c0a72fac8ce1289c1d75f8b8104b81fcf993d221ae926622c91d562e37837"
+      },
+      {
+        "module": "Ctap2",
+        "bytes": 162788,
+        "XML_members": 779,
+        "sha256": "f73a279c22863854712c0a74f5d94866a8299c4de2d17f9868c70ce4e9a491c8"
+      },
+      {
+        "module": "Management",
+        "bytes": 27546,
+        "XML_members": 38,
+        "sha256": "3fe89fabb5b242135ea567f5d092eeabbe94d9c7cef9e61da3fc069b08004bc3"
+      },
+      {
+        "module": "Oath",
+        "bytes": 48515,
+        "XML_members": 128,
+        "sha256": "5a9bcd824ff07714e350e0a0a6a198d8cf8eac10c30136f0fb321e0075d0ad94"
+      },
+      {
+        "module": "OpenPgp",
+        "bytes": 80066,
+        "XML_members": 331,
+        "sha256": "2685f74c6b23b676b1dae1751b719115611be4c58cd0c68adea099403193d606"
+      },
+      {
+        "module": "Piv",
+        "bytes": 88753,
+        "XML_members": 340,
+        "sha256": "6dedb1a9b6570528fc56b2882e1a4cb86a578ea1fdf8797f5dbd6ae24ad3dc4a"
+      },
+      {
+        "module": "SecurityDomain",
+        "bytes": 36624,
+        "XML_members": 69,
+        "sha256": "93253292b5e120e2b804ad1dc41fbd0387e4260fe251526a882abe6de7129b69"
+      },
+      {
+        "module": "WebAuthn",
+        "bytes": 107269,
+        "XML_members": 429,
+        "sha256": "957c9eae9b8d6a2130b15fc0451fcd2d9ea4b5459b278ef19e14adfc34005f6b"
+      },
+      {
+        "module": "YubiHsm",
+        "bytes": 34460,
+        "XML_members": 78,
+        "sha256": "da802a246470a83f4cb2e1339d16635e27d9c2c15a443e208a3aa11d65667a5d"
+      },
+      {
+        "module": "YubiOtp",
+        "bytes": 43401,
+        "XML_members": 129,
+        "sha256": "e3d336e6523896b642e43005545067c79f8109d7cd2408323fe0d2166c1a215d"
+      }
+    ],
+    "evidence_scope": "Coordinator checked archive integrity/ID/version/current README bytes/DLL/XML and external hash-verified preservation. No new archive or assembly execution, package signing or registry publication claim here."
+  },
+  "compiler_owner_rollup": "validation/examples/full/closeout/acceptance.json",
+  "limit": "All actual verification gates are recorded at their qualified scopes. Failed historical formatter receipts and baseline holds remain explicit; fresh whole-campaign acceptance, freeze and publication remain pending."
+}

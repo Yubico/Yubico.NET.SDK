@@ -203,6 +203,20 @@ through read-only result memory, with no SDK cleanup guarantee for returned or i
 Decrypted large/credential blobs can also be sensitive.
 Clearing an application copy does not clear the SDK's original allocations.
 
+Await and serialize the complete ceremony before disposing its client or borrowed connection. The
+Core guard/drain covers a logical exchange, while probes, PIN/token acquisition, GetNext, extension
+outputs, and blob workflows can span several exchanges. Presence `Completed` classifies the CTAP
+exchange before typed decoding and extension/RP processing; it is not whole-ceremony or RP acceptance.
+Keep prompt services alive through actual callback completion and schedule disposal outside callbacks.
+
+Core ARKG helpers deliberately target `draft-bradleylundberg-cfrg-arkg-09` (July 7, 2025,
+Internet-Draft, intended Informational, expired January 8, 2026), rather than a final standard. Their
+context input provides domain separation, not a proof of injective key derivation. Selected point/handle
+fixtures and sibling implementation agreement establish narrower structural evidence; the original
+immutable Rust generator provenance remains unavailable. Provider/native copies and actual packaged
+exports have separate qualification gaps. These facts neither establish full draft conformance nor
+settle the WebAuthn actor, serializer, or result-disclosure policy.
+
 The PRF salt mapping belongs in WebAuthn, but correct domain separation alone does not establish
 conformance. [L3 REC §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
 requires the verified-use hmac-secret PRF and a UV override when necessary. The current processor

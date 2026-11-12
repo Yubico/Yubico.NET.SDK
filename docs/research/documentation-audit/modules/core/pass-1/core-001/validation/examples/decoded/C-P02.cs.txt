@@ -1,0 +1,1 @@
+    CryptographyProviders.RngCreator = RandomNumberGenerator.Create;

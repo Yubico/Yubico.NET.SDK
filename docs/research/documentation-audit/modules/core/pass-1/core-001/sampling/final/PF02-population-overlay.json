@@ -1,0 +1,893 @@
+{
+  "scope": "Both architecture prose/map paths, all assigned original units; exact patch-overlap only, not whole-file exclusion",
+  "original_units": [
+    {
+      "id": "core-001:unit:0fb8a0528e26d6d7",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "range_sha256": "da951b631b395c82f193a13727e4d9520713845ca61363523aead6eba3e5db0c",
+      "original_first_line": 114,
+      "original_last_line": 132,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 6282,
+        "end_character_exclusive_normalized": 7362,
+        "first_line": 114,
+        "last_line": 132,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 6527,
+        "end_character_exclusive_normalized": 7607,
+        "first_line": 117,
+        "last_line": 135,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:121e21153eb2da07",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "2f8389a96c16a6ef6ae20b548030a92034e9d31cb2557e5229867030611d9495",
+      "original_first_line": 407,
+      "original_last_line": 421,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 18667,
+            "end_character_exclusive": 18772,
+            "old_first_line": 418,
+            "old_line_count": 1,
+            "added_lines": 1,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 18667,
+            "end_character_exclusive": 18772,
+            "old_first_line": 418,
+            "old_line_count": 1,
+            "added_lines": 1,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population",
+        "accepted-current-exact-original-span-overlap",
+        "combined-AFTER-queued-exact-original-span-overlap",
+        "changed-range-or-exact-metadata-unavailable"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:32395b09503914f0",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "2363e4a9d1753f9949699a67802cb4d728f3cffce2fe5297b070ce5e9f8bec02",
+      "original_first_line": 422,
+      "original_last_line": 452,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 19341,
+        "end_character_exclusive_normalized": 20886,
+        "first_line": 426,
+        "last_line": 456,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 20349,
+        "end_character_exclusive_normalized": 21894,
+        "first_line": 436,
+        "last_line": 466,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:36cdb2d6882afeed",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "4f2e98b2a4e5a60d860fc71ddcd8b589aa3ae035226d2429b8cad2277160ffd9",
+      "original_first_line": 42,
+      "original_last_line": 86,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 2644,
+            "end_character_exclusive": 2733,
+            "old_first_line": 79,
+            "old_line_count": 1,
+            "added_lines": 2,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          },
+          {
+            "start_character": 2893,
+            "end_character_exclusive": 2982,
+            "old_first_line": 82,
+            "old_line_count": 1,
+            "added_lines": 1,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 2644,
+            "end_character_exclusive": 2733,
+            "old_first_line": 79,
+            "old_line_count": 1,
+            "added_lines": 2,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          },
+          {
+            "start_character": 2893,
+            "end_character_exclusive": 2982,
+            "old_first_line": 82,
+            "old_line_count": 1,
+            "added_lines": 1,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population",
+        "accepted-current-exact-original-span-overlap",
+        "combined-AFTER-queued-exact-original-span-overlap",
+        "changed-range-or-exact-metadata-unavailable"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:4353e889f8fe39ad",
+      "owner": "A",
+      "stratum": "narrative-examples-and-maps",
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "range_sha256": "47eedc3cd936e0d0de1bdd6191a0154a81fcbb871a5a33d3f175e7ede08db56c",
+      "original_first_line": 148,
+      "original_last_line": 175,
+      "original_population_state": "candidate-eligible",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 7926,
+        "end_character_exclusive_normalized": 9508,
+        "first_line": 148,
+        "last_line": 175,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 8338,
+        "end_character_exclusive_normalized": 9920,
+        "first_line": 153,
+        "last_line": 180,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [],
+      "unchanged_population_candidate": true,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": true,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:5405450ff8e83ed4",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "c2b5e07d19c962ff626c095b3700dc2a7acd99722e343d00191abcae0c7ecc78",
+      "original_first_line": 16,
+      "original_last_line": 41,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 876,
+        "end_character_exclusive_normalized": 1780,
+        "first_line": 16,
+        "last_line": 41,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 876,
+        "end_character_exclusive_normalized": 1780,
+        "first_line": 16,
+        "last_line": 41,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:63dd32576a4caeb0",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "023d5079639b0206c2d4a3fb5828ac8fc53154f63dee04278a017a74b3cfefda",
+      "original_first_line": 192,
+      "original_last_line": 238,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 9875,
+            "end_character_exclusive": 10028,
+            "old_first_line": 236,
+            "old_line_count": 2,
+            "added_lines": 3,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 9707,
+            "end_character_exclusive": 10028,
+            "old_first_line": 234,
+            "old_line_count": 4,
+            "added_lines": 10,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population",
+        "accepted-current-exact-original-span-overlap",
+        "combined-AFTER-queued-exact-original-span-overlap",
+        "changed-range-or-exact-metadata-unavailable"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:849900d9f955f3f1",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "range_sha256": "3e871ebf675894f39bc24c86b462b72ba573a8aadf4e088dc1ee6f4aca252970",
+      "original_first_line": 1,
+      "original_last_line": 37,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 0,
+        "end_character_exclusive_normalized": 1971,
+        "first_line": 1,
+        "last_line": 37,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 0,
+        "end_character_exclusive_normalized": 1971,
+        "first_line": 1,
+        "last_line": 37,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:9081bf97fe2c9fb3",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "range_sha256": "04ac2d19369bd58d850a5975ec20fb367ca823cf3388aa9086e9a02bc92f569d",
+      "original_first_line": 84,
+      "original_last_line": 113,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 4579,
+        "end_character_exclusive_normalized": 6282,
+        "first_line": 84,
+        "last_line": 113,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 6101,
+            "end_character_exclusive": 6101,
+            "old_first_line": 110,
+            "old_line_count": 0,
+            "added_lines": 3,
+            "kind": "insertion-point",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population",
+        "combined-AFTER-queued-exact-original-span-overlap",
+        "changed-range-or-exact-metadata-unavailable"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:92d4f233da17f6f6",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "68a3dc7d770db9244e47871662786435237012598afa0ea4f1afe9416d5f7b7e",
+      "original_first_line": 239,
+      "original_last_line": 286,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 10323,
+        "end_character_exclusive_normalized": 12571,
+        "first_line": 241,
+        "last_line": 288,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 10807,
+        "end_character_exclusive_normalized": 13055,
+        "first_line": 246,
+        "last_line": 293,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:a4dbc5b8c7e1ddcb",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "range_sha256": "6c23b2adb6cc9939e42b3357da6836b53f1f002eaac6883f76093c7fe30cbd6f",
+      "original_first_line": 133,
+      "original_last_line": 147,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 7362,
+        "end_character_exclusive_normalized": 7926,
+        "first_line": 133,
+        "last_line": 147,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 7745,
+            "end_character_exclusive": 7745,
+            "old_first_line": 144,
+            "old_line_count": 0,
+            "added_lines": 2,
+            "kind": "insertion-point",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population",
+        "combined-AFTER-queued-exact-original-span-overlap",
+        "changed-range-or-exact-metadata-unavailable"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:a53efcbb8a802f53",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "4b86253a428c7592b74bfab7f6a11729aed02cfa88a136cd575cfa70bb46815c",
+      "original_first_line": 340,
+      "original_last_line": 406,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 16673,
+            "end_character_exclusive": 16748,
+            "old_first_line": 389,
+            "old_line_count": 1,
+            "added_lines": 1,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          },
+          {
+            "start_character": 16990,
+            "end_character_exclusive": 17153,
+            "old_first_line": 393,
+            "old_line_count": 2,
+            "added_lines": 4,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 16673,
+            "end_character_exclusive": 16748,
+            "old_first_line": 389,
+            "old_line_count": 1,
+            "added_lines": 1,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          },
+          {
+            "start_character": 16990,
+            "end_character_exclusive": 17153,
+            "old_first_line": 393,
+            "old_line_count": 2,
+            "added_lines": 4,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population",
+        "accepted-current-exact-original-span-overlap",
+        "combined-AFTER-queued-exact-original-span-overlap",
+        "changed-range-or-exact-metadata-unavailable"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:dc20880031e418c0",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "range_sha256": "f2805077349f2aee274f81c2f85ee25a82a1e6c94f80e869a2474cedba1b902d",
+      "original_first_line": 38,
+      "original_last_line": 46,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 1971,
+        "end_character_exclusive_normalized": 2207,
+        "first_line": 38,
+        "last_line": 46,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 1971,
+        "end_character_exclusive_normalized": 2207,
+        "first_line": 38,
+        "last_line": 46,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:dd6c3967323a33e1",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "range_sha256": "c084aaa1af269232c4456c1f8ad3d2836cc840485685fa3c6f13990b1a8952a6",
+      "original_first_line": 47,
+      "original_last_line": 83,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 2207,
+        "end_character_exclusive_normalized": 4579,
+        "first_line": 47,
+        "last_line": 83,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 2207,
+        "end_character_exclusive_normalized": 4579,
+        "first_line": 47,
+        "last_line": 83,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:e7fd838c8b1eb608",
+      "owner": "B4",
+      "stratum": null,
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "385ce7d319b85994b8ad013b54acb4f343e56ea03251046576bfeb502dbc31f7",
+      "original_first_line": 87,
+      "original_last_line": 191,
+      "original_population_state": "excluded-original-disposition",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 3209,
+        "end_character_exclusive_normalized": 8086,
+        "first_line": 88,
+        "last_line": 192,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 3209,
+        "end_character_exclusive_normalized": 8086,
+        "first_line": 88,
+        "last_line": 192,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "outside-original-9352-admitted-population"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": false,
+      "whole_file_exclusion": false
+    },
+    {
+      "id": "core-001:unit:f3504065f8d80ef8",
+      "owner": "A",
+      "stratum": "narrative-examples-and-maps",
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "source_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+      "range_sha256": "f03a06efdc61f1b9d8759fb6c1ba369b6e0248d25210b8d383c774bb00e92507",
+      "original_first_line": 287,
+      "original_last_line": 339,
+      "original_population_state": "candidate-eligible",
+      "original_selected": false,
+      "actual_verdict_authority": null,
+      "CURRENT": {
+        "file_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "state": "EXACT-UNCHANGED-UNIT",
+        "exact_unit_match": true,
+        "original_span_overlap": [],
+        "metadata_unknown": false,
+        "start_character_normalized": 12571,
+        "end_character_exclusive_normalized": 15194,
+        "first_line": 289,
+        "last_line": 341,
+        "match_rule": "CONTIGUOUS-UNCHANGED-LINES"
+      },
+      "AFTER_QUEUED": {
+        "file_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "state": "RANGE-CHANGED-OR-METADATA-UNKNOWN",
+        "exact_unit_match": false,
+        "original_span_overlap": [
+          {
+            "start_character": 14372,
+            "end_character_exclusive": 14678,
+            "old_first_line": 332,
+            "old_line_count": 3,
+            "added_lines": 8,
+            "kind": "replacement-or-deletion",
+            "coordinate_representation": "EXACT-ORIGINAL"
+          }
+        ],
+        "metadata_unknown": false
+      },
+      "candidate_eligible_supported_unchanged": false,
+      "credit_withholding_reasons": [
+        "combined-AFTER-queued-exact-original-span-overlap",
+        "changed-range-or-exact-metadata-unavailable"
+      ],
+      "unchanged_population_candidate": false,
+      "unsampled_population_row_is_not_source_content_approval": true,
+      "candidate_credit": 0,
+      "final_clean_credit": null,
+      "retained_in_conservative_quota_denominator": true,
+      "whole_file_exclusion": false
+    }
+  ],
+  "added_evidence_symbols": [
+    {
+      "diagram": "L2-layered-stack",
+      "name": "Ctap2SessionRequestEncoding",
+      "path": "src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs"
+    },
+    {
+      "diagram": "L2-layered-stack",
+      "name": "MakeCredentialResponse",
+      "path": "src/Ctap2/src/Credentials/MakeCredentialResponse.cs"
+    },
+    {
+      "diagram": "L2-layered-stack",
+      "name": "GetAssertionResponse",
+      "path": "src/Ctap2/src/Credentials/GetAssertionResponse.cs"
+    },
+    {
+      "diagram": "L3b-fido2-ctap-sequence",
+      "name": "Ctap2SessionRequestEncoding",
+      "path": "src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs"
+    },
+    {
+      "diagram": "L3b-fido2-ctap-sequence",
+      "name": "MakeCredentialResponse",
+      "path": "src/Ctap2/src/Credentials/MakeCredentialResponse.cs"
+    }
+  ],
+  "added_fields": "Five inserted symbol references are metadata inside existing original map units; no new original-population or actual-read credit.",
+  "conservative_population_delta": 0,
+  "qualification": "Changed admitted original units are explicitly withheld. Already excluded entries stay excluded. Unchanged admitted same-file units remain candidates."
+}

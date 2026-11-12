@@ -1,0 +1,4 @@
+/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.sourcelink.json
+/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.GlobalUsings.g.cs
+/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.AssemblyInfo.cs

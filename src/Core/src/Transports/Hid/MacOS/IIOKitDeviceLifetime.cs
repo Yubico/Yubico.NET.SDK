@@ -21,23 +21,22 @@ using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.Nativ
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
 /// <summary>
-///     The IOKit and CoreFoundation calls that govern the <em>lifetime</em> of a macOS HID connection:
+///     Interceptable native-lifetime and OTP feature-report operations for macOS HID connections:
 ///     creating the device, opening and closing it, creating and releasing CoreFoundation objects, and
-///     registering or clearing the IOKit callbacks, and OTP feature-report I/O.
+///     registering or clearing IOKit callbacks.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This is a seam, not an abstraction layer. It exists so the constructor-failure and disposal
-///         paths of <see cref="MacOSHidFeatureReportConnection" />,
-///         <see cref="MacOSHidIOReportConnection" />, and <see cref="MacOSOtpHidConnection" />
-///         can be tested without macOS hardware — the same
-///         reason <c>IWindowsHidReportAccess</c> exists on the Windows side. It deliberately mirrors the native calls
-///         one-for-one and adds no policy.
+///         Connection code uses this seam to make acquisition failures, feature reports and cleanup
+///         interceptable in no-hardware tests, as <c>IWindowsHidReportAccess</c> does on Windows. The production
+///         implementation forwards native calls and includes small managed compositions and status handling
+///         for device lookup and creation, property reads, and open/close results.
 ///     </para>
 ///     <para>
-///         OTP feature-report I/O and checked close verify that accepted operations drain before the
-///         physical claim is released. FIDO report I/O uses a separate bridge; this seam also exposes
-///         the existing feature-report and callback calls used by the macOS HID connections.
+///         Connection owners schedule and drain accepted operations before checked native cleanup and
+///         physical-claim release. Injected implementations let tests check that ordering; the seam alone
+///         provides neither drain nor native-release proof. FIDO report I/O uses a separate bridge; this
+///         seam exposes the feature-report and callback operations alongside native-lifetime operations.
 ///     </para>
 /// </remarks>
 [SupportedOSPlatform("macos")]
@@ -103,6 +102,11 @@ internal interface IIOKitDeviceLifetime
     ///     Registers, or with zero <paramref name="callback" /> and <paramref name="context" /> clears, the
     ///     input report callback.
     /// </summary>
+    /// <remarks>
+    ///     This dormant registration seam requires a buffer pinned for the entire native registration and
+    ///     callback drain, plus a rooted context. A call-scoped array pin is insufficient. Active FIDO input
+    ///     instead uses the native bridge's persistent buffer and separate callback-state root.
+    /// </remarks>
     void RegisterInputReportCallback(nint device, byte[] buffer, int bufferLength, nint callback, nint context);
 
     /// <summary>
@@ -113,8 +117,8 @@ internal interface IIOKitDeviceLifetime
 }
 
 /// <summary>
-///     The production <see cref="IIOKitDeviceLifetime" />: a direct pass-through to IOKit and
-///     CoreFoundation.
+///     The production <see cref="IIOKitDeviceLifetime" /> implementation, combining IOKit and CoreFoundation
+///     call forwarding with small managed compositions and status handling.
 /// </summary>
 [SupportedOSPlatform("macos")]
 internal sealed class IOKitDeviceLifetime : IIOKitDeviceLifetime
@@ -150,11 +154,8 @@ internal sealed class IOKitDeviceLifetime : IIOKitDeviceLifetime
     {
         // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). SDK exclusivity is enforced
         // by DeviceConnectionRegistry before native open; seizing would add a platform-wide policy and
-        // prevent other non-seizing clients from opening the interface. Both canonical implementations open
-        // non-seizing on macOS - Rust yubikit enables hidapi's `macos-shared-device`
-        // (hid_darwin_set_open_exclusive(0) => kIOHIDOptionsTypeNone), and python-fido2's macOS backend
-        // calls IOHIDDeviceOpen(handle, 0). The OTP feature-report path uses 0 as well, so both macOS
-        // HID paths stay consistent.
+        // prevent other non-seizing clients from opening the interface. The OTP path also passes zero.
+        // Process-local admission and OS access permissions remain separate policies.
         var result = OpenDeviceResult(device);
 
         if (result != 0)

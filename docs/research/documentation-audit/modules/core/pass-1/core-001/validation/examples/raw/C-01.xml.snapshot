@@ -1,0 +1,28 @@
+
+/// // The application supplies a nonblocking async callback that transfers an owned byte array.
+/// internal sealed class DialogPrompt(
+///     Func&lt;CredentialPromptContext, CancellationToken, ValueTask&lt;byte[]?&gt;&gt; acquire) : ICredentialPrompt
+/// {
+///     public async ValueTask&lt;IMemoryOwner&lt;byte&gt;?&gt; RequestSecretAsync(
+///         CredentialPromptContext context, CancellationToken cancellationToken)
+///     {
+///         byte[]? entered = await acquire(context, cancellationToken);
+///         if (entered is null)
+///         {
+///             cancellationToken.ThrowIfCancellationRequested();
+///             return null;
+///         }
+///
+///         try
+///         {
+///             cancellationToken.ThrowIfCancellationRequested();
+///             // This example requires a nonempty secret; the pooled owner rejects an empty source.
+///             return DisposableArrayPoolBuffer.CreateFromSpan(entered);
+///         }
+///         finally
+///         {
+///             System.Security.Cryptography.CryptographicOperations.ZeroMemory(entered);
+///         }
+///     }
+/// }
+/// 

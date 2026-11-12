@@ -29,10 +29,8 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///         interface deselects whatever the other session was using.
 ///     </para>
 ///     <para>
-///         Enforced at binding, before any wire operation, which is what canonical yubikit does — Rust makes a
-///         second session a compile error by taking the connection by value; Python's base <c>Session</c> stores
-///         itself on the connection at construction. Refusal happens on the call that would cause the damage,
-///         not on the victim's next operation.
+///         Binding refuses a second session before it can perform wire I/O. This protects the incumbent
+///         session's selected application rather than detecting the conflict on its next operation.
 ///     </para>
 ///     <para>
 ///         Keyed by connection identity in a <see cref="ConditionalWeakTable{TKey,TValue}" /> rather than by a

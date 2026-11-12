@@ -1,0 +1,149 @@
+{
+  "kind": "fresh-static-record-coverage-and-preservation-check",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "assigned_units": 265,
+  "selected_paths": 95,
+  "candidate_paths": 129,
+  "inherited_keys": 31,
+  "disposition_counts": {
+    "READ-CLEAN": 177,
+    "READ-CANDIDATE": 7,
+    "READ-RELATED-CANDIDATE-CONTEXT": 80,
+    "READ-EXCLUSION": 1
+  },
+  "clean_nominees": 14,
+  "preserved_frozen_artifacts": 5366,
+  "preserved_integration_artifacts": 8325,
+  "preserved_prior_piv_files": 114,
+  "preserved_user_files": 4,
+  "observed_product_diff_paths": [],
+  "preparation_failures_preserved": [
+    "read_packet.py initial root calculation FileNotFoundError; corrected to file parents[9]",
+    "assemble.py unmatched closing parenthesis at line232, then251; corrected before first successful assembly"
+  ],
+  "failures": [
+    "input source docs/research/documentation-audit/modules/core/pass-1/core-001/plan.md",
+    "link boundary-WebAuthn.md: boundaries/WebAuthn/verification-receipt.json"
+  ],
+  "independent_content_review": false,
+  "sdk_native_crypto_device_execution": false,
+  "git_index_ref_commit_push": false,
+  "subagents": false,
+  "owned_record_identities": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/read_packet.py",
+      "sha256": "dd14bb5d06b0c3dd26009739134a2d6f7de07c45dc9712be31804d936b15f86b",
+      "bytes": 852
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/capture_sources.py",
+      "sha256": "c107b2411060f18d463964a3e4f6af29f680dc6e9e5a460dbe6477bbd2596af9",
+      "bytes": 1400
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/traces.md",
+      "sha256": "c6d59dd65e7bc350884d0b6678859963397167f9bc86118c80160d33e69259a0",
+      "bytes": 16943
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/ctap2-handoff.md",
+      "sha256": "8f825e47f6436796a27d74840a8ae5c739b9ccbd23b49a0b1f15db8073a437c4",
+      "bytes": 7434
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/candidates.md",
+      "sha256": "e85cda5f0224c7a693c93ab0e1c7aaa8b072008bff68b08fe58bd3665881369f",
+      "bytes": 16912
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources.md",
+      "sha256": "37da651e188e9921cdefdc4778a1253a4bd6a8801fcd2e87ea121a20ff5c3fca",
+      "bytes": 10515
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/test-oracles.md",
+      "sha256": "d3241e85cb42d880b6bb2b7663767884fdeca31837b076214269f428e68feb5f",
+      "bytes": 11478
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/assemble.py",
+      "sha256": "bd0721ab17075dd85fda32b9c43040ddbaffdaca79b2affd40c37d7efc103f7d",
+      "bytes": 38370
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/unit-dispositions.json",
+      "sha256": "f1a37a68ab18869e74197a63a1d91cbe99db41f2b452e0997cba655116463974",
+      "bytes": 356272
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/file-dispositions.json",
+      "sha256": "5462622cac50e90b6723330b2e3d92a27a2a2322a9da8197d9ffb8cba5a9a2d0",
+      "bytes": 160606
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/inherited-dispositions.json",
+      "sha256": "9ff98ffbd21f11720f9b67e8f2544f4c3f174636acd2a045c900325b4c37fc96",
+      "bytes": 47511
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/clean-nominees.json",
+      "sha256": "0ee2c13d0d33eaa58a1d2d7fe35763512db49b88bf00814e864ef8590aef7058",
+      "bytes": 23384
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/candidate-index.json",
+      "sha256": "3c70b723e022f687eca664f00ee2034e4f3989ebdfd43ab4369142fdc098b1bc",
+      "bytes": 18725
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/source-identities.json",
+      "sha256": "78a3dee9582df2c17235f8780252bcc6d8bef887637bfb0a2ff4c5b2bce5734e",
+      "bytes": 8194
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/dependency-identities.json",
+      "sha256": "191c44258e8f96e9bc40c5aa9c69e9edaef816b88d4cbad07f9c6f332f1bed09",
+      "bytes": 9213
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/verification.json",
+      "sha256": "f123f5c03e042b93c2bd54a9286a00ef6cc0145a33f18a1f968d91897e970574",
+      "bytes": 1029
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/check_records.py",
+      "sha256": "a649a580656aae1066f5585c8ba047a09b75ce54c9029f9e78978910191f59b2",
+      "bytes": 7107
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/webauthn3.html",
+      "sha256": "157030c980d44a3ce4b1ec5bcfaa16790c7dfefac20709af6ed2b11c7120970b",
+      "bytes": 2739242
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/preview-sign-v4.html",
+      "sha256": "29359265d3b0f3dbc738482d4a33865beeb5c698e38651d2d12f14b7b5e6d86c",
+      "bytes": 2834409
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/Task-v10.0.0.cs",
+      "sha256": "5b0d6892267269233dcf5c6191f357b0ba6c4257d1e757ca4d2fe93272b29d9b",
+      "bytes": 389364
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/ReadOnlyMemory-v10.0.0.cs",
+      "sha256": "c19b25038fdf0abf70658aed8979dd83e9ca11e27f5b3df68950e8ecb40d879e",
+      "bytes": 19770
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/captures.json",
+      "sha256": "6bb8962a090aa0ab97f303dd4046328b0eaf0adf71decfa7960c8317a56a9093",
+      "bytes": 1294
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-WebAuthn.md",
+      "sha256": "ffaeff5adc6e15dc317ad7031f52180b98c5fff4a262426b1f91c569d71f953c",
+      "bytes": 7933
+    }
+  ]
+}

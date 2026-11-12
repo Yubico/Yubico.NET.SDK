@@ -1,0 +1,20 @@
+[
+  {
+    "path": "docs/usage/device-discovery.md",
+    "capture_name": "device-discovery.md",
+    "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+    "primary_before_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+  },
+  {
+    "path": "src/Core/README.md",
+    "capture_name": "Core-README.md",
+    "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c",
+    "primary_before_sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "capture_name": "TESTING.md",
+    "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe",
+    "primary_before_sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+  }
+]

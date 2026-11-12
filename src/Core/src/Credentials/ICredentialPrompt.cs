@@ -68,23 +68,24 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// </list>
 /// <para><b>Example</b></para>
 /// <code>
-/// internal sealed class DialogPrompt : ICredentialPrompt
+/// // The application supplies a nonblocking async callback that transfers an owned byte array.
+/// internal sealed class DialogPrompt(
+///     Func&lt;CredentialPromptContext, CancellationToken, ValueTask&lt;byte[]?&gt;&gt; acquire) : ICredentialPrompt
 /// {
 ///     public async ValueTask&lt;IMemoryOwner&lt;byte&gt;?&gt; RequestSecretAsync(
 ///         CredentialPromptContext context, CancellationToken cancellationToken)
 ///     {
-///         var title = context.IsRetry
-///             ? $"Incorrect PIN - {context.RetriesRemaining} attempts remaining"
-///             : $"Enter PIN for {context.Scope}";
-///
-///         byte[]? entered = await ShowPinDialogAsync(title, cancellationToken);
+///         byte[]? entered = await acquire(context, cancellationToken);
 ///         if (entered is null)
 ///         {
+///             cancellationToken.ThrowIfCancellationRequested();
 ///             return null;
 ///         }
 ///
 ///         try
 ///         {
+///             cancellationToken.ThrowIfCancellationRequested();
+///             // This example requires a nonempty secret; the pooled owner rejects an empty source.
 ///             return DisposableArrayPoolBuffer.CreateFromSpan(entered);
 ///         }
 ///         finally

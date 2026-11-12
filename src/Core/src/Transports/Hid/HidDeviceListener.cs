@@ -67,18 +67,19 @@ public abstract class HidDeviceListener : IDeviceChangeListener
     public abstract void Start();
 
     /// <summary>
-    /// Stops the listener and releases monitoring resources.
+    /// Requests listener shutdown and platform monitoring-resource cleanup.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// After calling Stop(), the listener can be restarted by calling <see cref="Start"/> again.
+    /// After successful shutdown, a listener may be restarted with <see cref="Start"/> if its platform
+    /// implementation has completed cleanup. Retained or uncertain native state can prevent restart.
     /// Calling Stop() on an already stopped listener has no effect.
     /// </para>
     /// <para>
     /// Do not call <see cref="Stop"/> or <see cref="Dispose()"/> from within the
-    /// <see cref="Changed"/> callback. Platform implementations wait for their native
-    /// registration or listener thread to drain before returning, so stopping from inside the
-    /// callback can deadlock or stall for the full disposal timeout.
+    /// <see cref="Changed"/> callback. Native unregister and thread joins can wait for that callback,
+    /// causing a deadlock or consuming the shutdown wait budget. A timeout or failed unregister
+    /// does not prove that native callbacks have drained.
     /// </para>
     /// </remarks>
     public abstract void Stop();
@@ -124,8 +125,12 @@ public abstract class HidDeviceListener : IDeviceChangeListener
     }
 
     /// <summary>
-    /// Disposes of the listener and releases all resources.
+    /// Updates managed disposal state as part of the platform listener's cleanup attempt.
     /// </summary>
+    /// <remarks>
+    /// Native cleanup depends on the platform outcome. Failed unregister or retained native state can leave
+    /// resources unresolved; a returned call or diagnostic status alone does not prove native release.
+    /// </remarks>
     /// <param name="disposing">True if called from Dispose(), false if from finalizer.</param>
     protected virtual void Dispose(bool disposing)
     {

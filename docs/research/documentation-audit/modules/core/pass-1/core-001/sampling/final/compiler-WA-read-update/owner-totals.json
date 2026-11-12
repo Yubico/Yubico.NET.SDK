@@ -1,0 +1,155 @@
+[
+  {
+    "owner": "A",
+    "actual_unique_reads": 233,
+    "required_target": 218,
+    "logical_supported_count": 218,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "B1",
+    "actual_unique_reads": 114,
+    "required_target": 111,
+    "logical_supported_count": 111,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "B2",
+    "actual_unique_reads": 153,
+    "required_target": 137,
+    "logical_supported_count": 137,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "B3",
+    "actual_unique_reads": 113,
+    "required_target": 112,
+    "logical_supported_count": 112,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "B4",
+    "actual_unique_reads": 131,
+    "required_target": 125,
+    "logical_supported_count": 125,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "B5",
+    "actual_unique_reads": 75,
+    "required_target": 73,
+    "logical_supported_count": 73,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "B6",
+    "actual_unique_reads": 35,
+    "required_target": 29,
+    "logical_supported_count": 29,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "C",
+    "actual_unique_reads": 62,
+    "required_target": 62,
+    "logical_supported_count": 62,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "Ctap2",
+    "actual_unique_reads": 9,
+    "required_target": 9,
+    "logical_supported_count": 9,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "Management",
+    "actual_unique_reads": 23,
+    "required_target": 23,
+    "logical_supported_count": 23,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "Oath",
+    "actual_unique_reads": 18,
+    "required_target": 18,
+    "logical_supported_count": 18,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "OpenPgp",
+    "actual_unique_reads": 31,
+    "required_target": 28,
+    "logical_supported_count": 28,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "Piv",
+    "actual_unique_reads": 44,
+    "required_target": 40,
+    "logical_supported_count": 40,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "SecurityDomain",
+    "actual_unique_reads": 15,
+    "required_target": 14,
+    "logical_supported_count": 14,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "WebAuthn",
+    "actual_unique_reads": 40,
+    "required_target": 34,
+    "logical_supported_count": 34,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "YubiHsm",
+    "actual_unique_reads": 10,
+    "required_target": 10,
+    "logical_supported_count": 10,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  },
+  {
+    "owner": "YubiOtp",
+    "actual_unique_reads": 28,
+    "required_target": 28,
+    "logical_supported_count": 28,
+    "logical_shortfall": 0,
+    "final_accepted_clean_count": null,
+    "identity_refresh": "PENDING"
+  }
+]

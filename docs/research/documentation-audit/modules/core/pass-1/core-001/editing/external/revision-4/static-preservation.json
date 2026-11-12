@@ -1,0 +1,81 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "actual_final_product_count": 37,
+  "final_product_paths": [
+    "TOOLCHAIN.md",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "docs/migration/v1-to-v2.md",
+    "scripts/toolchain/Process.cs",
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+    "src/Cli.Shared/src/Output/PinPrompt.cs",
+    "src/Cli.Shared/src/Output/SecureCredential.cs",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    "src/Tests.Shared/CLAUDE.md",
+    "src/Tests.Shared/IYubiKeyFilter.cs",
+    "src/Tests.Shared/Infrastructure/AllowList.cs",
+    "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+    "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    "src/Tests.Shared/Infrastructure/TestCategories.cs",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/README.md",
+    "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "src/Tests.Shared/YubiKeyTestState.cs",
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "verification/MacOSHidBoundaryComparison/Program.cs",
+    "verification/MacOSHidInputVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "verification/MacOSHidRouteVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "verification/NativeAotVerification/Program.cs",
+    "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+    "verification/NativeCompatibilityVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs"
+  ],
+  "actual_previous_product_count": 35,
+  "revision4_changed_product_paths": [
+    "src/Tests.Shared/Infrastructure/AllowList.cs",
+    "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+    "src/Tests.Shared/README.md"
+  ],
+  "new_diff_paths": [
+    "src/Tests.Shared/Infrastructure/AllowList.cs",
+    "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs"
+  ],
+  "manifest_paths": 164,
+  "full_patch_sha256": "4738181238db7103d65e47addac0a96c8a936e8c4a464a991885abd8ea788d68",
+  "checks": [
+    {
+      "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "protected_lines": "equal including raw-string contents and directives/imports/branches/assertions",
+      "xml_blocks": 4
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "protected_lines": "equal including raw-string contents and directives/imports/branches/assertions",
+      "xml_blocks": 6
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "markdown": "only the two exact R1 reviewed passages changed; before raw hash verified"
+    }
+  ],
+  "git_diff_check": "PASS",
+  "R2_corrected_keys": 7,
+  "current_example_inventory": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/example-inventory.json",
+    "bytes": 294006,
+    "sha256": "41651e0a9234a531424386be290e5670ace41f6f2dc3b5568a499ab850ada1bb"
+  },
+  "limits": "Exact non-comment/XML/Markdown/hash checks only; no build/test/formatter/native/device/crypto/provider execution, Git index/ref mutation or independent re-review. No new parser or consumer harness."
+}

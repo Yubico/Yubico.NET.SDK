@@ -1,0 +1,226 @@
+[
+  {
+    "path": "src/Ctap2/CLAUDE.md",
+    "link": "../../CLAUDE.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/CLAUDE.md",
+    "link": "../../docs/research/linux-managed-acceptance.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/CLAUDE.md",
+    "link": "../Core/README.md#cryptographic-metadata",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/CLAUDE.md",
+    "link": "tests/CLAUDE.md#user-interaction-and-coordination-lanes",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../../README.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../../docs/DEV-GUIDE.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../../docs/linux-setup.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../../docs/usage/device-discovery.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../../docs/usage/user-interaction.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../Core/README.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../Core/README.md#cryptographic-metadata",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "../WebAuthn/README.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/README.md",
+    "link": "examples/FidoTool/README.md#reset",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/tests/CLAUDE.md",
+    "link": "../../../docs/TESTING.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/Ctap2/tests/CLAUDE.md",
+    "link": "../CLAUDE.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "link": "../../CLAUDE.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "link": "../../docs/architecture/webauthn-extension-processing.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "link": "README.md#getting-started",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "link": "README.md#rp-authorization-belongs-to-the-application",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../../README.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../../docs/DEV-GUIDE.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../../docs/architecture/webauthn-extension-processing.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../../docs/linux-setup.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../../docs/usage/device-discovery.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../../docs/usage/user-interaction.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../Core/README.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../Ctap2/README.md",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "../Ctap2/examples/FidoTool/",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "src/Client/WebAuthnClientData.cs",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "src/Extensions/WebAuthnExtensionInputs.cs",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "src/Extensions/WebAuthnExtensionOutputs.cs",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "link": "src/WebAuthnClientError.cs",
+    "target_exists": true,
+    "new": false,
+    "anchor_resolution": "not inferred from target existence"
+  }
+]

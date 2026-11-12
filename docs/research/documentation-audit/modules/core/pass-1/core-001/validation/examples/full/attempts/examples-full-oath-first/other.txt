@@ -1,0 +1,5 @@
+obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.sourcelink.json
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.GlobalUsings.g.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.AssemblyInfo.cs

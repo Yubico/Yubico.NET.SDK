@@ -16,7 +16,7 @@ YubiKitLogging.Configure(loggerFactory);
 
 By default, YubiKit produces **no log output**. This is intentional:
 - No surprises for production deployments
-- No performance overhead if logging isn't needed
+- No configured output destination when logging isn't needed
 - Developer explicitly opts in to logging
 
 ## Configuration Methods
@@ -24,6 +24,11 @@ By default, YubiKit produces **no log output**. This is intentional:
 ### 1. No Logging (Default)
 
 Simply don't configure logging. YubiKit uses `NullLoggerFactory` internally.
+
+Configure before the first SDK use. Many SDK types retain static logger instances; replacing the
+factory affects later logger creation, not loggers already captured by those types. Your application
+owns the supplied factory and providers. Keep them alive through all SDK operations, monitor shutdown,
+and connection/session disposal, then dispose them in the application's outer scope.
 
 ```csharp
 var devices = await YubiKeyManager.FindAllAsync();
@@ -154,7 +159,7 @@ YubiKit uses the following log categories (class names):
 
 | Level | Use |
 |-------|-----|
-| `Trace` | Raw APDU bytes, protocol details |
+| `Trace` | Detailed protocol steps; ordinary APDU headers/lengths and SELECT identifier bytes |
 | `Debug` | State transitions, cache updates |
 | `Information` | Session creation, major operations |
 | `Warning` | Recoverable errors, fallback behavior |
@@ -162,19 +167,29 @@ YubiKit uses the following log categories (class names):
 
 ## Testing with Logging
 
-For unit tests, use `YubiKitLogging.UseTemporary()` to scope logging:
+`YubiKitLogging.UseTemporary()` temporarily replaces the process-wide factory and restores the captured
+factory on disposal. It is useful for serially coordinated diagnostics, not test-local or async-flow
+isolation. Parallel or out-of-order scopes can restore the wrong factory, and existing static loggers
+keep their earlier provider. Coordinate all participants before using it. This helper borrows an
+application-owned factory; it restores the global factory reference without disposing the borrowed one:
 
 ```csharp
-[Fact]
-public async Task MyTest()
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
+
+static async Task DiscoverWithTemporaryLoggingAsync(
+    ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 {
-    using var loggerFactory = LoggerFactory.Create(b => b.AddXUnit(output));
     using var _ = YubiKitLogging.UseTemporary(loggerFactory);
-    
-    // Test code - logging goes to xUnit output
-    // Original logger restored when scope exits
+    await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
 }
 ```
+
+Keep the factory and providers alive through all participating SDK work, including late enumeration
+completion and later uses of static loggers created during this scope. Completion of the bounded Find
+task is not a join for that work. Restoring the global factory neither replaces captured loggers nor
+ends their provider lifetime; the application must choose an outer lifetime that covers those uses.
 
 ## Troubleshooting
 
@@ -195,20 +210,21 @@ builder.AddFilter("Yubico.YubiKit", LogLevel.Warning);
 ### Performance concerns?
 
 - Use `LogLevel.Information` or higher in production
-- `Trace` level logs raw APDU bytes which adds overhead
+- `Trace` formatting and provider output add overhead; filter the categories you actually need
 - Logging is completely disabled with `NullLoggerFactory` (default)
 
 ## Security Considerations
 
-YubiKit logging is designed to be safe:
+Choose log levels, destinations, retention, and access controls according to the data your application
+handles. `YubiKitLogging` selects a factory; it has no central payload redactor. Ordinary APDU trace
+templates record headers and lengths rather than complete bodies, but SELECT logs caller-supplied
+application identifier bytes. Serial numbers and credential identifiers can also be privacy-sensitive.
 
-- ❌ PINs, PUKs, and passwords are **never** logged
-- ❌ Private keys are **never** logged  
-- ❌ Session keys are **never** logged
-- ✅ Public identifiers (serial numbers, credential IDs) may be logged at Debug level
-- ✅ Operation types and durations are logged at Info level
-
-If you have strict compliance requirements, use `LogLevel.Warning` or higher to minimize information disclosure.
+Exception objects have independent provenance. Transport/provider exceptions and application callback
+exceptions can reach configured providers, including text supplied by your application. Keep credentials,
+keys, plaintext, and sensitive intent/scope text out of exception messages and diagnostics. A higher
+minimum level reduces routine output but does not sanitize an exception at Warning or Error. Inspect
+the actual templates and provider behavior before collecting or exporting logs.
 
 ---
 
@@ -229,13 +245,14 @@ public class Ctap2Session
 public class Ctap2Session(ILogger<Ctap2Session> logger) { }
 ```
 
-Canonical logger factory: `YubiKitLogging.CreateLogger<T>()` at `src/Core/src/YubiKitLogging.cs:20`.
+Internal contributor entry point: `YubiKitLogging.CreateLogger<T>()` in
+`src/Core/src/YubiKitLogging.cs`. Consumers configure the public factory rather than calling this internal helper.
 
 ### Log Levels (when contributing new log calls)
 
 | Level | Use for |
 |---|---|
-| `Trace` | Raw APDU/CBOR bytes, detailed protocol steps |
+| `Trace` | Detailed protocol steps and reviewed nonsecret metadata; never sensitive payloads |
 | `Debug` | Protocol-level operations, state transitions |
 | `Info` | Session creation, major operations (enroll, authenticate) |
 | `Warning` | Recoverable errors, fallback behavior |
@@ -244,7 +261,7 @@ Canonical logger factory: `YubiKitLogging.CreateLogger<T>()` at `src/Core/src/Yu
 ### Logging Sensitive Data
 
 - ❌ NEVER log PINs, keys, or credentials
-- ✅ Log credential IDs as hex (public identifier)
+- Review identifier privacy before logging credential IDs, even when they are not secret key material
 - ✅ Log lengths, not contents, of sensitive buffers
 
 ```csharp

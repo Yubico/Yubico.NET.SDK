@@ -1,0 +1,74 @@
+{
+  "id": "FULL-061",
+  "old_context": "Management.IntegrationTests",
+  "new_context": "Management.UnitTests",
+  "old_source": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-061.cs",
+    "bytes": 1359,
+    "sha256": "d4a6c4b31a43961495a1ee225bfb8da7c97a7dd7cd90e061d1a15b06645fa1e2"
+  },
+  "new_source": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.UnitTests/FULL-061.cs",
+    "bytes": 1274,
+    "sha256": "bdd7bcbacb58d5d4ee8f4392bdcd01f4e99dacd9aa816b10e14b1512a8575812"
+  },
+  "old_compiled": {
+    "id": "FULL-061",
+    "path": "injections/Management.IntegrationTests/FULL-061.cs",
+    "compilation_alias_of": null,
+    "source_document": {
+      "path": "CLAUDE.md",
+      "bytes": 33846,
+      "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+    },
+    "review": {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+      "bytes": 8886,
+      "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+    },
+    "body_layout": "literal complete body with separate imports/containing class",
+    "body_sha256": "b04a32f9b5cd80815f9ed59a636d25f068685c0afc3c5f2fe37ac2e24af5c9a6",
+    "preserved_import_prefix": "",
+    "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test61;\npublic sealed class DocumentationBody61\n{\n",
+    "suffix": "\n}\n",
+    "generated_sha256": "d4a6c4b31a43961495a1ee225bfb8da7c97a7dd7cd90e061d1a15b06645fa1e2",
+    "compilation_status": "prepared-existing-project-injection",
+    "execution_status": "not-run"
+  },
+  "new_compiled": {
+    "id": "FULL-061",
+    "path": "injections/Management.UnitTests/FULL-061.cs",
+    "compilation_alias_of": null,
+    "source_document": {
+      "path": "CLAUDE.md",
+      "bytes": 33846,
+      "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+    },
+    "review": {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+      "bytes": 8886,
+      "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+    },
+    "body_layout": "literal complete body with separate imports/containing class",
+    "body_sha256": "b04a32f9b5cd80815f9ed59a636d25f068685c0afc3c5f2fe37ac2e24af5c9a6",
+    "preserved_import_prefix": "",
+    "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test61;\npublic sealed class DocumentationBody61\n{\n",
+    "suffix": "\n}\n",
+    "generated_sha256": "bdd7bcbacb58d5d4ee8f4392bdcd01f4e99dacd9aa816b10e14b1512a8575812",
+    "compilation_status": "prepared-existing-project-injection",
+    "execution_status": "not-run"
+  },
+  "body_decoded_sha256": "b04a32f9b5cd80815f9ed59a636d25f068685c0afc3c5f2fe37ac2e24af5c9a6",
+  "body_raw_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+  "raw_body_fields_unchanged": true,
+  "original_directives_and_nonprefix_remainder_exact": true,
+  "old_source_retained_but_not_selected": true,
+  "selected_sources": 300,
+  "selected_test_sources": 56,
+  "old_management_injections": 35,
+  "new_management_integration_injections": 34,
+  "new_management_unit_injections": 1,
+  "context_count_before": 10,
+  "context_count_after": 11,
+  "source_diff": "--- predecessor/Management.IntegrationTests/FULL-061.cs\n+++ current/Management.UnitTests/FULL-061.cs\n@@ -12,8 +12,6 @@\n using Yubico.YubiKit.Core.Devices;\n using Yubico.YubiKit.Core.Sessions;\n using Yubico.YubiKit.Core.Transports.SmartCard;\n-using Yubico.YubiKit.Tests.Shared;\n-using Yubico.YubiKit.Tests.Shared.Infrastructure;\n using Yubico.YubiKit.Management;\n using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\n namespace Audit20261111.DocExamples.Test61;\n"
+}

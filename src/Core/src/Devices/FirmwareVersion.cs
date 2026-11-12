@@ -19,6 +19,7 @@ using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Devices;
 
+/// <summary>A three-byte major.minor.patch firmware version with the SDK's major-zero compatibility policy.</summary>
 public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquatable<FirmwareVersion>
 {
     public FirmwareVersion() { }
@@ -44,33 +45,19 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public byte Patch { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether this firmware version represents an alpha or beta YubiKey.
-    ///     Alpha/beta keys report firmware versions with major version 0 but should be treated as the latest version
-    ///     for feature compatibility checks.
+    ///     Whether the major version is zero, which enables the SDK's optimistic development-firmware policy.
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         Treat an alpha or beta version as newer than any released firmware, and as being at least 5.8.0.
-    ///         Every alpha and beta key is built from a development branch at or ahead of that release, so a
-    ///         feature gate must not refuse one. <see cref="IsAtLeast(int,int,int)" /> already returns
-    ///         <see langword="true" /> for these versions, and
-    ///         <c>Feature.IsSupportedByFirmware</c> short-circuits on this property, so the usual gates need no
-    ///         special handling. Do not write <c>!IsAlphaOrBeta &amp;&amp; IsAtLeast(...)</c>: that cancels the
-    ///         built-in allowance and downgrades a development key to legacy behavior.
+    ///         Major-zero versions sort after every nonzero-major version. Among major-zero versions,
+    ///         comparison uses their numeric components. <see cref="IsAtLeast(int,int,int)"/> and
+    ///         <see cref="Feature.IsSupportedByFirmware"/> accept every major-zero version optimistically,
+    ///         including <see cref="Default"/> (0.0.0). Use those checks to preserve the SDK's policy.
     ///     </para>
     ///     <para>
-    ///         The version carries no finer detail. Different development builds report the same placeholder
-    ///         (typically 0.0.1), so it cannot distinguish one build from another. An individual applet build can
-    ///         therefore lack a feature this property implies, usually because the applet was cut before the
-    ///         instruction landed. The device reports that itself, as <c>SW=0x6D00</c> (instruction not supported)
-    ///         or a comparable rejection.
-    ///     </para>
-    ///     <para>
-    ///         That case is deliberately not handled in code. Detecting it would mean either abandoning the
-    ///         optimistic assumption, which breaks every correctly built development key, or probing the device
-    ///         before each gated call, which costs a round trip to accommodate a defective build. A test failing
-    ///         against a development key with <c>SW=0x6D00</c> is the expected signal: the applet on that specific
-    ///         key is missing the instruction. Check the key before suspecting the gate or the command encoding.
+    ///         This is a compatibility policy, not evidence that a particular applet build implements a
+    ///         command. Handle device rejection through the operation's error contract. An unsupported-instruction
+    ///         response warrants checking both the build's capabilities and the command sent.
     ///     </para>
     /// </remarks>
     public bool IsAlphaOrBeta => Major == 0;
@@ -108,8 +95,8 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     ///     the same type.
     /// </summary>
     /// <remarks>
-    ///     Alpha/beta keys (version 0.0.0) are treated as the latest version and will compare
-    ///     greater than any other version.
+    ///     Major-zero versions compare greater than nonzero-major versions. Within either group, comparison
+    ///     uses major, minor, then patch numerically. A non-null version compares greater than null.
     /// </remarks>
     /// <returns>
     ///     An integer that indicates whether the current instance precedes (negative value),
@@ -142,6 +129,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     /// <summary>
     ///     Parses a firmware version string in format "major.minor.patch".
     /// </summary>
+    /// <returns>A version with each component in 0..255, or null when the three components cannot be parsed.</returns>
     public static FirmwareVersion? FromString(string version)
     {
         var parts = version.Split('.');
@@ -200,12 +188,11 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         ((Major << 16) | (Minor << 8) | Patch).CompareTo((major << 16) | (minor << 8) | patch);
 
     /// <summary>
-    ///     Creates a <see cref="FirmwareVersion" /> from a byte array.
-    ///     The byte array must contain exactly three bytes, representing the major, minor, and patch versions.
+    ///     Creates a <see cref="FirmwareVersion" /> from exactly three bytes representing major, minor, and patch.
     /// </summary>
-    /// <param name="bytes">A byte array containing the version information.</param>
+    /// <param name="bytes">A borrowed span containing the version information.</param>
     /// <returns>A <see cref="FirmwareVersion" /> instance.</returns>
-    /// <exception cref="ArgumentException">Thrown if the byte array does not contain exactly three bytes.</exception>
+    /// <exception cref="ArgumentException">The span does not contain exactly three bytes.</exception>
     /// <remarks>
     ///     The first byte represents the major version, the second byte represents the minor version,
     ///     and the third byte represents the patch version.

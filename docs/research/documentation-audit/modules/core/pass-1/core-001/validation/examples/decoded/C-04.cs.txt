@@ -1,0 +1,8 @@
+static void InspectRsaKey(ReadOnlyMemory<byte> encodedKey)
+{
+    // encodedKey is borrowed; its caller remains responsible for clearing it.
+    using var owner = RSAPrivateKey.CreateFromPkcs8(encodedKey);
+    IPrivateKey genericKey = owner;
+    RSAPrivateKey rsaKey = genericKey.Cast<RSAPrivateKey>();
+    // rsaKey and genericKey alias owner; only owner manages disposal.
+}

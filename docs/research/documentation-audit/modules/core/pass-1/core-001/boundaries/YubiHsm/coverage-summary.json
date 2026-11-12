@@ -1,0 +1,31 @@
+{
+  "packet": "BOUNDARY-YubiHsm",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "packet_sha256": "21d6b36b4f0bbc366c8d829dcb057450d71f9bd3e836f896ae6c40e8096a1305",
+  "assigned_units": 160,
+  "selected_paths": 33,
+  "complete_candidate_files": 53,
+  "complete_candidate_lines": 6325,
+  "shared_assigned_units": 0,
+  "dispositions": {
+    "READ-CANDIDATE": 8,
+    "READ-CONTEXT": 73,
+    "READ-CLEAN": 79
+  },
+  "unread": 0,
+  "provisional_candidate_groups": 7,
+  "accepted_ids_allocated": 0,
+  "inherited_provenance_keys": 15,
+  "inherited_nonadditive_groups": 4,
+  "clean_nominees": 17,
+  "semantic_reading": "COMPLETE-ASSIGNED-STATIC-BOUNDARY-WITH-EXPLICIT-QUALIFICATIONS",
+  "independent_review": "PENDING",
+  "product_editing": "NOT-AUTHORIZED-HERE",
+  "compiler_validation": "VALID-NOT-CHECKED",
+  "sdk_builds": 0,
+  "sdk_tests": 0,
+  "crypto_native_device_connector_executions": 0,
+  "windows_handoff": "WAITING-USER-READY-DELTA",
+  "piv_physical_deferral": "UNCHANGED"
+}

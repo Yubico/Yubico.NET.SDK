@@ -17,7 +17,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
 /// <summary>
 /// An enumeration of the key families supported by COSE.
 /// <remarks>
-/// This enumeration is based on the IANA COSE Key Common Parameters registry.
+/// This enumeration is based on the IANA COSE Key Types registry.
 /// <para>
 /// https://www.iana.org/assignments/cose/cose.xhtml#key-type
 /// </para>
@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
 public enum CoseKeyType
 {
     /// <summary>
-    /// The type could not be determined.
+    /// Local sentinel for an undetermined type. Zero is reserved in the IANA registry.
     /// </summary>
     Unknown = 0,
 

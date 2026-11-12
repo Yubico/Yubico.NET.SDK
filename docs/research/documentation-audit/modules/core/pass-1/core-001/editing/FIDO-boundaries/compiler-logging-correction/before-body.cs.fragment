@@ -1,0 +1,3 @@
+private static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();
+
+Logger.LogDebug("Selected algorithm: {Algorithm}", selectedAlgorithm);

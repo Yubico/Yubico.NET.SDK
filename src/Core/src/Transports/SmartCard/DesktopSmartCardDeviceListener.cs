@@ -22,7 +22,8 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
 /// Monitors for SmartCard reader arrival and removal using PC/SC SCardGetStatusChange.
 /// </summary>
 /// <remarks>
-/// Uses a dedicated background thread with 1000ms timeout for responsive cancellation.
+/// Uses a dedicated background thread and a 1,000 ms maximum native status wait. Fresh UNAWARE reader
+/// states can return immediately; this timeout is not a minimum polling interval or a shutdown deadline.
 /// On Windows, also watches for PnP notifications via the special <c>\\?\PnP?\Notification</c> reader.
 /// <para>
 /// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="Changed"/>
@@ -188,8 +189,8 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
 
         if (!listenerStopped)
         {
-            // The listener may still be using the native context. Prefer a bounded leak over
-            // disposing a handle that could still be active on the background thread.
+            // The listener may still be using the native context. Retain it rather than dispose an active
+            // handle. This stop attempt has timed out; it proves neither thread exit nor safe restart.
             lock (_syncLock)
             {
                 if (ReferenceEquals(_context, context))
@@ -264,7 +265,7 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
 
                 _knownReaders = currentReaderSet;
 
-                // Wait for status change with timeout
+                // Supply a maximum wait. Recreated UNAWARE states can return immediately on success.
                 WaitForStatusChange(currentReaders);
             }
         }
@@ -470,7 +471,8 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
     }
 
     /// <summary>
-    /// Destructor to ensure resources are cleaned up.
+    /// Attempts context cleanup if this listener becomes finalizable. A running listener thread can keep
+    /// the instance reachable; use explicit disposal rather than relying on finalization for thread exit.
     /// </summary>
     ~DesktopSmartCardDeviceListener()
     {

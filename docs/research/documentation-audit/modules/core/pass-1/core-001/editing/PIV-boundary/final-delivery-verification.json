@@ -1,0 +1,15 @@
+{
+  "PGP-boundary": {
+    "changed_files": 17,
+    "XML_blocks": 146,
+    "product_patch_sha256": "dac49659e9357569fd836922bd2f52fe9622a6f7794fcabe320d84d29933134a",
+    "after_hashes_match": true
+  },
+  "PIV-boundary": {
+    "changed_files": 13,
+    "XML_blocks": 124,
+    "product_patch_sha256": "5a442195caab2674e3162a35bdffe9d4ab58e54ad72d7f33f6beeb20ab1ae3dd",
+    "after_hashes_match": true
+  },
+  "scope": "30 product paths; only OpenPGP/PIV documentation. No staged files. Metadata checkpoint unchanged."
+}

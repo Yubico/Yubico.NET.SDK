@@ -19,9 +19,14 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKit.Core.Utilities;
 
 /// <summary>
-///     Tag, length, Value structure that helps to parse APDU response data.
-///     This class handles BER-TLV encoded data with determinate length.
+///     Owns a copied tag-length-value encoding for definite-length smart-card data.
 /// </summary>
+/// <remarks>
+///     Parsing recognizes one tag octet, or two when the first octet's low five bits are 1F.
+///     Use tags supported by the consuming protocol; this bounded helper does not follow arbitrary
+///     BER tag continuations or validate every constructor tag for BER round-trip compatibility.
+///     Dispose the object to clear its encoding; caller-owned source buffers require separate cleanup.
+/// </remarks>
 public sealed class Tlv : IDisposable
 {
     private byte[]? _bytes;
@@ -37,7 +42,7 @@ public sealed class Tlv : IDisposable
     ///     This constructor creates a BER-TLV encoded structure where:
     ///     - The tag is encoded in the minimum number of bytes needed
     ///     - The length is encoded according to BER-TLV rules
-    ///     - The value is stored as provided
+    ///     - The value is copied into the owned encoding
     /// </remarks>
     public Tlv(int tag, ReadOnlySpan<byte> value)
     {
@@ -60,8 +65,9 @@ public sealed class Tlv : IDisposable
     public int Tag { get; private set; }
 
     /// <summary>
-    ///     Returns a copy of the value.
+    ///     Returns a read-only view of the owned value bytes.
     /// </summary>
+    /// <remarks>Previously obtained views observe clearing when this object is disposed.</remarks>
     public ReadOnlyMemory<byte> Value => _bytes.AsMemory(_offset, Length);
 
     /// <summary>
@@ -76,7 +82,7 @@ public sealed class Tlv : IDisposable
 
 
     /// <summary>
-    ///     Dispose the object and clears its buffers
+    ///     Clears the owned encoding and resets the tag and value length.
     /// </summary>
     public void Dispose()
     {
@@ -151,14 +157,14 @@ public sealed class Tlv : IDisposable
     }
 
     /// <summary>
-    ///     Retrieves the internal byte array of the TLV object as a Memory&lt;byte&gt;>.
+    ///     Returns a read-only view of the complete owned encoding.
     /// </summary>
     /// <returns>
-    ///     A Memory&lt;byte&gt; instance representing the underlying data of the TLV object.
+    ///     A <see cref="ReadOnlyMemory{T}"/> view containing the tag, length, and value.
     /// </returns>
     /// <remarks>
-    ///     This method provides a view of the TLV's internal data, allowing for efficient
-    ///     access and manipulation of the bytes without copying the data.
+    ///     No copy is made. Disposal clears this storage, including previously obtained views.
+    ///     This method remains callable after disposal and exposes the cleared encoding.
     /// </remarks>
     public ReadOnlyMemory<byte> AsMemory() => _bytes.AsMemory();
 
@@ -178,7 +184,7 @@ public sealed class Tlv : IDisposable
     /// <summary>
     ///     Parse a Tlv from a BER-TLV encoded byte array.
     /// </summary>
-    /// <param name="data">A byte array containing the TLV encoded data (and nothing more).</param>
+    /// <param name="data">Input beginning with a supported definite-length TLV. Trailing bytes are not checked.</param>
     /// <returns>The parsed Tlv</returns>
     public static Tlv Create(ReadOnlySpan<byte> data)
     {
@@ -202,7 +208,7 @@ public sealed class Tlv : IDisposable
         int tag = buffer[0];
 
         // Determine if the tag is in long form.
-        // Long form tags have more than one byte, starting with 0x1F.
+        // A low-five-bit value of 1F selects this helper's two-octet tag path.
         if ((buffer[0] & 0x1F) == 0x1F)
         {
             // Ensure there is enough data for a long form tag.

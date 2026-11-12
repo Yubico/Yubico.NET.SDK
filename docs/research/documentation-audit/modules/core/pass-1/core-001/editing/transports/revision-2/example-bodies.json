@@ -1,0 +1,61 @@
+{
+  "scope_file_count": 213,
+  "xml_code_body_count_base": 2,
+  "xml_code_body_count_current": 3,
+  "bodies": [
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "original_bodies": [],
+      "current_bodies": [
+        {
+          "first_line": 243,
+          "last_line": 262,
+          "body": "using System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\nstatic async Task SelectPivAsync(IYubiKey device, CancellationToken cancellationToken)\n{\n    // Returning the connection itself exposes its ownership to the enclosing scope.\n    await using IConnection connection = await device.CreateSessionOverTransportAsync(\n        ConnectionType.SmartCard,\n        (opened, token) => Task.FromResult(opened),\n        cancellationToken);\n    await using RawSmartCardSession session = await RawSmartCardSession.CreateAsync(\n        (ISmartCardConnection)connection, cancellationToken);\n    await session.SelectAsync(ApplicationIds.Piv, cancellationToken);\n}",
+          "body_sha256": "93c6e18a42028e6ee02a1c19a426d916e02df9684bc1cade1d9a4790266d414e"
+        }
+      ],
+      "classification": "Complete top-level startup policy/discovery snippet or composable method with typed prerequisites; documentation-only C#",
+      "resource_scope": "Factory startup returns non-disposable discovered views. Method examples dispose borrowed raw session before enclosing caller-owned connection. Generic result explicitly returns the actual connection. No fake helpers.",
+      "compiler_status": "VALID-NOT-CHECKED",
+      "runtime_status": "NOT-EXECUTED"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "original_bodies": [
+        {
+          "first_line": 72,
+          "last_line": 76,
+          "body": "// Explicit compatibility opt-in, before any discovery or monitoring:\nSmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;\nvar devices = await YubiKeyManager.FindAllAsync();",
+          "body_sha256": "4a910dc1489fa2a0d13c61f8078075ed803830e92fa7412488761ddaa4705adb"
+        },
+        {
+          "first_line": 103,
+          "last_line": 108,
+          "body": "// Explicitly accept shared access for this factory only:\n// Coordinate discovery/monitoring and all other connections to this key before opening directly.\nvar factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);\nawait using var connection = await factory.CreateAsync(reader, cancellationToken);",
+          "body_sha256": "ac32e3eb4b440ef96dea8acea3f8970350c1a289b64be9666bf93283b130d819"
+        }
+      ],
+      "current_bodies": [
+        {
+          "first_line": 72,
+          "last_line": 79,
+          "body": "using Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\n// Explicit compatibility opt-in, before any discovery or monitoring:\nSmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;\nvar devices = await YubiKeyManager.FindAllAsync();",
+          "body_sha256": "36c0086b750a13aa9044d29ac0581e82a5d44fdec049817fa4adb9c1b367b9f9"
+        },
+        {
+          "first_line": 106,
+          "last_line": 121,
+          "body": "using System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\nstatic async Task SelectPivSharedAsync(IPcscDevice reader, CancellationToken cancellationToken)\n{\n    // Coordinate discovery/monitoring and other connections before this direct open.\n    var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);\n    await using ISmartCardConnection connection = await factory.CreateAsync(reader, cancellationToken);\n    await using RawSmartCardSession session =\n        await RawSmartCardSession.CreateAsync(connection, cancellationToken);\n    await session.SelectAsync(ApplicationIds.Piv, cancellationToken);\n}",
+          "body_sha256": "5289baa08de2b885c902887c3e7c3f7e88fbf1fff7ba07efa2177760eb1074c5"
+        }
+      ],
+      "classification": "Complete top-level startup policy/discovery snippet or composable method with typed prerequisites; documentation-only C#",
+      "resource_scope": "Factory startup returns non-disposable discovered views. Method examples dispose borrowed raw session before enclosing caller-owned connection. Generic result explicitly returns the actual connection. No fake helpers.",
+      "compiler_status": "VALID-NOT-CHECKED",
+      "runtime_status": "NOT-EXECUTED"
+    }
+  ],
+  "ordinary_comment_native_signatures": "Reference declarations, not runnable consumer examples. Existing C signatures retained except correction of udev_monitor_unref return to native pointer; managed declaration unchanged.",
+  "inactive_history": "LinuxUdevScan.cs remains complete commented-out inactive implementation; no active example/compilation claim.",
+  "inventory_original_xml_examples": "The original inventory/example-bodies.json has no eligible Core C# body rows; this explicit XML inventory supplements it without changing historical inventory."
+}

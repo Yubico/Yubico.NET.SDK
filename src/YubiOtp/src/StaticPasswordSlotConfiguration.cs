@@ -43,7 +43,8 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
     /// The YubiKey itself has no concept of a keyboard layout; it only emits HID scan
     /// codes over USB. The scan codes produced here will render as <paramref name="password"/>
     /// only on a host configured with the same <paramref name="keyboardLayout"/>. Use
-    /// <see cref="KeyboardLayout.ModHex"/> for a layout-independent password.
+    /// <see cref="KeyboardLayout.ModHex"/> for characters whose scan codes are shared by supported
+    /// host layouts. Verify the selected characters and actual host layout; this is not universal layout independence.
     /// </remarks>
     /// <param name="password">The human-readable password (up to 38 characters).</param>
     /// <param name="keyboardLayout">The keyboard layout to translate characters with.</param>

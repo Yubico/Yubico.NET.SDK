@@ -1,0 +1,33 @@
+{
+  "kind": "historical-eight-family-two-boundary-structural-rollup",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_snapshot_metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "completed_units": 12022,
+  "remaining_units": 2022,
+  "files": [
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/coverage-progress.json",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/eight-family-two-boundary/coverage-progress.json",
+      "bytes": 65936,
+      "sha256": "8e309057c394b070530329cb5ce256dcda9f87b778a31eb31a96d3806968b125"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/coverage-progress.md",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/eight-family-two-boundary/coverage-progress.md",
+      "bytes": 2767,
+      "sha256": "ca5a431cf52e54ecb9468d33f5a1dfe12c9a1826d24aab934478f1eec00a4755"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/aggregate-all-families.py",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/eight-family-two-boundary/aggregate-all-families.py.snapshot",
+      "bytes": 23499,
+      "sha256": "93be593f171ac819cc080dceeb0f7235a540e6e954c29300adad9a763d1d61bc"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/all-families-receipt.json",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/eight-family-two-boundary/verification-receipt.json",
+      "bytes": 3143,
+      "sha256": "1ec20fc1b090c0705e930e694afae8fb1fb973e8098ca1d624bbb7a066f31345"
+    }
+  ]
+}

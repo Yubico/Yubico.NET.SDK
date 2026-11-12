@@ -1,0 +1,66 @@
+--- a/src/Piv/README.md
++++ b/src/Piv/README.md
+@@ -180,11 +180,12 @@
+ ```csharp
+ await using var session = await device.CreatePivSessionAsync();
+ 
++byte[] digest = [];
++Memory<byte> signature = Memory<byte>.Empty;
+ byte[] pin = Encoding.UTF8.GetBytes("123456");
+-byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
+-Memory<byte> signature = Memory<byte>.Empty;
+ try
+ {
++    digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
+     await session.VerifyPinAsync(pin);
+     var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+         ?? throw new InvalidOperationException("Generate a P-256 key first.");
+@@ -218,11 +219,12 @@
+     ?? throw new InvalidOperationException("Provision a matching RSA certificate first.");
+ using var rsa = certificate.GetRSAPublicKey()
+     ?? throw new InvalidOperationException("The certificate must contain an RSA public key.");
++byte[] expected = [];
++Memory<byte> plaintext = Memory<byte>.Empty;
+ byte[] pin = Encoding.UTF8.GetBytes("123456");
+-byte[] expected = Encoding.UTF8.GetBytes("known plaintext");
+-Memory<byte> plaintext = Memory<byte>.Empty;
+ try
+ {
++    expected = Encoding.UTF8.GetBytes("known plaintext");
+     byte[] ciphertext = rsa.Encrypt(expected, RSAEncryptionPadding.OaepSHA256);
+     await session.VerifyPinAsync(pin);
+     plaintext = await session.DecryptAsync(Slot.KeyManagement, ciphertext, RSAEncryptionPadding.OaepSHA256);
+@@ -241,6 +243,11 @@
+ `SignOrDecryptAsync` returns the padded representative. `CalculateSecretAsync` accepts a matching
+ P-256/P-384 or X25519 peer public key and returns raw agreement bytes. Your protocol authenticates the peer,
+ selects a KDF and derives application keys; clear the raw shared secret after derivation.
++
++Both examples enter `try` immediately after acquiring the PIN buffer, before hashing or allocating the known-plaintext
++fixture. Their `finally` blocks clear that PIN and each successfully assigned digest, signature, known-plaintext or
++output buffer, including when later setup fails. Keep this acquisition-to-cleanup scope when adapting them. Independent source,
++provider or application copies retain their own cleanup requirements; clearing these buffers does not clear those copies.
+ 
+ ### Manage PIN/PUK retries and recover access
+ 
+--- a/src/Piv/examples/PivTool/README.md
++++ b/src/Piv/examples/PivTool/README.md
+@@ -2,7 +2,7 @@
+ 
+ PivTool is an evaluation application for device discovery, credentials, key generation, certificates,
+ signing/decryption, attestation retrieval and reset. Start with the [PIV task guide](../../README.md)
+-for SDK contracts and complete host-verification/plaintext-cleanup examples. The tool demonstrates a
++for SDK contracts and scoped host-verification/plaintext-cleanup examples. The tool demonstrates a
+ subset of the SDK and has the limitations below; use a device you are authorized to provision.
+ 
+ ## Run and select a device
+@@ -146,7 +146,9 @@
+ credential/data buffers and, where used, an application-owned `IUserPresencePrompt`. Keep borrowed inputs
+ alive through awaited calls and clear secrets in the caller's finally scope. Returned host crypto objects,
+ certificates and imported `IPrivateKey` objects need their own disposal scopes. See the module task guide
+-for complete signature verification, known-plaintext decryption and protected-mode reopen/recovery scopes.
++for signature verification, known-plaintext decryption and protected-mode reopen/recovery scopes. Its signing and
++decryption examples protect each acquired PIN before later setup; preserve that scope in adaptations and account
++separately for any additional source, provider or result copies you create.
+ 
+ ## License
+ 

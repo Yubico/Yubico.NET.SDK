@@ -1,0 +1,146 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "kind": "fence",
+    "opening_line": 505,
+    "closing_line": 524,
+    "body_first_line": 506,
+    "body_last_line": 523,
+    "language": "csharp",
+    "body_sha256": "0b45a961044085951da4ada152bf365ce60e5c5aa9ea6c8029d8ece8b41ae5ba",
+    "body": "using Xunit;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\n\npublic class ProtocolConfigurationExamples\n{\n    [Fact]\n    public void Configure_FirmwareBelow400_UsesNeoMaxSize()\n    {\n        using var connection = new FakeSmartCardConnection { SupportsExtendedApduValue = false };\n        using var protocol = new PcscProtocol(connection);\n\n        protocol.Configure(new FirmwareVersion(3, 5, 0));\n\n        Assert.Equal(1390, protocol.MaxApduSize); // Complete-command ceiling, not a short data chunk.\n    }\n}\n",
+    "classification": "compilable-test-class-unchecked",
+    "reason": "Complete current test class in Core.UnitTests internal/fake/xUnit context; scopes fake and borrowed protocol, asserts the 1390 complete-command ceiling. Compilation NOT RUN.",
+    "compiler_state": "NOT RUN",
+    "execution_state": "NOT RUN",
+    "reviewed_example_number": 13,
+    "reviewed_body": "// ✅ GOOD - Tests real protocol configuration logic\n[Fact]\npublic void Configure_FirmwareBelow400_UsesNeoMaxSize()\n{\n    var protocol = new PcscProtocol(logger, connection);\n\n    protocol.Configure(new FirmwareVersion(3, 5, 0));\n\n    Assert.Equal(254, protocol.MaxApduSize);\n}\n",
+    "reviewed_body_sha256": "0aa1b6ea5781054ce21afffecc72f1790107fb4cf92510a38292d0d4b266fafc",
+    "reviewed_coordinates": {
+      "opening_line": 502,
+      "closing_line": 513,
+      "body_first_line": 503,
+      "body_last_line": 512
+    }
+  },
+  {
+    "path": "docs/LOGGING.md",
+    "kind": "fence",
+    "opening_line": 176,
+    "closing_line": 187,
+    "body_first_line": 177,
+    "body_last_line": 186,
+    "language": "csharp",
+    "body_sha256": "ef9ec2126df424d2e04e94eeac1b2642b62cbe9b6b09c5959f78788302c415f1",
+    "body": "using Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Devices;\n\nstatic async Task DiscoverWithTemporaryLoggingAsync(\n    ILoggerFactory loggerFactory, CancellationToken cancellationToken)\n{\n    using var _ = YubiKitLogging.UseTemporary(loggerFactory);\n    await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);\n}\n",
+    "classification": "compilable-method-unchecked",
+    "reason": "Complete typed method borrowing application-owned ILoggerFactory; caller lifetime covers late work and captured static loggers. Global restoration is not provider drain. Compilation NOT RUN.",
+    "compiler_state": "NOT RUN",
+    "execution_state": "NOT RUN",
+    "reviewed_example_number": 53,
+    "reviewed_body": "using Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Devices;\n\nstatic async Task DiscoverWithTemporaryLoggingAsync(CancellationToken cancellationToken)\n{\n    using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());\n    using var _ = YubiKitLogging.UseTemporary(loggerFactory);\n    await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);\n}\n",
+    "reviewed_body_sha256": "154a2714b865b0b68c87b15e91f5da177ea9cffae0371aedc8213b41ab1e3933",
+    "reviewed_coordinates": {
+      "opening_line": 175,
+      "closing_line": 186,
+      "body_first_line": 176,
+      "body_last_line": 185
+    }
+  },
+  {
+    "path": "docs/MEMORY-MANAGEMENT.md",
+    "kind": "fence",
+    "opening_line": 179,
+    "closing_line": 207,
+    "body_first_line": 180,
+    "body_last_line": 206,
+    "language": "csharp",
+    "body_sha256": "9642d27320b61b9da546aee4260d55f32829d95c80f5e3677ae7b2c6357d3119",
+    "body": "using System.Security.Cryptography;\n\nstatic async Task SendAsync(\n    Yubico.YubiKit.Core.Sessions.RawSmartCardSession session, CancellationToken cancellationToken)\n{\n    // Illustrative request bytes: choose a valid command/payload for the selected applet.\n    byte[] request = [0x01];\n    try\n    {\n        var command = new Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand(\n            0x00, 0xCA, 0x00, 0x00, request);\n        var response = await session.TransmitAndReceiveAsync(\n            command, throwOnError: false, cancellationToken: cancellationToken);\n        try\n        {\n            Console.WriteLine($\"SW={response.SW:X4}, {response.Data.Length} bytes\");\n        }\n        finally\n        {\n            response.Clear();\n        }\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(request);\n    }\n}\n",
+    "classification": "compilable-method-unchecked",
+    "reason": "Complete typed method borrowing an open RawSmartCardSession, owning request/response cleanup. Command bytes are illustrative; caller must select a valid applet/command. Compilation NOT RUN.",
+    "compiler_state": "NOT RUN",
+    "execution_state": "NOT RUN",
+    "reviewed_example_number": 65,
+    "reviewed_body": "using System.Security.Cryptography;\n\nstatic async Task SendAsync(\n    Yubico.YubiKit.Core.Sessions.RawSmartCardSession session, CancellationToken cancellationToken)\n{\n    // Illustrative request bytes: choose a valid command/payload for the selected applet.\n    byte[] request = [0x01];\n    try\n    {\n        var command = new Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand(\n            0x00, 0xCA, 0x00, 0x00, request);\n        var response = await session.TransmitAndReceiveAsync(\n            command, throwOnError: false, cancellationToken: cancellationToken);\n        try\n        {\n            Console.WriteLine($\"SW={response.SW:X4}, {response.Data.Length} bytes\");\n        }\n        finally\n        {\n            response.Clear();\n        }\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(request);\n    }\n}\n",
+    "reviewed_body_sha256": "9642d27320b61b9da546aee4260d55f32829d95c80f5e3677ae7b2c6357d3119",
+    "reviewed_coordinates": {
+      "opening_line": 179,
+      "closing_line": 207,
+      "body_first_line": 180,
+      "body_last_line": 206
+    }
+  },
+  {
+    "path": "docs/TESTING.md",
+    "kind": "fence",
+    "opening_line": 553,
+    "closing_line": 567,
+    "body_first_line": 554,
+    "body_last_line": 566,
+    "language": "csharp",
+    "body_sha256": "05375affb3f54c54ae20134a864987f2ecfc8486b857bf70dbf0006c0575f6b4",
+    "body": "using Xunit;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\nstatic async Task AssertSmartCardConnectionAsync(IYubiKey device, CancellationToken cancellationToken)\n{\n    await using ISmartCardConnection connection =\n        await device.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\n    Assert.NotNull(connection);\n    Assert.Equal(ConnectionType.SmartCard, connection.Type);\n}\n",
+    "classification": "compilable-method-unchecked",
+    "reason": "Complete illustrative helper borrowing an IYubiKey fake configured for SmartCard, owning returned connection and checking actual Type. Requires xUnit/Core references; no device-health claim. Compilation NOT RUN.",
+    "compiler_state": "NOT RUN",
+    "execution_state": "NOT RUN",
+    "reviewed_example_number": 95,
+    "reviewed_body": "[Fact]\npublic async Task ConnectAsync_WhenDeviceAvailable_ReturnsConnection()\n{\n    // Arrange\n    var device = new MockYubiKey { IsConnected = true };\n\n    // Act\n    await using var connection = await device.ConnectAsync<ISmartCardConnection>();\n\n    // Assert\n    Assert.NotNull(connection);\n    Assert.True(connection.IsConnected);\n}\n",
+    "reviewed_body_sha256": "28ccff2c76b60e18fc548ffcb6eb5cb53699161d657ccc679b1e32e591cdfc8e",
+    "reviewed_coordinates": {
+      "opening_line": 552,
+      "closing_line": 566,
+      "body_first_line": 553,
+      "body_last_line": 565
+    }
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "kind": "fence",
+    "opening_line": 356,
+    "closing_line": 364,
+    "body_first_line": 357,
+    "body_last_line": 363,
+    "language": "csharp",
+    "body_sha256": "048e4a43422e260a9df70e5e85b7e1576cb644c625850265b5811e1ca4e311d5",
+    "body": "// Before\nusing ISmartCardProtocol protocol = ProtocolFactory.Create(connection);\nawait protocol.SelectAsync(applicationId, cancellationToken);\n\n// After\nawait using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);\nawait raw.SelectAsync(applicationId, cancellationToken);\n",
+    "classification": "mixed-historical-before-current-after",
+    "reason": "Retain the complete mixed body. Only obsolete Before is historical/excluded; current After is eligible for context-specific compilation with borrowed connection, AID and token.",
+    "compiler_state": "NOT RUN",
+    "execution_state": "NOT RUN",
+    "reviewed_example_number": 118,
+    "reviewed_body": "// Before\nusing ISmartCardProtocol protocol = ProtocolFactory.Create(connection);\nawait protocol.SelectAsync(applicationId, cancellationToken);\n\n// After\nawait using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);\nawait raw.SelectAsync(applicationId, cancellationToken);\n",
+    "reviewed_body_sha256": "048e4a43422e260a9df70e5e85b7e1576cb644c625850265b5811e1ca4e311d5",
+    "reviewed_coordinates": {
+      "opening_line": 352,
+      "closing_line": 360,
+      "body_first_line": 353,
+      "body_last_line": 359
+    },
+    "segments": [
+      {
+        "label": "Before",
+        "body": "// Before\nusing ISmartCardProtocol protocol = ProtocolFactory.Create(connection);\nawait protocol.SelectAsync(applicationId, cancellationToken);\n\n",
+        "body_sha256": "7426b39b189400e0d210cf20315e225a8c6f8b4fee032b9d846bbecfdf295aaa",
+        "first_line": 357,
+        "last_line": 360,
+        "compilation_eligible": false,
+        "classification": "historical-excluded",
+        "compiler_state": "NOT RUN",
+        "execution_state": "NOT RUN"
+      },
+      {
+        "label": "After",
+        "body": "// After\nawait using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, cancellationToken);\nawait raw.SelectAsync(applicationId, cancellationToken);\n",
+        "body_sha256": "4de83237bac7d4cac6501f50564ea15bf75777112636cb5a60568d776e90db0d",
+        "first_line": 361,
+        "last_line": 363,
+        "compilation_eligible": true,
+        "classification": "current-composable-fragment",
+        "compiler_state": "NOT RUN",
+        "execution_state": "NOT RUN"
+      }
+    ]
+  }
+]

@@ -14,9 +14,12 @@
 
 namespace Yubico.YubiKit.Core.Devices;
 
+/// <summary>Application bits carried by device capability and configuration fields.</summary>
+/// <remarks>The containing field determines whether bits mean supported, enabled, or another application status.</remarks>
 [Flags]
 public enum DeviceCapabilities
 {
+    /// <summary>No modeled application bits are set.</summary>
     None = 0,
 
     /// <summary>
@@ -55,8 +58,8 @@ public enum DeviceCapabilities
     Fido2 = 0x02_00,
 
     /// <summary>
-    ///     Represents a combination of all available device capabilities.
-    ///     This includes Otp, U2f, OpenPgp, Piv, Oath, HsmAuth, and Fido2.
+    ///     The union of the currently modeled application bits: Otp, U2f, OpenPgp, Piv, Oath, HsmAuth, and Fido2.
+    ///     This mask describes the enum, rather than a particular device's enabled applications or future bits.
     /// </summary>
     All = Otp | U2f | OpenPgp | Piv | Oath | HsmAuth | Fido2
 }

@@ -1,0 +1,29 @@
+{
+  "kind": "historical-four-family-structural-rollup",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_snapshot_metadata_head": "c7ff868c6f1b89e2d72eaba526bf98d9c28adb05",
+  "completed_units": 5573,
+  "remaining_units": 8471,
+  "meaning": "8,471 was remaining, not completed coverage. Source/read dispositions remain investigator-only; review/edit/runtime qualification pending.",
+  "files": [
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/coverage-progress.json",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/coverage-progress.json",
+      "bytes": 32511,
+      "sha256": "0ba94491bf1791700e2136c4d0397d627a9572693049c39411aec567939ea974"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/coverage-progress.md",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/coverage-progress.md",
+      "bytes": 2339,
+      "sha256": "b6cf0723279ed5aa56229d5e6c0a29bea80192d7621e1556a162a0c311b27483"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/aggregate.py",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/aggregate.py.snapshot",
+      "bytes": 15142,
+      "sha256": "a2b8feea043eb1a75e3afe082e512ba0f354f10c8adc5f0f182e3d5b8414608e"
+    }
+  ],
+  "provenance_note": "Progress files were untracked at c7ff868c. Initial git show lookup failed with path absent (exit 128); exact working bytes are preserved here before current updates, rather than inventing a Git snapshot."
+}

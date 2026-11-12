@@ -1,0 +1,75 @@
+{
+  "outcome": "PASS",
+  "scope": "Focused logging documentation/body source correction only; not a fresh compiler result or restored compiled-example credit.",
+  "sample": "SAMPLE-WA002",
+  "selected_unit": "4886f819fa316d28",
+  "compiler_body": "FULL032",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries",
+  "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "focused_patch_sha256": "fb137a493fb4eac7b02b6592a9fc9d2abf74e1ef69d23f43015d7f76c5e4ad57",
+  "product": {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "before_accepted_primary_sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a",
+    "accepted_after_sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b",
+    "reviewed_logging_section": [70,96],
+    "repeated_route_line": 568
+  },
+  "changed_example": {
+    "fence": 2,
+    "before_body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+    "accepted_after_body_sha256": "692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860",
+    "classification": "Implementation fragment inside the real internal PreviewSignProcessor in WebAuthn; class-scope field and method-scope call, selectedAlgorithm supplied, explicit file-scope imports; not a public consumer class or complete executable example.",
+    "compiled_here": false
+  },
+  "reviewed_record_sha256": {
+    "focused.patch":"fb137a493fb4eac7b02b6592a9fc9d2abf74e1ef69d23f43015d7f76c5e4ad57",
+    "handoff.md":"a247157fc9d74fc689fe595099ad091b08da53d9c7b2073f9594538785792978",
+    "verification.json":"ef459be584bceb2136e8c8ac09ce8c368c3c3ab8e943ef9a2286fabe664eb2bb",
+    "preserved-inputs.json":"de13c4fcad1825c7cee98d7fe88f27c6985cca34a1ae6c5a2b778155bd2e2862",
+    "before.snapshot":"8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a",
+    "after.snapshot":"ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b",
+    "before-body.cs.fragment":"84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+    "after-body.cs.fragment":"692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860",
+    "LoggerFactoryExtensions-v10.0.0.cs.snapshot":"e48c259aa175f273e99652dd335889aaafdd59ae3da01a319fd2e9b8e7f26a77"
+  },
+  "actual_api_inputs": {
+    "binding": "verification.json real_api_full_source_identities: all eight actual paths and distinct snapshots independently matched; complete isolated/PRIMARY logging and Core/WebAuthn project files inspected, processor declaration checked.",
+    "isolated_logging_sha256":"bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "primary_logging_sha256":"a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b",
+    "core_project_sha256":"fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+    "isolated_webauthn_project_sha256":"b921fa801d7425bc87fd67beda89f2135b243affe1aa77ced1c464250c5e430d",
+    "primary_webauthn_project_sha256":"f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60",
+    "processor_sha256":"5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52",
+    "accessibility":"Core helpers internal; public LoggerFactory exposes ILoggerFactory; Core IVT excludes WebAuthn and WebAuthn.IntegrationTests. Actual processor internal to WebAuthn. No new access rights needed for stated in-module fragment.",
+    "original_api_source":"dotnet/runtime tag v10.0.0 src/libraries/Microsoft.Extensions.Logging.Abstractions/src/LoggerFactoryExtensions.cs, complete retained source lines 1-40",
+    "original_source_scope":"Public extension namespace/signature and typed category only; not installed Logging/Abstractions 10.0.2 package identity or compiled example."
+  },
+  "context7": {
+    "library_id":"/dotnet/docs",
+    "topic":"Public ILoggerFactory.CreateLogger<TCategoryName> extension and fully qualified type category",
+    "returned_sources":["docs/core/testing/microsoft-testing-platform-architecture-services.md","docs/core/extensions/logging/overview.md","docs/core/extensions/logging/library-guidance.md"],
+    "scope":"Independent API orientation; actual retained original and SDK source govern this review."
+  },
+  "independent_static_checks": {
+    "focused_patch_equals_actual_snapshot_diff":true,
+    "primary_guide_equals_before":true,
+    "historical_records_preserved":34,
+    "other_eligible_product_cs_md_paths_preserved":298,
+    "actual_source_snapshot_pairs_verified":8,
+    "current_fence_bodies":47,
+    "unchanged_fence_bodies":46,
+    "explicitly_changed_fence_bodies":1,
+    "sensitive_payload_security_prose_unchanged":true,
+    "oracle_patch_sha256_unchanged":"d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+    "runtime_api_ivt_changes":false
+  },
+  "compiler_and_sampling_status": {
+    "previous_FULL032":"Actual compiler-body accessibility error; not wrapper failure; failed attempt retained by coordinator.",
+    "SAMPLE_WA002":"Supported-sample credit remains retracted/reopened; this content PASS does not restore compiler credit.",
+    "fresh_actual_webauthn_compile":"Later coordinator-owned attempt, not run or pre-awarded here."
+  },
+  "remaining_gates":["fresh actual WebAuthn module/internal-context compiler attempt with real imports/dependencies","coordinator compiler/token/API preservation","analyzers/XML-cref binding","consumer/example validation","publication"],
+  "owned_writes":["compiler-logging-correction/review.md","compiler-logging-correction/review-identities.json"],
+  "not_run":["SDK build","capture/test run","formatter","crypto","native","device","Git commands/mutations","subagents","broader audit"],
+  "stopping_boundary":"Existing engineering/qualification holds unchanged; coordinator finishes/publishes Core Pass 1 and delivers deferred findings, then stops."
+}

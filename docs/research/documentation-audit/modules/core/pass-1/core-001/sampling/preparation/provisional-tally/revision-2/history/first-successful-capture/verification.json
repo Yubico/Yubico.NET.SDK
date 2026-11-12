@@ -1,0 +1,162 @@
+{
+  "result": "STRUCTURAL-1122-READ-AND-LAST-BOUNDED-QUEUE-CHECKS; NO CONTENT/SAMPLER PASS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "exact_actual_read_IDs": 1122,
+  "new_record_IDs": 53,
+  "new_supported_list_IDs": 46,
+  "new_zero_table_IDs": 7,
+  "duplicates": 0,
+  "conservative_broad_population": 9352,
+  "conservative_role_targets": 1067,
+  "next_required": 7,
+  "next_selected": 7,
+  "pool_shortfall": 0,
+  "new_full_category_quota": 0,
+  "current_mappings": 1122,
+  "staged_work_scopes": 4,
+  "pure_preamble_casefold_and_summary_scope_checks": true,
+  "final_denominator": null,
+  "final_clean_credit": null,
+  "sampler_PASS": null,
+  "preparer_content_verdicts": 0,
+  "input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/prepare.py": "9aaef3859e75ca8be2f1182adfa052ef7cff43200b179d83eb77c728a3bcdbc2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/original-read-tally.json": "2dcf70b3f39310c4b972f05ffb7852df832d47e4fadd5c479ce6d58281e0b6ca",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/additional-read-tally.json": "84ed721e47eb4a9f9350e4990c31aebc6d5d27daca4763739176a0c447e305ef",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/summary.json": "52249a77e9c01f80eb90193c279a37e4ce32d58483245bc7ee778f41e0435410",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/structural-check.json": "754b355a1dcc9a551ec1de7c6f4c6cb9f69948cfd1a0034e98ff89133e8691b5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/unread-required.json": "8137fca02e9efbb9b7ff85e134ae94eb068a6843eec77454b2790ed27b8a25e9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/population.json": "48442fdec87f94bf432608b9dd07d9004d8f117e558e3db668f7e346b9c2a75c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/strata.json": "96d2f8237a8195eef7cdbaa8e110c424393450e120e8bd516717cf22c246b1e8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/role-quota-status.json": "3694a36fdc7ab6b39147a21cc94b44c1054752a2be508b219241add4d81f88f2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-001-verdicts.md": "1edd8737c8030cb907537133b6eaac860ede9debae6f3e5a918b60e2e0cc18fb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-002-verdicts.json": "d8c3e3a433ab1e8db4769a787c5dbf9c699d196c8622b6f84436eb5ac94b3157",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-003-verdicts.json": "0567146888ba1eafcc4062ad2675b04a2d21548e20c26b189f0bba66ebf9b1cd",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-004-verdicts.json": "38c64e675e32a7cbd2f22a78cb853f27b3652147d9d2f6eae1f05da757d82f6c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B1-verdicts.json": "802fd7985e992840e3befb4cde7076f61b17b31114a49fad4cc25113977a9158",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json": "2e0da818e19fdac987d11b6a925f28414acae2f36d9af081faaaabf0b783cbba",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B3-verdicts.json": "4902832cbdd61c45fa0232c0882b004215d7559e5daaca0882fb32fd9447deee",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B4-verdicts.json": "bac85f6b1bf09738aaf92b2871e211f978472df6c0670e67d40c4f2dd41c4106",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B5-verdicts.json": "58c67c08a165c8f4c403731976e753c8489fa8278b1ba64c95d33d025bc3729c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B6-verdicts.json": "e27591804a868324fbe43b4670644550cd80216070068fbc6e67ff04d18b5ee9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-C-verdicts.json": "e1dd8d9bea9de13d98bdd0934eb0b528f16606d24dcfa68b8d584280bae87dee",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Ctap2-verdicts.json": "fa3377d06cdf6980aa11e41216665a4d78438e4398e53f4375ea583c67160487",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Management-verdicts.json": "94db330da8b8236b50e55986b4fad1bd2f69d7d72d7ac94de9a332b2f9a96b88",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-SecurityDomain-verdicts.json": "63eb25d52958b733c6496d6526d336d758b992fed942592e67cbf34e0c1ed71c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-YubiHsm-verdicts.json": "563c768ec21e3efdb98aeb924e606128c698c7d34d30e4dd2a7fc7c8f5b3fcf9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Oath-verdicts.md": "2c39133a3682c651f604b488dae5f2e9c17377ebbfc679d5022ab41f62c2f2ed",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn-verdicts.md": "82002499795b048303db19b620ed3a92db049540c4e6076f4c7fbd54fdc571e3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-OpenPgp-verdicts.md": "2ae5edfaf595c02e7256bc4a6abe4203357ce3c161152bd96a8eacaa70fa4021",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Piv-verdicts.md": "fe566621d9f19de4dbe327a499bd59f7a4131de9a4d549bbaf60757ff23261c8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-YubiOtp-verdicts.md": "d94c76eb87e0b4b1d1baedefe3d984ff3615fc35fe94c07602ecbdec1b418f21",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md": "091dd221ee7c374630403e0ed8ba8c715fa32c4438a450ea7a86910884fb6932",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md": "4ad4ffd1a99cb8d6edd686b326ba51d56ecf1ced53d41108c36687fcc72dae6a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/family-and-SD-replacement-verdicts.md": "e5b190ea09d189a9a753702bff6d6266c414ec3c7533ff25fafa1bf3e54df171",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md": "120d15b9065677bd8f1836fe865da8f79e584a8031392737f85d5bdcf578b8ca",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/expand.py": "c89a45930b26b89132c9f8a172acb1d8320507999c57c4caded1f2a692835fc9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/prepare.py": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/prepare.py": "30f91d6e72298e90074b6909aec60c7940563010ea106352b227c854e7a089d8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json": "45ca220e401ba48082e14f138d703df0e29a969dd7ae7d5edc89d2ad805075c2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-A-C.json": "ab02275eeac6cf721239b8965ebb5ac0c841df9e65fffab8fb3f0eafc082daa2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-protocols.json": "3cad8f595449bab9c38fe4e017a0f2b212010639c1bff7862161f535d5a6cab0",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-FIDO.json": "141942e73ebf22918e2cbb03ef24f17fc48e59c959e2faf08c2fc98c0c0ccea3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-transports.json": "8d22ef4cf166ca9b43a21339d745735f1efbfc3bdaefdeedd0881d6c892e2e0a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-SHARED.json": "98a749f7a5853f4da2fd8c3f83a9cbfb5c0112d977fc3641862d65fb441a20ef",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-applets.json": "196b53e3f397b0e241793d4413c4cbf761f3d60550ed4f4d36e4fc97a568164c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-PGP-PIV.json": "9945efaa98a20e502fc9aeb8ac7555faabc9fd8c78aaef9dbc36cd6baeaa85a5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-A.json": "7127792418f5fda0ca4b12e89e9a662d00b30ef37bbb0912240e2e8add80e00b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-SHARED.json": "78ececb0a2687e9c2d42f8d27aef9540e0cca7b428b467849e1aac3d771d1366",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-external.json": "d95731a23966df7564ef056653ca7f235eaa31320dc346a493ccab4b75eae936",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B2.json": "760a2e47df077987f6bac025b4a3f33f914ea17bdfa8e604acb1aa0f0b1f6d94",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B3.json": "e89396e367c6c3efd64e02be0251b19491bbbc1cace99f230a6f972dc449d584",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-SD.json": "d0998fb931d71ffa990b25a03e5ab31d9c43c14013dd4b4ebbc62720a2a9884e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/known-edit-overlap-inputs.json": "2f49225edca63795ee7712d8cf06ea458f500ca5b54762b1150dd79598598e14",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/accepted-overlap-inputs.json": "9ca00d4fe239e29185a75f01b34cd9dd174ccbeffc48c60c8923c5b3e79f8867",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review-identities.json": "dae83e2ddcb167b364433a9defc70b9f3d8a8195ad8db561fc8709b3e310343d",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/review-identities.json": "18a04dc034d44983c975a8654e1618eed2dd770c488186ca6a8b02c7e2bd261a",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/focused.patch": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/before/src/OpenPgp/src/OpenPgpSession.cs": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/after/src/OpenPgp/src/OpenPgpSession.cs": "a94cc912faad198fb7adc595cb0a6846d98a53b8bf33a489e0e69637451d550e",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/before/src/OpenPgp/CLAUDE.md": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/after/src/OpenPgp/CLAUDE.md": "1d48c7feea15a2ea287841d109d7ad02db24c4f817189cade61d0febf761e422",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/reviewed-queued-PGP-original-scope.diff": "e50885303530c59987567a7d0cfc3cddcf25678b37cd292711041929af280927",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/family-replacements/revision-2/replacement-pool-exclusions.json": "2e95ac9bfcef16cba5be65f6b22e8a51e4b438ab5e6c20001f1be6826f892af7",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/unit-dispositions.json": "49a22ea23bd2c6090e67b51e74989d02f330f96f90956126317203e8db6872d5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/superseded-proposals.json": "f476fe8dab8bef32566a2b3817eab0d78a472a8b1dccd3077c4e21612c65f7ae"
+  },
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/accepted-products-at-capture.json",
+      "bytes": 79693,
+      "sha256": "45ca220e401ba48082e14f138d703df0e29a969dd7ae7d5edc89d2ad805075c2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/completed-read-tally.json",
+      "bytes": 2086550,
+      "sha256": "1f9df37e4ace67af6a13374a2a487686577713a3efe5da5b92325b8e51009287"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/current-mapping.json",
+      "bytes": 931604,
+      "sha256": "5e1a4bbbea5d9aa53f3eea77327edfc91837666e7f78a582c45157e37d02a449"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/next-required-original-units.md",
+      "bytes": 6296,
+      "sha256": "b474d411a0e0f49648f6cf56aa1fc3089306bf2c0aa77b3e95d6f58e4073195b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/next-required-selection.json",
+      "bytes": 6843,
+      "sha256": "940815a14c0f97327af87ff1845201294947380775c7e32be1dfed10f7ad51b3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/pending-corrections.json",
+      "bytes": 1447,
+      "sha256": "92ea779c0416e7d3d8921034e04dd2e0825b44e47300cf080da051a836556272"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/preamble-screen-evidence.json",
+      "bytes": 12836,
+      "sha256": "72b88981ec8b5db0ea07f719a4fa9a85d1708c04fc3d1543abc4d43e9b6bd1ea"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/preparation-notes.json",
+      "bytes": 1717,
+      "sha256": "d3983dfc2c0ee72c3963e35849ca2ce5195efa44e54656b3d8b459e82d8ff3b2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/prepare.py",
+      "bytes": 29477,
+      "sha256": "9aaef3859e75ca8be2f1182adfa052ef7cff43200b179d83eb77c728a3bcdbc2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/read-plan.md",
+      "bytes": 4369,
+      "sha256": "3b36050f9a9b9d8862b0812bbe3fc353903089ccaaf78ec037e398def276f8ed"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/replacement-pool-exclusions.json",
+      "bytes": 15040,
+      "sha256": "d3e8c4e2732f5ec642e734d6a0bd09685848be8a1e5f178dc1185fb16208ec10"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/reviewed-queued-PGP-original-scope.diff",
+      "bytes": 8028,
+      "sha256": "e50885303530c59987567a7d0cfc3cddcf25678b37cd292711041929af280927"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/role-quota-status.json",
+      "bytes": 38950,
+      "sha256": "36b1216b2f50d2003d4f93f92988a868531959024016dfbad5aae2c60d5254ad"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/summary.json",
+      "bytes": 14390,
+      "sha256": "1413ebff7ccbccccf24ca31c547007985c4577712888dfdf70cf0512c1bf969a"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "Readonly NuGet metadata selection for the existing current Serilog application example, not restore/build/runtime execution. Versions live only in the new full audit host; repository central versions and shipping projects remain unchanged.",
+  "packages": [
+    {
+      "package": "serilog.extensions.hosting",
+      "version": "10.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/serilog.extensions.hosting/10.0.0/serilog.extensions.hosting.nuspec",
+      "status": 200,
+      "bytes": 4788,
+      "sha256": "55452419201983c59e4ce2c26a31a49da11c0353ebe70126a0a9073e102955a6",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/application-dependencies/serilog.extensions.hosting-10.0.0.nuspec.snapshot",
+      "access_utc": "2026-11-12T02:17:41.540463+00:00"
+    },
+    {
+      "package": "serilog.sinks.console",
+      "version": "6.1.1",
+      "url": "https://api.nuget.org/v3-flatcontainer/serilog.sinks.console/6.1.1/serilog.sinks.console.nuspec",
+      "status": 200,
+      "bytes": 1968,
+      "sha256": "c62dc2bc8325e72ff947a4228241357490b0e74ac1e827fa2e03628d7975b9ae",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/application-dependencies/serilog.sinks.console-6.1.1.nuspec.snapshot",
+      "access_utc": "2026-11-12T02:17:41.620552+00:00"
+    },
+    {
+      "package": "serilog.sinks.file",
+      "version": "7.0.0",
+      "url": "https://api.nuget.org/v3-flatcontainer/serilog.sinks.file/7.0.0/serilog.sinks.file.nuspec",
+      "status": 200,
+      "bytes": 2093,
+      "sha256": "35fe8657727b0d4fcf246b70bef772feaded6791092ed6c362f9dfefbedc18ad",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/application-dependencies/serilog.sinks.file-7.0.0.nuspec.snapshot",
+      "access_utc": "2026-11-12T02:17:41.687313+00:00"
+    }
+  ],
+  "context7": "Serilog documentation identifies hosting integration and Console/File sinks as separate real packages. Public NuGet index responses confirmed these stable versions.",
+  "future_evidence": "Actual restored assets and Csc analyzer/reference identities must still be captured by the canonical build."
+}

@@ -1,0 +1,66 @@
+{
+  "revision": 2,
+  "full_patch_sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+  "focused_delta_sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2",
+  "report_sha256": "69b055e77390877dc5455f90f114dc37b821fd720a0cec293197f0e909ae22ed",
+  "records": [
+    {
+      "path": "current-path-hashes.json",
+      "sha256": "0d440261ba1d64ab54bc415689a3f42bb8a199703e0c53cf9c3738f52d69f2e5"
+    },
+    {
+      "path": "example-bodies.json",
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "path": "example-identity-check.json",
+      "sha256": "fd3ad6ef4e2147919cf7aeee396996489081f5a083426dcbf2e9b306a68858c9"
+    },
+    {
+      "path": "file-dispositions.json",
+      "sha256": "b3a1421c894431a33dc88a0674b552f12773cb9238845652c169dfd5212ebed4"
+    },
+    {
+      "path": "focused-citations.json",
+      "sha256": "1e245be21f9507bb5dc904e8002aafeb6fb4dd2922e16a29571153a81b817b97"
+    },
+    {
+      "path": "focused-review-delta.patch",
+      "sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2"
+    },
+    {
+      "path": "prior-record-preservation.json",
+      "sha256": "18d3e961e86ae8dcc43fc2ea5f5de83ec39c1fc5d1b40def04d3bdc285395ccb"
+    },
+    {
+      "path": "proposal-dispositions.json",
+      "sha256": "ba2b3214d65cc416eeebb72c1518c295db5d625b1fa9a2d37a42af4a7e9273ee"
+    },
+    {
+      "path": "report.md",
+      "sha256": "69b055e77390877dc5455f90f114dc37b821fd720a0cec293197f0e909ae22ed"
+    },
+    {
+      "path": "review-inputs.json",
+      "sha256": "9d8b522c7beae4c02746b86534a7c1a7dc5849f2c9af95b3ecfcf302f2fdc741"
+    },
+    {
+      "path": "revision-corrections.json",
+      "sha256": "91d813ecff200a43d1f5e9056114e02a8f86e4d9157afee3d82c05950e7362e2"
+    },
+    {
+      "path": "source.patch",
+      "sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de"
+    },
+    {
+      "path": "static-preservation.json",
+      "sha256": "9929bb8578289b73ff8ba25cf87bff9750abf785060a48a000f16b87ab2aa49b"
+    },
+    {
+      "path": "xml-check.json",
+      "sha256": "f8f8477e5116f33e058d833df1bec9cac20a99998eeaad87412f49ea4d365627"
+    }
+  ],
+  "re_review_status": "PENDING-FOCUSED-INDEPENDENT-REVIEW",
+  "old_patch_86b0c6_and_original_records": "PRESERVED-BYTE-EXACT"
+}

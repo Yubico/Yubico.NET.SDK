@@ -16,6 +16,9 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
+// Plain continuation exceptions notify recovery only after a successful fragment advanced offset.
+// A first-fragment transport failure can leave wire state uncertain without that notification;
+// absence of a local refusal latch is not evidence that the card can safely accept another command.
 internal class ChainedApduTransmitter(
     ISmartCardConnection connection, IApduFormatter formatter, Action<Exception>? onContinuationFailure = null,
     bool rejectIntermediateFragment = false)

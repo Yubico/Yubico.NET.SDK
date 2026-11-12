@@ -1,0 +1,16 @@
+{
+  "scope": "Future explicit-handoff comparison policy only; no actual formatter files inspected",
+  "automatic_semantic_exclusion_for_EOF_only": false,
+  "automatic_whole_file_exclusion": false,
+  "required_checks": [
+    "Bind explicit accepted before/after hashes and actual transfer receipt; do not infer file list or repin unknown bytes.",
+    "Require exact raw prefix identity plus exactly one LF or CRLF appended to a previously unterminated file; preserve BOM and all preceding bytes.",
+    "Verify exact original decoded-character interval bytes/range hash and normalized existing mapped interval independently of whole-file hash.",
+    "If a successor terminal unit includes the new terminator, record that literal interval/range hash difference explicitly, not as a semantic edit.",
+    "Record append byte offset, hex bytes, source/successor lengths and unit intervals; no broad rstrip, whitespace normalization or content-verdict inference.",
+    "Any other edit uses ordinary exact changed-span reconciliation; root bullet and WA body remain substantive edits."
+  ],
+  "comparator": "eof_interval_policy.py:compare_eof_append",
+  "actual_product_comparisons": 0,
+  "final_product_hash_seal": "NOT CREATED; wait explicit Astra final transfer handoff"
+}

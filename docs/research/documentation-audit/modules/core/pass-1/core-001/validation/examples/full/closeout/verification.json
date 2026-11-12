@@ -1,0 +1,72 @@
+{
+  "status": "FINISHED_ROLLUP_FRESH_STATIC_VERIFICATION_PASS",
+  "rollup_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/manifest.json",
+    "bytes": 7912,
+    "sha256": "8cd9aaff3478b26312709369f09ef42e56d43eee3ada2a41c117b6a87f88902c"
+  },
+  "acceptance_summary": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/acceptance.json",
+    "bytes": 3449,
+    "sha256": "d72b062c396d044f16fb7ae75cf75889656428505fa9c074f0af066dd3e61120"
+  },
+  "source_body_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/manifest.json",
+    "bytes": 2315007,
+    "sha256": "84e70ceed63320f4ddcf8210c2cf69ebd0a08259d2f39b16923dcfd657c8206b"
+  },
+  "final_source_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/reviewed-inputs.json",
+    "bytes": 972734,
+    "sha256": "070b721e14ab9ec4d19705301ab2ac3d103bac0f78b9b157cc13b737493a5daf"
+  },
+  "selected_body_ledger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/selected-bodies.json",
+    "bytes": 912948,
+    "sha256": "57da954d9f03817475e30bf2acd59b1f4fd11f7195f461579847c1a7abe65c04"
+  },
+  "canonical_preparation_ledger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/preparations.json",
+    "bytes": 890804,
+    "sha256": "1cc9d90ce6f403cad3a0df4945f0f6cf21e826180c748f4cf00dfe287bb220d4"
+  },
+  "authority_ledger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/authority-dispositions.json",
+    "bytes": 1609107,
+    "sha256": "a35ac85409682d4295cb450f54977b640695cac1cfc3dda87159bfa45c884aae"
+  },
+  "retained_file_ledger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/retained-files.json",
+    "bytes": 180789,
+    "sha256": "dc2131b058c0ced25acf8ffac32e7261f5718cdf0e1aa4e68028a11c1762a57f"
+  },
+  "history_ledger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/history-identities.json",
+    "bytes": 524488,
+    "sha256": "8d03be159b20b82f4627df6d9a783db757cdeaad438eca9fc0a8f8a6f9d8e284"
+  },
+  "authority_records": 703,
+  "selected_full_unique_body_ids": 302,
+  "full_unique_preparations": 300,
+  "consumer_files": 244,
+  "distinct_test_injections": 56,
+  "explicit_same_context_aliases": 2,
+  "pilot_unique_compilations": 17,
+  "total_unique_compilations": 317,
+  "accepted_full_contexts": 11,
+  "zero_warning_contexts": 11,
+  "full_retained_copies_verified": 208,
+  "full_retained_bytes": 19352598,
+  "pilot_retained_copies_separately_verified": 29,
+  "all_source_backed_current_manifest_regions_exact": true,
+  "current_product_paths_verified": 363,
+  "all_attempts_and_original_profiles_preserved": true,
+  "failed_attempts_still_failed": 7,
+  "original_live_bin_obj_paths_dereferenced": false,
+  "current_binary_equivalence_claim": false,
+  "example_execution_claim": false,
+  "normative_physical_and_deferred_holds": "retained unchanged",
+  "normal_clean_build_pack_tests": "Coordinator-owned; not polled or certified.",
+  "worker_actions": "New closeout data/Markdown and read-only immutable/source/retained-copy checks only; no primary product/Git/SDK/capture/native/device/subagent actions.",
+  "new_build_capture_requalification_tool": false
+}

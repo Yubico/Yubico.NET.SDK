@@ -38,7 +38,7 @@ internal static class PrivateKeyConsistency
     ///     Verifies that <c>Q = d·G</c> by signing a fixed digest with the key as supplied and verifying
     ///     with a public-only key built from the same <c>Q</c>. A signature made with <c>d</c> verifies
     ///     under <c>Q</c> only if they match; an off-curve <c>Q</c> fails the same way. No D-only key is
-    ///     ever imported, so no public point is derived by the runtime.
+    ///     ever imported by this helper. Provider admission and internal storage remain platform-specific.
     /// </summary>
     /// <exception cref="CryptographicException">The point does not match the scalar, or is invalid.</exception>
     public static void ThrowIfPublicPointDoesNotMatch(in ECParameters parameters)
@@ -49,9 +49,8 @@ internal static class PrivateKeyConsistency
         bool matches;
         try
         {
-            // Some platforms (OpenSSL) already refuse a mismatched import here; others (CNG, SecKey)
-            // accept it and re-derive Q, which the verify step below catches. Either way the caller sees
-            // one exception type.
+            // Import validation differs by provider. Verify against the separately imported public
+            // point as well, and present import/signature failures through one exception type.
             using var signer = ECDsa.Create(parameters);
             using var verifier = ECDsa.Create(new ECParameters { Curve = parameters.Curve, Q = parameters.Q });
 
@@ -75,9 +74,9 @@ internal static class PrivateKeyConsistency
     ///     <c>e·d ≡ 1 (mod lcm(p−1, q−1))</c>.
     /// </summary>
     /// <remarks>
-    ///     Uses <see cref="BigInteger" />, which is neither constant-time nor zeroable. The private values
-    ///     already exist in the caller-supplied managed arrays, so this adds no exposure the import does not
-    ///     already have.
+    ///     Uses <see cref="BigInteger" />, which is neither constant-time nor explicitly clearable.
+    ///     Its private-value temporaries have lifetimes independent of the caller's arrays. These selected
+    ///     relations do not establish primality, distinct odd primes, or every RSA component range.
     /// </remarks>
     /// <exception cref="CryptographicException">A component is missing or a relation does not hold.</exception>
     public static void ThrowIfInconsistent(in RSAParameters parameters)

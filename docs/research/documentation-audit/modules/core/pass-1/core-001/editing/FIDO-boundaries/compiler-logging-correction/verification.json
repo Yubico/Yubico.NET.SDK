@@ -1,0 +1,149 @@
+{
+  "sample": "SAMPLE-WA002",
+  "selected_unit": "4886f819fa316d28",
+  "compiler_body": "FULL032",
+  "path": "src/WebAuthn/CLAUDE.md",
+  "before_accepted_primary_sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a",
+  "after_full_source_sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b",
+  "focused_patch_sha256": "fb137a493fb4eac7b02b6592a9fc9d2abf74e1ef69d23f43015d7f76c5e4ad57",
+  "changed_ranges": [
+    {
+      "before": [
+        72,
+        72
+      ],
+      "after": [
+        72,
+        79
+      ],
+      "operation": "replace"
+    },
+    {
+      "before": [
+        77,
+        77
+      ],
+      "after": [
+        84,
+        87
+      ],
+      "operation": "replace"
+    },
+    {
+      "before": [
+        79,
+        79
+      ],
+      "after": [
+        89,
+        89
+      ],
+      "operation": "replace"
+    },
+    {
+      "before": [
+        558,
+        558
+      ],
+      "after": [
+        568,
+        568
+      ],
+      "operation": "replace"
+    }
+  ],
+  "example": {
+    "fence": 2,
+    "before_line": 78,
+    "after_line": 88,
+    "before_body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+    "after_body_sha256": "692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860",
+    "body_changed": true,
+    "classification": "implementation fragment inside PreviewSignProcessor; class-scope field plus method-scope logging call, explicit file-scope imports and supplied selectedAlgorithm; not standalone executable",
+    "compiled_here": false
+  },
+  "current_fido_fences": 47,
+  "current_fido_fences_unchanged": 46,
+  "current_fido_fences_changed": 1,
+  "historical_records_preserved": 34,
+  "all_other_product_cs_md_unchanged": true,
+  "queued_wa_oracle_patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+  "sensitive_payload_prose_unchanged": true,
+  "primary_guide_still_equals_before": true,
+  "api_evidence": {
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/Microsoft.Extensions.Logging.Abstractions/src/LoggerFactoryExtensions.cs",
+    "tag": "v10.0.0",
+    "snapshot_sha256": "e48c259aa175f273e99652dd335889aaafdd59ae3da01a319fd2e9b8e7f26a77",
+    "scope": "public API namespace/signature source; not installed-package identity or compiled example"
+  },
+  "real_api_full_source_identities": [
+    {
+      "origin": "isolated",
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/src/Core/src/YubiKitLogging.cs",
+      "sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+      "snapshot": "isolated-source-1.snapshot"
+    },
+    {
+      "origin": "isolated",
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+      "snapshot": "isolated-source-2.snapshot"
+    },
+    {
+      "origin": "isolated",
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "sha256": "b921fa801d7425bc87fd67beda89f2135b243affe1aa77ced1c464250c5e430d",
+      "snapshot": "isolated-source-3.snapshot"
+    },
+    {
+      "origin": "isolated",
+      "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs",
+      "sha256": "5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52",
+      "snapshot": "isolated-source-4.snapshot"
+    },
+    {
+      "origin": "PRIMARY-read-only",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/YubiKitLogging.cs",
+      "sha256": "a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b",
+      "snapshot": "PRIMARY-read-only-source-1.snapshot"
+    },
+    {
+      "origin": "PRIMARY-read-only",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+      "snapshot": "PRIMARY-read-only-source-2.snapshot"
+    },
+    {
+      "origin": "PRIMARY-read-only",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60",
+      "snapshot": "PRIMARY-read-only-source-3.snapshot"
+    },
+    {
+      "origin": "PRIMARY-read-only",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs",
+      "sha256": "5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52",
+      "snapshot": "PRIMARY-read-only-source-4.snapshot"
+    }
+  ],
+  "package_file": {
+    "path": "Directory.Packages.props",
+    "sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+    "logging_versions": "10.0.2"
+  },
+  "focused_static_checks": "passed",
+  "independent_review": "pending",
+  "fresh_actual_compile_profile": "Astra after accepted transfer; not run here",
+  "FULL032_previous_failed_attempt": "retained coordinator evidence; no validation files modified",
+  "sampling_reclassification": "declared coordinator queue only; no central ledger edits",
+  "not_run": [
+    "SDK build",
+    "SDK test",
+    "formatter",
+    "crypto",
+    "native",
+    "device",
+    "Git mutation",
+    "subagent"
+  ]
+}

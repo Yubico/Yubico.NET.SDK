@@ -1042,7 +1042,8 @@ public class SlotConfigurationTests
     [Fact]
     public void Crc_AllZeroConfig_ValidCrc()
     {
-        // UpdateConfiguration with no flags produces a mostly-zero config
+        // Default update flags remain present (SerialApiVisible/AllowUpdate); check the assembled CRC,
+        // not an all-zero wire vector or an independently supplied CRC known answer.
         using var config = new UpdateConfiguration();
         var result = config.GetConfig();
 

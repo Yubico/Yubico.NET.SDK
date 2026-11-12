@@ -1,0 +1,37 @@
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using System;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.OpenPgp;
+
+namespace Audit20261111.DocExamples.Full;
+internal static class Body351
+{
+internal static async Task CompileOnly()
+{
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+await using var session = await device.CreateOpenPgpSessionAsync();
+ApplicationRelatedData data = await session.GetApplicationRelatedDataAsync();
+Console.WriteLine($"Card {data.Aid.Version}, applet {session.FirmwareVersion}");
+foreach (var entry in await session.ListKeyInformationAsync())
+{
+    Console.WriteLine($"{entry.Key}: {entry.Value}");
+}
+}
+
+}

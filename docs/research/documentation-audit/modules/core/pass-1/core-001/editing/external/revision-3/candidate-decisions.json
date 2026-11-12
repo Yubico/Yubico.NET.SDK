@@ -1,0 +1,101 @@
+{
+  "inherited_final_revision2": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/full-successor-candidate-decisions.json",
+    "bytes": 5529934,
+    "sha256": "a089953241799102e7c4ed4ea48fe66246e4edcb97a284efdb235c524ff90260"
+  },
+  "updates": [
+    {
+      "path": "scripts/toolchain/Process.cs",
+      "ids": [
+        "CORE-B4-C007",
+        "CORE-B4-C008",
+        "FPT-054",
+        "FPT-055"
+      ],
+      "documentation": "EDIT, authorized D-comment scope hold discharged; independent review pending",
+      "reason": "EDIT released D facet: scope Exec summary to processes dispatched through it and condition full step logging on availability. Mask covers supplied secrets in shown commands, not process output or RunLog.Start stored argv. Dotnet.Capture and RunLog.Git launch directly. No process/masking/logging/drain implementation or credential value changed.",
+      "source_anchors": [
+        "Exec.Run/Mask at base lines29-85,114-115; Dotnet.Capture130-150",
+        "scripts/toolchain/RunLog.cs:55-64,451-467",
+        "investigation/B4/file-evidence.md:177-191; investigation-B4.md:125-138"
+      ],
+      "original_local_proposal_links": [
+        {
+          "local_id": "CORE-B4-C007",
+          "proposal_id": "FPT-054",
+          "facets": [
+            "D",
+            "P",
+            "M",
+            "Q",
+            "B"
+          ]
+        }
+      ],
+      "remaining": "M/P/E/runtime/producer/physical facets unchanged; no accepted IDs allocated"
+    },
+    {
+      "path": "scripts/toolchain/Results.cs",
+      "ids": [
+        "CORE-B4-C008",
+        "FPT-055"
+      ],
+      "documentation": "EDIT, authorized D-comment scope hold discharged; independent review pending",
+      "reason": "EDIT released D facet: EnsureTestsRan checks classified failed/all-NoTestsExecuted outcomes, not actual nonzero parsed execution counts. Document empty/mixed/unknown-count limits without strengthening the gate or endorsing them as a new policy.",
+      "source_anchors": [
+        "Gates.EnsureTestsRan at base lines97-109; actual predicates103-108",
+        "scripts/toolchain/TestTargets.cs at base lines97-117, classifier",
+        "investigation/B4/file-evidence.md:177-191; investigation-B4.md:131-138"
+      ],
+      "original_local_proposal_links": [
+        {
+          "local_id": "CORE-B4-C008",
+          "proposal_id": "FPT-055",
+          "facets": [
+            "D",
+            "P",
+            "Q",
+            "B"
+          ]
+        }
+      ],
+      "remaining": "M/P/E/runtime/producer/physical facets unchanged; no accepted IDs allocated"
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "ids": [
+        "CORE-A-C018",
+        "FPT-018"
+      ],
+      "documentation": "EDIT, authorized D-comment scope hold discharged; independent review pending",
+      "reason": "EDIT released D facet: describe actual per-term native arguments and same-kind positive flag restriction; remove duplicate/stale wildcard-combination and unqualified runner boolean claims. Pinned repeated-switch execution remains unrun. No filter code, help/error text, expression, assertion or policy changed.",
+      "source_anchors": [
+        "TranslateToMtpFilter at base lines158-256; branches171-187,190-220,224-256",
+        "investigation-A.md:320-331, CORE-A-C018"
+      ],
+      "original_local_proposal_links": [
+        {
+          "local_id": "CORE-A-C018",
+          "proposal_id": "FPT-018",
+          "facets": [
+            "D",
+            "E",
+            "Q"
+          ]
+        },
+        {
+          "local_id": "CORE-B4-C008",
+          "proposal_id": "FPT-055",
+          "facets": [
+            "D",
+            "P",
+            "Q",
+            "B"
+          ]
+        }
+      ],
+      "remaining": "M/P/E/runtime/producer/physical facets unchanged; no accepted IDs allocated"
+    }
+  ]
+}

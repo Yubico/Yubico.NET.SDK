@@ -1,0 +1,12 @@
+[
+  {
+    "path": "docs/architecture/sdk-architecture-map.yml",
+    "before_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+    "primary_before_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852"
+  },
+  {
+    "path": "docs/architecture/sdk-architecture-diagrams.md",
+    "before_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+    "primary_before_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+  }
+]

@@ -1,0 +1,63 @@
+{
+  "schema": "core-001-SHARED-sampling-correction-independent-review-1",
+  "verdict": "PASS",
+  "scope": "Exact one-Markdown-file SAMPLE-A001/A003 lifecycle correction only; no broad guide re-audit or A C# transfer",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides",
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "accepted_path": "docs/architecture/event-driven-device-discovery.md",
+  "before_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+  "accepted_after_sha256": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c",
+  "accepted_focused_patch_sha256": "37074361c54bb2232ff8406ae37af482a73c51b029a3dfd8328e467f697e274e",
+  "sampling_refs": ["SAMPLE-A001", "SAMPLE-A003", "core-001:unit:cf1e2081af8b8ac4"],
+  "edited_overlap_clean_sampling_credit": 0,
+  "sampling_reconciliation_owner": "coordinator; no central sampling record changed",
+  "preserved_predecessor": {
+    "review_path_relative_to_run": "editing/SHARED/revision-2/review.md",
+    "review_sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2",
+    "identity_path_relative_to_run": "editing/SHARED/revision-2/review-identities.json",
+    "identity_sha256": "10ceb52f8cb0575e7751689c4885d8ab4a150ca922307beaf2fa77cd3dedcb84",
+    "full_26_path_patch_sha256": "8e743d0336f0d0338d6a726f63ececcd37a3877cb7da6741626e169d8b99c56c",
+    "meaning": "Predecessor full-26-path acceptance retained exactly; this focused patch replaces only the named path hash. No old acceptance identity is relabeled."
+  },
+  "focused_inputs_sha256": {
+    "report.md": "b3208cbcc46f47a0d7895116dcb1b92e1748fa048bd5dd7981dd08b15f0f4249",
+    "before.md": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+    "after.md": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c",
+    "product.patch": "37074361c54bb2232ff8406ae37af482a73c51b029a3dfd8328e467f697e274e",
+    "changed-path-sha256.json": "e6ff511cdae1c0a39bd55a57a65cbdca25e5b42998cd84fcb44aa1fd9f589e77",
+    "source-evidence.json": "6ee9dbd9453025c41a310f8ee6398f5bb20642663993c8beba5234b5408774da",
+    "preserved-record-identities.json": "dbd28838f3e8a28be6b63a192b61a99e7c734817c136dee7e323b366417b4290",
+    "verification.json": "69ac992e52e460d6c9102dccf951cfc5bbe0e99f15503237a79a179a514ee4a4",
+    "output-identities.json": "289f236981401cf194575c3c4350d212f6c05f8d6ed0cb1fd876bf5e6b0def42"
+  },
+  "guide_worktree_source_sha256": {
+    "src/Core/src/Devices/HotplugSignals.cs": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+    "src/Core/src/Devices/YubiKeyMonitor.cs": "1145218451f56567275d848d9bdfd04082a557fd49e88f2d2c536c08d01c83f1",
+    "src/Core/src/Devices/DeviceChangeFeed.cs": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3"
+  },
+  "retained_channel_authority": {
+    "path_relative_to_run": "investigation/A/sources/dotnet10-bounded-channel.cs.txt",
+    "revision": "dotnet/runtime v10.0.0",
+    "sha256": "4798673d97ee37741287c70b7f017b5f962b956b1a9e214b9089e0940a4ee406",
+    "checked_lines": [305, 360],
+    "limit": "TryComplete preserves earlier completion/error; not installed-runtime or execution evidence"
+  },
+  "independent_static_verification": {
+    "mismatches": 0,
+    "product_paths_changed_from_predecessor": ["docs/architecture/event-driven-device-discovery.md"],
+    "other_accepted_product_paths_unchanged": 25,
+    "prior_records_preserved": 34,
+    "source_evidence_entries_verified": 7,
+    "actual_after_equals_after_capture": true,
+    "reconstructed_unified_diff_equals_focused_patch": true,
+    "unchanged_fence": {"opening_line":25,"closing_line":33,"body_sha256":"63a69f9739206bd38ed7f95780af89d803f8a4408323d7b7870e3abf3cf48fbb"},
+    "git_diff_check_exit": 0,
+    "focused_reverse_check_exit": 0,
+    "head_unchanged": true,
+    "index_unchanged": true
+  },
+  "unrun": ["build/test/compiler/formatter", "native/device/cryptographic operations", "throwing-logger fault injection", "held experiments"],
+  "ungranted": ["clean-sample credit for edited overlap", "blanket cleanup/resource/native-release proof", "all-stream normal completion", "unconditional original-creation-error preservation", "A C# sampling-patch transfer", "whole-guide or platform re-audit"],
+  "remaining_coordinator_gates": ["Sampling reconciliation/expansion", "Final boundary cross-checks and validation", "Core Pass-1 publication and precise deferred-owner handoff, then stop"],
+  "reviewer_writes_only": ["editing/SHARED/sampling-correction/review.md", "editing/SHARED/sampling-correction/review-identities.json"]
+}

@@ -1,0 +1,496 @@
+{
+  "contexts": [
+    {
+      "context": "consumer",
+      "classification": "No Microsoft.NET.Test.Sdk; unchanged ordinary host sources."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "classification": "xUnit v3 producer; no Microsoft.NET.Test.Sdk package/import. Existing admission stays unchanged.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/project.assets.json",
+        "bytes": 172915,
+        "sha256": "e26664215f376a89ca44b72fc651feaab5de89919b998b0be2b32354a006456d"
+      }
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "classification": "Exact Test.Sdk 18.0.1 net8.0 package entrypoint expected before CoreCompile.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/project.assets.json",
+        "bytes": 193712,
+        "sha256": "db75140c40e1c06484d26c4a23db32db91903417b82b9e79d6b8e5127ce02208"
+      },
+      "library": {
+        "sha512": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+        "type": "package",
+        "path": "microsoft.net.test.sdk/18.0.1",
+        "files": [
+          ".nupkg.metadata",
+          ".signature.p7s",
+          "Icon.png",
+          "build/net462/Microsoft.NET.Test.Sdk.props",
+          "build/net462/Microsoft.NET.Test.Sdk.targets",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.fs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.vb",
+          "build/net8.0/Microsoft.NET.Test.Sdk.props",
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/net462/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/net8.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "lib/native/_._",
+          "lib/net462/_._",
+          "lib/net8.0/_._",
+          "microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+          "microsoft.net.test.sdk.nuspec"
+        ]
+      },
+      "target": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeCoverage": "18.0.1",
+          "Microsoft.TestPlatform.TestHost": "18.0.1"
+        },
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "build": {
+          "build/net8.0/Microsoft.NET.Test.Sdk.props": {},
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets": {}
+        }
+      },
+      "package_metadata_content_hash_matches_assets": true,
+      "package_file_already_fixed": false,
+      "source_already_known_compile_source": false
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "classification": "Exact Test.Sdk 18.0.1 net8.0 package entrypoint expected before CoreCompile.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/project.assets.json",
+        "bytes": 194085,
+        "sha256": "8b0c01e06662b15be758ca0802bf103b6cbc0ef4f8bedd6017de61f45dbfffca"
+      },
+      "library": {
+        "sha512": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+        "type": "package",
+        "path": "microsoft.net.test.sdk/18.0.1",
+        "files": [
+          ".nupkg.metadata",
+          ".signature.p7s",
+          "Icon.png",
+          "build/net462/Microsoft.NET.Test.Sdk.props",
+          "build/net462/Microsoft.NET.Test.Sdk.targets",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.fs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.vb",
+          "build/net8.0/Microsoft.NET.Test.Sdk.props",
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/net462/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/net8.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "lib/native/_._",
+          "lib/net462/_._",
+          "lib/net8.0/_._",
+          "microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+          "microsoft.net.test.sdk.nuspec"
+        ]
+      },
+      "target": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeCoverage": "18.0.1",
+          "Microsoft.TestPlatform.TestHost": "18.0.1"
+        },
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "build": {
+          "build/net8.0/Microsoft.NET.Test.Sdk.props": {},
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets": {}
+        }
+      },
+      "package_metadata_content_hash_matches_assets": true,
+      "package_file_already_fixed": false,
+      "source_already_known_compile_source": false
+    },
+    {
+      "context": "Core.UnitTests",
+      "classification": "xUnit v3 producer; no Microsoft.NET.Test.Sdk package/import. Existing admission stays unchanged.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/project.assets.json",
+        "bytes": 173076,
+        "sha256": "7537e7c68390bd66c2903d7545c8bfd0b7580d301a6c5fed94ec62304d998b95"
+      }
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "classification": "Exact Test.Sdk 18.0.1 net8.0 package entrypoint expected before CoreCompile.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/project.assets.json",
+        "bytes": 191434,
+        "sha256": "a29cc1df0f8931ca42eb1aeeb94a351ecac5d546a83f4fb4935ad9dd06cdac3f"
+      },
+      "library": {
+        "sha512": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+        "type": "package",
+        "path": "microsoft.net.test.sdk/18.0.1",
+        "files": [
+          ".nupkg.metadata",
+          ".signature.p7s",
+          "Icon.png",
+          "build/net462/Microsoft.NET.Test.Sdk.props",
+          "build/net462/Microsoft.NET.Test.Sdk.targets",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.fs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.vb",
+          "build/net8.0/Microsoft.NET.Test.Sdk.props",
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/net462/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/net8.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "lib/native/_._",
+          "lib/net462/_._",
+          "lib/net8.0/_._",
+          "microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+          "microsoft.net.test.sdk.nuspec"
+        ]
+      },
+      "target": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeCoverage": "18.0.1",
+          "Microsoft.TestPlatform.TestHost": "18.0.1"
+        },
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "build": {
+          "build/net8.0/Microsoft.NET.Test.Sdk.props": {},
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets": {}
+        }
+      },
+      "package_metadata_content_hash_matches_assets": true,
+      "package_file_already_fixed": false,
+      "source_already_known_compile_source": false
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "classification": "Exact Test.Sdk 18.0.1 net8.0 package entrypoint expected before CoreCompile.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/project.assets.json",
+        "bytes": 214293,
+        "sha256": "9d4b0874db15975cde5467c306b335ba7787d3f34fbd03353caa3ee19bb278a9"
+      },
+      "library": {
+        "sha512": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+        "type": "package",
+        "path": "microsoft.net.test.sdk/18.0.1",
+        "files": [
+          ".nupkg.metadata",
+          ".signature.p7s",
+          "Icon.png",
+          "build/net462/Microsoft.NET.Test.Sdk.props",
+          "build/net462/Microsoft.NET.Test.Sdk.targets",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.fs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.vb",
+          "build/net8.0/Microsoft.NET.Test.Sdk.props",
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/net462/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/net8.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "lib/native/_._",
+          "lib/net462/_._",
+          "lib/net8.0/_._",
+          "microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+          "microsoft.net.test.sdk.nuspec"
+        ]
+      },
+      "target": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeCoverage": "18.0.1",
+          "Microsoft.TestPlatform.TestHost": "18.0.1"
+        },
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "build": {
+          "build/net8.0/Microsoft.NET.Test.Sdk.props": {},
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets": {}
+        }
+      },
+      "package_metadata_content_hash_matches_assets": true,
+      "package_file_already_fixed": false,
+      "source_already_known_compile_source": false
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "classification": "Exact Test.Sdk 18.0.1 net8.0 package entrypoint expected before CoreCompile.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/project.assets.json",
+        "bytes": 192138,
+        "sha256": "ba5e7f73c72c4901693a67bbc5fd0e4e228d37a766ea902bc3a2574b596ef9f8"
+      },
+      "library": {
+        "sha512": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+        "type": "package",
+        "path": "microsoft.net.test.sdk/18.0.1",
+        "files": [
+          ".nupkg.metadata",
+          ".signature.p7s",
+          "Icon.png",
+          "build/net462/Microsoft.NET.Test.Sdk.props",
+          "build/net462/Microsoft.NET.Test.Sdk.targets",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.fs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.vb",
+          "build/net8.0/Microsoft.NET.Test.Sdk.props",
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/net462/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/net8.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "lib/native/_._",
+          "lib/net462/_._",
+          "lib/net8.0/_._",
+          "microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+          "microsoft.net.test.sdk.nuspec"
+        ]
+      },
+      "target": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeCoverage": "18.0.1",
+          "Microsoft.TestPlatform.TestHost": "18.0.1"
+        },
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "build": {
+          "build/net8.0/Microsoft.NET.Test.Sdk.props": {},
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets": {}
+        }
+      },
+      "package_metadata_content_hash_matches_assets": true,
+      "package_file_already_fixed": false,
+      "source_already_known_compile_source": false
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "classification": "Exact Test.Sdk 18.0.1 net8.0 package entrypoint expected before CoreCompile.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/project.assets.json",
+        "bytes": 191918,
+        "sha256": "7fbb1a55d45e613639e42b4821ac102598199e1f855525cc6cbaba784fae49ab"
+      },
+      "library": {
+        "sha512": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+        "type": "package",
+        "path": "microsoft.net.test.sdk/18.0.1",
+        "files": [
+          ".nupkg.metadata",
+          ".signature.p7s",
+          "Icon.png",
+          "build/net462/Microsoft.NET.Test.Sdk.props",
+          "build/net462/Microsoft.NET.Test.Sdk.targets",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.fs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.vb",
+          "build/net8.0/Microsoft.NET.Test.Sdk.props",
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/net462/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/net8.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "lib/native/_._",
+          "lib/net462/_._",
+          "lib/net8.0/_._",
+          "microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+          "microsoft.net.test.sdk.nuspec"
+        ]
+      },
+      "target": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeCoverage": "18.0.1",
+          "Microsoft.TestPlatform.TestHost": "18.0.1"
+        },
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "build": {
+          "build/net8.0/Microsoft.NET.Test.Sdk.props": {},
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets": {}
+        }
+      },
+      "package_metadata_content_hash_matches_assets": true,
+      "package_file_already_fixed": false,
+      "source_already_known_compile_source": false
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "classification": "Exact Test.Sdk 18.0.1 net8.0 package entrypoint expected before CoreCompile.",
+      "assets": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/project.assets.json",
+        "bytes": 191938,
+        "sha256": "a3414618f8fe6c20e0ca1142b006745123dcee01caa0d2ddf90759f9f0ae456b"
+      },
+      "library": {
+        "sha512": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+        "type": "package",
+        "path": "microsoft.net.test.sdk/18.0.1",
+        "files": [
+          ".nupkg.metadata",
+          ".signature.p7s",
+          "Icon.png",
+          "build/net462/Microsoft.NET.Test.Sdk.props",
+          "build/net462/Microsoft.NET.Test.Sdk.targets",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.fs",
+          "build/net8.0/Microsoft.NET.Test.Sdk.Program.vb",
+          "build/net8.0/Microsoft.NET.Test.Sdk.props",
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "build/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/net462/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/net8.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netcoreapp2.0/Microsoft.NET.Test.Sdk.targets",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.props",
+          "buildMultiTargeting/netstandard2.0/Microsoft.NET.Test.Sdk.targets",
+          "lib/native/_._",
+          "lib/net462/_._",
+          "lib/net8.0/_._",
+          "microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+          "microsoft.net.test.sdk.nuspec"
+        ]
+      },
+      "target": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CodeCoverage": "18.0.1",
+          "Microsoft.TestPlatform.TestHost": "18.0.1"
+        },
+        "compile": {
+          "lib/net8.0/_._": {}
+        },
+        "runtime": {
+          "lib/net8.0/_._": {}
+        },
+        "build": {
+          "build/net8.0/Microsoft.NET.Test.Sdk.props": {},
+          "build/net8.0/Microsoft.NET.Test.Sdk.targets": {}
+        }
+      },
+      "package_metadata_content_hash_matches_assets": true,
+      "package_file_already_fixed": false,
+      "source_already_known_compile_source": false
+    }
+  ],
+  "package_files": {
+    "source": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+      "bytes": 218,
+      "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a"
+    },
+    "producer": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.targets",
+      "bytes": 3211,
+      "sha256": "93e2c4a4e08fa8db6af3b5907205741ad5184e642181bfdbe949c5109e19aa2f"
+    },
+    "props": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.props",
+      "bytes": 848,
+      "sha256": "a52a33ff2b93571aaba9311d42b62b6cbb14eb4f71ab580a40eb7e7ffe1f13ba"
+    },
+    "nuspec": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.nuspec",
+      "bytes": 1376,
+      "sha256": "2dd29606329ec4f855d243329f56fad96b71cd315897a1f721eeb57f38f85290"
+    },
+    "archive": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.18.0.1.nupkg",
+      "bytes": 39745,
+      "sha256": "d1cdffae9f5d8b4c3b1395267d187a3ebae6dc07b28bc34e8f96e6da2ea3021d"
+    },
+    "archive_sha512": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+      "bytes": 88,
+      "sha256": "f665987c75f76a2c228ee04fe9d80fddb9fb32f507fbfea9ddd87bdc5bc96b2b"
+    },
+    "metadata": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/.nupkg.metadata",
+      "bytes": 178,
+      "sha256": "76ba008b650088ff2b68c7a6a9516858a364022bedf75efd8b10d0e14c250a27"
+    }
+  },
+  "package_content_hash": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+  "archive_sha512": "cfpn4IW0Q+emID8eUocS7xfmwwYgD/JX5S+zCZA2l7gcYzxZ1vvfcdZHcKkuzCH4gMbBYqcZqtBn9uZa0WJRUg==",
+  "archive_members_match_installed_files": true,
+  "source_qualified_kernel_unchanged": true,
+  "hash_distinction": "NuGet metadata/assets contentHash is WNpu...; full archive SHA512/sidecar is cfpn.... Both identities are retained separately; equality or signature validation is not claimed.",
+  "documentation": "Context7 /dotnet/sdk query did not document this exact producer. Actual installed package target lines 13,25,34,43-49 and archive bytes are authoritative. Context7 /nuget/nuget.client distinguishes GetContentHash and GetArchiveHashAsync."
+}

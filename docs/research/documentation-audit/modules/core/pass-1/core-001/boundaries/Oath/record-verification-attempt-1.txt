@@ -1,0 +1,9 @@
+Static verification attempt 1:
+python3 -B docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/verify_records.py
+Exit 1. Exact IDs, raw/range source identities, all 56 pinned product files, inherited keys,
+16 nominees and original-source identities checked successfully. One local-link check failed:
+Local link: boundaries/Oath/verification.json
+The first invocation checked the report's link before creating its own verification.json output.
+It then wrote the FAIL result with that failure. A fresh second invocation checks the now-present
+artifact and replaces the current result; this retained receipt preserves the first outcome.
+This is a records-only bootstrap/link-check failure, not SDK, test or device execution.

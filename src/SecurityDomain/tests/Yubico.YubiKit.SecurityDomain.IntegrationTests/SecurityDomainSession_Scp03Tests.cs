@@ -111,9 +111,9 @@ public class SecurityDomainSession_Scp03Tests : SecurityDomainStateRestoringTest
         }
         finally
         {
-            // This test deliberately supersedes the default SCP03 keys and asserts they stop
-            // working. Restore factory defaults so later tests and suites can still authenticate
-            // with Scp03KeyParameters.Default.
+            // This test deliberately supersedes the default SCP03 keys. Request reset to attempt
+            // the default-key precondition needed by later tests and suites using
+            // Scp03KeyParameters.Default; this cleanup does not assert restored factory contents.
             await state.ResetSecurityDomainAsync(CancellationTokenSource.Token);
         }
     }

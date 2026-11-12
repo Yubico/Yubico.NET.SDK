@@ -1,0 +1,21 @@
+{
+  "paths": [
+    {
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "before_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "primary_before_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "after_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+      "scope": "Five explicitly authorized diagram-evidence symbol additions only",
+      "independent_review": "pending"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "before_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+      "primary_before_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+      "after_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+      "scope": "Bounded L3 SCP/L4 lifecycle prose only",
+      "independent_review": "pending"
+    }
+  ],
+  "focused_patch_sha256": "27a8d85cda33ec95f3e309a8d1d5665ec9f3cd6403d3a75acdf501aebae31c33"
+}

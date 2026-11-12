@@ -1,0 +1,52 @@
+{
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "--project",
+    "Yubico.YubiKit.Core",
+    "--clean"
+  ],
+  "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "logger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+    "bytes": 1670,
+    "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-12T01:10:15.771204+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/core-build-after-a-c",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/core-build-after-a-c",
+  "qualification_faults": [],
+  "reuse": {
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+    "files": [
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+        "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+        "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+        "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+        "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+      }
+    ]
+  }
+}

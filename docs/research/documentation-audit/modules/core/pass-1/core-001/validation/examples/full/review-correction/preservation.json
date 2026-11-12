@@ -1,0 +1,74 @@
+{
+  "review_sha256": "f1c2d367252874dd6cb8b6b895fa4b5726103986a35ca26853c3899b310f03e0",
+  "files": [
+    {
+      "path": "reviewed-inputs-current.json",
+      "bytes": 586272,
+      "sha256": "806ce07d050835dbcac7e4ce33ffb2b0006c5c8e9937e4321f3af6f569a4dc5c",
+      "snapshot": "review-correction/before/reviewed-inputs-current.json.snapshot"
+    },
+    {
+      "path": "manifest-current.json",
+      "bytes": 2312417,
+      "sha256": "bc34edaf8dcb153765aba87ebb786695f83010042d9df3d2bcb1af0923eef545",
+      "snapshot": "review-correction/before/manifest-current.json.snapshot"
+    },
+    {
+      "path": "compiled-contexts.json",
+      "bytes": 11981,
+      "sha256": "c1bbc9256087c9ed5a44c5a4d03d9966e3799fd7ab66800db5c8e40d52b6e05f",
+      "snapshot": "review-correction/before/compiled-contexts.json.snapshot"
+    },
+    {
+      "path": "test-context-dispositions-final-draft.json",
+      "bytes": 88564,
+      "sha256": "50eefc814a84081722ebf936b8dbd9e45223e7945db30b8e6a0675ea1cfbf472",
+      "snapshot": "review-correction/before/test-context-dispositions-final-draft.json.snapshot"
+    },
+    {
+      "path": "capture.py",
+      "bytes": 6580,
+      "sha256": "acaf3f438cf103388da1ae600502a139a1ca6f729f054fa0df462d18ebf0d4bf",
+      "snapshot": "review-correction/before/capture.py.snapshot"
+    },
+    {
+      "path": "test-contexts.py",
+      "bytes": 8223,
+      "sha256": "49c7b52fcb6bfe396d77a928a6d24028e054f3bbf6422cbb9159f9a8f9101abc",
+      "snapshot": "review-correction/before/test-contexts.py.snapshot"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 5929,
+      "sha256": "4934e09597f442683e45daeec8e23bdb734c67f1b4854c68320d5744c74e6833",
+      "snapshot": "review-correction/before/verify.py.snapshot"
+    },
+    {
+      "path": "injections/Core.UnitTests/FULL-211.cs",
+      "bytes": 1112,
+      "sha256": "afd804ac99cc8b7c92d314ad3d91d3ca3c94a9aaa620e9519a0eb4b7f6cca631",
+      "snapshot": "review-correction/before/injections/Core.UnitTests/FULL-211.cs.snapshot"
+    },
+    {
+      "path": "injections/Management.IntegrationTests/FULL-244.cs",
+      "bytes": 1241,
+      "sha256": "bdd3145ed272b805b01deed4d9acee58e3967ea7353cce5a48af755f95cdfdc0",
+      "snapshot": "review-correction/before/injections/Management.IntegrationTests/FULL-244.cs.snapshot"
+    },
+    {
+      "path": "injections/Ctap2.IntegrationTests/FULL-027.cs",
+      "bytes": 1361,
+      "sha256": "38aa8aba676c38c7378552abc4c9e9ce5839e06d7556b4b9945a7e598aaa6480",
+      "snapshot": "review-correction/before/injections/Ctap2.IntegrationTests/FULL-027.cs.snapshot"
+    },
+    {
+      "path": "../../../full-example-preparation.md",
+      "bytes": 13792,
+      "sha256": "d7adc4f6d3d4179f7989c684db1940e98e3382fe810caf186ab3421dd5466c4b",
+      "snapshot": "review-correction/before/full-example-preparation.md.snapshot"
+    }
+  ],
+  "alias_238": "Metadata alias of FULL-211; never materialized/selected as a second Csc source.",
+  "scope": "Reviewed Full candidate/preparation only. No qualified DocCheck/logger/binder/root source or workspace change.",
+  "preparation_failure": "First snapshot collection requested absent alias FULL-238.cs; no original changed. Existing partial snapshots were byte-verified and preserved."
+}

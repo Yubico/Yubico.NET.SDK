@@ -1,0 +1,657 @@
+diff --git c/src/OpenPgp/CLAUDE.md w/src/OpenPgp/CLAUDE.md
+index 66547c936..c3f555c91 100644
+--- c/src/OpenPgp/CLAUDE.md
++++ w/src/OpenPgp/CLAUDE.md
+@@ -34,8 +34,9 @@ SmartCard-only (`ISmartCardConnection`), over USB CCID or NFC. Applet SELECT and
+ | `OpenPgpSession.Reset.cs` | Factory reset sequence |
+ 
+ ### Shared Session State
+-- `OpenPgpBackend _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
+-- `FirmwareVersion _version` — firmware for feature gating
++- `IOpenPgpBackend? _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
++- Inherited `ApplicationSession.FirmwareVersion` — effective version for protocol configuration and feature gating;
++  initialization chooses the override or detected applet version. The detected version is logged, not retained in a `_version` field.
+ - `ApplicationRelatedData _appData` — cached card state (refreshable)
+ - `Kdf? _kdf` — active KDF configuration (lazy-loaded)
+ - `GetKdfAsync` returns the cached instance and `SetKdfAsync` retains its input instance. Session
+@@ -51,11 +52,22 @@ split into reset-code and prior-administrator-authentication methods so no input
+ ## Key Patterns
+ 
+ ### Initialization Sequence
+-1. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
+-2. GET_VERSION (INS=0xF1) → BCD decode; use compatibility fallback 1.0.0 on CONDITIONS_NOT_SATISFIED.
++1. Bind the borrowed connection and register the owned protocol before device I/O.
++2. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
++3. GET_VERSION (INS=0xF1) → BCD decode the first three bytes of an OK response with at least three bytes.
++   Every non-OK response, short OK response or caught APDU exception falls back to 1.0.0; other exceptions propagate.
+    This fallback establishes no qualified minimum device version. Keep applet response, physical-device
+    metadata and effective configured version distinct, especially on development devices.
+-3. Cache `ApplicationRelatedData` for feature detection and KDF state
++4. Configure the effective override-or-detected version and optional SCP, then rebind the backend if needed.
++   Physical-device metadata is not consulted. The override does not skip SELECT/version discovery.
++5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF remains lazy. Publish readiness only after initialization
++   completes. Failed initialization disposes/detaches the session; the device helper cleans up its hidden connection.
++
++Core guards each logical exchange, not whole certificate, key, credential or reset workflows. Await the complete public
++task before another operation or disposal, including parsing and presence callbacks. Keep borrowed inputs/keys and the
++caller-owned prompt alive through that task. Synchronous session disposal clears the current KDF before base protocol
++drain; asynchronous disposal awaits Core teardown and then invokes derived KDF cleanup in finally, even on failure.
++Neither ordering supplies a whole-workflow lease. F9 response/encoding/parser copies retain separate cleanup gaps.
+ 
+ ### KDF (Iterated-Salted-S2K)
+ Iterated-and-Salted S2K hashes a byte count in one hash context:
+@@ -84,6 +96,12 @@ SELECT/read establishes access, so reset guidance requires independent state ins
+ is erased on successful device reset; YubiKey ATT key/certificate and fixed ATT policy survive. Ordinary
+ key replacement clears fixed UIF; fixed ATT recovery requires irreversible ATT private-key replacement.
+ 
++Reset preserves the effective version and inherited readiness/authentication state. An existing SCP session retains
++its processor graph and keys: SELECT is plain, subsequent sends are secure, and no new handshake runs. OpenPGP
++retains no creation SCP parameters for reset. Reopen after uncertainty and inspect persistent state before retrying;
++an authentication flag alone establishes no channel restoration. The integration helper instead resets in a separate
++plain session before creating an optional SCP body session, so it supplies no SCP-reset oracle.
++
+ ## Model Layer
+ 
+ Core owns the shared `CryptographicDefinitions.Keys/Curves/Algorithms` catalog. `EcAttributes.KeyType`
+@@ -188,6 +206,8 @@ The helper resets before use when requested and leaves post-test state in place.
+ actual assertions: nonempty/length checks establish response shape, host verification establishes a signature,
+ and certificate-byte replacement establishes overwrite rather than trust-chain validation. Full reset verification
+ requires more than the existing three retry-counter assertions.
++The Unverify signing-failure test leaves signature policy uncontrolled: `Always` could already consume the earlier
++authorization. Its later APDU exception does not isolate Unverify's effect or establish both User modes cleared.
+ 
+ ## User-presence notifications
+ 
+diff --git c/src/OpenPgp/README.md w/src/OpenPgp/README.md
+index 8eae8259d..3052544ca 100644
+--- c/src/OpenPgp/README.md
++++ w/src/OpenPgp/README.md
+@@ -29,8 +29,10 @@ Core is installed transitively. The current SDK checks these version thresholds
+ Match these checks with the card's advertised capabilities, supported algorithms, slot and policy support.
+ They describe this SDK's checks rather than a blanket availability guarantee. In particular, cached/ATT touch
+ policies need additional device support, and retry/challenge commands leave some capability checks to the card.
+-The 1.0.0 version-query fallback is a compatibility fallback, not a qualified minimum device version. NEO applet
+-versions have a different history from physical firmware; NEO import, generation and deletion paths still need
++The version query falls back to 1.0.0 for every non-OK response, successful response shorter than three bytes,
++or caught APDU exception; transport and other exceptions propagate. This is a compatibility value, not a qualified
++minimum device version. NEO applet versions have a different history from physical firmware; NEO import,
++generation and deletion paths still need
+ separate qualification. Development-device applet versions and device metadata can differ: retain both when
+ diagnosing a feature check, and use an override only with a known device profile.
+ 
+@@ -72,9 +74,29 @@ foreach (var entry in await session.ListKeyInformationAsync())
+ 
+ The device extension owns the connection it opens. `OpenPgpSession.CreateAsync(connection, ...)` uses an existing
+ SmartCard connection; keep that connection alive through session disposal and dispose it afterward. Await operations
+-sequentially on a session. `GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF, while KDF has a
+-separate lazy cache. Typed initialization requires recognized mandatory algorithm attributes; use `GetDataAsync`
+-for raw response inspection when a model omits a field.
++sequentially on a session, and await each complete public task before disposal. Core excludes overlapping logical
++exchanges, including chaining and SCP processing, but a public method can span several exchanges plus parsing,
++cache changes and callbacks. For example, certificate occurrence selection and its read/write are separate exchanges.
++Keep borrowed keys, input buffers and prompt services alive through the complete task, not just its last transmit.
++
++Creation binds the session before device I/O, selects the applet and reads its version, then configures framing and
++optional SCP before parsing application data. A failed factory disposes/detaches the session; a direct factory leaves
++your connection open, while the device extension cleans up its hidden connection. `FirmwareVersionOverride` chooses
++the effective framing/feature version without skipping the version probe. Device metadata, the detected applet version,
++the effective session version and the AID's Card specification version are separate diagnostic values.
++
++For SCP, supply `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile. Keep those parameters and
++their contained resources alive through actual factory completion. SCP03 parameter disposal clears its retained
++`StaticKeys`, not your original source arrays. SCP11 parameters retain the supplied key/certificate objects: disposal
++disposes the retained OCE private key and certificates, but not the SD public key. Avoid independently disposing shared
++aliases while creation uses them. These ownership rules do not establish device/profile support or trust. Generic Core
++SCP version checks alone do not identify the earliest supported OpenPGP firmware. `IsAuthenticated` records SCP setup;
++the card separately enforces User/Admin PIN authorization. See the [Core guide](../Core/README.md) for SCP configuration.
++
++`GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF, while KDF has a separate lazy cache. Typed
++initialization requires recognized mandatory algorithm attributes. After successful initialization, use `GetDataAsync`
++for raw response inspection when a model omits a field. If typed initialization itself fails, dispose that attempt and
++use a separate [raw SmartCard session](../../docs/architecture/raw-access-tiers.md) for diagnosis.
+ 
+ `KeyInformation`, `KeyFingerprints`, and `GenerationTimes` are read-only dictionaries. Their slots reflect the
+ card's reported data. Use key status to inspect presence: an unset fingerprint can still occupy a 20-byte zero-filled
+@@ -85,6 +107,8 @@ field. `GetSupportedAlgorithmsAsync` returns an ordered list with repeated slots
+ Pass PINs as UTF-8 bytes from your credential reader. The public factory defaults are User `123456` and Admin
+ `12345678`; change both before real use. Apply the card's byte-length/profile rules as well as reader limits.
+ Avoid creating immutable strings for production secrets, and clear owned credential buffers in `finally`.
++`OpenPgpCredentialOptions` configures reader lengths in UTF-16 code units before UTF-8 encoding; those counts are
++distinct from card byte limits. The byte-taking PIN methods add no general credential-format/length validation.
+ 
+ The same User PIN (PW1) authorizes two separate card states: `extended: false` selects signature mode (VERIFY P2=81),
+ and `extended: true` selects decryption/authentication mode (P2=82). Both share the User retry counter. The Reset Code
+@@ -219,6 +243,16 @@ session teardown, and clear separately owned initial hashes and serialized KDF b
+ a fresh session to reload KDF; refreshing application data leaves the KDF cache unchanged. These lifetime constraints
+ describe the current implementation rather than a general cloning/ownership policy.
+ 
++Synchronous session disposal clears the current KDF before draining the protocol. Asynchronous disposal awaits Core
++teardown first and then clears that KDF, including when teardown fails. Await the complete PIN/KDF workflow before
++either path: protocol drain alone does not cover host derivation or the intervals between exchanges.
++
++The example clears its caller-owned hashes/salts and keeps both KDF objects in enclosing disposal scopes. Internal
++F9 serialization and parsing still leave separate copies without explicit clearing scopes: an intermediate complete
++encoding, the `SetKdfAsync` payload, decoded fields and the read response. Clearing the KDF object or a caller-owned
++encoding does not clear those copies. Initial PIN hashes are authentication material; these cleanup gaps remain
++implementation work.
++
+ ## Inspect key representation metadata
+ 
+ Use Core's `CryptographicDefinitions` to inspect shared key, curve and operation metadata. This package
+@@ -393,6 +427,8 @@ Use that technique only for SDK outputs whose storage you own, rather than arbit
+ Clearing a `ToArray()` copy would leave the original secret intact. The SDK clears its raw decipher response after
+ copying the successful result. RSA/EdDSA signatures instead transfer response storage to the caller; ECDSA returns
+ new DER storage and clears the raw response. Keep caller-owned result cleanup in both cases.
++These are local response-owner scopes. Transport return arrays, earlier chained-response fragments and SCP
++plaintext/protected intermediates have separate owners; clearing the final output does not establish their erasure.
+ 
+ ## Store certificates and attest a generated key
+ 
+@@ -470,10 +506,16 @@ first, reads directly if absent, and falls back to `PolicyMayRequire` on a faile
+ Firmware without UIF support stays silent. See [user interaction](../../docs/usage/user-interaction.md).
+ 
+ Terminal notifications are `Completed`, `Cancelled` or `Failed`. Device APDU errors resolve as `Failed`; the SDK
+-currently leaves OpenPGP statuses, including 6600, outside its `TimedOut` classification. Cancellation can leave
+-an admitted SmartCard exchange or persistent command in progress. Await
+-completion/drain and inspect state through a fresh session before retrying a mutation; a cancelled token is no
+-rollback guarantee.
++currently leaves OpenPGP statuses, including 6600, outside its `TimedOut` classification. Keep the application-owned
++prompt alive until full operation and callback completion, and avoid reentering or disposing the session from a
++callback. Sign/authenticate resolve completion before transferring the signature; decrypt resolves before copying
++the caller's result and clears the raw response even if resolution fails. Attestation creates its certificate before
++the outer completion callback; a callback failure can currently abandon that disposable certificate.
++
++Cancellation is checked before each logical exchange is admitted. After admission, constituent SmartCard work uses
++`CancellationToken.None`; a later exchange in the same public method can still reject the canceled token. Ending an
++outer wait does not stop that work or make borrowed inputs safe to clear. Await the actual public task and teardown,
++then inspect state through a fresh session before retrying a mutation. A canceled token supplies no rollback guarantee.
+ 
+ ## Reset an application deliberately
+ 
+@@ -484,8 +526,15 @@ public ATT certificate preserves that certificate, not a recoverable factory pri
+ `ResetAsync` attempts PIN blocking, TERMINATE, ACTIVATE and state refresh, using the SDK's 1.0.6 check. Its current
+ implementation ignores TERMINATE/ACTIVATE statuses and checks no complete erasure postcondition. A normal return
+ alone proves too little: independently inspect key status, certificates, PIN acceptance/retries, KDF and UIF afterward.
+-Cancellation/failure can leave blocked PINs or partial state. This method performs the attempted reset and returns
+-fresh application metadata for part of that inspection; your application supplies authorization and full verification.
++Cancellation/failure can leave blocked PINs or partial state. `ResetAsync` refreshes the session's application-data
++cache without returning metadata. The `ResetAndInspectAsync` example below makes a separate application-data read
++and returns that result for part of the inspection; your application supplies authorization and full verification.
++
++Reset preserves the session's effective version, including any override. On an SCP-created session, reset commands
++use the existing secure graph; reselection sends a plain SELECT without discarding that graph or establishing new
++keys, and subsequent commands use its retained secure state. OpenPGP retains no creation parameters for a reset
++handshake. The inherited authentication flag therefore supplies no SCP-restoration evidence. Dispose/reopen after
++uncertain reset or recovery, and independently inspect persistent state before retrying.
+ 
+ ```csharp
+ static async Task<ApplicationRelatedData> ResetAndInspectAsync(
+diff --git c/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs w/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs
+index dedf13264..da51aa61c 100644
+--- c/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs
++++ w/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs
+@@ -89,6 +89,8 @@ protected static string FormatKeyRef(KeyRef keyRef) =>
+     /// <remarks>
+     ///     Disposing the result clears its byte storage. A supplied command-line option remains in an immutable
+     ///     string and can be exposed through process arguments; prefer application-owned input buffers for secrets.
++    ///     A supplied string bypasses reader length limits. The reader path counts UTF-16 code units before
++    ///     UTF-8 encoding; neither path adds card credential-format or encoded-byte-limit validation.
+     /// </remarks>
+     protected static IMemoryOwner<byte>? GetCredential(string? provided, CredentialReaderOptions options)
+     {
+@@ -105,19 +107,19 @@ protected static string FormatKeyRef(KeyRef keyRef) =>
+     }
+ 
+     /// <summary>
+-    ///     Gets User PIN input with reader limits 6–127; the application also applies card byte/profile limits.
++    ///     Gets User PIN input; the reader path permits 6–127 UTF-16 code units. Supplied strings bypass those limits.
+     /// </summary>
+     protected static IMemoryOwner<byte>? GetPin(string? provided) =>
+         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpPin());
+ 
+     /// <summary>
+-    ///     Gets Admin PIN input with reader limits 8–127; the application also applies card byte/profile limits.
++    ///     Gets Admin PIN input; the reader path permits 8–127 UTF-16 code units. Supplied strings bypass those limits.
+     /// </summary>
+     protected static IMemoryOwner<byte>? GetAdminPin(string? provided) =>
+         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpAdminPin());
+ 
+     /// <summary>
+-    ///     Gets Reset Code input with reader limits 8–127; the application also applies card byte/profile limits.
++    ///     Gets Reset Code input; the reader path permits 8–127 UTF-16 code units. Supplied strings bypass those limits.
+     /// </summary>
+     protected static IMemoryOwner<byte>? GetResetCode(string? provided) =>
+         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpResetCode());
+@@ -134,4 +136,4 @@ protected static bool ConfirmAction(string action, bool force)
+ 
+         return OutputHelpers.ConfirmDangerous(action);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/Backend/OpenPgpBackend.cs w/src/OpenPgp/src/Backend/OpenPgpBackend.cs
+index 7db280f3b..97c5b5f5d 100644
+--- c/src/OpenPgp/src/Backend/OpenPgpBackend.cs
++++ w/src/OpenPgp/src/Backend/OpenPgpBackend.cs
+@@ -85,9 +85,11 @@ private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellati
+         }
+         catch (ApduException)
+         {
+-            // CONDITIONS_NOT_SATISFIED on very old firmware
++            // APDU exceptions share the compatibility fallback below. Transport and other exceptions propagate.
+         }
+ 
++        // Every non-OK response and every successful response shorter than three bytes also reaches this fallback.
++        // It is an effective compatibility value, not evidence that the device runs version 1.0.0.
+         return new FirmwareVersion(1, 0, 0);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs w/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs
+index d61c4bb0c..831e93b49 100644
+--- c/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs
++++ w/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs
+@@ -20,14 +20,15 @@ namespace Yubico.YubiKit.OpenPgp.Credentials;
+ /// Supplies credential-reader limits and prompts for OpenPGP input.
+ /// </summary>
+ /// <remarks>
+-/// These factories configure the reader. The application also checks the card's credential format and
+-/// encoded byte limits; UTF-8 byte length can differ from reader input length. Session methods receive
+-/// bytes directly and leave credential collection with the application.
++/// These factories configure text-reader limits in UTF-16 code units, before UTF-8 encoding. The caller
++/// separately checks the card's credential format and encoded byte limits; neither these presets nor
++/// the byte-taking session methods perform general card-profile validation. UTF-8 byte length can differ
++/// from the reader's count.
+ /// </remarks>
+ public static class OpenPgpCredentialOptions
+ {
+     /// <summary>
+-    /// Creates User PIN reader options with MinLength 6 and MaxLength 127.
++    /// Creates User PIN reader options with a length of 6–127 UTF-16 code units.
+     /// </summary>
+     public static CredentialReaderOptions ForOpenPgpPin() => new()
+     {
+@@ -38,7 +39,7 @@ public static class OpenPgpCredentialOptions
+     };
+ 
+     /// <summary>
+-    /// Creates Admin PIN reader options with MinLength 8 and MaxLength 127.
++    /// Creates Admin PIN reader options with a length of 8–127 UTF-16 code units.
+     /// </summary>
+     public static CredentialReaderOptions ForOpenPgpAdminPin() => new()
+     {
+@@ -49,7 +50,7 @@ public static class OpenPgpCredentialOptions
+     };
+ 
+     /// <summary>
+-    /// Creates Reset Code reader options with MinLength 8 and MaxLength 127.
++    /// Creates Reset Code reader options with a length of 8–127 UTF-16 code units.
+     /// </summary>
+     public static CredentialReaderOptions ForOpenPgpResetCode() => new()
+     {
+@@ -58,4 +59,4 @@ public static class OpenPgpCredentialOptions
+         MinLength = 8,
+         MaxLength = 127
+     };
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/IOpenPgpSession.cs w/src/OpenPgp/src/IOpenPgpSession.cs
+index c43e25e56..b6c7ba27b 100644
+--- c/src/OpenPgp/src/IOpenPgpSession.cs
++++ w/src/OpenPgp/src/IOpenPgpSession.cs
+@@ -28,8 +28,14 @@ namespace Yubico.YubiKit.OpenPgp;
+ ///     Use a SmartCard session and await each operation before starting the next. Administrative writes
+ ///     generally require prior Admin PIN verification; the card enforces access conditions and advertised
+ ///     capabilities. PIN inputs are borrowed UTF-8 bytes. Keep them valid until the awaited call completes,
+-///     then clear caller-owned buffers. Cancellation can leave a command or persistent change in progress;
+-///     inspect device state before retrying a mutation.
++///     then clear caller-owned buffers. Core guards one logical exchange, including APDU chaining and SCP,
++///     rather than the whole public method. Certificate occurrence selection, key/cache updates and PIN/KDF
++///     workflows span separate exchanges. Await the complete public task before another call or disposal,
++///     and keep borrowed keys, input memory and prompt services alive through their last use.
++///     Cancellation is checked before each exchange is admitted; an admitted SmartCard exchange runs with
++///     CancellationToken.None. Ending an outer wait does not complete that task or permit input cleanup.
++///     Await actual completion/teardown and inspect fresh state before retrying a persistent mutation.
++///     Inherited IsAuthenticated describes SCP setup, while the card separately enforces User/Admin PIN access.
+ /// </remarks>
+ public interface IOpenPgpSession : IApplicationSession
+ {
+@@ -304,9 +310,11 @@ Task GenerateKeyAsync(
+     /// </summary>
+     /// <remarks>
+     ///     The algorithm attributes for the slot are derived from the key and written first (when the card
+-    ///     allows changing them; otherwise only RSA 2048 can be imported). Supported keys: RSA 2048, 3072 and
+-    ///     4096 with public exponent 65537, P-256, P-384, P-521, Ed25519 and X25519. The private key is not
+-    ///     cleared by this method.
++    ///     allows changing them; otherwise only RSA 2048 can be imported). Modeled representations include
++    ///     RSA 2048, 3072 and 4096 with public exponent 65537; P-256, P-384, P-521, secp256k1,
++    ///     Brainpool P256r1/P384r1/P512r1, Ed25519 and X25519. Check host-provider, card and slot support
++    ///     separately: catalog representation alone establishes none of them. The private key is not cleared
++    ///     by this method.
+     ///     The caller retains and disposes <paramref name="privateKey" />. Attribute writes can invalidate the
+     ///     previous key before import succeeds; cancellation or refresh failure can follow a persistent change.
+     ///     Inspect a fresh read before retrying. Certificates and fingerprint/time metadata are separate.
+@@ -572,6 +580,8 @@ Task<IReadOnlyList<SupportedAlgorithm>> GetSupportedAlgorithmsAsync(
+     ///     Lazily reads F9 and returns the same cached instance on later calls. An APDU read error currently
+     ///     caches KdfNone. Treat the result as session-retained: keep it undisposed while the session uses it.
+     ///     The session disposes its current cached KDF during disposal. Refreshing application data leaves it unchanged.
++    ///     Synchronous disposal clears that object before protocol drain; asynchronous disposal clears it after
++    ///     Core teardown, including on failure. Await complete PIN/KDF tasks before either disposal path.
+     /// </remarks>
+     Task<Kdf> GetKdfAsync(
+         CancellationToken cancellationToken = default);
+@@ -668,7 +678,11 @@ Task<ReadOnlyMemory<byte>> AuthenticateAsync(
+     ///     normal return alone is insufficient to establish erasure. Read back keys, certificates, PIN/retry,
+     ///     KDF and policy state independently. Failure/cancellation can leave PINs blocked or state partly changed.
+     ///     The cached KDF reference is dropped without disposal; retain its cleanup scope through session teardown.
++    ///     Reset retains the effective version and any existing SCP processor graph. Reselection sends a plain
++    ///     SELECT through that graph, then uses its retained secure state for subsequent commands; it performs
++    ///     no fresh SCP handshake. The inherited authentication flag does not establish channel restoration.
++    ///     After uncertain reset/recovery, dispose and reopen, then inspect persistent state before retrying.
+     /// </remarks>
+     Task ResetAsync(
+         CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/IYubiKeyExtensions.cs w/src/OpenPgp/src/IYubiKeyExtensions.cs
+index be5a6c167..0c46609c7 100644
+--- c/src/OpenPgp/src/IYubiKeyExtensions.cs
++++ w/src/OpenPgp/src/IYubiKeyExtensions.cs
+@@ -34,6 +34,13 @@ public static class IYubiKeyExtensions
+         /// <param name="options">Optional cross-cutting session creation settings.</param>
+         /// <param name="cancellationToken">Token used to cancel the operation.</param>
+         /// <returns>An initialized <see cref="OpenPgpSession" />. The caller owns its lifetime.</returns>
++        /// <remarks>
++        ///     Uses only SmartCard transport; an unsupported preference or a failed open/initialization does not
++        ///     select another transport. Dispose the returned session with <c>await using</c> to close its hidden
++        ///     connection after protocol teardown. Failed creation also cleans up that connection.
++        ///     SCP parameters are borrowed through factory completion. The session retains but does not dispose
++        ///     the caller's user-presence prompt; keep it alive through all session operations and callbacks.
++        /// </remarks>
+         public async Task<OpenPgpSession> CreateOpenPgpSessionAsync(
+             SessionCreationOptions? options = null,
+             CancellationToken cancellationToken = default)
+diff --git c/src/OpenPgp/src/Kdf.cs w/src/OpenPgp/src/Kdf.cs
+index 47d34bc7b..ff18db41f 100644
+--- c/src/OpenPgp/src/Kdf.cs
++++ w/src/OpenPgp/src/Kdf.cs
+@@ -35,6 +35,8 @@ public enum KdfHashAlgorithm : byte
+ ///     Standalone instances are caller-owned and disposable. A session retains the same object supplied
+ ///     to SetKdfAsync or returned by GetKdfAsync and disposes its current cache during teardown. Keep that
+ ///     object undisposed while the session uses it; retain outer cleanup scopes for replaced/reset objects.
++///     KdfIterSaltedS2k disposal clears its backing arrays but does not prevent subsequent Process calls.
++///     Disposing an aliased object early can therefore change derivation rather than produce a disposed-object error.
+ /// </remarks>
+ public abstract class Kdf : IDisposable
+ {
+@@ -72,6 +74,9 @@ public virtual void Dispose() { }
+     ///     Algorithm 3 requires the modeled S2K fields; absent/other identifiers currently produce KdfNone.
+     ///     Malformed TLV or missing required S2K fields can fail parsing. Retain raw F9 data when inspecting
+     ///     identifiers beyond the model. The returned object is owned by the caller unless retained by a session.
++    ///     Parsing copies TLV fields and clones salts/initial hashes into the result. Result disposal clears
++    ///     its backing arrays, not the caller's encoding or the intermediate dictionary field copies, which
++    ///     currently have no explicit clearing scope.
+     /// </remarks>
+     public static Kdf Parse(ReadOnlySpan<byte> encoded)
+     {
+@@ -316,6 +321,8 @@ public override byte[] ToBytes()
+                 tlvs.Add(new Tlv(0x88, hashAdmin.Span));
+             }
+ 
++            // Individual TLVs are disposed below. EncodeList's complete encoding is copied again here;
++            // that intermediate currently has no clearing scope, independently of the caller-owned result.
+             return TlvHelper.EncodeList([.. tlvs]).ToArray();
+         }
+         finally
+@@ -351,4 +358,4 @@ internal static KdfIterSaltedS2k ParseData(IDictionary<int, ReadOnlyMemory<byte>
+             InitialHashUser = data.TryGetValue(0x87, out var hu) ? hu : null,     // init setter clones
+             InitialHashAdmin = data.TryGetValue(0x88, out var ha) ? ha : null,    // init setter clones
+         };
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/OpenPgpSession.Config.cs w/src/OpenPgp/src/OpenPgpSession.Config.cs
+index f7b742b9d..a048c0961 100644
+--- c/src/OpenPgp/src/OpenPgpSession.Config.cs
++++ w/src/OpenPgp/src/OpenPgpSession.Config.cs
+@@ -196,6 +196,8 @@ public async Task SetKdfAsync(
+ 
+         _logger.LogInformation("Setting KDF configuration");
+ 
++        // ToBytes creates a separate encoding that may contain initial PIN hashes. This call currently
++        // retains no owner to clear that payload; disposing the KDF clears only its own backing arrays.
+         await PutDataAsync(DataObject.Kdf, kdf.ToBytes(), cancellationToken)
+             .ConfigureAwait(false);
+ 
+@@ -250,4 +252,4 @@ private static List<SupportedAlgorithm> FixCurve25519AlgorithmInfo(
+ 
+         return result;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/OpenPgpSession.Keys.cs w/src/OpenPgp/src/OpenPgpSession.Keys.cs
+index 96f969e39..6c3548910 100644
+--- c/src/OpenPgp/src/OpenPgpSession.Keys.cs
++++ w/src/OpenPgp/src/OpenPgpSession.Keys.cs
+@@ -159,7 +159,9 @@ public async Task<X509Certificate2> AttestKeyAsync(
+ 
+         // GET_ATTESTATION generates the attestation cert and writes it to the
+         // certificate slot for the key. We then read it back with GetCertificateAsync.
+-        // This matches ykman canonical: send_apdu → get_certificate(key_ref).
++        // The Python implementation uses the same send_apdu → get_certificate(key_ref) sequence.
++        // The outer notification helper resolves Completed after this callback returns its certificate.
++        // A resolution failure can abandon that disposable result; it has no local cleanup scope here.
+         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
+         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+             await GetUserPresenceContextAsync(KeyRef.Att, UserPresenceOperations.OpenPgp.AttestKey, cancellationToken).ConfigureAwait(false));
+@@ -272,4 +274,4 @@ await TransmitWithResponseAsync(command, cancellationToken)
+             .ConfigureAwait(false);
+         _updatedUifs.Clear();
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/OpenPgpSession.Reset.cs w/src/OpenPgp/src/OpenPgpSession.Reset.cs
+index c749f36a8..ad1a003f5 100644
+--- c/src/OpenPgp/src/OpenPgpSession.Reset.cs
++++ w/src/OpenPgp/src/OpenPgpSession.Reset.cs
+@@ -54,7 +54,9 @@ await BlockPinAsync((byte)Pw.Admin, status.AttemptsAdmin, cancellationToken)
+         var activateCmd = new ApduCommand(0x00, (int)Ins.Activate, 0x00, 0x00);
+         await TransmitNoThrowAsync(activateCmd, cancellationToken).ConfigureAwait(false);
+ 
+-        // Step 6: Re-initialize — re-SELECT and refresh cached state
++        // Step 6: Re-SELECT with the existing backend and refresh cached application state.
++        // An SCP session retains its secure graph: SELECT is plain, subsequent sends use the retained
++        // keys/state, and no new handshake runs. Existing readiness/authentication flags are not reset here.
+         _logger.LogDebug("Re-initializing session after reset");
+ 
+         // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
+@@ -95,4 +97,4 @@ private async Task BlockPinAsync(
+ 
+         _logger.LogDebug("PIN P2=0x{P2:X2} exhausted {Count} attempts", p2, remainingAttempts);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/OpenPgpSession.cs w/src/OpenPgp/src/OpenPgpSession.cs
+index 28d8d539c..a4eb04fb9 100644
+--- c/src/OpenPgp/src/OpenPgpSession.cs
++++ w/src/OpenPgp/src/OpenPgpSession.cs
+@@ -97,6 +97,11 @@ private OpenPgpSession(
+     ///     to acquire an owned connection automatically. Parsed mandatory algorithm fields must be understood
+     ///     for initialization to succeed. Version checks use session configuration; preserve applet/device
+     ///     version provenance when diagnosing development-device feature checks.
++    ///     The session binds to the connection before device I/O; failed initialization disposes and detaches
++    ///     the session while leaving this caller-owned connection open. Selection and version discovery precede
++    ///     optional SCP setup; application-data parsing uses the configured protocol before readiness is published.
++    ///     FirmwareVersionOverride selects the effective framing/feature version without skipping the version probe
++    ///     or consulting physical-device metadata. Keep borrowed SCP inputs alive through factory completion.
+     /// </remarks>
+     public static Task<OpenPgpSession> CreateAsync(
+         ISmartCardConnection connection,
+@@ -396,6 +401,9 @@ private async Task<Kdf> GetOrLoadKdfAsync(CancellationToken cancellationToken)
+ 
+     // ── Disposal ──────────────────────────────────────────────────────
+ 
++    // Synchronous disposal reaches this cleanup before base protocol drain. Asynchronous disposal awaits
++    // Core protocol/owned-connection teardown first, then invokes this override in finally, even on failure.
++    // Neither path waits for an entire multi-exchange public workflow: callers must await it before disposal.
+     protected override void Dispose(bool disposing)
+     {
+         Kdf? kdf = null;
+@@ -413,4 +421,4 @@ protected override void Dispose(bool disposing)
+             base.Dispose(disposing);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/PrivateKeyImport.cs w/src/OpenPgp/src/PrivateKeyImport.cs
+index 98e9e1d5f..ea8d801f4 100644
+--- c/src/OpenPgp/src/PrivateKeyImport.cs
++++ w/src/OpenPgp/src/PrivateKeyImport.cs
+@@ -23,6 +23,12 @@ namespace Yubico.YubiKit.OpenPgp;
+ ///     for the slot and the private key template. Owns the padded or reordered copies it makes and
+ ///     clears them on dispose.
+ /// </summary>
++/// <remarks>
++///     The caller retains the original private key through the complete import task and disposes it afterward.
++///     Ed25519 templates borrow its seed directly; padded components and reversed X25519 scalars are separate
++///     import-owned copies. Template serialization and APDU processing create additional owners with their own
++///     cleanup scopes.
++/// </remarks>
+ internal sealed class PrivateKeyImport : IDisposable
+ {
+     private static readonly byte[] PublicExponent65537 = [0x01, 0x00, 0x01];
+@@ -187,4 +193,4 @@ private static ReadOnlySpan<byte> TrimLeadingZeros(byte[]? value)
+ 
+         return span;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/src/PrivateKeyTemplate.cs w/src/OpenPgp/src/PrivateKeyTemplate.cs
+index c552d93b0..2a14d4a41 100644
+--- c/src/OpenPgp/src/PrivateKeyTemplate.cs
++++ w/src/OpenPgp/src/PrivateKeyTemplate.cs
+@@ -43,6 +43,11 @@ internal abstract class PrivateKeyTemplate
+     ///     Serializes the private key template to its wire format for PUT_DATA_ODD, addressed to <paramref name="keyRef" />.
+     /// </summary>
+     /// <returns>Caller-owned encoded private material; clear after transmission, including failure paths.</returns>
++    /// <remarks>
++    ///     After GetComponents returns, the finally scopes dispose those copied TLVs and clear concatenated
++    ///     values and inner encoding. PutKeyAsync clears the returned encoding separately. Source key memory
++    ///     remains with its original owner. Partial allocation inside GetComponents precedes these cleanup scopes.
++    /// </remarks>
+     public byte[] ToBytes(KeyRef keyRef)
+     {
+         var crtBytes = keyRef.GetCrt();
+@@ -240,4 +245,4 @@ protected override Tlv[] GetComponents()
+ 
+         return [new Tlv(0x92, PrivateKey.Span)];
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/tests/CLAUDE.md w/src/OpenPgp/tests/CLAUDE.md
+index 088025c37..fc60db0bb 100644
+--- c/src/OpenPgp/tests/CLAUDE.md
++++ w/src/OpenPgp/tests/CLAUDE.md
+@@ -10,3 +10,29 @@ This file provides guidance for the OpenPGP module test infrastructure.
+ 
+ - `Yubico.YubiKit.OpenPgp.UnitTests` - Unit tests for OpenPGP module
+ - `Yubico.YubiKit.OpenPgp.IntegrationTests` - Integration tests requiring YubiKey hardware
++
++## Interpret the assertions
++
++`WithOpenPgpSessionAsync` optionally resets in a separate plain session, disposes it, then creates the action's
++session with any SCP parameters. It awaits the action before synchronous session disposal and leaves post-action
++state in place. This setup does not exercise resetting an SCP session or restoring its channel options.
++
++Keep comments within each test's actual oracle:
++
++- Wire initialization checks command membership; dedicated key-generation tests check their asserted operation order.
++- Cached-KDF disposal checks an aliased salt after async disposal; the throwing-KDF case checks synchronous detachment.
++  Neither checks a held derivation, replacement/reset cleanup or a complete multi-exchange workflow drain.
++- Signature-helper tests retain actual response arrays for transfer/zeroing assertions. The decrypt completion-callback
++  failure test checks exception identity and outcome, not raw-array erasure. Neither establishes cleanup of the full
++  transport/chaining/SCP producer graph.
++- The PIN status-lookup cancellation fake cancels its own task, independently of the token it receives. Its exception
++  propagation is not evidence that an admitted native SmartCard exchange can be interrupted.
++- SHA-512 KDF coverage checks length. Literal known-answer comparisons and same-logic SHA-256 calculations have
++  different independence; libgcrypt-named tests execute SDK derivation, not libgcrypt.
++- Host signature/plaintext/shared-secret equality is stronger than nonempty/length checks. Ed25519/X25519 public-point
++  import checks establish no signature/agreement result, and attestation shape checks establish no key binding or trust.
++- Unverify's signing-failure case leaves signature policy uncontrolled and checks no other-operation state. Reset's
++  three retry-counter assertions establish no complete erasure postcondition.
++
++Firmware early returns and provider skips remain exclusions, not executed body evidence. Running a test suite does
++not by itself qualify another transport, device family, provider or operating system.
+diff --git c/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs w/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs
+index 81b56f5cb..7ce756894 100644
+--- c/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs
++++ w/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs
+@@ -76,10 +76,11 @@ await state.WithOpenPgpSessionAsync(
+                 var signature = await session.SignAsync(message, System.Security.Cryptography.HashAlgorithmName.SHA256);
+                 Assert.True(signature.Length > 0);
+ 
+-                // The following signing failure probes signature state; other-operation state is untested here.
++                // This case leaves signature policy uncontrolled: Always could already consume authorization
++                // above. The later failure alone does not isolate Unverify's effect; other-operation state is untested.
+                 await session.UnverifyPinAsync();
+ 
+-                // Signing should now fail because PIN is no longer verified
++                // Assert an APDU exception, without attributing its cause or checking the exact status word.
+                 await Assert.ThrowsAsync<ApduException>(
+                     () => session.SignAsync(
+                         "After unverify"u8.ToArray(),
+@@ -123,8 +124,8 @@ await state.WithOpenPgpSessionAsync(
+             resetBeforeUse: true,
+             action: async session =>
+             {
+-                // Attempt key generation without verifying Admin PIN
+-                // The card should reject the operation with a security status error
++                // Attempt key generation without verifying Admin PIN. The assertion checks exception type,
++                // rather than a specific security status word or the phase at which generation fails.
+                 await Assert.ThrowsAsync<ApduException>(
+                     () => session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256)));
+             });
+@@ -168,4 +169,4 @@ await state.WithOpenPgpSessionAsync(
+                 // Verify the new PIN works
+                 await session.VerifyPinAsync(newPin);
+             });
+-}
+\ No newline at end of file
++}
+diff --git c/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs w/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs
+index b059bc7e3..e432b4752 100644
+--- c/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs
++++ w/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs
+@@ -38,8 +38,15 @@ public static class OpenPgpTestStateExtensions
+         /// </param>
+         /// <param name="action">The async action to execute with the session.</param>
+         /// <param name="configuration">Optional protocol configuration.</param>
+-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
++        /// <param name="scpKeyParams">
++        ///     Borrowed SCP parameters for the action's session only. The optional reset uses a separate plain
++        ///     session, disposed before this session is created; this helper does not test reset over SCP.
++        /// </param>
+         /// <param name="cancellationToken">Cancellation token.</param>
++        /// <remarks>
++        ///     WithConnectionAsync owns the connection; both sessions borrow it sequentially. The action must await
++        ///     all its session work before returning, because its session is synchronously disposed afterward.
++        /// </remarks>
+         public Task WithOpenPgpSessionAsync(
+             bool resetBeforeUse,
+             Func<OpenPgpSession, Task> action,
+@@ -74,4 +81,4 @@ public Task WithOpenPgpSessionAsync(
+                 await action(session).ConfigureAwait(false);
+             }, cancellationToken);
+     }
+-}
+\ No newline at end of file
++}

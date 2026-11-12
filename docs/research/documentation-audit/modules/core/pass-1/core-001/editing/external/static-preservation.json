@@ -1,0 +1,148 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "edited_product_files": 19,
+  "changed_paths": [
+    "TOOLCHAIN.md",
+    "docs/migration/v1-to-v2.md",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+    "src/Cli.Shared/src/Output/PinPrompt.cs",
+    "src/Cli.Shared/src/Output/SecureCredential.cs",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    "src/Tests.Shared/CLAUDE.md",
+    "src/Tests.Shared/IYubiKeyFilter.cs",
+    "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    "src/Tests.Shared/Infrastructure/TestCategories.cs",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/README.md",
+    "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "src/Tests.Shared/YubiKeyTestState.cs"
+  ],
+  "dispositions": {
+    "HOLD-READONLY-FORMAT-OR-SCRIPT": 37,
+    "HOLD-HISTORICAL": 22,
+    "RETAIN": 47,
+    "EDIT": 19
+  },
+  "family_local_candidates": 32,
+  "boundary_referrals": 3,
+  "example_bodies_base_and_current": 243,
+  "checks": [
+    {
+      "path": "TOOLCHAIN.md",
+      "markdown_fences": "balanced"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "markdown_fences": "balanced"
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 4,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 4,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 3,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 2,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Cli.Shared/src/Output/PinPrompt.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 5,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Cli.Shared/src/Output/SecureCredential.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 7,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 0,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 1,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 1,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Tests.Shared/CLAUDE.md",
+      "markdown_fences": "balanced"
+    },
+    {
+      "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 3,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 2,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 9,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 7,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "markdown_fences": "balanced"
+    },
+    {
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 3,
+      "cref_resolution": "NOT-CHECKED"
+    },
+    {
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "noncomment_lines": "equal (full lines and unchanged inline code)",
+      "xml_blocks_well_formed": 34,
+      "cref_resolution": "NOT-CHECKED"
+    }
+  ],
+  "git_diff_check": "PASS",
+  "source_patch_sha256": "ec6997bd2b14af3f2ad82988d60487fe4e542dbaccf38e1e96e026892ac03727",
+  "index_refs_commits": "No mutation requested or performed",
+  "limits": "Text/XML/fence and raw/LF/hash preservation only; not a Roslyn token/API/cref check, build, formatter, test, example compilation, native/provider/device/crypto run or independent content/citation acceptance."
+}

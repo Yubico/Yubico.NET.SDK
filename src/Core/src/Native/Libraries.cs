@@ -12,37 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// As long as we have the Libraries.Net47.cs class which holds the opposite preprocessor directive check,
-// this check is required - as having both at the same time is not possible.
+// Keep the existing target conditional; the active SDK targets modern .NET.
 
 #if !NETFRAMEWORK
 
 namespace Yubico.YubiKit.Core.Native;
 
 /// <summary>
-///     Handles the loading and management of native libraries required by the Yubico SDK.
+///     Names the native shim used by source-generated imports.
 /// </summary>
 /// <remarks>
-///     This class provides cross-platform and cross-framework support for loading native libraries.
-///     The implementation differs based on the target framework:
-///     For .NET Framework 4.7:
-///     - Native libraries must be placed in architecture-specific subdirectories (x86/x64)
-///     - Library loading is handled explicitly at runtime based on process architecture
-///     - Requires proper cleanup through the Cleanup method
-///     For Modern .NET:
-///     - Native libraries are handled by the runtime's built-in library loading mechanism
-///     - Architecture-specific loading is managed automatically
-///     - No explicit cleanup is required
+///     Runtime/package resolution supplies the shared library for ordinary JIT deployment. Native AOT
+///     package targets select a RID-specific static archive and system dependencies. This constant neither
+///     loads a library nor proves the selected artifact's source, ABI, or device compatibility.
 /// </remarks>
 internal static class Libraries
 {
     /// <summary>
-    ///     The filename of the native shims library for modern .NET versions.
+    ///     The logical native shim name used by imports and package linking targets.
     /// </summary>
     /// <remarks>
-    ///     For modern .NET, the runtime automatically handles library loading and architecture selection.
-    ///     The DLL extension is omitted as it's platform-specific and managed by the runtime.
-    ///     The library should be properly packaged with the correct runtimes/* folder structure in the NuGet package.
+    ///     The platform-specific filename suffix is omitted. Ordinary JIT deployment uses package runtime
+    ///     assets; Native AOT targets bind this name to the selected static archive instead.
     /// </remarks>
     internal const string NativeShims = "Yubico.NativeShims";
 }

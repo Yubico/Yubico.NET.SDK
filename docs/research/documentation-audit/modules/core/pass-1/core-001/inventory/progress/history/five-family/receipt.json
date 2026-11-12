@@ -1,0 +1,33 @@
+{
+  "kind": "historical-five-family-structural-rollup",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_snapshot_metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "completed_units": 7135,
+  "remaining_units": 6909,
+  "files": [
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/coverage-progress.json",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/five-family/coverage-progress.json",
+      "bytes": 41725,
+      "sha256": "87f8604acc7760337acd130a6a1b403f2fd3e348d4019e6219e4dcf86cc415b7"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/coverage-progress.md",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/five-family/coverage-progress.md",
+      "bytes": 2810,
+      "sha256": "650bfbd45447f67d3a1007d5cd0b24f6daf229fb8ac1056bf37f7c29dbca93af"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/aggregate.py",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/five-family/aggregate.py.snapshot",
+      "bytes": 21988,
+      "sha256": "43977eb5724f585a89fa992119ce043df295c43ba096d2545d5262bda6711292"
+    },
+    {
+      "original_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/five-family-receipt.json",
+      "snapshot_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/five-family/verification-receipt.json",
+      "bytes": 1629,
+      "sha256": "4107b7803ede29bdfc7946d7edfcdde671efe3f31586242d1e727f3a2fb4fa2a"
+    }
+  ]
+}

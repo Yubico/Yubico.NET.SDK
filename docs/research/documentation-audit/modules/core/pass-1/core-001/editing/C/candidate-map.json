@@ -1,0 +1,579 @@
+[
+  {
+    "local": "CORE-C-C001",
+    "proposal": "FPT-083",
+    "released_facets": [
+      "D",
+      "M"
+    ],
+    "action": "Edit console/interface storage descriptions: interactive pooled characters versus redirected managed strings; preserve the actual fallback and separate its lifetime limitation.",
+    "primary_paths": [
+      "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "src/Core/src/Credentials/ISecureCredentialReader.cs"
+    ],
+    "path_decision_rows": [
+      0,
+      1,
+      2
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C002",
+    "proposal": "FPT-084",
+    "released_facets": [
+      "D",
+      "Q"
+    ],
+    "action": "Edit confirmation ownership in acquisition/comparison/second cleanup/first transfer order; qualify the sentinel oracle without reopening the resolved original cleanup scope.",
+    "primary_paths": [
+      "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs"
+    ],
+    "path_decision_rows": [
+      3,
+      4,
+      5,
+      6
+    ],
+    "inherited_aliases": [
+      "audit-v2-20261022-20261031:26h"
+    ]
+  },
+  {
+    "local": "CORE-C-C003",
+    "proposal": "FPT-085",
+    "released_facets": [
+      "D",
+      "E",
+      "P",
+      "M",
+      "B"
+    ],
+    "action": "Edit UTF-16 input limits, encoded-byte/code-point distinctions, ignored versus rejected input, hex separator/decoded units, default replacement fallback and empty allocation limitation. Hold Unicode, empty and hex policy changes; actual applet constraints remain boundary-owned.",
+    "primary_paths": [
+      "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "src/Core/src/Credentials/CredentialPromptContext.cs",
+      "src/Core/src/Credentials/CredentialReaderOptions.cs",
+      "src/Core/src/Credentials/ICredentialPrompt.cs"
+    ],
+    "path_decision_rows": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "inherited_aliases": [
+      "openpgp-001:PGP-CORE-001",
+      "ctap2-001:CTAP-XREF-003",
+      "ctap2-001:CTAP-IMP-006",
+      "audit-v2-20261022-20261031:26g",
+      "audit-v2-20261022-20261031:N3"
+    ]
+  },
+  {
+    "local": "CORE-C-C004",
+    "proposal": "FPT-086",
+    "released_facets": [
+      "D",
+      "E",
+      "P",
+      "B"
+    ],
+    "action": "Edit the precise waiting-key cancellation scope and preserve queued-key/redirected responsiveness as unrun implementation questions; existing no-key test remains unchanged.",
+    "primary_paths": [
+      "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/ConsoleCredentialReaderTests.cs"
+    ],
+    "path_decision_rows": [
+      15,
+      16,
+      17,
+      18
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C005",
+    "proposal": "FPT-087",
+    "released_facets": [
+      "D",
+      "B"
+    ],
+    "action": "Edit Tlv view/copy and disposal, list collection versus element ownership, pooled alias lifetime and clear-only handle versus pool-return ownership; retain correct local source/result cleanup context.",
+    "primary_paths": [
+      "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+      "src/Core/src/Utilities/DisposableBufferHandle.cs",
+      "src/Core/src/Utilities/DisposableTlvList.cs",
+      "src/Core/src/Utilities/MemoryExtensions.cs",
+      "src/Core/src/Utilities/Tlv.cs"
+    ],
+    "path_decision_rows": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C006",
+    "proposal": "FPT-088",
+    "released_facets": [
+      "D",
+      "E",
+      "P",
+      "B"
+    ],
+    "action": "Edit dictionary/search copy qualifications and recommend the existing disposable DecodeList path for sensitive sequences. Hold abandoned-copy fixes and probes; clearing a later copy is not erasure of the original read-only storage.",
+    "primary_paths": [
+      "src/Core/src/Utilities/TlvHelper.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs"
+    ],
+    "path_decision_rows": [
+      26,
+      27,
+      28,
+      29
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C007",
+    "proposal": "FPT-089",
+    "released_facets": [
+      "D",
+      "E",
+      "P",
+      "M"
+    ],
+    "action": "Edit bounded tag/framing behavior and BerLength sizing/writing scope, with nonnegative caller precondition. Update current range/truncation/indefinite/size regression descriptions; hold single-item/tag-roundtrip/negative-input engineering decisions. X.690 original named clauses inspected; earlier pending confidence is historical.",
+    "primary_paths": [
+      "src/Core/src/Utilities/BerLength.cs",
+      "src/Core/src/Utilities/Tlv.cs",
+      "src/Core/src/Utilities/TlvHelper.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs"
+    ],
+    "path_decision_rows": [
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+    ],
+    "inherited_aliases": [
+      "audit-v2-20261022-20261031:#20",
+      "audit-v2-20261022-20261031:25e"
+    ]
+  },
+  {
+    "local": "CORE-C-C008",
+    "proposal": "FPT-090",
+    "released_facets": [
+      "D",
+      "M",
+      "Q",
+      "B"
+    ],
+    "action": "Edit application-owned factory lifetime, configure-before-use, retained static loggers, global temporary-scope limits and callback-exception provenance. Adopt B6's ordinary APDU header/length versus SELECT identifier distinction only in the shared followup, not by editing B6 files.",
+    "primary_paths": [
+      "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "src/Core/src/Credentials/UserPresenceNotification.cs",
+      "src/Core/src/YubiKitLogging.cs"
+    ],
+    "path_decision_rows": [
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "inherited_aliases": [
+      "security-domain-001:SD-DEP-005"
+    ]
+  },
+  {
+    "local": "CORE-C-C009",
+    "proposal": "FPT-091",
+    "released_facets": [
+      "D",
+      "E",
+      "P",
+      "M",
+      "B"
+    ],
+    "action": "Edit factory-specific PKCS#8/SPKI subset, AlgorithmIdentifier versus outer/nested exhaustion, and AsnContentException distinctions. Hold stronger uniform exact-DER/factory admission claims pending FPX-04; no probes ran.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+      "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+      "src/Core/src/Cryptography/ECPublicKey.cs",
+      "src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "src/Core/src/Cryptography/RSAPublicKey.cs"
+    ],
+    "path_decision_rows": [
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C010",
+    "proposal": "FPT-092",
+    "released_facets": [
+      "D",
+      "E",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "action": "Edit RSA public parameter XML, borrowed mutable parameter arrays, EC cached-point divergence, shape versus selected consistency/full validation, and DP-width admission qualification. Hold validation-depth/alias API choices and provider acceptance claims.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/AsnUtilities.cs",
+      "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+      "src/Core/src/Cryptography/ECParametersExtensions.cs",
+      "src/Core/src/Cryptography/ECPrivateKey.cs",
+      "src/Core/src/Cryptography/ECPublicKey.cs",
+      "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+      "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "src/Core/src/Cryptography/RSAPublicKey.cs"
+    ],
+    "path_decision_rows": [
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63
+    ],
+    "inherited_aliases": [
+      "audit-v2-20261022-20261031:#27"
+    ]
+  },
+  {
+    "local": "CORE-C-C011",
+    "proposal": "FPT-093",
+    "released_facets": [
+      "D",
+      "P",
+      "Q",
+      "B"
+    ],
+    "action": "Edit independent BigInteger/ARKG secret-copy lifetimes and narrow macOS extra-D wording to inspected .NET v10.0.0 absent-Q extraction. Supplying Q skips that route in the inspected source; actual runtime/native erasure remains unqualified.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "src/Core/src/Cryptography/ECPrivateKey.cs",
+      "src/Core/src/Cryptography/IArkgPrimitives.cs",
+      "src/Core/src/Cryptography/PrivateKeyConsistency.cs"
+    ],
+    "path_decision_rows": [
+      64,
+      65,
+      66,
+      67,
+      68,
+      69
+    ],
+    "inherited_aliases": [
+      "ctap2-001:CTAP-IMP-005",
+      "ctap2-001:CTAP-IMP-035",
+      "audit-v2-20261022-20261031:#17"
+    ]
+  },
+  {
+    "local": "CORE-C-C012",
+    "proposal": "FPT-094",
+    "released_facets": [
+      "D",
+      "M",
+      "Q",
+      "B"
+    ],
+    "action": "Edit public creator reach versus direct runtime calls/internal seams, fresh per-call ownership and complete provider disposal fragments. Remove fake helper APIs and stale xref. Existing internal creator tests retain their finite scope.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/ArkgPrimitives.cs",
+      "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs"
+    ],
+    "path_decision_rows": [
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76
+    ],
+    "inherited_aliases": [
+      "audit-v2-20261022-20261031:25c",
+      "audit-v2-20261022-20261031:25d"
+    ]
+  },
+  {
+    "local": "CORE-C-C013",
+    "proposal": "FPT-095",
+    "released_facets": [
+      "D",
+      "E",
+      "P",
+      "Q",
+      "B"
+    ],
+    "action": "Edit local AES/KDF/alternate-CMAC/ASN writer cleanup boundaries and returned ECDH result ownership. AsnWriter Encode/Reset source is settled; SDK writer Reset and exceptional allocation cleanup are unchanged engineering issues, not provider-wide erasure claims.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/AesUtilities.cs",
+      "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+      "src/Core/src/Cryptography/ICmacPrimitives.cs",
+      "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+      "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "src/Core/src/Cryptography/X963Kdf.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs"
+    ],
+    "path_decision_rows": [
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C014",
+    "proposal": "FPT-096",
+    "released_facets": [
+      "D",
+      "P",
+      "Q"
+    ],
+    "action": "Edit regression, early version/scalar guard and retained observer-alias descriptions, including finite pool and published-vector qualifications. Preserve every executable test, assertion, runtime message and fixture literal.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "src/Core/src/Cryptography/ECPrivateKey.cs",
+      "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs"
+    ],
+    "path_decision_rows": [
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C015",
+    "proposal": "FPT-097",
+    "released_facets": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "action": "Edit exact COSE registry name/local zero sentinel wording and structural applicability versus complete profile pairing. Retain numeric IDs and correct widths/catalog descriptions; no applet algorithm upgrade, NIST-final table claim or capability inference.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+      "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+      "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+      "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+      "src/Core/src/Cryptography/KeyType.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs"
+    ],
+    "path_decision_rows": [
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C016",
+    "proposal": "FPT-098",
+    "released_facets": [
+      "D",
+      "M",
+      "Q",
+      "B"
+    ],
+    "action": "Edit omitted inner parameters versus RFC 5915 section 3 conformance requirement and explicit wrapper versus universal importer claims. Hold target-profile choice and runtime changes; finite importer tests do not establish universal conformance.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "src/Core/src/Cryptography/AsnUtilities.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs"
+    ],
+    "path_decision_rows": [
+      109,
+      110,
+      111,
+      112,
+      113
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C017",
+    "proposal": "FPT-099",
+    "released_facets": [
+      "D",
+      "B"
+    ],
+    "action": "Edit current RSAPrivateKey and VerifyPinAsync examples with borrowed input/session and complete owned scopes; correct ordinary short-Weierstrass terminology and private-owner rationale. Shared span/Base32/struct narrative recommendations are handed off rather than edited.",
+    "primary_paths": [
+      "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+      "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "src/Core/src/Cryptography/IPublicKeyExtensions.cs",
+      "src/Core/src/Cryptography/PrivateKey.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs"
+    ],
+    "path_decision_rows": [
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C018",
+    "proposal": "FPT-100",
+    "released_facets": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "action": "Edit expired July 7, 2025 draft-09 target, domain separation without injectivity, and exact A/B/C/handle assertion scope. Retain unpinned Rust/generator provenance explicitly; do not claim independent reproducibility or full conformance.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "src/Core/src/Cryptography/IArkgPrimitives.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs"
+    ],
+    "path_decision_rows": [
+      126,
+      127,
+      128,
+      129,
+      130
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C019",
+    "proposal": "FPT-101",
+    "released_facets": [
+      "P",
+      "E",
+      "Q",
+      "B"
+    ],
+    "action": "HOLD this group's P/E/Q/B facets: no D facet was released. Paths receive separate D edits through C011/C012/C018, not a C019 implementation acceptance. Allocation/conversion outcome checks, native secret-point erasure and exact deployed producer/export/provider qualification remain deferred.",
+    "primary_paths": [
+      "src/Core/src/Cryptography/ArkgPrimitives.cs",
+      "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs"
+    ],
+    "path_decision_rows": [
+      131,
+      132,
+      133
+    ],
+    "inherited_aliases": []
+  },
+  {
+    "local": "CORE-C-C020",
+    "proposal": "FPT-102",
+    "released_facets": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "action": "RETAIN/HANDOFF: no C primary SCP parameter path. B6 owns StaticKeys input clones versus retained parameter references, SCP11 private/public/certificate containment, shared record-clone lifetime and initializer/profile choices. Session options and actual caller claims remain with their assigned owners.",
+    "primary_paths": [],
+    "path_decision_rows": [
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143
+    ],
+    "inherited_aliases": []
+  }
+]

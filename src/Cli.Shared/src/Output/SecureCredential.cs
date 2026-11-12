@@ -83,8 +83,8 @@ public sealed class SecureCredential : IMemoryOwner<byte>
     /// end-of-input on redirected input.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// The entered credential contains invalid Unicode text, or its UTF-8 encoding exceeds
-    /// <paramref name="maxByteLength"/> bytes.
+    /// Interactive input contains invalid Unicode text, or the interactive UTF-8 encoding or
+    /// redirected raw input exceeds <paramref name="maxByteLength"/> bytes.
     /// </exception>
     /// <exception cref="ArgumentException">
     /// <paramref name="label"/> is <see langword="null"/>, empty, or consists only of white-space characters.
@@ -96,6 +96,10 @@ public sealed class SecureCredential : IMemoryOwner<byte>
     /// <see langword="null"/> means exactly one thing: no credential was supplied. It never
     /// signals an input error. This mirrors the <c>ICredentialPrompt</c> contract so console
     /// prompts and SDK prompts agree on what a declined credential looks like.
+    /// The limit counts encoded bytes, not UTF-16 code units or Unicode code points. Interactive
+    /// input validates surrogate pairs but does not normalize text; redirected input is not
+    /// validated as UTF-8. Applet-specific credential rules remain the caller's responsibility.
+    /// Reads are synchronous and have no cancellation-token or native-input interruption contract.
     /// </remarks>
     public static SecureCredential? Prompt(string label, int maxByteLength = 128)
     {
@@ -331,10 +335,10 @@ public sealed class SecureCredential : IMemoryOwner<byte>
     /// every flow that reads two secrets, such as confirmation and change-PIN.
     /// </para>
     /// <para>
-    /// Carriage returns are discarded rather than buffered, so a credential of exactly
+    /// Every carriage return is discarded, including one embedded within a line, so a credential of exactly
     /// <c>buffer.Length</c> bytes followed by CRLF is accepted instead of being rejected as
-    /// over-long. A carriage return is a line-terminator artifact and is never treated as
-    /// credential content.
+    /// over-long. This reader does not preserve carriage returns as credential content or validate
+    /// the remaining bytes as UTF-8.
     /// </para>
     /// </remarks>
     internal static int ReadRedirectedInput(Span<byte> buffer, Stream input)

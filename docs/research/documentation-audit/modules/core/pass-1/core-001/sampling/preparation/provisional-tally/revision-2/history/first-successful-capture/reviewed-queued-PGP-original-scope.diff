@@ -1,0 +1,114 @@
+diff --git a/src/OpenPgp/src/OpenPgpSession.cs b/src/OpenPgp/src/OpenPgpSession.cs
+--- a/src/OpenPgp/src/OpenPgpSession.cs
++++ b/src/OpenPgp/src/OpenPgpSession.cs
+@@ -97,6 +97,11 @@
+     ///     to acquire an owned connection automatically. Parsed mandatory algorithm fields must be understood
+     ///     for initialization to succeed. Version checks use session configuration; preserve applet/device
+     ///     version provenance when diagnosing development-device feature checks.
++    ///     The session binds to the connection before device I/O; failed initialization disposes and detaches
++    ///     the session while leaving this caller-owned connection open. Selection and version discovery precede
++    ///     optional SCP setup; application-data parsing uses the configured protocol before readiness is published.
++    ///     FirmwareVersionOverride selects the effective framing/feature version without skipping the version probe
++    ///     or consulting physical-device metadata. Keep borrowed SCP inputs alive through factory completion.
+     /// </remarks>
+     public static Task<OpenPgpSession> CreateAsync(
+         ISmartCardConnection connection,
+@@ -357,7 +362,8 @@
+         }
+         catch (Exception ex)
+         {
+-            // UIF is advisory metadata. A failed read must not replace the cryptographic operation.
++            // UIF is advisory metadata. If diagnostic logging succeeds, a failed read falls back to
++            // PolicyMayRequire so the cryptographic operation can proceed. Logging failures propagate.
+             _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
+             basis = UserPresenceBasis.PolicyMayRequire;
+         }
+@@ -396,6 +402,9 @@
+ 
+     // ── Disposal ──────────────────────────────────────────────────────
+ 
++    // Synchronous disposal reaches this cleanup before base protocol drain. Asynchronous disposal awaits
++    // Core protocol/owned-connection teardown first, then invokes this override in finally, even on failure.
++    // Neither path waits for an entire multi-exchange public workflow: callers must await it before disposal.
+     protected override void Dispose(bool disposing)
+     {
+         Kdf? kdf = null;
+@@ -413,4 +422,4 @@
+             base.Dispose(disposing);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/OpenPgp/CLAUDE.md b/src/OpenPgp/CLAUDE.md
+--- a/src/OpenPgp/CLAUDE.md
++++ b/src/OpenPgp/CLAUDE.md
+@@ -34,8 +34,9 @@
+ | `OpenPgpSession.Reset.cs` | Factory reset sequence |
+ 
+ ### Shared Session State
+-- `OpenPgpBackend _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
+-- `FirmwareVersion _version` — firmware for feature gating
++- `IOpenPgpBackend? _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
++- Inherited `ApplicationSession.FirmwareVersion` — effective version for protocol configuration and feature gating;
++  initialization chooses the override or detected applet version. The detected version is logged, not retained in a `_version` field.
+ - `ApplicationRelatedData _appData` — cached card state (refreshable)
+ - `Kdf? _kdf` — active KDF configuration (lazy-loaded)
+ - `GetKdfAsync` returns the cached instance and `SetKdfAsync` retains its input instance. Session
+@@ -51,11 +52,22 @@
+ ## Key Patterns
+ 
+ ### Initialization Sequence
+-1. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
+-2. GET_VERSION (INS=0xF1) → BCD decode; use compatibility fallback 1.0.0 on CONDITIONS_NOT_SATISFIED.
++1. Bind the borrowed connection and register the owned protocol before device I/O.
++2. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
++3. GET_VERSION (INS=0xF1) → BCD decode the first three bytes of an OK response with at least three bytes.
++   Every non-OK response, short OK response or caught APDU exception falls back to 1.0.0; other exceptions propagate.
+    This fallback establishes no qualified minimum device version. Keep applet response, physical-device
+    metadata and effective configured version distinct, especially on development devices.
+-3. Cache `ApplicationRelatedData` for feature detection and KDF state
++4. Configure the effective override-or-detected version and optional SCP, then rebind the backend if needed.
++   Physical-device metadata is not consulted. The override does not skip SELECT/version discovery.
++5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF remains lazy. Publish readiness only after initialization
++   completes. Failed initialization disposes/detaches the session; the device helper cleans up its hidden connection.
++
++Core guards each logical exchange, not whole certificate, key, credential or reset workflows. Await the complete public
++task before another operation or disposal, including parsing and presence callbacks. Keep borrowed inputs/keys and the
++caller-owned prompt alive through that task. Synchronous session disposal clears the current KDF before base protocol
++drain; asynchronous disposal awaits Core teardown and then invokes derived KDF cleanup in finally, even on failure.
++Neither ordering supplies a whole-workflow lease. F9 response/encoding/parser copies retain separate cleanup gaps.
+ 
+ ### KDF (Iterated-Salted-S2K)
+ Iterated-and-Salted S2K hashes a byte count in one hash context:
+@@ -83,6 +95,12 @@
+ SELECT/read establishes access, so reset guidance requires independent state inspection. Ordinary material
+ is erased on successful device reset; YubiKey ATT key/certificate and fixed ATT policy survive. Ordinary
+ key replacement clears fixed UIF; fixed ATT recovery requires irreversible ATT private-key replacement.
++
++Reset preserves the effective version and inherited readiness/authentication state. An existing SCP session retains
++its processor graph and keys: SELECT is plain, subsequent sends are secure, and no new handshake runs. OpenPGP
++retains no creation SCP parameters for reset. Reopen after uncertainty and inspect persistent state before retrying;
++an authentication flag alone establishes no channel restoration. The integration helper instead resets in a separate
++plain session before creating an optional SCP body session, so it supplies no SCP-reset oracle.
+ 
+ ## Model Layer
+ 
+@@ -188,13 +206,16 @@
+ actual assertions: nonempty/length checks establish response shape, host verification establishes a signature,
+ and certificate-byte replacement establishes overwrite rather than trust-chain validation. Full reset verification
+ requires more than the existing three retry-counter assertions.
++The Unverify signing-failure test leaves signature policy uncontrolled: `Always` could already consume the earlier
++authorization. Its later APDU exception does not isolate Unverify's effect or establish both User modes cleared.
+ 
+ ## User-presence notifications
+ 
+ When `SessionCreationOptions.UserPresencePrompt` is supplied, signing, decryption, authentication, and
+ attestation use the relevant cached UIF before the cryptographic APDU. `On`/`Fixed` map to `PolicyRequires`,
+ `Cached`/`CachedFixed` map to `PolicyMayRequire`, and `Off` is silent. Attestation uses the attestation-key
+-UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` without replacing the cryptographic
++UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` when diagnostic logging succeeds,
++allowing the cryptographic operation to proceed. A logging exception propagates instead and can prevent that
+ operation; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
+ that policy. A direct GET DATA is issued only when the cached application-related data omitted that key's UIF.
+ Device APDU errors resolve as `Failed`; OpenPGP statuses including 6600 currently receive no `TimedOut`

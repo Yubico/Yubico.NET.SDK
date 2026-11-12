@@ -1,0 +1,21 @@
+{
+  "state": "DRAFT-PENDING-EDIT-REVIEW-CLOSEOUT",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "Owned final reconciliation records and draft handoff; excludes this manifest itself. Not a publication/acceptance seal.",
+  "files": {
+    "deferred-findings.md": "99341de7da22254bef9926dc79e8e3e6af809ec91b0b238561184bbf048ceb05",
+    "triage/final/candidate-reconciliation.json": "1dffa7804eb6c87140cc17ffcb909bdf0eec2d51080d3b5b43ed93e174ca30c9",
+    "triage/final/coverage-reconciliation.json": "dabe64ddcc29e79af3db25c15210a62baab302ae8b27701c2be073d7277d4f09",
+    "triage/final/deferred-facets.json": "2cae948c2c4bfb667a3fe57f68aebf03fdc321fd4f6936af2a8b2ede3a5d6086",
+    "triage/final/editor-returns.json": "4f66cce021a2efdca40f665e729ed564e3e18ae3e68c499528d2aacd215e3ae9",
+    "triage/final/inherited-reconciliation.json": "0f0b6ad92303f65ce56cd0f3c253e4b7a7a3db371ad30c66e21ea408192f6756",
+    "triage/final/preserved-inputs.json": "601a0cf7e86087254c7fb093a9ff2c0aa04fef9ba8be31647d3b83ba70f864d5",
+    "triage/final/protected-dispositions.json": "d6826c5a8b3f4fb4fa927037b95871b3bae7712777b911638e4efecd23380edb",
+    "triage/final/reconcile.py": "23639cc50491a0c4ee9708cda80cbbe2461656355e4a78fd0931715f2a776b74",
+    "triage/final/record-assembly-notes.md": "3d39cf36ad47ce02db0aa186fa37844a5ac08fae81d51e8eea8d2a3c8732c689",
+    "triage/final/relationships.json": "536975737283cfbe0a42622a113b4ec7432d49029a1c503ec05b9e102405675a",
+    "triage/final/rows.md": "2f2875585bbed40d9799d283c275ddc6fc8b4ef80a00b3a21535c9112082dbcf",
+    "triage/final/source-followups.json": "861a710c05765ddf967c55fa1c577a614bb1ffb3cea44f1d40249f70555871f0",
+    "triage/final/verification.json": "7ba1c7976127bbe9c4565429a76b99ab918d631bf2a1d0e3bf3be03baa199569"
+  }
+}

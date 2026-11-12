@@ -1,0 +1,4 @@
+parent stdout
+OWNED_DESCENDANT=3336193
+
+Retained command v2: /home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/orphan; external receipt: /home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/orphan/final.json; status=failed; quiescent=True

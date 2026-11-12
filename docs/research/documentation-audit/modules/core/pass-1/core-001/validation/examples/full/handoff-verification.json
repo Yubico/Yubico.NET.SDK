@@ -1,0 +1,22 @@
+{
+  "scope": "Bounded final static/preparation receipt only. No SDK/compiler/checker/test/example/native/device/crypto-provider execution, formatter or Git mutation.",
+  "full_profile_sha256": "806ce07d050835dbcac7e4ce33ffb2b0006c5c8e9937e4321f3af6f569a4dc5c",
+  "final_checker_profile_sha256": "db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1",
+  "checked_owned_record_count": 387,
+  "full_counts": {
+    "additional_authority_records": 662,
+    "pilot_records": 41,
+    "total_authority_records": 703,
+    "additional_prepared_occurrences": 302,
+    "unique_additional_compilations": 300,
+    "consumer_bodies": 244,
+    "existing_test_body_occurrences": 58,
+    "unique_existing_test_bodies": 56,
+    "proposed_illustration_qualifications": 34,
+    "compile_contexts": 10
+  },
+  "full_build_status": "not-run",
+  "qualification_release": "34 explicit source-backed qualifications await independent confirmation before full compilation release.",
+  "old_pilot_and_qualified_tools": "unchanged",
+  "pending": "Fresh independent final-checker three-input review and full-example preparation/qualification review; then serialized coordinator canonical commands."
+}

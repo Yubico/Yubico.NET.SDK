@@ -1,0 +1,1234 @@
+[
+  {
+    "path": "src/YubiHsm/CLAUDE.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+    "pinned_git_blob": "e8f54e5abe454c3e91380de74e139b163fa05477",
+    "pinned_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+    "normalized_lf_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 195,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X002",
+      "CORE-HSM-X003",
+      "CORE-HSM-X004",
+      "CORE-HSM-X005",
+      "CORE-HSM-X006",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Applet/HSM actors, gate table, borrowed inputs/prompt, key response variant, notification terminal and historical qualification are accurate bounded context. Reset transaction/auth and whole-workflow/copy scope need localized follow-up; no whole module rewrite.",
+    "unit_ids": [
+      "core-001:unit:f4a1e21e6fa236ac",
+      "core-001:unit:71bd62554fc11bca",
+      "core-001:unit:7db6fbfef6380bbf",
+      "core-001:unit:bbb19744be9a1564",
+      "core-001:unit:482e017b50e5c23b",
+      "core-001:unit:f719110786267801",
+      "core-001:unit:00e817cb60c87971",
+      "core-001:unit:b6cefbdced81b261",
+      "core-001:unit:969ca35d72262c60",
+      "core-001:unit:6f10e0219c81beab",
+      "core-001:unit:99a7878f9ae10fdf"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/PACKAGE_README.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4",
+    "pinned_git_blob": "e39287c3d96a7879f387fcdde49ba03d42e69bb4",
+    "pinned_sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4",
+    "normalized_lf_sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 25,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-RETAIN",
+    "candidate_ids": [],
+    "authored_context": "Package manages YubiKey credentials and returns session keys; external HSM library completes enrollment/handshake. Alpha warning and transitive Core/install/documentation links retain scope; no new HSM qualification claim.",
+    "unit_ids": [
+      "core-001:unit:abf88689593f247f",
+      "core-001:unit:69a3664da3f5561e"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/README.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+    "pinned_git_blob": "3772f43d3541e3014fcb2b8bbac19be5991ec707",
+    "pinned_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+    "normalized_lf_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 330,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X002",
+      "CORE-HSM-X003",
+      "CORE-HSM-X004",
+      "CORE-HSM-X005",
+      "CORE-HSM-X006",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Read complete listing/enrollment/HSM adapter/rotation/prompt blocks and enclosing cleanup. Application callbacks have declared typed contracts, owned resources and borrowed-secret responsibilities. Preserve supplied-cryptogram limitation; add local channel-history/full-workflow distinction without replacing truthful qualifications.",
+    "unit_ids": [
+      "core-001:unit:e2c611eac31ccf1c",
+      "core-001:unit:0e2a6b8014b211f1",
+      "core-001:unit:9849d2719a1f4489",
+      "core-001:unit:b0802a12b8e9559f",
+      "core-001:unit:9b6e960fa937439b",
+      "core-001:unit:1ae1a01ebf7f3e5d",
+      "core-001:unit:e496e59b826a88f7",
+      "core-001:unit:1efcc215023da128",
+      "core-001:unit:04bbe6a58cdfc823",
+      "core-001:unit:2f26c7ab9c51df33",
+      "core-001:unit:bbd2f1c7724f4002",
+      "core-001:unit:2ad880d4e67b99fc"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ef92af96bf576ececa9a95ae003eacd2b3e8875d026812c94e6c1cbcf8d0c4fe",
+    "pinned_git_blob": "dfe2b3b79ddfcfbe182e27bb582a6f197f317356",
+    "pinned_sha256": "ef92af96bf576ececa9a95ae003eacd2b3e8875d026812c94e6c1cbcf8d0c4fe",
+    "normalized_lf_sha256": "ef92af96bf576ececa9a95ae003eacd2b3e8875d026812c94e6c1cbcf8d0c4fe",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 89,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Current/new keys parsed and length-checked then selector before clearing scope; early wrong-length/selection exits leave copies. Owned session inside try, finally clears only after entry. Recoverable key storage remains operator responsibility.",
+    "unit_ids": [
+      "core-001:unit:45663117c7a6201c"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d1dba03820a9377c806561de170e118d8ee6aee6017ed669198ac9791556db4d",
+    "pinned_git_blob": "1e4a10b3cf3ec06346f55699d5ab8ef9ce2af466",
+    "pinned_sha256": "d1dba03820a9377c806561de170e118d8ee6aee6017ed669198ac9791556db4d",
+    "normalized_lf_sha256": "d1dba03820a9377c806561de170e118d8ee6aee6017ed669198ac9791556db4d",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 66,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Option/flag/positional parser reads label before options, hex FormatException mapsnull, default management key fresh 16-zero bytes. No secure-string or command-line secrecy claim.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1cfc353d4f49a87f1ec49c3d2df0d2b0afa5f880447351451aede31d7f35b49f",
+    "pinned_git_blob": "bce3e73ee9dcea1b856bd975e87daa01e53ea386",
+    "pinned_sha256": "1cfc353d4f49a87f1ec49c3d2df0d2b0afa5f880447351451aede31d7f35b49f",
+    "normalized_lf_sha256": "1cfc353d4f49a87f1ec49c3d2df0d2b0afa5f880447351451aede31d7f35b49f",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 445,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "All list/add/delete/generate dispatch and helpers read. Management key finally includes credential resolution in main paths, but keyEnc/keyMac second allocation and invalid private/management length exits strand copies. Session awaited/owned; emitted keys and visible arguments remain diagnostic; no HSM provisioning.",
+    "unit_ids": [
+      "core-001:unit:52467afc34736ceb",
+      "core-001:unit:fa30412cc3d933a1",
+      "core-001:unit:8f16d503ab482d17",
+      "core-001:unit:f25726f00414a916",
+      "core-001:unit:be6deb0bde5274d7"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "f33b6b0a21f4cc8c2cd28c1b7471f5b89cfb4754af2d4e3c06df2b6617dad950",
+    "pinned_git_blob": "8b49b7fdc44726227959f7fe630884e9b8b848dd",
+    "pinned_sha256": "f33b6b0a21f4cc8c2cd28c1b7471f5b89cfb4754af2d4e3c06df2b6617dad950",
+    "normalized_lf_sha256": "f33b6b0a21f4cc8c2cd28c1b7471f5b89cfb4754af2d4e3c06df2b6617dad950",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 41,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X004",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Owned convenience session reads retries/LIST and prints session.FirmwareVersion. This is effective HSM policy rather than an independent Management/raw revision fact. No hidden authentication or prompt.",
+    "unit_ids": [
+      "core-001:unit:f4566399afef2281"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/ResetCommand.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "396a257b3636c4cde077da1657b56180eabbc2d2631cfef989e26854e9c88c2d",
+    "pinned_git_blob": "808199e3cbf4cd17a97d86ee47832a771a4b7944",
+    "pinned_sha256": "396a257b3636c4cde077da1657b56180eabbc2d2631cfef989e26854e9c88c2d",
+    "normalized_lf_sha256": "396a257b3636c4cde077da1657b56180eabbc2d2631cfef989e26854e9c88c2d",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 48,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Confirmation before selection, owned session then awaited destructive reset. Cancellation of confirmation differs from admitted device operation. Printed success follows method success, no independent persistent readback.",
+    "unit_ids": [
+      "core-001:unit:eac986726ec4b27c"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/CredentialMenu.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "742e51544c3f0fcc6ff700638551398f519550a6a79b618c8e649ebc42bea8d2",
+    "pinned_git_blob": "8f93f654c42d66a22ae2f8a78ee5b01f1ba63ec6",
+    "pinned_sha256": "742e51544c3f0fcc6ff700638551398f519550a6a79b618c8e649ebc42bea8d2",
+    "normalized_lf_sha256": "742e51544c3f0fcc6ff700638551398f519550a6a79b618c8e649ebc42bea8d2",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 81,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Five complete selected-device/await-using session/example calls. Session encloses synchronous prompts and all awaited operations; example borrows it. Eligibility is SmartCard only, not applet support.",
+    "unit_ids": [
+      "core-001:unit:21f40fcc716bb8e0",
+      "core-001:unit:5a812b1714e58820",
+      "core-001:unit:78e3133b7665d0ba",
+      "core-001:unit:9ad2bd2c53d1b963",
+      "core-001:unit:5819bbe2c482cf63"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ManagementKeyMenu.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "b0b6d782cf4f4b6a8ec7492974a9301ebdf4b006b17d164556784628ddcd1f4f",
+    "pinned_git_blob": "ca53f05c19e1db8a27b6bf885a635d05d8d00589",
+    "pinned_sha256": "b0b6d782cf4f4b6a8ec7492974a9301ebdf4b006b17d164556784628ddcd1f4f",
+    "normalized_lf_sha256": "b0b6d782cf4f4b6a8ec7492974a9301ebdf4b006b17d164556784628ddcd1f4f",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 39,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Rotation and retry menu each owns one session through awaited example; storage/secret acquisition is example/operator-owned. No extra lifetime owner or retries loop.",
+    "unit_ids": [
+      "core-001:unit:857ca96c5023da44",
+      "core-001:unit:fa0ab68105813734"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ResetMenu.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3f32158d78eaf39daeefe0dc29133578fa8b54492d3257710fef72aaeaae7073",
+    "pinned_git_blob": "4c4c46fd5290bedbb689d6688d8621355023bdb6",
+    "pinned_sha256": "3f32158d78eaf39daeefe0dc29133578fa8b54492d3257710fef72aaeaae7073",
+    "normalized_lf_sha256": "3f32158d78eaf39daeefe0dc29133578fa8b54492d3257710fef72aaeaae7073",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 25,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Owns selected-device session through confirmation/reset example, then disposes. Does not add rollback, SCP restoration or physical postcondition.",
+    "unit_ids": [
+      "core-001:unit:cbb38c36d4b5a688"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4357b3325337d10056caa63afa370efe407ff35eaa3ec5335be2244a92ab0655",
+    "pinned_git_blob": "1bcde8d81d3d0b449a71dad5016a8fed6bd0a327",
+    "pinned_sha256": "4357b3325337d10056caa63afa370efe407ff35eaa3ec5335be2244a92ab0655",
+    "normalized_lf_sha256": "4357b3325337d10056caa63afa370efe407ff35eaa3ec5335be2244a92ab0655",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 27,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X003",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Owns session without prompt, invokes symmetric-only calculation example. Accurate comment preserves physical policy versus absent notification service.",
+    "unit_ids": [
+      "core-001:unit:3be1d65195552838"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Output/OutputHelpers.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4cb86e464499056014e0c51955f7574d210bdea339d550da13274d54f2a405f0",
+    "pinned_git_blob": "51113d129e41037d46a246deaf51a1dec47c6a8c",
+    "pinned_sha256": "4cb86e464499056014e0c51955f7574d210bdea339d550da13274d54f2a405f0",
+    "normalized_lf_sha256": "4cb86e464499056014e0c51955f7574d210bdea339d550da13274d54f2a405f0",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 49,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Complete delegation to shared output/confirmation including WriteHex borrowed spans. Formatting can create immutable output independently of cleared input; no local secret redaction.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "f242a37d27a22adba254f7bfc478e07ffea41efda7cf617ba308e12da9b5872a",
+    "pinned_git_blob": "7c54864cee437a784008d4025a19c09e47313714",
+    "pinned_sha256": "f242a37d27a22adba254f7bfc478e07ffea41efda7cf617ba308e12da9b5872a",
+    "normalized_lf_sha256": "f242a37d27a22adba254f7bfc478e07ffea41efda7cf617ba308e12da9b5872a",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 23,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Shared selector configured SmartCard eligibility and FirstEligible noninteractive choice. Shared helper still performs All discovery/enrichment; selected transport prerequisite is narrower than enabled applet or historical failure explanation.",
+    "unit_ids": [
+      "core-001:unit:e1f9b2b10741af23"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "68b9f8b0648a4d6efdc847ffc53145b134865f102f0a53000f7f0d133ac70ae1",
+    "pinned_git_blob": "c38a120cae6c151d907878e9b2c3fa0485afff5a",
+    "pinned_sha256": "68b9f8b0648a4d6efdc847ffc53145b134865f102f0a53000f7f0d133ac70ae1",
+    "normalized_lf_sha256": "68b9f8b0648a4d6efdc847ffc53145b134865f102f0a53000f7f0d133ac70ae1",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 61,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Using credential owners encompass derivation/credential prompts and PUT; management hex string persists independently; management byte array finally clear. Derivation enrollment parity/HSM object remains external.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "7ac1545e8212629bed1b9d8e07c3ae2830faec2dbd9ae06a8327f5051949fb15",
+    "pinned_git_blob": "dcaac9429357605b4795ec7d8339bc38fe067410",
+    "pinned_sha256": "7ac1545e8212629bed1b9d8e07c3ae2830faec2dbd9ae06a8327f5051949fb15",
+    "normalized_lf_sha256": "7ac1545e8212629bed1b9d8e07c3ae2830faec2dbd9ae06a8327f5051949fb15",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 82,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Generated or parsed pair before touch prompt/management parse and clearing try; later failures can strand pair. WriteHex exposes long-lived keys. Existing comments accurately warn; owned credential disposal is separate.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4347572bb2427884a7b0b1eb08939a2480c13536a497a2b487f55b938a7e655a",
+    "pinned_git_blob": "9969de9655682a47c1a9b3185a7ddb66ea476797",
+    "pinned_sha256": "4347572bb2427884a7b0b1eb08939a2480c13536a497a2b487f55b938a7e655a",
+    "normalized_lf_sha256": "4347572bb2427884a7b0b1eb08939a2480c13536a497a2b487f55b938a7e655a",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 107,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X003",
+      "CORE-HSM-X005",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Lists every algorithm but symmetric CALCULATE always; prompts visible context/optional cryptogram, parses under finally, checks 8+8, owns context/parts and keys through diagnostic output. Preserves 56-byte warning and external authenticated HSM role.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "67e60cd6caf5eeacefc04e512a1caa2b89f1cc4fd1b43941d9e4f6369e6707bc",
+    "pinned_git_blob": "ab35ba8b4a485da844bb494e053002c4a4cb930d",
+    "pinned_sha256": "67e60cd6caf5eeacefc04e512a1caa2b89f1cc4fd1b43941d9e4f6369e6707bc",
+    "normalized_lf_sha256": "67e60cd6caf5eeacefc04e512a1caa2b89f1cc4fd1b43941d9e4f6369e6707bc",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 40,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Both visible hex strings and two parses precede try; second parse can strand first key. Active key recovery/communication uncertainty external; finally clears both only after entry.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/DeleteCredential.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "9b96c5632834104bfdfdfed8010b7ad71ad26e2ad3033f0448f467656ae06f24",
+    "pinned_git_blob": "5394a89fbb8f17a45d1e41099185557cee6447b9",
+    "pinned_sha256": "9b96c5632834104bfdfdfed8010b7ad71ad26e2ad3033f0448f467656ae06f24",
+    "normalized_lf_sha256": "9b96c5632834104bfdfdfed8010b7ad71ad26e2ad3033f0448f467656ae06f24",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 55,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Lists/chooses label, visible management string and destructive confirmation before allocation; management array clear surrounds awaited DELETE. Session is menu-borrowed; public labels need no secret cleanup.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "daaaacd1b89810eb7753633cf97f600eb0144a4659080ef1c4137814c3fcd636",
+    "pinned_git_blob": "863e7aa50d4c098e3eebd8c22367142f1dcc767f",
+    "pinned_sha256": "daaaacd1b89810eb7753633cf97f600eb0144a4659080ef1c4137814c3fcd636",
+    "normalized_lf_sha256": "daaaacd1b89810eb7753633cf97f600eb0144a4659080ef1c4137814c3fcd636",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 54,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Credential owner and management array enclose generate then public-key export; on-device private generation and external HSM enrollment distinct. GetPublicKey width-only validation inherited.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GetManagementKeyRetries.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "97db46e3c19e7b40311bb78bff57171a9705f39f57be5228e02e38b02aad7950",
+    "pinned_git_blob": "08603f090f216c42c2a55bd69ac3990f33cd6f3a",
+    "pinned_sha256": "97db46e3c19e7b40311bb78bff57171a9705f39f57be5228e02e38b02aad7950",
+    "normalized_lf_sha256": "97db46e3c19e7b40311bb78bff57171a9705f39f57be5228e02e38b02aad7950",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 23,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "One borrowed-session read and low-count diagnostic warning; no secret input, decrement, guessing loop or attempt reset.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ListCredentials.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "24d9a6d1f184c0904db90a472584462a000503e52f6f58744108905f2ed7cbb3",
+    "pinned_git_blob": "c40d8c38eea1e0829d48a590a0e5db520cad7ab0",
+    "pinned_sha256": "24d9a6d1f184c0904db90a472584462a000503e52f6f58744108905f2ed7cbb3",
+    "normalized_lf_sha256": "24d9a6d1f184c0904db90a472584462a000503e52f6f58744108905f2ed7cbb3",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 29,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Borrowed session LIST snapshots -> shared table; unknown algorithm/touch presentation stays metadata. No authentication, key copy or physical selection guarantee.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ResetHsmAuth.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "01a72079c10452aca742b09dddaf5ccd6bc7d9d9ebd76a4863e347971ef74369",
+    "pinned_git_blob": "4d5cb9c923e92e3ba4dfcfee542f481d51c67033",
+    "pinned_sha256": "01a72079c10452aca742b09dddaf5ccd6bc7d9d9ebd76a4863e347971ef74369",
+    "normalized_lf_sha256": "01a72079c10452aca742b09dddaf5ccd6bc7d9d9ebd76a4863e347971ef74369",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 27,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Explicit destructive confirmation then borrowed session Reset; success messages follow method return. Does not independently read back defaults/empty list or restore SCP.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+    "pinned_git_blob": "23c9c8dc4304e39910ee393a23a7e27fb22431ab",
+    "pinned_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+    "normalized_lf_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 26,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Actual HSM/Core/Management/Cli.Shared/Cli.Commands references and Spectre/Hosting package participation. Compilation needs full project/helper context, no build conducted.",
+    "unit_ids": [
+      "core-001:unit:f2d244364ba202c5"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "62987192be23a118424e68ceeaf3fa1d85f47fd494507b19da1982a3c8c0dceb",
+    "pinned_git_blob": "ce4fea8d8c978cbf6ed464e5aa77b69164c8900a",
+    "pinned_sha256": "62987192be23a118424e68ceeaf3fa1d85f47fd494507b19da1982a3c8c0dceb",
+    "normalized_lf_sha256": "62987192be23a118424e68ceeaf3fa1d85f47fd494507b19da1982a3c8c0dceb",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 113,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Whole interactive/noninteractive dispatch, owned CTS lifetimes and error output read. Diagnostic secret-output warning is accurate. CLI CancelKeyPress handler captures disposed CTS without unregister; one-process top-level lifetime is distinct from reusable helper policy. No runtime strings edited.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/Backend/HsmAuthBackend.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "62a705c289a8a731da02805921aa1bcad3216b526dd1bf5d7334b81649a31e9e",
+    "pinned_git_blob": "0d877be030c089ae07d0be4b6b3be09f4aad2e05",
+    "pinned_sha256": "62a705c289a8a731da02805921aa1bcad3216b526dd1bf5d7334b81649a31e9e",
+    "normalized_lf_sha256": "62a705c289a8a731da02805921aa1bcad3216b526dd1bf5d7334b81649a31e9e",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 58,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X004"
+    ],
+    "authored_context": "Thin SmartCard select/send wrapper. SELECT finds tag 79 with TryFindValue, exact width 3 or 5.4.3 fallback; malformed TLV errors still propagate. Public version copies differ from sensitive material; no result crypto performed.",
+    "unit_ids": [
+      "core-001:unit:2ede9280f41c4085",
+      "core-001:unit:d197f34ac331ace7",
+      "core-001:unit:2c00745a92a32066",
+      "core-001:unit:ac34af5219eeb53f",
+      "core-001:unit:4043a42f355fff30",
+      "core-001:unit:93f15f446e18cfec"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/Backend/IHsmAuthBackend.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "dcfcbafe1f2608de40eb72a80efc4cc88da231083aeacde8c71c1b08dc5bdfea",
+    "pinned_git_blob": "f1e83214d03a461d717108fb7e787d7d64b51623",
+    "pinned_sha256": "dcfcbafe1f2608de40eb72a80efc4cc88da231083aeacde8c71c1b08dc5bdfea",
+    "normalized_lf_sha256": "dcfcbafe1f2608de40eb72a80efc4cc88da231083aeacde8c71c1b08dc5bdfea",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 29,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-RETAIN",
+    "candidate_ids": [],
+    "authored_context": "Two backend operations expose initial version and APDU send/throw policy; no independent resource/disposal owner. Concrete Select remains internal helper, not missing public API.",
+    "unit_ids": [
+      "core-001:unit:80bad3f3caf0b8d6",
+      "core-001:unit:53357dcaac8348fc"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/HsmAuthAlgorithm.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4aab021e674bf5c082a53b916bb1112a49e99d1565e5546f177001263e8d4cec",
+    "pinned_git_blob": "c3b4453a9d77c98f9de204ffc19119af66a4849f",
+    "pinned_sha256": "4aab021e674bf5c082a53b916bb1112a49e99d1565e5546f177001263e8d4cec",
+    "normalized_lf_sha256": "4aab021e674bf5c082a53b916bb1112a49e99d1565e5546f177001263e8d4cec",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 68,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X006"
+    ],
+    "authored_context": "Open byte enum 38/39, local width switches 16/32 and public point 65; unknown identifiers deliberately throw only when algorithm-specific properties are queried. HSM KDF profile is separate from Core catalog support.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/HsmAuthCredential.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "19a4c51f32e7c4f4c03a20bd94825c8a4c09cf4698b6de889cb799491cc28df4",
+    "pinned_git_blob": "58fced070adb941ab4ab7149f10384a920bd0fa5",
+    "pinned_sha256": "19a4c51f32e7c4f4c03a20bd94825c8a4c09cf4698b6de889cb799491cc28df4",
+    "normalized_lf_sha256": "19a4c51f32e7c4f4c03a20bd94825c8a4c09cf4698b6de889cb799491cc28df4",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 52,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X006"
+    ],
+    "authored_context": "Detached LIST snapshot, nullable touch, metadata-only init properties, all-field record equality versus case-insensitive label ordering. Retry restoration/deletion claims explicitly attributed to vendor overview.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/HsmAuthRetryException.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "5ddb414865deeacb71c80247e0f79fd7674bdb36aecaaefe549fdbbdbfdb2e71",
+    "pinned_git_blob": "050c74d4db054bf63266dc975377cbda3054e281",
+    "pinned_sha256": "5ddb414865deeacb71c80247e0f79fd7674bdb36aecaaefe549fdbbdbfdb2e71",
+    "normalized_lf_sha256": "5ddb414865deeacb71c80247e0f79fd7674bdb36aecaaefe549fdbbdbfdb2e71",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 71,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X006",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Retry count holder derives from APDU exception and documents method coverage. XML catch-every-protocol-failure assurance exceeds APDU status scope; Parse/transport failures can have other exception types.",
+    "unit_ids": [
+      "core-001:unit:d9d9f5602dca2c1b"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/HsmAuthSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+    "pinned_git_blob": "95e90197f92791edd57c09362c2fd43c46256907",
+    "pinned_sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+    "normalized_lf_sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 987,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X002",
+      "CORE-HSM-X003",
+      "CORE-HSM-X004",
+      "CORE-HSM-X005",
+      "CORE-HSM-X006"
+    ],
+    "authored_context": "Complete 987-line source read: factory binding/prepare/select/version/config/SCP/backend, all operations, validation, retry/presence/result helpers and finally cleanup. Preserve independent lower copies and reset graph/flags, per-exchange versus public workflow; see analysis tables for exact lines.",
+    "unit_ids": [
+      "core-001:unit:46216fa4bb477d2d",
+      "core-001:unit:b36716106e7ef3af",
+      "core-001:unit:867ce01a916b9526",
+      "core-001:unit:f76fe7fd564fdf59",
+      "core-001:unit:8f919f71996860e6",
+      "core-001:unit:a31c4f6ef7f8ceb5",
+      "core-001:unit:6b3244e018be9450",
+      "core-001:unit:e67cc0fe0d743020",
+      "core-001:unit:c143c8dcfc8723a2",
+      "core-001:unit:3270b468d31dc8c9",
+      "core-001:unit:32344ea8599ff159",
+      "core-001:unit:570cf77dfe20754d",
+      "core-001:unit:6c71d3e46dddd93e",
+      "core-001:unit:0ba7de36589f8d1c",
+      "core-001:unit:229cbbf0c816393f",
+      "core-001:unit:988a9384c804f3ab",
+      "core-001:unit:92c1b5732f4ff9b8",
+      "core-001:unit:c4d04ce56e188f14",
+      "core-001:unit:66033149e18930bd",
+      "core-001:unit:a64f8e655d13ab4d",
+      "core-001:unit:36849dd60dafde94",
+      "core-001:unit:512eeb739fe18a50",
+      "core-001:unit:ae7529f6ebd6a069",
+      "core-001:unit:b1e69ebc4ce3b9be",
+      "core-001:unit:084fa91d45ef9b3d",
+      "core-001:unit:b7d95c24d028842c",
+      "core-001:unit:d2053b26d9b0f9c9",
+      "core-001:unit:6052b5be9b29734f",
+      "core-001:unit:9a67b77c4103c979",
+      "core-001:unit:3ceb4c49a09206e1",
+      "core-001:unit:7d73ad99b0542ab5",
+      "core-001:unit:465a6cd06cc30bcd",
+      "core-001:unit:901f80e38630f0af"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "af98ffeb0449789dac2a185d9e7b467ce30838e835413c4b1fa05e8e8ec8eeac",
+    "pinned_git_blob": "08d622e1c3eebfbb0f20ac7923eb3ff8be3acaea",
+    "pinned_sha256": "af98ffeb0449789dac2a185d9e7b467ce30838e835413c4b1fa05e8e8ec8eeac",
+    "normalized_lf_sha256": "af98ffeb0449789dac2a185d9e7b467ce30838e835413c4b1fa05e8e8ec8eeac",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 378,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X003",
+      "CORE-HSM-X005",
+      "CORE-HSM-X006"
+    ],
+    "authored_context": "All public method XML read, including actor/borrowed-secret roles, exact context lengths, cryptogram 56-byte qualification, challenge/public point limits, retry policy and reset policy. Local inherited channel/auth/full-task guidance is the focused gap; existing response-profile warnings remain useful.",
+    "unit_ids": [
+      "core-001:unit:851afa54e70f73e4",
+      "core-001:unit:bdf74ceb5f2099b0",
+      "core-001:unit:4c6a50aaddea40e8"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/IYubiKeyExtensions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "93df1799760d8b4bf52e0f652d7da89462a48a61f29fc4310e73f0458f7b1d9f",
+    "pinned_git_blob": "676b7bf01981959762e0cc2002b7043c4fbe5cde",
+    "pinned_sha256": "93df1799760d8b4bf52e0f652d7da89462a48a61f29fc4310e73f0458f7b1d9f",
+    "normalized_lf_sha256": "93df1799760d8b4bf52e0f652d7da89462a48a61f29fc4310e73f0458f7b1d9f",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 87,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X003",
+      "CORE-HSM-X004"
+    ],
+    "authored_context": "Only SmartCard transport resolved once; referenced options shallow-copy, direct Create awaited and OwnConnection after success. List convenience encloses session disposal. Failure cleanup belongs outer Core helper and source-based native release distinction.",
+    "unit_ids": [
+      "core-001:unit:2d8972407287dd86"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/Properties/AssemblyInfo.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c19b164f86e1356e2f573b8737a16de31a87bb450d6a1f60dfea7618cca17572",
+    "pinned_git_blob": "47f76be6107bef7dce2178fe5b38bf2ab755b5ab",
+    "pinned_sha256": "c19b164f86e1356e2f573b8737a16de31a87bb450d6a1f60dfea7618cca17572",
+    "normalized_lf_sha256": "c19b164f86e1356e2f573b8737a16de31a87bb450d6a1f60dfea7618cca17572",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 6,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-RETAIN",
+    "candidate_ids": [],
+    "authored_context": "Friend declaration exposes internals to actual HSM unit project, not integration applet protocol. Context-only declaration, unchanged.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/PublicAPI.Shipped.txt",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+    "pinned_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "normalized_lf_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 1,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-RETAIN",
+    "candidate_ids": [],
+    "authored_context": "Nullable header only; no shipped signatures to semantically disposition. Preserve exact file, no API edit.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/PublicAPI.Unshipped.txt",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+    "pinned_git_blob": "b1cc1389de1251088f5f3d3a83e9f0e0407c02e8",
+    "pinned_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+    "normalized_lf_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 84,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-RETAIN",
+    "candidate_ids": [],
+    "authored_context": "Complete 84-line snapshot reconciled with eight public types, inherited interface/session machinery and current operations/feature fields. Snapshot lists 48 parser constant, not complete wire-response universal grammar. No compiled API binding performed.",
+    "unit_ids": [
+      "core-001:unit:3543d20e17e245b9"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/SessionKeys.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "8a220c1c4984f39b2029edee3b175e58bd5ac7db063a593bd3d36b3462fd7d26",
+    "pinned_git_blob": "ff330c32262b6a8665343519c7f72f2114fcdd61",
+    "pinned_sha256": "8a220c1c4984f39b2029edee3b175e58bd5ac7db063a593bd3d36b3462fd7d26",
+    "normalized_lf_sha256": "8a220c1c4984f39b2029edee3b175e58bd5ac7db063a593bd3d36b3462fd7d26",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 129,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X002",
+      "CORE-HSM-X005"
+    ],
+    "authored_context": "Strict 48-byte admission, three independently allocated 16-byte arrays, span views, idempotent clear/disposed refusal. Final response and copied keys have independent lifetimes; caller/connector copies and exceptional partial allocations remain separate. Existing 56-byte remarks retain uncertainty.",
+    "unit_ids": [
+      "core-001:unit:29006ac1de1a54fe",
+      "core-001:unit:6554bab20cf51323",
+      "core-001:unit:328fa7631af38d2d"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed",
+    "pinned_git_blob": "f7a631a9b6c53bde89ad62c41d1031744bec03f6",
+    "pinned_sha256": "abc45db95fa758e433c10e7fdbdef18bd61611fabafd9fcd560c079b3ceea29e",
+    "normalized_lf_sha256": "abc45db95fa758e433c10e7fdbdef18bd61611fabafd9fcd560c079b3ceea29e",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 20,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-RETAIN",
+    "candidate_ids": [],
+    "authored_context": "Core-only shipping reference and descriptive applet-not-connector package boundary. Shared NativeAOT opt-in is analyzer/metadata participation rather than runtime qualification.",
+    "unit_ids": [
+      "core-001:unit:548d700094d3206f"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/CLAUDE.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c65163bce092d689e9d88a08839a99a40fb3d9c08220df10bc61b55358f5b1c9",
+    "pinned_git_blob": "1d8da8f620663ec8f135e58a66f090923e066fec",
+    "pinned_sha256": "c65163bce092d689e9d88a08839a99a40fb3d9c08220df10bc61b55358f5b1c9",
+    "normalized_lf_sha256": "c65163bce092d689e9d88a08839a99a40fb3d9c08220df10bc61b55358f5b1c9",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 23,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X003",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Actual reset-before/plain versus optional-SCP-body resource distinction, persistent cleanup and assertion-accurate shape/touch/dummy rejection explanations. Existing required-testing link retained; no old rejected link finding reintroduced.",
+    "unit_ids": [
+      "core-001:unit:1000e7195b8cf769"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ae95aaad9ae3dd0c00ec180bb8d88f54845385ced12fae96a1257abeb2dadf34",
+    "pinned_git_blob": "ea566f18597ae3048d97b520118e2caf7ebee64c",
+    "pinned_sha256": "ae95aaad9ae3dd0c00ec180bb8d88f54845385ced12fae96a1257abeb2dadf34",
+    "normalized_lf_sha256": "ae95aaad9ae3dd0c00ec180bb8d88f54845385ced12fae96a1257abeb2dadf34",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 199,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X006",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Complete four methods plus NewToken/default/password helpers: scalar export cleanup, algorithm metadata, nonempty challenge, multiply invalid dummy handshake and exact ApduException/nonzeroSW, touch metadata only. CTS/input/persistent cleanup limitations retain HSM-IMP-006.",
+    "unit_ids": [
+      "core-001:unit:4760ac6b0859b54d",
+      "core-001:unit:1e8b86a55b54704e",
+      "core-001:unit:44f88b2df5bc2e57",
+      "core-001:unit:7490364af15b4c37"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1307a5c79bda1829be76784d1d070f79858fbdae6db2f33f691f2a32f0e56c20",
+    "pinned_git_blob": "57fe1b359e45d5724995e21cd32a35be75c9704b",
+    "pinned_sha256": "1307a5c79bda1829be76784d1d070f79858fbdae6db2f33f691f2a32f0e56c20",
+    "normalized_lf_sha256": "1307a5c79bda1829be76784d1d070f79858fbdae6db2f33f691f2a32f0e56c20",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 336,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X004",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Complete nine methods: reset/LIST, symmetric roundtrip, derived algorithm only, new-management-key PUT, retries8, omission-only three lengths, generated point width/prefix, replacement-password SEnc width and touch metadata. No authenticated external HSM; helper leaves persistence and NewToken owners unscoped.",
+    "unit_ids": [
+      "core-001:unit:b6882212fe01e6f0",
+      "core-001:unit:fad4dd2efec2dcf5",
+      "core-001:unit:e8ca6f7526282022",
+      "core-001:unit:3a4109de6d14d68b",
+      "core-001:unit:e685a68c7e261d51",
+      "core-001:unit:5884e757b9dc6bcf",
+      "core-001:unit:e01b2c496b4b2231",
+      "core-001:unit:208d789ca32e5779",
+      "core-001:unit:bdf0b9fa2e22c201"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4ef2ec945701a8f79c9c8536a1b9a39877de5c33dbf612460f1ebbf7c36d6aee",
+    "pinned_git_blob": "b8a2f98336e3242ca8fa9a1548dde0baef5fa8f8",
+    "pinned_sha256": "4ef2ec945701a8f79c9c8536a1b9a39877de5c33dbf612460f1ebbf7c36d6aee",
+    "normalized_lf_sha256": "4ef2ec945701a8f79c9c8536a1b9a39877de5c33dbf612460f1ebbf7c36d6aee",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 70,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Shared connection owner surrounds separate plain reset session then body session with optional SCP. Configuration forwarded both; SCP only body. Full action awaited, no post-body reset/readback. No automatically qualified secure reset.",
+    "unit_ids": [
+      "core-001:unit:7142071d50d6d4b7"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+    "pinned_git_blob": "026c2a2fe4c4f81dc81a3f65600e75007b4a3c18",
+    "pinned_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+    "normalized_lf_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 42,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": ".NET 10, xUnit v2/traditional runner, hardware parallelism config and actual Tests.Shared/Core/HSM references. Metadata filtering and runner participation are not actual device execution.",
+    "unit_ids": [
+      "core-001:unit:38c5a121ce477d50"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "99b992e228671021c6f07f140576ba5f0f84dd54735244bbd8dce9c1176a0563",
+    "pinned_git_blob": "e53cc6e207508a4f66b4051622a0929dcdb7fb4c",
+    "pinned_sha256": "99b992e228671021c6f07f140576ba5f0f84dd54735244bbd8dce9c1176a0563",
+    "normalized_lf_sha256": "99b992e228671021c6f07f140576ba5f0f84dd54735244bbd8dce9c1176a0563",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 211,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X006",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Helper/input tests check raw-byte length, null padding, nonalias under source zeroing, UTF-8 encoded fixtures and public ParamName. Session helper uses borrowed recorder with high override and one SELECT; no operation bytes/native lifetime proof for rejected inputs.",
+    "unit_ids": [
+      "core-001:unit:42f6421cd0673e02"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthCredentialTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e9ae98ee40ca3fbd4ec19d1117903273dcd8b7e74da8ef62bfeeff619c480957",
+    "pinned_git_blob": "31a0f90edb80045a6e1e3a43b0e63a15142daaa1",
+    "pinned_sha256": "e9ae98ee40ca3fbd4ec19d1117903273dcd8b7e74da8ef62bfeeff619c480957",
+    "normalized_lf_sha256": "e9ae98ee40ca3fbd4ec19d1117903273dcd8b7e74da8ef62bfeeff619c480957",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 75,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Ordinal-ignore-case sort examples, null comparison and selected record retry difference. Actual record equality covers all fields; selected fixtures do not independently vary every property.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a9f10ae1a4a9e63236d3d102c7166114123239901fff73013b73706cfce1add9",
+    "pinned_git_blob": "43f045dbdc27860010c5b2a391ae7b8996590176",
+    "pinned_sha256": "a9f10ae1a4a9e63236d3d102c7166114123239901fff73013b73706cfce1add9",
+    "normalized_lf_sha256": "a9f10ae1a4a9e63236d3d102c7166114123239901fff73013b73706cfce1add9",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 242,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X006",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Nine command paths use queued 63Cx and compare count/SW and selected messages; synthetic 63C9 is explicitly beyond the documented initial eight. Asymmetric calculation's expected Invalid credential password substring matches the actual credential helper. GET_CHALLENGE remains outside this suite; recorder proves no device retry transitions.",
+    "unit_ids": [
+      "core-001:unit:dd37ce8f1ff7e887",
+      "core-001:unit:7ae4c529d67dd20f",
+      "core-001:unit:4cdf9340ec67218f",
+      "core-001:unit:81d350cf892f61cd",
+      "core-001:unit:58bfa2595ea07ff4",
+      "core-001:unit:9b9cb9dd04bdb7b0",
+      "core-001:unit:43ee813b845202b4",
+      "core-001:unit:673587f212268a6c",
+      "core-001:unit:36e72373773c5747",
+      "core-001:unit:192328fc04a7715a"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "144fe0367dc9d52efb0c5290274cf6708c6403361d968730e39271cd0cd9d89e",
+    "pinned_git_blob": "16a7646527519d35b616d9f88fe9a7870c1d3ef2",
+    "pinned_sha256": "144fe0367dc9d52efb0c5290274cf6708c6403361d968730e39271cd0cd9d89e",
+    "normalized_lf_sha256": "144fe0367dc9d52efb0c5290274cf6708c6403361d968730e39271cd0cd9d89e",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 358,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X001",
+      "CORE-HSM-X004",
+      "CORE-HSM-X005",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Exact selected request headers/TLV bytes, context guard command counts,5.6.0/5.7.1 password inclusion, password-selector tag positions, borrowed factory failure and reset override. Fake queues supply crypto data without validation. Reset test carries no SCP handshake or post-reset protected operation.",
+    "unit_ids": [
+      "core-001:unit:d5c991345bf8977b",
+      "core-001:unit:839fa04eb5965974",
+      "core-001:unit:75649a8bd0ae3bb6",
+      "core-001:unit:ea4a127a298cf001",
+      "core-001:unit:23c6b77c26150d0a",
+      "core-001:unit:0f1bc8a1b24a7f9e",
+      "core-001:unit:ac8ed9a859c531f5",
+      "core-001:unit:34d46c059c1d7d4e",
+      "core-001:unit:b5c1617bcce50358",
+      "core-001:unit:cdf81b04b73ac1a7",
+      "core-001:unit:261e37fb24419500"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/LabelValidationTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4e82f4a9fc4f575a15b1260dc8cb44f8c4675c6903defb11a0f92cebde34b1e3",
+    "pinned_git_blob": "764dcb5367dd3714053665b032566e66a27af846",
+    "pinned_sha256": "4e82f4a9fc4f575a15b1260dc8cb44f8c4675c6903defb11a0f92cebde34b1e3",
+    "normalized_lf_sha256": "4e82f4a9fc4f575a15b1260dc8cb44f8c4675c6903defb11a0f92cebde34b1e3",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 87,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "UTF-8 byte-width encoding/bound checks distinguish 21/22 CJK characters; null/empty guards, no malformed label roundtrip or normalization policy assertion.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3e4881e977fceebc79658924f31705531dfe19c99df5bd8684d105780884bf3f",
+    "pinned_git_blob": "24c27697f440648ede8242c5bcad3d1cd7111c0a",
+    "pinned_sha256": "3e4881e977fceebc79658924f31705531dfe19c99df5bd8684d105780884bf3f",
+    "normalized_lf_sha256": "3e4881e977fceebc79658924f31705531dfe19c99df5bd8684d105780884bf3f",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 82,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Same BCL primitive with separate constants checks parameter wiring; nonzero/distinct halves and deterministic/different-password comparisons. Existing comment correctly limits KnownVector name. No crypto recomputation executed here.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/RetryExtractionTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "89af879e4f779bbee997d24e7655c5f0a47e1dbc8187af0e51dc8bd6d5c3be5b",
+    "pinned_git_blob": "7469e50f0fc0a3e85c14f4191345416df924f0c2",
+    "pinned_sha256": "89af879e4f779bbee997d24e7655c5f0a47e1dbc8187af0e51dc8bd6d5c3be5b",
+    "normalized_lf_sha256": "89af879e4f779bbee997d24e7655c5f0a47e1dbc8187af0e51dc8bd6d5c3be5b",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 44,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Explicit retry nibble 0/1/5/8/15 and unrelated status vectors. Pure decoding scope, distinct from device max retry semantics.",
+    "unit_ids": [],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/SessionKeysTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ee6f54eb0ef5613d29aa97940ab433b52a3dc32c5110026bcc050fae23919516",
+    "pinned_git_blob": "7ab797d3c828fed7706f35c49fe9bee417f82033",
+    "pinned_sha256": "ee6f54eb0ef5613d29aa97940ab433b52a3dc32c5110026bcc050fae23919516",
+    "normalized_lf_sha256": "ee6f54eb0ef5613d29aa97940ab433b52a3dc32c5110026bcc050fae23919516",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 122,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X002",
+      "CORE-HSM-X005",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Three fixture-region content checks; selected non-48-byte rejection; reflection observes all actual arrays before/after Dispose; helper zeros actual RawData.56 absent from fixture cases, lower transport/callback/decrypted copies outside oracle.",
+    "unit_ids": [
+      "core-001:unit:32cf859f510562b0",
+      "core-001:unit:b2f3ef5a47d5bce4",
+      "core-001:unit:56ac675d5c5a5b82",
+      "core-001:unit:396a9dc5f948951f",
+      "core-001:unit:b9cdd29a16fa739a",
+      "core-001:unit:f316e212511658da"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/TouchNotificationTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "2c5e3e7cccdae1ef9e357913826e86ead06632e8be236d21b9e99bcc0c92bd45",
+    "pinned_git_blob": "4786321da6c9fcc5b9d33b0215689b846b2bf470",
+    "pinned_sha256": "2c5e3e7cccdae1ef9e357913826e86ead06632e8be236d21b9e99bcc0c92bd45",
+    "normalized_lf_sha256": "2c5e3e7cccdae1ef9e357913826e86ead06632e8be236d21b9e99bcc0c92bd45",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 333,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X003",
+      "CORE-HSM-X007"
+    ],
+    "authored_context": "Full policy/order/lifecycle tests and prompt implementation read. Fake command-count 2 before CALCULATE; same context/basis/operation/token None; prompt-cancel before wire, request/no-resolution failure, success-resolution identity and primary APDU retention. Source disposes produced keys but tests lack actual-array callback-failure witness.",
+    "unit_ids": [
+      "core-001:unit:b6f2f47dc485e27f",
+      "core-001:unit:56b56f5f5ddac7fd",
+      "core-001:unit:5aa84c0734068a7a",
+      "core-001:unit:c130dbf412ad43fb",
+      "core-001:unit:2f737b1fbfaf197c",
+      "core-001:unit:38f6cef0ccfabb19",
+      "core-001:unit:cc9404a82d26d774",
+      "core-001:unit:cc23e5cb2cbb84ab",
+      "core-001:unit:e7182c006c715df1",
+      "core-001:unit:63a6bb1cd1f609d8",
+      "core-001:unit:0769b13e6234b944",
+      "core-001:unit:b3a4e2c9e4dc1f4e",
+      "core-001:unit:f5b4929cb59ba6c7",
+      "core-001:unit:d9e4586d8cd3f860",
+      "core-001:unit:06e5e295ca27b82f",
+      "core-001:unit:b096bde40858a9da",
+      "core-001:unit:6be908be3b2b0dd9",
+      "core-001:unit:587992a10b39ebd0",
+      "core-001:unit:a661e70816ad2a31",
+      "core-001:unit:5dd28d205763c867"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  },
+  {
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+    "pinned_git_blob": "20e0c7065c5537fdf565f7116d5792e676980212",
+    "pinned_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+    "normalized_lf_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+    "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+    "line_count": 31,
+    "read_status": "READ-COMPLETE",
+    "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+    "candidate_ids": [
+      "CORE-HSM-X007"
+    ],
+    "authored_context": ".NET 10/xUnit v3 executable/MTP runner and actual shared/helper references; no direct traditional test SDK. Test-source inspection only.",
+    "unit_ids": [
+      "core-001:unit:2429245cbf9bcf06"
+    ],
+    "review_status": "INDEPENDENT-REVIEW-PENDING",
+    "validation_status": "VALID-NOT-CHECKED"
+  }
+]

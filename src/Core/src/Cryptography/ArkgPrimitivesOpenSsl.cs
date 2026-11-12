@@ -29,9 +29,16 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// <remarks>
 /// Provides the security-critical primitives required by the ARKG-P256
 /// algorithm: on-curve point validation, ECDH shared-secret computation,
-/// and the full draft-bradleylundberg-cfrg-arkg-09 derivation. Point math
+/// and derivation targeting draft-bradleylundberg-cfrg-arkg-09. That July 7, 2025
+/// Internet-Draft had intended Informational status and expired January 8, 2026;
+/// it is a work-in-progress reference, rather than a final standard. Point math
 /// goes through Yubico.NativeShims (OpenSSL); scalar reduction uses
 /// <see cref="System.Numerics.BigInteger"/>.
+/// Secret-derived BigInteger values are variable-time and cannot be explicitly cleared. Several
+/// scalar, hash, and native-marshalling arrays also remain uncleared; the explicit clearing scopes
+/// below cover only their named buffers. SafeHandle disposal frees native objects, but the point
+/// wrapper uses ordinary free rather than a clear-free operation. Actual NativeShims exports and
+/// provider cleanup require qualification against the deployed binary.
 /// </remarks>
 internal sealed partial class ArkgPrimitivesOpenSsl : IArkgPrimitives
 {
@@ -73,9 +80,7 @@ internal sealed partial class ArkgPrimitivesOpenSsl : IArkgPrimitives
         using SafeBigNum xBn = NativeMethods.BnBinaryToBigNum(xBytes);
         using SafeBigNum yBn = NativeMethods.BnBinaryToBigNum(yBytes);
 
-        // EC_POINT_set_affine_coordinates returns 0 for an off-curve point on
-        // most modern OpenSSL builds; fall through to the explicit on-curve
-        // check so the answer is unambiguous regardless of OpenSSL version.
+        // Require successful coordinate assignment before asking the provider's on-curve check.
         int setResult = NativeMethods.EcPointSetAffineCoordinates(group, sslPoint, xBn, yBn);
         if (setResult != 1)
         {
@@ -105,7 +110,7 @@ internal sealed partial class ArkgPrimitivesOpenSsl : IArkgPrimitives
         }
 
         // Perform ECDH using OpenSSL: compute privateScalar * publicPoint.
-        // Per RFC, the shared secret is the X coordinate of the resulting point.
+        // The ARKG draft's ECDH sub-KEM uses the X coordinate of the resulting point.
         using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(415);
         using SafeEcPoint pubPoint = SecToPoint(group, publicPoint);
         using SafeEcPoint sharedPoint = NativeMethods.EcPointNew(group);

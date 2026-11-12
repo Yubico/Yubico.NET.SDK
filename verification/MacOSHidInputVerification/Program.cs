@@ -2,7 +2,8 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// Synthetic backend only: no device discovery, IOHIDDevice creation, or physical-driver claim.
+// Synthetic nonshipping experiment ABI, not the shipping NativeShims input-owner exports.
+// No device discovery, IOHIDDevice creation or physical-driver qualification is performed here.
 unsafe partial class Program
 {
     private const string Library = "libhidinput_experiment.dylib";

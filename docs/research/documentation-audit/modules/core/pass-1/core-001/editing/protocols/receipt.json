@@ -1,0 +1,23 @@
+{
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+  "branch": "yubikit-core-docs-edit-protocols",
+  "base_commit": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "current_commit": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_commit": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "eligible_primary_cs_count": 91,
+  "edited_count": 56,
+  "decision_counts": {
+    "edit": 56,
+    "retain": 23,
+    "hold": 12
+  },
+  "candidate_associated_eligible_count": 74,
+  "full_product_diff_sha256": "4a89837083fd34826639a55d1bd988574565bc8a4da508975820e0acfa3755d1",
+  "limited_noncomment_line_comparison_matched": 56,
+  "xml_well_formedness_errors": [],
+  "compiler_cref_token_api_status": "NOT-RUN; existing coordinator checker owns this gate",
+  "build_test_formatter_crypto_native_device_status": "NOT-RUN as instructed",
+  "git_index_ref_commit_push_subagents": "NONE",
+  "independent_content_citation_review": "PENDING; this is the editor return, not independent review",
+  "git_diff_check": "PASS; exit 0, no whitespace diagnostics"
+}

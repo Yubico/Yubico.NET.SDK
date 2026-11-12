@@ -1,0 +1,103 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "changed_product_paths": [
+    "src/Ctap2/CLAUDE.md",
+    "src/Ctap2/README.md",
+    "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Ctap2/src/Backend/HidBackend.cs",
+    "src/Ctap2/src/Backend/SmartCardBackend.cs",
+    "src/Ctap2/src/Ctap2Session.cs",
+    "src/Ctap2/src/ICtap2Session.cs",
+    "src/Ctap2/tests/CLAUDE.md",
+    "src/WebAuthn/CLAUDE.md",
+    "src/WebAuthn/README.md",
+    "src/WebAuthn/src/Client/WebAuthnClient.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs"
+  ],
+  "candidate_groups": 35,
+  "path_population": 310,
+  "eligible_path_population": 299,
+  "changed_file_checks": [
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "6290b17e0f9c11947ef360972435eeb7a1ea77eb7a54c096ecc47523d8a13902",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "ab63d93dc641aefd16a0cd57f1d44c9e36f43b134b1ae6b9a3001d6d4d88fbe0",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "d9061005b45eb89d72fa452e8f2ca553419832e03414b2ceeed264fdd075b38a",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/Ctap2/src/Ctap2Session.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "c236e4a0791ad095555f70a0c6bb7dfa455e7f7dcc102c4105b113fc8df67134",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/Ctap2/src/ICtap2Session.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "3229d12297db565a79a66689748e86be718ca77415f6566a5ca8c3892454d4fe",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "091b7fe999c04c3a16d955cb3a193139723a3f9b9442ccce144a1638d8c9e2eb",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "b9e0a758deee456d0c83917246671e3374327a20aca9a16ab82334cacf516f36",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "33ea57b6a65f2ce99f7ed32b255203bdc7b1ce8b3c67ffbbdac60606431af3ac",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "comment_erased_code_equal": true,
+      "non_comment_line_sha256": "06cf8fe80d1aff4458cf741e501917462ea59d8f50d963b92997535173965093",
+      "xml_new_errors": 0,
+      "preexisting_xml_errors": []
+    }
+  ],
+  "example_bodies_unchanged": 47,
+  "new_xml_errors": 0,
+  "new_missing_link_targets": 0,
+  "scope": "Static source/text preservation, XML fragment syntax, fence bodies and file-target checks only.",
+  "not_run": [
+    "build",
+    "test",
+    "formatter",
+    "compiler",
+    "crypto experiment",
+    "native",
+    "device"
+  ],
+  "independent_review": "pending",
+  "publication": "pending coordinator; no index/ref/commit/push changes"
+}

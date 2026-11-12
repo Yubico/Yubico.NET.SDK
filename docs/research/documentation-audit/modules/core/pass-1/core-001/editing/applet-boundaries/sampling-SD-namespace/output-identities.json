@@ -1,0 +1,26 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/before-identities.json",
+    "sha256": "fd496f18bc78fe4b92264bd4d7d9085613d953d373703e28b05c6e7f4e825a81"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/before.md",
+    "sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/focused.diff",
+    "sha256": "b1cb5c00f569c94499060cd1539edf2bafa67057763126e3786c3f0e83c8ab65"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/report.md",
+    "sha256": "f50ef24e2ede03f3e61f57d69ac749e73afd0f45cb097bc20e33b2046da406fa"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/source-evidence.json",
+    "sha256": "04e5ed3fe7def5a6d49a481ddf92529d77a17185b8971bc8a4add52f9c676a7b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/verification.json",
+    "sha256": "f79a9a6b50ae368f604cd5da77196af00626065bb29054f2d6648bf6f7fc79fc"
+  }
+]

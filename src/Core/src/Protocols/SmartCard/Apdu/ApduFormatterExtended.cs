@@ -27,7 +27,7 @@ internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
         if (le is < 0 or > 65536)
             throw new ArgumentException("Le must be between 0 and 65536", nameof(le));
 
-        // ISO 7816-4 extended APDU formats used here always include Le:
+        // This formatter always includes Le; these layouts describe SDK output rather than every ISO case:
         // Case 2E (no data): CLA INS P1 P2 00 Le_hi Le_lo (7 bytes)
         // Case 4E (data): CLA INS P1 P2 00 Lc_hi Lc_lo [data] Le_hi Le_lo (9+ bytes)
 

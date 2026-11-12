@@ -1,0 +1,5 @@
+
+    /// ConnectionType.Hid.ToConcreteScope();                             // HidFido | HidOtp
+    /// (ConnectionType.SmartCard | ConnectionType.Hid).ToConcreteScope(); // SmartCard | HidFido | HidOtp
+    /// ((ConnectionType)0x40).ToConcreteScope();                         // Unknown: undefined bits are dropped
+    /// 

@@ -1,0 +1,50 @@
+$ dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.15)
+
+skipped Yubico.YubiKit.Core.UnitTests.Native.Windows.CfgMgr32InteropTests.WindowsHidDeviceListener_Start_RegistersNotification (0ms)
+  Windows-only
+skipped Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp.Scp11Tests.Scp11a_WithAllowList_FullFlow_Succeeds (0ms)
+  Requires SecurityDomain session and YubiKey hardware
+skipped Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp.Scp11Tests.Scp11b_FullAuthentication_WithRealDevice_Succeeds (0ms)
+  Requires actual YubiKey hardware with firmware >= 5.7.2
+[+1665/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - 6 tests running (3s)
+
+[+1698/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - 2 tests running (6s)
+
+skipped Yubico.YubiKit.Core.UnitTests.AuditV2.CoreScpAuditReproTests.YESDK1631_ChildBody_OneToFiveByteResponse_ThrowsBadResponse (0ms)
+  Child-process body; executed only via ChildProcessTestRunner.
+[+1798/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.PcscConnectionLifetimeTests.BuiltInPcscConnection_DroppedUninitializedWrapper_ReleasesOwnerWithoutNativeCalls (9s)
+
+[+1869/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDiscoveryAdmissionTests.FidoComposite_UnprovenCloseQuarantinesPidAdmission (12s)
+
+[+1874/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDiscoveryAdmissionTests.FidoRead_FailedRemovalKeepsPidAdmissionThroughActualQuiescenceAndClose (15s)
+
+[+1903/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryIdentityReaderTests.TryReadAsync_ConnectNeverCompletes_ReturnsNullWithinBoundedTime (18s)
+
+[+1904/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings(cancel: False) (21s)
+
+[+1905/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings(cancel: True) (24s)
+
+[+1908/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.FindAllAsync_LiveUnknownPidWaiter_DoesNotBlockDifferentPidMetadata (27s)
+
+[+1925/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_SaturatedWorkersBeyondBudget_IdentityDegradesToNull_BoundPreserved (30s)
+
+[+1933/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_ConsumedIdentityBudget_DoesNotAddMetadataOpenAndRetriesLater (33s)
+
+[+1942/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysPidMergeTests.FindAllAsync_DuplicatePidBlockedIdentityReads_AreBoundedAsOneGroup (36s)
+
+[+1961/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysScopeTests.FindAllAsync_ExitRetiresQueuedIdentityReadsBeforeLaterWorkerAdmission(cancel: False) (39s)
+
+[+2008/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.PcscDiscoveryLifetimeTests.BuiltInPcscDiscovery_UnprovenDisconnectRetainsOriginalClaimAndNativeRoot (42s)
+
+[+2024/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.YubiKeyMonitorTests.WatchAsync_OverflowDuringReplay_IsIsolated_AndSameMonitorCanRebuildProjection (45s)
+
+[+2044/x0/?4] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.YubiKeyMonitorTests.DisposeAsync_RetiresQueuedBuiltInFinderReadsBeforeWorkerCapacityReturns (48s)
+
+
+Test run summary: Passed! - /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64)
+  total: 2069
+  failed: 0
+  succeeded: 2065
+  skipped: 4
+  duration: 48s 898ms

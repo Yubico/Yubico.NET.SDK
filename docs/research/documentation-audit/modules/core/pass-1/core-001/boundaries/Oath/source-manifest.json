@@ -1,0 +1,120 @@
+{
+  "original_capture": {
+    "url": "https://developers.yubico.com/OATH/YKOATH_Protocol.html",
+    "accessed_utc": "2026-11-12T00:32:54.472556+00:00",
+    "status": 200,
+    "sha256": "44b94628c1a6a9bced1b11fa62370f62f62ec71390980ebe0ea3a46e64eab896",
+    "bytes": 55921,
+    "content_type": "text/html",
+    "path": "ykoath-protocol.html",
+    "revision": "Unversioned public vendor page",
+    "role": "Original public vendor protocol reference, not GP conformance/device qualification"
+  },
+  "reused": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+      "sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+      "bytes": 4161,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/context.md",
+      "sha256": "68694ce44329e1d16d56f048cfe4f1c1ad6c7d12152f92f703e1c8b3671d9ba7",
+      "bytes": 7589,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/1b87964ba258e3ce39fd2959888dfe7cf81a6843.patch",
+      "sha256": "f62d8c5e3bdbab61b90c281096737811c5c66ec679849e94b797c9e618e655fb",
+      "bytes": 9039,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf",
+      "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "bytes": 487598,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+      "sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+      "bytes": 105976,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+      "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "bytes": 799930,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.txt",
+      "sha256": "59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543",
+      "bytes": 272406,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-source-register.md",
+      "sha256": "6f3edcfba098920dd43e3e2a6db59c03108e39bfbb4ab81373e87d2c74731727",
+      "bytes": 8174,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-manifest.json",
+      "sha256": "45e64aebedf728bb3f91553e301a7eb75a736876470fbbb3bd0ee1cfd8bbe16c",
+      "bytes": 15881,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc4648.txt",
+      "sha256": "84e14418f795d503be5f34bf23ce4ebaa119e9ec7c9f667d8caeb111385b178f",
+      "bytes": 35491,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/final-source-register.md",
+      "sha256": "6078fe5116d94de6ae580797220f0e190bc322a6a4b0b8c6817626e5630fb23e",
+      "bytes": 13576,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+      "sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+      "bytes": 709753,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-routing.json",
+      "sha256": "6da8ae5538df16ed9d623986a32f77091ad1a8f0a741ee1298900ad13715326b",
+      "bytes": 146812,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-packet-inputs.json",
+      "sha256": "8b4d36bda7feddb24af4df42f0160d79e300cd945421abc9515686dba6c4d881",
+      "bytes": 42398,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/boundary-seeds.md",
+      "sha256": "9ed51a236bbe615c1afdfb4c92958eaa63c299b0be5546b8d7410951924c4ed3",
+      "bytes": 12918,
+      "role": "Read-only reused evidence; reading scope in sources.md"
+    },
+    {
+      "path": "yubikit/oath.py",
+      "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+      "sha256": "245d1b72971b1ef40686150cd257a978ae3c1de2118b6c8d3c8f3df92f8fb929",
+      "bytes": 17202,
+      "url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/oath.py",
+      "role": "Read complete file as source comparator; no import, test or crypto execution"
+    }
+  ],
+  "context7": {
+    "library_id": "/dotnet/docs",
+    "query": "Memory<T> ownership consumers async methods keep buffer alive until returned Task terminal; ReadOnlyMemory does not imply immutable backing storage",
+    "source": "https://github.com/dotnet/docs/blob/main/docs/standard/memory-and-spans/memory-t-usage-guidelines.md",
+    "role": "Current API/design guidance, unversioned query result; no runtime qualification"
+  },
+  "research_bounds": "Reuse completed initial+focused gaps from B6/C; no additional final-GP/ISO/hardware-rationale attempts."
+}

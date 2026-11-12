@@ -1,0 +1,21 @@
+{
+  "body_identities_unchanged": 415,
+  "document_coordinate_deltas": [
+    {
+      "id": "FULL-150",
+      "path": "docs/architecture/event-driven-device-discovery.md",
+      "old_document": {
+        "path": "docs/architecture/event-driven-device-discovery.md",
+        "bytes": 12139,
+        "sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60"
+      },
+      "current_document": {
+        "path": "docs/architecture/event-driven-device-discovery.md",
+        "bytes": 13461,
+        "sha256": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c"
+      },
+      "old_start": 1507,
+      "new_start": 1507
+    }
+  ]
+}

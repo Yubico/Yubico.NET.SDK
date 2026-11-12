@@ -1,0 +1,1600 @@
+diff --git c/src/Core/src/Devices/DeviceConnectionRegistry.cs w/src/Core/src/Devices/DeviceConnectionRegistry.cs
+index 0e8861239..c159e1fb9 100644
+--- c/src/Core/src/Devices/DeviceConnectionRegistry.cs
++++ w/src/Core/src/Devices/DeviceConnectionRegistry.cs
+@@ -24,13 +24,15 @@ namespace Yubico.YubiKit.Core.Devices;
+ /// <remarks>
+ ///     <para>
+ ///         The lease belongs to the CONNECTION, not to a session: it is acquired before physical connection
+-///         creation and released if creation fails or when that connection is disposed. Sessions come and go
+-///         over a connection without touching it.
++///         creation. The connection's route controls release after creation failure or disposal; owners that
++///         cannot prove native release can retain and quarantine the claim. Borrowed sessions come and go
++///         over a connection without releasing its lease.
+ ///     </para>
+ ///     <para>
+ ///         A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. A second
+-///         acquisition through any known member is refused immediately with
+-///         <see cref="ConnectionInUseException" />; it never waits for an unbounded holder to end.
++///         acquisition is refused with <see cref="ConnectionInUseException" /> when it reaches an already-held
++///         member. Acquisition visits sorted IDs sequentially: discovery on an earlier member can delay that
++///         check. It waits for discovery, rather than waiting for an existing connection to end.
+ ///     </para>
+ ///     <para>
+ ///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection
+diff --git c/src/Core/src/Devices/HidConnectionSlot.cs w/src/Core/src/Devices/HidConnectionSlot.cs
+index febe52df5..2e644093a 100644
+--- c/src/Core/src/Devices/HidConnectionSlot.cs
++++ w/src/Core/src/Devices/HidConnectionSlot.cs
+@@ -79,7 +79,8 @@ public Task<IConnection> OpenRawConnectionAsync(
+         if (OwnsNativeLifetime)
+             return OpenBuiltInConnectionAsync(physicalClaim: null, cancellationToken);
+ 
+-        // Windows and custom interfaces retain the synchronous compatibility adapters.
++        // Windows and custom interfaces open synchronously before Task.FromResult. Their adapters also
++        // call report I/O inline; a Task return type adds neither native cancellation nor release proof.
+         return Task.FromResult<IConnection>(ConnectionType == ConnectionType.HidFido
+             ? new FidoHidConnection(_hidInterface.ConnectToIOReports())
+             : new OtpHidConnection(_hidInterface.ConnectToFeatureReports()));
+diff --git c/src/Core/src/Devices/PcscConnectionSlot.cs w/src/Core/src/Devices/PcscConnectionSlot.cs
+index 6ebf9421d..818f502dd 100644
+--- c/src/Core/src/Devices/PcscConnectionSlot.cs
++++ w/src/Core/src/Devices/PcscConnectionSlot.cs
+@@ -89,8 +89,9 @@ internal async Task<IConnection> OpenRegisteredConnectionAsync(
+         }
+         catch
+         {
+-            // External factories own partial-open cleanup until they return a connection. An ordinary failure
+-            // therefore releases this managed claim; factories that cannot prove cleanup signal that explicitly.
++            // Ordinary factory failures promise partial-open cleanup. This catch also covers post-open
++            // logging/wrapper failures: it releases the registration but does not dispose a returned local.
++            // Keep that exceptional path distinct from the factory's cleanup contract.
+             registration.Dispose();
+             throw;
+         }
+diff --git c/src/Core/src/Devices/RegisteredConnections.cs w/src/Core/src/Devices/RegisteredConnections.cs
+index 12fc626e3..c8d12d64d 100644
+--- c/src/Core/src/Devices/RegisteredConnections.cs
++++ w/src/Core/src/Devices/RegisteredConnections.cs
+@@ -19,11 +19,12 @@
+ namespace Yubico.YubiKit.Core.Devices;
+ 
+ /// <summary>
+-///     Transparent connection decorators that release a <see cref="DeviceConnectionRegistry" /> ownership lease
+-///     exactly once when the wrapped connection is disposed. Disposal runs through a <see cref="DisposalGate" />,
+-///     so the inner connection is torn down exactly once, the lease is released only afterwards, and every
+-///     disposal call — sync or async, concurrent or repeated — returns only once teardown has finished. Pure
+-///     passthrough otherwise — behavior of the inner connection is unchanged.
++///     Connection decorators that share one disposal attempt and outcome through <see cref="DisposalGate" />.
++///     SmartCard disposal releases the registration after successful inner disposal; failure retains and
++///     quarantines it. The FIDO and OTP compatibility wrappers release it after the attempt even when inner
++///     disposal throws. Every sync or async caller observes the shared outcome, rather than a new attempt.
++///     Inner disposal completion is not independent proof that concurrent native calls have drained.
++///     Built-in macOS/Linux HID connections instead transfer the registration directly to their native owner.
+ /// </summary>
+ internal sealed class RegisteredSmartCardConnection(
+     ISmartCardConnection inner,
+diff --git c/src/Core/src/Devices/YubiKeyConnectionExtensions.cs w/src/Core/src/Devices/YubiKeyConnectionExtensions.cs
+index bb2a171f0..9f62df14a 100644
+--- c/src/Core/src/Devices/YubiKeyConnectionExtensions.cs
++++ w/src/Core/src/Devices/YubiKeyConnectionExtensions.cs
+@@ -228,14 +228,39 @@ public static ConnectionType ResolveSessionTransport(
+     ///     succeeds but <paramref name="createAsync" /> fails, the connection is disposed before the failure is
+     ///     rethrown. If disposal also fails, that cleanup failure is logged and the original creation failure
+     ///     still propagates unchanged.
++    ///     On success, the helper returns the result unchanged and leaves the connection open. The delegate
++    ///     must return a result that owns the connection, or exposes it so the caller can dispose it. Returning
++    ///     only a session that borrows the connection loses the hidden connection's disposal scope.
+     /// </remarks>
+     /// <param name="yubiKey">The physical device.</param>
+     /// <param name="transport">The single concrete transport selected for the session.</param>
+-    /// <param name="createAsync">Creates the result over the opened connection.</param>
++    /// <param name="createAsync">Creates a result that assumes or exposes ownership of the opened connection.</param>
+     /// <param name="cancellationToken">A token to cancel connection opening or session creation.</param>
+     /// <returns>The result created over the opened connection.</returns>
+     /// <exception cref="ArgumentException"><paramref name="transport" /> is not one concrete transport.</exception>
+     /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
++    /// <example>
++    /// <code>
++    /// using System.Threading;
++    /// using System.Threading.Tasks;
++    /// using Yubico.YubiKit.Core.Abstractions;
++    /// using Yubico.YubiKit.Core.Devices;
++    /// using Yubico.YubiKit.Core.Sessions;
++    /// using Yubico.YubiKit.Core.Transports.SmartCard;
++    ///
++    /// static async Task SelectPivAsync(IYubiKey device, CancellationToken cancellationToken)
++    /// {
++    ///     // Returning the connection itself exposes its ownership to the enclosing scope.
++    ///     await using IConnection connection = await device.CreateSessionOverTransportAsync(
++    ///         ConnectionType.SmartCard,
++    ///         (opened, token) => Task.FromResult(opened),
++    ///         cancellationToken);
++    ///     await using RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
++    ///         (ISmartCardConnection)connection, cancellationToken);
++    ///     await session.SelectAsync(ApplicationIds.Piv, cancellationToken);
++    /// }
++    /// </code>
++    /// </example>
+     public static Task<TResult> CreateSessionOverTransportAsync<TResult>(
+         this IYubiKey yubiKey,
+         ConnectionType transport,
+diff --git c/src/Core/src/Exceptions.cs w/src/Core/src/Exceptions.cs
+index b86070b9d..b161d788c 100644
+--- c/src/Core/src/Exceptions.cs
++++ w/src/Core/src/Exceptions.cs
+@@ -14,17 +14,17 @@
+ 
+ namespace Yubico.YubiKit.Core;
+ 
++/// <summary>Reports invalid data in a YubiKey response.</summary>
+ public class BadResponseException(string message) : Exception(message)
+ {
+-    //The data contained in a YubiKey response was invalid
+ }
+ 
+ /// <summary>
+ /// Exception thrown when a platform interop (P/Invoke) operation fails.
+ /// </summary>
+ /// <remarks>
+-/// This exception wraps platform-specific errors from native API calls (PC/SC, HID, etc.)
+-/// and provides context about what operation failed.
++/// Call sites use this type to add operation context. Native failures are not universally wrapped in it:
++/// PC/SC, Configuration Manager, and Windows report calls can expose other exception types.
+ /// </remarks>
+ public class PlatformInteropException : Exception
+ {
+diff --git c/src/Core/src/Native/Desktop/SCard/SCard.Interop.cs w/src/Core/src/Native/Desktop/SCard/SCard.Interop.cs
+index aacf6fcf3..5ec9088bb 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCard.Interop.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCard.Interop.cs
+@@ -79,6 +79,9 @@ private static partial uint SCardListReaders(
+         ref int readerNamesLength
+     );
+ 
++    // This wrapper currently encodes group filters and decodes reader names as ASCII, whereas Connect
++    // marshals UTF-8. Non-ASCII names can lose information here before reaching Connect. The published
++    // native shim forwards platform text; these managed conversions do not establish its deployed encoding.
+     public static uint SCardListReaders(
+         SCardContext context,
+         string[]? groups,
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardError.cs w/src/Core/src/Native/Desktop/SCard/SCardError.cs
+index 3d94cdf6e..973b8835e 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardError.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardError.cs
+@@ -15,7 +15,7 @@
+ namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
+ 
+ /// <summary>
+-///     Smart card function return values
++///     Windows-oriented smart-card return-value catalog, not a normalized cross-backend status model.
+ /// </summary>
+ internal class ErrorCode
+ {
+@@ -23,6 +23,8 @@ internal class ErrorCode
+     ///     The client attempted a smart card operation in a remote session, such as a client
+     ///     session running on a terminal server, and the operating system in use does not support
+     ///     smart card redirection.
++    ///     The retained literal below differs from Win32 ERROR_BROKEN_PIPE (109 decimal, 0x6D);
++    ///     correcting that value is a separate implementation change.
+     /// </summary>
+     public const uint ERROR_BROKEN_PIPE = 0x00000109;
+ 
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardException.cs w/src/Core/src/Native/Desktop/SCard/SCardException.cs
+index 4d6863109..e384306a7 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardException.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardException.cs
+@@ -16,6 +16,12 @@
+ 
+ namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
+ 
++/// <summary>Reports a PC/SC failure, with the supplied native status stored in the 32-bit HResult.</summary>
++/// <remarks>
++///     Message lookup uses the existing Windows-oriented catalog. A backend can assign a different meaning
++///     to the same raw code, notably pcsc-lite's unsupported-feature status. Preserve backend and raw-code
++///     provenance when diagnosing failures rather than treating the symbolic message as normalization.
++/// </remarks>
+ [Serializable]
+ public class SCardException : Exception
+ {
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardIORequest.cs w/src/Core/src/Native/Desktop/SCard/SCardIORequest.cs
+index 1531b0ebb..31e72fc4f 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardIORequest.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardIORequest.cs
+@@ -17,8 +17,14 @@
+ namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
+ 
+ /// <summary>
+-///     The SCARD_IO_REQUEST
++///     The managed transmit PCI carrier: two four-byte fields, eight bytes in total.
+ /// </summary>
++/// <remarks>
++///     The default provider passes this carrier to the native shim. Windows uses two 32-bit DWORDs.
++///     Published NativeShims 1.18.1 forwards the pointer without conversion; a Linux LP64 producer using
++///     pcsc-lite's two-unsigned-long PCI requires a different native layout. Match the deployed producer and
++///     target headers before asserting compatibility. Linux header widths establish no macOS layout claim.
++/// </remarks>
+ [StructLayout(LayoutKind.Sequential)]
+ internal struct SCARD_IO_REQUEST
+ {
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardProtocol.cs w/src/Core/src/Native/Desktop/SCard/SCardProtocol.cs
+index 6450bb719..fa07b08d6 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardProtocol.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardProtocol.cs
+@@ -37,6 +37,7 @@ internal enum SCARD_PROTOCOL
+     /// </summary>
+     T1 = 0x00000002,
+ 
++    /// <summary>Windows raw-protocol value. pcsc-lite uses a different value; built-in transmit selects T0/T1.</summary>
+     Raw = 0x00010000,
+ 
+     /// <summary>
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs w/src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs
+index ec325e46a..99754ca09 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs
+@@ -16,6 +16,12 @@
+ 
+ namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
+ 
++/// <summary>Matches the published NativeShims 1.18.1 packed reader-state wrapper, not each platform's native struct.</summary>
++/// <remarks>
++///     ReaderName and UserData have pointer width; states and ATR length are 32-bit, with 36 bytes of ATR
++///     storage. Copies borrow the same reader-name allocation. Create uses StringToHGlobalAnsi (the Windows
++///     code page on Windows, UTF-8 on Unix); that choice is separate from UTF-8 reader-name decoding.
++/// </remarks>
+ [StructLayout(LayoutKind.Sequential, Pack = 1)]
+ internal unsafe struct SCARD_READER_STATE
+ {
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardScope.cs w/src/Core/src/Native/Desktop/SCard/SCardScope.cs
+index 65a1eda76..9bd236837 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardScope.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardScope.cs
+@@ -20,15 +20,17 @@ namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
+ internal enum SCARD_SCOPE
+ {
+     /// <summary>
+-    ///     Database operations are performed within the domain of the user.
++    ///     User database scope on Windows. pcsc-lite documents this scope as unused.
+     /// </summary>
+     USER,
+ 
++    /// <summary>Terminal scope; unused by pcsc-lite.</summary>
+     TERMINAL,
+ 
+     /// <summary>
+     ///     Database operations are performed within the domain of the system. The calling
+     ///     application must have appropriate access permissions for any database actions.
++    ///     On pcsc-lite this selects the local resource-manager service.
+     /// </summary>
+     SYSTEM
+ }
+\ No newline at end of file
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardShare.cs w/src/Core/src/Native/Desktop/SCard/SCardShare.cs
+index 8b1af00cf..e4ba97ae4 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardShare.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardShare.cs
+@@ -31,8 +31,8 @@ internal enum SCARD_SHARE
+     SHARED = 2,
+ 
+     /// <summary>
+-    ///     This application is allocating the reader for its private use, and will be controlling
+-    ///     it directly. No other applications are allowed access to it.
++    ///     Direct reader control. Windows allocates the reader exclusively; pcsc-lite permits shared
++    ///     direct mode. This value does not supply one portable reader-exclusion policy.
+     /// </summary>
+     DIRECT = 3
+ }
+\ No newline at end of file
+diff --git c/src/Core/src/Native/Desktop/SCard/SCardStatus.cs w/src/Core/src/Native/Desktop/SCard/SCardStatus.cs
+index aa327c189..1d39c9d18 100644
+--- c/src/Core/src/Native/Desktop/SCard/SCardStatus.cs
++++ w/src/Core/src/Native/Desktop/SCard/SCardStatus.cs
+@@ -14,6 +14,7 @@
+ 
+ namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
+ 
++/// <summary>Windows card-status values, distinct from state-change flags and pcsc-lite's status flags.</summary>
+ internal enum SCARD_STATUS
+ {
+     UNKNOWN = 0,
+diff --git c/src/Core/src/Native/Libraries.cs w/src/Core/src/Native/Libraries.cs
+index 5f87aee4a..ed0b40a7a 100644
+--- c/src/Core/src/Native/Libraries.cs
++++ w/src/Core/src/Native/Libraries.cs
+@@ -12,37 +12,28 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
+-// As long as we have the Libraries.Net47.cs class which holds the opposite preprocessor directive check,
+-// this check is required - as having both at the same time is not possible.
++// Keep the existing target conditional; the active SDK targets modern .NET.
+ 
+ #if !NETFRAMEWORK
+ 
+ namespace Yubico.YubiKit.Core.Native;
+ 
+ /// <summary>
+-///     Handles the loading and management of native libraries required by the Yubico SDK.
++///     Names the native shim used by source-generated imports.
+ /// </summary>
+ /// <remarks>
+-///     This class provides cross-platform and cross-framework support for loading native libraries.
+-///     The implementation differs based on the target framework:
+-///     For .NET Framework 4.7:
+-///     - Native libraries must be placed in architecture-specific subdirectories (x86/x64)
+-///     - Library loading is handled explicitly at runtime based on process architecture
+-///     - Requires proper cleanup through the Cleanup method
+-///     For Modern .NET:
+-///     - Native libraries are handled by the runtime's built-in library loading mechanism
+-///     - Architecture-specific loading is managed automatically
+-///     - No explicit cleanup is required
++///     Runtime/package resolution supplies the shared library for ordinary JIT deployment. Native AOT
++///     package targets select a RID-specific static archive and system dependencies. This constant neither
++///     loads a library nor proves the selected artifact's source, ABI, or device compatibility.
+ /// </remarks>
+ internal static class Libraries
+ {
+     /// <summary>
+-    ///     The filename of the native shims library for modern .NET versions.
++    ///     The logical native shim name used by imports and package linking targets.
+     /// </summary>
+     /// <remarks>
+-    ///     For modern .NET, the runtime automatically handles library loading and architecture selection.
+-    ///     The DLL extension is omitted as it's platform-specific and managed by the runtime.
+-    ///     The library should be properly packaged with the correct runtimes/* folder structure in the NuGet package.
++    ///     The platform-specific filename suffix is omitted. Ordinary JIT deployment uses package runtime
++    ///     assets; Native AOT targets bind this name to the selected static archive instead.
+     /// </remarks>
+     internal const string NativeShims = "Yubico.NativeShims";
+ }
+diff --git c/src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs w/src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs
+index 26f65827f..375ced8d3 100644
+--- c/src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs
++++ w/src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs
+@@ -17,7 +17,7 @@
+ namespace Yubico.YubiKit.Core.Native.Linux.Libc;
+ 
+ // Every raw int extracted for a native call remains borrowed from its SafeHandle.
+-// A future reactor must retain a SafeHandle reference for its entire registration,
++// The read reactor retains a separate SafeHandle reference for its entire registration,
+ // not just poll(). This stack-only lease is for synchronous native call scopes.
+ internal readonly ref struct LinuxDescriptorLease : IDisposable
+ {
+diff --git c/src/Core/src/Native/Linux/Linux.Libraries.cs w/src/Core/src/Native/Linux/Linux.Libraries.cs
+index c95cc886c..79fb82794 100644
+--- c/src/Core/src/Native/Linux/Linux.Libraries.cs
++++ w/src/Core/src/Native/Linux/Linux.Libraries.cs
+@@ -17,5 +17,8 @@ namespace Yubico.YubiKit.Core.Native.Linux;
+ internal static class Libraries
+ {
+     internal const string LinuxKernelLib = "libc.so.6";
++    // This import requires the unversioned name. A runtime package containing only libudev.so.1 may
++    // not satisfy it (Ubuntu noble supplies the unversioned link in libudev-dev). Verify deployment;
++    // FindHidInterfaces logs a missing-library failure and returns no Linux HID interfaces.
+     internal const string LinuxUdevLib = "libudev.so";
+ }
+\ No newline at end of file
+diff --git c/src/Core/src/Native/Linux/Udev/Udev.Interop.cs w/src/Core/src/Native/Linux/Udev/Udev.Interop.cs
+index b4d39ddef..20e86dd9f 100644
+--- c/src/Core/src/Native/Linux/Udev/Udev.Interop.cs
++++ w/src/Core/src/Native/Linux/Udev/Udev.Interop.cs
+@@ -121,8 +121,8 @@ public static partial int udev_enumerate_add_match_subsystem(
+     public static partial IntPtr udev_list_entry_get_next(IntPtr previousEntry);
+ 
+     // Get the name associated with this entry. It is the path.
+-    // The return value is a string, but in the form of a pointer to ASCII
+-    // bytes. Hence, to convert the result into a C# string object, use
++    // The return value is borrowed NUL-terminated native text. On Unix, the conversion below copies
++    // UTF-8 bytes into a managed string while the owning enumerate object remains alive. Use
+     //   Marshal.PtrToStringAnsi
+     // The return is a reference to an object that belongs to the
+     // enumerateObject. We don't destroy it. Hence, it is an IntPtr, not a
+@@ -163,8 +163,8 @@ public static partial LinuxUdevDeviceSafeHandle udev_device_new_from_syspath(
+ 
+     // Get the devnode from the device.
+     // This is what will be used by the HIDRAW library.
+-    // The return value is a string, but in the form of a pointer to ASCII
+-    // bytes. Hence, to convert the result into a C# string object, use
++    // The return value is borrowed NUL-terminated native text. On Unix, the conversion below copies
++    // UTF-8 bytes into a managed string while the owning device remains alive. Use
+     //   Marshal.PtrToStringAnsi
+     // The return is a reference to an object that belongs to the
+     // deviceObject. We don't destroy it. Hence, it is an IntPtr, not a
+@@ -179,7 +179,7 @@ public static partial LinuxUdevDeviceSafeHandle udev_device_new_from_syspath(
+     // Get the parent device from the current device.
+     // The return value is another UDEV device handle which, while refcounted,
+     // is owned by the original (child) udev device. Do not call unref on this
+-    // pointer.
++    // pointer. Keep the child alive while reading the parent or copying its fields.
+     // The C signature is
+     //   struct udev_device *udev_device_get_parent(struct udev_device *udev_device);
+     [LibraryImport(Libraries.LinuxUdevLib, EntryPoint = "udev_device_get_parent")]
+@@ -191,8 +191,8 @@ public static IntPtr udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObje
+ 
+     // Get the path from the device.
+     // This is what will be used by the HIDRAW library.
+-    // The return value is a string, but in the form of a pointer to ASCII
+-    // bytes. Hence, to convert the result into a C# string object, use
++    // The return value is borrowed NUL-terminated native text. On Unix, the conversion below copies
++    // UTF-8 bytes into a managed string while the owning device remains alive. Use
+     //   Marshal.PtrToStringAnsi
+     // The return is a reference to an object that belongs to the
+     // deviceObject. We don't destroy it. Hence, it is an IntPtr, not a
+@@ -239,7 +239,8 @@ public static partial LinuxUdevMonitorSafeHandle udev_monitor_new_from_netlink(
+     // This will be called from within the SafeHandle class, but should be
+     // called by no one else.
+     // The C signature is
+-    //   void udev_monitor_unref(struct udev_monitor *udev_monitor);
++    //   struct udev_monitor *udev_monitor_unref(struct udev_monitor *udev_monitor);
++    // The native API returns NULL; this managed declaration intentionally discards the return value.
+     [LibraryImport(Libraries.LinuxUdevLib, EntryPoint = "udev_monitor_unref",
+         SetLastError = true)]
+     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+diff --git c/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs w/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs
+index b907dfd64..f726df25e 100644
+--- c/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs
++++ w/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs
+@@ -65,6 +65,9 @@ parameter is not a valid pointer to a C array of at least
+ 
+     [LibraryImport(Libraries.CoreFoundation)]
+     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
++    // ABI finding: Apple LP64 defines CFNumberType with CFIndex width (64 bits), unlike the 32-bit theType
++    // declaration here and in CFNumberGetValue. Current callers request SInt32 using positive value 3;
++    // four-byte value storage is separate from the parameter-width discrepancy. Native effects are unverified.
+     internal static partial nint CFNumberCreate(nint allocator, int theType, ref int valuePtr);
+ 
+     [LibraryImport(Libraries.CoreFoundation)]
+diff --git c/src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs w/src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs
+index 24ca2b88d..b394b11ab 100644
+--- c/src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs
++++ w/src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs
+@@ -72,6 +72,10 @@ internal enum kern_return_t
+     KERN_POLICY_STATIC = 51,
+     KERN_INSUFFICIENT_BUFFER_SIZE = 52,
+ 
++    // IOReturn catalog finding: Apple's native definitions contain reserved gaps (including 0x2CB/0x2DC)
++    // that this sequential list omits. Preserve raw status when diagnosing errors; native NotOpen is
++    // 0xE00002CD and NotPermitted is 0xE00002E2. The current ExclusiveAccess literal/branch remains 0xE00002C5.
++    // Numeric corrections require a separate implementation change; these names are not an ABI validation.
+     // err_system 0xE000_0000
+     IOReturnError = unchecked((int)0xE000_02BC),
+     IOReturnNoMemory,
+diff --git c/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs w/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs
+index d0a1372a9..17411342e 100644
+--- c/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs
++++ w/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs
+@@ -294,6 +294,8 @@ @param      context Pointer to data to be passed to the callback.
+     */
+     [LibraryImport(Libraries.IOKitFramework)]
+     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
++    // Registration retains the native buffer beyond this call: any use of this array seam needs a persistent
++    // pin and rooted context until callbacks drain. Active FIDO input uses the bridge's native-owned buffer.
+     public static partial void IOHIDDeviceRegisterInputReportCallback(
+         IntPtr device, // IOHIDDeviceRef
+         byte[] report, // uint8_t*
+diff --git c/src/Core/src/Native/NativeMethods.cs w/src/Core/src/Native/NativeMethods.cs
+index 4e477e915..9175c68b6 100644
+--- c/src/Core/src/Native/NativeMethods.cs
++++ w/src/Core/src/Native/NativeMethods.cs
+@@ -44,6 +44,9 @@ public enum DlOpenFlags
+     // settings). It does not currently have any effect on platforms other
+     // than Windows, but is included because of the analyzer and in the hope
+     // that it will be supported by these platforms in the future.
++    // Dormant loader finding: LibraryImport requires exact LoadLibraryExW spelling; Utf16 does not add W.
++    // This declaration also lacks captured last-error semantics used by its caller. System32 restricts the
++    // imported kernel32 module, not the target library's dependency search. NativeShims uses another route.
+     [LibraryImport(Kernel32Dll, StringMarshalling = StringMarshalling.Utf16)]
+     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+     public static partial SafeWindowsLibraryHandle LoadLibraryEx(string libFilename, IntPtr reserved, int flags);
+diff --git c/src/Core/src/Native/PlatformApiException.cs w/src/Core/src/Native/PlatformApiException.cs
+index 7b3303e23..d5a73e751 100644
+--- c/src/Core/src/Native/PlatformApiException.cs
++++ w/src/Core/src/Native/PlatformApiException.cs
+@@ -16,6 +16,11 @@
+ 
+ namespace Yubico.YubiKit.Core.Native;
+ 
++/// <summary>Reports platform API context supplied by a native call site.</summary>
++/// <remarks>
++///     The source/error-code constructor includes the supplied source label and eight-digit hexadecimal
++///     32-bit pattern in Message. It does not normalize backend status codes or store that code in HResult.
++/// </remarks>
+ public class PlatformApiException : Exception
+ {
+     public PlatformApiException() :
+diff --git c/src/Core/src/Native/SdkPlatformInfo.cs w/src/Core/src/Native/SdkPlatformInfo.cs
+index dcf263772..adc93315c 100644
+--- c/src/Core/src/Native/SdkPlatformInfo.cs
++++ w/src/Core/src/Native/SdkPlatformInfo.cs
+@@ -18,8 +18,11 @@
+ 
+ namespace Yubico.YubiKit.Core.Native;
+ 
++/// <summary>Exposes runtime platform detection and platform-selected helper values.</summary>
++/// <remarks>Each native API still needs its own encoding and ABI contract.</remarks>
+ public static class SdkPlatformInfo
+ {
++    /// <summary>Gets UTF-16 on Windows and UTF-8 on the other recognized platforms.</summary>
+     public static Encoding Encoding => OperatingSystem switch
+     {
+         SdkPlatform.Windows => Encoding.Unicode,
+@@ -27,6 +30,7 @@ public static class SdkPlatformInfo
+         _ => Encoding.UTF8
+     };
+ 
++    /// <summary>Gets the helper encoding's code-unit width in bytes: two on Windows, otherwise one.</summary>
+     public static int CharSize => OperatingSystem switch
+     {
+         SdkPlatform.Windows => 2,
+@@ -34,12 +38,18 @@ public static class SdkPlatformInfo
+         _ => 1
+     };
+ 
++    /// <summary>Gets the existing size selection: eight bytes on Linux, otherwise four.</summary>
++    /// <remarks>
++    ///     This is not a universal native DWORD rule. Windows DWORD is always 32 bits; Unix API typedefs
++    ///     depend on the selected header and target ABI. Inspect each imported structure separately.
++    /// </remarks>
+     public static int DwordSize => OperatingSystem switch
+     {
+         SdkPlatform.Linux => 8,
+         _ => 4
+     };
+ 
++    /// <summary>Gets the detected Windows, macOS, or Linux platform, or Unknown.</summary>
+     public static SdkPlatform OperatingSystem
+     {
+         get
+@@ -54,6 +64,8 @@ public static SdkPlatform OperatingSystem
+         }
+     }
+ 
++    /// <summary>Checks Windows Administrator-role membership; returns false on other platforms.</summary>
++    /// <remarks>This check does not establish access to a particular HID collection or PC/SC reader.</remarks>
+     public static bool IsElevated
+     {
+         get
+diff --git c/src/Core/src/Native/UnmanagedDynamicLibrary.cs w/src/Core/src/Native/UnmanagedDynamicLibrary.cs
+index 85e7d99fe..1f3f10fa7 100644
+--- c/src/Core/src/Native/UnmanagedDynamicLibrary.cs
++++ w/src/Core/src/Native/UnmanagedDynamicLibrary.cs
+@@ -20,6 +20,11 @@
+ 
+ namespace Yubico.YubiKit.Core.Native;
+ 
++/// <summary>Owns an explicitly opened library and resolves function delegates from it.</summary>
++/// <remarks>
++///     Keep this owner undisposed until every resolved function call has finished. A returned delegate does
++///     not itself retain the library handle. This support loader is separate from NativeShims import resolution.
++/// </remarks>
+ internal abstract class UnmanagedDynamicLibrary : IDisposable
+ {
+     protected readonly SafeLibraryHandle _handle;
+diff --git c/src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs w/src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs
+index b7d7218e9..63c49448e 100644
+--- c/src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs
++++ w/src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs
+@@ -211,6 +211,9 @@ internal static CmErrorCode CM_Get_Device_Id(
+         int bufferLen)
+         => CM_Get_Device_Id(dnDevInst, buffer, bufferLen, 0);
+ 
++    // Native PULONG points to a 32-bit value even in a 64-bit process. The IntPtr count storage in
++    // this size wrapper and the property wrappers below is a separate declaration-width finding.
++    // Property buffer sizes are bytes; device-ID lengths are UTF-16 characters.
+     internal static CmErrorCode CM_Get_Device_Id_Size(
+         out IntPtr pulLen,
+         int dnDevInst)
+@@ -278,6 +281,9 @@ IntPtr NotifyContext
+     );
+ 
+ 
++    // Native contract: LPGUID is a pointer, and the list capacity/count uses 32-bit ULONG characters
++    // (UTF-16), not bytes. These by-value Guid declarations need separate ABI correction: Windows x64's
++    // indirect 16-byte aggregate convention can hide the difference, without proving x86/arm64 compatibility.
+     [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_ListW",
+         StringMarshalling = StringMarshalling.Utf16)]
+     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+diff --git c/src/Core/src/Native/Windows/HidD/HidD.Interop.cs w/src/Core/src/Native/Windows/HidD/HidD.Interop.cs
+index 3822dfb9e..5d08a56ba 100644
+--- c/src/Core/src/Native/Windows/HidD/HidD.Interop.cs
++++ w/src/Core/src/Native/Windows/HidD/HidD.Interop.cs
+@@ -17,6 +17,10 @@
+ 
+ namespace Yubico.YubiKit.Core.Native.Windows.HidD;
+ 
++// ABI findings: native HidD_* returns BOOLEAN (one byte), unlike Kernel32 ReadFile/WriteFile's
++// four-byte BOOL. The Bool annotations below remain pending a separate correction. Native HIDP_CAPS
++// fields are unsigned 16-bit values; short preserves width but not values above 32767, including lengths.
++// No architecture-specific runtime failure is established by these declaration comparisons alone.
+ internal static partial class NativeMethods
+ {
+ 
+diff --git c/src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs w/src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs
+index aaf49db2d..0e8e825bf 100644
+--- c/src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs
++++ w/src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs
+@@ -14,6 +14,12 @@
+ 
+ namespace Yubico.YubiKit.Core.Native.Windows.HidD;
+ 
++/// <summary>Exposes synchronous Windows report-handle operations for production and injected tests.</summary>
++/// <remarks>
++///     Report byte lengths include the report-ID byte; facade sizes exclude it. The production owner returns
++///     independent payload arrays and borrows SET input only through the synchronous call. This seam supplies
++///     neither a cancellation token nor an observation that concurrent native borrows have drained on Dispose.
++/// </remarks>
+ internal interface IWindowsHidReportAccess : IDisposable
+ {
+     string DevicePath { get; }
+diff --git c/src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs w/src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs
+index 2f5dd9c7e..03497de34 100644
+--- c/src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs
++++ w/src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs
+@@ -17,6 +17,15 @@
+ 
+ namespace Yubico.YubiKit.Core.Native.Windows.HidD;
+ 
++/// <summary>Owns synchronous Windows metadata, input/output, and feature-report handle access.</summary>
++/// <remarks>
++///     ReadFile/WriteFile use a normal handle and null OVERLAPPED storage. Calls can block the invoking thread;
++///     the typed compatibility adapters do not add native cancellation. A synchronous import retains the handle
++///     through native return, so concurrent Dispose can return before the last native borrow releases it.
++///     Callers must finish report work before disposal; this owner exposes no checked native-close outcome.
++///     Report-ID-prefixed staging arrays are separate from typed-adapter copies and returned payload arrays.
++///     Clearing an adapter copy does not clear this owner's staging, which is currently left for GC.
++/// </remarks>
+ internal sealed class WindowsHidReportAccess : IWindowsHidReportAccess
+ {
+     private const int ErrorAccessDenied = 5;
+@@ -47,9 +56,8 @@ public WindowsHidReportAccess(string devicePath)
+     public short OutputReportByteLength { get; }
+     public short FeatureReportByteLength { get; }
+ 
+-    // The two report paths below deliberately request DIFFERENT access, and are deliberately SEPARATE
+-    // methods. Read the note on OpenFeatureConnection before changing either: the split is load-bearing,
+-    // and it is what makes hidapi's retry-on-failure pattern unnecessary here.
++    // Keep desired access specific to the report operation: ReadFile/WriteFile need read/write access,
++    // while the feature path requests none. Availability still depends on the collection, ACL and driver.
+ 
+     /// <summary>
+     ///     Opens the handle used for input/output reports (FIDO).
+@@ -57,10 +65,9 @@ public WindowsHidReportAccess(string devicePath)
+     /// <remarks>
+     ///     Requires GENERIC_READ | GENERIC_WRITE because this path really does use ReadFile/WriteFile
+     ///     (see <see cref="GetInputReport" /> and <see cref="SetOutputReport" />), unlike the feature path.
+-    ///     Do NOT add a fall back to a lesser access level here: a zero-access handle would open
+-    ///     successfully and then fail on every subsequent ReadFile/WriteFile, turning one clear
+-    ///     UnauthorizedAccessException at open time — which carries the elevation guidance a non-elevated
+-    ///     Windows caller needs — into cryptic failures at each I/O call.
++    ///     A zero-access fallback cannot supply the access required by these file calls. Access denied can
++    ///     reflect collection restrictions, ACLs, another handle's sharing policy, or host token policy;
++    ///     elevation is an environment-specific troubleshooting step, not a universal FIDO prerequisite.
+     /// </remarks>
+     public void OpenIOConnection()
+         => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |
+@@ -71,38 +78,21 @@ public void OpenIOConnection()
+     /// </summary>
+     /// <remarks>
+     ///     <para>
+-    ///         OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature, which are IOCTLs that succeed on
+-    ///         a zero-access handle. The OTP interface is a keyboard top-level collection, and Windows
+-    ///         refuses GENERIC_READ/GENERIC_WRITE on the system keyboard even for an elevated process
+-    ///         (anti-keylogger restriction). Opening with no access sidesteps that while still permitting
+-    ///         feature-report IOCTLs.
++    ///         OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature rather than ReadFile/WriteFile.
++    ///         This path requests zero desired access so it does not request keyboard input/output access
++    ///         that it will not use. The collection, ACL, driver, and existing handle sharing still determine
++    ///         whether open and feature transfer succeed.
+     ///     </para>
+     ///     <para>
+-    ///         Scope of the evidence, stated precisely: the constructor's metadata probe shows only that this
+-    ///         same path OPENS with zero access (CreateFile + HidD_GetPreparsedData/HidP_GetCaps). It does not
+-    ///         exercise HidD_GetFeature/HidD_SetFeature, so it is supporting evidence, not proof that feature
+-    ///         I/O succeeds. Sufficiency for feature I/O rests on the Win32 contract for these IOCTLs plus the
+-    ///         Windows hardware run recorded in docs/architecture/connection-ownership-and-contention.md (YubiOtp integration
+-    ///         10/10, fw 5.8.0).
++    ///         The constructor's metadata probe checks open with zero access and capability retrieval
++    ///         (CreateFile + HidD_GetPreparsedData/HidP_GetCaps), not HidD_GetFeature/HidD_SetFeature.
++    ///         Historical hardware results have their own source,
++    ///         host, and device scope and do not qualify every deployment of this implementation.
+     ///     </para>
+     ///     <para>
+-    ///         <b>Why there is no "try read/write, fall back to none" retry, as hidapi does.</b> hidapi's
+-    ///         Windows backend (<c>windows/hid.c</c>, <c>hid_open_path</c>) opens with
+-    ///         GENERIC_READ | GENERIC_WRITE and, on failure, retries with zero access, commenting that system
+-    ///         devices such as keyboards cannot be opened read/write because the system takes exclusive
+-    ///         control to prevent keyloggers, but that feature reports still work. It needs that retry because
+-    ///         it returns ONE handle serving both <c>hid_read</c>/<c>hid_write</c> (ReadFile/WriteFile) and
+-    ///         <c>hid_get_feature_report</c> (IOCTL), so it must request the maximal access and degrade.
+-    ///     </para>
+-    ///     <para>
+-    ///         This type splits those into two handles instead — <see cref="OpenIOConnection" /> for
+-    ///         ReadFile/WriteFile, this method for feature IOCTLs — so each already requests exactly what its
+-    ///         callers use. Adding the retry here would buy nothing and cost a syscall: read/write access
+-    ///         grants no capability this path uses; on the keyboard-class OTP collection the first attempt
+-    ///         always fails, so it would always fall through to zero access anyway; and zero access already
+-    ///         succeeds in a superset of the cases read/write does, being the least restrictive request and
+-    ///         not subject to share-mode conflicts. There is no case a read/write-first retry could rescue
+-    ///         that this call does not already handle.
++    ///         The separate open methods choose access from the operation instead of trying read/write first
++    ///         and degrading on failure. Both request FILE_SHARE.ALL, which allows compatible OS opens but
++    ///         does not override another handle's sharing restrictions or acquire a process-local SDK claim.
+     ///     </para>
+     /// </remarks>
+     public void OpenFeatureConnection()
+diff --git c/src/Core/src/ServiceLocator.cs w/src/Core/src/ServiceLocator.cs
+index 1b07426a9..1571f03fa 100644
+--- c/src/Core/src/ServiceLocator.cs
++++ w/src/Core/src/ServiceLocator.cs
+@@ -17,14 +17,18 @@
+ namespace Yubico.YubiKit.Core;
+ 
+ /// <summary>
+-///     ONLY FOR TESTING, DONT USE IN PRODUCTION CODE.
++///     Holds a process-global service provider for tests, not the SDK's discovery entry point.
+ /// </summary>
++/// <remarks>The caller owns the provider; replacing it does not dispose the previous provider.</remarks>
+ public static class ServiceLocator
+ {
+     private static IServiceProvider? _serviceProvider;
+ 
++    /// <summary>Sets the caller-owned provider used by subsequent lookups.</summary>
+     public static void SetLocatorProvider(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+ 
++    /// <summary>Resolves a required service from the configured provider.</summary>
++    /// <exception cref="InvalidOperationException">No provider is set, or the provider cannot resolve T.</exception>
+     public static T GetService<T>() where T : notnull => _serviceProvider is null
+         ? throw new InvalidOperationException("Service provider not set.")
+         : _serviceProvider.GetRequiredService<T>();
+diff --git c/src/Core/src/Transports/Hid/FindHidInterfaces.cs w/src/Core/src/Transports/Hid/FindHidInterfaces.cs
+index f9b833c57..3f95bf293 100644
+--- c/src/Core/src/Transports/Hid/FindHidInterfaces.cs
++++ w/src/Core/src/Transports/Hid/FindHidInterfaces.cs
+@@ -22,11 +22,19 @@
+ 
+ namespace Yubico.YubiKit.Core.Transports.Hid;
+ 
++/// <summary>Finds operating-system HID interfaces rather than grouped physical YubiKeys.</summary>
+ public interface IFindHidInterfaces
+ {
++    /// <summary>Returns a snapshot of enumerated Yubico interfaces.</summary>
++    /// <remarks>
++    ///     A token canceled before worker execution prevents enumeration. Once enumeration starts, the task
++    ///     remains pending until it finishes; cancellation does not interrupt native enumeration. Unsupported
++    ///     platforms return an empty list. A missing Linux udev library is logged and also returns empty.
++    /// </remarks>
+     Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default);
+ }
+ 
++/// <summary>Enumerates platform HID interfaces and filters them to the Yubico vendor ID.</summary>
+ public class FindHidInterfaces : IFindHidInterfaces
+ {
+     private readonly ILogger<FindHidInterfaces> _logger;
+@@ -45,6 +53,7 @@ internal FindHidInterfaces(ILogger<FindHidInterfaces> logger,
+         _getPlatformDevices = getPlatformDevices;
+     }
+ 
++    /// <inheritdoc />
+     public async Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
+         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
+ 
+@@ -95,6 +104,7 @@ private IReadOnlyList<IHidInterface> FindAllLinux()
+     private static IReadOnlyList<IHidInterface> FindAllWindows() =>
+         WindowsHidInterface.GetList();
+ 
++    /// <summary>Creates a one-shot interface finder with the supplied logger or a no-op logger.</summary>
+     public static FindHidInterfaces Create(ILogger<FindHidInterfaces>? logger = null) =>
+         new(logger ?? NullLogger<FindHidInterfaces>.Instance);
+ }
+diff --git c/src/Core/src/Transports/Hid/HidDeviceListener.cs w/src/Core/src/Transports/Hid/HidDeviceListener.cs
+index ac3769003..f4d9c7916 100644
+--- c/src/Core/src/Transports/Hid/HidDeviceListener.cs
++++ w/src/Core/src/Transports/Hid/HidDeviceListener.cs
+@@ -71,14 +71,15 @@ public DeviceListenerStatus Status
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// After calling Stop(), the listener can be restarted by calling <see cref="Start"/> again.
++    /// After successful shutdown, a listener may be restarted with <see cref="Start"/> if its platform
++    /// implementation has completed cleanup. Retained or uncertain native state can prevent restart.
+     /// Calling Stop() on an already stopped listener has no effect.
+     /// </para>
+     /// <para>
+     /// Do not call <see cref="Stop"/> or <see cref="Dispose()"/> from within the
+-    /// <see cref="Changed"/> callback. Platform implementations wait for their native
+-    /// registration or listener thread to drain before returning, so stopping from inside the
+-    /// callback can deadlock or stall for the full disposal timeout.
++    /// <see cref="Changed"/> callback. Native unregister and thread joins can wait for that callback,
++    /// causing a deadlock or consuming the shutdown wait budget. A timeout or failed unregister
++    /// does not prove that native callbacks have drained.
+     /// </para>
+     /// </remarks>
+     public abstract void Stop();
+diff --git c/src/Core/src/Transports/Hid/IHidInterface.cs w/src/Core/src/Transports/Hid/IHidInterface.cs
+index d81ed3e4c..a2515f74e 100644
+--- c/src/Core/src/Transports/Hid/IHidInterface.cs
++++ w/src/Core/src/Transports/Hid/IHidInterface.cs
+@@ -34,10 +34,20 @@ public interface IHidInterface : IDevice
+     /// <summary>
+     /// Establishes an active connection to the HID interface for the transmittal of data through feature reports.
+     /// </summary>
++    /// <remarks>
++    ///     Opens synchronously. The caller owns the returned connection and must dispose it after all report
++    ///     calls finish. This direct open acquires no grouped-key registry claim; coordinate other opens and
++    ///     discovery for the entire lifetime. Prefer typed IYubiKey connections for SDK-managed admission.
++    /// </remarks>
+     IHidConnection ConnectToFeatureReports();
+ 
+     /// <summary>
+     /// Establishes an active connection to the HID interface for the transmittal of data through I/O reports.
+     /// </summary>
++    /// <remarks>
++    ///     Opens synchronously and transfers the connection to the caller. Dispose it after report calls finish.
++    ///     This direct open acquires no grouped-key registry claim. Blocking, report normalization, cancellation,
++    ///     and native release behavior depend on the platform; descriptor sizes alone do not define every result.
++    /// </remarks>
+     IHidConnection ConnectToIOReports();
+ }
+\ No newline at end of file
+diff --git c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs
+index d8823a807..9990eded0 100644
+--- c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs
++++ w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs
+@@ -14,7 +14,8 @@
+ 
+ namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
+ 
+-// Keyboard Mapping for ModHex.
++// Maps the sixteen ModHex letters in both cases (32 characters). Shifted uppercase entries require
++// matching host layout/modifier behavior; the table alone does not guarantee identical text on every host.
+ public sealed partial class HidCodeTranslator
+ {
+     private static HidCodeTranslator GetModHex()
+diff --git c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs
+index bf8e49bf2..3b113c976 100644
+--- c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs
++++ w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs
+@@ -20,15 +20,15 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
+ ///     Represents an abstract keyboard's HID code map. Able to convert to and
+ ///     from characters and their corresponding HID code.
+ /// </summary>
++/// <remarks>
++///     These are SDK lookup tables, not host keyboard-layout detection. Use a table matching the receiving
++///     host's layout and modifier state. Aliased usage codes can decode to the same character, so a reverse
++///     then forward lookup need not return the original byte. Locale names do not prove complete locale coverage.
++/// </remarks>
+ public sealed partial class HidCodeTranslator
+ {
+-    // HID doesn't distinguish upper and lower case letters. The way the OS
+-    // determines this is by the state of the shift, or shift-lock keys,
+-    // which are separate HID codes. However, the top bit of the byte we use
+-    // for HID codes is not used for the actual code, so the YubiKey uses
+-    // it to indicate an upper-case character. So when the YubiKey sees
+-    // this bit set, it simulates a shift keystroke before, then a release
+-    // afterwards.
++    // The top bit in this YubiKey encoding requests a shifted keystroke. It is not part of the HID
++    // usage and does not universally mean uppercase: layout, punctuation and host modifier state matter.
+     private const byte _shift = 0x80;
+ 
+ 
+@@ -64,7 +64,7 @@ private HidCodeTranslator(
+ 
+ 
+     /// <summary>
+-    ///     Gets the HID code that corresponds to the given HID code.
++    ///     Gets the encoded keyboard usage and shift marker for the given character in this table.
+     /// </summary>
+     /// <param name="ch">The character to look-up the HID code for.</param>
+     /// <returns>
+@@ -92,7 +92,7 @@ public byte this[char ch]
+     /// <summary>
+     ///     Gets the character that corresponds to the given HID code.
+     /// </summary>
+-    /// <param name="hidCode"></param>
++    /// <param name="hidCode">The encoded keyboard usage, including the optional shift marker.</param>
+     /// <returns>The character that would be rendered for this HID code.</returns>
+     /// <exception cref="ArgumentOutOfRangeException">
+     ///     A character was requested from a HID code not in this <see cref="HidCodeTranslator" />.
+@@ -136,7 +136,7 @@ public char this[byte hidCode]
+     public string SupportedCharactersString => new(_byChar.Keys.ToArray());
+ 
+     /// <summary>
+-    ///     An array of chars respresenting all of the characters supported
++    ///     An enumerable of characters supported
+     ///     by this <see cref="HidCodeTranslator" /> instance.
+     /// </summary>
+     public IEnumerable<char> SupportedCharacters => _byChar.Keys;
+diff --git c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs
+index 62d3caba2..9d9e10ae5 100644
+--- c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs
++++ w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs
+@@ -14,7 +14,8 @@
+ 
+ namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
+ 
+-// Keyboard Mapping for es_US.
++// Current es_US table is US-shaped. Treat it as the explicit mappings below, not proof of complete
++// Spanish host-layout coverage; table corrections and host validation are separate work.
+ public sealed partial class HidCodeTranslator
+ {
+     private static HidCodeTranslator GetES_US()
+diff --git c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs
+index cf9b341d6..4e5908537 100644
+--- c/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs
++++ w/src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs
+@@ -14,7 +14,8 @@
+ 
+ namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
+ 
+-// Keyboard Mapping for sv_SE.
++// Current sv_SE table is US-shaped and omits Swedish letters. Its name is not a claim of complete
++// Swedish host-layout coverage; table corrections and host validation are separate work.
+ public sealed partial class HidCodeTranslator
+ {
+     private static HidCodeTranslator GetSV_SE()
+diff --git c/src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs w/src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs
+index 231baa2e2..09fcb74e4 100644
+--- c/src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs
++++ w/src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs
+@@ -15,6 +15,7 @@
+ // ReSharper disable InconsistentNaming
+ namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
+ 
++/// <summary>Identifies an SDK keyboard translation table, not a detected or validated host locale.</summary>
+ public enum KeyboardLayout
+ {
+     ModHex = 0,
+diff --git c/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs w/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs
+index fcbc3dd25..d29c13a29 100644
+--- c/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs
++++ w/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs
+@@ -190,7 +190,7 @@ public LinuxHidPollOutcome WaitForEvent()
+     {
+         var pollFds = _pollFds ?? throw new InvalidOperationException("The event source is not initialized.");
+         // The listener thread owns both handles. Retain them explicitly for this raw-fd
+-        // poll; future report-reactor registrations need references across registration too.
++        // poll. The separate report reactor retains device references across each entire registration.
+         using var shutdownLease = new LinuxDescriptorLease(_shutdownEventHandle
+             ?? throw new InvalidOperationException("The shutdown event is not initialized."));
+         using var monitorLease = new LinuxDescriptorLease(_monitorHandle
+diff --git c/src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs w/src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs
+index b5d45bd1c..143668305 100644
+--- c/src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs
++++ w/src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs
+@@ -127,8 +127,9 @@ public static IReadOnlyList<IHidInterface> GetList()
+     ///     Establishes a connection capable of transmitting feature reports to a keyboard device.
+     /// </summary>
+     /// <returns>
+-    ///     An active connection object.
++    ///     A caller-owned connection. Open and report calls wait synchronously; dispose it after use.
+     /// </returns>
++    /// <remarks>This direct open acquires no grouped-key registry claim.</remarks>
+     public IHidConnection ConnectToFeatureReports() =>
+         new LinuxHidFeatureReportConnection(ReaderName);
+ 
+@@ -136,8 +137,9 @@ public IHidConnection ConnectToFeatureReports() =>
+     ///     Establishes a connection capable of transmitting IO reports to a FIDO device.
+     /// </summary>
+     /// <returns>
+-    ///     An active connection object.
++    ///     A caller-owned connection. Open and report calls wait synchronously; dispose it after use.
+     /// </returns>
++    /// <remarks>This direct open acquires no grouped-key registry claim.</remarks>
+     public IHidConnection ConnectToIOReports() =>
+         new LinuxHidIOReportConnection(ReaderName);
+ 
+@@ -325,10 +327,8 @@ private static (ushort UsagePage, ushort Usage) GetHidUsageFromHandle(LinuxFileS
+ 
+     internal static (ushort UsagePage, ushort Usage) ParseHidDescriptorBytes(ReadOnlySpan<byte> descriptor)
+     {
+-        // HID descriptor parsing - looking for Usage Page and Usage items
+-
+-        // IMPORTANT: We need to validate the UsagePage + Usage combination
+-        // Don't just return the first values found - parse both, then validate
++        // Extract the first Usage Page and first Usage independently. The caller classifies this pair;
++        // this scan does not validate collection nesting or the complete descriptor.
+ 
+         ushort usagePage = 0;
+         ushort usage = 0;
+@@ -357,7 +357,7 @@ internal static (ushort UsagePage, ushort Usage) ParseHidDescriptorBytes(ReadOnl
+                 }
+             }
+ 
+-            // Once we have both, we can stop (we want the first/primary usage)
++            // Stop after the first pair; HidInterfaceClassifier decides whether it is supported.
+             if (usagePageFound && usageFound)
+             {
+                 break;
+diff --git c/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs w/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs
+index 88e37ab5d..308c3e820 100644
+--- c/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs
++++ w/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs
+@@ -103,6 +103,11 @@ int OpenDeviceResult(nint device)
+     ///     Registers, or with zero <paramref name="callback" /> and <paramref name="context" /> clears, the
+     ///     input report callback.
+     /// </summary>
++    /// <remarks>
++    ///     This dormant registration seam requires a buffer pinned for the entire native registration and
++    ///     callback drain, plus a rooted context. A call-scoped array pin is insufficient. Active FIDO input
++    ///     instead uses the native bridge's persistent buffer and separate callback-state root.
++    /// </remarks>
+     void RegisterInputReportCallback(nint device, byte[] buffer, int bufferLength, nint callback, nint context);
+ 
+     /// <summary>
+@@ -150,11 +155,8 @@ public void OpenDevice(nint device)
+     {
+         // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). SDK exclusivity is enforced
+         // by DeviceConnectionRegistry before native open; seizing would add a platform-wide policy and
+-        // prevent other non-seizing clients from opening the interface. Both canonical implementations open
+-        // non-seizing on macOS - Rust yubikit enables hidapi's `macos-shared-device`
+-        // (hid_darwin_set_open_exclusive(0) => kIOHIDOptionsTypeNone), and python-fido2's macOS backend
+-        // calls IOHIDDeviceOpen(handle, 0). The OTP feature-report path uses 0 as well, so both macOS
+-        // HID paths stay consistent.
++        // prevent other non-seizing clients from opening the interface. The OTP path also passes zero.
++        // Process-local admission and OS access permissions remain separate policies.
+         var result = OpenDeviceResult(device);
+ 
+         if (result != 0)
+diff --git c/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs w/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
+index 4cddfd3f7..4478475c6 100644
+--- c/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
++++ w/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
+@@ -38,8 +38,8 @@ internal static class IOKitHelpers
+     /// <exception cref="PlatformApiException">
+     ///     The type requested and the type returned by IOKit do not match.
+     /// </exception>
+-    /// <exception cref="NullReferenceException">
+-    ///     An attempt was made to dereference the property, even though it was null.
++    /// <exception cref="InvalidOperationException">
++    ///     The property is absent, so the nullable result has no value.
+     /// </exception>
+     public static int GetIntPropertyValue(IntPtr device, string propertyName)
+     {
+@@ -54,7 +54,7 @@ public static int GetIntPropertyValue(IntPtr device, string propertyName)
+     }
+ 
+     /// <summary>
+-    ///     Gets an nullable integer-typed property value from a device.
++    ///     Gets a nullable integer-typed property value from a device.
+     /// </summary>
+     /// <param name="device">
+     ///     The previously opened device against which the property should be queried.
+@@ -63,7 +63,8 @@ public static int GetIntPropertyValue(IntPtr device, string propertyName)
+     ///     The name of the property to query for.
+     /// </param>
+     /// <returns>
+-    ///     The value of the property.
++    ///     The signed 32-bit property value, null when absent, or zero when CFNumberGetValue reports a
++    ///     lossy or out-of-range conversion. Zero therefore does not distinguish a stored zero from conversion failure.
+     /// </returns>
+     /// <exception cref="PlatformApiException">
+     ///     The type requested and the type returned by IOKit do not match.
+diff --git c/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs w/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs
+index 68dc6d59e..e73428246 100644
+--- c/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs
++++ w/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs
+@@ -23,6 +23,12 @@
+ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
+ 
+ /// <summary>macOS HID topology listener. The run-loop thread owns each generation's native lifetime.</summary>
++/// <remarks>
++///     Static unmanaged callbacks recover a rooted generation from its GCHandle context. Normal shutdown
++///     retains that generation until the run-loop thread exits and performs cleanup. A timed-out callback can
++///     drain later; ambiguous registration followed by failed thread startup can instead retain a generation
++///     with no worker to finish cleanup. Neither path permits restart while native ownership remains uncertain.
++/// </remarks>
+ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
+ {
+     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
+diff --git c/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs w/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs
+index 75ca27a96..65ebec890 100644
+--- c/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs
++++ w/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs
+@@ -8,6 +8,11 @@
+ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
+ 
+ /// <summary>Synchronous feature reports over the connection-owned macOS OTP worker.</summary>
++/// <remarks>
++///     Expert GET transfers an eight-byte caller-owned array and pads a successful short native result with
++///     zeros. Typed OTP receive instead rejects a short result. SET preserves supported caller lengths.
++///     Construction and report calls wait for the worker; disposal waits for admitted work and checked close.
++/// </remarks>
+ [SupportedOSPlatform("macos")]
+ internal sealed class MacOSHidFeatureReportConnection : IHidConnection
+ {
+diff --git c/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs w/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
+index cba3402ec..390d3be8e 100644
+--- c/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
++++ w/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
+@@ -11,6 +11,11 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
+ /// <summary>
+ ///     Synchronous HID report compatibility surface over the persistent macOS FIDO input owner.
+ /// </summary>
++/// <remarks>
++///     Descriptor sizes are metadata. Receive accepts fixed FIDO input: 64 payload bytes, or 65 bytes with a
++///     leading zero report ID that is removed. Other lengths terminalize input. SET preserves supported caller
++///     lengths. The six-second read timeout detaches that reader while the native input owner remains active.
++/// </remarks>
+ [SupportedOSPlatform("macos")]
+ internal sealed class MacOSHidIOReportConnection : IHidConnection
+ {
+diff --git c/src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs w/src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs
+index b4a5eb7d4..e79e25c79 100644
+--- c/src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs
++++ w/src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs
+@@ -74,9 +74,9 @@ public override void Start()
+                 // making the finalizer unreachable while registered — an owner that drops the
+                 // listener without Dispose() would leak the native registration forever and keep
+                 // pumping events into an abandoned object graph. The Weak handle keeps the
+-                // finalizer reachable so it can unregister (draining in-flight callbacks) and
+-                // free this handle. During normal operation the owner strongly roots the
+-                // listener, so callbacks never observe a collected target.
++                // finalizer reachable so it can attempt unregister. Successful unregister drains callbacks;
++                // the current paths discard its status, so invocation alone supplies no drain proof.
++                // During explicit use the caller must keep the listener alive through shutdown.
+                 _marshalableThisPtr = GCHandle.Alloc(this, GCHandleType.Weak);
+ 
+                 // Build the notification filter for HID device interfaces
+diff --git c/src/Core/src/Transports/IDeviceChangeListener.cs w/src/Core/src/Transports/IDeviceChangeListener.cs
+index 5cb88c9f4..daf1e41b5 100644
+--- c/src/Core/src/Transports/IDeviceChangeListener.cs
++++ w/src/Core/src/Transports/IDeviceChangeListener.cs
+@@ -29,11 +29,17 @@ public interface IDeviceChangeListener : IDisposable
+     DeviceListenerStatus Status { get; }
+ 
+     /// <summary>Establishes baseline state and begins monitoring subsequent changes.</summary>
+-    /// <remarks>Set <see cref="Changed"/> first. Check <see cref="Status"/> after starting.</remarks>
+-    /// <exception cref="ObjectDisposedException">The listener has been disposed.</exception>
++    /// <remarks>
++    ///     Set <see cref="Changed"/> first and check <see cref="Status"/> after starting. Starting a disposed
++    ///     instance is unsupported; create a new listener. Implementations do not uniformly throw on that path.
++    /// </remarks>
+     void Start();
+ 
+-    /// <summary>Stops monitoring and releases monitoring resources.</summary>
+-    /// <remarks>Call outside the <see cref="Changed"/> callback to avoid waiting on that callback.</remarks>
++    /// <summary>Requests monitoring shutdown and platform resource cleanup.</summary>
++    /// <remarks>
++    ///     Call outside the <see cref="Changed"/> callback to avoid waiting on that callback. Platform timeout
++    ///     or native-unregister failure can leave ownership unresolved; a returned call or diagnostic status
++    ///     alone is not a portable proof of callback drain and native release.
++    /// </remarks>
+     void Stop();
+ }
+\ No newline at end of file
+diff --git c/src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs w/src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs
+index 6306c3b16..01279a52c 100644
+--- c/src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs
++++ w/src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs
+@@ -22,7 +22,8 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
+ /// Monitors for SmartCard reader arrival and removal using PC/SC SCardGetStatusChange.
+ /// </summary>
+ /// <remarks>
+-/// Uses a dedicated background thread with 1000ms timeout for responsive cancellation.
++/// Uses a dedicated background thread and a 1,000 ms maximum native status wait. Fresh UNAWARE reader
++/// states can return immediately; this timeout is not a minimum polling interval or a shutdown deadline.
+ /// On Windows, also watches for PnP notifications via the special <c>\\?\PnP?\Notification</c> reader.
+ /// <para>
+ /// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="Changed"/>
+@@ -188,8 +189,8 @@ private void StopListening()
+ 
+         if (!listenerStopped)
+         {
+-            // The listener may still be using the native context. Prefer a bounded leak over
+-            // disposing a handle that could still be active on the background thread.
++            // The listener may still be using the native context. Retain it rather than dispose an active
++            // handle. This stop attempt has timed out; it proves neither thread exit nor safe restart.
+             lock (_syncLock)
+             {
+                 if (ReferenceEquals(_context, context))
+@@ -264,7 +265,7 @@ private void ListenerThreadProc()
+ 
+                 _knownReaders = currentReaderSet;
+ 
+-                // Wait for status change with timeout
++                // Supply a maximum wait. Recreated UNAWARE states can return immediately on success.
+                 WaitForStatusChange(currentReaders);
+             }
+         }
+@@ -470,7 +471,8 @@ public void Dispose()
+     }
+ 
+     /// <summary>
+-    /// Destructor to ensure resources are cleaned up.
++    /// Attempts context cleanup if this listener becomes finalizable. A running listener thread can keep
++    /// the instance reachable; use explicit disposal rather than relying on finalization for thread exit.
+     /// </summary>
+     ~DesktopSmartCardDeviceListener()
+     {
+diff --git c/src/Core/src/Transports/SmartCard/FindPcscDevices.cs w/src/Core/src/Transports/SmartCard/FindPcscDevices.cs
+index 604531d4a..3d5163a03 100644
+--- c/src/Core/src/Transports/SmartCard/FindPcscDevices.cs
++++ w/src/Core/src/Transports/SmartCard/FindPcscDevices.cs
+@@ -6,11 +6,19 @@
+ 
+ namespace Yubico.YubiKit.Core.Transports.SmartCard;
+ 
++/// <summary>Finds PC/SC interfaces recognized as YubiKeys in one enumeration.</summary>
+ public interface IFindPcscDevices
+ {
++    /// <summary>Returns a snapshot of recognized reader interfaces.</summary>
++    /// <remarks>
++    ///     Cancellation is checked before worker admission. Once admitted, the returned task awaits the actual
++    ///     enumeration; canceling a separate wait does not stop that worker. Integrated USB readers are
++    ///     recognized by name; generic/NFC readers require card-status and ATR probing.
++    /// </remarks>
+     Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default);
+ }
+ 
++/// <summary>Enumerates recognized USB and card-present generic/NFC PC/SC interfaces.</summary>
+ public class FindPcscDevices : IFindPcscDevices
+ {
+     /// <summary>
+@@ -42,6 +50,7 @@ internal FindPcscDevices(
+         _freeReaderName = freeReaderName ?? Marshal.FreeHGlobal;
+     }
+ 
++    /// <inheritdoc />
+     public async Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default)
+     {
+         cancellationToken.ThrowIfCancellationRequested();
+@@ -170,6 +179,7 @@ private static bool IsIntegratedSmartCardYubiKeyReader(string readerName)
+             && ReaderNamePidParser.ExpectedConnectionsForPid(value).SupportsConnection(ConnectionType.SmartCard);
+     }
+ 
++    /// <summary>Creates a one-shot PC/SC finder with the supplied logger or a no-op logger.</summary>
+     public static FindPcscDevices Create(ILogger<FindPcscDevices>? logger = null) =>
+         new(logger ?? NullLogger<FindPcscDevices>.Instance);
+ }
+\ No newline at end of file
+diff --git c/src/Core/src/Transports/SmartCard/ISmartCardConnection.cs w/src/Core/src/Transports/SmartCard/ISmartCardConnection.cs
+index 1a0ec1e4a..aa6587e38 100644
+--- c/src/Core/src/Transports/SmartCard/ISmartCardConnection.cs
++++ w/src/Core/src/Transports/SmartCard/ISmartCardConnection.cs
+@@ -48,6 +48,12 @@ Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+     ///     disposal can block without a bound on native acquisition/end; prefer async begin and, for built-in
+     ///     scopes, async disposal.
+     /// </summary>
++    /// <remarks>
++    ///     A transaction coordinates resource-manager clients, not concurrent callers using this same
++    ///     connection. Serialize a complete multi-command workflow in the application. Built-in scope disposal
++    ///     waits for native end; an end failure closes ordinary admission and is reported by later connection
++    ///     disposal. The built-in scope's diagnostic callback logs that failure instead of throwing it here.
++    /// </remarks>
+     IDisposable BeginTransaction(CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+@@ -60,6 +66,8 @@ Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+     ///     block the caller; override it for nonblocking acquisition. Built-in connections reject cancellation
+     ///     before native dispatch; afterward the transaction may begin successfully, and completion waits for
+     ///     native work. Do not assume cancellation releases the connection or ends the transaction.
++    ///     The same-connection workflow and end-failure reporting rules of <see cref="BeginTransaction" />
++    ///     also apply to this scope. A borrowed session's disposal does not dispose its connection.
+     /// </remarks>
+     Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default)
+     {
+diff --git c/src/Core/src/Transports/SmartCard/PcscNativeResources.cs w/src/Core/src/Transports/SmartCard/PcscNativeResources.cs
+index e4773c7a9..d5aa41165 100644
+--- c/src/Core/src/Transports/SmartCard/PcscNativeResources.cs
++++ w/src/Core/src/Transports/SmartCard/PcscNativeResources.cs
+@@ -115,7 +115,8 @@ public bool TryRelease(out Exception? cleanupError)
+             uint result;
+             try
+             {
+-                // Power the card off so card-wide security state cannot outlive this connection (see SmartCardSharing).
++                // Request power-off and check the returned status. This is native release evidence,
++                // not an observation of physical power or PIN-state clearing (see SmartCardSharing).
+                 result = _api.Disconnect(cardHandle, SCARD_DISPOSITION.UNPOWER_CARD);
+             }
+             catch (Exception ex)
+diff --git c/src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs w/src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs
+index 9d1ba3c10..32666788c 100644
+--- c/src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs
++++ w/src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs
+@@ -65,11 +65,14 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
+     ///     Set it once at start-up, before constructing factories or using <see cref="Devices.YubiKeyManager" />
+     ///     for discovery or monitoring. Existing factories and connections retain their selected policy.
+     ///     Migration: applications that require the former fallback behavior must explicitly select
+-    ///     <see cref="SmartCardSharing.ExclusiveWithSharedFallback" /> and accept shared card-wide security state.
++    ///     <see cref="SmartCardSharing.ExclusiveWithSharedFallback" /> and accept shared application security state.
+     ///     <see cref="SmartCardSharing.Shared" /> is also an explicit coexistence opt-in, not an isolation policy.
+     /// </remarks>
+     /// <example>
+     /// <code>
++    /// using Yubico.YubiKit.Core.Devices;
++    /// using Yubico.YubiKit.Core.Transports.SmartCard;
++    ///
+     /// // Explicit compatibility opt-in, before any discovery or monitoring:
+     /// SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;
+     /// var devices = await YubiKeyManager.FindAllAsync();
+@@ -101,10 +104,20 @@ public SmartCardConnectionFactory()
+     /// <summary>Creates a factory that opens card handles with <paramref name="sharing"/>.</summary>
+     /// <example>
+     /// <code>
+-    /// // Explicitly accept shared access for this factory only:
+-    /// // Coordinate discovery/monitoring and all other connections to this key before opening directly.
+-    /// var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
+-    /// await using var connection = await factory.CreateAsync(reader, cancellationToken);
++    /// using System.Threading;
++    /// using System.Threading.Tasks;
++    /// using Yubico.YubiKit.Core.Sessions;
++    /// using Yubico.YubiKit.Core.Transports.SmartCard;
++    ///
++    /// static async Task SelectPivSharedAsync(IPcscDevice reader, CancellationToken cancellationToken)
++    /// {
++    ///     // Coordinate discovery/monitoring and other connections before this direct open.
++    ///     var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
++    ///     await using ISmartCardConnection connection = await factory.CreateAsync(reader, cancellationToken);
++    ///     await using RawSmartCardSession session =
++    ///         await RawSmartCardSession.CreateAsync(connection, cancellationToken);
++    ///     await session.SelectAsync(ApplicationIds.Piv, cancellationToken);
++    /// }
+     /// </code>
+     /// </example>
+     public SmartCardConnectionFactory(SmartCardSharing sharing)
+diff --git c/src/Core/src/Transports/SmartCard/SmartCardSharing.cs w/src/Core/src/Transports/SmartCard/SmartCardSharing.cs
+index ba923598c..cff153e21 100644
+--- c/src/Core/src/Transports/SmartCard/SmartCardSharing.cs
++++ w/src/Core/src/Transports/SmartCard/SmartCardSharing.cs
+@@ -19,14 +19,14 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// Smart-card application state is card-wide, not per handle: NIST SP 800-73-5 Part 2 §2.4.2 lists the
+-/// PIV PIN among the application security status indicators, so once a PIN is verified any handle on
+-/// the card can use a PIN=ONCE key until the card is reset. By default the built-in SDK factory requires
++/// Other clients using a shared card can select applications and affect application security state.
++/// A PC/SC handle does not provide an independent application-state boundary. The built-in factory requires
+ /// exclusive PC/SC access and fails with <see cref="Devices.ConnectionInUseException" /> on contention,
+ /// without a shared retry. PC/SC exclusivity excludes other PC/SC clients through the resource manager;
+ /// it is not a guarantee about other transports or arbitrary custom connection implementations.
+-/// All built-in modes request power-off on release (<c>SCARD_UNPOWER_CARD</c>) to clear card-wide state.
+-/// Shared access permits other clients to use that state while the card remains powered;
++/// All built-in modes request power-off on release (<c>SCARD_UNPOWER_CARD</c>) and check native release
++/// statuses. The requested disposition does not establish observed power-off or physical PIN-state clearing.
++/// Shared access accepts interference from other card clients;
+ /// <see cref="ISmartCardConnection.IsExclusive" /> reports the acquired mode, and an explicitly selected
+ /// fallback to shared access is logged as a warning.
+ /// </para>
+@@ -34,11 +34,13 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
+ /// Set the process-wide mode through <see cref="SmartCardConnectionFactory.DefaultSharing" />, or pass one
+ /// to <see cref="SmartCardConnectionFactory(SmartCardSharing)" />. Applications migrating from the former
+ /// fallback default must opt in explicitly if they need coexistence with other smart-card clients.
++/// The factory policy is initially <see cref="Exclusive" />; the zero-valued enum member remains
++/// <see cref="ExclusiveWithSharedFallback" />.
+ /// </para>
+ /// </remarks>
+ public enum SmartCardSharing
+ {
+-    /// <summary>Explicit opt-in: open exclusively; on a sharing violation, retry shared and accept shared card-wide state.</summary>
++    /// <summary>Explicit opt-in: open exclusively; on a sharing violation, retry shared and accept shared application state.</summary>
+     ExclusiveWithSharedFallback,
+ 
+     /// <summary>The factory default: open exclusively or fail with <see cref="Devices.ConnectionInUseException" />; never retry shared.</summary>
+@@ -46,7 +48,7 @@ public enum SmartCardSharing
+ 
+     /// <summary>
+     /// Open shared, for applications that must coexist with other smart-card users (gpg-agent, browsers,
+-    /// the OS smart-card service) and accept that card-wide state is reachable from their handles.
++    /// the OS smart-card service) and accept shared application state and application-selection interference.
+     /// </summary>
+     Shared
+ }
+\ No newline at end of file
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs w/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs
+index 5b6f435f0..796ce2748 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs
+@@ -128,7 +128,8 @@ public void StartedListener_NoDeviceChange_NoSpuriousEvents()
+             // Act - wait briefly with listener running
+             Thread.Sleep(500);
+ 
+-            // Assert - no spurious events while running
++            // Count callbacks over this interval. Zero also passes if Start failed; this measures neither
++            // native registration success nor polling cadence.
+             Assert.Equal(0, eventCount);
+             _output.WriteLine("No spurious events fired during quiet period with listener running");
+         }
+@@ -159,6 +160,8 @@ public async Task Dispose_AfterStart_CompletesCleanly()
+         var completedTask = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(5)));
+ 
+         // Assert
++        // The race and diagnostic status are observed, but the disposal task's result is not awaited.
++        // A fast fault can win; this supplies no successful native unregister/drain assertion.
+         Assert.True(completedTask == disposeTask, "Dispose should complete within 5 seconds");
+         Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
+         _output.WriteLine("Dispose after Start() completed cleanly within timeout");
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs w/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs
+index 9ee892768..75e5fba0c 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs
+@@ -100,7 +100,7 @@ public void StartedListener_NoDeviceChange_NoSpuriousEvents()
+             // Act - wait briefly with listener running
+             Thread.Sleep(500);
+ 
+-            // Assert - no spurious events while running
++            // Count callbacks during this quiet interval, not native status-call cadence or CPU use.
+             Assert.Equal(0, eventCount);
+             _output.WriteLine("No spurious events fired during quiet period with listener running");
+         }
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs
+index 80888ec6e..9db8e62aa 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs
+@@ -25,8 +25,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
+ 
+ /// <summary>
+ ///     Covers <c>ApplicationSession.ConfigureProtocolAsync</c>'s SCP guard: SCP is only valid on a PC/SC SmartCard
+-///     protocol. This is the Core contract that backs the Phase 38 FIDO2 rule (ISC-9.1) — supplying
+-///     <c>scpKeyParams</c> while a non-SmartCard transport (e.g. the default HID FIDO) is selected throws,
++///     protocol. Supplying SCP parameters while a non-SmartCard transport is selected throws,
+ ///     rather than silently ignoring the requested secure channel.
+ /// </summary>
+ public class ApplicationSessionScpTests
+@@ -302,8 +301,7 @@ public async Task CleanupFailure_PreservesOriginalInitializationException()
+     {
+         // Deliberately not `using`: DisposeAfterInitializationFailure already disposed this session, and
+         // that disposal FAILED. DisposalGate makes a failed teardown terminal and replays the same failure
+-        // to every later caller, so a second dispose would rethrow the cleanup IOException. Upstream's
+-        // version could use `using` because it has no DisposalGate; ours shares failed completions by design.
++        // to every later caller, so a second dispose would rethrow the cleanup IOException.
+         var session = TestSession.Create(new InertConnection());
+         var expected = new InvalidOperationException("initialization failure");
+         var protocol = new TrackingProtocol(disposeException: new IOException("cleanup failure"));
+@@ -331,8 +329,7 @@ await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                 scp));
+ 
+         // Borrowed: the session did not create this connection, so disposal is the caller's.
+-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
++        // The zero count checks that protocol cleanup leaves this borrowed connection open.
+         Assert.Equal(0, connection.DisposeCount);
+     }
+ 
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs
+index c88bcc7db..646a72939 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs
+@@ -235,12 +235,12 @@ public async Task ConnectAsync_AliasedMembersRegroupedLater_OlderCompositeScopeR
+     }
+ 
+     // ------------------------------------------------------------------------------------------------
+-    // Rule 2 — one live session per connection (Python's model, enforced at binding).
++    // Rule 2 — one live session per connection, enforced at binding.
+     // ------------------------------------------------------------------------------------------------
+ 
+     /// <summary>
+     ///     Rule 1 cannot see this case: one connection, opened once, handed to two sessions. That is exactly
+-    ///     what Python's base Session guards, and it is the same applet-deselection hazard one level down.
++    ///     the same applet-deselection hazard at the session-binding boundary.
+     /// </summary>
+     [Fact]
+     public async Task Session_SecondLiveSessionOnOneConnection_IsRefused()
+@@ -294,7 +294,7 @@ public async Task Session_Dispose_DoesNotDisposeACallerCreatedConnection()
+ 
+     /// <summary>
+     ///     The end-to-end shape the refusal rules require: one connection, successive applet sessions, no
+-    ///     reconnect. This is Rust's <c>into_connection</c> handoff expressed in C# lifetimes.
++    ///     reconnect. Each session borrows the same enclosing caller-owned connection scope.
+     /// </summary>
+     [Fact]
+     public async Task SuccessiveSessions_OverOneConnection_BothReachTheWire()
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs
+index 97d3e24b9..356bdf52f 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs
+@@ -17,8 +17,8 @@
+ namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
+ 
+ /// <summary>
+-/// Tests verifying that HidDeviceListener implementations lifecycle and disposal
+-/// work correctly. These tests are CRITICAL for shutdown safety.
++/// Checks platform-listener status, repeated lifecycle calls, and disposal-task timing. Timing races below
++/// observe which task becomes terminal; they do not inspect that task's result or prove native callback drain.
+ /// </summary>
+ [Trait("Category", "Disposal")]
+ public class HidDeviceListenerDisposalTests
+@@ -229,8 +229,8 @@ public void DeviceEvent_NotFiredBeforeStart()
+     }
+ 
+     /// <summary>
+-    /// Verifies that Dispose completes within a reasonable timeout when listener is running.
+-    /// If this test hangs, the cancellation logic is broken.
++    /// Checks that the disposal task wins a ten-second race after Start. A faulted task also wins;
++    /// Start may report Error, so this is not proof of successful registration or unregister.
+     /// </summary>
+     [Fact]
+     public async Task Dispose_AfterStart_CompletesWithinTimeout()
+@@ -255,7 +255,7 @@ public async Task Dispose_AfterStart_CompletesWithinTimeout()
+     }
+ 
+     /// <summary>
+-    /// Verifies that Dispose completes quickly when listener was never started.
++    /// Checks that the disposal task wins a one-second race without Start; its result is not awaited here.
+     /// </summary>
+     [Fact]
+     public async Task Dispose_NeverStarted_CompletesImmediately()
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs
+index ba388543c..ddd60b417 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs
+@@ -310,9 +310,9 @@ public void Dispose_CalledMultipleTimes_NoException()
+     }
+ 
+     /// <summary>
+-    /// Verifies that the finalizer doesn't throw exceptions.
+-    /// Note: GC collection timing is non-deterministic, so we just verify
+-    /// a listener can be abandoned without causing process-level issues.
++    /// Checks that the calling thread observes no exception while abandoning a listener and requesting GC.
++    /// Startup exceptions are tolerated. The test observes neither finalizer entry, native context release,
++    /// nor thread exit; a running listener can remain reachable. It does not catch finalizer-thread failures.
+     /// </summary>
+     [Fact]
+     public void Finalizer_DoesNotThrowException()
+@@ -324,7 +324,7 @@ void CreateAndAbandonListener()
+             {
+                 var listener = DesktopSmartCardDeviceListener.Create();
+                 listener.Start(); // Start it so there's actual cleanup needed
+-                // Don't dispose - let it become eligible for GC
++                // Abandon the local reference; a running thread can still keep the listener reachable.
+             }
+             catch (Exception)
+             {
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs
+index b4daad88f..840206e02 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs
+@@ -345,6 +345,11 @@ public async Task AsyncTransaction_CancellationAfterNativeDispatch_DoesNotAbando
+         }
+     }
+ 
++    /// <summary>
++    ///     Holds transmit while requesting scope end, checks that end has not been submitted, then releases
++    ///     transmit and observes one end call. A repeated scope dispose is inert and a later synchronous begin
++    ///     adds one end call. The fake EndTransaction itself is not held, so this is not a held-native-end oracle.
++    /// </summary>
+     [Fact]
+     public async Task AsyncTransaction_AsyncScopeEndAwaitsNativeEndAndSyncBeginStillWorks()
+     {
+@@ -373,6 +378,11 @@ public async Task AsyncTransaction_AsyncScopeEndAwaitsNativeEndAndSyncBeginStill
+         }
+     }
+ 
++    /// <summary>
++    ///     Injects an end failure: scope disposal returns, subsequent raw work is refused, and connection
++    ///     disposal reports SCardException after one end, disconnect, and context-release call. Native release
++    ///     routing and error reporting are separate observations; no physical transaction/reset result is tested.
++    /// </summary>
+     [Fact]
+     public async Task AsyncTransaction_FailedAsyncEnd_RefusesFurtherWorkAndShutdownReportsFailure()
+     {
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs
+index 306a9af3f..d4cbe69b9 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs
+@@ -21,11 +21,10 @@
+ namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
+ 
+ /// <summary>
+-///     How a PC/SC handle is opened and released. The PIV PIN security status is card-wide
+-///     (NIST SP 800-73-5 Part 2 §2.4.2), so a shared handle opened by another local process can use a PIN=ONCE
+-///     slot during and after an SDK session unless the SDK holds the card exclusively and powers it off on
+-///     release. These no-hardware tests prove strict exclusive mode selection, no shared retry on
+-///     contention, and SCARD_UNPOWER_CARD on disconnect, not physical card isolation.
++///     Checks managed PC/SC sharing policy and release arguments with a fake native API. Assertions cover
++///     strict exclusive selection, no shared retry on contention, explicit opt-ins, factory policy snapshots,
++///     and requested SCARD_UNPOWER_CARD on disconnect. They measure neither physical power-off/PIN-state
++///     clearing nor access by a competing process. A borrowed session can end before its connection closes.
+ /// </summary>
+ [Trait("Audit", "YESDK-1630")]
+ [Collection(DiscoveryWorkerAdmissionCollection.Name)]
+@@ -273,7 +272,7 @@ public async Task ExplicitSharing_OverridesDefaultSharing()
+         }
+     }
+ 
+-    /// <summary>Power the card off on release so PIN=ONCE state cannot outlive the session.</summary>
++    /// <summary>Checks that every sharing mode requests UNPOWER_CARD when the connection is disposed.</summary>
+     [Theory]
+     [InlineData(SmartCardSharing.Exclusive)]
+     [InlineData(SmartCardSharing.Shared)]

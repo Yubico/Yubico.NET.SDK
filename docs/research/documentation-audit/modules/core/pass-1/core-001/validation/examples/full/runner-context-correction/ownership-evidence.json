@@ -1,0 +1,110 @@
+{
+  "document": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/CLAUDE.md",
+    "bytes": 34741,
+    "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+  },
+  "original_body_id": "FULL-061",
+  "raw_body_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+  "decoded_body_sha256": "b04a32f9b5cd80815f9ed59a636d25f068685c0afc3c5f2fe37ac2e24af5c9a6",
+  "authority": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/example-bodies.json",
+    "bytes": 326723,
+    "sha256": "0c04cc6fd89bbdfd6c9310b232ebca0d1c35b155e1fc2da1ea0e672f2e3b83dd"
+  },
+  "authority_entry": {
+    "path": "CLAUDE.md",
+    "kind": "fence",
+    "opening_line": 527,
+    "closing_line": 541,
+    "body_first_line": 528,
+    "body_last_line": 540,
+    "language": "csharp",
+    "body_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+    "body": "// \u2705 GOOD - Tests actual SCP handshake with real hardware\n[Fact]\npublic async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()\n{\n    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);\n    using var scpKeyParams = Scp03KeyParameters.Default;\n    await using var session = await device.CreateManagementSessionAsync(\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: TestContext.Current.CancellationToken);\n\n    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);\n    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);\n}\n",
+    "classification": "illustrative-composable-fragment",
+    "reason": "API/pattern fragment requiring surrounding imports, typed caller inputs or app/test context; some examples deliberately contrast rejected designs. Not a standalone consumer program.",
+    "compiler_state": "NOT RUN",
+    "execution_state": "NOT RUN",
+    "reviewed_example_number": 14,
+    "reviewed_body": "// \u2705 GOOD - Tests actual SCP handshake with real hardware\n[Fact]\npublic async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()\n{\n    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);\n    using var scpKeyParams = Scp03KeyParameters.Default;\n    await using var session = await device.CreateManagementSessionAsync(\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: TestContext.Current.CancellationToken);\n\n    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);\n    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);\n}\n",
+    "reviewed_body_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+    "reviewed_coordinates": {
+      "opening_line": 516,
+      "closing_line": 530,
+      "body_first_line": 517,
+      "body_last_line": 529
+    }
+  },
+  "review": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+    "bytes": 8886,
+    "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+  },
+  "root_v3_policy": {
+    "first_line": 119,
+    "last_line": 123,
+    "lines": [
+      "**Testing:**",
+      "- \u2705 ALWAYS use `dotnet toolchain.cs test` (handles xUnit v2/v3 runner differences)",
+      "- \u2705 xUnit v3: pass `TestContext.Current.CancellationToken` to cancellable operations and waits; use a linked token source when testing cancellation (`xUnit1051`).",
+      "- \u2705 Await tasks in tests; never use `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()` (`xUnit1031`), even after checking completion.",
+      "- \u2705 Keep compiler and analyzer warnings as errors in test projects too; fix nullable flow with explicit guards or typed assertions, not unjustified `!` or suppression."
+    ]
+  },
+  "root_hardware_example": {
+    "first_line": 532,
+    "last_line": 551,
+    "lines": [
+      "**Integration Tests** - When unit testing is impossible/impractical:",
+      "```csharp",
+      "// \u2705 GOOD - Tests actual SCP handshake with real hardware",
+      "[Fact]",
+      "public async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()",
+      "{",
+      "    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);",
+      "    using var scpKeyParams = Scp03KeyParameters.Default;",
+      "    await using var session = await device.CreateManagementSessionAsync(",
+      "        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },",
+      "        cancellationToken: TestContext.Current.CancellationToken);",
+      "",
+      "    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);",
+      "    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);",
+      "}",
+      "```",
+      "",
+      "This example requires an authorized dedicated SmartCard key configured with the supplied SCP03 defaults.",
+      "The caller owns the parameters: the session is disposed before their enclosing using scope clears the",
+      "owned static key arrays."
+    ]
+  },
+  "selected_project": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+    "bytes": 1012,
+    "sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156"
+  },
+  "selected_project_text": "<Project Sdk=\"Microsoft.NET.Sdk\">\n\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n    <OutputType>Exe</OutputType>\n    <IsPackable>false</IsPackable>\n\n    <!-- Enable Microsoft Testing Platform with xunit v3 -->\n    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>\n  </PropertyGroup>\n\n  <ItemGroup>\n    <!-- Package versions come from Directory.Packages.props -->\n    <!-- When using Microsoft Testing Platform, DON'T use Microsoft.NET.Test.Sdk -->\n    <PackageReference Include=\"xunit.v3\" />\n    <PackageReference Include=\"xunit.runner.visualstudio\" />\n    <PackageReference Include=\"Microsoft.Extensions.DependencyInjection\" />\n  </ItemGroup>\n\n  <ItemGroup>\n    <Content Include=\"xunit.runner.json\" CopyToOutputDirectory=\"PreserveNewest\"/>\n  </ItemGroup>\n\n  <ItemGroup>\n    <Using Include=\"Xunit\"/>\n  </ItemGroup>\n\n  <ItemGroup>\n    <ProjectReference Include=\"..\\..\\src\\Yubico.YubiKit.Management.csproj\"/>\n  </ItemGroup>\n\n</Project>\n",
+  "rejected_core_unit": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+    "bytes": 1402,
+    "sha256": "a778d4fe2a7ba5e3da251972f9d142b6e3e3e0a7aa782fbb0e2ee3065ab3a6ad"
+  },
+  "xunit_v3_symbol_documentation": {
+    "path": "/home/rupicola/.nuget/packages/xunit.v3.extensibility.core/3.0.0/lib/netstandard2.0/xunit.v3.core.xml",
+    "bytes": 642328,
+    "sha256": "489accc70cf3adb5a9c55cfa4f6c36f1da45ebc8f97b2dac70d22501105de56a"
+  },
+  "xunit_v3_compile_assembly": {
+    "path": "/home/rupicola/.nuget/packages/xunit.v3.extensibility.core/3.0.0/lib/netstandard2.0/xunit.v3.core.dll",
+    "bytes": 480520,
+    "sha256": "e61bda4c4ebe5f7e0112a044bfc3e2b518f76e9870d9b27fcf8ff740aad9981f"
+  },
+  "required_symbols": [
+    "T:Xunit.TestContext",
+    "P:Xunit.TestContext.Current",
+    "P:Xunit.TestContext.CancellationToken"
+  ],
+  "hardware_prerequisites": "Authorized dedicated SmartCard key configured with supplied SCP03 defaults. Integration-task semantics remain; new UnitTests-named project is only a genuine v3 compile assembly, never an execution lane for this body.",
+  "classification": "Three emitted CS0103 diagnostics are generated runner-context defects. No true accepted-body/compiler/policy defect identified in this scope; hardware prerequisites and no-execution condition are not waived.",
+  "context7": "https://xunit.net/docs/getting-started/v3/whats-new and xunit analyzer cancellation guidance confirm TestContext.Current.CancellationToken is v3 context cancellation, not a v2 helper."
+}

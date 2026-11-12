@@ -1,0 +1,102 @@
+[
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "target": "README.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "target": "../../CLAUDE.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "target": "../Core/README.md#cryptographic-metadata",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "target": "../../docs/usage/device-discovery.md#selection-in-the-cli-examples",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "target": "../../docs/TESTING.md#hardware-authorization",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../../README.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../../docs/linux-setup.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../Core/README.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../Core/README.md#pcsc-sharing-policy-and-migration",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../Core/README.md#cryptographic-metadata",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../Core/README.md#cryptographic-metadata",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../../docs/usage/device-discovery.md#selection-in-the-cli-examples",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../Core/README.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../SecurityDomain/README.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../../docs/usage/user-interaction.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../../docs/usage/device-discovery.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/README.md",
+    "target": "../../docs/DEV-GUIDE.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/examples/PivTool/README.md",
+    "target": "../../README.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/examples/PivTool/README.md",
+    "target": "../../../../docs/linux-setup.md",
+    "local_exists": true
+  },
+  {
+    "path": "src/Piv/examples/PivTool/README.md",
+    "target": "../../README.md#verify-the-pin-sign-and-verify-on-the-host",
+    "local_exists": true
+  }
+]

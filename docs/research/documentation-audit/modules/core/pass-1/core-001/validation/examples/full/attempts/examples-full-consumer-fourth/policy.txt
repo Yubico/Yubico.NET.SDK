@@ -1,0 +1,16 @@
+Project=/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj
+SDK=10.0.404
+SDKPath=/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks
+Version=1.0.0
+TFM=net10.0
+Configuration=Release
+WarningsAsErrors=true
+Analyzers=true
+AnalysisMode=AllEnabledByDefault
+AnalysisLevel=preview
+SkipCompiler=false
+SharedCompiler=false
+ProvideArgs=true
+Assets=/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/project.assets.json
+TargetPath=/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.dll
+SourceLink=/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.sourcelink.json

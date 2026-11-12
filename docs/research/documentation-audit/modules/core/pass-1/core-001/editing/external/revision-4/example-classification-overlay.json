@@ -1,0 +1,301 @@
+{
+  "immutable_inventory": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/example-bodies.json",
+    "bytes": 290568,
+    "sha256": "9dd8d13ac9144cc1505e1b590d46759f7f26c98ea3651616963bc3c26cbb1109"
+  },
+  "updates": [
+    {
+      "key": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "version": "base",
+        "body_sha256": "96d97d285b01486d97a7ce0e752b83f616ca98a7e926cb3631594edd31094813"
+      },
+      "review": "R2",
+      "ids": [
+        "CORE-A-C013",
+        "FPT-013"
+      ],
+      "immutable_original": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "version": "base",
+        "first_line": 112,
+        "last_line": 131,
+        "language": "csharp",
+        "body_sha256": "96d97d285b01486d97a7ce0e752b83f616ca98a7e926cb3631594edd31094813",
+        "body": "public sealed class AllowList\n{\n    private readonly HashSet<int> _allowedSerials;\n\n    public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null)\n    {\n        _allowedSerials = [..provider.GetList()];\n\n        if (_allowedSerials.Count == 0)\n        {\n            Console.Error.WriteLine(provider.OnInvalidInputErrorMessage());\n            Environment.Exit(-1); // Hard fail - cannot continue without allow list\n        }\n    }\n\n    public bool IsDeviceAllowed(int? serialNumber) =>\n        serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);\n}",
+        "classification": "composable code fragment or method/type example; enclosing document supplies imports, caller inputs and project context",
+        "compiler_status": "NOT-RUN; no new compilation or execution credit",
+        "resources": "Changed examples use actual APIs and explicit session/connection or secret-owner/finally scopes. Other retained bodies retain documented prerequisites; no all-platform/native/physical acceptance."
+      },
+      "correction": "Abbreviated AllowList implementation sketch, not a complete replacement; actual AllowUnknownSerials property/logging and complete implementation remain in source. Current CLAUDE32-33 explicitly marks this section as a sketch.",
+      "successor_entry": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "version": "base",
+        "first_line": 112,
+        "last_line": 131,
+        "language": "csharp",
+        "body_sha256": "96d97d285b01486d97a7ce0e752b83f616ca98a7e926cb3631594edd31094813",
+        "body": "public sealed class AllowList\n{\n    private readonly HashSet<int> _allowedSerials;\n\n    public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null)\n    {\n        _allowedSerials = [..provider.GetList()];\n\n        if (_allowedSerials.Count == 0)\n        {\n            Console.Error.WriteLine(provider.OnInvalidInputErrorMessage());\n            Environment.Exit(-1); // Hard fail - cannot continue without allow list\n        }\n    }\n\n    public bool IsDeviceAllowed(int? serialNumber) =>\n        serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);\n}",
+        "classification": "Abbreviated AllowList implementation sketch, not a complete replacement; actual AllowUnknownSerials property/logging and complete implementation remain in source. Current CLAUDE32-33 explicitly marks this section as a sketch.",
+        "compiler_status": "NOT-RUN; implementation sketch, not complete replacement",
+        "resources": "Abbreviated illustration omits actual property/logging/complete implementation; do not use as a replacement AllowList implementation.",
+        "csharp_compilation_participant": false
+      },
+      "prior_current_body_superseded": false
+    },
+    {
+      "key": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "version": "current",
+        "body_sha256": "4a89a27ab23bc7e2123eb74ffd192133757490d18bb829dbf1d0767862041126"
+      },
+      "review": "R2",
+      "ids": [
+        "CORE-A-C013",
+        "FPT-013"
+      ],
+      "immutable_original": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "version": "current",
+        "first_line": 92,
+        "last_line": 111,
+        "language": "csharp",
+        "body_sha256": "4a89a27ab23bc7e2123eb74ffd192133757490d18bb829dbf1d0767862041126",
+        "body": "public sealed class AllowList\n{\n    private readonly HashSet<int> _allowedSerials;\n\n    public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null)\n    {\n        _allowedSerials = [..provider.GetList()];\n\n        if (_allowedSerials.Count == 0 && !provider.AllowUnknownSerials)\n        {\n            Console.Error.WriteLine(provider.OnInvalidInputErrorMessage());\n            Environment.Exit(-1); // Hard fail - cannot continue without allow list\n        }\n    }\n\n    public bool IsDeviceAllowed(int? serialNumber) =>\n        serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);\n}",
+        "classification": "composable code fragment or method/type example; enclosing document supplies imports, caller inputs and project context",
+        "compiler_status": "NOT-RUN; no new compilation or execution credit",
+        "resources": "Changed examples use actual APIs and explicit session/connection or secret-owner/finally scopes. Other retained bodies retain documented prerequisites; no all-platform/native/physical acceptance."
+      },
+      "correction": "Abbreviated AllowList implementation sketch, not a complete replacement; actual AllowUnknownSerials property/logging and complete implementation remain in source. Current CLAUDE32-33 explicitly marks this section as a sketch.",
+      "successor_entry": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "version": "current",
+        "first_line": 92,
+        "last_line": 111,
+        "language": "csharp",
+        "body_sha256": "4a89a27ab23bc7e2123eb74ffd192133757490d18bb829dbf1d0767862041126",
+        "body": "public sealed class AllowList\n{\n    private readonly HashSet<int> _allowedSerials;\n\n    public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null)\n    {\n        _allowedSerials = [..provider.GetList()];\n\n        if (_allowedSerials.Count == 0 && !provider.AllowUnknownSerials)\n        {\n            Console.Error.WriteLine(provider.OnInvalidInputErrorMessage());\n            Environment.Exit(-1); // Hard fail - cannot continue without allow list\n        }\n    }\n\n    public bool IsDeviceAllowed(int? serialNumber) =>\n        serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);\n}",
+        "classification": "Abbreviated AllowList implementation sketch, not a complete replacement; actual AllowUnknownSerials property/logging and complete implementation remain in source. Current CLAUDE32-33 explicitly marks this section as a sketch.",
+        "compiler_status": "NOT-RUN; implementation sketch, not complete replacement",
+        "resources": "Abbreviated illustration omits actual property/logging/complete implementation; do not use as a replacement AllowList implementation.",
+        "csharp_compilation_participant": false
+      },
+      "prior_current_body_superseded": false
+    },
+    {
+      "key": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "version": "base",
+        "body_sha256": "ae523949c5098862ac6b754577eee04dd0731485e5a39cd027f9c08dbb6e93a5"
+      },
+      "review": "R2",
+      "ids": [
+        "CORE-A-C013",
+        "FPT-013"
+      ],
+      "immutable_original": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "version": "base",
+        "first_line": 28,
+        "last_line": 48,
+        "language": "csharp/xml-code",
+        "body_sha256": "ae523949c5098862ac6b754577eee04dd0731485e5a39cd027f9c08dbb6e93a5",
+        "body": "    public class OnlyProductionKeysFilter : IYubiKeyFilter\n    {\n        public bool Matches(YubiKeyTestState device)\n        {\n            // Only match devices with serial numbers above 10000000\n            return device.SerialNumber > 10_000_000;\n        }\n\n        public string GetDescription()\n        {\n            return \"Production keys only (SN > 10000000)\";\n        }\n    }\n\n    [YubiKeyTheory(CustomFilter = typeof(OnlyProductionKeysFilter))]\n    public async Task TestOnProductionKeys(YubiKeyTestDevice device)\n    {\n        // Test runs only on production keys\n    }\n        ",
+        "classification": "composable code fragment or method/type example; enclosing document supplies imports, caller inputs and project context",
+        "compiler_status": "NOT-RUN; no new compilation or execution credit",
+        "resources": "Changed examples use actual APIs and explicit session/connection or secret-owner/finally scopes. Other retained bodies retain documented prerequisites; no all-platform/native/physical acceptance."
+      },
+      "correction": "Superseded non-current invalid API example at the audited source pin: YubiKeyTheory/YubiKeyTestDevice do not match current APIs. Repaired by the current WithYubiKey/YubiKeyTestState body; not a usable context-dependent fragment.",
+      "successor_entry": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "version": "base",
+        "first_line": 28,
+        "last_line": 48,
+        "language": "csharp/xml-code",
+        "body_sha256": "ae523949c5098862ac6b754577eee04dd0731485e5a39cd027f9c08dbb6e93a5",
+        "body": "    public class OnlyProductionKeysFilter : IYubiKeyFilter\n    {\n        public bool Matches(YubiKeyTestState device)\n        {\n            // Only match devices with serial numbers above 10000000\n            return device.SerialNumber > 10_000_000;\n        }\n\n        public string GetDescription()\n        {\n            return \"Production keys only (SN > 10000000)\";\n        }\n    }\n\n    [YubiKeyTheory(CustomFilter = typeof(OnlyProductionKeysFilter))]\n    public async Task TestOnProductionKeys(YubiKeyTestDevice device)\n    {\n        // Test runs only on production keys\n    }\n        ",
+        "classification": "Superseded non-current invalid API example at the audited source pin: YubiKeyTheory/YubiKeyTestDevice do not match current APIs. Repaired by the current WithYubiKey/YubiKeyTestState body; not a usable context-dependent fragment.",
+        "compiler_status": "NOT-RUN; source-backed obsolete API classification, not observed compiler output",
+        "resources": "Historical invalid-for-current-API body, not a usable fragment. Current corrected test/helper body retains its separate source-backed context and unrun compilation status.",
+        "csharp_compilation_participant": false
+      },
+      "prior_current_body_superseded": false
+    },
+    {
+      "key": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "version": "base",
+        "body_sha256": "f44d4bb4843f4f6f73c6aa90a40ed69d8bbedaf1da0a26b1fd1276ef05dee888"
+      },
+      "review": "R2",
+      "ids": [
+        "CORE-A-C013",
+        "FPT-013"
+      ],
+      "immutable_original": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "version": "base",
+        "first_line": 25,
+        "last_line": 32,
+        "language": "csharp/xml-code",
+        "body_sha256": "f44d4bb4843f4f6f73c6aa90a40ed69d8bbedaf1da0a26b1fd1276ef05dee888",
+        "body": "    {\n      \"YubiKeyTests\": {\n        \"AllowedSerialNumbers\": [12345678, 87654321],\n        \"EnableHardFail\": true\n      }\n    }\n    ",
+        "classification": "composable code fragment or method/type example; enclosing document supplies imports, caller inputs and project context",
+        "compiler_status": "NOT-RUN; no new compilation or execution credit",
+        "resources": "Changed examples use actual APIs and explicit session/connection or secret-owner/finally scopes. Other retained bodies retain documented prerequisites; no all-platform/native/physical acceptance."
+      },
+      "correction": "JSON configuration illustration, not C# or a C# compilation participant; old EnableHardFail setting is unsupported at the audited source pin.",
+      "successor_entry": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "version": "base",
+        "first_line": 25,
+        "last_line": 32,
+        "language": "json",
+        "body_sha256": "f44d4bb4843f4f6f73c6aa90a40ed69d8bbedaf1da0a26b1fd1276ef05dee888",
+        "body": "    {\n      \"YubiKeyTests\": {\n        \"AllowedSerialNumbers\": [12345678, 87654321],\n        \"EnableHardFail\": true\n      }\n    }\n    ",
+        "classification": "JSON configuration illustration, not C# or a C# compilation participant; old EnableHardFail setting is unsupported at the audited source pin.",
+        "compiler_status": "NOT-APPLICABLE (configuration illustration); no configuration loaded",
+        "resources": "Configuration illustration only: no resource acquisition, C# compilation participant or actual configuration load.",
+        "csharp_compilation_participant": false
+      },
+      "prior_current_body_superseded": false
+    },
+    {
+      "key": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "version": "current",
+        "body_sha256": "f44d4bb4843f4f6f73c6aa90a40ed69d8bbedaf1da0a26b1fd1276ef05dee888"
+      },
+      "review": "R2",
+      "ids": [
+        "CORE-A-C013",
+        "FPT-013"
+      ],
+      "immutable_original": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "version": "current",
+        "first_line": 25,
+        "last_line": 32,
+        "language": "csharp/xml-code",
+        "body_sha256": "f44d4bb4843f4f6f73c6aa90a40ed69d8bbedaf1da0a26b1fd1276ef05dee888",
+        "body": "    {\n      \"YubiKeyTests\": {\n        \"AllowedSerialNumbers\": [12345678, 87654321],\n        \"EnableHardFail\": true\n      }\n    }\n    ",
+        "classification": "composable code fragment or method/type example; enclosing document supplies imports, caller inputs and project context",
+        "compiler_status": "NOT-RUN; no new compilation or execution credit",
+        "resources": "Changed examples use actual APIs and explicit session/connection or secret-owner/finally scopes. Other retained bodies retain documented prerequisites; no all-platform/native/physical acceptance."
+      },
+      "correction": "JSON configuration illustration, not C# or a C# compilation participant; old EnableHardFail setting is unsupported at the audited source pin.",
+      "successor_entry": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "version": "current",
+        "first_line": 25,
+        "last_line": 32,
+        "language": "json",
+        "body_sha256": "d5539c5c9af0a16cb63930653f4a11a2979f287af69b3cb1899032d286d30b4e",
+        "body": "    {\n      \"YubiKeyTests\": {\n        \"AllowedSerialNumbers\": [12345678, 87654321],\n        \"AllowUnknownSerials\": false\n      }\n    }\n    ",
+        "classification": "Current JSON configuration illustration using actual provider keys; not C# or a compilation participant",
+        "compiler_status": "NOT-APPLICABLE (configuration illustration); no configuration loaded",
+        "resources": "Configuration illustration only: no resource acquisition, C# compilation participant or actual configuration load.",
+        "csharp_compilation_participant": false
+      },
+      "prior_current_body_superseded": true
+    },
+    {
+      "key": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "version": "base",
+        "body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7"
+      },
+      "review": "R2",
+      "ids": [
+        "CORE-A-C019",
+        "FPT-019",
+        "CORE-B4-C008",
+        "FPT-055"
+      ],
+      "immutable_original": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "version": "base",
+        "first_line": 23,
+        "last_line": 35,
+        "language": "csharp/xml-code",
+        "body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7",
+        "body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow\"\n",
+        "classification": "composable code fragment or method/type example; enclosing document supplies imports, caller inputs and project context",
+        "compiler_status": "NOT-RUN; no new compilation or execution credit",
+        "resources": "Changed examples use actual APIs and explicit session/connection or secret-owner/finally scopes. Other retained bodies retain documented prerequisites; no all-platform/native/physical acceptance."
+      },
+      "correction": "Shell command fragments embedded in XML documentation, not C# code; no command executed.",
+      "successor_entry": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "version": "base",
+        "first_line": 23,
+        "last_line": 35,
+        "language": "sh (XML-embedded)",
+        "body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7",
+        "body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow\"\n",
+        "classification": "Shell command fragments embedded in XML documentation, not C# code; no command executed.",
+        "compiler_status": "NOT-APPLICABLE (shell recipes); commands NOT-RUN",
+        "resources": "Command fragments, not C# resource scopes. Retain documented command prerequisites; no command or test executed.",
+        "csharp_compilation_participant": false,
+        "xml_character_reference_provenance": {
+          "raw_body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7",
+          "raw_body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow\"\n",
+          "rendered_body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow\"\n",
+          "rendered_body_sha256": "5c293e080aac266553cc3e0920b1a11d6eb758448ba41340e09b27b1147e67a2",
+          "transformation": "Only the literal XML &amp; references are expanded to shell &; raw extracted XML body/hash retained, not a new parser or executed shell rendering."
+        }
+      },
+      "prior_current_body_superseded": false
+    },
+    {
+      "key": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "version": "current",
+        "body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7"
+      },
+      "review": "R2",
+      "ids": [
+        "CORE-A-C019",
+        "FPT-019",
+        "CORE-B4-C008",
+        "FPT-055"
+      ],
+      "immutable_original": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "version": "current",
+        "first_line": 23,
+        "last_line": 35,
+        "language": "csharp/xml-code",
+        "body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7",
+        "body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow\"\n",
+        "classification": "composable code fragment or method/type example; enclosing document supplies imports, caller inputs and project context",
+        "compiler_status": "NOT-RUN; no new compilation or execution credit",
+        "resources": "Changed examples use actual APIs and explicit session/connection or secret-owner/finally scopes. Other retained bodies retain documented prerequisites; no all-platform/native/physical acceptance."
+      },
+      "correction": "Shell command fragments embedded in XML documentation, not C# code; no command executed.",
+      "successor_entry": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "version": "current",
+        "first_line": 23,
+        "last_line": 35,
+        "language": "sh (XML-embedded)",
+        "body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7",
+        "body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow\"\n",
+        "classification": "Shell command fragments embedded in XML documentation, not C# code; no command executed.",
+        "compiler_status": "NOT-APPLICABLE (shell recipes); commands NOT-RUN",
+        "resources": "Command fragments, not C# resource scopes. Retain documented command prerequisites; no command or test executed.",
+        "csharp_compilation_participant": false,
+        "xml_character_reference_provenance": {
+          "raw_body_sha256": "5a25bdc655b19f6637001274cb1de027ee0aca3bff6f1e77eb4797cb5419a4d7",
+          "raw_body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&amp;Category!=RequiresUserPresence&amp;Category!=Slow\"\n",
+          "rendered_body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow\"\n",
+          "rendered_body_sha256": "5c293e080aac266553cc3e0920b1a11d6eb758448ba41340e09b27b1147e67a2",
+          "transformation": "Only the literal XML &amp; references are expanded to shell &; raw extracted XML body/hash retained, not a new parser or executed shell rendering."
+        }
+      },
+      "prior_current_body_superseded": false
+    }
+  ],
+  "rule": "Apply by exact path/version/body hash. Only the prior provider current entry is replaced by the new current JSON body; every original body remains retained in the overlay and frozen inventory."
+}

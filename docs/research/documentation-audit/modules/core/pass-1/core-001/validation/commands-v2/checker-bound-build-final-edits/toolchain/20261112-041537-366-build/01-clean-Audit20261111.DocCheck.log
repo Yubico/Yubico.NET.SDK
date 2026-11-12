@@ -1,0 +1,30 @@
+$ dotnet clean docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release
+Build started 11/12/2026 4:15:37 AM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.deps.json".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.runtimeconfig.json".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.pdb".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.xml".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.Y.7B00C671.Up2Date".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/refint/Yubico.YubiKit.Audit20261111.DocCheck.dll".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.xml".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.pdb".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.genruntimeconfig.cache".
+         Deleting file "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/ref/Yubico.YubiKit.Audit20261111.DocCheck.dll".
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.28

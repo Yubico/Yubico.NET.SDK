@@ -1,0 +1,4176 @@
+[
+  {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "pinned_git_bytes_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "git_blob": "94f676d744b51fa1c7710bdbd609fbede57522e1",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:c8377e0a58dac11c",
+      "core-001:unit:e4e6d25f71a1f9d5",
+      "core-001:unit:4886f819fa316d28",
+      "core-001:unit:69eb045259c0ae84",
+      "core-001:unit:8a2a75091e01f16e",
+      "core-001:unit:0cbe9e97499b776c",
+      "core-001:unit:7efbf6cb5c9c091a",
+      "core-001:unit:d02e37cce04f6e87",
+      "core-001:unit:c265e305296a25c0",
+      "core-001:unit:9dc7ab5953064c3f",
+      "core-001:unit:88a2a3c44157eccf",
+      "core-001:unit:23d1cb9fa229fd5e",
+      "core-001:unit:13efa480557b5601",
+      "core-001:unit:e132a9715ed0cf59",
+      "core-001:unit:9b2b20dfbae1bf78",
+      "core-001:unit:7616cf4561420ae9"
+    ],
+    "selected_ranges": [
+      [
+        6,
+        13
+      ],
+      [
+        14,
+        69
+      ],
+      [
+        70,
+        87
+      ],
+      [
+        90,
+        172
+      ],
+      [
+        173,
+        195
+      ],
+      [
+        196,
+        237
+      ],
+      [
+        238,
+        271
+      ],
+      [
+        272,
+        283
+      ],
+      [
+        284,
+        322
+      ],
+      [
+        323,
+        370
+      ],
+      [
+        371,
+        405
+      ],
+      [
+        406,
+        428
+      ],
+      [
+        429,
+        461
+      ],
+      [
+        464,
+        529
+      ],
+      [
+        530,
+        539
+      ],
+      [
+        540,
+        554
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Current module instructions separate protocol-2 availability, credential versus presence prompts, RP callback, output lifetimes and human-coordinated tests. Retain accurate applet limitations; add whole-ceremony lifetime condition when editing.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/PACKAGE_README.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "6c7ec48109b88969b9c4c330c7b8fc05e32834c5953703323b0ab2366e5a1647",
+    "pinned_git_bytes_sha256": "6c7ec48109b88969b9c4c330c7b8fc05e32834c5953703323b0ab2366e5a1647",
+    "git_blob": "e51703fe18363392327ae68720bbdfef1a76ef5b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:5dd7c9866beaf64c",
+      "core-001:unit:f359a9f5657f5d91",
+      "core-001:unit:2618c79188df3e24"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        19
+      ],
+      [
+        20,
+        28
+      ],
+      [
+        29,
+        33
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Package overview routes client/RP responsibilities and draft/alpha limitations to module guide; dependency is transitively Core through CTAP2. No native or hardware support claim inferred.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",
+    "pinned_git_bytes_sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",
+    "git_blob": "78229ba358c5c60000325124c1da599bfcaa3cb6",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:7f21d081d59e31d1",
+      "core-001:unit:6ad41fdaa3317dd9",
+      "core-001:unit:769859e6b5d210b6",
+      "core-001:unit:2a6071b02a7ab8bb",
+      "core-001:unit:f1c02ff89212630e",
+      "core-001:unit:c98b0fd3f9f450f8",
+      "core-001:unit:3bdbd8bc61269591",
+      "core-001:unit:a2d5a6b6b877ad61",
+      "core-001:unit:28924869bc2a3439",
+      "core-001:unit:546f13cbc632a4a1",
+      "core-001:unit:de1e8b502592fa01",
+      "core-001:unit:bf53e9ad2aa19caf",
+      "core-001:unit:6afae0cb3a2a58c7",
+      "core-001:unit:e01b8f6074a85877",
+      "core-001:unit:aeadc0996d07ac60",
+      "core-001:unit:ba95739fd9292e26",
+      "core-001:unit:ea4254b670022117",
+      "core-001:unit:4a8a3396e121872f",
+      "core-001:unit:bc86ea13aef518dd",
+      "core-001:unit:761f1552c9ab4aaf",
+      "core-001:unit:88aa5776f8847ece"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        16
+      ],
+      [
+        17,
+        32
+      ],
+      [
+        33,
+        41
+      ],
+      [
+        42,
+        132
+      ],
+      [
+        133,
+        154
+      ],
+      [
+        155,
+        169
+      ],
+      [
+        170,
+        191
+      ],
+      [
+        192,
+        216
+      ],
+      [
+        217,
+        259
+      ],
+      [
+        260,
+        278
+      ],
+      [
+        279,
+        307
+      ],
+      [
+        308,
+        328
+      ],
+      [
+        329,
+        355
+      ],
+      [
+        356,
+        373
+      ],
+      [
+        374,
+        394
+      ],
+      [
+        416,
+        444
+      ],
+      [
+        445,
+        451
+      ],
+      [
+        452,
+        462
+      ],
+      [
+        463,
+        469
+      ],
+      [
+        470,
+        477
+      ],
+      [
+        478,
+        522
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Consumer examples have one owned client and explicit PIN finally; RP upload/serializer remains application-owned. Constraints membership headline overstates observed-member bound; whole-ceremony disposal condition should accompany ownership.",
+    "candidate_ids": [
+      "CORE-WA-X001",
+      "CORE-WA-X002"
+    ],
+    "candidate_file_disposition": "UNCHANGED-REOPEN-PROPOSED-LOCAL-DOC",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Attestation/WebAuthnAttestationObject.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "caf73438332e52d2baaa92a25344d0ffe10e157b3359c4b856650e0a4a60699d",
+    "pinned_git_bytes_sha256": "caf73438332e52d2baaa92a25344d0ffe10e157b3359c4b856650e0a4a60699d",
+    "git_blob": "44110fe6d947e8d6223cb080fce8a82125e848db",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:612bc1a7453588dd"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        33
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Decode borrows outer CBOR and attStmt slices while materializing authData. Create/Encode allocate a new modeled map and retain component objects. Parsing is no trust or signature verification.",
+    "candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4bc9c446bd42044d462240499856fd5e5bc3425c21a89f57c15dc46adbf6e5ad",
+    "pinned_git_bytes_sha256": "4bc9c446bd42044d462240499856fd5e5bc3425c21a89f57c15dc46adbf6e5ad",
+    "git_blob": "102c10827ff1451c155ba01eccb2ec502f026e3b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:c2615feb00bbff1e"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        21
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Result retains CTAP credential/signature/raw bytes and full modeled User. Descriptor omission is accurately qualified, but selected request association is not recovered. User policy remains separate DEC-002.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X007",
+      "CORE-WA-X008"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "bc4efb9c5baabe280698100dcf93e640dc088c1f191887229f823319eb0d28b5",
+    "pinned_git_bytes_sha256": "bc4efb9c5baabe280698100dcf93e640dc088c1f191887229f823319eb0d28b5",
+    "git_blob": "1cc293ba0a2b4542c09ccdee259e8d88f6a9839b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:f32f4dd1702bc55b"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Eager first/next collection passes User and optional descriptor through; omission becomes Empty twice across match/result construction. No sequence lease or output privacy filter.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X007",
+      "CORE-WA-X008"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/MatchedCredential.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d04cb09b436eda097f5e7f642ca265d9252e50b1705aeb9f2a426838bf836673",
+    "pinned_git_bytes_sha256": "d04cb09b436eda097f5e7f642ca265d9252e50b1705aeb9f2a426838bf836673",
+    "git_blob": "a77091f1690e45d0d9b4778076c8bddd170a2138",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:1e62948d3401d402"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        30
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Lazy task wrapper returns prebuilt response; Id/User are retained views/entity. WaitAsync cancels a wait, not already completed ceremony or side effects.",
+    "candidate_ids": [
+      "CORE-WA-X005",
+      "CORE-WA-X007",
+      "CORE-WA-X008"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/PublicKeyCredentialRequestOptions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "afc16bc2f2256be2780149a25ea7d6180c64a858436ecb4c7948bc670f420b56",
+    "pinned_git_bytes_sha256": "afc16bc2f2256be2780149a25ea7d6180c64a858436ecb4c7948bc670f420b56",
+    "git_blob": "d205756df1b3e32944d9a0ef4ef1c52b251d94cb",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:0aa4351b9bbc2869"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        24
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Caller RP/challenge/allow-list inputs, required application validator, cooperative timer and cross-origin checks are accurately distinguished from server verification.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "6315c89e7b66fbfedec2779f7f98c399d13110125ab7609d6a9f21c2082a039d",
+    "pinned_git_bytes_sha256": "6315c89e7b66fbfedec2779f7f98c399d13110125ab7609d6a9f21c2082a039d",
+    "git_blob": "1e9727d69bbe472f62cba241b10722cb8d770280",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:b852c310afdc28cc"
+    ],
+    "selected_ranges": [
+      [
+        59,
+        65
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "CTS timer/linked token signal begins after validation; Expired excludes caller cancellation. Dispose only timer resources, with no operation join or native abort.",
+    "candidate_ids": [
+      "CORE-WA-X005"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/CredentialFilter.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "67793da940d0c7213f03007301a501b29200bcde39093f5e0409c459bec7191d",
+    "pinned_git_bytes_sha256": "67793da940d0c7213f03007301a501b29200bcde39093f5e0409c459bec7191d",
+    "git_blob": "1869537cf45c08aa32c2cfee83ec204a2da6e390",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:3b26c4640b0aacc6"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        36
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Silent up:false zero-hash chunks shrink RequestTooLarge and advance NoCredentials. Singleton response recovers chunk descriptor; multi-entry response chooses returned matching ID. Final response omission is separate.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/IWebAuthnBackend.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d3a2324d75b3f5641de7c498cc04ae42b9f6016c42714edd750b87a809e29e11",
+    "pinned_git_bytes_sha256": "d3a2324d75b3f5641de7c498cc04ae42b9f6016c42714edd750b87a809e29e11",
+    "git_blob": "534649e18b20a6a423973d997a02337416f6d4f8",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:7dd10118fba0b7eb"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Internal DTOs and backend seam hold borrowed request views/options, protocol and token/storage operations. Public serializer/operation-wide lifetime is absent.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "6005f2fb3d915f3d7fa6a324f9828e188ff8833fd22dfe2817b8a9ae35429c94",
+    "pinned_git_bytes_sha256": "6005f2fb3d915f3d7fa6a324f9828e188ff8833fd22dfe2817b8a9ae35429c94",
+    "git_blob": "1c031d01a30385130918d0f96a45fd506d427653",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:b26b000ec1d32c67"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        34
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Adopts exact plaintext token array; Dispose zeroes it and leaves backend protocol alive. Scope is this array; no claim that provider/response copies vanish.",
+    "candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/PinUvSharedSecret.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "8fa0ee43a87c42f7a31a49c241586d9e7d32ee6e893eac383f3c370833a5fb5b",
+    "pinned_git_bytes_sha256": "8fa0ee43a87c42f7a31a49c241586d9e7d32ee6e893eac383f3c370833a5fb5b",
+    "git_blob": "b9dbbee7fa527a79f437926904944a92fa20f7c4",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        56
+      ]
+    ],
+    "observation": "Supporting DTO adopts exact derived secret array and zeroes on Dispose; KeyAgreement retains public dictionary. No finalizer or returned-result cleanup is implied.",
+    "candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Registration/PublicKeyCredentialCreationOptions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a3bf2220b3770b2448843bf197119b585fdb0a375241124ab379b890edbefa9d",
+    "pinned_git_bytes_sha256": "a3bf2220b3770b2448843bf197119b585fdb0a375241124ab379b890edbefa9d",
+    "git_blob": "dff98fa4c7d78f2ccc430f2dd07e34c84215c932",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:415f4f2364327f06"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        25
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "RP/user/challenge/algorithm and attestation/UV/RK options feed current ceremony validation. Timeout/Enterprise limitations remain truthful applet-owned qualifications.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Registration/RegistrationResponse.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a9460c3915859b86c80a3dc3c4cd2de7abb32fd2038f2df84703653f067144c6",
+    "pinned_git_bytes_sha256": "a9460c3915859b86c80a3dc3c4cd2de7abb32fd2038f2df84703653f067144c6",
+    "git_blob": "d7f72b43773b230a59ae0bd079ab35bf7c660702",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:b4125585d8579c68",
+      "core-001:unit:04e7408b6e3054ca"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        24
+      ],
+      [
+        65,
+        70
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Returned key/attestation/raw bytes are not RP-verified; transports alone receive independent sorted/read-only snapshot. Ordinary result views retain their original ownership.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/RpIdValidator.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "22fecdf4ac61fd572b187f29bb966e0376844fed5982e36578524372b6b2b87c",
+    "pinned_git_bytes_sha256": "22fecdf4ac61fd572b187f29bb966e0376844fed5982e36578524372b6b2b87c",
+    "git_blob": "e254232a7d034531d679a140ba17f82151acde02",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        52
+      ]
+    ],
+    "observation": "Supporting public delegate gives application RP validity and complete origin binding; sync callback precedes timer/device calls, cancellation propagates, false/ordinary throw maps Security.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "f4326f93e6a56ebb853c2e21976d284f217716c32a3bf2be239eec7538794a9f",
+    "pinned_git_bytes_sha256": "f4326f93e6a56ebb853c2e21976d284f217716c32a3bf2be239eec7538794a9f",
+    "git_blob": "f515efa639478bfb88a601391c640234d0e1cbdf",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:6c64f8a2e18e2b7f"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Configured-option checks and PIN-first/token choice are SDK policy. UV capability check omits token capability; no PRF verified override. Core firmware/catalog supplies neither.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnBackend.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ad7e6403a5938844ccdfc05680230252c47f8cb53170b04d2541d0f09664365b",
+    "pinned_git_bytes_sha256": "ad7e6403a5938844ccdfc05680230252c47f8cb53170b04d2541d0f09664365b",
+    "git_blob": "b10cf771a163be153d8af97f16a14b3ebf8386d9",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:54b34f7db8f36c7d",
+      "core-001:unit:edf74e4b8aa2d217"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ],
+      [
+        261,
+        283
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Owns supplied session and lazy V2 protocol/cache. Temporary ClientPin borrows shared protocol; disposing each would invalidate backend. Options auth-tag copies clear in finally; whole-workflow disposal is unjoined.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X003",
+      "CORE-WA-X006",
+      "CORE-WA-X009"
+    ],
+    "candidate_file_disposition": "UNCHANGED-REOPEN-PROPOSED-LOCAL-DOC",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51",
+    "pinned_git_bytes_sha256": "6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51",
+    "git_blob": "316bdcc0e211f8b3899bfa371a353b099672e59f",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:b4018d78f56300bf",
+      "core-001:unit:49de5d2f9f6648b6"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        23
+      ],
+      [
+        88,
+        175
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Probe narrows final request; all next assertions and outputs finish before matches return. Final builder loses selected descriptor on omission and passes User unchanged.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X005",
+      "CORE-WA-X006",
+      "CORE-WA-X007",
+      "CORE-WA-X008",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc",
+    "pinned_git_bytes_sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc",
+    "git_blob": "a80d86e080fcb1e8fc18c0332ea5469e57d94274",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:f18560b2af685af2",
+      "core-001:unit:f4c5e6436215c444",
+      "core-001:unit:6b8df4b0f626d72f",
+      "core-001:unit:92d7ee30964ec32a",
+      "core-001:unit:fccac6ffd21ae5c0"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ],
+      [
+        47,
+        60
+      ],
+      [
+        60,
+        72
+      ],
+      [
+        88,
+        97
+      ],
+      [
+        147,
+        196
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "CeremonyAuth clears token/tag/prompt owner; escalation at most once; registration caches probe and remints. Output preparation stays outside retry, preserving no-repeat creation boundary.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X003",
+      "CORE-WA-X004",
+      "CORE-WA-X005",
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.PinUvAuth.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c53c886d634d1dcf5cb27b83113bc5558c6703dec1c1ce6a2e16a770bcb0fa14",
+    "pinned_git_bytes_sha256": "c53c886d634d1dcf5cb27b83113bc5558c6703dec1c1ce6a2e16a770bcb0fa14",
+    "git_blob": "4b1fe6a8399990aeae659793a5f3dbfb3cd0501a",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:7d95e5d21e05b64d",
+      "core-001:unit:d661e3f1de8bdbfb"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        23
+      ],
+      [
+        104,
+        200
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Prompt result ownership/retry and detached late-result cleanup are explicit. Context code-point/byte limits are descriptive, not local validation; direct PIN rejection does not trigger prompt fallback.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X003",
+      "CORE-WA-X005",
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "6f7a9804a1a03d0e00409937df3c7a041f04bece06b99f1bdf73476a4ecc4cb2",
+    "pinned_git_bytes_sha256": "6f7a9804a1a03d0e00409937df3c7a041f04bece06b99f1bdf73476a4ecc4cb2",
+    "git_blob": "cf2e08e1e3c113ef0bca323764c2e29daae6dff0",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:fe29915ee74e35e5",
+      "core-001:unit:7abb6709b90a3545",
+      "core-001:unit:67c0e72eb01cab0d",
+      "core-001:unit:542fdce095307525"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ],
+      [
+        80,
+        178
+      ],
+      [
+        178,
+        209
+      ],
+      [
+        209,
+        270
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Effective RK and permission union precede attempts; final statement preference and transport snapshot reuse cached info. Output failure can follow creation; algorithm conversion uses Core numeric carrier only.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X009",
+      "CORE-WA-X010",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Validation.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a0cf2071ea8a47e229e24ff7756a1ebf63804fbf29d84590fef7e1b7ad85f26c",
+    "pinned_git_bytes_sha256": "a0cf2071ea8a47e229e24ff7756a1ebf63804fbf29d84590fef7e1b7ad85f26c",
+    "git_blob": "2bab4ba9b9ef061166d869fb97c5aa7398722c78",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:5c75965e75f02d56"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        22
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Strict UTF-8 RP wire check then synchronous application authorization precedes deadline/backend. Selected CTAP status mapping covers attempt only; protocol/backend failures retain own types.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ce590e3e646f32b56f42377840139ba651270d66ad402bc9a0eb86b36facae5f",
+    "pinned_git_bytes_sha256": "ce590e3e646f32b56f42377840139ba651270d66ad402bc9a0eb86b36facae5f",
+    "git_blob": "3baa87737c5f4001092e0b4380c5a150d77a4c9b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:fcf17565c8126b8c",
+      "core-001:unit:d115c2e177bf3ac9",
+      "core-001:unit:0f8a45a2dd4603f3"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        46
+      ],
+      [
+        92,
+        102
+      ],
+      [
+        102,
+        119
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Public constructor adopts session on success, retains application prompt and leaves returned buffers intact. Dispose bool changes after backend completion; no ceremony-wide admission/join.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-REOPEN-PROPOSED-LOCAL-DOC",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClientData.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1e63ca795735481bb457ffdcb5761870a0b9ece0564eb40c4297b4d61bcb82db",
+    "pinned_git_bytes_sha256": "1e63ca795735481bb457ffdcb5761870a0b9ece0564eb40c4297b4d61bcb82db",
+    "git_blob": "499f366b17418d5fc8aa0b32e8f7ead29cd39aad",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        194
+      ]
+    ],
+    "observation": "Supporting builder owns JSON/hash arrays but manual control escaping is not exact CCDToString; low-level accepts arbitrary nonblank type and does not enforce crossOrigin/topOrigin relationship.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClientOptions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "b15ecbad82956b0a05ba328532d7fa2fcb956eb10af2e340c81b14eea45bdc74",
+    "pinned_git_bytes_sha256": "b15ecbad82956b0a05ba328532d7fa2fcb956eb10af2e340c81b14eea45bdc74",
+    "git_blob": "a7dd35875e0ebb820b44385fc5f156c6b0418868",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:306ea7fb5b0622ce"
+    ],
+    "selected_ranges": [
+      [
+        76,
+        83
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Required RP validator, positive prompt cap and optional credential prompt. Service lifetime belongs to application; record carrier does not confer ownership on service.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnOrigin.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "0230fdbd6e5b29f533c28dcf6299e7989d7663359bd879cdaa1943e93d2c4663",
+    "pinned_git_bytes_sha256": "0230fdbd6e5b29f533c28dcf6299e7989d7663359bd879cdaa1943e93d2c4663",
+    "git_blob": "e020cf6225ceb8d86026800e9eb850ee6ebc5fd3",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        177
+      ]
+    ],
+    "observation": "Supporting origin representation accepts HTTPS or HTTP localhost/.localhost, strips URL path/query/fragment and default port; native/opaque origins remain outside this representation.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Cose/Aaguid.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1b2b42e6ebb8c0f7f8043540b14fc614851d4c548d92012e011c8328456c0a72",
+    "pinned_git_bytes_sha256": "1b2b42e6ebb8c0f7f8043540b14fc614851d4c548d92012e011c8328456c0a72",
+    "git_blob": "38d87c530b93d80577b8bd47a36fca3c247b1ed6",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:213f5e2c72bd715d"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Explicit bytes/Guid construction works through CTAP converter; default empty span/nonreflexive equality remains WA-owned. Public identifier bytes are not a secret-cleanup finding.",
+    "candidate_ids": [
+      "CORE-WA-X010"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/CredBlobCodec.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "81e3fc093e7af6835e4807cebc93a398827e5fb74d1d21e0f0a332ea5dd5bf43",
+    "pinned_git_bytes_sha256": "81e3fc093e7af6835e4807cebc93a398827e5fb74d1d21e0f0a332ea5dd5bf43",
+    "git_blob": "801854e1d786fe25488185fbe73b4b2a61b26657",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:5b4597153ec8f728"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        22
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Delegates builder/typed response parsing; get blob copies can hold sensitive application data and have no owner cleanup. Support/policy remains applet-level.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/CredProtectCodec.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "57333d4b08d47445eda1826aa2434706646ef285597f6e6af818a3109d8cc242",
+    "pinned_git_bytes_sha256": "57333d4b08d47445eda1826aa2434706646ef285597f6e6af818a3109d8cc242",
+    "git_blob": "32abe647250b3ccd4697504ed1e80fd7bcfc452e",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:7d926f1edba94468"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        24
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Forwards integer policy plus ignored enforcement request to CTAP builder, parses only policy 1..3. Missing platform enforcement is not supplied by Core.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/MinPinLengthCodec.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "bf9a2858f40ba2ac60b98ccd62d050ca451ee30377b1622fd9e227be7a296191",
+    "pinned_git_bytes_sha256": "bf9a2858f40ba2ac60b98ccd62d050ca451ee30377b1622fd9e227be7a296191",
+    "git_blob": "d58dc7ce9426f20f4ed45826db5241d84bef93d4",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:71b71a42ea95c151"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        22
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Always requests true when called; factory ignores Requested false on nonnull input. Output reports authorized current policy in code points, not mutation.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ace27282dae2d6d505174ed6a46e6f3bba4077e0b8f1a2e0dcc0242703766bb9",
+    "pinned_git_bytes_sha256": "ace27282dae2d6d505174ed6a46e6f3bba4077e0b8f1a2e0dcc0242703766bb9",
+    "git_blob": "df4bad978f5e23b2560b073b390c6d06b2cd8e31",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:08b6684a9f9907e5",
+      "core-001:unit:4dc9fbdce8d0d703",
+      "core-001:unit:ca41821454aa62d6",
+      "core-001:unit:21914c163fd43949",
+      "core-001:unit:2f2118f70fe7ebdb"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        37
+      ],
+      [
+        40,
+        74
+      ],
+      [
+        74,
+        81
+      ],
+      [
+        81,
+        166
+      ],
+      [
+        166,
+        196
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Delegates canonical CTAP encoder/decoder; inner attestation supplies key/handle, outer signed extension algorithm. Repacking is no trust verification; selected exceptions propagate/suppress separately.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X010",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/PrfCodec.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "19c79865f60ff7e49f057bc94c5a2e92f1a884ce1f15f37e6666aa779c8fa872",
+    "pinned_git_bytes_sha256": "19c79865f60ff7e49f057bc94c5a2e92f1a884ce1f15f37e6666aa779c8fa872",
+    "git_blob": "af51cada1c54f92b43f47aa6b8effda73e89f260",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:1c9a4251a90dfdb5"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        27
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Decrypts 32/64-byte aggregate, clears aggregate in finally but range temporaries/returned arrays survive. Protocol-specific crypto delegated to CTAP.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/CredPropsInput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "81a4f3f96ef8ad804d0ef356547ccab1b29e9ead4a8dfacc180b6ea517b9b405",
+    "pinned_git_bytes_sha256": "81a4f3f96ef8ad804d0ef356547ccab1b29e9ead4a8dfacc180b6ea517b9b405",
+    "git_blob": "f4528b525ac1b2364305d3c30a31afd97d67e2cb",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        24
+      ]
+    ],
+    "observation": "Supporting parameterless presence requests client-derived effective RK property; no authenticator input or native/permission side effect.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/CredProtectInput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "be4fd27e331cbfd66c3ee40faf0d4f1f6dcf4e255285e6a62b538b58be0e5627",
+    "pinned_git_bytes_sha256": "be4fd27e331cbfd66c3ee40faf0d4f1f6dcf4e255285e6a62b538b58be0e5627",
+    "git_blob": "e3ca1d73b82df88311a85da148bd129078cda795",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:804769cea0fc2988"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        30
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Public enforcement flag limitation is accurately disclosed. Input does not add a Core enforcement policy.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/LargeBlobInput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "5ea26adb60acbad09435a18c26740724551d51d114d92d0bd922a8d984a5cf9c",
+    "pinned_git_bytes_sha256": "5ea26adb60acbad09435a18c26740724551d51d114d92d0bd922a8d984a5cf9c",
+    "git_blob": "18ca8c07b80a34b2cff5be668acb52bdb7750c43",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        56
+      ]
+    ],
+    "observation": "Supporting input retains borrowed write bytes through post-assertion storage; documented exact-one original allow-list and Required support limitations remain applet-owned.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/LargeBlobSupport.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ca42f08467570f7dcfbbbc3164ec00539112f61b1ab5e85473bffb8f11b75e27",
+    "pinned_git_bytes_sha256": "ca42f08467570f7dcfbbbc3164ec00539112f61b1ab5e85473bffb8f11b75e27",
+    "git_blob": "a630f3a6e16df8cf6b9ddff886eaa8f4fd5474cc",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        37
+      ]
+    ],
+    "observation": "Supporting Required enum correctly discloses unsupported resulting-credential edge; caller requests RK Required and inspects actual result, without treating that as repaired enforcement.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/PrfInput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3e1f093d3839931551c7b4703e2e9faa3792bee6ba298e0d3be5df02473c11ca",
+    "pinned_git_bytes_sha256": "3e1f093d3839931551c7b4703e2e9faa3792bee6ba298e0d3be5df02473c11ca",
+    "git_blob": "bdf26ca82ba18830592ce56b93dc0677aaabc33e",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        103
+      ]
+    ],
+    "observation": "Supporting input retains caller memory/dictionary; ComputeSalt returns hash but leaves concatenation containing input uncleared. Verified-PRF and temporary-cleanup limitations stay explicit.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/PrfInputValues.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "14ce3d6c3e286e09e6fc72c7ad357ebe5e2042255197f1aee512d1b317acf36e",
+    "pinned_git_bytes_sha256": "14ce3d6c3e286e09e6fc72c7ad357ebe5e2042255197f1aee512d1b317acf36e",
+    "git_blob": "a12d440d9765bf465ed218147cd9d37a8958635a",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        36
+      ]
+    ],
+    "observation": "Supporting per-credential input borrows First/Second backing memory through ceremony output; init properties do not transfer ownership or clear source.",
+    "candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/CredPropsOutput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e240b00785058e4528e471e8367bfe1cce70f0cb107f63e7539c16cdf71a5dca",
+    "pinned_git_bytes_sha256": "e240b00785058e4528e471e8367bfe1cce70f0cb107f63e7539c16cdf71a5dca",
+    "git_blob": "83f23955f7dfa1809c6bf2cda62b3ec6b51424e5",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        24
+      ]
+    ],
+    "observation": "Supporting nullable bool permits unknown; active processor supplies effective RK bool. No independent authenticator-state attestation follows.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/CredProtectOutput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "b40c59b7c8541d47137d85c875fcfff031917fecc5131201b310d3b8ce508d13",
+    "pinned_git_bytes_sha256": "b40c59b7c8541d47137d85c875fcfff031917fecc5131201b310d3b8ce508d13",
+    "git_blob": "dc8e13d5af8bc2182935ed191a0ac2f08b05438d",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:c909ecaea89d23dd"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        27
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Reports actual policy after creation; output check is no substitute for preventing insufficient-policy creation.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/LargeBlobOutput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "8fb797b606997355433152dd51150cf3708da7cacac013e6d2b9a68b60a2295e",
+    "pinned_git_bytes_sha256": "8fb797b606997355433152dd51150cf3708da7cacac013e6d2b9a68b60a2295e",
+    "git_blob": "0ddb7f58ef743c732c98049cc6106943835df8e4",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        53
+      ]
+    ],
+    "observation": "Supporting records retain read plaintext memory; missing byte[] becomes present empty memory. Written false, cancellation, read failure and absent result have separate meanings.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/PrfOutput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "661ae947267d952dd40604d34d332af7ea4c7dd587e7ac564a90fe11ae2f11cd",
+    "pinned_git_bytes_sha256": "661ae947267d952dd40604d34d332af7ea4c7dd587e7ac564a90fe11ae2f11cd",
+    "git_blob": "9bdbe50cbf5f0b0e8ad45e226d3fafd3984a0d19",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        50
+      ]
+    ],
+    "observation": "Supporting nondisposable result views expose SDK-owned derived secret arrays without cleanup; caller-constructed results may borrow caller memory. No writable-result workaround is available.",
+    "candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/ByteArrayKeyComparer.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "01fa60f0e76e2b3a54004cd960ab93fff010bb2778574e6490f674da94d27f40",
+    "pinned_git_bytes_sha256": "01fa60f0e76e2b3a54004cd960ab93fff010bb2778574e6490f674da94d27f40",
+    "git_blob": "cee8390adcf9e3e31386accd93a808a0eb524adf",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        58
+      ]
+    ],
+    "observation": "Supporting internal comparer uses byte equality/full-content hash. Normalized dictionary retains backing key buffers, which must stay unchanged; not a public helper.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/GeneratedSigningKey.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a8c5240df33c028082bee9ff695353fed4e06f9fe53d7d8913cd593a4b4494c9",
+    "pinned_git_bytes_sha256": "a8c5240df33c028082bee9ff695353fed4e06f9fe53d7d8913cd593a4b4494c9",
+    "git_blob": "79063e8aa11ee90e16b6c1aa6031f73528971999",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:e394fb08e12ad8ba",
+      "core-001:unit:3d8a76b50b673771"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        57
+      ],
+      [
+        58,
+        62
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Handle/public key/selected algorithm and decoded required inner attestation; empty handle permitted by draft but blocked by signing params. No private signing key export.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X010"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "be9ae1af7a6ae0b6183631c33c888ed1e2df1cc98bf9a59ca85ae963f6bc859c",
+    "pinned_git_bytes_sha256": "be9ae1af7a6ae0b6183631c33c888ed1e2df1cc98bf9a59ca85ae963f6bc859c",
+    "git_blob": "849f481394813db353726203e0ff3de9db8ac1ed",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        115
+      ]
+    ],
+    "observation": "Supporting constructor normalizes dictionary comparer by copying entries, not memory. Requires nonempty map; processor separately checks original allow-list membership.",
+    "candidate_ids": [
+      "CORE-WA-X007",
+      "CORE-WA-X010"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignAuthenticationOutput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1e308b35f5906b9d3235d070d2c3594cedaf6edd190d2c3dfe74ec5431008840",
+    "pinned_git_bytes_sha256": "1e308b35f5906b9d3235d070d2c3594cedaf6edd190d2c3dfe74ec5431008840",
+    "git_blob": "6e35092c3d2c589e93e880e05a173657ac168af2",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        32
+      ]
+    ],
+    "observation": "Supporting raw algorithm-specific signature view is passed through; selected algorithm rules and RP verification remain caller responsibilities.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignErrors.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ba6da297450eea518843295d55733a76af8168f2542b59938695d3c4e9610059",
+    "pinned_git_bytes_sha256": "ba6da297450eea518843295d55733a76af8168f2542b59938695d3c4e9610059",
+    "git_blob": "2e03d8fd71459b80b4bbc358942d298ba5aec2ca",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:9033ae8e5e5df3e6"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        21
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected CTAP statuses map to WebAuthn vocabulary. This is SDK policy and no universal DOMException equivalence.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignFlags.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e6415e5c577e56be688db43c98db2def15097859f37d0a8373230f6f08af965d",
+    "pinned_git_bytes_sha256": "e6415e5c577e56be688db43c98db2def15097859f37d0a8373230f6f08af965d",
+    "git_blob": "7da9f412e61cecb0b109f46ec83a3c86112627bf",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        62
+      ]
+    ],
+    "observation": "Supporting enum defines 000/001/101; public registration has no flag setter and derives UP/UV from ceremony preference, so enum alone is no unattended signing capability.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationInput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "5e15ea9923a7c733ed646901fbde505a96ba92ce1b31877b623af8f205d3ac4c",
+    "pinned_git_bytes_sha256": "5e15ea9923a7c733ed646901fbde505a96ba92ce1b31877b623af8f205d3ac4c",
+    "git_blob": "48c4918c618a238949302970a30a4cc5db811a90",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:8dff3178706d9d82",
+      "core-001:unit:a4b6f12b2d26426f",
+      "core-001:unit:db68ffdb64e23fe4"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        30
+      ],
+      [
+        32,
+        36
+      ],
+      [
+        45,
+        68
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Retains algorithm list; effective flags derive from ceremony UV preference, not stored internal Flags. Capability-gated request may be omitted.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "74e877562a4fa415163d2a4b6daeb28c378b1f292402d3f05a05fc13d6a2049c",
+    "pinned_git_bytes_sha256": "74e877562a4fa415163d2a4b6daeb28c378b1f292402d3f05a05fc13d6a2049c",
+    "git_blob": "0c27c1cc294ca472f63e11e17697325b899c0ea8",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        31
+      ]
+    ],
+    "observation": "Supporting generated-key record carries handle/public key/attestation, not private key. Decoded inner attestation still needs selected RP trust verification.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X010"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "89b3d3a6f49cc7fd5d13b8d5eb681a97f5d95bdf8d360d10068334a55ed63d1e",
+    "pinned_git_bytes_sha256": "89b3d3a6f49cc7fd5d13b8d5eb681a97f5d95bdf8d360d10068334a55ed63d1e",
+    "git_blob": "8a0db6787bdde961c4ad338368fadba27312fffa",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        96
+      ]
+    ],
+    "observation": "Supporting constructor borrows keyHandle/TBS/optional args unchanged; rejects empty handle/TBS locally. Empty handle draft permission and algorithm-specific args validation remain separate.",
+    "candidate_ids": [
+      "CORE-WA-X010",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionOutputsBuilder.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "067d45c2359b947116f79ab40bb151951b831ce0f778ee97294e4c1904a8ab49",
+    "pinned_git_bytes_sha256": "067d45c2359b947116f79ab40bb151951b831ce0f778ee97294e4c1904a8ab49",
+    "git_blob": "c72fd21f4997c9547aa12f37df5eb68f7b4e0393",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:44a4dc5bba2c5e71"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        20
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Mutable internal sink builds record with exact output references; no clone/clear owner or public extension plugin contract.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "5a56da1a5c055d49eaefc819d4d2048ac1b4aead6c541564aed8e379def8800f",
+    "pinned_git_bytes_sha256": "5a56da1a5c055d49eaefc819d4d2048ac1b4aead6c541564aed8e379def8800f",
+    "git_blob": "07c062604de647ff9d5573ce284836c82fe1a064",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:e0625682936f116f",
+      "core-001:unit:5949a9b88b86d677"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ],
+      [
+        123,
+        132
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Fresh per-attempt processors; permission union/preparation/output phases and selected error suppression. Dispose reaches processor shared secrets, not returned output arrays.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/ExtensionContext.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1de0248955e2611da1c1bd787caafb3952dc215a677ba53e261c328ddc772a71",
+    "pinned_git_bytes_sha256": "1de0248955e2611da1c1bd787caafb3952dc215a677ba53e261c328ddc772a71",
+    "git_blob": "d59d85e5b67562e1d60b9222acbf20bd911dc2a6",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:0a162a025a64ab7c"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Retains cached GetInfo/backend/protocol references for ceremony. Advertisement/enabled checks and available V2 object are not guarantees of successful authorization or old-device support.",
+    "candidate_ids": [
+      "CORE-WA-X009",
+      "CORE-WA-X010"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/IAuthenticationExtensionProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c5e7655a01ab0b4fb4ea25cb283b9b57f1d8e341b23cfb793445bb6f8b35d4b6",
+    "pinned_git_bytes_sha256": "c5e7655a01ab0b4fb4ea25cb283b9b57f1d8e341b23cfb793445bb6f8b35d4b6",
+    "git_blob": "af326d3aee9805cefa6c46d3740be1c27f5500dd",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:fd9e1750fe96b9d6"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Per-attempt interface supplies selected descriptor and live token for each output; underlying Core exchange lease does not cover this phase.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/IRegistrationExtensionProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "22ff80aa73ca5184484a7c3d7291c91c53cfb41bb3237bb523da3582cdc6ea59",
+    "pinned_git_bytes_sha256": "22ff80aa73ca5184484a7c3d7291c91c53cfb41bb3237bb523da3582cdc6ea59",
+    "git_blob": "42a9f0e13a61ec5b676784d3540c07d9c635b4ae",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:057958d97b1c7192"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Per-attempt preparation occurs after token, before command; output follows successful device exchange. Borrowed response/token lifetimes stay with ceremony.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredBlobProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "fb768651cd9e6e1763f260b64537ba3fdc4a6ca198d8167cc400a5ae11f858d1",
+    "pinned_git_bytes_sha256": "fb768651cd9e6e1763f260b64537ba3fdc4a6ca198d8167cc400a5ae11f858d1",
+    "git_blob": "68bddc4b2f5d574e2aead94520183459936ac8ee",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:a5f7dd6126f9047f"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Registration forwards supplied bytes; auth request asks credBlob:true only when chosen processor runs. Retrieved bytes remain separate sensitive-result lifetime.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredPropsProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c410456bec6c54927876c033a56277886a25590561b9a23ae791c25d12ac8bd6",
+    "pinned_git_bytes_sha256": "c410456bec6c54927876c033a56277886a25590561b9a23ae791c25d12ac8bd6",
+    "git_blob": "a546e1d38cdf36c3374572cd6b548c03ff8ea02b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:fd78030e6b69fa8f"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Client-only bool reports effective RK parameter; no authenticator input or second capability query.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredProtectProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e91ccab32bc5272c670bea9910c874f476a00fb0204d52e9b32823ca882c8146",
+    "pinned_git_bytes_sha256": "e91ccab32bc5272c670bea9910c874f476a00fb0204d52e9b32823ca882c8146",
+    "git_blob": "4d22e555794beb54fb3831ab05784da204b8a712",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:9e08a15c609bef2e"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Forwards policy and parses response, with accurate missing-enforcement disclosure; no Core responsibility implied.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "2c13aca84e970d61ba6941f782d1e6019bb330fbbe07e8a736d78957370a6c9f",
+    "pinned_git_bytes_sha256": "2c13aca84e970d61ba6941f782d1e6019bb330fbbe07e8a736d78957370a6c9f",
+    "git_blob": "35960eaed8a59f24372f5e0bd3196bcf7f348edb",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:8a4c39428bc33d27"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        34
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Uses largeBlobKey/storage-array route; Required effective-RK/key validation and original write cardinality missing. Post-assertion read errors and write false/cancellation differ; nullable array conversion remains.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/MinPinLengthProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "582575273eae53fb22e8615c7b4df27fcb111a3deba2e7d0b43d5d666fcf5064",
+    "pinned_git_bytes_sha256": "582575273eae53fb22e8615c7b4df27fcb111a3deba2e7d0b43d5d666fcf5064",
+    "git_blob": "80845d3d41902f1960a4456e2fc2a789a67524d7",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:dc0dfeee0038d251"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        27
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Presence constructs processor without carrying Requested. Reports current authorized policy; no PIN policy setter.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52",
+    "pinned_git_bytes_sha256": "5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52",
+    "git_blob": "d198739bacb24fc5ac6fbb6a30dde379b15d49cd",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:f37df340a64cc02f"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        27
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Validates one sign entry per original allowed credential and selects by bytes. Final selected input translation differs from final descriptor recovery. Output inner-attestation proof remains unverified.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/PrfProcessor.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4e547a860099b61ba5e6cf9feeed4ead4ea3f6ff39ffdf86cb487fb405fd2cb3",
+    "pinned_git_bytes_sha256": "4e547a860099b61ba5e6cf9feeed4ead4ea3f6ff39ffdf86cb487fb405fd2cb3",
+    "git_blob": "8ee4732375b0c847d0d37373078b5eeecaed4367",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:d088c1664014656b",
+      "core-001:unit:5d7a47127fd63841"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        42
+      ],
+      [
+        250,
+        256
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Per-attempt key agreement/secret disposal; salts cleared after builder, no token permission/UV override. Source concat/builder/results keep separate cleanup gaps.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionOutputsBuilder.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e049d856b92fb9170e001225936f319f33cc2637f6a0825834f4c6d37fdd3f8e",
+    "pinned_git_bytes_sha256": "e049d856b92fb9170e001225936f319f33cc2637f6a0825834f4c6d37fdd3f8e",
+    "git_blob": "25bcf82219f7237b4881672a920a79746624ec4f",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:86b9e144c88220e3"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        20
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Mutable internal sink forwards optional output references into record. Container existence differs from each result presence.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "90c1b71bb902a8828b52437cb0eb782fe33aeaf82e21896abd4126ca64bf34b0",
+    "pinned_git_bytes_sha256": "90c1b71bb902a8828b52437cb0eb782fe33aeaf82e21896abd4126ca64bf34b0",
+    "git_blob": "1addc8a83d8ad06bb7e757c85fc0abb68e08ec34",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:0d4a747643339464",
+      "core-001:unit:997185f273db92ff"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ],
+      [
+        131,
+        140
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Capability-filtered processors, aggregated permissions and per-attempt disposal. Error isolation and applet enforcement gaps already disclosed.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/WebAuthnExtensionInputs.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "72a395e96c1c963f22c6345d1ed42dea2bb09b1ea591796afd795fa680ae80c4",
+    "pinned_git_bytes_sha256": "72a395e96c1c963f22c6345d1ed42dea2bb09b1ea591796afd795fa680ae80c4",
+    "git_blob": "751fd9ba50d1b4533bca1e2d2dbf72df5d824599",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:86852c087a984e05"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        38
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Typed optional input containers distinguish unsupported omission and code-point disclosure. Requests do not prove support, enforcement or credential availability.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/WebAuthnExtensionOutputs.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d3b5ef82080653660d38c7b27292903e67687cb45cb4f7594ea19252eb29e84f",
+    "pinned_git_bytes_sha256": "d3b5ef82080653660d38c7b27292903e67687cb45cb4f7594ea19252eb29e84f",
+    "git_blob": "49e6934c36b795b158102efb1e49ab28ba068857",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:b27e793ad1962533"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Container/result absence versus false is explicit; derived secrets/plaintext have no result cleanup owner. Client disposal clears neither copies nor results.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/IYubiKeyExtensions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "57bdcde9265ea2951982480b4373c058388f0e1263abd35c1917e670ee27d759",
+    "pinned_git_bytes_sha256": "57bdcde9265ea2951982480b4373c058388f0e1263abd35c1917e670ee27d759",
+    "git_blob": "d6189e41a28b7bd3297c60ef9c6b97ec2bde6a1b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:6a7d01969126a813",
+      "core-001:unit:06d5faa281acff8e"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        25
+      ],
+      [
+        27,
+        84
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Validates client prerequisites then delegates session creation/options/transport unchanged to CTAP. On successful construction adopts session; no hidden second fallback or reset logic.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Preferences/AttestationPreference.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "9997944e02e9b8629ad48d47b528f7705807c68be9fd311fcd74d9520f2ef16e",
+    "pinned_git_bytes_sha256": "9997944e02e9b8629ad48d47b528f7705807c68be9fd311fcd74d9520f2ef16e",
+    "git_blob": "4914cd33504827ea4f8243b979b9310cdf5b5656",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        68
+      ]
+    ],
+    "observation": "Supporting None/self versus pass-through preferences; Enterprise does not send CTAP enterprise parameter and Indirect has no anonymization service.",
+    "candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Preferences/ResidentKeyPreference.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "18c610dda27f85f93c893aebb47b23b0022b1650727f473796def4fbca48a159",
+    "pinned_git_bytes_sha256": "18c610dda27f85f93c893aebb47b23b0022b1650727f473796def4fbca48a159",
+    "git_blob": "6fe09e513a9ae5d03f148b3fb80a3164e9819738",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        57
+      ]
+    ],
+    "observation": "Supporting enum expresses discouraged/preferred/required; ceremony resolves against cached rk capability and rejects required when unavailable.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Preferences/UserVerificationPreference.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "7ec8463c356a2a0e9a44c7457082a594de7e1da702def8a0b6f5b6fd75854812",
+    "pinned_git_bytes_sha256": "7ec8463c356a2a0e9a44c7457082a594de7e1da702def8a0b6f5b6fd75854812",
+    "git_blob": "da3eeac246e4c95210b563af2c6445b83a510c59",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        57
+      ]
+    ],
+    "observation": "Supporting enum expresses preference, not absolute actual-UV guarantee; token/profile/alwaysUv and extension policy stay in client/authenticator.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/PublicAPI.Shipped.txt",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_git_bytes_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        1
+      ]
+    ],
+    "observation": "Directive-only analyzer input (#nullable enable); excluded from explanatory prose denominator, retained byte-exact.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/PublicAPI.Unshipped.txt",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "58bf398b569712e8c7fd2cc4331daac4d03eee568e4537c01fcfc1e1f6329c41",
+    "pinned_git_bytes_sha256": "58bf398b569712e8c7fd2cc4331daac4d03eee568e4537c01fcfc1e1f6329c41",
+    "git_blob": "5e6c09310123a4a123c22098a70c40a8918137b8",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:4f63111f73121848"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        544
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Whole analyzer declaration snapshot excluded from prose-clean denominator. Boundary public type/constructor/property inventory reconciled; no independent semantic approval of every signature.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Util/Base64Url.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "7639da849031b0e00077b255cbe06b405d9cdd257db1df8d2bbdf91a679a62d3",
+    "pinned_git_bytes_sha256": "7639da849031b0e00077b255cbe06b405d9cdd257db1df8d2bbdf91a679a62d3",
+    "git_blob": "83b1db291bb5663e0eb2689d67e1b4492b749004",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        96
+      ]
+    ],
+    "observation": "Supporting client-data/credential-key helper emits unpadded URL alphabet; decode restores padding and uses permissive BCL conversion. It is not a new strict canonical input policy.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Util/SensitiveMemory.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "dc27a954e28b16ced49d358e4d66cb11fedebdc4071be47cebfa4b1df85d45f8",
+    "pinned_git_bytes_sha256": "dc27a954e28b16ced49d358e4d66cb11fedebdc4071be47cebfa4b1df85d45f8",
+    "git_blob": "583a827a613f6959084027f1af7d321e8c1d60b2",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        38
+      ]
+    ],
+    "observation": "Supporting internal helper clears actual owned auth-tag views via MemoryMarshal.AsMemory, with null/empty no-op. It is not a public authority to mutate borrowed result views.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/WebAuthnAuthenticatorData.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d083829372b4600e2b1eba9793bf013a05149d916b7789dae5f42b7a6e9a779e",
+    "pinned_git_bytes_sha256": "d083829372b4600e2b1eba9793bf013a05149d916b7789dae5f42b7a6e9a779e",
+    "git_blob": "907b74fa3fcda8b1ca3fd2ed4b19e2db36c4d5b9",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:65571e9164d18d8a"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "CTAP parser makes independent raw/field copies; parsed extension values slice ED copy. Parses received flags/extensions without RP verification.",
+    "candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/WebAuthnClientError.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "28ad9186c5f1ba246fde66f144b9e635c9702e18b80a6290b8a93d5aaf5ecb99",
+    "pinned_git_bytes_sha256": "28ad9186c5f1ba246fde66f144b9e635c9702e18b80a6290b8a93d5aaf5ecb99",
+    "git_blob": "28c4ede6c181086c12f49887473eeaca9f89047a",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        96
+      ]
+    ],
+    "observation": "Supporting error vocabulary distinguishes client timeout/NotAllowed, authenticator timeout/Constraint, Security RP rejection and caller OCE; not every layer failure is normalized.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/WebAuthnTransport.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "b5d0bfdcc80233f3990e01f3d2012d402c745b1641eefae530dd032356e3c1b5",
+    "pinned_git_bytes_sha256": "b5d0bfdcc80233f3990e01f3d2012d402c745b1641eefae530dd032356e3c1b5",
+    "git_blob": "0c5351b8bc24ad96866170f22498d511539442b7",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        79
+      ]
+    ],
+    "observation": "Supporting open string carrier preserves future transport hints and distinguishes contact smart-card from SDK SmartCard route; hints do not assert active host reachability.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60",
+    "pinned_git_bytes_sha256": "cc2e5a07c8fe6a22e7c9258e837b331429125655c36f59c4462b009d5b7e732a",
+    "git_blob": "c99afc8bd569f0e056deab7b3bbb995bd4d3ac51",
+    "raw_matches_pin": false,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:ec91cffcba17a31e"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        25
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Direct ProjectReference is CTAP2; Core transitively supplies public carriers. InternalVisibleTo supports test seam; package/draft/AOT opt-in is no native acceptance.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/AuditV2/WebAuthnAuditHardwareReproTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e76e23298277fd5d3175fda15fcc29e98c2a6ca29d5166deb70adda920e1f8e2",
+    "pinned_git_bytes_sha256": "e76e23298277fd5d3175fda15fcc29e98c2a6ca29d5166deb70adda920e1f8e2",
+    "git_blob": "68024c6bc18c7124c4b0b89e503bf203626b9466",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:1d9b240734555549",
+      "core-001:unit:4915fd31e906cf4b",
+      "core-001:unit:cdcba02dfa9becf4",
+      "core-001:unit:4b812eb898c346a4"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        18
+      ],
+      [
+        20,
+        59
+      ],
+      [
+        59,
+        100
+      ],
+      [
+        100,
+        123
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected hardware scenarios use real owned CTAP sessions/known PIN; timeout observes bounded assumed slack and GetInfo reuse; no run or full RP verification here.",
+    "candidate_ids": [
+      "CORE-WA-X005",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/AuditV2/WebAuthnAuditHardwareTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "86303d0a9598a9f9b2519cbf34cdded2d0c766f92248f739c0aac27a136a4c60",
+    "pinned_git_bytes_sha256": "86303d0a9598a9f9b2519cbf34cdded2d0c766f92248f739c0aac27a136a4c60",
+    "git_blob": "9bf21cde3f072c645ae72d3b51b7f7cb133ec689",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:5e6d10ee43aecd52",
+      "core-001:unit:7a26d71891c91751",
+      "core-001:unit:a224004de4e9ae8d",
+      "core-001:unit:fa7a552e79c53389",
+      "core-001:unit:7583e22c896bac13"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        16
+      ],
+      [
+        18,
+        71
+      ],
+      [
+        82,
+        142
+      ],
+      [
+        142,
+        191
+      ],
+      [
+        191,
+        252
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "PRF repeat/actual UV variants/held-ID association and blob register-write-read assert scoped hardware behavior when run; mutable PIN setup and output cleanup remain qualifications.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/PreviewSignTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e5e80dff9ec33e4899224a9c97967d5815de0e41b893eaf059e93d699ffd5dad",
+    "pinned_git_bytes_sha256": "e5e80dff9ec33e4899224a9c97967d5815de0e41b893eaf059e93d699ffd5dad",
+    "git_blob": "358376bd709d9cb0eba1f99088305b70bc4511af",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:b71afcc8b07af33d",
+      "core-001:unit:ba9fbf17ca6bb0b9",
+      "core-001:unit:153e384e99050903",
+      "core-001:unit:0ac104241b0a0444",
+      "core-001:unit:8ee3abec514450e9",
+      "core-001:unit:3ed397830c1ed5ba"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        33
+      ],
+      [
+        35,
+        80
+      ],
+      [
+        80,
+        208
+      ],
+      [
+        208,
+        259
+      ],
+      [
+        261,
+        282
+      ],
+      [
+        289,
+        326
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Reflection-only ARKG bridge, extension signature offline verification and dual-ID nonmembership limitation. All selected user-presence/UV/stateful setup lanes are unrun.",
+    "candidate_ids": [
+      "CORE-WA-X007",
+      "CORE-WA-X010",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnClientFactoryTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "14b17026230b638b8b702412fb314c6994f78a8fa1aad14906e90b0d5788551c",
+    "pinned_git_bytes_sha256": "14b17026230b638b8b702412fb314c6994f78a8fa1aad14906e90b0d5788551c",
+    "git_blob": "4daac2c85c9075f2689e3349bb1ca9067cfa06cf",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:2b9c4e099f6aa728",
+      "core-001:unit:0cb494f7969547df",
+      "core-001:unit:f2ef613f1f918e04"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        31
+      ],
+      [
+        33,
+        57
+      ],
+      [
+        57,
+        110
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Explicit SmartCard creation/credential fields; broad NotSupported skip inherits SELECT wrapper uncertainty. Disposable result existence is not native release proof.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnClientTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "eb393503c766950f0ed6c1ba173ec0f278b12c80b775eec3023aa9a574b4005c",
+    "pinned_git_bytes_sha256": "eb393503c766950f0ed6c1ba173ec0f278b12c80b775eec3023aa9a574b4005c",
+    "git_blob": "f485e9c9071b3f1b1baeaf97c2a18a401c3c11de",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:e8b91042a3c607f1",
+      "core-001:unit:80a31cbfe7996ed1",
+      "core-001:unit:47d5e95911b4a46a",
+      "core-001:unit:38e6455bea4d78de",
+      "core-001:unit:1a881dad5abdfe16",
+      "core-001:unit:263fbc92a1ec6707"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        30
+      ],
+      [
+        53,
+        81
+      ],
+      [
+        81,
+        104
+      ],
+      [
+        104,
+        164
+      ],
+      [
+        164,
+        212
+      ],
+      [
+        212,
+        257
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Basic/full/discoverable result assertions use fresh sessions after client adoption; discouraged-UV test lacks capability guards and cannot qualify every PIN-set key.",
+    "candidate_ids": [
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnExcludeListStressTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "87eae2c7849f47e5cd77b352d28c1f31f7a3c5c6707d7529d046787978618ae2",
+    "pinned_git_bytes_sha256": "87eae2c7849f47e5cd77b352d28c1f31f7a3c5c6707d7529d046787978618ae2",
+    "git_blob": "31a402f1427d17e83a98c97eacd80d4894b5f140",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:14f106d253d221de",
+      "core-001:unit:c942b1dd8ebd9f14"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        50
+      ],
+      [
+        58,
+        217
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Seventeen persistent credentials/exclusion and destructive RP-wide cleanup. Separate sessions follow client ownership; best-effort cleanup gives no restoration or secret-erasure proof.",
+    "candidate_ids": [
+      "CORE-WA-X002",
+      "CORE-WA-X006",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "6cc1ea3f6243313fe4f184c24ad770963ff9e8074c69f6c68dd68770b3c772fe",
+    "pinned_git_bytes_sha256": "6cc1ea3f6243313fe4f184c24ad770963ff9e8074c69f6c68dd68770b3c772fe",
+    "git_blob": "d5e8a0e18938de95213e03a38aeee96307d05d78",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:a8ac500d30a641f6"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        24
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Fixed known test PIN; normalization may set/change/request token and cleanup deletes all RP credentials. Helper existence is not unattended authorization; success-only temporary clearing is scoped.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "71ed2e0f5e017827aca5b40767dfd56cf5b0a40d5c0c681bde064380675eea31",
+    "pinned_git_bytes_sha256": "bcd9f25673de2e12f61718cf7e08204eb360f30cb2238cf3c2aa9bf5ef65c9ab",
+    "git_blob": "73217c3486f4580df38edcad6e3bf9c659f15039",
+    "raw_matches_pin": false,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:eb5669b588b07d03"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        38
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "net10 test project reference/runner configuration; unit uses xUnit v3/MTP, integration xUnit v2/Tests.Shared. Source configuration supplies no run or compiler participation proof.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Attestation/AttestationObjectTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "adee07b4f0da7a3d791cbf6ecb374a1d91c1c74f7c338fa76a820fc5e49b8a82",
+    "pinned_git_bytes_sha256": "adee07b4f0da7a3d791cbf6ecb374a1d91c1c74f7c338fa76a820fc5e49b8a82",
+    "git_blob": "95f57e0f6fab1a79017cd50092dc82ccf3865759",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:bbf19b1cac6e1dae"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        21
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected preamble with parser-fixture context; no new whole-file conformance or cryptographic trust disposition.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/AuditV2/WebAuthnAuditReproTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c5e1553c572569a8b0d70e9f74fa1e6d5ee6f7b817f17ee5beb847a1243e4e59",
+    "pinned_git_bytes_sha256": "c5e1553c572569a8b0d70e9f74fa1e6d5ee6f7b817f17ee5beb847a1243e4e59",
+    "git_blob": "63a04a9c6a601cc7be88c0dd0a668d66549dcfb4",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:6423d2d787153ebc",
+      "core-001:unit:6cf5cdf2f8dbbd2b",
+      "core-001:unit:d0e49073bcde5dfb",
+      "core-001:unit:77b411baae4188b3",
+      "core-001:unit:42168e747b2f2950",
+      "core-001:unit:b873f608a6462e16",
+      "core-001:unit:a78b316e99da06d2",
+      "core-001:unit:1b9eb080433e648e",
+      "core-001:unit:e5997da51df51ce8",
+      "core-001:unit:d67f0e26298d54a2",
+      "core-001:unit:edf2488ee1fbe268",
+      "core-001:unit:c17392c263e81b14",
+      "core-001:unit:7b09d6eea0657d0d",
+      "core-001:unit:04e1ecd789776bd0",
+      "core-001:unit:837c786d9cb85585",
+      "core-001:unit:847765566c819811",
+      "core-001:unit:4c275c7d070e03a5",
+      "core-001:unit:546bab42e8ba1d84",
+      "core-001:unit:392ff7b2ada92c51"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        20
+      ],
+      [
+        28,
+        37
+      ],
+      [
+        44,
+        75
+      ],
+      [
+        106,
+        152
+      ],
+      [
+        152,
+        207
+      ],
+      [
+        207,
+        253
+      ],
+      [
+        253,
+        276
+      ],
+      [
+        276,
+        302
+      ],
+      [
+        302,
+        327
+      ],
+      [
+        348,
+        383
+      ],
+      [
+        391,
+        392
+      ],
+      [
+        394,
+        401
+      ],
+      [
+        418,
+        440
+      ],
+      [
+        467,
+        484
+      ],
+      [
+        484,
+        503
+      ],
+      [
+        503,
+        521
+      ],
+      [
+        541,
+        568
+      ],
+      [
+        568,
+        593
+      ],
+      [
+        593,
+        620
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected fake assertions cover absent uv/rk, attestation None/self views, crossOrigin, deadline signal and chunk limits. Hanging fake is cancellation-aware, not native abort.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/AuditV2/WebAuthnExtensionAuditReproTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "489d34011dc8548ea37c8daef597da48c7879b1f29c453c572b2fbde82ea0e59",
+    "pinned_git_bytes_sha256": "489d34011dc8548ea37c8daef597da48c7879b1f29c453c572b2fbde82ea0e59",
+    "git_blob": "3ea9ce0a8c998cd0b12486e00e6cbde8f99438f8",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:32cb35da41fde50f",
+      "core-001:unit:9bcc6bfb07a890cc"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        18
+      ],
+      [
+        168,
+        220
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected getCredBlob assertion checks request encoding and typed returned bytes only when requested. Fake outputs have no device/trust/cleanup qualification.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/AuditV2/WebAuthnLargeBlobAuditReproTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "38665196fca5d48a06d821cb30a7eb009208a4960ecefeeb8c0469611b1d4f84",
+    "pinned_git_bytes_sha256": "38665196fca5d48a06d821cb30a7eb009208a4960ecefeeb8c0469611b1d4f84",
+    "git_blob": "f222939c4b78d3402063bcf11bed0e1994f8f36d",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:4ffb9b375d892b73"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        13
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected import/namespace context for synthetic blob audit fixtures; no assigned full test body and no whole-file acceptance.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/CredentialFilterTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "45686d5247f70a513b40cf264718d310f9b3fda3f0194034a46a18f85cd9f36b",
+    "pinned_git_bytes_sha256": "45686d5247f70a513b40cf264718d310f9b3fda3f0194034a46a18f85cd9f36b",
+    "git_blob": "0c2102c2bc4a64e2c1d33cfda47d113495948177",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:4bbdb4247020f30d",
+      "core-001:unit:987aa99b3c3b0be2",
+      "core-001:unit:22bfec6942489079",
+      "core-001:unit:ce2d54b3cc3bdee7",
+      "core-001:unit:8c7958f2377d0a4a",
+      "core-001:unit:b076eb935d024138",
+      "core-001:unit:623f9c39d6aaf71e",
+      "core-001:unit:67d8b8b276780c53",
+      "core-001:unit:a462837d9cba9bdb"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        23
+      ],
+      [
+        27,
+        54
+      ],
+      [
+        54,
+        89
+      ],
+      [
+        89,
+        122
+      ],
+      [
+        122,
+        169
+      ],
+      [
+        169,
+        190
+      ],
+      [
+        190,
+        220
+      ],
+      [
+        220,
+        236
+      ],
+      [
+        236,
+        261
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected complete tests assert chunk shape/retry/selection/no-token/length skip. Standard fixture includes descriptor; no final omission-recovery regression.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/CredentialPromptRetryTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a4e87ba698804e4c4bec65a4bdc472707fa8e0ee8c35d280116f8de5251c5513",
+    "pinned_git_bytes_sha256": "a4e87ba698804e4c4bec65a4bdc472707fa8e0ee8c35d280116f8de5251c5513",
+    "git_blob": "f6136c04b2b18fc3fa032c2969b3c92f6cb59f2d",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:525a379cc638e4d0",
+      "core-001:unit:7fec72ba15637e83",
+      "core-001:unit:2bedc5f84c4db9be",
+      "core-001:unit:7f2694daadeacc94",
+      "core-001:unit:6f0384a167746134",
+      "core-001:unit:49031be8c8952c54",
+      "core-001:unit:1af7b29ad8258a34",
+      "core-001:unit:c3124acfd623eca7",
+      "core-001:unit:b8a66cb98708847b"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        36
+      ],
+      [
+        39,
+        40
+      ],
+      [
+        45,
+        52
+      ],
+      [
+        79,
+        80
+      ],
+      [
+        83,
+        85
+      ],
+      [
+        85,
+        94
+      ],
+      [
+        101,
+        102
+      ],
+      [
+        110,
+        124
+      ],
+      [
+        189,
+        210
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected scripted/late/recording prompt units plus actual backing-owner assertions. SDK context/retry/clearing is distinct from fake ASCII validity and production profile checks.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/CtapStatusMappingTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "16793af6a76ecbb0fae31eea4fc57367716ee1003bf9061dd19f6e1bc88998fa",
+    "pinned_git_bytes_sha256": "16793af6a76ecbb0fae31eea4fc57367716ee1003bf9061dd19f6e1bc88998fa",
+    "git_blob": "a08255984b64d0d19f359f4da5b2dead5c896559",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:1c352e0613fdba0c"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        19
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected declaration preamble with mapper context; mapper table is not coverage of GetInfo/token/output or transport failure normalization.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/PinUvAuthTokenSessionTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "27b59cbfe0b304db47b4fccc2f2f1f8a0278480b223fa981ce37eff539d7d4da",
+    "pinned_git_bytes_sha256": "27b59cbfe0b304db47b4fccc2f2f1f8a0278480b223fa981ce37eff539d7d4da",
+    "git_blob": "ae42ba244f82cf71cd0df90d08492ec0e9c51465",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:653075e29d96ad82",
+      "core-001:unit:e3341c4434b8c8a4"
+    ],
+    "selected_ranges": [
+      [
+        31,
+        43
+      ],
+      [
+        56,
+        69
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Actual handed-in sentinel token array clears and repeated Dispose getter rejects. No provider/transport/input-copy erasure oracle.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/RegistrationTransportTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1558b58527e8362a7aa5521d46010b6b5be73cd8edad041e58303de3ab6d556a",
+    "pinned_git_bytes_sha256": "1558b58527e8362a7aa5521d46010b6b5be73cd8edad041e58303de3ab6d556a",
+    "git_blob": "db712a822eb706e5cf2888530bc0bdd058d250fb",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:e23af61976b72c02",
+      "core-001:unit:99ea8261ce613339",
+      "core-001:unit:4418bac57ca66560"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ],
+      [
+        70,
+        89
+      ],
+      [
+        89,
+        114
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Actual source-list mutation and readonly-list guard assert independent sorted unique hints; caller-constructed response defaults empty. No host-reachability assertion.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/RpAuthorizationTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a20572bf3350d8ae4c09fd5b1df2fdd852ab88566f9e2d463a558accd1a2f97e",
+    "pinned_git_bytes_sha256": "a20572bf3350d8ae4c09fd5b1df2fdd852ab88566f9e2d463a558accd1a2f97e",
+    "git_blob": "fbe38b335481e03374209c86482ecb70bf215d15",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:c44f689efd97f306",
+      "core-001:unit:a31fd3a0f07aaecd",
+      "core-001:unit:d9f1625f161a7cb0",
+      "core-001:unit:ba9bbbedd0ad0f34"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        25
+      ],
+      [
+        27,
+        63
+      ],
+      [
+        63,
+        91
+      ],
+      [
+        91,
+        250
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Both ceremonies forward arbitrary faithfully encodable RP text unchanged when callback approves and block backend on rejection/cancellation/wire-invalid Unicode. No built-in browser syntax/binding policy.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "b4efebf82c2d4d54b7c5a91d4c344bd7855d8228badfc52fc0079dd955a72975",
+    "pinned_git_bytes_sha256": "b4efebf82c2d4d54b7c5a91d4c344bd7855d8228badfc52fc0079dd955a72975",
+    "git_blob": "8d363170669429c9ffb3358adeb3b942177bfb96",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:5688765f7de61780",
+      "core-001:unit:f22967e8d014e38c",
+      "core-001:unit:61a73d107ed6a6bc",
+      "core-001:unit:564a5ed3c2002aef",
+      "core-001:unit:ec86c644f6922705",
+      "core-001:unit:0cbf5879858a4367",
+      "core-001:unit:ae7e2b19869f2278",
+      "core-001:unit:cf1a98a03c709800",
+      "core-001:unit:026217b413a15edf",
+      "core-001:unit:903abce29ecadde7"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        33
+      ],
+      [
+        35,
+        52
+      ],
+      [
+        52,
+        66
+      ],
+      [
+        66,
+        80
+      ],
+      [
+        91,
+        92
+      ],
+      [
+        93,
+        95
+      ],
+      [
+        95,
+        97
+      ],
+      [
+        144,
+        145
+      ],
+      [
+        145,
+        146
+      ],
+      [
+        146,
+        152
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Real CTAP/Core SmartCard protocol over fake connection checks request intent/operation/RP. No terminal outcome recorder or native/physical oracle; broad layer headline should be scoped.",
+    "candidate_ids": [
+      "CORE-WA-X004",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-REOPEN-PROPOSED-LOCAL-DOC",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserVerification/UvDecisionLogicTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "38a9061225214cbfbc3efc88bf56359f8e0dcfd0da2b52e31ac5030b502a4630",
+    "pinned_git_bytes_sha256": "38a9061225214cbfbc3efc88bf56359f8e0dcfd0da2b52e31ac5030b502a4630",
+    "git_blob": "3620bfedc0a079b33b0015e40fbc6f25f472d72f",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:876d6e14e704aec5"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        30
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected truth-table summary with implementation branch context: configured versus available verification and policy overrides remain distinct from actual device token support.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnBackendTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "968ab5e4ab60ae0c6a0e0a9bf627a9835ce4c77204420456e513f57988c94d65",
+    "pinned_git_bytes_sha256": "968ab5e4ab60ae0c6a0e0a9bf627a9835ce4c77204420456e513f57988c94d65",
+    "git_blob": "3fc9feb00933c87d0f817f989bcdc933f9fb8730",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:3f951ec2fa5e1669",
+      "core-001:unit:d9eafd53cc70ab6f"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        40
+      ],
+      [
+        46,
+        83
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected shared-secret test checks shape/nonzero/copy/access guard, not retained-view zeroing. Contextual tag tests capture actual options copy and in-call snapshot.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d787616f384a7c78f16e400298e091c50651bcb881f7f378ed9976c1b24d5576",
+    "pinned_git_bytes_sha256": "d787616f384a7c78f16e400298e091c50651bcb881f7f378ed9976c1b24d5576",
+    "git_blob": "6edce1585a5a60ebb6aff3b17764bf5480ee5637",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:abfcfd663b9df0f2",
+      "core-001:unit:454610d0fb2d1997",
+      "core-001:unit:973272bfb2688ff9",
+      "core-001:unit:2cb188f63525619e",
+      "core-001:unit:9e08c5b0b531c74f",
+      "core-001:unit:fc487c39e4026e0e",
+      "core-001:unit:4e7d6f6a4a87f86b",
+      "core-001:unit:99123f40e242a789",
+      "core-001:unit:39ed94e056c9df96",
+      "core-001:unit:fce4677517674626",
+      "core-001:unit:2412153ca15e3273"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        37
+      ],
+      [
+        58,
+        67
+      ],
+      [
+        76,
+        89
+      ],
+      [
+        102,
+        124
+      ],
+      [
+        124,
+        155
+      ],
+      [
+        155,
+        172
+      ],
+      [
+        172,
+        228
+      ],
+      [
+        228,
+        256
+      ],
+      [
+        264,
+        281
+      ],
+      [
+        281,
+        304
+      ],
+      [
+        304,
+        322
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected complete fake attempt/probe/remint tests assert call counts/options/permissions. Cached probe and output-after-success are separate; 5.8 comment lacks immutable measurement here.",
+    "candidate_ids": [
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-REOPEN-PROPOSED-LOCAL-DOC",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientConstructionTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "359781cda2db390a0ef042320100d64f5a9c64a03915f51b51d97d0bfc13aaa3",
+    "pinned_git_bytes_sha256": "359781cda2db390a0ef042320100d64f5a9c64a03915f51b51d97d0bfc13aaa3",
+    "git_blob": "5690b1345ba0bd7762c70c8c6f9e54e289486ad3",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:c540afe01b9890a1",
+      "core-001:unit:4cbe421d01b43a9d",
+      "core-001:unit:faf47cf13d6e260f",
+      "core-001:unit:ef7322a88d58d4e3"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ],
+      [
+        66,
+        80
+      ],
+      [
+        80,
+        94
+      ],
+      [
+        94,
+        108
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected tests check successful sequential disposal forwarding and failed-constructor nonadoption, not concurrency/drain or native release.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientDataTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "40f96107098736b2d6d93690e5f173c1372007c722bfd3c255e44ab3a77790bc",
+    "pinned_git_bytes_sha256": "40f96107098736b2d6d93690e5f173c1372007c722bfd3c255e44ab3a77790bc",
+    "git_blob": "1fa8b0aa49eb16709a9528223115c1912a5d62f4",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        167
+      ]
+    ],
+    "observation": "Supporting tests assert fixed JSON/order/hash consistency and quote escaping; intentionally invalid low-level topOrigin combination is marked as such. Controls/surrogates exact CCDToString remain uncovered.",
+    "candidate_ids": [
+      "CORE-WA-X011",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+    "pinned_git_bytes_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+    "git_blob": "5b5b8593fdc708830e389e7e350577b77776df77",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:7fe08c46f10afee5",
+      "core-001:unit:e29522f04d40349a",
+      "core-001:unit:206b0d5dc9ed0c8b",
+      "core-001:unit:55873ac75ea37e66"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ],
+      [
+        130,
+        163
+      ],
+      [
+        163,
+        189
+      ],
+      [
+        493,
+        532
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected response/idempotent tests compare bytes and one backend call; incomplete internal factory tests wait cancellation and later completion, not device cancellation.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientMakeCredentialTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "9f0355c42b8536a3ad765789cef624feebd3cc91674ef444232ad0af4ae5bba3",
+    "pinned_git_bytes_sha256": "9f0355c42b8536a3ad765789cef624feebd3cc91674ef444232ad0af4ae5bba3",
+    "git_blob": "a0ea6e67738d6d906f5d1791631fd82de10b3404",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:32ecdff19092a86d",
+      "core-001:unit:aa6085092d9f4c6b",
+      "core-001:unit:1d9844353d945bf9"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        31
+      ],
+      [
+        268,
+        294
+      ],
+      [
+        610,
+        627
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected AAGUID/key type and backend disposal tests plus ceremony sentinel context. Returned objects/counts do not establish end-to-end response ownership or RP acceptance.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientOptionsTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "fa0b8d84a5f715d0c399bc37ff9a986e0077bb8ac0676acd02d752c03d2ac785",
+    "pinned_git_bytes_sha256": "fa0b8d84a5f715d0c399bc37ff9a986e0077bb8ac0676acd02d752c03d2ac785",
+    "git_blob": "bb5b876e59a55b2bfab37680987fffa4cc90fd6b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:2f2513b5ffd4c56b",
+      "core-001:unit:97599d05acd6924f"
+    ],
+    "selected_ranges": [
+      [
+        28,
+        29
+      ],
+      [
+        29,
+        32
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected NullPrompt implements declined-result contract; unselected option guards are not new boundary-wide acceptance.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientPinRetryTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "5ea56b2e150580884d9a1eb5f4c84a16649f19d6df6a65c42b80dda939feef97",
+    "pinned_git_bytes_sha256": "5ea56b2e150580884d9a1eb5f4c84a16649f19d6df6a65c42b80dda939feef97",
+    "git_blob": "16d012c1e2d993ad5cf522c26e16b309a7473dec",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:594fbf3fc544c74e"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        33
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected retry-test summary/import context; no Core credential prompt acquisition added to CTAP itself.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnOriginTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a5f38b0d0fd2d60e586e96b78119ff25aad910b403dcaaa239fffc23e66dca7e",
+    "pinned_git_bytes_sha256": "a5f38b0d0fd2d60e586e96b78119ff25aad910b403dcaaa239fffc23e66dca7e",
+    "git_blob": "8ea48c7a4b5f4fa9f6c55fa3c333584f24184981",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        92
+      ]
+    ],
+    "observation": "Supporting selected scheme/host/default-port/stripping/equality cases; no document ancestry/name-resolution/browser Secure Contexts oracle.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnSurfaceTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "db05c5bc2b9d676d7976ed91410f42d49c68f2aa9e1c7dd6969fa7784530878a",
+    "pinned_git_bytes_sha256": "db05c5bc2b9d676d7976ed91410f42d49c68f2aa9e1c7dd6969fa7784530878a",
+    "git_blob": "0960f9b0d810c1c8030685e5af7ffc117b2ee59a",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:86ae2fd22a7bdeed"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        25
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Reflection source checks internal backend/types and public session constructor shape, not compiled consumer/analyzer or native semantics.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/AaguidTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c2477829ed953772ddbf9b28a6b2e34d31d3b3d86be7455e55c57c75dc53ae59",
+    "pinned_git_bytes_sha256": "c2477829ed953772ddbf9b28a6b2e34d31d3b3d86be7455e55c57c75dc53ae59",
+    "git_blob": "6436cbe495f4ea564cb2eca99defad719cc39392",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        90
+      ]
+    ],
+    "observation": "Supporting constructed-value Guid/string/equality tests; byte-array BeEquivalentTo preserves order under pinned library rule, without source mutation control. Default/reflexive equality and big-endian runtime absent.",
+    "candidate_ids": [
+      "CORE-WA-X010",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/CoseAlgorithmTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3254f50927f5bfc24a005ac35326620c7c2d9df3192fd81c83140f8513017ad7",
+    "pinned_git_bytes_sha256": "3254f50927f5bfc24a005ac35326620c7c2d9df3192fd81c83140f8513017ad7",
+    "git_blob": "ffabb55d79b514798721b1b01a05ff73a9dc6c50",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:3f08ecad4409477a"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        19
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected import context uses CTAP algorithm carrier, not duplicate WebAuthn crypto implementation or provider capability proof.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/CoseKeyTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "0d6966585a81655ff150bc01301d1b6b8815af7001587e4351fddb44b7685a11",
+    "pinned_git_bytes_sha256": "0d6966585a81655ff150bc01301d1b6b8815af7001587e4351fddb44b7685a11",
+    "git_blob": "6ce6730855a037d4bc813f5bf5260fcf225ab1f0",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:e600b3d209fefaec",
+      "core-001:unit:79f0945cf5eb204b",
+      "core-001:unit:cdc3a0ac90dccc99"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        19
+      ],
+      [
+        62,
+        84
+      ],
+      [
+        84,
+        103
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected synthetic unknown-key/raw metadata and EC2/crv/coordinate lengths. Pinned FluentAssertions 7.0.0 byte-array rule compares exact order; no provider-validity claim.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/Fixtures.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e38bd3c5b6f9f63c537908b5ee7f480bca239bd1193703d5c7bb4706a25902fe",
+    "pinned_git_bytes_sha256": "e38bd3c5b6f9f63c537908b5ee7f480bca239bd1193703d5c7bb4706a25902fe",
+    "git_blob": "463b2c3a2369ef1dca3f38d7935dbf971580e0de",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        168
+      ]
+    ],
+    "observation": "Supporting synthetic canonical COSE EC/OKP/RSA encodings; RSA modulus deliberately zero, coordinate literals not validated as mathematical keys. Generator is retained source, not a native producer.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/ExtensionSessionTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "bbf0c7ed1526b6c4e193958de0731f22b590321c19df920946206bde1ab72fd3",
+    "pinned_git_bytes_sha256": "bbf0c7ed1526b6c4e193958de0731f22b590321c19df920946206bde1ab72fd3",
+    "git_blob": "6272c8ff1449d3ae4bf289126a7017c59c210cb6",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:f7fc274baa684518",
+      "core-001:unit:905aa9fa170c6c5b",
+      "core-001:unit:1b932c40537768a9",
+      "core-001:unit:910e333c001e3e72"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ],
+      [
+        79,
+        105
+      ],
+      [
+        151,
+        190
+      ],
+      [
+        290,
+        299
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected exact encoded credBlob/canonical key order and no-extra-permission getCredBlob fixture. No blanket absence of permission-using processors or full device support.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/LargeBlob/LargeBlobProcessorTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "f9436c2005b8e0a66b9cd6aa252b7a196250e5bcf3d87ba02407c437504ce5b9",
+    "pinned_git_bytes_sha256": "f9436c2005b8e0a66b9cd6aa252b7a196250e5bcf3d87ba02407c437504ce5b9",
+    "git_blob": "63615a710a1e735b2d435be0817bfa13b58162af",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:d2be5f0365af290b",
+      "core-001:unit:651df80c5416339e"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        32
+      ],
+      [
+        163,
+        180
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected mocked write CtapException maps Written=false. No original allow-list cardinality, read-error/cancel, whole-array transaction or restoration oracle.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignCodecTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "dd343f4dac10c0ca8895a83f31c8fad467421f3f46cfd299ea034e60a80c5cc1",
+    "pinned_git_bytes_sha256": "dd343f4dac10c0ca8895a83f31c8fad467421f3f46cfd299ea034e60a80c5cc1",
+    "git_blob": "5d11383163085178063ef14c73d699fd02e317d2",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:197270a7f7e9bffc",
+      "core-001:unit:35e46ef0a6a3636d"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        29
+      ],
+      [
+        87,
+        137
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected synthetic inner-attestation extraction asserts ID/key/algorithm/views; extra inner algorithm fixture leaves minimal inner shape untested. No trust verification.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignProcessorTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "72b5f6e9f34606e523c0746808c342cffa42f22d18fd3d511267bf75e61e1972",
+    "pinned_git_bytes_sha256": "72b5f6e9f34606e523c0746808c342cffa42f22d18fd3d511267bf75e61e1972",
+    "git_blob": "a4c3714a9e26a75787f4eec6d847d41da0b826ab",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:4e15fa5e2d4d3425"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        28
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected processor summary describes original list map validation/selected input. No assigned full method body and no hardware/crypto disposition.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignSigningParamsTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e509f48aaa43f6bec1fd9fb0e0722f7dfbe6a87890a1ae0236eace1109e54871",
+    "pinned_git_bytes_sha256": "e509f48aaa43f6bec1fd9fb0e0722f7dfbe6a87890a1ae0236eace1109e54871",
+    "git_blob": "ef3856dee2794f3908a61c714eb089df252fd573",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        86
+      ]
+    ],
+    "observation": "Supporting tests assert exact raw args/null and local empty-handle/TBS errors; arbitrary args fixture is explicitly pass-through, not semantic CBOR validity.",
+    "candidate_ids": [
+      "CORE-WA-X010",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfCodecTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e73e42a21b37d949e2eb7e270a9e25086146e24a38a6b43faa19371c3bd58e31",
+    "pinned_git_bytes_sha256": "e73e42a21b37d949e2eb7e270a9e25086146e24a38a6b43faa19371c3bd58e31",
+    "git_blob": "d37d48452fee02ac303381f6a55e366eff6dacd1",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:1358b7acdab0d1ee"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        26
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected vector summary checked with complete codec-test bodies; exact output/salt comparisons for V1/V2 codec do not negotiate V1 or enforce verified PRF.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfInputTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "612415d028e83126027bf59a63072a988c7f16bd057df2dd9741782fba44a408",
+    "pinned_git_bytes_sha256": "612415d028e83126027bf59a63072a988c7f16bd057df2dd9741782fba44a408",
+    "git_blob": "f3b26223d6706d1ee3b676b919eeeac738c160b5",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        44
+      ]
+    ],
+    "observation": "Supporting tests assert length/repeat equality/different inputs, not independent domain-separated KAT or cleanup; codec vector tests supply stronger separate input/output comparison.",
+    "candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-QUALIFIED-RELATED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfProcessorTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3eaaa8901f81fb5181e0a90d2fef44db261ad117370d3ccab1f6121f64bc07b5",
+    "pinned_git_bytes_sha256": "3eaaa8901f81fb5181e0a90d2fef44db261ad117370d3ccab1f6121f64bc07b5",
+    "git_blob": "bb71559aecbf87d898eebac1231bd0a3ae22e5f2",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:392ac2a69b61e54c"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        32
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected processor-summary/vector context; permissions/UV enforcement remain absent in actual source. No full module test acceptance.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "f87b4e6f8e39695b2b9d5cbc9b989e92b6da50f02e1adcddaf8f2561d0ecc50f",
+    "pinned_git_bytes_sha256": "f87b4e6f8e39695b2b9d5cbc9b989e92b6da50f02e1adcddaf8f2561d0ecc50f",
+    "git_blob": "31d92f669ba8478be2f653779e2c01afcddfe521",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:8f86d3062cabad4b",
+      "core-001:unit:889cfdef6f963950",
+      "core-001:unit:e4510d1edf896877",
+      "core-001:unit:4d0e90e93f862e9d",
+      "core-001:unit:9d294cecb3571b95",
+      "core-001:unit:befb20eb7f5d216d",
+      "core-001:unit:26c688582eb59718",
+      "core-001:unit:8705722ec03b98c1",
+      "core-001:unit:944095256af7ecd9",
+      "core-001:unit:3861e13c28206b28",
+      "core-001:unit:dd7a8c8d3beb3ad5",
+      "core-001:unit:c3a2eb8d6af99117",
+      "core-001:unit:9d99e662b78bca94"
+    ],
+    "selected_ranges": [
+      [
+        43,
+        54
+      ],
+      [
+        54,
+        67
+      ],
+      [
+        67,
+        79
+      ],
+      [
+        79,
+        91
+      ],
+      [
+        91,
+        107
+      ],
+      [
+        107,
+        123
+      ],
+      [
+        123,
+        140
+      ],
+      [
+        140,
+        160
+      ],
+      [
+        160,
+        176
+      ],
+      [
+        176,
+        190
+      ],
+      [
+        192,
+        193
+      ],
+      [
+        194,
+        195
+      ],
+      [
+        196,
+        203
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected fake Connect throws at routing boundary. Type-selection assertions establish exposed order/SCP implication, not native initialization or universal logic-absence proof.",
+    "candidate_ids": [
+      "CORE-WA-X012"
+    ],
+    "candidate_file_disposition": "UNCHANGED-REOPEN-PROPOSED-LOCAL-DOC",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/MockCtap2Responses.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e2007f88e15a5c8213c5bf9924a0f3dc7b36c3b1f0d313f4e19af0a41b613a1f",
+    "pinned_git_bytes_sha256": "e2007f88e15a5c8213c5bf9924a0f3dc7b36c3b1f0d313f4e19af0a41b613a1f",
+    "git_blob": "c8835fc822db549b5d5bc7bf99d2083eaaf8f549",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:cc6a71960da5a0e5"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        24
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected helper preamble with response-shape context; normal final fakes include descriptors and remain synthetic, not device-valid cryptographic responses.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TestExtensionContext.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "892910a0f57a3f6cdae2f70c540bf9cdf8ad98e0063611e075878976038c186d",
+    "pinned_git_bytes_sha256": "892910a0f57a3f6cdae2f70c540bf9cdf8ad98e0063611e075878976038c186d",
+    "git_blob": "e2f1a9d1db7532dc0793709854d92839bb15cf46",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:5611603589abb95c"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        21
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected helper preamble; supporting-all backend is test capability context, not production negotiation or a public extension seam.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TestPinUvAuthProtocol.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "dfacce476ce024288791f9842c50644723cfee2cdda56dbf880187bddd6f26bb",
+    "pinned_git_bytes_sha256": "dfacce476ce024288791f9842c50644723cfee2cdda56dbf880187bddd6f26bb",
+    "git_blob": "8b729dbb80db33a4be381f182257a1581b15b059",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:c6719030f9881ef4"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        18
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "Selected preamble with complete sentinel helper context: Version=2/tagLength=16 and unused throwing crypto methods are intentional noncrypto fake, not protocol-2 conformance.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TokenBufferAssert.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "13180dd048e3e3fe36cdb05bd173b222e571be2c412c448a0157e42c4cb89ac6",
+    "pinned_git_bytes_sha256": "13180dd048e3e3fe36cdb05bd173b222e571be2c412c448a0157e42c4cb89ac6",
+    "git_blob": "1e326cb6fe5521cb700e61273a4ab824913e0f51",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        77
+      ]
+    ],
+    "observation": "Supporting nonempty/every-byte Zeroed observer and any-nonzero NotZeroed observer; sentinel source tracked explicitly. Does not prove every original sentinel byte remains intact.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/WebAuthnAuthenticatorDataTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d6ed0cfe605997a50ff3c1a966ec497805448d31552b1312bd32666b995daa7b",
+    "pinned_git_bytes_sha256": "d6ed0cfe605997a50ff3c1a966ec497805448d31552b1312bd32666b995daa7b",
+    "git_blob": "2f800a60f26afe0633b65cfd5b40855b478b5b91",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [],
+    "selected_ranges": [],
+    "read_scope": "candidate-population/context-only; zero assigned units",
+    "contextual_read_line_ranges": [
+      [
+        1,
+        150
+      ]
+    ],
+    "observation": "Supporting synthetic UP/ED/RP-hash/CBOR extension fixtures assert names/values/count, not signatures/trust/complete-envelope malformed rejection or independent snapshot mutation.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-APPLET-OWNED-DEPENDENCY",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "ffab7fa521d0d5cd5020d2c7b3bfc6df0f4cf3cf7c7175b87cf45852829fc0f0",
+    "pinned_git_bytes_sha256": "81d45f41ffafa9c84b673916b21aceb36562a54d91d2385fff774eb7ada700a3",
+    "git_blob": "a51060f0d5b3eccd32184f94ecf5052ec0e12f27",
+    "raw_matches_pin": false,
+    "bom_crlf_normalized_matches_pin": true,
+    "assigned_unit_ids": [
+      "core-001:unit:1a536c6d55c40cd3"
+    ],
+    "selected_ranges": [
+      [
+        1,
+        34
+      ]
+    ],
+    "read_scope": "complete assigned ranges plus named caller/helper context",
+    "contextual_read_line_ranges": [],
+    "observation": "net10 test project reference/runner configuration; unit uses xUnit v3/MTP, integration xUnit v2/Tests.Shared. Source configuration supplies no run or compiler participation proof.",
+    "candidate_ids": [],
+    "candidate_file_disposition": "UNCHANGED-RETAIN-SCOPED-CONTRACT",
+    "reopening": "candidates.md and original source-run inherited key; no blanket module reopening",
+    "independent_review": "PENDING"
+  }
+]

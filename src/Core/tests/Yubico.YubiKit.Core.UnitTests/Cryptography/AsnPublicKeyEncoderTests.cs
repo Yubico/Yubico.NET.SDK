@@ -246,7 +246,7 @@ public class AsnPublicKeyEncoderTests
     /// <summary>
     /// The curve OID is caller-supplied. X25519 has a 32-byte key definition, so a general OID
     /// lookup would accept P-256 sized coordinates and emit them as an id-ecPublicKey key on a
-    /// curve that is not an EC prime curve at all.
+    /// key algorithm OID that is not an ordinary short-Weierstrass named-curve identifier.
     /// </summary>
     [Theory]
     [InlineData(Oids.X25519)]

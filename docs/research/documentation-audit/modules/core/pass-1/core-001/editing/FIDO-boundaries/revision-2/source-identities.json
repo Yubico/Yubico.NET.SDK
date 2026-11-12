@@ -1,0 +1,52 @@
+[
+  {
+    "path": "src/Ctap2/src/Pin/PinUvAuthHelpers.cs",
+    "current_sha256": "47d199377344b2505fa593fbe3ad4f31fb0eeb937b5f63d572ae5f702a617643",
+    "product_pin_sha256": "47d199377344b2505fa593fbe3ad4f31fb0eeb937b5f63d572ae5f702a617643"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+    "current_sha256": "78f359a17f9743cda2fd9ab11e599219241a36ac10e414354c5d903ea04915e7",
+    "product_pin_sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+    "current_sha256": "6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51",
+    "product_pin_sha256": "6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "current_sha256": "543741db31d0b1aad86a96012f6d9a75cde6c613e33425242a6868f5022fff7a",
+    "product_pin_sha256": "d787616f384a7c78f16e400298e091c50651bcb881f7f378ed9976c1b24d5576"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TestPinUvAuthProtocol.cs",
+    "current_sha256": "dfacce476ce024288791f9842c50644723cfee2cdda56dbf880187bddd6f26bb",
+    "product_pin_sha256": "dfacce476ce024288791f9842c50644723cfee2cdda56dbf880187bddd6f26bb"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap21.txt",
+    "sha256": "97960d3aff3b1d266cdcb6e8e1ee2802df5629b0c420bc6e0192d6b1841ed71f",
+    "read_only": true
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/candidates.md",
+    "sha256": "d719f307b97710eef252790cc4efe289a2935b670188903a05609b5766f4f759",
+    "read_only": true
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/candidates.md",
+    "sha256": "e85cda5f0224c7a693c93ab0e1c7aaa8b072008bff68b08fe58bd3665881369f",
+    "read_only": true
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources.md",
+    "sha256": "a5ecfaf16fab13a2127793e545680700dbafe3ba9288293c2665c5098e485ea7",
+    "read_only": true
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+    "sha256": "33c44266e8c9a45124e18f64e81653e5881d9d5fd4d8b55b0deb2a9f9de1ab65",
+    "read_only": true
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "failures": [],
+  "final_product_count": 37,
+  "path_hashes_checked": 164,
+  "frozen_output_identities_checked": 47,
+  "review_record_identities_checked": 2,
+  "accepted_toolchain_comments_unchanged": [
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs",
+    "scripts/toolchain/Process.cs"
+  ],
+  "R1_paths": [
+    "src/Tests.Shared/Infrastructure/AllowList.cs",
+    "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+    "src/Tests.Shared/README.md"
+  ],
+  "R2_overlay_keys": 7,
+  "example_body_records": 247,
+  "new_csharp_bodies": 0,
+  "patch_sha256": "4738181238db7103d65e47addac0a96c8a936e8c4a464a991885abd8ea788d68",
+  "git_diff_check": "PASS",
+  "static_scope": "PASS",
+  "limits": "Static hash/non-comment/XML/Markdown checks only. No build/test/formatter/native/device/crypto/provider execution, Git index/ref mutation or independent re-review."
+}

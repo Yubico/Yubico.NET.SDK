@@ -2,7 +2,7 @@
 
 PivTool is an evaluation application for device discovery, credentials, key generation, certificates,
 signing/decryption, attestation retrieval and reset. Start with the [PIV task guide](../../README.md)
-for SDK contracts and complete host-verification/plaintext-cleanup examples. The tool demonstrates a
+for SDK contracts and scoped host-verification/plaintext-cleanup examples. The tool demonstrates a
 subset of the SDK and has the limitations below; use a device you are authorized to provision.
 
 ## Run and select a device
@@ -128,6 +128,11 @@ block while calling the async SDK and have limited cancellation propagation; a d
 represent cancellation caught by the helper. Await terminal work and inspect device state before repeating
 mutations. These limitations remain engineering follow-ups rather than guarantees of the sample.
 
+Keep the original SDK task and its inputs/session/prompt alive until actual completion, even if an outer wait ends.
+Core guards one logical exchange, not the tool's complete credential, certificate or PIN-only workflow. PIV presence
+callbacks and local RSA unpadding sit outside that exchange guard. A cancellation token does not interrupt admitted
+SmartCard traffic or supply a native deadline; the sample's broad error/timeout mapping does not establish one.
+
 ## Find the SDK examples
 
 - `PivExamples/`: task helpers using real SDK types, including device-backed certificate signature generators.
@@ -141,7 +146,9 @@ XML examples are composable fragments: supply an `IYubiKey device`, `Cancellatio
 credential/data buffers and, where used, an application-owned `IUserPresencePrompt`. Keep borrowed inputs
 alive through awaited calls and clear secrets in the caller's finally scope. Returned host crypto objects,
 certificates and imported `IPrivateKey` objects need their own disposal scopes. See the module task guide
-for complete signature verification, known-plaintext decryption and protected-mode reopen/recovery scopes.
+for signature verification, known-plaintext decryption and protected-mode reopen/recovery scopes. Its signing and
+decryption examples protect each acquired PIN before later setup; preserve that scope in adaptations and account
+separately for any additional source, provider or result copies you create.
 
 ## License
 

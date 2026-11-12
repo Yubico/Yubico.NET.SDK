@@ -1,0 +1,22 @@
+{
+  "scope": "Pure Python helper/import oracles only; no SDK test/build/capture execution.",
+  "red": {
+    "exit_code": 1,
+    "missing_import_ids": [
+      "FULL-302",
+      "FULL-303",
+      "FULL-306"
+    ]
+  },
+  "green": {
+    "exit_code": 0,
+    "all56_helper_imports_satisfied": true,
+    "all56_runner_compatible": true,
+    "negative_cases_rejected": [
+      "removed-import",
+      "ancestor-namespace",
+      "wrong-module-namespace"
+    ]
+  },
+  "command": "python3 -B helper-import-correction/verify.py"
+}

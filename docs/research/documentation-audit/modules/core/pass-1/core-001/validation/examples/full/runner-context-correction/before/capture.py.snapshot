@@ -1,0 +1,182 @@
+"""Finite full-pass contexts around the unchanged, qualified pilot compiler observer."""
+import importlib.util
+import json
+import os
+from pathlib import Path
+import sys
+from types import FunctionType
+import xml.etree.ElementTree as ET
+
+HERE = Path(__file__).resolve().parent
+V = HERE.parents[1]
+sys.path.insert(0, str(V))
+from foundation import ROOT, RUNTIME, require, sha
+
+PILOT_SHA = '482151879d4c9e8c911a8e6615352a1c05a6406d58383dbc96a8d36154112eed'
+PARSER_SHA = 'a6c2c0954772242d99fed2460f7c473780835605752c59732d32b76002cb8cee'
+
+
+def full_descriptors(helper, lines, project):
+    """Use the proven grammar with a private explicit project base; qualified globals stay intact."""
+    require(Path(helper.__file__).resolve() == V / 'checker-binding/bind.py' and
+            sha(Path(helper.__file__).read_bytes()) == PARSER_SHA, 'Qualified descriptor algorithm changed')
+    project = Path(project)
+    require(project.is_absolute() and project.resolve().is_relative_to(ROOT) and project.suffix == '.csproj',
+            'Supply the actual selected primary project')
+    original = helper.compiler_file_arguments
+    scope = dict(original.__globals__, PROJECT=project)
+    resolver = FunctionType(original.__code__, scope, original.__name__, original.__defaults__, original.__closure__)
+    return resolver(lines)
+
+
+def kernel(project):
+    original = HERE.parent / 'capture.py'
+    require(sha(original.read_bytes()) == PILOT_SHA, 'Qualified pilot compiler observer changed')
+    spec = importlib.util.spec_from_file_location('preserved_pilot_compiler_observer', original)
+    module = importlib.util.module_from_spec(spec)
+    source = original.read_text()
+    old = 'helper.compiler_file_arguments(lines)'
+    require(source.count(old) == 1, 'Reconcile the single proven descriptor call site')
+    module.full_descriptors = full_descriptors
+    exec(compile(source.replace(old, 'full_descriptors(helper, lines, PROJECT)'),
+                 str(original) + '[Full-selected-project-descriptors]', 'exec'), module.__dict__)
+    # Explicit contexts only; the original V still routes parser reuse to qualified validation tools.
+    module.HERE, module.PROJECT, module.NAME = HERE, project, project.stem
+    require(module.V == V and module.ROOT == ROOT, 'Compiler observer helper context differs')
+    return module
+
+
+def expected_sources(project, injection):
+    values = {str(path.resolve()) for path in project.parent.rglob('*.cs')
+              if not {'bin', 'obj'}.intersection(path.relative_to(project.parent).parts)}
+    for item in ET.parse(project).getroot().findall('.//Compile'):
+        require('Remove' not in item.attrib, 'New compile-removal policy needs an explicit context review')
+        if 'Include' in item.attrib:
+            path = item.attrib['Include'].replace('\\', '/')
+            require('$(' not in path and '*' not in path, 'New evaluated source include needs an explicit context review')
+            values.add(str((project.parent / path).resolve()))
+    values.update(injection)
+    if project.stem in ('Yubico.YubiKit.Core.UnitTests', 'Yubico.YubiKit.Ctap2.UnitTests'):
+        # Exact already-restored package source, attached by the actual xUnit v3 target.
+        values.add('/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/_content/DefaultRunnerReporters.cs')
+    admission = json.loads((HERE / 'package-entrypoint-admission.json').read_bytes())
+    if str(project) in admission['contexts'].values():
+        values.add(admission['files']['source']['path'])
+    return values
+
+
+def test_sdk_metadata(assets, props, targets, admission, project, policy):
+    """Only the pinned Test.Sdk net8.0 producer, not a general package-source evaluator."""
+    require(str(project) in admission['contexts'].values(), 'Project has no pinned Test.Sdk entrypoint admission')
+    require(policy['GenerateProgramFile'] == 'true' and policy['GeneratedProgramFile'] == admission['files']['source']['path']
+            and policy['NuGetPackageRoot'] in admission['package_folders'] and policy['Language'] == 'C#',
+            'Actual Test.Sdk entrypoint generation policy differs')
+    require(assets['project']['restore']['projectPath'] == str(project), 'Test.Sdk assets belong to another project')
+    key = admission['package_key']
+    library = assets['libraries'][key]
+    require(library['type'] == 'package' and library['path'] == admission['package_path'] and
+            library['sha512'] == admission['package_content_hash'], 'Test.Sdk resolved package identity differs')
+    relative = {role: str(Path(admission['files'][role]['path']).relative_to(admission['package_root']))
+                for role in ('source', 'producer', 'props')}
+    require(set(relative.values()) <= set(library['files']) and
+            set(assets['targets']['net10.0'][key]['build']) == {relative['producer'], relative['props']} and
+            assets['packageFolders'] == admission['package_folders'], 'Test.Sdk resolved source/build assets differ')
+    ns = {'m': 'http://schemas.microsoft.com/developer/msbuild/2003'}
+    for text, role in ((props, 'props'), (targets, 'producer')):
+        expected = '$(NuGetPackageRoot)' + admission['package_path'] + '/' + relative[role]
+        tree = ET.fromstring(text)
+        imports = tree.findall('.//m:Import', ns)
+        matches = [node for node in imports if node.attrib.get('Project') == expected]
+        require(len(matches) == 1 and matches[0].attrib.get('Condition') == "Exists('" + expected + "')" and
+                any(matches[0] in list(group) and group.attrib.get('Condition') == " '$(ExcludeRestorePackageImports)' != 'true' "
+                    for group in tree.findall('m:ImportGroup', ns)), 'Test.Sdk actual NuGet import producer differs')
+
+
+def package_entrypoint(k, policy):
+    admission_path = HERE / 'package-entrypoint-admission.json'
+    admission = json.loads(admission_path.read_bytes())
+    if str(k.PROJECT) not in admission['contexts'].values():
+        return None
+    require(all(Path(row['path']).resolve() == Path(row['path']) for row in admission['files'].values()),
+            'Redirected pinned Test.Sdk package input')
+    k.verify(list(admission['files'].values()))
+    assets_path = Path(policy['Assets'])
+    require(assets_path == k.PROJECT.parent / 'obj/project.assets.json', 'Unexpected Test.Sdk assets location')
+    assets = json.loads(assets_path.read_bytes())
+    props = assets_path.parent / (k.PROJECT.name + '.nuget.g.props')
+    targets = assets_path.parent / (k.PROJECT.name + '.nuget.g.targets')
+    test_sdk_metadata(assets, props.read_text(), targets.read_text(), admission, k.PROJECT, policy)
+    inputs = [k.identity(path) for path in (admission_path, props, targets)] + list(admission['files'].values())
+    return dict(package=admission['package_key'], source=admission['files']['source'], producer=admission['files']['producer'],
+                inputs=inputs, assets=k.identity(assets_path),
+                effective_policy={name: policy[name] for name in ('GenerateProgramFile', 'GeneratedProgramFile', 'NuGetPackageRoot', 'Language')},
+                scope='Exact pinned package source required in both before Compile items and executed Csc arguments; no assembly execution.')
+
+
+def before(k, directory, context):
+    policy = k.policy(directory)
+    require(policy['Project'] == str(k.PROJECT) and policy['SDK'] == '10.0.404' and policy['TFM'] == 'net10.0'
+            and policy['Configuration'] == 'Release', 'Actual full-example project/SDK/target differs')
+    require(all(policy[name] == 'true' for name in ('WarningsAsErrors', 'Analyzers', 'ProvideArgs')) and
+            policy['SkipCompiler'] == policy['SharedCompiler'] == 'false', 'Actual compiler/analyzer execution policy differs')
+    actual = k.items(directory)
+    entrypoint = package_entrypoint(k, policy)
+    expected = expected_sources(k.PROJECT, context['injections'])
+    require(expected <= set(context['known_compile_sources']), 'New source appeared outside the reviewed fixed input population')
+    ordinary = expected.intersection(actual['sources'])
+    require(ordinary == expected, 'Expected source/injection file is absent from actual Csc inputs')
+    obj = RUNTIME / 'jobs' / k.NAME / 'obj' if context['name'] == 'consumer' else k.PROJECT.parent / 'obj'
+    for path in set(actual['sources']) - expected:
+        require(Path(path).is_relative_to(obj) and Path(path).name in
+                (k.NAME + '.GlobalUsings.g.cs', k.NAME + '.AssemblyInfo.cs', '.NETCoreApp,Version=v10.0.AssemblyAttributes.cs',
+                 *(('SelfRegisteredExtensions.cs', 'XunitAutoGeneratedEntryPoint.cs') if context['name'] in ('Core.UnitTests', 'Ctap2.UnitTests') else ())),
+                'Unexpected actual compiler-generated source input: ' + path)
+    require(any(Path(path).name == 'Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll' for path in actual['analyzers']), 'Canonical analyzer absent')
+    files = {Path(path) for values in actual.values() for path in values}
+    files |= {Path(policy['Assets']), Path(policy['SDKPath']).parent / 'Roslyn/bincore/csc.dll'}
+    if entrypoint:
+        files.update(Path(row['path']) for row in entrypoint['inputs'])
+    snapshots = directory / 'sources'
+    snapshots.mkdir()
+    for path in actual['sources']:
+        if Path(path).is_relative_to(HERE) or Path(path).is_relative_to(obj) or (entrypoint and path == entrypoint['source']['path']):
+            row = k.identity(path)
+            with (snapshots / (row['sha256'] + '-' + Path(path).name + '.snapshot')).open('xb') as output:
+                output.write(Path(path).read_bytes())
+    with (directory / 'project.assets.json.snapshot').open('xb') as output:
+        output.write(Path(policy['Assets']).read_bytes())
+    k.write(directory / 'before.json', dict(policy=policy, items=actual, inputs=[k.identity(path) for path in sorted(files)], context=context,
+                                          package_compile_input=entrypoint))
+
+
+def finish(k, directory, context):
+    compiled = json.loads((directory / 'compiler.json').read_bytes())
+    k.verify(compiled['inputs'])
+    k.verify(compiled['outputs'])
+    target = Path(k.policy(directory)['TargetPath']).resolve()
+    allowed = RUNTIME / 'jobs' / k.NAME / 'bin' if context['name'] == 'consumer' else k.PROJECT.parent / 'bin'
+    require(target.is_relative_to(allowed) and target.name == k.NAME + '.dll', 'Final output escaped the approved actual project tree')
+    require(k.identity(target)['sha256'] == compiled['outputs'][0]['sha256'], 'Final DLL differs from actual Csc output')
+    relevant = [target, target.with_suffix('.pdb')]
+    relevant += [target.with_suffix(suffix) for suffix in ('.deps.json', '.runtimeconfig.json') if target.with_suffix(suffix).is_file()]
+    k.write(directory / 'finish.json', dict(outputs=[k.identity(path) for path in relevant],
+            compiler_outputs=compiled['outputs'], inputs=compiled['inputs'], context=context, execution_status='not-run',
+            output_scope='Own compiled DLL/PDB and available dependency/runtime metadata; actual consumed reference bytes are in compiler inputs. Unconsumed copied dependencies/native/package assets receive no tested-output claim.'))
+
+
+if __name__ == '__main__':
+    phase, folder = sys.argv[1:]
+    directory = Path(folder).resolve()
+    require(directory.is_relative_to(HERE / 'attempts') and directory.is_dir(), 'Use a fresh full-example attempt')
+    project = Path(os.environ['DocExamplesSelectedProject']).resolve()
+    context = json.loads((directory / 'context.json').read_bytes())
+    require(context['project'] == str(project), 'Actual hook project differs from the accepted context')
+    k = kernel(project)
+    if phase == 'before':
+        before(k, directory, context)
+    elif phase == 'compiler':
+        k.compiler(directory)  # Proven observer with only its descriptor call bound to the selected project.
+    elif phase == 'finish':
+        finish(k, directory, context)
+    else:
+        raise ValueError('Unknown capture phase')

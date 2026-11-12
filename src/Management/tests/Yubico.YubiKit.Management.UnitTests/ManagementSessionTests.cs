@@ -39,6 +39,8 @@ public class ManagementSessionTests
                 connection,
                 cancellationToken: TestContext.Current.CancellationToken));
 
+        // This direct constructor does not attach a guard holder. The assertion above checks rejection,
+        // but this probe cannot detect a stale attachment; that requires a separately bound factory probe.
         await using var probe = new ProbeSession(connection);
     }
 

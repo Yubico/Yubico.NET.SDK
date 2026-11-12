@@ -1,0 +1,70 @@
+[
+  {
+    "path": "triage/editing-release.md",
+    "sha256": "3b01360cf7e973b51e076ef02c3683228d007e96c783915e62a046e34bc8cc71"
+  },
+  {
+    "path": "triage/full-family/map.json",
+    "sha256": "ee023021f2fd2586b4d75fc0a488cba2e3bdbb1ea7fdb91a793dbbd8bb4a7dd8"
+  },
+  {
+    "path": "triage/full-family/relationships.json",
+    "sha256": "6ed02ffb72d3b29857b8fea693598ecb165132c05b4ea42e9c190baced362e90"
+  },
+  {
+    "path": "triage/full-family/inherited-links.json",
+    "sha256": "c6d1e7fae0e33dca904cf9953e20a2e4aafc378b940a325a2eaf71be81042bd2"
+  },
+  {
+    "path": "triage/full-family/probe-priorities.md",
+    "sha256": "ba50b9749470b66fc6cf9ea2d54688bf4a777aec60502c8e5352131d018b596e"
+  },
+  {
+    "path": "investigation-A.md",
+    "sha256": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256"
+  },
+  {
+    "path": "investigation/A/findings.json",
+    "sha256": "881d8c0cc6430bc4ece95991d2559bde4b0247b15139436baa9cd4e022622c4e"
+  },
+  {
+    "path": "investigation/A/file-dispositions.json",
+    "sha256": "74d638d50e7e7a78caeeff5c924b8ee08b2c1880ebb848099448ec237c71c289"
+  },
+  {
+    "path": "investigation/A/unit-results.json",
+    "sha256": "23cd7105b3ca3b63c36cd6f5c3233a2bd12916be199fc5f15524cf8a6c6c5fcf"
+  },
+  {
+    "path": "investigation/A/sources/captures.json",
+    "sha256": "9fbb74cdf80fe12a9b07384b9f64cdaa671f3453e179e9d94d7ebb14d31dae17"
+  },
+  {
+    "path": "investigation/A/sources/notes.md",
+    "sha256": "1dde48d8718d7138eae9ab4da79f12d477f8dd0c298f88d1b909bd2dd4f47c29"
+  },
+  {
+    "path": "inventory/packets/A.json",
+    "sha256": "427fd5833a9a57057a01b556277caf71f5a043820adbe63b0c37485f52712a0c"
+  },
+  {
+    "path": "investigation/A/sources/vendor-config.html",
+    "sha256": "b707e6b2874a1de53149285a9567ff7262b8e6714839658ca42312b4def41538"
+  },
+  {
+    "path": "investigation/A/sources/vendor-fips-form-factor.html",
+    "sha256": "5d5ef94f7ba2cd9fbc232c4e922b9c6d638179c8a88290503de3f45e1dbce5b0"
+  },
+  {
+    "path": "investigation/A/sources/windows-container.html",
+    "sha256": "a11a8c3ad8bbf1fab20d93ef237b0a42a93b2ef2e051614e4655ab7d5a827fa8"
+  },
+  {
+    "path": "investigation/A/sources/windows-reader-instance.html",
+    "sha256": "586a3696a59bee30045ac891aeb72b83c584de337ed48feba2550a1f243b2673"
+  },
+  {
+    "path": "investigation/A/sources/dotnet10-bounded-channel.cs.txt",
+    "sha256": "4798673d97ee37741287c70b7f017b5f962b956b1a9e214b9089e0940a4ee406"
+  }
+]

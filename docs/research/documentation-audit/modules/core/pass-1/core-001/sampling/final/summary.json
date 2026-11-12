@@ -1,0 +1,46 @@
+{
+  "state": "FINAL SAMPLING RECONCILIATION CANDIDATE; NOT ASTRA/INDEPENDENT ACCEPTANCE",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "assigned_original_inventory": 14044,
+  "historical_admitted_population": 9352,
+  "historical_original_selection": 983,
+  "actual_unique_reads": 1129,
+  "actual_additional_reads": 146,
+  "conservative_quota_population": 9352,
+  "original_role_minimum_sum": 983,
+  "authorized_expansion_sum": 84,
+  "required_target_sum": 1067,
+  "all_five_actual_patches_considered": true,
+  "queued_packets": 5,
+  "queued_paths": 9,
+  "current_accepted_manifest_paths": 361,
+  "candidate_supported_unchanged_after_all_five_patches": 1067,
+  "candidate_shortfall": 0,
+  "all_candidate_role_targets_met": true,
+  "actual_verdict_withheld_units": 62,
+  "known_population_eligibility_delta_units": 81,
+  "actual_CURRENT_mapping_states": {
+    "EXACT-UNCHANGED-UNIT": 1116,
+    "RANGE-CHANGED-OR-METADATA-UNKNOWN": 13
+  },
+  "actual_projected_AFTER_mapping_states": {
+    "EXACT-UNCHANGED-UNIT": 1109,
+    "RANGE-CHANGED-OR-METADATA-UNKNOWN": 20
+  },
+  "unknown_original_metadata_files": [],
+  "PF02_changed_admitted_population_ids": [
+    "core-001:unit:f3504065f8d80ef8"
+  ],
+  "PF02_changed_already_excluded_map_ids": [
+    "core-001:unit:9081bf97fe2c9fb3",
+    "core-001:unit:a4dbc5b8c7e1ddcb"
+  ],
+  "final_accepted_denominator": null,
+  "final_accepted_clean_count": null,
+  "sampler_PASS": null,
+  "post_transfer_hash_refresh": "PENDING ONCE AFTER ALL FIVE TRANSFERS; projected bytes are not primary bytes",
+  "review": "PENDING ASTRA AND INDEPENDENT REVIEW",
+  "preparer_content_verdicts": 0,
+  "inventory_clean_claim": "NONE: original14,044 include candidate/context/history/exclusions; only original9,352 form the conservative sampling population",
+  "execution": "Python records/patch/range/hash comparisons only; no Git, SDK/compiler/tests, native/device, formatter, cryptographic SDK operation or subagents"
+}

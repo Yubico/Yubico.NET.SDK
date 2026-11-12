@@ -1,0 +1,178 @@
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -499,16 +499,27 @@
+ #### ✅ DO Write These Tests
+ 
+ **Behavior Tests** - Tests that verify actual functionality:
+-```csharp
+-// ✅ GOOD - Tests real protocol configuration logic
+-[Fact]
+-public void Configure_FirmwareBelow400_UsesNeoMaxSize()
+-{
+-    var protocol = new PcscProtocol(logger, connection);
+-
+-    protocol.Configure(new FirmwareVersion(3, 5, 0));
+-
+-    Assert.Equal(254, protocol.MaxApduSize);
++
++This example belongs in the Core unit-test assembly, which can access the internal protocol and its
++existing fake. The test owns the fake connection; the protocol borrows it and is disposed first.
++```csharp
++using Xunit;
++using Yubico.YubiKit.Core.Devices;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
++using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
++
++public class ProtocolConfigurationExamples
++{
++    [Fact]
++    public void Configure_FirmwareBelow400_UsesNeoMaxSize()
++    {
++        using var connection = new FakeSmartCardConnection { SupportsExtendedApduValue = false };
++        using var protocol = new PcscProtocol(connection);
++
++        protocol.Configure(new FirmwareVersion(3, 5, 0));
++
++        Assert.Equal(1390, protocol.MaxApduSize); // Complete-command ceiling, not a short data chunk.
++    }
+ }
+ ```
+ 
+--- a/docs/LOGGING.md
++++ b/docs/LOGGING.md
+@@ -170,20 +170,26 @@
+ `YubiKitLogging.UseTemporary()` temporarily replaces the process-wide factory and restores the captured
+ factory on disposal. It is useful for serially coordinated diagnostics, not test-local or async-flow
+ isolation. Parallel or out-of-order scopes can restore the wrong factory, and existing static loggers
+-keep their earlier provider. Coordinate all participants before using it. For example:
++keep their earlier provider. Coordinate all participants before using it. This helper borrows an
++application-owned factory; it restores the global factory reference without disposing the borrowed one:
+ 
+ ```csharp
+ using Microsoft.Extensions.Logging;
+ using Yubico.YubiKit.Core;
+ using Yubico.YubiKit.Core.Devices;
+ 
+-static async Task DiscoverWithTemporaryLoggingAsync(CancellationToken cancellationToken)
+-{
+-    using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
++static async Task DiscoverWithTemporaryLoggingAsync(
++    ILoggerFactory loggerFactory, CancellationToken cancellationToken)
++{
+     using var _ = YubiKitLogging.UseTemporary(loggerFactory);
+     await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+ }
+ ```
++
++Keep the factory and providers alive through all participating SDK work, including late enumeration
++completion and later uses of static loggers created during this scope. Completion of the bounded Find
++task is not a join for that work. Restoring the global factory neither replaces captured loggers nor
++ends their provider lifetime; the application must choose an outer lifetime that covers those uses.
+ 
+ ## Troubleshooting
+ 
+--- a/docs/TESTING.md
++++ b/docs/TESTING.md
+@@ -546,22 +546,23 @@
+ 
+ ### Test All Public APIs
+ 
+-The following is an illustrative test shape with an application-supplied fake, not a complete Core
+-test or a replacement for meaningful protocol assertions. Dispose a connection even when an assertion fails:
+-
+-```csharp
+-[Fact]
+-public async Task ConnectAsync_WhenDeviceAvailable_ReturnsConnection()
+-{
+-    // Arrange
+-    var device = new MockYubiKey { IsConnected = true };
+-
+-    // Act
+-    await using var connection = await device.ConnectAsync<ISmartCardConnection>();
+-
+-    // Assert
++The following illustrative assertion helper borrows an application-supplied `IYubiKey` fake configured
++to return a SmartCard connection. It checks the public connection type, not live device health or
++protocol behavior. The helper owns and disposes the returned connection even when an assertion fails:
++
++```csharp
++using Xunit;
++using Yubico.YubiKit.Core.Abstractions;
++using Yubico.YubiKit.Core.Devices;
++using Yubico.YubiKit.Core.Transports.SmartCard;
++
++static async Task AssertSmartCardConnectionAsync(IYubiKey device, CancellationToken cancellationToken)
++{
++    await using ISmartCardConnection connection =
++        await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
++
+     Assert.NotNull(connection);
+-    Assert.True(connection.IsConnected);
++    Assert.Equal(ConnectionType.SmartCard, connection.Type);
+ }
+ ```
+ 
+--- a/docs/architecture/connection-ownership-and-contention.md
++++ b/docs/architecture/connection-ownership-and-contention.md
+@@ -193,8 +193,11 @@
+ than `OperationCanceledException`. During a FIDO HID keep-alive, the caller
+ token can signal `CTAPHID_CANCEL` after observing a keep-alive; the protocol then waits for the
+ original terminal response and drains its frames. CANCEL has no response of its own. Core currently
+-returns a late CBOR success (`0x00`) rather than replacing it with cancellation. That local result policy
+-is separate from whether the authenticator actually canceled the request. With no further report, the
++returns a late success payload beginning with `0x00` when the original command byte is unencoded CBOR
++`0x10`. An encoded `0x90` request can correlate with the terminal response but currently misses that
++success classification and can surface cancellation instead. This normalization gap remains separate
++from whether the authenticator actually canceled the request and from the no-response CANCEL rule.
++With no further report, the
+ wait can remain pending indefinitely. During an OTP HID touch wait, the caller
+ token can trigger a dummy-report reset;
+ reuse requires that reset to succeed. Neither signal rolls back work already sent. A failed partial
+--- a/docs/architecture/raw-access-tiers.md
++++ b/docs/architecture/raw-access-tiers.md
+@@ -107,6 +107,10 @@
+ Supply ordinary request/response commands to `SendAndReceiveAsync`. `CTAPHID_CANCEL` is a no-response
+ control command, not a request with a cancel acknowledgment. Core's caller-token cancellation sends it
+ only after a keep-alive and then drains the original response; silence can leave that drain pending.
++The late-success exception currently requires the original unencoded CBOR command byte `0x10` and a
++response payload beginning with `0x00`. Encoded `0x90` can pass terminal-command correlation, which masks
++the initialization bit, but misses that success classification and can surface cancellation instead.
++This is a current normalization gap, not a different intended CBOR grammar or authenticator requirement.
+ Malformed control data or a partial FIDO failure does not establish a general safe-reuse guarantee.
+ 
+ ### OTP HID
+--- a/docs/usage/device-discovery.md
++++ b/docs/usage/device-discovery.md
+@@ -42,7 +42,7 @@
+ 
+ | Application | Recommended path |
+ |---|---|
+-| Short CLI command or script | `FindFirstAsync` / `FindAllAsync`; no background cleanup |
++| Short CLI command or script | `FindFirstAsync` / `FindAllAsync`; no caller-owned monitor or start/stop lifetime |
+ | Optional hardware feature | `FindFirstOrDefaultAsync`; null means no matching key now |
+ | CCID-only utility | `Find…Async(interfaces: ConnectionType.SmartCard)` to avoid HID probing |
+ | One device-change consumer | `YubiKeyManager.WatchAsync(ct)`; enumeration owns the monitor |
+--- a/src/Core/CLAUDE.md
++++ b/src/Core/CLAUDE.md
+@@ -115,7 +115,11 @@
+ 
+ `CoseKeyInfo` in `Core.Cryptography.Cose` contains kty/crv, never an intrinsic alg. Only verified IANA mappings
+ are present (secp256k1 = 8; Brainpool P256/P384/P512 = 256/258/259). Active `Ctap2.Cose.CoseKey` remains open-valued and preserves
+-unknown wire metadata/opaque bytes; PIN/UV profile checks remain strict. OpenPGP-specific legacy 25519 OIDs,
++unknown wire metadata/opaque bytes. PIN/UV key agreement has a separate required protocol profile:
++the current peer helper checks byte-array coordinates and their 32-byte lengths, forces P-256 import,
++and delegates point acceptance to the provider. It does not validate the peer's required kty/crv/alg
++labels or optional-label restrictions. This is a validation gap, not intended forward compatibility;
++correct labels on the platform-generated key do not validate the peer. OpenPGP-specific legacy 25519 OIDs,
+ RSA sizes and slot choices live in OpenPgp; Core must never depend on that module.
+ 
+ To add a variant, append an explicit `KeyType` ID, add curve/key data and relationships, and registered COSE
+@@ -908,7 +912,7 @@
+ - **Constituent I/O is shielded after admission.** SmartCard cancellation is checked at entry; admitted transmits use `CancellationToken.None`. FIDO can request CANCEL after a keep-alive and drain the original response; OTP touch-wait cancellation can attempt a reset. Neither supplies rollback, a completion deadline, or native release proof.
+ - **Whole workflows remain caller-owned.** Await complete public operations before another operation or disposal. The guard drains an exchange, not later exchanges, parsing/cache work, or detached callbacks. Never dispose from a callback that the operation must await.
+ - **The guard is protocol-instance scoped.** An SCP wrapper shares its base PC/SC guard, but independently created raw protocol instances over one connection are not coordinated. The supported contract prevents that shape by admitting one `ApplicationSession` per connection; connection-wide raw protocol ownership is a separate API decision.
+-- **Discovery/connection ownership is atomic.** A connection to a grouped physical key claims every known stable member interface ID before native open. A second connection through any member throws `ConnectionInUseException` immediately. Claims are sorted, deduplicated, rolled back on failure, and released only after physical teardown. Standalone records use one-element scopes when discovery cannot prove grouping. Discovery remains per-interface and nonblocking; connections may wait cancellably for active discovery, while waiting connections retain priority. One level down, `ConnectionSessionGuard` allows one live `ApplicationSession` per connection and supports sequential reuse. In-process only — cross-process contention is not covered.
++- **Grouped connection claims are acquired incrementally before native open.** Member IDs are sorted and deduplicated, then claimed one at a time. An active discovery lease on an earlier member can delay checking a later member held by a live connection; cancellation can end that wait first. Encountering a live holder refuses acquisition with `ConnectionInUseException`, and failure rolls back earlier claims in reverse order. This is not a whole-set atomic preflight or an invocation-time refusal guarantee. Built-in PC/SC and macOS/Linux native owners require their route-specific release proof; Windows/custom compatibility disposal does not automatically prove physical teardown. Standalone records use one-element scopes. Discovery remains per-interface and nonblocking, with waiting connections retaining priority. `ConnectionSessionGuard` separately allows one live session per connection and sequential reuse. These are in-process claims, not cross-process exclusion.
+ - **Discovery caller waits are budgeted and reads are single-flight.** Identity reads use two seconds per attempt; composite metadata uses three seconds. Underlying work can continue after that wait. One finder owns an atomic evidence epoch containing identity cache, metadata cache, and read scope. Hotplug invalidation replaces the whole epoch and retires queued admissions; active work keeps its native ownership and writes only into the old caches. Identity entries validate the observed PID; successful metadata entries instead use member IDs and lack the equivalent PID check. Successful serial-less metadata can remain cached. Without listener hints, same-slot substitution can stay stale until observed absence. Public Find uses fresh per-call evidence and retires its scope on exit. See [discovery guarantees](../../docs/architecture/device-discovery-guarantees.md).
+ - **Potentially sibling discovery reads do not overlap.** Before worker admission, USB reads take a process-wide PID gate; an unknown USB PID takes all known PID gates atomically. Eligibility checks, complete grants, and releases share one short lock. Ineligible requests await a release notification without reserving any gates, so a pending unknown-PID request cannot spread a held PID's stall to unrelated PIDs, even in a live finder after its caller's budget expires. This conservative policy also serializes distinct same-PID keys, but known different PIDs and NFC remain independent. It changes no merge evidence or public connection claims. `FindYubiKeys` registers in-scope candidates in its read scope for both identity and metadata reads. The granted admission transfers to the discovery registry lease before native open and follows native release, including retained/quarantined built-in owners. Never release it at a bounded wait, cancellation, scope retirement, or merely because failed native disposal completed its task. Queued admission observes epoch retirement without occupying a native worker. `DiscoveryReadSchedulingTests` pins disposal, abandonment, retirement, and independent-PID progress with a live unknown-PID waiter; `PcscDiscoveryLifetimeTests` pins failed native-release retention.
+ - **The monitor is a single owned lifetime with one producer.** `YubiKeyMonitor` owns listeners and sequential

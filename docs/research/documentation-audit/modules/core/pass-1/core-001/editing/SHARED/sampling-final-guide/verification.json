@@ -1,0 +1,26 @@
+{
+  "only_product_delta_from_accepted_before": [
+    "docs/TESTING.md",
+    "docs/usage/device-discovery.md",
+    "src/Core/README.md"
+  ],
+  "other_23_product_paths_unchanged": true,
+  "prior_records_preserved": 63,
+  "complete_fenced_bodies_unchanged": 54,
+  "unclosed_fences": 0,
+  "new_missing_local_file_targets": [],
+  "scope": "Local file targets; anchors/external URLs not checked.",
+  "static_checks": {
+    "diff-whitespace": {
+      "exit": 0,
+      "output": ""
+    },
+    "focused-patch": {
+      "exit": 0,
+      "output": ""
+    }
+  },
+  "index_unchanged": true,
+  "build_test_formatter_compiler_native_crypto_device": "NOT RUN",
+  "focused_independent_review": "pending"
+}

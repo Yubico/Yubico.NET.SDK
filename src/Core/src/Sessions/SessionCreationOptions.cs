@@ -23,9 +23,11 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///     Configures cross-cutting behavior when an application session is created.
 /// </summary>
 /// <remarks>
-///     Factories snapshot these values when called and do not retain this object. Sessions retain the referenced
-///     <see cref="UserPresencePrompt" /> for their lifetime without taking ownership of it. The caller retains
-///     ownership and disposal responsibility for both that service and <see cref="ScpKeyParameters" />.
+///     Factories pass the settings to initialization. An initializer can retain this options object while
+///     creation is pending; returned sessions retain the selected values and references rather than the carrier.
+///     Referenced keys, certificates, and services are shared objects, not deep copies. Sessions that use
+///     <see cref="UserPresencePrompt" /> retain it without taking ownership; Management and Security Domain
+///     ignore it. The caller owns the prompt and <see cref="ScpKeyParameters" />.
 /// </remarks>
 public sealed class SessionCreationOptions
 {
@@ -34,7 +36,8 @@ public sealed class SessionCreationOptions
 
     /// <summary>
     ///     Gets optional Secure Channel Protocol key parameters. The parameters are borrowed for initialization;
-    ///     the caller retains ownership and disposal responsibility.
+    ///     the caller retains ownership and disposal responsibility. Security Domain also retains them for
+    ///     reset and reinitialization. Keep the parameters alive until that session has been disposed.
     /// </summary>
     public ScpKeyParameters? ScpKeyParameters { get; init; }
 
@@ -56,7 +59,9 @@ public sealed class SessionCreationOptions
     ///     presence.
     /// </summary>
     /// <remarks>
-    ///     A session retains the referenced service for its lifetime. The SDK does not own or dispose it.
+    ///     Sessions that use this service retain it for their lifetime without disposing it. Management and
+    ///     Security Domain ignore it. Keep callbacks non-reentrant: disposing the session from its own callback,
+    ///     synchronously or asynchronously, can wait on the exchange that is awaiting that callback.
     /// </remarks>
     public IUserPresencePrompt? UserPresencePrompt { get; init; }
 

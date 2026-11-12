@@ -45,7 +45,8 @@ public sealed class Curve25519PublicKey : PublicKey
     /// </summary>
     /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes.</returns>
     /// <remarks>
-    /// The public key is represented as a byte array, which is the raw public key data.
+    /// This is a borrowed view of the copied key-owned storage. Construction checks the 32-byte
+    /// representation width, rather than validating a point's mathematical or protocol suitability.
     /// </remarks>
     public ReadOnlyMemory<byte> PublicPoint => _publicPoint;
 
@@ -80,6 +81,8 @@ public sealed class Curve25519PublicKey : PublicKey
     /// <exception cref="CryptographicException">
     /// Thrown if the subjectPublicKeyInfo is invalid.
     /// </exception>
+    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
+    /// <remarks>The shared decoder checks AlgorithmIdentifier fields, rather than complete outer-input exhaustion.</remarks>
     public static Curve25519PublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
         AsnPublicKeyDecoder
             .CreatePublicKey(subjectPublicKeyInfo)

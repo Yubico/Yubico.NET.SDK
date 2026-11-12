@@ -1,0 +1,5 @@
+
+    /// ConnectionType.Hid.Matches(ConnectionType.HidFido | ConnectionType.SmartCard); // true: FIDO is shared
+    /// ConnectionType.HidOtp.Matches(ConnectionType.SmartCard);                       // false: nothing shared
+    /// ConnectionType.All.Matches(ConnectionType.Unknown);                            // false: empty set
+    /// 

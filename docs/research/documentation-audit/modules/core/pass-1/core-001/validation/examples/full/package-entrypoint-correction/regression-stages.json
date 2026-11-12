@@ -1,0 +1,26 @@
+{
+  "scope": "Pure source-admission oracles only; no capture before/compiler/finish phase or SDK build/test execution.",
+  "red": {
+    "exit_code": 1,
+    "missing_expected_source_in_all_seven_integration_contexts": true
+  },
+  "green": {
+    "exit_code": 0,
+    "all_seven_included_three_excluded": true,
+    "negative_cases_rejected": [
+      "GenerateProgramFile",
+      "GeneratedProgramFile",
+      "NuGetPackageRoot",
+      "Language",
+      "wrong-package-content-hash",
+      "wrong-package-path",
+      "source-absent-from-assets",
+      "producer-absent-from-assets",
+      "foreign-project-assets",
+      "producer-import-wrong-version",
+      "producer-import-condition-weakened",
+      "excluded-project"
+    ]
+  },
+  "command": "python3 -B package-entrypoint-correction/verify.py"
+}

@@ -1,0 +1,713 @@
+[
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/README.md",
+    "section": "126–152",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "SCP11 task lacks immediate required effective-version creation example",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/README.md",
+    "section": "202–207",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Retain accurate assumed/explicit version conditions; add setup gate consequence",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "125–205",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Actual override/default -> Core gate; local config and version not retained",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "765–799",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Both reset callbacks omit config/version, retain exact SCP parameters",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "section": "130–147",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Local setup/version provenance and selected catch must stay together",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+    "section": "factory remarks35–41",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain current warning; add immediate SCP11 effective-version requirement",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "Generate207–214 and Reset316–330",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain accurate explicit-version/reset limitation; explain local pre-wire failure",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "docs/migration/v1-to-v2.md",
+    "section": "factory row119–120 and SD822–826",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain version source/wrapper mapping; reopen if reset retention or gate changes",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "section": "FirmwareVersionOverride XML46–52",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "SHARED/B5 review of SD only-source versus generation/setup gate condition",
+    "trigger": "Effective version/gate/reset option retention changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/README.md",
+    "section": "215–225",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Contained private-key/certificate identity needs actionable ownership wording",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "section": "123–128",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Replace unverified deep ownership caveat with source-qualified containment details",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "83–101",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Exact retained caller parameter object and borrowed connection",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "608–617",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Caller-owned private D alias, distinct encrypted copy",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "646–652",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Curve byte stackalloc uninitialized; source-quality qualification only",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainKeyMaterial.cs",
+    "section": "32–108",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Pooled plaintext finally versus separate KCV/ciphertext/provider temporaries",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+    "section": "factory 35–41",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain borrowed wrapper ownership; add concrete contained-owner cross-reference",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "section": "constructors/properties/Dispose",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B6/C primary owns containment/alias/clone XML correction",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+    "section": "Keys/Default/Dispose",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B6 primary owns exact StaticKeys reference disposal contract",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/tests/CLAUDE.md",
+    "section": "owned parameter examples 78–147",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain sound example scopes, do not imitate undisposed actual test inputs",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "section": "retained prompt XML 25–28,58–60",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "C/SHARED adds adoption condition: SD ignores supplied prompt and retains no service",
+    "trigger": "Key/certificate containment, aliases or temporary cleanup changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "816–823",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Facade strips response owner and exposes Data alias",
+    "trigger": "Facade response/result ownership or cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "35–52",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Input borrow and result owner/clear policy absent; supplemental XML read",
+    "trigger": "Facade response/result ownership or cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/README.md",
+    "section": "215–225",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Public source/result cleanup responsibility needs hidden-owner qualification",
+    "trigger": "Facade response/result ownership or cleanup changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "GET DATA35–52; certificates76–92",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Add ROM lifetime/hidden clear-owner conditions; preserve accurate certificate transfer/trust text",
+    "trigger": "Facade response/result ownership or cleanup changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "section": "Data/Clear",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B6 owns response copy/status owner; no unsafe writable cast recommendation",
+    "trigger": "Facade response/result ownership or cleanup changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/src/KeyInfo.cs",
+    "section": "metadata record XML",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain public metadata classification, not a secret owner",
+    "trigger": "Facade response/result ownership or cleanup changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/src/CaIdentifier.cs",
+    "section": "identifier record XML",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain value-only metadata/not trust wording",
+    "trigger": "Facade response/result ownership or cleanup changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "765–936",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Raw attempts bypass guard; flags clear only after attempts/disposal, failure cleanup local",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "312–332",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Add failed-reset disposal/reopen condition near existing destructive limits",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/README.md",
+    "section": "172–190",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Cancellation/failed-reset lifecycle and diagnostic completion boundaries",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "section": "74–99",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Keep attempt count and fresh-session workaround, add stale graph/failure action",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/tests/CLAUDE.md",
+    "section": "reset details57–75 and examples",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain two-session sequencing; add failed-reset recovery scope only if needed",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/tests/README.md",
+    "section": "automatic reset90–104",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain attempts/no-verification; qualify failed-session action",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+    "section": "31–87",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Preserve lexical reset-session disposal before next factory and parameter borrow; revisit comments if lifecycle changes",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "docs/AI-DOCS-GUIDE.md",
+    "section": "SecurityDomain484–509",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Already accurately destructive/partial/no-verified-state; retain unchanged unless policy changes",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+    "section": "public-workflow versus exchange rationale",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B5 primary retains mechanism; SD raw bypass is caller consequence",
+    "trigger": "Reset raw admission/status/readiness/reinit/recovery policy changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecureChannelException.cs",
+    "section": "70–74",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Message embeds opaque immediate failure text; supplemental helper read",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "section": "142–148",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Keep selected wrapper; useful nested status/local gate diagnosis",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "section": "175–179",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Global logging and opaque exception provenance, no blanket privacy assurance",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "232–244",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "GET DATA warning forwards exception object",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "485–489",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "SCP03 import error forwards exception object",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "666–670",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "EC import error forwards exception object",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecureChannelException.cs",
+    "section": "type/constructors/status19–74",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain selected-wrap and immediate-status XML, review opaque Message policy separately",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+    "section": "factory exceptions43–46",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Accurate selected catch; retain, reopen on changed set/phase",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "docs/migration/v1-to-v2-map.yml",
+    "section": "securitydomain-exception scalar",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain precise selected wrapping; no current edit warranted, preserve unrelated DOC-002",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "docs/migration/v1-to-v2.md",
+    "section": "SecurityDomain822–826",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Already accurate immediate-status/selection/cancellation boundary; retain",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/Core/src/YubiKitLogging.cs",
+    "section": "factory selection/configuration",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "C/SHARED primary owns redaction/provider lifetime policy",
+    "trigger": "Exception translation/nesting or logging/provider policy changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/README.md",
+    "section": "30–37",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Add a/c first post-setup correct-MAC phase beside existing b/authority qualification",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/README.md",
+    "section": "137–163",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Retain draft permission/counter condition and trust role distinction",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "25–31",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Setup flag versus device auth phase; draft final/profile scope",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+    "section": "61–70",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Protected public listing after flag is not an administrative-authority oracle",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "section": "SCP parameters123–128",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Add a/c first-MAC phase beside existing b authority distinction",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "type25–31 and allowlist249–275",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain draft restrictions; enrich a/c phase without final-profile upgrade",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+    "section": "handshake40–44/100–151",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B6 owns setup-ready wording and final/draft citation correction",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "docs/migration/v1-to-v2.md",
+    "section": "SecurityDomain822–826",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain b actor distinction; reopen on changed auth contract",
+    "trigger": "Auth completion/profile/command authority or trust provisioning changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "35–52",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Zero Le and configured format limits; no absent-Le promise",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "section": "281–290",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "One logical STORE DATA may physically chain through Core",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "208–228",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Common empty requestData/Le0 follows Core encryption/format policy",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+    "section": "32–36",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Forwarding dependency only, not a new local mechanism",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "section": "GetData208–245/StoreData727–735",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Observed command fields unchanged; XML inherits exact method contract",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+    "section": "Format22–56",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B6 owns bounds/zero-Le semantics, no new SD mechanism",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+    "section": "Format25–68",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B6 owns max/Le encoding; SD consumes reviewed outcome",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "section": "empty80/response133–166",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "B6 owns empty/profile/chaining fix decision; SD normal instructions exclude post-setup82",
+    "trigger": "B6 Le/empty/encryption/chaining/status behavior changes",
+    "owner": "Named Core primary or SHARED editor; no boundary write authority"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+    "section": "167–192",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Unscoped borrowed fake and exact failed-reinit oracle, not device reset proof",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+    "section": "68–75",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Fixture owns derived arrays separately from StaticKeys",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+    "section": "104–109",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Dispose only static keys, not fixture derived buffers",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+    "section": "24–50",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "DisposeCount/no synchronous Dispose is narrower than complete disposal observer",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+    "section": "217–435",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Nonnull/config inputs or transmit assertion do not verify all propagated settings/disposal",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+    "section": "1–103",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+    "section": "1–216",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+    "section": "1–196",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+    "section": "1–366",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+    "section": "1–183",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+    "section": "1–86",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Supplemental complete fixture read; exact caller trust/cleanup owner SD-IMP-007/008",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/Scp11TestData.cs",
+    "section": "1–94",
+    "outcome": "UNCHANGED; records-only assignment",
+    "reason": "Supplemental complete fixture read; exact caller trust/cleanup owner SD-IMP-007/008",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "Fresh SD editor/reviewer or scoped test owner after triage"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/README.md",
+    "section": "test project/coverage/setup and cleanup",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain no-hardware versus hardware distinction; sharpen actual oracle/resource scope",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/CLAUDE.md",
+    "section": "factory oracle36–48 and reset57–75",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Existing limits accurate; update only after real fixture/assertion/harness changes",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainStateRestoringTests.cs",
+    "section": "19–58",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain independent60-second Track-only cleanup and attempted restoration wording",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "SD editor"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnectionTests.cs",
+    "section": "17–46",
+    "outcome": "UNCHANGED; explicit dependency retention/referral",
+    "reason": "Retain published primitive-only scope and full tag equality; do not promote to handshake conformance",
+    "trigger": "Actual tests, fixture, assertions, tokens or restore harness changes",
+    "owner": "SD editor"
+  }
+]

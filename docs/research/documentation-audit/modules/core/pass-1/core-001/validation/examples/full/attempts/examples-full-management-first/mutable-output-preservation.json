@@ -1,0 +1,137 @@
+{
+  "files": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0002-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1246,
+        "sha256": "e8bc363453ad22381922f3fc4128943d09d14ff74a00866a3779385e8ede7db6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0003-Yubico.YubiKit.Management.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1246,
+        "sha256": "e8bc363453ad22381922f3fc4128943d09d14ff74a00866a3779385e8ede7db6"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 765,
+        "sha256": "4ba3100f312c1fe9cd4222f882054f9744b0759568ff135f69a6f15cd8ef398d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0004-Yubico.YubiKit.Management.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 765,
+        "sha256": "4ba3100f312c1fe9cd4222f882054f9744b0759568ff135f69a6f15cd8ef398d"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0005-Yubico.YubiKit.Management.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0006-Yubico.YubiKit.Management.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0007-Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0008-Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/project.assets.json",
+        "bytes": 191491,
+        "sha256": "50bd8134c4786add3b08e90e458696fe72d16cd9169cfda475520652d8bc2d1d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0009-project.assets.json",
+        "bytes": 191491,
+        "sha256": "50bd8134c4786add3b08e90e458696fe72d16cd9169cfda475520652d8bc2d1d"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-first/0010-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      }
+    }
+  ],
+  "scope": "Only mutable local outputs/refs/generated compiler inputs. SDK/framework/NuGet caches and reconstructible source corpus are excluded."
+}

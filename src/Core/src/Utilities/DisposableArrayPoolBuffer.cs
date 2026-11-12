@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Utilities;
 /// A disposable buffer backed by <see cref="ArrayPool{T}"/> that securely clears memory on disposal.
 /// Implements <see cref="IMemoryOwner{T}"/> for compatibility with async APIs.
 /// </summary>
+/// <remarks>
+/// The exposed memory is sliced to the requested size. Disposal clears the entire rental and returns
+/// it to the pool. Finish all uses before disposal, including uses through previously obtained views:
+/// those views still reference storage that the pool may lend to another caller.
+/// </remarks>
 public sealed class DisposableArrayPoolBuffer : IMemoryOwner<byte>
 {
     private byte[]? _rentedBuffer;

@@ -1,0 +1,23 @@
+{
+  "material_narrative": {
+    "original_population": 38,
+    "original_full_quota": 4,
+    "additional_full_quota": 4,
+    "proposed_total": 8,
+    "known_miss_clean_credit": 0
+  },
+  "protected_output_replacement": {
+    "original_population": 106,
+    "original_selected_quota": 11,
+    "protected_exclusion": "core-001:unit:9ea1794bce816ec8",
+    "exact_accepted_or_reviewed_overlap_ids": [],
+    "working_population": 105,
+    "working_minimum": 11,
+    "valid_original_selected": 10,
+    "required_replacements": 1,
+    "replacement_ids": [
+      "core-001:unit:7dc8f2fc14f0186c"
+    ]
+  },
+  "qualification": "Candidate role-level calculation only; final canonical denominator and actual Astra replacement reading remain pending."
+}

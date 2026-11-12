@@ -18,6 +18,10 @@ using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
+// Implements the fixed P-256/SHA-256/AES-128 derivation shape: two 32-byte agreements form
+// the 64-byte input ka1 || ka2. X9.63 then produces 80 bytes, split into five 16-byte values:
+// receipt key, S-ENC, S-MAC, S-RMAC, and DEK. Parameter admission is broader than
+// this parser's fixed curve/coordinate widths; it does not establish generic SCP11 profile support.
 internal static class Scp11X963Kdf
 {
     internal static SessionKeys DeriveSessionKeys(
@@ -25,7 +29,7 @@ internal static class Scp11X963Kdf
         ECDiffieHellman skOceEcka, // Host static or ephemeral private key
         ReadOnlyMemory<byte> oceAuthenticateData, // Host Authenticate EC KeyAgreement TLV Bytes
         ECDiffieHellmanPublicKey pkSdEcka, // Yubikey Public Key
-        ReadOnlyMemory<byte> ePkSdEcka, // Yubikey Ephemeral SD Public Key Bytes
+        ReadOnlyMemory<byte> ePkSdEcka, // Returned SD public-key TLV: ephemeral for a/b, static for c
         ReadOnlyMemory<byte> sdReceipt // Yubikey receipt
     )
     {
@@ -141,9 +145,8 @@ internal static class Scp11X963Kdf
             if (staticParameters.D is null)
                 throw new CryptographicException("The static ECDH key has no private value.");
 
-            // Key agreement 1: ephemeral OCE private key with ephemeral SD public key.
-            // ephemeralParameters carries the local key's own matching Q/D pair; the SD's
-            // ephemeral public key is the remote party.
+            // Key agreement 1: ephemeral OCE private key with the returned SD public key
+            // (ephemeral for a/b, static for c). The local parameters carry their matching Q/D pair.
             ka1 = ecdh.ComputeSharedSecret(ephemeralParameters, ePkSdEcka.ExportParameters());
 
             // Key agreement 2: static/ephemeral OCE private key with static SD public key.
@@ -215,19 +218,7 @@ internal static class Scp11X963Kdf
         ReadOnlySpan<byte> keyAgreementData,
         Func<int, byte[]> receiptBufferFactory)
     {
-        // var useOpenSsl = false; // Try AesCmac instead of OpenSSL
-        // if (useOpenSsl)
-        // {
-        //     using var cmacObj =
-        //         new CmacPrimitivesOpenSsl(CmacBlockCipherAlgorithm.Aes128); // This works in legacy code.
-        //
-        //     Span<byte> oceReceipt = stackalloc byte[16];
-        //     cmacObj.CmacInit(receiptVerificationKey);
-        //     cmacObj.CmacUpdate(keyAgreementData);
-        //     cmacObj.CmacFinal(oceReceipt); // Our generated receipt
-        //     return oceReceipt.ToArray();
-        // }
-
+        // The configured CMAC primitive owns provider resources; the returned receipt has a separate owner.
         byte[]? receipt = receiptBufferFactory(16);
         try
         {

@@ -29,11 +29,14 @@ public sealed class FactoryShapeTests
     }
 
     /// <summary>
-    /// The WebAuthn factory carries two independent options objects, and they must stay separate.
+    /// Checks the named one-shot extension set for session options followed by cancellation.
     /// </summary>
     /// <remarks>
-    /// <see cref="WebAuthnClientOptions"/> configures the client that is returned (public-suffix checker,
-    /// enterprise RP IDs, credential prompt, prompt-attempt cap) and is equally meaningful on the public
+    /// This reflection check covers the applet types and expected method names listed in the test;
+    /// it does not exercise connection ownership, initialization or runtime cancellation.
+    /// The separate WebAuthn factory check preserves its two independent options objects:
+    /// <see cref="WebAuthnClientOptions"/> configures the client that is returned (application-owned RP-ID
+    /// validity/authorization callback, credential prompt, prompt-attempt cap) and is equally meaningful on the public
     /// <c>WebAuthnClient</c> constructor, where the caller supplies their own session.
     /// <see cref="SessionCreationOptions"/> configures the session this factory creates on the
     /// caller's behalf, so it is meaningful only here. Folding the latter into the former would put a

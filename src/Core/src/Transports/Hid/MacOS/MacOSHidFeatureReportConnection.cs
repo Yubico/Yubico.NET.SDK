@@ -8,6 +8,11 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
 /// <summary>Synchronous feature reports over the connection-owned macOS OTP worker.</summary>
+/// <remarks>
+///     Expert GET transfers an eight-byte caller-owned array and pads a successful short native result with
+///     zeros. Typed OTP receive instead rejects a short result. SET preserves supported caller lengths.
+///     Construction and report calls wait for the worker; disposal waits for admitted work and checked close.
+/// </remarks>
 [SupportedOSPlatform("macos")]
 internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 {

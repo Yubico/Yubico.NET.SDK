@@ -1,0 +1,57 @@
+{
+  "result": "PASS",
+  "protected_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+      "sha256": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/example-bodies.json",
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/file-dispositions.json",
+      "sha256": "dcd67fdf4dda350456a2034220b7089dd80fabdd38c6e6155056eea813ece35f",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+      "sha256": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/proposal-dispositions.json",
+      "sha256": "c32b2c2b1063becaf4d567b616993aabb5329819755bc2ed9b3d63b97ccf2115",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review-identities.json",
+      "sha256": "94b90c17733559a9a2b5cf77136085ac3844b7bad66091f86a223b32ec176e16",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review.md",
+      "sha256": "090e3f28b303b77839d08e852eced612bc4a785923f73d106f2cc6965bc19812",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source-citations.json",
+      "sha256": "596f27302575eb63b3eca6d7d7bab4658a48fd5ebfd5673fd86b6849c2b0fc09",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+      "preserved_byte_exact": true
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/static-preservation.json",
+      "sha256": "629eaf27ce006f955f0fe36f985524266f5f3b89912873d27a0d5505db9eafc4",
+      "preserved_byte_exact": true
+    }
+  ],
+  "prior_source_patch_sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+  "prior_editor_and_review_records_rewritten": false
+}

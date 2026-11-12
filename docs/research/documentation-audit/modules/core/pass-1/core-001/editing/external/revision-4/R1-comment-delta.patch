@@ -1,0 +1,94 @@
+--- a/src/Tests.Shared/Infrastructure/AllowList.cs
++++ b/src/Tests.Shared/Infrastructure/AllowList.cs
+@@ -17,18 +17,18 @@
+ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
+ 
+ /// <summary>
+-///     Implements allow list verification to prevent integration tests from running on production YubiKeys.
+-///     This is a CRITICAL safety mechanism that validates device serial numbers before any test operations.
++///     Checks configured serial numbers for integration-test fixture authorization.
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///         The AllowList performs a hard fail (Environment.Exit(-1)) if:
+-///         - No allowed serial numbers are configured
+-///         - A device's serial number is not in the allow list
++///         Construction exits with Environment.Exit(-1) only when the configured serial list is empty
++///         and AllowUnknownSerials is false. IsDeviceAllowed returns a Boolean; it does not exit for
++///         a missing or disallowed serial.
+ ///     </para>
+ ///     <para>
+-///         This aggressive approach prevents accidental test execution on production keys, which could
+-///         lead to data loss or device misconfiguration.
++///         The fixture harness filters rejected devices and failed identification reads. An empty
++///         fixture list causes SkipException at lazy row binding. Discovery and live identification
++///         reads can occur before per-device authorization, so connect only dedicated test hardware.
+ ///     </para>
+ /// </remarks>
+ public sealed class AllowList
+@@ -42,7 +42,8 @@
+     /// <param name="logger">Optional logger for diagnostics.</param>
+     /// <exception cref="ArgumentNullException">Thrown when provider is null.</exception>
+     /// <remarks>
+-    ///     Constructor performs hard fail (Environment.Exit(-1)) if allow list is empty.
++    ///     Exits with Environment.Exit(-1) when the configured serial list is empty and
++    ///     <see cref="AllowUnknownSerials"/> is false. Individual serial checks do not exit the process.
+     /// </remarks>
+     public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null)
+     {
+@@ -83,4 +84,4 @@
+     /// <returns>True if the serial number is allowed; otherwise, false.</returns>
+     public bool IsDeviceAllowed(int? serialNumber) =>
+         serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);
+-}+}
+--- a/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs
++++ b/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs
+@@ -22,14 +22,19 @@
+ /// <remarks>
+ ///     <para>
+ ///     Expected configuration structure:
+-///     <code>
++///     <code language="json">
+ ///     {
+ ///       "YubiKeyTests": {
+ ///         "AllowedSerialNumbers": [12345678, 87654321],
+-///         "EnableHardFail": true
++///         "AllowUnknownSerials": false
+ ///       }
+ ///     }
+ ///     </code>
++///     </para>
++///     <para>
++///         Only AllowedSerialNumbers and AllowUnknownSerials are read. Keep AllowUnknownSerials false
++///         unless every attached serial-less device is dedicated test hardware: enabling it allows
++///         the harness to authorize views with readable metadata but no readable serial number.
+ ///     </para>
+ /// </remarks>
+ public sealed class AppSettingsAllowListProvider : IAllowListProvider
+@@ -144,4 +149,4 @@
+             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+             .Build();
+     }
+-}+}
+--- a/src/Tests.Shared/README.md
++++ b/src/Tests.Shared/README.md
+@@ -6,7 +6,8 @@
+ 
+ The test infrastructure provides:
+ 
+-- **Safety-first allow list** - hard-fails when no device is explicitly authorized.
++- **Allow-list authorization** - exits on empty configuration unless unknown serials are enabled;
++  filters rejected devices and raises `SkipException` at row binding when no authorized fixture remains.
+ - **Lazy device discovery** - discovers and binds devices at test execution time, not discovery time.
+ - **Declarative device filtering** - filters by firmware, form factor, connection type, capabilities, FIPS state, and custom predicates.
+ - **Parameterized testing** - standard xUnit `[Theory]` tests receive `YubiKeyTestState` values from `[WithYubiKey]`.
+@@ -331,6 +332,8 @@
+ ## Known Limitations
+ 
+ - Devices must be connected before the test runner starts.
+-- Allow-list violations call `Environment.Exit(-1)` by design.
++- An empty configured serial list exits with `Environment.Exit(-1)` unless `AllowUnknownSerials` is
++  enabled. Rejected devices and failed identification reads are filtered; an empty fixture list raises
++  `SkipException` at row binding, rather than exiting the process.
+ - Each `[WithYubiKey]` attribute produces one placeholder that binds to the first matching authorized
+   device at execution; multiple attributes are not deduplicated by physical key.

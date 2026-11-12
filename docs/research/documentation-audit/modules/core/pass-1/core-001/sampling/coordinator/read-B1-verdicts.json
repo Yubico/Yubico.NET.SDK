@@ -1,0 +1,1012 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of all111 original B1 proposed units plus relevant contexts; final eligibility and mapping pending",
+  "reading_sha256": "ccb070cc50b9a476bbaad8c4cc7023654080867d6547849a69d1f21b69242d6e",
+  "context": [
+    "DeviceConnectionRegistry ownership/recovery state",
+    "PcscConnectionNativeState RunAsync/NativeWorkItem/SignalWorker",
+    "Historical session-contention report at64efe844",
+    "Complete selected tests/helper bodies and existing concrete connection/disposal flows"
+  ],
+  "units": [
+    {
+      "id": "core-001:unit:a7c4a6b478cc9c7a",
+      "path": "src/Core/src/Devices/ConnectionInUseException.cs",
+      "range_sha256": "4a7096b6a3552727703a72136117fd4618ac2c86948589891132f117481533e9",
+      "current_file_sha256": "9eda3e03a195d18bbd3cd4f2e66a9a7836a17323b6fb089b21b5c20fa27a54e1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:6fafc3d16be878bf",
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "range_sha256": "988907dec971f77d68446fa76ac2bc3d64730caa51cfa19dfd7147ff4e2fb703",
+      "current_file_sha256": "19a6ff2836c687491016f0ba3d51eeef5641fa773cba4f92ce58ce298274b720",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:1f43bb31b9a99e4c",
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "range_sha256": "3854dda6b03ab4e4c58298a4718a71a2b63beb49e9ddf009af644bb0a0536bcd",
+      "current_file_sha256": "19a6ff2836c687491016f0ba3d51eeef5641fa773cba4f92ce58ce298274b720",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:63aa8710ae155517",
+      "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+      "range_sha256": "768587ec6832fbf547c5cdc681bd2d42c44af07596a9cd9a9ccf84b15a6b8326",
+      "current_file_sha256": "53395c3f41bb3d12aa31142c365d47407f01b380fc4d7d1d67194b70460420a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:5f8bc8be883eb29d",
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "range_sha256": "21af0af5f7c90e81b4fcf55856fa8e8b322815b801f63ce85b338250647f945e",
+      "current_file_sha256": "3cd87b0435f55032d75613d1b1adacd505a40628d9a0dccdb81e873c104545e6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:a7472e3bb01063ea",
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "range_sha256": "8a31e162c8c398f6634c869c8bf31845a8881ae41039b49c0d55b6753ce1f96c",
+      "current_file_sha256": "cf28fd54950dca187c7ac9c8428998ce7866a73c9b06d01eab67958d80557c30",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:23c94a53a4cf4727",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "046e70dfefc09e7688b32293a4911163a694bcaaf06f03c563a5679ebdfe3f8b",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:73f56f81969d98ff",
+      "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+      "range_sha256": "e4559e36e8f5c415c74c4e66b6608a77947af5d7b32a696c51a69a4ac5ca11d9",
+      "current_file_sha256": "1bc88cbc1d76f0c5d13ec6a563231fefb2178af776783798682c6038a0a38136",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:7c7ab9076a83cc1e",
+      "path": "src/Cli.Commands/src/Fido/FidoCommands.cs",
+      "range_sha256": "ad3452966da8a288e6453d476c0bb72342c2183521a59fd110857ed887e2ac14",
+      "current_file_sha256": "5d923798282b4b4d01fe2932777fbe54b0ab60f3073fbd2c49e732c89025abe8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:329317501a183f73",
+      "path": "src/Cli.Commands/src/HsmAuth/HsmAuthCommands.cs",
+      "range_sha256": "1c982d552889448c21ad2bf110ea18bbe5786b1d5d579b1b61fc3ed0eed75937",
+      "current_file_sha256": "2a1ab704610840b24227bf449c07ea636bbf97a6c19742c8aca122fb388a7c12",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:914c925013cf6445",
+      "path": "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs",
+      "range_sha256": "1c982d552889448c21ad2bf110ea18bbe5786b1d5d579b1b61fc3ed0eed75937",
+      "current_file_sha256": "167e5234ae5703ba2084455611b0bab81a3cb627aee6c9d994cb944a5612037e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:b894464f9dd75094",
+      "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "range_sha256": "d7204aa7627d58e72aa23627dc1ca809f3fd46704c9d12ffe84e65aa5443785f",
+      "current_file_sha256": "a63fd0d90987929519c69e37f6d189001ea67ff73ec57136c686987469f62ba0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:b7cd32c941a627dc",
+      "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+      "range_sha256": "1c982d552889448c21ad2bf110ea18bbe5786b1d5d579b1b61fc3ed0eed75937",
+      "current_file_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:4b49917685ba7b55",
+      "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+      "range_sha256": "1c982d552889448c21ad2bf110ea18bbe5786b1d5d579b1b61fc3ed0eed75937",
+      "current_file_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:33ef7a843647f935",
+      "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+      "range_sha256": "1c982d552889448c21ad2bf110ea18bbe5786b1d5d579b1b61fc3ed0eed75937",
+      "current_file_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:25c478c7304f56dc",
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "range_sha256": "ea7ab2445ce1a55e916b01da655dd0664450b97ebd5430de9c0c9f52260d56f0",
+      "current_file_sha256": "cf28fd54950dca187c7ac9c8428998ce7866a73c9b06d01eab67958d80557c30",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:751938c8fd251302",
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "range_sha256": "3bb79850874306cc8198977b410bdc81248baa003a590657dc2f180ccf3b180f",
+      "current_file_sha256": "19a6ff2836c687491016f0ba3d51eeef5641fa773cba4f92ce58ce298274b720",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:7391db03d44cc0a6",
+      "path": "src/Core/src/Devices/DisposalGate.cs",
+      "range_sha256": "29848dd67f624c542ce63037b853c946cf7b821b448a9abfb00b57a43a6a7b8c",
+      "current_file_sha256": "0cdfe89e05eaea96cf64525bfd3675de0179b65705f1bffc2719ccde6f3336c4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Teardown failure records callback/result and releases lease only under configured failure policy; no guaranteed native release inferred from observer or task completion."
+    },
+    {
+      "id": "core-001:unit:6c7f0156ee70e8b9",
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "range_sha256": "5723b7c069b9d20efb2fb178ff930b835abc28b554ec241ecfada19bf620b0e7",
+      "current_file_sha256": "016e4d3b76e1e099d584b084047221d0699767aa9b10deb46395591c5ae1b63b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:806535e6212119aa",
+      "path": "src/Core/src/Devices/PcscConnectionSlot.cs",
+      "range_sha256": "6b569ec42def99103e35e03935cb8f63111bd4c1655a34f347e2cef4f2c4361d",
+      "current_file_sha256": "3e5a04199d228468ab0ca5b661ebaf2dded78ff3db75956d03250d0b7d0df9d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:fd20a8a6daf993ee",
+      "path": "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+      "range_sha256": "1e62f55436b25f1247657a9338021822813016bfa7c5ebab649b61b1cca858ca",
+      "current_file_sha256": "d079f655a8c0261c32f9687bf26e8a09f8d2eecc5242d8d45545c7b184a28b7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:3f826327a54d8ea5",
+      "path": "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+      "range_sha256": "8fd15798848426fc68f09fc3ebffb0e3581f0243c904b2321f493810439e3347",
+      "current_file_sha256": "d079f655a8c0261c32f9687bf26e8a09f8d2eecc5242d8d45545c7b184a28b7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:b0da9a6ee7f248bd",
+      "path": "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+      "range_sha256": "a4e4d68007e623490745c6786b1acd1c6ac09b445ea7a6a352c1c7748f17b35d",
+      "current_file_sha256": "6112c337e3b701da891c2ca39de8be270bb94a49c27c5b64f64fad05e9e47053",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:1cbc332bcc33a27a",
+      "path": "src/Core/src/Transports/SmartCard/ISCardApi.cs",
+      "range_sha256": "c6dd6d70e4fbcfc665844114c9b7fce4439dd958f69777733064d19e115cd382",
+      "current_file_sha256": "46bd33abd503244e3c6f9efbf09fe9e470d38475b017d8fb461a81714ed2ed45",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:e537dcedcf111d4c",
+      "path": "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs",
+      "range_sha256": "4aa0f75e76b30254036e13a22541ed2da774f0ece6b3286b1e48228b8eae74dc",
+      "current_file_sha256": "20d7373e88426adc7b14a5f366abb321108716b603fb0ca229a873a6c0d605b5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:a2543b389fd3b603",
+      "path": "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs",
+      "range_sha256": "3c9db7459060341ab718c2a8584da114863646448591fb10d0c6384de24434b4",
+      "current_file_sha256": "20d7373e88426adc7b14a5f366abb321108716b603fb0ca229a873a6c0d605b5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:6f9709c1f760afd3",
+      "path": "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs",
+      "range_sha256": "1c823e221d0f4ff7747b0711142df44e80ff26402738d9f2cd825905f79507e2",
+      "current_file_sha256": "20d7373e88426adc7b14a5f366abb321108716b603fb0ca229a873a6c0d605b5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:e7b21994e1483471",
+      "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+      "range_sha256": "a16c04a1fa570dd36e276bf640e3ec75123d091facede9fb69128852c170b7cb",
+      "current_file_sha256": "53395c3f41bb3d12aa31142c365d47407f01b380fc4d7d1d67194b70460420a0",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-DORMANT-ILLUSTRATION",
+      "note": "Only commented-out getAtr prototype; no active API or meaningful current contract. Preserve historical text, exclude clean quota."
+    },
+    {
+      "id": "core-001:unit:9715fd23161cbcd7",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "3f919957675fa54052174ece060e9159a7ca0daa43ab3f56f3c8999385b623b5",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "Only license/imports/namespace and blank lines; actual class begins after this unit. Exclude from clean quota and replace if required."
+    },
+    {
+      "id": "core-001:unit:5e7f801af3e0b797",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "b283771e71edd66c5dd0f4356ad4860c49aabea377a6ac3e57689676d77eb348",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:2426f3a0239dcbe2",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "2ad2990691cee443e8a3c88c5e1df2df8a96367fcef4748756297839dea73a88",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:0ffbd3041f68ccc4",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "0aef7551954cf395a1cbf05726f9d35c5d902bc0da639186d0c720f02ca84a6c",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:d261ddd7d88711cf",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "432fe3c6d5894ea5bf0c69454f376ae1b2dff62176ed958f9917eeda0d2051f4",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:5cc1208a32fa99dc",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "b56491ceb4edb5ca5c6a3352c3178f273f7ee9dcfe22399eb463a28cbb71a1b9",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:49276f849fb765c9",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "719712f257678f88b467e5c912313ef11a8376038bec7f904248f70918972187",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:a1e401ec2b99f21c",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "1f4a71065e4c5da4d3ddfc19cf6110743a93f16f7c49fe5ed5edfe7d43d1e078",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:9ea9c554224581f3",
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "range_sha256": "32c682ff89d7706659d8636d7343c4a38994a60a2510f6a642c158add5561091",
+      "current_file_sha256": "e0d25805f1b42b4eb0666f7ffa22674e5f173cbc28c04a8887564522075aa817",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:41b892356800d072",
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "range_sha256": "6d72a026dfdc77129467c97946104ccc5bc4f14596decb1968ab25ea7338e2e1",
+      "current_file_sha256": "e0d25805f1b42b4eb0666f7ffa22674e5f173cbc28c04a8887564522075aa817",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:134f7ca39a4d364a",
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "range_sha256": "723d299b5251e1034048605625586add5573e0b8c43943ff36fc31e9c959653f",
+      "current_file_sha256": "3cd87b0435f55032d75613d1b1adacd505a40628d9a0dccdb81e873c104545e6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:b1a1e66c96c6de98",
+      "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+      "range_sha256": "3e789380de4437a473aaba6e3feea1a956c25cb03c0e1c8bf1505223f5df777a",
+      "current_file_sha256": "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Pooled output stays through NativeWorkItem completion; RunAsync returns work.Task, invocation cancellation precedes nativeCall, completion publishes afterward. Independent returned response is copied before pool return; no all-buffer erasure claim."
+    },
+    {
+      "id": "core-001:unit:f1d4372202bdaa9b",
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "range_sha256": "17384a772c2220cfb379751697e13d19d9cb105b8a00b5cded17d21833895f81",
+      "current_file_sha256": "c4e33e77acd4e1727750a8d458a0a282f356757dc00e23094c1fe8c3897ce5dd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Historical-report basis verified by reading 64efe844:docs/plans/session-contention/phase1-findings.md: key103/macOS/5.8.0, PIV interference4/4 and bothHID transports1/1. Raw ephemeral harness/log absent; no fresh physical qualification or current parallel-ownership permission."
+    },
+    {
+      "id": "core-001:unit:76bce9eaa7b001ed",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/FidoHidOwnershipIntegrationTests.cs",
+      "range_sha256": "0c69b22706f0de93b590ca09fe981fb7797cea9350c076e6ce03bbd00abac331",
+      "current_file_sha256": "a780ea911ad43397492dbe0f5eacae130cc8c272a4343a09de8bb4f4733d296d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:d6201231a3c57f13",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/FidoHidOwnershipIntegrationTests.cs",
+      "range_sha256": "63a027a658de48e27ec6e8e4b60c459e9537ec3b1b299a953d8c2bf6fab0abaa",
+      "current_file_sha256": "a780ea911ad43397492dbe0f5eacae130cc8c272a4343a09de8bb4f4733d296d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:5e913abec1e8ec34",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/PcscLifetimeIntegrationTests.cs",
+      "range_sha256": "37ff226a2f8ac8d7bf8436709599bb5e28aa0696093a2ac64702f517d5681cce",
+      "current_file_sha256": "5fe303262aa38f87025e80bef2196dff94e392679b89b4a7cd857630ecd84a9e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:2d70f4ce6efb7f43",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/PcscLifetimeIntegrationTests.cs",
+      "range_sha256": "aa8c6ad473db77a71c32e8b49a5edd045b2759a1105fe7c919b46e98c33bf832",
+      "current_file_sha256": "5fe303262aa38f87025e80bef2196dff94e392679b89b4a7cd857630ecd84a9e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Test checks serial/firmware across3connection and2transaction cycles. USB eligibility is metadata-based, not a connection.Transport assertion; no physical execution or PIN/power-off proof credited."
+    },
+    {
+      "id": "core-001:unit:42875de817e3bdfe",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs",
+      "range_sha256": "b97968f35380e4c6a3fabbe18b2ddec7de6b2baaa890253b53f0d0400ea7bec3",
+      "current_file_sha256": "7a7316cf12935d66c42fa013f9245fdb2a92a4a40447cfa68d7aa08c1e20c420",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Unsupported/nonstarted paths return before assertion and print a skip message; only the reached started-status assertion is supported. No framework skip/hardware success inferred."
+    },
+    {
+      "id": "core-001:unit:4e9e2576c70c8c9b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs",
+      "range_sha256": "bc85e162ec9b43d6b826a74a4b1495a06d778c66f35427da6576ea74f4e8a870",
+      "current_file_sha256": "7a7316cf12935d66c42fa013f9245fdb2a92a4a40447cfa68d7aa08c1e20c420",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Only reached started->disposed path asserts Stopped; earlier branches return. No physical cleanup guarantee or xUnit skip semantics inferred from printed text."
+    },
+    {
+      "id": "core-001:unit:decf8ef6a2d8b21b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "range_sha256": "de578d40a7adcc267962deb0c52be9c68ba687d6ce739bc3e23f40b81b55d0d3",
+      "current_file_sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:c36dc6665f2f26a9",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "range_sha256": "b8e0977c5c0fd96813c3247ad700496a4ea7fa84088879c285ae81eb62e8a5d2",
+      "current_file_sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:21b621ff07b21b15",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "range_sha256": "56f8eda18c59e69cfde7c0f11650dba54620d50ae48c824bd67909d270954d51",
+      "current_file_sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:76de1c869bb5ef35",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "range_sha256": "1f1716ada60b001d854ca4405b92e2274bd88ac1df7bc355ba9b2f3d8193399a",
+      "current_file_sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:b874814041bef7a7",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "range_sha256": "829d11f5372b37ab64efac4576295dc22d18ffb1f0b8acf14b801db8b8b540e4",
+      "current_file_sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:77e334d16d6b14fa",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "range_sha256": "e2bb6b17d2abe385ebe9c17eed56cbf21251f571d8279a839144d7e8c1d06de5",
+      "current_file_sha256": "a4adb44b77ba49b91f3bc6311130e627fe25d96c8d059cd33f3f3254576e4bf3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:c462c54dfc3b511c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "range_sha256": "41b50177dbf4ed86beffade1f7f3850ddb63e01590f93df91c7fdc4b0d730a24",
+      "current_file_sha256": "a4adb44b77ba49b91f3bc6311130e627fe25d96c8d059cd33f3f3254576e4bf3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:1db77308e3dc0e0d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "range_sha256": "c8f74d38b5dd596b58375af2ad76161a9a946bbcb3d8a07d6cce392e62c1444b",
+      "current_file_sha256": "a4adb44b77ba49b91f3bc6311130e627fe25d96c8d059cd33f3f3254576e4bf3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:0b910444e6b2dc1e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionOwnershipTests.cs",
+      "range_sha256": "2fb88d3eafa657d6f1b090ee46474bfeacd99a774f6de9906bfb6f922915511d",
+      "current_file_sha256": "30990ad0c384418386558e0b6ae7b1de2d019c98a7c620f8e739b3a1d3cc1bc4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:4533d20585009bbe",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionOwnershipTests.cs",
+      "range_sha256": "f38bc471cabfef43183ecb2469074e802b2f8dd7c7659231b625eb15c08fb0e6",
+      "current_file_sha256": "30990ad0c384418386558e0b6ae7b1de2d019c98a7c620f8e739b3a1d3cc1bc4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:131eb4b992393eff",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionOwnershipTests.cs",
+      "range_sha256": "116f4eec52a6235d689046091d59fe729dede65ff0713a5be8c260efa843f6ba",
+      "current_file_sha256": "30990ad0c384418386558e0b6ae7b1de2d019c98a7c620f8e739b3a1d3cc1bc4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:e8b5cb0b222fb273",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionRegistryTests.cs",
+      "range_sha256": "3f216363304f43a1c8ec7b09b93683ed5e2083dc92b38e06711961686b0b072b",
+      "current_file_sha256": "0dbcecbc4b6606d9e901f768c0a8e259f531dbfaa60b354e379aff250b5ccf28",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:b39ebdf0080ad057",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionRegistryTests.cs",
+      "range_sha256": "64c76a82d0983c661a00f26911e231fcd1221c684a07e948538e9bd24f38679c",
+      "current_file_sha256": "0dbcecbc4b6606d9e901f768c0a8e259f531dbfaa60b354e379aff250b5ccf28",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:253ea51a06b003ae",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionRegistryTests.cs",
+      "range_sha256": "d997e9e29cf19d4330b1a2118ce06caa2683792f38c7734669e49e14805d8042",
+      "current_file_sha256": "0dbcecbc4b6606d9e901f768c0a8e259f531dbfaa60b354e379aff250b5ccf28",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:f0d6a034c70c13ef",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionRegistryTests.cs",
+      "range_sha256": "ab04660df4d9c67dd153b281f4018416d7fe0ffcaca8133b715912af63421044",
+      "current_file_sha256": "0dbcecbc4b6606d9e901f768c0a8e259f531dbfaa60b354e379aff250b5ccf28",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:cf2d3ad0f7214673",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HeldExceptionPropagationTests.cs",
+      "range_sha256": "480d4cedf5bfc4cdaba107f35ad17af52f79466a65b0a250a343f77aae026ca5",
+      "current_file_sha256": "701241dd20f11f931bff67b8178b81231d4e3f6a936e961fa3c4324f58c7a6ae",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:57c9e23533f4dbbb",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HeldExceptionPropagationTests.cs",
+      "range_sha256": "e6379b68209cc7dca4ef1887e6327c5daa41bed9d6bd4f42e1024133579c3124",
+      "current_file_sha256": "701241dd20f11f931bff67b8178b81231d4e3f6a936e961fa3c4324f58c7a6ae",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:61a56a695ce12781",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HeldExceptionPropagationTests.cs",
+      "range_sha256": "3e6e3a2ad4a5009ec70201f09a9d729331f14ef98056a7d3ca1c70317e7e60bb",
+      "current_file_sha256": "701241dd20f11f931bff67b8178b81231d4e3f6a936e961fa3c4324f58c7a6ae",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:4a349d2a9cab87d4",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HidConnectionSlotTests.cs",
+      "range_sha256": "0e2ca9b6853dc637d798823ac2c79af8f772e68f2c28349f59a2437536a23d13",
+      "current_file_sha256": "245278271407b9a8bbb45625d5b4755ad6f4ff1603bc73a7e38c0be0a331c1d4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:8a5dcadb26779e91",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HidConnectionSlotTests.cs",
+      "range_sha256": "76680ad133cf0c25025cf6d909ae7c768cf3151afc92fb2f4fa130db0e1553c8",
+      "current_file_sha256": "245278271407b9a8bbb45625d5b4755ad6f4ff1603bc73a7e38c0be0a331c1d4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:5ee9c6e686ace85f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HidConnectionSlotTests.cs",
+      "range_sha256": "459739a9f7ad79ae0e84f0933b03748d0a0c846371c21f0ff7063ae84ffd568c",
+      "current_file_sha256": "245278271407b9a8bbb45625d5b4755ad6f4ff1603bc73a7e38c0be0a331c1d4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:23d950d8aed651a1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscConnectionSlotTests.cs",
+      "range_sha256": "514b20b53d94191d3868cfe42fdbaca9b257445aa7b6d3b8c7e9bbda55e48e48",
+      "current_file_sha256": "982b55764b21b769aafc7863f2da2ce5efe9890c86feba3915c4dbed883faa5b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:f5217fdf9ac66dfb",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscConnectionSlotTests.cs",
+      "range_sha256": "b55b7566de67f7f087177edd2b389a2ceae80705f2c65a2f93deb5753becd0cd",
+      "current_file_sha256": "982b55764b21b769aafc7863f2da2ce5efe9890c86feba3915c4dbed883faa5b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:99e7372a3a618d9f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscConnectionSlotTests.cs",
+      "range_sha256": "9a39601641d626ea68887822a555f38818a499268dd2a27e664d02d8a41d554d",
+      "current_file_sha256": "982b55764b21b769aafc7863f2da2ce5efe9890c86feba3915c4dbed883faa5b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:09ba4c6c878a24ab",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscDiscoveryLifetimeTests.cs",
+      "range_sha256": "7882adc2f88f68a090395aebba8e3a16cf7c13cb3516bc1b611d650cc4aa0c0d",
+      "current_file_sha256": "1e3ed0e21ad843e5ec980cd3a3277e60dd7b0bf9ecd9c61e3003347286eddd4b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:089e31d2fb088253",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ResolvePreferredConnectionTests.cs",
+      "range_sha256": "899f5e93ddfbbd5a13e3539dca26f493e47e7139982c24d50e0eabfc259a3867",
+      "current_file_sha256": "c1ef66ab44a1a914fa77c7ed9b5c5a30af31db33f5d715e6df798bf721703eb4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:bc020d9522237ab3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ResolvePreferredConnectionTests.cs",
+      "range_sha256": "5a6be8a06c4ca48da235bdf3ec870de259fca0171b17822444bafa5e31e1dea5",
+      "current_file_sha256": "c1ef66ab44a1a914fa77c7ed9b5c5a30af31db33f5d715e6df798bf721703eb4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:792520a43ae7f3ca",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SessionTransportTests.cs",
+      "range_sha256": "294527daebb500c31f6d82ad5df96949ed7acbfc5f51511374142148801fbb09",
+      "current_file_sha256": "5a6b87b37aea98564c0e073022e55fb69ad0667015eb308e6fe9be16b448fe7e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:5c944f58856816a1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SessionTransportTests.cs",
+      "range_sha256": "940b710675fe6c25da66ed21a6ff961e481c12bb03345da0f2358e1d63d3fe07",
+      "current_file_sha256": "5a6b87b37aea98564c0e073022e55fb69ad0667015eb308e6fe9be16b448fe7e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:e029926a1e9c6337",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SessionTransportTests.cs",
+      "range_sha256": "0b84050614cc696c393ce9c490758c175496681f8a49eae4971c42c2b5e7e883",
+      "current_file_sha256": "5a6b87b37aea98564c0e073022e55fb69ad0667015eb308e6fe9be16b448fe7e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:4429ee9c5a22cc88",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerSCardErrorTests.cs",
+      "range_sha256": "cdc089e3023cc13dafca9a101223fc2524664bae690f50e322ecc69c5b326846",
+      "current_file_sha256": "a309aee019947c76d1cc6859a53c2f00b6393d9201b025562ccca4762d04dafb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:e57765e071b17e08",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerSCardErrorTests.cs",
+      "range_sha256": "0c06663786a8158a4f4689367437925431f4449b79f411fd037d298ac83b655a",
+      "current_file_sha256": "a309aee019947c76d1cc6859a53c2f00b6393d9201b025562ccca4762d04dafb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:abbf813ff2da914c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerSCardErrorTests.cs",
+      "range_sha256": "aa9c27816bbdf7d6122d20db9f6a48450ccf75ebb6ac781682aacab825a163e7",
+      "current_file_sha256": "a309aee019947c76d1cc6859a53c2f00b6393d9201b025562ccca4762d04dafb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:00195f036e18e87c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerSCardErrorTests.cs",
+      "range_sha256": "0a5f6a4737a4163d28138b21501aef21cb0fa9076a677eaca4aec04d74bd36ce",
+      "current_file_sha256": "a309aee019947c76d1cc6859a53c2f00b6393d9201b025562ccca4762d04dafb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:b564a05176790f32",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+      "range_sha256": "178525467d63809acfff84920bd57067957c91d9bb1e5dfdc9f25bb559852ce0",
+      "current_file_sha256": "29de34cb39f881d87f172270e2fdd30d423de6571b24c37db441ed143b5b19eb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:fc00ebeb2dd79f1a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+      "range_sha256": "6da0c7153aa05a4e2b0d2f6e96a10f8a0d2c2dc0877c109033c360ad56557229",
+      "current_file_sha256": "29de34cb39f881d87f172270e2fdd30d423de6571b24c37db441ed143b5b19eb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:71132d68612d1386",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+      "range_sha256": "9d9b3fca9a2b1adf1def38ae46d6fd3a9b2ab0f3f85f49ecceed3bca726b898b",
+      "current_file_sha256": "29de34cb39f881d87f172270e2fdd30d423de6571b24c37db441ed143b5b19eb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:ef3112014b3d86ba",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+      "range_sha256": "496ab854fca40a965489987e9c70defa49ebfad7939b847ed9f969c55199839c",
+      "current_file_sha256": "29de34cb39f881d87f172270e2fdd30d423de6571b24c37db441ed143b5b19eb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:4452d5e281d19d93",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+      "range_sha256": "c52e0ce89e80d51ff9d86ad235b9c7e050f4be0ad99796e386a99f3098eb22a2",
+      "current_file_sha256": "29de34cb39f881d87f172270e2fdd30d423de6571b24c37db441ed143b5b19eb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:03322f8f66599a98",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscCleanupFailureProbe.cs",
+      "range_sha256": "e01dc2c3219431fcd9aa93a2de7f70802edcfff5584edc13436565ec508cc10d",
+      "current_file_sha256": "f40aef9938191650ff06385f7e668e15f8dd3479550ecb2e15d3e1e88f63102e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:41b66b77535ba368",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscCleanupFailureProbe.cs",
+      "range_sha256": "d452b2a9a3aa4e1acdf2bbee307971681c8a0442f093093aea41dec0e95f2ac8",
+      "current_file_sha256": "f40aef9938191650ff06385f7e668e15f8dd3479550ecb2e15d3e1e88f63102e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:31218f4596c4a81f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscIsolatedProbe.cs",
+      "range_sha256": "740af118e2c7253d5de1afeca83e7305f83978f0baffffd0aa1749b24f4c1b16",
+      "current_file_sha256": "4b1f2a13d5d4f9365f418b2306bc3459c1191945af830befd239882df8a997d0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:d736f3451d2568f0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "range_sha256": "7d1ac76b63d40ee26b9506cc0ce444c866f886f1dd70a67ec3e78682658aaf1b",
+      "current_file_sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:485fb49e647199dd",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "range_sha256": "3123fb5630535915ee5c9be12b460625699fb5a9d36be8b28a21095c3772dd97",
+      "current_file_sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:6e08c22f74dfe1a3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "range_sha256": "731a0d7842770c1db56ef3547989129220980ea30573a9b6fb33bbe443318845",
+      "current_file_sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:e0467b8767274957",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "range_sha256": "8796af8d2a5f2e4aa2b281e4c6b882496172dc961ce60d7c0948c835bacc896e",
+      "current_file_sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:d1c8c7f987c29804",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "range_sha256": "b97e2328e0004bc6533edf323463e35828a3ac022ab406c872bdbe92db51ea2e",
+      "current_file_sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:ef4f5814f550c0a6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "range_sha256": "177eca73bbc077b25fc670aad1b8c5c34a4929a20fdd4365aa867c6f6380fb3e",
+      "current_file_sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:dba344cadebd82b6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/FindPcscDevicesTests.cs",
+      "range_sha256": "067d4c1d349bf1b287b2118a7e8bca71d16333c334f138173c19acb7c58e661c",
+      "current_file_sha256": "e36b3fb438020e7420e5f60c470cc9e760421ab995097c1e82bd14fcc8cb2e20",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Saturation and recovery use controlled PCSC seam/fake timers; next-interval observation and reference/count assertions support the stated publication scope, not native device qualification."
+    },
+    {
+      "id": "core-001:unit:5ecd56767b03d939",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/FindPcscDevicesTests.cs",
+      "range_sha256": "ac54be0c9ba8e9ab1816a9069a3fe8a46af4456d3fd541944d243b0c547b6a50",
+      "current_file_sha256": "e36b3fb438020e7420e5f60c470cc9e760421ab995097c1e82bd14fcc8cb2e20",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:40e3599ab290e2f8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/FindPcscDevicesTests.cs",
+      "range_sha256": "19d7c78980c9f30fcefd2f7d349b520b606efe327da5c5f9be247c39f84022cf",
+      "current_file_sha256": "e36b3fb438020e7420e5f60c470cc9e760421ab995097c1e82bd14fcc8cb2e20",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:35eed0b90edf0eaa",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "range_sha256": "5e72a5f5c27202879fa22f569d0fec3e43c48919c38dfa01215deec2ee507e1b",
+      "current_file_sha256": "d592c70ef9ce35b70d6fa1cdb87201398573896ecf3bb7329f88ece79089f550",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:204fc3ecd9a8035a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscContextIsolationTests.cs",
+      "range_sha256": "1a8f6c95df44dbe8183c78e490b656104dbfff2251af13f54288efb26cabe593",
+      "current_file_sha256": "9d9c082a3743a318fd8a77714338a9a4f37bfb8381ac40f403cd79274282e92f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:78cd1ec16aa90462",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscContextIsolationTests.cs",
+      "range_sha256": "61396c995bdf8740d26ea91970fe27948134d91d42081a0ff95f8f945f345d58",
+      "current_file_sha256": "9d9c082a3743a318fd8a77714338a9a4f37bfb8381ac40f403cd79274282e92f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:ff45ccfa322ed808",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscReaderNameOwnershipTests.cs",
+      "range_sha256": "b8e488c2830a10cc88a5d82e510623a2e57f18b2f88d399bc0b72df2d89d8e38",
+      "current_file_sha256": "4e44922b4dffd3ee8f4c7251affd8a67cb3d0ee8907c9a77e1c64b458d056bb6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Explicit third-allocation failure checks exact earlier allocation/free counts, outstanding set, no status call and closed fake context; no untested failure paths inferred."
+    },
+    {
+      "id": "core-001:unit:97212de7ff1e3488",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscReaderNameOwnershipTests.cs",
+      "range_sha256": "46739e2dcc49dcd921fee61a5c34e3d421cf54dcf1450e5157a2370260c46367",
+      "current_file_sha256": "4e44922b4dffd3ee8f4c7251affd8a67cb3d0ee8907c9a77e1c64b458d056bb6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:05c98e846d3a45d0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscReaderNameOwnershipTests.cs",
+      "range_sha256": "e99dac34afa41813c5bb57992a3ca0d83e3827923328fc7046e3fcbc00cd72e1",
+      "current_file_sha256": "4e44922b4dffd3ee8f4c7251affd8a67cb3d0ee8907c9a77e1c64b458d056bb6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:f5493372352f7285",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscReaderNameOwnershipTests.cs",
+      "range_sha256": "ce5d6d3d1668b472a41a140a0a201ae9d7a42706c964ce396bc77707e35a0208",
+      "current_file_sha256": "4e44922b4dffd3ee8f4c7251affd8a67cb3d0ee8907c9a77e1c64b458d056bb6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:1244570db6d5abc2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardConnectionFactoryTests.cs",
+      "range_sha256": "008558fdbfe9502e708ee87e3a0a89d3a1bbf62a5e704e3cef4a4e85ca55ddfd",
+      "current_file_sha256": "0dbbe9f65607812416a55e7315266a3a017b751fd1cc417fc6580988771d49e2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:92b0180ca2af1ca2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardConnectionFactoryTests.cs",
+      "range_sha256": "97afd48e83482eb1d9abd76bdbff7099b85d1d895a880267be2a574dabb7d984",
+      "current_file_sha256": "0dbbe9f65607812416a55e7315266a3a017b751fd1cc417fc6580988771d49e2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Pre-owner throwing logger refusal checks managed registry release/reacquisition only, distinct from post-open native cleanup findings."
+    },
+    {
+      "id": "core-001:unit:22c1af2afd58644c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "range_sha256": "90bf18c9e499f5b28140074f3b9b08f1b22a3d66433bc123be3494e1a863d0f7",
+      "current_file_sha256": "a17c5ca5567636e3f32ab0e203843377a8cb02e5328f21c1f1c7dc83ef51f215",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Direct default-connection test observes exclusive-only request mode and strict contention result under fake API."
+    },
+    {
+      "id": "core-001:unit:76e45a85145ee160",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "range_sha256": "08b42206fec4251b8294401a4829688dc909e8f59a412ddea9ac4663223ebcf4",
+      "current_file_sha256": "a17c5ca5567636e3f32ab0e203843377a8cb02e5328f21c1f1c7dc83ef51f215",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Native-resource test uses fake exclusive refusal and explicit cleanup result; current physical exclusivity is not executed."
+    },
+    {
+      "id": "core-001:unit:04e891ab6ca26522",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/UsbSmartCardConnectionTests.cs",
+      "range_sha256": "1157ab29082ef723088a272ab097b9d9d75480f0b702c453c71797145d5e963f",
+      "current_file_sha256": "fc0a8caa5175b9ab844d45cc288de744f95cd30bb55707a46faa19768c28a4a2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    },
+    {
+      "id": "core-001:unit:66cc866c1db102c5",
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "range_sha256": "d8c0e05f69c70c3aa51ced11a64df18a4b27e5900c7833610acfc7795b97dd02",
+      "current_file_sha256": "cf28fd54950dca187c7ac9c8428998ce7866a73c9b06d01eab67958d80557c30",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; declaration, local control flow, policy or exact fake/assertion scope supported. No native/device completion or untested universal outcome inferred."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "observed_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "branch": "yubikit-core-docs-edit-transports",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "eligible_cs_files": 213,
+  "dispositions": {
+    "RETAIN": 135,
+    "EDIT": 62,
+    "HOLD": 16
+  },
+  "edited_cs_files": 62,
+  "candidate_associated_eligible_files": 122,
+  "local_candidates": 37,
+  "proposal_groups": 36,
+  "preservation_failures": [],
+  "all_noncomment_nonblank_lines_equal": true,
+  "bom_preserved": true,
+  "final_newline_preserved": true,
+  "source_patch_sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+  "source_patch_bytes": 95685,
+  "method": "Compare verbatim nonblank lines excluding only full-line // comments after explicit BOM decoding and CRLF-to-LF normalization. Existing inline comments, block comments, directives, strings, assertions and declarations remain in comparison. Per-file Git base/pin identities also reconciled. This is a bounded preservation receipt, not a C# parser or compiler.",
+  "build_test_formatter_native_device_crypto": "NOT-RUN",
+  "independent_review": "PENDING",
+  "source_inventory_writes": false,
+  "final_static_reconciliation": {
+    "result": "PASS",
+    "errors": [],
+    "eligible_files": 213,
+    "edited_files": 62,
+    "retained_files": 135,
+    "held_files": 16,
+    "candidate_associated_eligible_files": 122,
+    "proposal_groups": 36,
+    "all_edited_paths_have_proposal_mapping": true,
+    "exact_source_patch_matches_working_diff": true,
+    "git_diff_check": "PASS (fresh command exit 0)",
+    "git_apply_reverse_check": "PASS (fresh read-only command exit 0)",
+    "cached_diff_empty": true,
+    "observed_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+    "checks_run": "Static text/hash/JSON/Git inspection only; no compiler/test/native/device/crypto execution."
+  }
+}

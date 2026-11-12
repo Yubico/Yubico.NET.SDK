@@ -1,0 +1,14 @@
+[
+  {
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+    "well_formed_xml_comment_blocks": 7,
+    "result": "PASS",
+    "limitation": "XML syntax only; no compiler/cref/analyzer check."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "well_formed_xml_comment_blocks": 22,
+    "result": "PASS",
+    "limitation": "XML syntax only; no compiler/cref/analyzer check."
+  }
+]

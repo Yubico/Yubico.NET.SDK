@@ -1,8 +1,9 @@
 # TLV processing
 
 `Yubico.YubiKit.Core.Utilities` provides `Tlv` and `TlvHelper` for the tag-length-value encoding used by
-smart-card applets. Both own buffers, so disposal and zeroing rules matter; this page is the canonical set
-of usage examples.
+smart-card applets. A `Tlv` owns its encoding; the static `TlvHelper` creates or searches values without
+being an owner itself. Dispose owned TLVs and clear sensitive source/result buffers separately. The
+examples below are composable fragments with caller-supplied response, certificate, or key bytes.
 
 ```csharp
 using System.Security.Cryptography;
@@ -33,6 +34,18 @@ Memory<byte> explicitlyOwnedEncoding = TlvHelper.EncodeList([tagList, certificat
 disposes only the `Tlv` inputs passed to that call; `EncodeList` does not dispose its inputs. Neither method
 clears source buffers supplied to `Tlv` constructors, returned encodings, or intermediate encodings used for
 nesting.
+
+`Tlv.Value` is a borrowed view into the TLV's owned encoding, not another copy. Use it only while that
+owner remains alive and unchanged. Disposing `DisposableTlvList` disposes its elements; clearing the
+collection alone is a different action. `TryFindValue` returns an independent mutable value copy, but
+the current search implementation also leaves an intermediate copied encoding outside that returned
+owner. Clearing the returned value cannot erase that intermediate. Prefer an explicitly disposed
+`DecodeList` for sensitive sequences and retain the original response's own cleanup scope.
+
+These helpers implement bounded, definite-length TLV handling, rather than a complete BER validator.
+The current tag helper handles at most two tag octets; single-item parsing and tag admission do not
+establish that every remaining input byte or every BER tag form has been validated. Use the applet's
+schema and required-field checks in addition to decoding.
 
 For public, nonsecret nested data, encode the inner elements and use that encoding as the outer value:
 
@@ -72,4 +85,3 @@ finally
     CryptographicOperations.ZeroMemory(privateKeyBytes);
 }
 ```
-

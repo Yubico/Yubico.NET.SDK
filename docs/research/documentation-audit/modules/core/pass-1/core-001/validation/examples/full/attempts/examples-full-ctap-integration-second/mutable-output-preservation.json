@@ -1,0 +1,233 @@
+{
+  "files": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0001-Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.deps.json",
+        "bytes": 38182,
+        "sha256": "bbb991f8ae654ac7ff40004654b5371020bb9deba485efc130070a4da3947f43"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0002-Yubico.YubiKit.Ctap2.IntegrationTests.deps.json",
+        "bytes": 38182,
+        "sha256": "bbb991f8ae654ac7ff40004654b5371020bb9deba485efc130070a4da3947f43"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0003-Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0004-Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0005-Yubico.YubiKit.Ctap2.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0006-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1236,
+        "sha256": "4441e06f3b23b3b811306a460f37589e979be552764f693a538ef5270177b7f0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0007-Yubico.YubiKit.Ctap2.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1236,
+        "sha256": "4441e06f3b23b3b811306a460f37589e979be552764f693a538ef5270177b7f0"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 750,
+        "sha256": "2508460d4e31d125362af9ae8eb51f18f890b4c80e4b5d63a4d6f50571995625"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0008-Yubico.YubiKit.Ctap2.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 750,
+        "sha256": "2508460d4e31d125362af9ae8eb51f18f890b4c80e4b5d63a4d6f50571995625"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0009-Yubico.YubiKit.Ctap2.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0010-Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0011-Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0012-Yubico.YubiKit.Ctap2.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 83968,
+        "sha256": "4ca0cd2b9608f177d73123b5d5f6fa860788438ce04b7aa82f16f336d6b8fd44"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0013-Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 83968,
+        "sha256": "4ca0cd2b9608f177d73123b5d5f6fa860788438ce04b7aa82f16f336d6b8fd44"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0014-Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0015-Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/project.assets.json",
+        "bytes": 193712,
+        "sha256": "db75140c40e1c06484d26c4a23db32db91903417b82b9e79d6b8e5127ce02208"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0016-project.assets.json",
+        "bytes": 193712,
+        "sha256": "db75140c40e1c06484d26c4a23db32db91903417b82b9e79d6b8e5127ce02208"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0017-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0018-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      }
+    }
+  ],
+  "scope": "Only mutable local outputs/refs/generated compiler inputs. SDK/framework/NuGet caches and reconstructible source corpus are excluded."
+}

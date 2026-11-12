@@ -1,0 +1,3 @@
+
+        ///     CryptographyProviders.Sha1Creator = SHA1.Create; // Runtime default.
+        /// 

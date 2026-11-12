@@ -1,0 +1,142 @@
+{
+  "status": "unapplied two-file EOF-only proposal; independent review required",
+  "patch_sha256": "f5c82111cb86e52a8c5a0de620f487efff3f934d28e529389243aa5c5105e818",
+  "source_snapshot_sha256": "fb60b98283f685a1b30e9d0d1262942855b2ea667fc710adf14bed72e4a36cd9",
+  "patch_dry_run_exit_code": 0,
+  "patch_dry_run_files": 2,
+  "patch_dry_run_fuzz": 0,
+  "total_removed_bytes": 2,
+  "removed_hex_per_file": "0a",
+  "all_363_accepted_primary_hashes_unchanged": true,
+  "all_239_prior_applied_eof_after_hashes_unchanged": true,
+  "preserved_predecessor_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/prepare-evidence.py",
+      "sha256": "f7cafc2c537e399d808fc3a8369a02346e3f2b627b62cce651e8bf6e4b101cdd"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/eof-only.patch",
+      "sha256": "ee6f3b9e8198dcdcaea69c3016ba7de9352dc4788fe1a6058bb40d616220d516"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/eof-identities.json",
+      "sha256": "ecb98825cd981f9b372652f38f68e728ea204edfc6c60af229579bb3fc217ae4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/baseline-findings.json",
+      "sha256": "b0b3752d4436e24a531abbc20c086e0432f66cbd6199c13013647b253778d3e7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/format-membership.json",
+      "sha256": "2e7f5fdd3e750b2b92ebbf0f87d9dbabe0aa3051af926c8e0fd67c7e9e9cfbc5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/preparation-receipt.json",
+      "sha256": "eb0f97e160c4616fa138d4cfd64c550874bfb37acda51ac89b4be1e7f062e98c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/baseline-context.json",
+      "sha256": "356ac71f65489c5f6767fad924f6682c2535e05af4aca6b7b30ecba902514bd6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/verification-receipt.json",
+      "sha256": "c7df5460e84f59ebac75d3cb09e3e98a24270f05d5e9f33ef1e498ed978dcb1a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/report.md",
+      "sha256": "92854f3d03f738a5e6d2b5d408000b103f95d89bf48e6d3834cfa7bcd3fb8358"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/archive-packaging-correction.md",
+      "sha256": "df0a5496dca9f1f005f8e9503265ca5e5905c5e781f9346b9b2573efe431eb99"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/review.md",
+      "sha256": "2497b432bd3c452150d03edb57ed98a87f6e7d3fd6ff61ae1e811e24f735eed3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/review-identities.json",
+      "sha256": "6f5d6947da96124f9842952d9ef5b4efd3410e2abf142feba7d44e11d3cccbbf"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/source-snapshots.json",
+      "sha256": "e4cac85a915335280ab5d4282a880c2b6da777d04447bc5c6eddd2f816aeb680"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/archive-packaging-correction.json",
+      "sha256": "03e38bdcbd8e6dd0ee49f661f3c302ea0aeba2ba54c80e78979e4366ab2d7e95"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/packaging-review.md",
+      "sha256": "600b75dcd63da536c4aabddf6d07da5679ed3256b4d2f27eae0bab4d1a5d20cf"
+    }
+  ],
+  "unchanged_checker_and_policy": [
+    {
+      "path": ".editorconfig",
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records.py",
+      "sha256": "e115552ca79243091ad160bddb0667e4bb1dc9d2d1cd86800b4152ac8ab2f552"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records-v2.py",
+      "sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa"
+    }
+  ],
+  "static_admission_records": [
+    {
+      "path": "editing/format-final/external-scope/baseline-findings.json",
+      "sha256": "dd4959ca2c4303d5a1e136df828159be0db2f11032e0e531fd042df970ed294b",
+      "kind": "utf8-json"
+    },
+    {
+      "path": "editing/format-final/external-scope/conditional-context.json",
+      "sha256": "890bf1ee6cfe7976c2b59b022f1ce7387769acef3a3f97f13bb8cef6c1a20563",
+      "kind": "utf8-json"
+    },
+    {
+      "path": "editing/format-final/external-scope/eof-identities.json",
+      "sha256": "79404e587f1360b9d3c4209a1f719086b63addb912e70465423164e89ae6c864",
+      "kind": "utf8-json"
+    },
+    {
+      "path": "editing/format-final/external-scope/eof-only.patch",
+      "sha256": "f5c82111cb86e52a8c5a0de620f487efff3f934d28e529389243aa5c5105e818",
+      "kind": "utf8-text"
+    },
+    {
+      "path": "editing/format-final/external-scope/report.md",
+      "sha256": "cbe611645da411042f5c70ae199d4fc849ba7e18a18fe4b418df03f9b8a7e3df",
+      "kind": "utf8-text"
+    },
+    {
+      "path": "editing/format-final/external-scope/source-evidence.json",
+      "sha256": "96a7ffc60b6e0802090b6f7f11edc9ae68c8637b2a0ce1b8b1cf01d5645ef99d",
+      "kind": "utf8-json"
+    },
+    {
+      "path": "editing/format-final/external-scope/source-snapshots.json",
+      "sha256": "fb60b98283f685a1b30e9d0d1262942855b2ea667fc710adf14bed72e4a36cd9",
+      "kind": "utf8-json"
+    }
+  ],
+  "full_git_clean_or_index_admission_executed": false,
+  "primary_product_writes": 0,
+  "git_mutations": 0,
+  "sdk_formatter_test_native_device_subagent_executions": 0,
+  "source_pin_reads": "read-only git show only",
+  "actual_failed_formatter_qualification_retained": true,
+  "isolated_patch_application": {
+    "exit_code": 0,
+    "files": 2,
+    "fuzz": 0,
+    "after_hashes_match_snapshots": true,
+    "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/format-final-reconciliation/external-scope/patch-apply-check",
+    "stdout_sha256": "3287b421c452d62e4dc4f881f26c3d680cc3d850233c94b42c517189ffe6dfef"
+  },
+  "fresh_final_primary_accepted_hashes_checked": 363,
+  "fresh_final_prior_eof_after_hashes_checked": 239,
+  "all_predecessor_record_hashes_unchanged_at_final_check": true
+}

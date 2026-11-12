@@ -1,0 +1,1082 @@
+[
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 1,
+    "before": {
+      "opening_line": 8,
+      "closing_line": 18,
+      "body": "using System;\nusing Yubico.YubiKit.Core.Devices;\n\n// Find all connected YubiKeys\nvar devices = await YubiKeyManager.FindAllAsync();\nforeach (var device in devices)\n{\n    Console.WriteLine($\"Found YubiKey: {device.DeviceId} ({device.AvailableConnections})\");\n}\n",
+      "body_sha256": "d2d783917b37647871ce1fb2aca9eea19d0b47822fde9f3aef1d372adafcb35f",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 8,
+      "closing_line": 18,
+      "body": "using System;\nusing Yubico.YubiKit.Core.Devices;\n\n// Find all connected YubiKeys\nvar devices = await YubiKeyManager.FindAllAsync();\nforeach (var device in devices)\n{\n    Console.WriteLine($\"Found YubiKey: {device.DeviceId} ({device.AvailableConnections})\");\n}\n",
+      "body_sha256": "d2d783917b37647871ce1fb2aca9eea19d0b47822fde9f3aef1d372adafcb35f",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 2,
+    "before": {
+      "opening_line": 57,
+      "closing_line": 71,
+      "body": "// Find all devices\nvar allDevices = await YubiKeyManager.FindAllAsync();\n\n// Enumerate/probe only SmartCard interfaces (no HID slots are returned).\nvar smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);\n\n// Find only HID-connected devices (FIDO2, OTP)\nvar hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);\n\n// Find one device. The predicate is optional.\nvar firstDevice = await YubiKeyManager.FindFirstAsync();\nvar firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(\n    device => device.SupportsConnection(ConnectionType.SmartCard));\n",
+      "body_sha256": "07ee58b51eb4b1048246bb8ee21864a2c7beac1a65da523d8fdb391220a907a6",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 57,
+      "closing_line": 71,
+      "body": "// Find all devices\nvar allDevices = await YubiKeyManager.FindAllAsync();\n\n// Enumerate/probe only SmartCard interfaces (no HID slots are returned).\nvar smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);\n\n// Find only HID-connected devices (FIDO2, OTP)\nvar hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);\n\n// Find one device. The predicate is optional.\nvar firstDevice = await YubiKeyManager.FindFirstAsync();\nvar firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(\n    device => device.SupportsConnection(ConnectionType.SmartCard));\n",
+      "body_sha256": "07ee58b51eb4b1048246bb8ee21864a2c7beac1a65da523d8fdb391220a907a6",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 3,
+    "before": {
+      "opening_line": 81,
+      "closing_line": 96,
+      "body": "// Every YubiKey reachable as a smart card (CCID); HID is never enumerated.\nvar smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);\n\n// Every YubiKey reachable over FIDO HID. HID descriptors are enumerated, but only FIDO interfaces are probed.\nvar fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);\n\n// Every YubiKey on every interface, still without publishing into a monitor feed.\nvar allYubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);\n\n// Either family can discover the selected physical key. No OTP slots/protocol probes are admitted.\nvar selected = await YubiKeyManager.FindFirstAsync(\n    predicate: key => key.SerialNumber == serial,\n    interfaces: ConnectionType.SmartCard | ConnectionType.HidFido,\n    cancellationToken: cancellationToken);\n",
+      "body_sha256": "24bb8dd79e188660f1754ee91964aa1a82d39b5283f50efaf298fdcd9801d190",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 81,
+      "closing_line": 96,
+      "body": "// Every YubiKey reachable as a smart card (CCID); HID is never enumerated.\nvar smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);\n\n// Every YubiKey reachable over FIDO HID. HID descriptors are enumerated, but only FIDO interfaces are probed.\nvar fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);\n\n// Every YubiKey on every interface, still without publishing into a monitor feed.\nvar allYubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);\n\n// Either family can discover the selected physical key. No OTP slots/protocol probes are admitted.\nvar selected = await YubiKeyManager.FindFirstAsync(\n    predicate: key => key.SerialNumber == serial,\n    interfaces: ConnectionType.SmartCard | ConnectionType.HidFido,\n    cancellationToken: cancellationToken);\n",
+      "body_sha256": "24bb8dd79e188660f1754ee91964aa1a82d39b5283f50efaf298fdcd9801d190",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 4,
+    "before": {
+      "opening_line": 145,
+      "closing_line": 156,
+      "body": "var device = await YubiKeyManager.FindFirstAsync();\nif (device.CachedDeviceInfo is { } info)\n{\n    Console.WriteLine($\"Last observed firmware: {info.FirmwareVersion}\");\n    Console.WriteLine($\"Last observed USB capabilities: {info.UsbEnabled}\");\n}\nelse\n{\n    Console.WriteLine(\"Device metadata is unavailable.\");\n}\n",
+      "body_sha256": "68c3a91d60d3e1c7e581823d8db3ca1785f27607f92bee71ce596cc059ab5f1a",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 145,
+      "closing_line": 156,
+      "body": "var device = await YubiKeyManager.FindFirstAsync();\nif (device.CachedDeviceInfo is { } info)\n{\n    Console.WriteLine($\"Last observed firmware: {info.FirmwareVersion}\");\n    Console.WriteLine($\"Last observed USB capabilities: {info.UsbEnabled}\");\n}\nelse\n{\n    Console.WriteLine(\"Device metadata is unavailable.\");\n}\n",
+      "body_sha256": "68c3a91d60d3e1c7e581823d8db3ca1785f27607f92bee71ce596cc059ab5f1a",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 5,
+    "before": {
+      "opening_line": 247,
+      "closing_line": 263,
+      "body": "using Yubico.YubiKit.Core.Devices;\n\nusing var stop = new CancellationTokenSource();\nvar ct = stop.Token; // Cancel from the application's shutdown path.\nawait foreach (var change in YubiKeyManager.WatchAsync(ct))\n{\n    Console.WriteLine(change switch\n    {\n        DeviceAdded added => $\"Connected: {added.Device.DeviceId}\",\n        DeviceRemoved removed => $\"Removed: {removed.Device.DeviceId}\",\n        DeviceUpdated updated => $\"Metadata changed: {updated.Device.DeviceId}\",\n        SnapshotComplete complete => $\"Initial snapshot ready at revision {complete.Revision}\",\n        _ => \"Unknown change\"\n    });\n}\n",
+      "body_sha256": "7e996315ccdbc1594fd5d5644414ba702383bf66970f8c1815101f5a7c725c3c",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 247,
+      "closing_line": 263,
+      "body": "using Yubico.YubiKit.Core.Devices;\n\nusing var stop = new CancellationTokenSource();\nvar ct = stop.Token; // Cancel from the application's shutdown path.\nawait foreach (var change in YubiKeyManager.WatchAsync(ct))\n{\n    Console.WriteLine(change switch\n    {\n        DeviceAdded added => $\"Connected: {added.Device.DeviceId}\",\n        DeviceRemoved removed => $\"Removed: {removed.Device.DeviceId}\",\n        DeviceUpdated updated => $\"Metadata changed: {updated.Device.DeviceId}\",\n        SnapshotComplete complete => $\"Initial snapshot ready at revision {complete.Revision}\",\n        _ => \"Unknown change\"\n    });\n}\n",
+      "body_sha256": "7e996315ccdbc1594fd5d5644414ba702383bf66970f8c1815101f5a7c725c3c",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 6,
+    "before": {
+      "opening_line": 274,
+      "closing_line": 294,
+      "body": "using Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\n\nusing var stop = new CancellationTokenSource();\nvar ct = stop.Token;\nvar devices = new HashSet<IYubiKey>(ReferenceEqualityComparer.Instance);\nvar loaded = false;\nConsole.WriteLine(\"Loading\u2026\");\nawait foreach (var change in YubiKeyManager.WatchAsync(ct))\n{\n    if (change is DeviceAdded added)\n        devices.Add(added.Device);\n    else if (change is DeviceRemoved removed)\n        devices.Remove(removed.Device);\n    else if (change is SnapshotComplete)\n        loaded = true;\n    // DeviceUpdated retains the object; render its updated CachedDeviceInfo below.\n    Console.WriteLine(!loaded ? \"Loading\u2026\" : devices.Count == 0 ? \"No YubiKeys connected\" : $\"{devices.Count} YubiKey(s)\");\n}\n",
+      "body_sha256": "eb95a765658f5a24d16ff3cdad6eccb35495f55b430d09b5231cf0e1422ac052",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 274,
+      "closing_line": 294,
+      "body": "using Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\n\nusing var stop = new CancellationTokenSource();\nvar ct = stop.Token;\nvar devices = new HashSet<IYubiKey>(ReferenceEqualityComparer.Instance);\nvar loaded = false;\nConsole.WriteLine(\"Loading\u2026\");\nawait foreach (var change in YubiKeyManager.WatchAsync(ct))\n{\n    if (change is DeviceAdded added)\n        devices.Add(added.Device);\n    else if (change is DeviceRemoved removed)\n        devices.Remove(removed.Device);\n    else if (change is SnapshotComplete)\n        loaded = true;\n    // DeviceUpdated retains the object; render its updated CachedDeviceInfo below.\n    Console.WriteLine(!loaded ? \"Loading\u2026\" : devices.Count == 0 ? \"No YubiKeys connected\" : $\"{devices.Count} YubiKey(s)\");\n}\n",
+      "body_sha256": "eb95a765658f5a24d16ff3cdad6eccb35495f55b430d09b5231cf0e1422ac052",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 7,
+    "before": {
+      "opening_line": 307,
+      "closing_line": 325,
+      "body": "using Microsoft.Extensions.DependencyInjection;\nusing Microsoft.Extensions.Hosting;\nusing Yubico.YubiKit.Core.Devices;\n\nawait using var monitor = await YubiKeyManager.CreateMonitorAsync();\nvar builder = Host.CreateApplicationBuilder(args);\nbuilder.Services.AddSingleton(monitor); // Externally created instance: container does not own disposal.\nbuilder.Services.AddHostedService<MonitorLifetime>();\n// Register services that receive YubiKeyMonitor and call monitor.WatchAsync(theirStoppingToken).\nusing var host = builder.Build();\nawait host.RunAsync();\n\nsealed class MonitorLifetime(YubiKeyMonitor monitor) : IHostedService\n{\n    public Task StartAsync(CancellationToken ct) => Task.CompletedTask;\n    public Task StopAsync(CancellationToken ct) => monitor.DisposeAsync().AsTask();\n}\n",
+      "body_sha256": "f5384f828de00df6275eadf2b1b61661678970274471c856226d34948c91a5a1",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 309,
+      "closing_line": 327,
+      "body": "using Microsoft.Extensions.DependencyInjection;\nusing Microsoft.Extensions.Hosting;\nusing Yubico.YubiKit.Core.Devices;\n\nawait using var monitor = await YubiKeyManager.CreateMonitorAsync();\nvar builder = Host.CreateApplicationBuilder(args);\nbuilder.Services.AddSingleton(monitor); // Externally created instance: container does not own disposal.\nbuilder.Services.AddHostedService<MonitorLifetime>();\n// Register services that receive YubiKeyMonitor and call monitor.WatchAsync(theirStoppingToken).\nusing var host = builder.Build();\nawait host.RunAsync();\n\nsealed class MonitorLifetime(YubiKeyMonitor monitor) : IHostedService\n{\n    public Task StartAsync(CancellationToken ct) => Task.CompletedTask;\n    public Task StopAsync(CancellationToken ct) => monitor.DisposeAsync().AsTask();\n}\n",
+      "body_sha256": "f5384f828de00df6275eadf2b1b61661678970274471c856226d34948c91a5a1",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 8,
+    "before": {
+      "opening_line": 370,
+      "closing_line": 378,
+      "body": "static async Task WatchOnUiAsync(Action<DeviceChange> apply, CancellationToken ct)\n{\n    var ui = SynchronizationContext.Current\n        ?? throw new InvalidOperationException(\"Start watching from the UI thread.\");\n    await foreach (var change in YubiKeyManager.WatchAsync(ct))\n        ui.Post(_ => apply(change), null);\n}\n",
+      "body_sha256": "b41c71d99a45a5b6a5a341bc1da037a1a67dcb8eaa0867d19599a4d080429dbd",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 380,
+      "closing_line": 388,
+      "body": "static async Task WatchOnUiAsync(Action<DeviceChange> apply, CancellationToken ct)\n{\n    var ui = SynchronizationContext.Current\n        ?? throw new InvalidOperationException(\"Start watching from the UI thread.\");\n    await foreach (var change in YubiKeyManager.WatchAsync(ct))\n        ui.Post(_ => apply(change), null);\n}\n",
+      "body_sha256": "b41c71d99a45a5b6a5a341bc1da037a1a67dcb8eaa0867d19599a4d080429dbd",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 9,
+    "before": {
+      "opening_line": 385,
+      "closing_line": 399,
+      "body": "try\n{\n    var devices = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);\n}\ncatch (OperationCanceledException)\n{\n    // Scan was cancelled\n}\ncatch (PlatformInteropException ex)\n{\n    // Platform API error (e.g., SmartCard service not running)\n    Console.WriteLine($\"Platform error: {ex.Message}\");\n}\n",
+      "body_sha256": "a3325c13e18af8776c8faa6284b9e4c39e4a1aefc777a0b65d48d97e337b8fc1",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 395,
+      "closing_line": 409,
+      "body": "try\n{\n    var devices = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);\n}\ncatch (OperationCanceledException)\n{\n    // Scan was cancelled\n}\ncatch (PlatformInteropException ex)\n{\n    // Platform API error (e.g., SmartCard service not running)\n    Console.WriteLine($\"Platform error: {ex.Message}\");\n}\n",
+      "body_sha256": "a3325c13e18af8776c8faa6284b9e4c39e4a1aefc777a0b65d48d97e337b8fc1",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 10,
+    "before": {
+      "opening_line": 407,
+      "closing_line": 409,
+      "body": "dotnet toolchain.cs -- test --integration --project Management.IntegrationTests --filter \"(FullyQualifiedName~OwnedMonitorReadOnlyTests|FullyQualifiedName~ScopedDiscoveryReadOnlyTests)&Category!=RequiresUserPresence\"\n",
+      "body_sha256": "a5ccb5f682c8c141d66d71d8e9770e0a03f1204c13b961462cefd87b8f801802",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 417,
+      "closing_line": 419,
+      "body": "dotnet toolchain.cs -- test --integration --project Management.IntegrationTests --filter \"(FullyQualifiedName~OwnedMonitorReadOnlyTests|FullyQualifiedName~ScopedDiscoveryReadOnlyTests)&Category!=RequiresUserPresence\"\n",
+      "body_sha256": "a5ccb5f682c8c141d66d71d8e9770e0a03f1204c13b961462cefd87b8f801802",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 11,
+    "before": {
+      "opening_line": 486,
+      "closing_line": 497,
+      "body": "public class MyService(IYubiKeyManager manager)\n{\n    public async Task DoWork()\n    {\n        var devices = await manager.FindAllAsync();\n    }\n}\n\n// In Program.cs\nbuilder.Services.AddYubiKeyManagerCore();\n",
+      "body_sha256": "57c0656d2ddfc6872483870b1bdd27577fd5342882ba54219909edc6cf0ea6cd",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 496,
+      "closing_line": 507,
+      "body": "public class MyService(IYubiKeyManager manager)\n{\n    public async Task DoWork()\n    {\n        var devices = await manager.FindAllAsync();\n    }\n}\n\n// In Program.cs\nbuilder.Services.AddYubiKeyManagerCore();\n",
+      "body_sha256": "57c0656d2ddfc6872483870b1bdd27577fd5342882ba54219909edc6cf0ea6cd",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "body_number": 12,
+    "before": {
+      "opening_line": 500,
+      "closing_line": 510,
+      "body": "public class MyService\n{\n    public async Task DoWork()\n    {\n        var devices = await YubiKeyManager.FindAllAsync();\n    }\n}\n\n// No DI registration needed - just use the static API directly\n",
+      "body_sha256": "a33acbf1f1ea3314beea7b9070c45064144e7a71c865fc22c4faf2c355ab2211",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 510,
+      "closing_line": 520,
+      "body": "public class MyService\n{\n    public async Task DoWork()\n    {\n        var devices = await YubiKeyManager.FindAllAsync();\n    }\n}\n\n// No DI registration needed - just use the static API directly\n",
+      "body_sha256": "a33acbf1f1ea3314beea7b9070c45064144e7a71c865fc22c4faf2c355ab2211",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 1,
+    "before": {
+      "opening_line": 41,
+      "closing_line": 44,
+      "body": "dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha\ndotnet add package Yubico.YubiKit.Core --prerelease\n",
+      "body_sha256": "58fd29e51790678cee93f1793af708cffcc6597d177379253879f304e37c8ec1",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 41,
+      "closing_line": 44,
+      "body": "dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha\ndotnet add package Yubico.YubiKit.Core --prerelease\n",
+      "body_sha256": "58fd29e51790678cee93f1793af708cffcc6597d177379253879f304e37c8ec1",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 2,
+    "before": {
+      "opening_line": 51,
+      "closing_line": 68,
+      "body": "using Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Piv;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nConsole.WriteLine($\"Serial {device.SerialNumber}: {device.AvailableConnections}\");\n\nforeach (var each in await YubiKeyManager.FindAllAsync())\n{\n    Console.WriteLine($\"  {each.SerialNumber}: {each.AvailableConnections}\");\n}\n",
+      "body_sha256": "2d787d65101738f9812ba6917a9268a5ccfb33162ab707227327f7be66a9c253",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 51,
+      "closing_line": 68,
+      "body": "using Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Piv;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nConsole.WriteLine($\"Serial {device.SerialNumber}: {device.AvailableConnections}\");\n\nforeach (var each in await YubiKeyManager.FindAllAsync())\n{\n    Console.WriteLine($\"  {each.SerialNumber}: {each.AvailableConnections}\");\n}\n",
+      "body_sha256": "2d787d65101738f9812ba6917a9268a5ccfb33162ab707227327f7be66a9c253",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 3,
+    "before": {
+      "opening_line": 127,
+      "closing_line": 130,
+      "body": "var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);\nvar fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);\n",
+      "body_sha256": "36919ee52199f01ea271cafc2533cc8079ec8b4e760a86a02f10198c2479ff36",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 138,
+      "closing_line": 141,
+      "body": "var smartCardYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.SmartCard, cancellationToken: cancellationToken);\nvar fidoYubiKeys = await YubiKeyManager.FindAllAsync(interfaces: ConnectionType.HidFido, cancellationToken: cancellationToken);\n",
+      "body_sha256": "36919ee52199f01ea271cafc2533cc8079ec8b4e760a86a02f10198c2479ff36",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 4,
+    "before": {
+      "opening_line": 149,
+      "closing_line": 154,
+      "body": "if (device.CachedDeviceInfo is { } info)\n{\n    Console.WriteLine($\"Last observed firmware: {info.FirmwareVersion}, form factor: {info.FormFactor}\");\n}\n",
+      "body_sha256": "a95ce875742421cc42117b44eb2ccb969602f325fafcbd4124b8e7299396db2b",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 160,
+      "closing_line": 165,
+      "body": "if (device.CachedDeviceInfo is { } info)\n{\n    Console.WriteLine($\"Last observed firmware: {info.FirmwareVersion}, form factor: {info.FormFactor}\");\n}\n",
+      "body_sha256": "a95ce875742421cc42117b44eb2ccb969602f325fafcbd4124b8e7299396db2b",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 5,
+    "before": {
+      "opening_line": 184,
+      "closing_line": 188,
+      "body": "// After closing the competing client; expectedSerialNumber is the serial you want to find.\nIYubiKey? matchingDevice = await YubiKeyManager.FindFirstOrDefaultAsync(\n    key => key.SerialNumber == expectedSerialNumber, cancellationToken: cancellationToken);\n",
+      "body_sha256": "2b6e0220f981b623808a9e780598f1d86f68f75b7dbc22ab5367a6096a9541a9",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 195,
+      "closing_line": 199,
+      "body": "// After closing the competing client; expectedSerialNumber is the serial you want to find.\nIYubiKey? matchingDevice = await YubiKeyManager.FindFirstOrDefaultAsync(\n    key => key.SerialNumber == expectedSerialNumber, cancellationToken: cancellationToken);\n",
+      "body_sha256": "2b6e0220f981b623808a9e780598f1d86f68f75b7dbc22ab5367a6096a9541a9",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 6,
+    "before": {
+      "opening_line": 204,
+      "closing_line": 207,
+      "body": "SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\n",
+      "body_sha256": "e2481dca75a02fadb2ec4ab663637e2620e9ff59fc24dfaf90ffca1008e27f70",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 215,
+      "closing_line": 218,
+      "body": "SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\n",
+      "body_sha256": "e2481dca75a02fadb2ec4ab663637e2620e9ff59fc24dfaf90ffca1008e27f70",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 7,
+    "before": {
+      "opening_line": 212,
+      "closing_line": 216,
+      "body": "// Coordinate discovery/monitoring and all other connections to this key before opening directly.\nvar factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);\nawait using ISmartCardConnection connection = await factory.CreateAsync(reader, cancellationToken);\n",
+      "body_sha256": "0d56c201fac75500480d0ac95b22f0dfec46ef4ed24109398868276348a12215",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 223,
+      "closing_line": 227,
+      "body": "// Coordinate discovery/monitoring and all other connections to this key before opening directly.\nvar factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);\nawait using ISmartCardConnection connection = await factory.CreateAsync(reader, cancellationToken);\n",
+      "body_sha256": "0d56c201fac75500480d0ac95b22f0dfec46ef4ed24109398868276348a12215",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 8,
+    "before": {
+      "opening_line": 238,
+      "closing_line": 240,
+      "body": "await using var piv = await device.CreatePivSessionAsync();\n",
+      "body_sha256": "77a17b31fd3ec5a57d222afaa33c2904fcca5892caeb19a2f40269c15890ea87",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 249,
+      "closing_line": 251,
+      "body": "await using var piv = await device.CreatePivSessionAsync();\n",
+      "body_sha256": "77a17b31fd3ec5a57d222afaa33c2904fcca5892caeb19a2f40269c15890ea87",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 9,
+    "before": {
+      "opening_line": 259,
+      "closing_line": 263,
+      "body": "IYubiKey first = await YubiKeyManager.FindFirstAsync();\nIYubiKey? smartCard = await YubiKeyManager.FindFirstOrDefaultAsync(\n    device => device.SupportsConnection(ConnectionType.SmartCard));\n",
+      "body_sha256": "dcd0265322dd87993b13f72d8481f427e31027d830580327d059abf0847e5ad2",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 270,
+      "closing_line": 274,
+      "body": "IYubiKey first = await YubiKeyManager.FindFirstAsync();\nIYubiKey? smartCard = await YubiKeyManager.FindFirstOrDefaultAsync(\n    device => device.SupportsConnection(ConnectionType.SmartCard));\n",
+      "body_sha256": "dcd0265322dd87993b13f72d8481f427e31027d830580327d059abf0847e5ad2",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 10,
+    "before": {
+      "opening_line": 271,
+      "closing_line": 283,
+      "body": "await foreach (DeviceChange change in YubiKeyManager.WatchAsync())\n{\n    Console.WriteLine(change switch\n    {\n        DeviceAdded added => $\"Added: serial {added.Device.SerialNumber}\",\n        DeviceRemoved removed => $\"Removed: serial {removed.Device.SerialNumber}\",\n        DeviceUpdated updated => $\"Updated: serial {updated.Device.SerialNumber}\",\n        SnapshotComplete => \"Initial snapshot complete\",\n        _ => \"Unknown change\"\n    });\n}\n",
+      "body_sha256": "c31e086f65b6cbc2bde8f4b894e43f26b4635eb4acd326d4e4620ad526c2c30a",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 282,
+      "closing_line": 294,
+      "body": "await foreach (DeviceChange change in YubiKeyManager.WatchAsync())\n{\n    Console.WriteLine(change switch\n    {\n        DeviceAdded added => $\"Added: serial {added.Device.SerialNumber}\",\n        DeviceRemoved removed => $\"Removed: serial {removed.Device.SerialNumber}\",\n        DeviceUpdated updated => $\"Updated: serial {updated.Device.SerialNumber}\",\n        SnapshotComplete => \"Initial snapshot complete\",\n        _ => \"Unknown change\"\n    });\n}\n",
+      "body_sha256": "c31e086f65b6cbc2bde8f4b894e43f26b4635eb4acd326d4e4620ad526c2c30a",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 11,
+    "before": {
+      "opening_line": 307,
+      "closing_line": 327,
+      "body": "await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();\nawait using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection);\n\n// firmwareVersion is the device's firmware, read via Management; it sets APDU formatting. Configure first.\nraw.Configure(firmwareVersion);\nawait raw.SelectAsync(ApplicationIds.Piv);\nApduResponse response = await raw.TransmitAndReceiveAsync(\n    new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, requestData),\n    throwOnError: false);\n\ntry\n{\n    Console.WriteLine($\"SW={response.SW:X4}, {response.Data.Length} bytes\");\n    // Consume response.Data here before clearing its owner.\n}\nfinally\n{\n    response.Clear();\n}\n",
+      "body_sha256": "8c3b4fcdfdc4ac88785fe8266a3c50446ad13fe6664bc4b8718394c8c5853aab",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 318,
+      "closing_line": 338,
+      "body": "await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();\nawait using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection);\n\n// firmwareVersion is the device's firmware, read via Management; it sets APDU formatting. Configure first.\nraw.Configure(firmwareVersion);\nawait raw.SelectAsync(ApplicationIds.Piv);\nApduResponse response = await raw.TransmitAndReceiveAsync(\n    new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, requestData),\n    throwOnError: false);\n\ntry\n{\n    Console.WriteLine($\"SW={response.SW:X4}, {response.Data.Length} bytes\");\n    // Consume response.Data here before clearing its owner.\n}\nfinally\n{\n    response.Clear();\n}\n",
+      "body_sha256": "8c3b4fcdfdc4ac88785fe8266a3c50446ad13fe6664bc4b8718394c8c5853aab",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 12,
+    "before": {
+      "opening_line": 352,
+      "closing_line": 356,
+      "body": "await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();\n// Direct I/O takes a preformatted APDU: no applet selection or command chaining is added here.\nReadOnlyMemory<byte> reply = await connection.TransmitAndReceiveAsync(commandBytes, cancellationToken);\n",
+      "body_sha256": "e45ae4556cc41529328df3ecf52d8769ae8d6b865f10d99c8e096f22863f4c2d",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 363,
+      "closing_line": 367,
+      "body": "await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();\n// Direct I/O takes a preformatted APDU: no applet selection or command chaining is added here.\nReadOnlyMemory<byte> reply = await connection.TransmitAndReceiveAsync(commandBytes, cancellationToken);\n",
+      "body_sha256": "e45ae4556cc41529328df3ecf52d8769ae8d6b865f10d99c8e096f22863f4c2d",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 13,
+    "before": {
+      "opening_line": 362,
+      "closing_line": 376,
+      "body": "await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();\nIDisposable transaction = await connection.BeginTransactionAsync();\ntry\n{\n    // Perform serialized raw operations on connection here.\n}\nfinally\n{\n    if (transaction is IAsyncDisposable asyncTransaction)\n        await asyncTransaction.DisposeAsync();\n    else\n        transaction.Dispose();\n}\n",
+      "body_sha256": "744f8c40491ae45f9f101952255069175e6571aa44fd7a553469fc645fe562d3",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 373,
+      "closing_line": 387,
+      "body": "await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();\nIDisposable transaction = await connection.BeginTransactionAsync();\ntry\n{\n    // Perform serialized raw operations on connection here.\n}\nfinally\n{\n    if (transaction is IAsyncDisposable asyncTransaction)\n        await asyncTransaction.DisposeAsync();\n    else\n        transaction.Dispose();\n}\n",
+      "body_sha256": "744f8c40491ae45f9f101952255069175e6571aa44fd7a553469fc645fe562d3",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 14,
+    "before": {
+      "opening_line": 433,
+      "closing_line": 435,
+      "body": "dotnet toolchain.cs -- test --project Core --filter \"FullyQualifiedName~Linux\"\n",
+      "body_sha256": "cad4c463ea76340881ded9c8e3298cdc9ca14974459537a8708193696a060d91",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 444,
+      "closing_line": 446,
+      "body": "dotnet toolchain.cs -- test --project Core --filter \"FullyQualifiedName~Linux\"\n",
+      "body_sha256": "cad4c463ea76340881ded9c8e3298cdc9ca14974459537a8708193696a060d91",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 15,
+    "before": {
+      "opening_line": 472,
+      "closing_line": 474,
+      "body": "dotnet toolchain.cs -- test --project Core --filter \"FullyQualifiedName~LinuxOtp\"\n",
+      "body_sha256": "d3d48ae9517d3f4bc35d826b01b948271aeeaa5525acfabf005b7d4cd7dd6aed",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 483,
+      "closing_line": 485,
+      "body": "dotnet toolchain.cs -- test --project Core --filter \"FullyQualifiedName~LinuxOtp\"\n",
+      "body_sha256": "d3d48ae9517d3f4bc35d826b01b948271aeeaa5525acfabf005b7d4cd7dd6aed",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 16,
+    "before": {
+      "opening_line": 490,
+      "closing_line": 497,
+      "body": "await using var fidoHidConnection = await device.ConnectAsync<IFidoHidConnection>(cancellationToken);\nawait using (var raw = await RawCtapHidSession.CreateAsync(fidoHidConnection, cancellationToken))\n{\n    // CTAP HID initialization is lazy, on the first raw exchange.\n}\nawait using var next = await RawCtapHidSession.CreateAsync(fidoHidConnection, cancellationToken);\n",
+      "body_sha256": "8ee8a3d71d43af85137353a7a1401c2143915a045caa45143989191b781e7f2a",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 501,
+      "closing_line": 508,
+      "body": "await using var fidoHidConnection = await device.ConnectAsync<IFidoHidConnection>(cancellationToken);\nawait using (var raw = await RawCtapHidSession.CreateAsync(fidoHidConnection, cancellationToken))\n{\n    // CTAP HID initialization is lazy, on the first raw exchange.\n}\nawait using var next = await RawCtapHidSession.CreateAsync(fidoHidConnection, cancellationToken);\n",
+      "body_sha256": "8ee8a3d71d43af85137353a7a1401c2143915a045caa45143989191b781e7f2a",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 17,
+    "before": {
+      "opening_line": 501,
+      "closing_line": 503,
+      "body": "dotnet toolchain.cs -- test --project Core --filter \"FullyQualifiedName~LinuxHidRoutingTests\"\n",
+      "body_sha256": "f271ddcc26fca58d2921e2fdddde167e4bb00d64a1ea89e27a65276bfb81b469",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 512,
+      "closing_line": 514,
+      "body": "dotnet toolchain.cs -- test --project Core --filter \"FullyQualifiedName~LinuxHidRoutingTests\"\n",
+      "body_sha256": "f271ddcc26fca58d2921e2fdddde167e4bb00d64a1ea89e27a65276bfb81b469",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 18,
+    "before": {
+      "opening_line": 514,
+      "closing_line": 517,
+      "body": "dotnet toolchain.cs -- test --project Ctap2 --filter \"FullyQualifiedName~Ctap2SessionLinuxCrossLayerTests\"\ndotnet toolchain.cs -- test --project YubiOtp --filter \"FullyQualifiedName~YubiOtpSessionLinuxCrossLayerTests\"\n",
+      "body_sha256": "f5fc16fe96499ae3a9ca0cc4430a78a7b617e6f918492f1398868af55daad0b3",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 525,
+      "closing_line": 528,
+      "body": "dotnet toolchain.cs -- test --project Ctap2 --filter \"FullyQualifiedName~Ctap2SessionLinuxCrossLayerTests\"\ndotnet toolchain.cs -- test --project YubiOtp --filter \"FullyQualifiedName~YubiOtpSessionLinuxCrossLayerTests\"\n",
+      "body_sha256": "f5fc16fe96499ae3a9ca0cc4430a78a7b617e6f918492f1398868af55daad0b3",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 19,
+    "before": {
+      "opening_line": 528,
+      "closing_line": 535,
+      "body": "using var scp = new Scp03KeyParameters(\n    KeyReference.Default, new StaticKeys(encKey, macKey, dekKey));\n\nawait using var session = await device.CreatePivSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scp });\n// Perform supported PIV operations here. Session disposal precedes parameter disposal.\n",
+      "body_sha256": "3d6bac3b865c0139280c8ce6afbcadad70179d0cb082474667e13daa3ecefa19",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 539,
+      "closing_line": 546,
+      "body": "using var scp = new Scp03KeyParameters(\n    KeyReference.Default, new StaticKeys(encKey, macKey, dekKey));\n\nawait using var session = await device.CreatePivSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scp });\n// Perform supported PIV operations here. Session disposal precedes parameter disposal.\n",
+      "body_sha256": "3d6bac3b865c0139280c8ce6afbcadad70179d0cb082474667e13daa3ecefa19",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "src/Core/README.md",
+    "body_number": 20,
+    "before": {
+      "opening_line": 575,
+      "closing_line": 598,
+      "body": "using Yubico.YubiKit.Core.Cryptography;\nusing static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions;\n\nKeyInfo keyInfo = Keys.Get(KeyType.P256); // same instance as Keys.P256\nConsole.WriteLine(keyInfo.DisplayName); // P-256\nConsole.WriteLine(keyInfo.Curve?.FieldSizeBits); // 256\nConsole.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.2.840.10045.2.1 (id-ecPublicKey)\nConsole.WriteLine(keyInfo.Asn1?.NamedCurveOid); // 1.2.840.10045.3.1.7\n\nCurveInfo curveInfo = Curves.GetByOid(\"1.2.840.10045.3.1.7\"); // named curves only\nforeach (KeyInfo construction in Keys.FindByCurve(curveInfo))\n    Console.WriteLine(construction.DisplayName); // a curve can have multiple concrete constructions\nforeach (AlgorithmInfo algorithmInfo in Algorithms.FindForKey(keyInfo))\n    Console.WriteLine(algorithmInfo.DisplayName); // multiple ECDSA choices, ECDH, ...\n\nif (Keys.TryGet((KeyType)999, out KeyInfo? unknown))\n    Console.WriteLine(unknown.DisplayName); // non-null on success\nbool found = Curves.TryGetByOid(\"1.2.3.4.5\", out _); // false\nvar matches = Algorithms.FindByOid(Oids.RsaPss); // generic + parameterized RSA-PSS\nCurveInfo? rsaCurve = Keys.Rsa2048.Curve; // null\nCurveInfo? aesCurve = Keys.Aes256.Curve; // null\nAsn1KeyInfo? aesAsn1 = Keys.Aes256.Asn1; // null; CBC is an operation, not a bare key\n",
+      "body_sha256": "20081e49e3d8a92f868059ac2d3120cacd656586065aa64a5bde2572848c7b08",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 586,
+      "closing_line": 609,
+      "body": "using Yubico.YubiKit.Core.Cryptography;\nusing static Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions;\n\nKeyInfo keyInfo = Keys.Get(KeyType.P256); // same instance as Keys.P256\nConsole.WriteLine(keyInfo.DisplayName); // P-256\nConsole.WriteLine(keyInfo.Curve?.FieldSizeBits); // 256\nConsole.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.2.840.10045.2.1 (id-ecPublicKey)\nConsole.WriteLine(keyInfo.Asn1?.NamedCurveOid); // 1.2.840.10045.3.1.7\n\nCurveInfo curveInfo = Curves.GetByOid(\"1.2.840.10045.3.1.7\"); // named curves only\nforeach (KeyInfo construction in Keys.FindByCurve(curveInfo))\n    Console.WriteLine(construction.DisplayName); // a curve can have multiple concrete constructions\nforeach (AlgorithmInfo algorithmInfo in Algorithms.FindForKey(keyInfo))\n    Console.WriteLine(algorithmInfo.DisplayName); // multiple ECDSA choices, ECDH, ...\n\nif (Keys.TryGet((KeyType)999, out KeyInfo? unknown))\n    Console.WriteLine(unknown.DisplayName); // non-null on success\nbool found = Curves.TryGetByOid(\"1.2.3.4.5\", out _); // false\nvar matches = Algorithms.FindByOid(Oids.RsaPss); // generic + parameterized RSA-PSS\nCurveInfo? rsaCurve = Keys.Rsa2048.Curve; // null\nCurveInfo? aesCurve = Keys.Aes256.Curve; // null\nAsn1KeyInfo? aesAsn1 = Keys.Aes256.Asn1; // null; CBC is an operation, not a bare key\n",
+      "body_sha256": "20081e49e3d8a92f868059ac2d3120cacd656586065aa64a5bde2572848c7b08",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 1,
+    "before": {
+      "opening_line": 27,
+      "closing_line": 42,
+      "body": "# Run all tests\ndotnet toolchain.cs test\n\n# Run tests for a specific module (partial match)\ndotnet toolchain.cs -- test --project Core\ndotnet toolchain.cs -- test --project Ctap2\ndotnet toolchain.cs -- test --project Piv\n\n# Run tests with a filter\ndotnet toolchain.cs -- test --filter \"FullyQualifiedName~MyTestClass\"\ndotnet toolchain.cs -- test --filter \"Method~Sign\"\n\n# Combine project and filter\ndotnet toolchain.cs -- test --project Piv --filter \"Method~Sign\"\n",
+      "body_sha256": "5f64f3cab35661ee51e6ebe9c67823d6285f2c4a1069b62d23555a4bec1a135e",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 27,
+      "closing_line": 42,
+      "body": "# Run all tests\ndotnet toolchain.cs test\n\n# Run tests for a specific module (partial match)\ndotnet toolchain.cs -- test --project Core\ndotnet toolchain.cs -- test --project Ctap2\ndotnet toolchain.cs -- test --project Piv\n\n# Run tests with a filter\ndotnet toolchain.cs -- test --filter \"FullyQualifiedName~MyTestClass\"\ndotnet toolchain.cs -- test --filter \"Method~Sign\"\n\n# Combine project and filter\ndotnet toolchain.cs -- test --project Piv --filter \"Method~Sign\"\n",
+      "body_sha256": "5f64f3cab35661ee51e6ebe9c67823d6285f2c4a1069b62d23555a4bec1a135e",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 2,
+    "before": {
+      "opening_line": 72,
+      "closing_line": 78,
+      "body": "# Quick smoke test \u2014 skips slow keygen and user-presence tests\ndotnet toolchain.cs -- test --integration --project Piv --smoke\n\n# Targeted test for a specific method you touched\ndotnet toolchain.cs -- test --integration --project Oath --filter \"FullyQualifiedName~CalculateAll\"\n",
+      "body_sha256": "cf6a897b3024e06608921c48029f1182364b42ace12a894f9a6ebf28594e43f1",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 72,
+      "closing_line": 78,
+      "body": "# Quick smoke test \u2014 skips slow keygen and user-presence tests\ndotnet toolchain.cs -- test --integration --project Piv --smoke\n\n# Targeted test for a specific method you touched\ndotnet toolchain.cs -- test --integration --project Oath --filter \"FullyQualifiedName~CalculateAll\"\n",
+      "body_sha256": "cf6a897b3024e06608921c48029f1182364b42ace12a894f9a6ebf28594e43f1",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 3,
+    "before": {
+      "opening_line": 84,
+      "closing_line": 86,
+      "body": "dotnet toolchain.cs -- test --integration --project Piv\n",
+      "body_sha256": "35f009fe409f9ff806cffd2f687bc004ced97a204c7b9f8fbb60a1c2fddf15d2",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 84,
+      "closing_line": 86,
+      "body": "dotnet toolchain.cs -- test --integration --project Piv\n",
+      "body_sha256": "35f009fe409f9ff806cffd2f687bc004ced97a204c7b9f8fbb60a1c2fddf15d2",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 4,
+    "before": {
+      "opening_line": 102,
+      "closing_line": 111,
+      "body": "# WRONG - May fail on xUnit v3 projects\ndotnet test src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj\n\n# WRONG - Filter syntax incompatible with xUnit v3\ndotnet test --filter \"FullyQualifiedName~MyTest\"\n\n# CORRECT - Always use the build script\ndotnet toolchain.cs -- test --project Ctap2 --filter \"FullyQualifiedName~MyTest\"\n",
+      "body_sha256": "3b3d1fd8f5c71e90c3d6eba1d62c6752cd264ab5f6b9d969160fa4ad3f269acf",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 102,
+      "closing_line": 111,
+      "body": "# WRONG - May fail on xUnit v3 projects\ndotnet test src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj\n\n# WRONG - Filter syntax incompatible with xUnit v3\ndotnet test --filter \"FullyQualifiedName~MyTest\"\n\n# CORRECT - Always use the build script\ndotnet toolchain.cs -- test --project Ctap2 --filter \"FullyQualifiedName~MyTest\"\n",
+      "body_sha256": "3b3d1fd8f5c71e90c3d6eba1d62c6752cd264ab5f6b9d969160fa4ad3f269acf",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 5,
+    "before": {
+      "opening_line": 116,
+      "closing_line": 118,
+      "body": "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>\n",
+      "body_sha256": "2808b744fe839cd88d2c3a3ec861f793b674dbfab80a5d9a0f464c90060adf9f",
+      "language": "xml"
+    },
+    "after": {
+      "opening_line": 116,
+      "closing_line": 118,
+      "body": "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>\n",
+      "body_sha256": "2808b744fe839cd88d2c3a3ec861f793b674dbfab80a5d9a0f464c90060adf9f",
+      "language": "xml"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 6,
+    "before": {
+      "opening_line": 126,
+      "closing_line": 131,
+      "body": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/\nsrc/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/\nsrc/Piv/tests/Yubico.YubiKit.Piv.UnitTests/\n... etc\n",
+      "body_sha256": "b1ab595716d28ddadf6b481aa5dde9cb0acfec08d23c0e671ceedbe8ccd9858a",
+      "language": ""
+    },
+    "after": {
+      "opening_line": 126,
+      "closing_line": 131,
+      "body": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/\nsrc/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/\nsrc/Piv/tests/Yubico.YubiKit.Piv.UnitTests/\n... etc\n",
+      "body_sha256": "b1ab595716d28ddadf6b481aa5dde9cb0acfec08d23c0e671ceedbe8ccd9858a",
+      "language": ""
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 7,
+    "before": {
+      "opening_line": 166,
+      "closing_line": 171,
+      "body": "FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name\nName=MyTestMethod              Exact test method name\nClassName~Integration          Classes containing 'Integration'\nName!=SkipMe                   Exclude tests named 'SkipMe'\n",
+      "body_sha256": "0f609596277542601f36e2195b39cf5d0ed2f737fae56044bce9ae201ca31cee",
+      "language": ""
+    },
+    "after": {
+      "opening_line": 171,
+      "closing_line": 176,
+      "body": "FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name\nName=MyTestMethod              Exact test method name\nClassName~Integration          Classes containing 'Integration'\nName!=SkipMe                   Exclude tests named 'SkipMe'\n",
+      "body_sha256": "0f609596277542601f36e2195b39cf5d0ed2f737fae56044bce9ae201ca31cee",
+      "language": ""
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 8,
+    "before": {
+      "opening_line": 224,
+      "closing_line": 228,
+      "body": "dotnet toolchain.cs -- test --integration --project Ctap2 --smoke\ndotnet toolchain.cs -- test --integration --project WebAuthn --smoke\ndotnet toolchain.cs -- test --integration --project WebAuthn --filter \"Category!=RequiresUserPresence\"\n",
+      "body_sha256": "e8d968676464a498df79f6611a219b4276663ce7375eebda41fdfe2b4c703ba3",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 229,
+      "closing_line": 233,
+      "body": "dotnet toolchain.cs -- test --integration --project Ctap2 --smoke\ndotnet toolchain.cs -- test --integration --project WebAuthn --smoke\ndotnet toolchain.cs -- test --integration --project WebAuthn --filter \"Category!=RequiresUserPresence\"\n",
+      "body_sha256": "e8d968676464a498df79f6611a219b4276663ce7375eebda41fdfe2b4c703ba3",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 9,
+    "before": {
+      "opening_line": 232,
+      "closing_line": 235,
+      "body": "dotnet toolchain.cs -- test --integration --project Ctap2 --filter \"Category=RequiresUserPresence\"\ndotnet toolchain.cs -- test --integration --project WebAuthn --filter \"Category=RequiresUserPresence\"\n",
+      "body_sha256": "c4977b1c498bafc3e8584567bad382c99be28f9de05c2f51ee601cb464d21105",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 237,
+      "closing_line": 240,
+      "body": "dotnet toolchain.cs -- test --integration --project Ctap2 --filter \"Category=RequiresUserPresence\"\ndotnet toolchain.cs -- test --integration --project WebAuthn --filter \"Category=RequiresUserPresence\"\n",
+      "body_sha256": "c4977b1c498bafc3e8584567bad382c99be28f9de05c2f51ee601cb464d21105",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 10,
+    "before": {
+      "opening_line": 245,
+      "closing_line": 264,
+      "body": "// \u274c WRONG - Does not work\n[WithYubiKey(MinFirmware = \"5.7.0\")]\n[SkippableTheory]\n[InlineData(KeyType.Rsa3072)]\n[InlineData(KeyType.Rsa4096)]\npublic async Task SignAsync_LargeRsa_Works(KeyType algorithm, YubiKeyTestState state)\n{\n    // This will fail - state won't be injected correctly\n}\n\n// \u2705 CORRECT - Use separate tests\n[SkippableTheory]\n[WithYubiKey(MinFirmware = \"5.7.0\")]\npublic async Task SignAsync_Rsa3072_Works(YubiKeyTestState state) { /* ... */ }\n\n[SkippableTheory]\n[WithYubiKey(MinFirmware = \"5.7.0\")]\npublic async Task SignAsync_Rsa4096_Works(YubiKeyTestState state) { /* ... */ }\n",
+      "body_sha256": "8a45b76d1a02f1a37fb15769b1d3ec6f573e67095a311afc1829a4bb5c5ddc60",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 250,
+      "closing_line": 269,
+      "body": "// \u274c WRONG - Does not work\n[WithYubiKey(MinFirmware = \"5.7.0\")]\n[SkippableTheory]\n[InlineData(KeyType.Rsa3072)]\n[InlineData(KeyType.Rsa4096)]\npublic async Task SignAsync_LargeRsa_Works(KeyType algorithm, YubiKeyTestState state)\n{\n    // This will fail - state won't be injected correctly\n}\n\n// \u2705 CORRECT - Use separate tests\n[SkippableTheory]\n[WithYubiKey(MinFirmware = \"5.7.0\")]\npublic async Task SignAsync_Rsa3072_Works(YubiKeyTestState state) { /* ... */ }\n\n[SkippableTheory]\n[WithYubiKey(MinFirmware = \"5.7.0\")]\npublic async Task SignAsync_Rsa4096_Works(YubiKeyTestState state) { /* ... */ }\n",
+      "body_sha256": "8a45b76d1a02f1a37fb15769b1d3ec6f573e67095a311afc1829a4bb5c5ddc60",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 11,
+    "before": {
+      "opening_line": 297,
+      "closing_line": 327,
+      "body": "// One device row; state.ConnectionType may contain multiple flags.\n[SkippableTheory]\n[WithYubiKey]\npublic async Task DefaultSelection(YubiKeyTestState state)\n{\n    var info = await state.Device.GetDeviceInfoAsync();\n    Assert.Equal(state.SerialNumber, info.SerialNumber);\n}\n\n// One row whose device must expose SmartCard.\n[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]\npublic async Task SmartCardOnly(YubiKeyTestState state)\n{\n    var info = await state.Device.GetDeviceInfoAsync();\n    Assert.Equal(state.SerialNumber, info.SerialNumber);\n}\n\n// Three separate rows, one for each requested connection type.\n[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]\n[WithYubiKey(ConnectionType = ConnectionType.HidFido)]\n[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]\npublic async Task EachManagementConnection(YubiKeyTestState state)\n{\n    // This demonstrates independent device-filter rows, not operation-transport coverage.\n    var info = await state.Device.GetDeviceInfoAsync();\n    Assert.Equal(state.SerialNumber, info.SerialNumber);\n}\n",
+      "body_sha256": "9dedbdc9a06cb9503c1e8b1351b48e2103cef07895cd13e6989acc8131cfcd29",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 302,
+      "closing_line": 332,
+      "body": "// One device row; state.ConnectionType may contain multiple flags.\n[SkippableTheory]\n[WithYubiKey]\npublic async Task DefaultSelection(YubiKeyTestState state)\n{\n    var info = await state.Device.GetDeviceInfoAsync();\n    Assert.Equal(state.SerialNumber, info.SerialNumber);\n}\n\n// One row whose device must expose SmartCard.\n[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]\npublic async Task SmartCardOnly(YubiKeyTestState state)\n{\n    var info = await state.Device.GetDeviceInfoAsync();\n    Assert.Equal(state.SerialNumber, info.SerialNumber);\n}\n\n// Three separate rows, one for each requested connection type.\n[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]\n[WithYubiKey(ConnectionType = ConnectionType.HidFido)]\n[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]\npublic async Task EachManagementConnection(YubiKeyTestState state)\n{\n    // This demonstrates independent device-filter rows, not operation-transport coverage.\n    var info = await state.Device.GetDeviceInfoAsync();\n    Assert.Equal(state.SerialNumber, info.SerialNumber);\n}\n",
+      "body_sha256": "9dedbdc9a06cb9503c1e8b1351b48e2103cef07895cd13e6989acc8131cfcd29",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 12,
+    "before": {
+      "opening_line": 342,
+      "closing_line": 353,
+      "body": "[SkippableTheory]\n[WithYubiKey]\npublic async Task GetDeviceInfo_DefaultManagementSelection(YubiKeyTestState state)\n{\n    await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>\n    {\n        var deviceInfo = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);\n    });\n}\n",
+      "body_sha256": "da244c11bfbf6860ff45ccf1a2d655fd2b570b0bf84584788a8be4b4eaf93de7",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 347,
+      "closing_line": 358,
+      "body": "[SkippableTheory]\n[WithYubiKey]\npublic async Task GetDeviceInfo_DefaultManagementSelection(YubiKeyTestState state)\n{\n    await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>\n    {\n        var deviceInfo = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);\n    });\n}\n",
+      "body_sha256": "da244c11bfbf6860ff45ccf1a2d655fd2b570b0bf84584788a8be4b4eaf93de7",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 13,
+    "before": {
+      "opening_line": 361,
+      "closing_line": 379,
+      "body": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]\n[WithYubiKey(ConnectionType = ConnectionType.HidFido)]\n[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]\npublic async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestState state)\n{\n    Assert.True(state.ConnectionType is\n        ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp);\n\n    await state.WithManagementAsync(async (mgmt, _) =>\n    {\n        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);\n\n        var info = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, info.SerialNumber);\n    }, preferredConnection: state.ConnectionType);\n}\n",
+      "body_sha256": "96c24635e172d8f3462d1a6d54cf878f7e3b1290ca30088504fba92182cac771",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 366,
+      "closing_line": 384,
+      "body": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]\n[WithYubiKey(ConnectionType = ConnectionType.HidFido)]\n[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]\npublic async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestState state)\n{\n    Assert.True(state.ConnectionType is\n        ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp);\n\n    await state.WithManagementAsync(async (mgmt, _) =>\n    {\n        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);\n\n        var info = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, info.SerialNumber);\n    }, preferredConnection: state.ConnectionType);\n}\n",
+      "body_sha256": "96c24635e172d8f3462d1a6d54cf878f7e3b1290ca30088504fba92182cac771",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 14,
+    "before": {
+      "opening_line": 394,
+      "closing_line": 398,
+      "body": "var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);\nvar fidoDevice = devices.FirstOrDefault(d => \n    d.DeviceId.Contains(\":0001\") || d.DeviceId.Contains(\":F1D0\"));\n",
+      "body_sha256": "154754fe657ed96022e8fc963e638bbc1de503e71de93bac887e8ebd8e7b7d36",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 399,
+      "closing_line": 403,
+      "body": "var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);\nvar fidoDevice = devices.FirstOrDefault(d => \n    d.DeviceId.Contains(\":0001\") || d.DeviceId.Contains(\":F1D0\"));\n",
+      "body_sha256": "154754fe657ed96022e8fc963e638bbc1de503e71de93bac887e8ebd8e7b7d36",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 15,
+    "before": {
+      "opening_line": 401,
+      "closing_line": 413,
+      "body": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.HidFido)]\npublic async Task ManagementOverFido_Works(YubiKeyTestState state)\n{\n    await state.WithManagementAsync(async (mgmt, _) =>\n    {\n        Assert.Equal(ConnectionType.HidFido, mgmt.ConnectionType);\n        var info = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, info.SerialNumber);\n    }, preferredConnection: state.ConnectionType);\n}\n",
+      "body_sha256": "d80f6ef069d1b44d37d81ae005136622624bffd4cb13d1ce48377a59bb015bd6",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 406,
+      "closing_line": 418,
+      "body": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.HidFido)]\npublic async Task ManagementOverFido_Works(YubiKeyTestState state)\n{\n    await state.WithManagementAsync(async (mgmt, _) =>\n    {\n        Assert.Equal(ConnectionType.HidFido, mgmt.ConnectionType);\n        var info = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, info.SerialNumber);\n    }, preferredConnection: state.ConnectionType);\n}\n",
+      "body_sha256": "d80f6ef069d1b44d37d81ae005136622624bffd4cb13d1ce48377a59bb015bd6",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 16,
+    "before": {
+      "opening_line": 433,
+      "closing_line": 454,
+      "body": "using Yubico.YubiKit.Tests.Shared.Infrastructure;\n\npublic class MyTests\n{\n    // Test requires hardware (device must be connected, but runs automatically)\n    [Fact]\n    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]\n    public async Task FindAllAsync_ReturnsDevice() { }\n\n    // Test requires user to insert/remove device (cannot run in CI/agents)\n    [Fact]\n    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]\n    [Trait(TestCategories.Category, TestCategories.Slow)]\n    public async Task WatchAsync_DetectsRemoval() { }\n\n    // Slow test with long delays\n    [Fact]\n    [Trait(TestCategories.Category, TestCategories.Slow)]\n    public async Task Performance_ManyOperations() { }\n}\n",
+      "body_sha256": "f32cf0969185a64db816dda52d84934178f40f761d4cee34756336c9c07d76f9",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 438,
+      "closing_line": 459,
+      "body": "using Yubico.YubiKit.Tests.Shared.Infrastructure;\n\npublic class MyTests\n{\n    // Test requires hardware (device must be connected, but runs automatically)\n    [Fact]\n    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]\n    public async Task FindAllAsync_ReturnsDevice() { }\n\n    // Test requires user to insert/remove device (cannot run in CI/agents)\n    [Fact]\n    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]\n    [Trait(TestCategories.Category, TestCategories.Slow)]\n    public async Task WatchAsync_DetectsRemoval() { }\n\n    // Slow test with long delays\n    [Fact]\n    [Trait(TestCategories.Category, TestCategories.Slow)]\n    public async Task Performance_ManyOperations() { }\n}\n",
+      "body_sha256": "f32cf0969185a64db816dda52d84934178f40f761d4cee34756336c9c07d76f9",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 17,
+    "before": {
+      "opening_line": 458,
+      "closing_line": 470,
+      "body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests (run only unit tests)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only fast unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow\"\n",
+      "body_sha256": "59c87d7b0ac71c4c7f2d505f646f315614efaa3a8e2eec9c51443da2e0eb9fb5",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 463,
+      "closing_line": 475,
+      "body": "# Skip tests requiring user interaction (for CI/agents)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n\n# Skip slow tests\ndotnet toolchain.cs -- test --filter \"Category!=Slow\"\n\n# Skip hardware tests (run only unit tests)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware\"\n\n# Run only fast unit tests (no hardware, no user presence, not slow)\ndotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence&Category!=Slow\"\n",
+      "body_sha256": "59c87d7b0ac71c4c7f2d505f646f315614efaa3a8e2eec9c51443da2e0eb9fb5",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 18,
+    "before": {
+      "opening_line": 505,
+      "closing_line": 507,
+      "body": "dotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n",
+      "body_sha256": "f62032c84989e08c33c56ccada71d57711ef729eace28b1d861826e5f0d24935",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 510,
+      "closing_line": 512,
+      "body": "dotnet toolchain.cs -- test --filter \"Category!=RequiresUserPresence\"\n",
+      "body_sha256": "f62032c84989e08c33c56ccada71d57711ef729eace28b1d861826e5f0d24935",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 19,
+    "before": {
+      "opening_line": 526,
+      "closing_line": 538,
+      "body": "[Fact]\npublic async Task Read_WhenCancelled_StopsWaiting()\n{\n    using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(\n        TestContext.Current.CancellationToken);\n    var read = reader.ReadAsync(cancellation.Token);\n    cancellation.Cancel();\n\n    await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>\n        read.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));\n}\n",
+      "body_sha256": "0d5a9b0728f5d9935f33d06ca9380bb658730e4ba1e79d21034ec898f461fb11",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 531,
+      "closing_line": 543,
+      "body": "[Fact]\npublic async Task Read_WhenCancelled_StopsWaiting()\n{\n    using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(\n        TestContext.Current.CancellationToken);\n    var read = reader.ReadAsync(cancellation.Token);\n    cancellation.Cancel();\n\n    await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>\n        read.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));\n}\n",
+      "body_sha256": "0d5a9b0728f5d9935f33d06ca9380bb658730e4ba1e79d21034ec898f461fb11",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 20,
+    "before": {
+      "opening_line": 553,
+      "closing_line": 567,
+      "body": "using Xunit;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\nstatic async Task AssertSmartCardConnectionAsync(IYubiKey device, CancellationToken cancellationToken)\n{\n    await using ISmartCardConnection connection =\n        await device.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\n    Assert.NotNull(connection);\n    Assert.Equal(ConnectionType.SmartCard, connection.Type);\n}\n",
+      "body_sha256": "05375affb3f54c54ae20134a864987f2ecfc8486b857bf70dbf0006c0575f6b4",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 558,
+      "closing_line": 572,
+      "body": "using Xunit;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\nstatic async Task AssertSmartCardConnectionAsync(IYubiKey device, CancellationToken cancellationToken)\n{\n    await using ISmartCardConnection connection =\n        await device.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\n    Assert.NotNull(connection);\n    Assert.Equal(ConnectionType.SmartCard, connection.Type);\n}\n",
+      "body_sha256": "05375affb3f54c54ae20134a864987f2ecfc8486b857bf70dbf0006c0575f6b4",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 21,
+    "before": {
+      "opening_line": 571,
+      "closing_line": 579,
+      "body": "// \u2705 GOOD\n[Fact]\npublic void CommandApdu_WithNullData_ThrowsArgumentNullException()\n\n// \u274c BAD\n[Fact]\npublic void Test1()\n",
+      "body_sha256": "4a64be614107258f37ffe49e2d16320f89bb993123d90d474b9135b7fd21803e",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 576,
+      "closing_line": 584,
+      "body": "// \u2705 GOOD\n[Fact]\npublic void CommandApdu_WithNullData_ThrowsArgumentNullException()\n\n// \u274c BAD\n[Fact]\npublic void Test1()\n",
+      "body_sha256": "4a64be614107258f37ffe49e2d16320f89bb993123d90d474b9135b7fd21803e",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "body_number": 22,
+    "before": {
+      "opening_line": 589,
+      "closing_line": 605,
+      "body": "[Fact]\npublic async Task IntegrationTest_WithRealDevice()\n{\n    await using var connection = await _device.ConnectAsync<ISmartCardConnection>();\n\n    try\n    {\n        ReadOnlyMemory<byte> result = await connection.TransmitAndReceiveAsync(apdu);\n        Assert.True(result.Length >= 2); // Framing only, not command success or protocol conformance.\n    }\n    finally\n    {\n        await ResetDeviceAsync(connection);\n    }\n}\n",
+      "body_sha256": "c3d4ad97312a0f06c71b7ba5b0302f1880769a46d2bf0aabfa800d8fe67b9de8",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 594,
+      "closing_line": 610,
+      "body": "[Fact]\npublic async Task IntegrationTest_WithRealDevice()\n{\n    await using var connection = await _device.ConnectAsync<ISmartCardConnection>();\n\n    try\n    {\n        ReadOnlyMemory<byte> result = await connection.TransmitAndReceiveAsync(apdu);\n        Assert.True(result.Length >= 2); // Framing only, not command success or protocol conformance.\n    }\n    finally\n    {\n        await ResetDeviceAsync(connection);\n    }\n}\n",
+      "body_sha256": "c3d4ad97312a0f06c71b7ba5b0302f1880769a46d2bf0aabfa800d8fe67b9de8",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged body"
+  }
+]

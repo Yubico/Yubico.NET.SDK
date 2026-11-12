@@ -1,0 +1,502 @@
+diff --git c/src/Ctap2/CLAUDE.md w/src/Ctap2/CLAUDE.md
+index bd4acf31b..dc071d3bb 100644
+--- c/src/Ctap2/CLAUDE.md
++++ w/src/Ctap2/CLAUDE.md
+@@ -43,11 +43,12 @@ not RP registration/sign-in verification. See the README for the complete protoc
+ > CTAP GetInfo on this transport.
+ > FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
+ > firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
+-> so `Major == 0` sentinel firmware is treated as modern.
+-> A grouped physical YubiKey admits one live SDK connection across all known interfaces. A second
+-> session is refused with `ConnectionInUseException` until the current session disposes its owned
+-> connection. CTAP2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
+-> transport after a connection failure.
++> so `Major == 0` passes a permissive SDK feature policy, not a verified modern-firmware check.
++> SDK-managed opens claim the device view's known member interface IDs in this process. An overlapping
++> connection claim is refused with `ConnectionInUseException`; disjoint scoped views, direct factories
++> and other processes need separate coordination. Each connection admits one live session.
++> CTAP2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
++> transport after an opening or initialization failure.
+ 
+ ## Architecture Overview
+ 
+@@ -136,6 +137,19 @@ scope outside the session's. Do not append the direct factory or a one-shot GetI
+ connection-owning session is live on the same key. SCP03 requires an authorized SmartCard key configured
+ with the supplied keys; own/dispose `Scp03KeyParameters` outside the secure session scope.
+ 
++Serialize and fully await complete operations and helper workflows before disposal. The Core guard
++drains one admitted exchange; it does not join ClientPin's multiple exchanges, begin/next enumeration,
++blob read-modify-write, or post-exchange parsing and callbacks. Keep borrowed inputs, protocols, tokens
++and caller-owned prompts usable through their last continuation. A callback must not reenter or dispose
++the session awaiting it. Prefer async disposal, but do not treat it as a whole-workflow completion join.
++
++Detected GetInfo firmware gates USB SmartCard before an override sets effective session/protocol
++firmware. HID INIT vendor bytes and Management firmware are separate observations. Initial SmartCard
++SELECT/GetInfo precede options-based configuration; major-zero configuration selects APDU format from
++connection support before ordinary `ForceShortApdus` handling. SCP setup rebinds the backend without
++another SELECT or protected CTAP probe. Applet-selection survival and FIDO-over-SCP product acceptance
++remain device/profile qualifications; `IsAuthenticated` is not CTAP PIN/UV authorization.
++
+ ### GetInfo (No User Presence Required)
+ 
+ ```csharp
+@@ -341,8 +355,18 @@ resolution after the response is fully drained and the CTAP status is known. Sma
+ equivalent in-flight signal, so `SmartCardBackend` owns both the policy request and resolution;
+ MakeCredential and GetAssertion emit `PolicyRequires` immediately before the APDU unless their
+ effective `UserPresence` option is `false`. Their scope is the RP ID.
+-Successful response ownership transfers only after terminal resolution succeeds; a callback failure clears
+-the untransferred backend response, including secret-derived extension output.
++Successful response ownership transfers only after terminal resolution succeeds. The backends clear
++their untransferred response view after resolution on failure, including secret-derived extension
++output. Cleanup is not unconditional: when a terminal callback fails alongside a primary exception,
++a logging provider throwing while that failure is logged can bypass the later clearing statement.
++APDU failures before a backend receives a response and independent report/APDU/decoded copies also
++remain outside that view's cleanup scope.
++
++Resolution uses an uncancelled token and can delay return after cancellation; a failed request callback
++disables resolution. Completed describes CTAP status before decoding, not an entire WebAuthn ceremony
++or RP acceptance. Baseline Windows HID uses synchronous report I/O without native read interruption;
++neither keep-alive cancellation nor async disposal imposes a completion deadline. Dispose and reopen
++after uncertain framing, transport or teardown state rather than promising universal reuse.
+ 
+ Selection and Reset carry null-scope context for an authoritative HID keep-alive, but do not predict
+ touch on SmartCard. Generic `SendCborRequestAsync` calls do not infer touch semantics. Bio enrollment
+diff --git c/src/Ctap2/README.md w/src/Ctap2/README.md
+index 6f5e42f49..d474baa4d 100644
+--- c/src/Ctap2/README.md
++++ w/src/Ctap2/README.md
+@@ -286,27 +286,53 @@ in-flight signal, so ordinary MakeCredential/GetAssertion report `PolicyRequires
+ Notification completion reflects the exchange status before typed decoding, not proof of gesture, UV or
+ RP acceptance. See [user interaction](../../docs/usage/user-interaction.md) for callback contracts.
+ 
++Keep the caller-owned prompt usable through terminal callbacks. Resolution uses an uncancelled token
++and can delay return after cancellation. A failed request callback receives no resolution callback.
++Cancellation requests neither interrupt a baseline Windows synchronous HID read nor impose a native
++completion deadline. If framing, transport or teardown leaves exchange state uncertain, dispose and
++reopen the connection rather than assuming it is reusable.
++
+ ## Constraints
+ 
+ Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes concrete identities and optional
+ `Core.Cryptography.Cose.CoseKeyInfo` (kty/crv, not alg). Core `CoseAlgorithmIdentifier` uses
+ `Es256`, `Es384`, `Es512`, `EdDsa`, `Rs256`, and `EcdhEsHkdf256`. CTAP2's `CoseAlgorithm` remains open-valued
+ with its existing PascalCase constants and unknown-value preservation. A Core COSE mapping is not CTAP2
+-operation/profile support; PIN/UV curve and algorithm checks remain strict. Operation applicability in the
+-catalog must never broaden CTAP2 profile checks or restrict unknown numeric response identifiers.
++operation/profile support. CTAP's PIN/UV key-agreement profile requires EC2/P-256, alg=-25, 32-byte X/Y
++coordinates, an on-curve point and no other optional key parameters. The current helper checks coordinate
++storage types and lengths and imports the point as P-256 through the provider, but omits peer kty/crv/alg
++and optional-parameter checks. This is a validation gap, not intended forward compatibility. Catalog
++applicability supplies none of those missing checks and must not restrict unknown numeric response identifiers.
+ 
+ Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
+ preparation directly; there is no applet-selection step.
+ 
++The USB SmartCard gate uses detected GetInfo firmware before `FirmwareVersionOverride` configures the
++session and protocol. Missing firmware becomes `0.0.0`; major-zero versions pass the SDK's permissive
++feature policy, not a verified modern-firmware check. HID INIT vendor bytes, GetInfo firmware and
++Management firmware are separate observations. Later GetInfo reads do not reconfigure the session.
++Initial SmartCard SELECT/GetInfo precede options-based configuration. For major-zero firmware,
++Core chooses APDU format from connection support before its ordinary `ForceShortApdus` handling.
++
+ - The default selects HID FIDO when exposed, otherwise SmartCard; it never retries another transport after
+   opening/initialization failure. `SessionCreationOptions.PreferredConnectionType`
+   forces one. `ConnectionType.HidOtp` throws `ArgumentException`, an unexposed one `NotSupportedException`.
+ - SCP runs only over SmartCard. `ScpKeyParameters` without an explicit preference selects SmartCard; pairing
+   them with `ConnectionType.HidFido` throws `NotSupportedException` during initialization.
+-- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection;
+-  a second session throws `ConnectionInUseException` until the first is disposed.
++- SDK-managed opens claim the selected device view's known member interface IDs in this process.
++  An overlapping claim throws `ConnectionInUseException`; disjoint scoped views, direct connection
++  factories and other processes need separate coordination. Each connection admits one live session.
+ - Sessions from `device.CreateCtap2SessionAsync()` own the connection they opened; `Ctap2Session.CreateAsync`
+   borrows yours and you dispose it. Use `await using` for both; there is no finalizer backstop.
++- Serialize and fully await complete operations and helper workflows before disposing the session,
++  protocol, token or borrowed connection. Core drains an admitted exchange, not a whole PIN-token,
++  begin/next, blob read-modify-write or post-exchange decoding/notification workflow. Callbacks must
++  not dispose or reenter the session whose operation is awaiting them.
++- SmartCard SCP setup follows plain FIDO selection/GetInfo, then rebinds the backend without another
++  SELECT or a protected CTAP probe. Setup success and `IsAuthenticated` do not establish device-side
++  authentication phase completion, applet-selection survival, FIDO-over-SCP product qualification or
++  PIN/UV permissions. Keep caller-owned SCP parameters in an outer scope around session creation;
++  their key/certificate owners are separate from the session's derived keys.
+ - `ResetAsync` invalidates generated credentials, including non-discoverable/U2F credentials, erases
+   discoverable credentials and clears the PIN. Storage/configuration effects depend on the applicable
+   protocol/product. CTAP 2.1/2.3 require receipt within ten seconds of power-up for displayless devices;
+diff --git c/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs w/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
+index 859893b58..723bf6b59 100644
+--- c/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
++++ w/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
+@@ -14,8 +14,10 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
+ /// Session creation selects the FIDO AID and enforces the USB SmartCard firmware 5.8.0+ gate;
+ /// NFC SmartCard uses the current connection's NFC classification and requires the FIDO AID.
+ /// Interface eligibility alone can admit SmartCard-only devices without CTAP support. The shared
+-/// selector uses cancellable prompts and best-effort display metadata. Reset callers keep the
+-/// confirmed device identity through the operation rather than selecting a second key.
++/// selector uses cancellable prompts and best-effort display metadata. Both reset flows select again
++/// after reinsertion without correlating the new selection to the earlier key. The interactive menu
++/// reuses its earlier transport choice; the command-line flow chooses from the later selection.
++/// The operator must verify the physical target; selection does not enforce continuity.
+ /// </remarks>
+ public static class DeviceSelector
+ {
+@@ -25,4 +27,4 @@ public static class DeviceSelector
+     /// <summary>Finds an eligible YubiKey, preferring FIDO HID when multiple devices cannot be prompted for.</summary>
+     public static Task<DeviceSelection?> SelectDeviceAsync(CancellationToken cancellationToken = default) =>
+         Selector.SelectDeviceAsync(cancellationToken);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Ctap2/src/Backend/HidBackend.cs w/src/Ctap2/src/Backend/HidBackend.cs
+index a21a717b3..5e83bde94 100644
+--- c/src/Ctap2/src/Backend/HidBackend.cs
++++ w/src/Ctap2/src/Backend/HidBackend.cs
+@@ -27,7 +27,10 @@ namespace Yubico.YubiKit.Ctap2.Backend;
+ /// <remarks>Uses a borrowed protocol. HID keep-alive status 0x02 can request a device-wait
+ /// notification; the backend resolves the operation from the drained CTAP status before typed
+ /// decoding. Completed means CTAP success, not verified presence, UV or RP authentication.
+-/// Only an untransferred response is cleared here; a successful returned view has no cleanup owner.</remarks>
++/// A successful status-stripped view shares Core's accumulated response array and has no cleanup owner.
++/// Failure cleanup clears that untransferred array after terminal resolution, not independent input-report
++/// or decoded copies. A logging provider throwing while a secondary resolution failure is logged can
++/// bypass the later clearing statement.</remarks>
+ internal sealed class HidBackend : ICtap2Backend
+ {
+     private readonly IFidoHidProtocol _protocol;
+@@ -115,4 +118,4 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Ctap2/src/Backend/SmartCardBackend.cs w/src/Ctap2/src/Backend/SmartCardBackend.cs
+index 73fd49b52..1677ea223 100644
+--- c/src/Ctap2/src/Backend/SmartCardBackend.cs
++++ w/src/Ctap2/src/Backend/SmartCardBackend.cs
+@@ -27,7 +27,11 @@ namespace Yubico.YubiKit.Ctap2.Backend;
+ /// </summary>
+ /// <remarks>Uses a borrowed protocol. With no in-flight presence signal, an operation's supplied
+ /// policy notification is requested before transmission. Resolution uses CTAP status before typed
+-/// decoding, not verified UP/UV or RP success. Only an untransferred response is cleared here.</remarks>
++/// decoding, not verified UP/UV or RP success. The returned status-stripped view shares ApduResponse's
++/// copied Data storage; other transport, SCP and decoded copies have separate lifetimes. Failure cleanup
++/// clears the received, untransferred Data view after resolution. It cannot reach an APDU error response
++/// that Core never returns, and a logging provider throwing while a secondary resolution failure is
++/// logged can bypass the later clearing statement.</remarks>
+ internal sealed class SmartCardBackend : ICtap2Backend
+ {
+     private const byte NfcCtapMsg = 0x10;  // Used as APDU INS
+@@ -95,7 +99,7 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+                 P1 = 0x00,
+                 P2 = 0x00,
+                 Data = request,
+-                Le = 0  // Maximum response length
++                Le = 0  // Formatter emits wire Le=0 (maximum for the selected format), not an absent Le.
+             };
+ 
+             var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
+@@ -146,4 +150,4 @@ public async Task<ReadOnlyMemory<byte>> SendCborAsync(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Ctap2/src/Ctap2Session.cs w/src/Ctap2/src/Ctap2Session.cs
+index 611bcb0bc..fe8449f5e 100644
+--- c/src/Ctap2/src/Ctap2Session.cs
++++ w/src/Ctap2/src/Ctap2Session.cs
+@@ -115,6 +115,14 @@ private Ctap2Session(
+     /// The override configures session/protocol firmware after that gate, and later GetInfo calls do
+     /// not update it. SCP on HID is rejected before channel initialization or GetInfo.
+     /// </para>
++    /// <para>
++    /// Initial SmartCard SELECT/GetInfo precede options-based configuration. For major-zero firmware,
++    /// Core selects APDU format from connection support before ordinary ForceShortApdus handling.
++    /// SCP setup rebinds the backend without another SELECT or protected CTAP probe; successful setup
++    /// alone does not qualify applet-selection survival or FIDO-over-SCP interoperability.
++    /// Await complete operations and helper workflows before disposal; the exchange drain is not a
++    /// whole-workflow join. Keep caller-owned prompts usable through their final callbacks.
++    /// </para>
+     /// </remarks>
+     /// <param name="connection">The connection to the YubiKey (SmartCard or FIDO HID).</param>
+     /// <param name="options">Optional cross-cutting session creation settings.</param>
+@@ -477,4 +485,4 @@ internal static void EnsureSmartCardTransportSupported(
+             "For older USB-connected YubiKeys, use IFidoHidConnection instead.");
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Ctap2/src/ICtap2Session.cs w/src/Ctap2/src/ICtap2Session.cs
+index 69d582737..5b0bede95 100644
+--- c/src/Ctap2/src/ICtap2Session.cs
++++ w/src/Ctap2/src/ICtap2Session.cs
+@@ -30,11 +30,18 @@ namespace Yubico.YubiKit.Ctap2;
+ /// <para>
+ /// Await each call before starting another exchange. The session refuses overlapping exchanges,
+ /// rather than queuing them, and does not reserve the authenticator across a multi-command sequence.
++/// Serialize and fully await complete operations and helper workflows before disposing the session
++/// or its borrowed dependencies. Exchange drain does not join begin/next, PIN-token or blob workflows,
++/// post-exchange decoding, or notification callbacks. Keep caller-owned prompts usable through their
++/// last callback; callbacks must not reenter or dispose the session awaiting them.
+ /// A pre-canceled exchange is refused before wire admission.
+ /// Cancellation is cooperative: admitted SmartCard exchanges complete, while HID cancellation is
+ /// observed during keep-alive processing and the terminal response is drained. Cancellation can race
+ /// a successful return and does not impose a host deadline or undo device work. A transport,
+ /// notification callback or decoder failure is not proof that the authenticator made no change.
++/// Native completion is transport-specific; baseline Windows synchronous HID reads are not interrupted
++/// by this token. After uncertain framing, transport or teardown state, dispose and reopen the connection
++/// rather than assuming cancellation restored it.
+ /// </para>
+ /// <para>
+ /// User-presence notifications describe SDK policy or an observed HID wait. Their completion reflects
+@@ -244,4 +251,4 @@ Task<GetAssertionResponse> GetAssertionAsync(
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The next assertion response.</returns>
+     Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Ctap2/tests/CLAUDE.md w/src/Ctap2/tests/CLAUDE.md
+index c626f776c..9c8f24262 100644
+--- c/src/Ctap2/tests/CLAUDE.md
++++ w/src/Ctap2/tests/CLAUDE.md
+@@ -33,7 +33,7 @@ CTAP2 tests must be aware of transport differences:
+ **USB SmartCard Tests:**
+ - Use `ISmartCardConnection` only on firmware 5.8.0+ when the FIDO AID is exposed
+ - Prefer HID FIDO for USB CTAP2 coverage unless the test specifically validates the SmartCard APDU path
+-- FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; firmware gates use `Feature.IsSupportedByFirmware(...)` so sentinel versions are treated as modern
++- FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; `Feature.IsSupportedByFirmware(...)` lets major-zero versions pass a permissive SDK policy, not a verified modern-firmware check
+ - CTAP2 SmartCard session creation selects the FIDO AID before the firmware gate because firmware comes from CTAP GetInfo over the selected application
+ 
+ ### User Interaction And Coordination Lanes
+diff --git c/src/WebAuthn/CLAUDE.md w/src/WebAuthn/CLAUDE.md
+index 94f676d74..1d936feb8 100644
+--- c/src/WebAuthn/CLAUDE.md
++++ w/src/WebAuthn/CLAUDE.md
+@@ -170,6 +170,14 @@ The origin and client options are required; `RpIdValidator` is required within t
+ while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
+ in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
+ 
++Serialize and fully await whole ceremonies before client disposal. Core drains individual exchanges,
++not the complete probing, PIN-token, assertion or extension-output workflow; the client has no
++whole-ceremony disposal join. Keep borrowed inputs and caller-owned prompts usable through their last
++actual continuation, including late PIN-prompt completion after cancellation. Callbacks must not
++reenter or dispose the client awaiting them. Session adoption does not acquire a borrowed connection.
++SDK-managed connection exclusion requires overlapping known member interface IDs in this process;
++coordinate disjoint scoped views, direct factories and other processes separately.
++
+ ### Registration transport metadata
+ 
+ `MakeCredentialCoreAsync` already obtains `AuthenticatorInfo` through `GetCachedInfoAsync`. Pass that
+@@ -281,6 +289,11 @@ the prompt in the `SessionCreationOptions` already forwarded to CTAP2; callers s
+ The prompt is informational, not a user-verification input. To abandon a ceremony, cancel its token.
+ A PIN still comes only from `pinBytes` or `WebAuthnClientOptions.CredentialPrompt`.
+ 
++Terminal notification describes CTAP status before typed decoding and extension-output preparation,
++not complete ceremony or RP success. Resolution uses an uncancelled token and can delay return after
++cancellation. A failed request callback disables resolution. The caller owns both prompt services
++and keeps their resources usable through actual remaining callbacks.
++
+ ### RP ID Validation
+ 
+ `WebAuthnClient.Validation.cs` checks only nonempty, faithfully UTF-8 encodable RP text,
+diff --git c/src/WebAuthn/README.md w/src/WebAuthn/README.md
+index 78229ba35..b11eca540 100644
+--- c/src/WebAuthn/README.md
++++ w/src/WebAuthn/README.md
+@@ -193,8 +193,12 @@ properties are optional and default to null; construct them with named object in
+ 
+ As an alternative to borrowed PIN bytes, set `WebAuthnClientOptions.CredentialPrompt` and leave
+ `pinBytes` null in ceremony calls. The client asks only when a ceremony needs a PIN and owns the retry
+-loop. `ReadPinAsync` below is an application-supplied input routine, which `ConsoleCredentialReader`
+-can back; it must honor cancellation and return only the UTF-8 secret bytes.
++loop. `ReadPinAsync` below is an application-supplied input routine; it must honor cancellation and
++return only the UTF-8 secret bytes. An adapter over `ConsoleCredentialReader` must account for its
++UTF-16 code-unit limits and configurable encoding: these are not the prompt's Unicode-code-point
++minimum and UTF-8-byte maximum. The application must supply a PIN meeting the CTAP profile, including
++NFC and no final NUL; context values and ClientPin's byte-length guard do not enforce that profile.
++Do not silently normalize an existing PIN into a different credential.
+ 
+ ```csharp
+ internal sealed class PinPrompt(Func<CredentialPromptContext, CancellationToken, Task<byte[]>> readPin) : ICredentialPrompt
+@@ -240,6 +244,11 @@ await using var client = await device.CreateWebAuthnClientAsync(
+     origin, clientOptions, sessionOptions: new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+ ```
+ 
++The session retains but does not own the presence prompt. Its terminal notification reflects CTAP
++exchange status before typed decoding and extension-output processing, not complete ceremony success.
++Resolution uses an uncancelled token and can delay return after cancellation; a failed request callback
++receives no resolution callback. Keep prompt resources usable until their actual callbacks finish.
++
+ User verification is separate from presence. `UserVerification` expresses a preference; authenticator
+ policy and extension permissions also affect the SDK's PIN/UV-token decision:
+ 
+@@ -451,8 +460,14 @@ does not change the origin in client data or make an assertion acceptable to the
+ 
+ ## Constraints
+ 
+-- After successful construction, the client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself. Rejected construction does not transfer a caller-supplied session. Prompts remain caller-owned; keep them alive until the client ends.
+-- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection; a second session throws `ConnectionInUseException` until the first is disposed.
++- After successful construction, the client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself. Rejected construction does not transfer a caller-supplied session. A session that borrowed a connection still leaves connection disposal with its original caller.
++- Serialize and fully await complete ceremonies before client disposal. Disposal drains individual
++  exchanges, not the complete probing, token, assertion and extension-output workflow. Keep borrowed
++  inputs and caller-owned prompt resources usable through actual remaining work, including a PIN prompt
++  returning late after cancellation. Callbacks must not reenter or dispose the client awaiting them.
++- SDK-managed opens claim the device view's known member interface IDs in this process. An overlapping
++  claim throws `ConnectionInUseException`; disjoint scoped views, direct connection factories and other
++  processes need separate coordination. Each connection admits one live session.
+ - Transport is fixed when the CTAP2 session is created and is never renegotiated after a failure. Override it with `SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }`. Supplying SCP parameters without a transport override selects SmartCard automatically; explicit HID plus SCP is unsupported. Firmware/FIDO-AID qualifications still apply.
+ - RP validity and origin/RP authorization are mandatory application policy through `WebAuthnClientOptions.RpIdValidator`; there is no built-in domain/URI syntax gate, domain-suffix policy, or enterprise bypass.
+ - The client asks for nothing but a PIN, supplied as `pinBytes` or by the prompt. A ceremony that needs one and has neither fails with `NotAllowed` rather than prompting.
+diff --git c/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs w/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
+index a80d86e08..9b05170ba 100644
+--- c/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
++++ w/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
+@@ -157,10 +157,10 @@ private async Task<TAttempt> RunWithUvEscalationAsync<TAttempt>(
+     /// <param name="auth">The ceremony's token owner.</param>
+     /// <param name="decision">The UV decision in force (its method is reused for a re-mint).</param>
+     /// <param name="remintPermissions">
+-    /// When set, the token is re-minted with these permissions after the probe. Authenticators may refuse
+-    /// to reuse a token consumed by a getAssertion(up:false) probe for a following makeCredential, so
+-    /// registration passes <c>MakeCredential</c>; a following getAssertion accepts the same token, so
+-    /// selection passes null.
++    /// When set and a token exists, the token is re-minted with these permissions after the probe.
++    /// Registration passes <c>MakeCredential</c>; authentication selection passes null and reuses its
++    /// existing token for the final assertion. This is the SDK's reuse choice, not a guarantee of
++    /// authenticator acceptance; the authenticator's token state and expiry conditions still apply.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     private async Task<PublicKeyCredentialDescriptor?> ProbeCredentialsAsync(
+@@ -231,4 +231,4 @@ private static WebAuthnClientError MapCeremonyCtapException(CtapException ex, bo
+             ? Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex)
+             : MapCtapStatusToWebAuthnError(ex);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/WebAuthn/src/Client/WebAuthnClient.cs w/src/WebAuthn/src/Client/WebAuthnClient.cs
+index 3baa87737..99204b9c2 100644
+--- c/src/WebAuthn/src/Client/WebAuthnClient.cs
++++ w/src/WebAuthn/src/Client/WebAuthnClient.cs
+@@ -33,6 +33,14 @@ namespace Yubico.YubiKit.WebAuthn.Client;
+ /// Disposing the client does not clear returned response or extension-result buffers.
+ /// </para>
+ /// <para>
++/// Serialize and fully await complete ceremonies before disposing this client or its dependencies.
++/// Client disposal does not join an in-flight ceremony: Core drains individual exchanges, not the
++/// complete capability/probe/token/assertion/extension-output workflow. Keep borrowed inputs and
++/// caller-owned prompt resources usable through actual remaining work, including a credential prompt
++/// that returns late after cancellation. A callback must not reenter or dispose the client awaiting it.
++/// Adopting a session does not acquire ownership of a connection that session already borrowed.
++/// </para>
++/// <para>
+ /// The concrete backend uses PIN/UV auth protocol 2 without negotiating protocol 1. PIN/UV token
+ /// acquisition and extensions that use key agreement therefore need compatible authenticator support;
+ /// ceremonies that need neither may still work without it. Built-in UV token support also depends on
+@@ -117,4 +125,4 @@ private static void ZeroAndDispose(IMemoryOwner<byte>? owner)
+             owner.Dispose();
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs
+index 8d3631706..62c2b77e3 100644
+--- c/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs
++++ w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs
+@@ -28,8 +28,9 @@
+ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
+ 
+ /// <summary>
+-///     Runs a real <see cref="Ctap2Session" /> under the WebAuthn client, so the intent has to cross every layer between
+-///     the application's call and the user-presence prompt.
++///     Checks requested intent and operation context through WebAuthn, a real <see cref="Ctap2Session" />
++///     and Core's SmartCard protocol over a fake connection. The assertions cover request context,
++///     not terminal notifications, native transport completion or physical user presence.
+ /// </summary>
+ public sealed class UserPresenceIntentTests
+ {
+@@ -151,4 +152,4 @@ public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, Cance
+             return default;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
+index 6edce1585..2cebccb75 100644
+--- c/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
++++ w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
+@@ -280,7 +280,9 @@ public async Task MakeCredential_ExcludeListProbeFails_ThrowsUnknownWithoutEscal
+         await _backend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+     }
+ 
+-    /// <summary>After the probe the token is re-minted with MakeCredential only (5.8.0: a used token no longer authorises).</summary>
++    /// <summary>Checks combined probe permissions followed by a new MakeCredential-only token request.</summary>
++    /// <remarks>Earlier commentary attributes re-minting to used-token behavior on firmware 5.8.0.
++    /// This fake-backend test does not measure or qualify that firmware behavior.</remarks>
+     [Fact]
+     public async Task MakeCredential_AfterExcludeListProbe_RemintsTokenWithMakeCredentialOnly()
+     {
+@@ -402,8 +404,9 @@ public async Task GetAssertion_AllowList_NothingMatches_SendsDummyDescriptorAndR
+     }
+ 
+     /// <summary>
+-    ///     With a token the probe is signed and the same token signs the assertion: a getAssertion accepts a token
+-    ///     already used for an up:false probe (only makeCredential does not, see the registration test).
++    ///     Checks one GetAssertion permission-token acquisition and nonnull auth parameters on both the
++    ///     probe and final assertion requests. The fake backend and noncryptographic protocol exercise the
++    ///     SDK's token-reuse choice, not authenticator acceptance or command-specific token invalidation.
+     /// </summary>
+     [Fact]
+     public async Task GetAssertion_AllowList_WithToken_SignsProbeAndAssertionWithOneToken()
+@@ -438,4 +441,4 @@ public async Task GetAssertion_NoAllowList_DoesNotProbe()
+ 
+         await _backend.Received(1).GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs
+index 31d92f669..e0a3f4a5a 100644
+--- c/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs
++++ w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs
+@@ -24,8 +24,8 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests;
+ 
+ /// <summary>
+ ///     WebAuthn forwards its session creation options to the underlying CTAP2 session and adds no independent
+-///     transport logic. These tests prove the pass-through: WebAuthn sees the CTAP2 default (HID FIDO first),
+-///     honors an explicit override, and surfaces the CTAP2 validation errors unchanged.
++///     transport selection in the inspected factory. These tests check selected connection types and
++///     pre-connect validation errors. The fake throws at Connect, before native open or CTAP initialization.
+ /// </summary>
+ public class IYubiKeyExtensionsTransportTests
+ {
+@@ -66,7 +66,7 @@ public async Task CreateWebAuthnClientAsync_UnconfiguredRpIdValidator_ThrowsBefo
+         Assert.Null(device.RequestedConnection);
+     }
+ 
+-    // Default both transports -> HID FIDO (the CTAP2 default), proving WebAuthn adds no transport logic.
++    // With both transports exposed, this route requests HID FIDO, matching the CTAP2 default.
+     [Fact]
+     public async Task CreateWebAuthnClientAsync_DefaultBothTransports_PicksHidFido()
+     {
+@@ -78,7 +78,7 @@ await Assert.ThrowsAsync<ConnectProbeException>(
+         Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
+     }
+ 
+-    // Default fallback: first choice (HID FIDO) absent -> SmartCard (proves the forwarded HidFido->SmartCard order).
++    // With HID FIDO absent, selection requests SmartCard; this is not retry after an opening failure.
+     [Fact]
+     public async Task CreateWebAuthnClientAsync_DefaultSmartCardOnly_FallsBackToSmartCard()
+     {
+@@ -204,4 +204,4 @@ public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellatio
+     }
+ 
+     private sealed class ConnectProbeException : Exception;
+-}
+\ No newline at end of file
++}

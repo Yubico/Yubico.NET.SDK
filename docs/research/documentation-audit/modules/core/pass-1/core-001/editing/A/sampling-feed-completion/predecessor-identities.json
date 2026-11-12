@@ -1,0 +1,147 @@
+{
+  "sample": "SAMPLE-A003",
+  "completed_two_file_patch_sha256": "c00893c28c7b215f129b6b68e36a8240b2b34d5eec511da7fc4df8a082e29651",
+  "completed_two_file_identity_manifest_sha256": "841c02582dad5183cce16f0a850044ed331329a3ba85abd7b09104271fb2b417",
+  "immutable_editor_files": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-A.md",
+      "sha256": "32854eda75d59d643bd7e951a148e6a15d09b285d8d6be14c81caeca8acc8f6a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/changed-path-sha256.json",
+      "sha256": "ee78a04250d30f520a39790dfed3b2e546340d3247aad1e05d879cc475900c13"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/example-bodies.json",
+      "sha256": "4088b11eb2dc2c872c99ea7f06a4421e1edd981bfe855b2aa04ecc20010b290f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/input-identities.json",
+      "sha256": "fa28ed373cb445a251e9fa55f692ab14fe688c8707dc2dee8860e9826d0c320d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/output-identities.json",
+      "sha256": "f895a0be53057fe2cab6608e0411c59663ca788a5e1088596ef06a5891dbb67a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/path-dispositions.json",
+      "sha256": "2b10d73d25dfbf30ee325919c19ae9f1af59df115f6c2be7362fba0c1030b2c8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/product.patch",
+      "sha256": "28cfedee32cba340d041a90edadd79afff3d65ced04317a8863d43854890a517"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/review-identities.json",
+      "sha256": "8acfb7df9d4ec066989385ef613b17045349d09973cfbd62ff5f796e007609a4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/review.md",
+      "sha256": "d15893a37fdd3a01ad1fa0e8c30adffc818cb220917a46390177470c4662ccb1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/candidate-dispositions.json",
+      "sha256": "37044d79f9a7f47312c1c8a702621c37193de7eafcea012c5a5a0f950433c958"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/changed-path-sha256.json",
+      "sha256": "4ecc11cf6e641cb94be9d578aa5c98a504a14baba00be73884d97f90aa39b0e1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/correction-paths.json",
+      "sha256": "7a411c97d08d8708fff0b839b551dca7f157d63dcfb940c0acefa5d55f57b755"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/example-bodies.json",
+      "sha256": "4088b11eb2dc2c872c99ea7f06a4421e1edd981bfe855b2aa04ecc20010b290f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/output-identities.json",
+      "sha256": "8fef6a617dd845d69f330413661f514ca0c07698ab4b3bb1662e693f3ad7b757"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/path-dispositions.json",
+      "sha256": "7a94167e7b3830b9686fb79eed04f70e87bd5045634e68cfd65bd17caca0af4e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/predecessor-identities.json",
+      "sha256": "8e5611c69ed18dea8643050e8d610bcdfe2928ce9bedbfab38a30ffa1eb8466e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/product.patch",
+      "sha256": "028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/report.md",
+      "sha256": "014c09198326a2050d0f5ae82e657a21c00c6029db1f078ebe5b1c890f80b3cd"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/review-identities.json",
+      "sha256": "eb701c79f1ceb9dc4186f0e4908694cb5fafafa13589d8b03ed571a1212bfad2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/review.md",
+      "sha256": "f0f59c2ae7fcbf9194699d81822c71d88143a5ea3b6e200f40de0d0175539390"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/verification.json",
+      "sha256": "d06a4eae1698168aa7c4127e931048975b92ea6c84001822ca2df3a53efa56ca"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/annotation.json",
+      "sha256": "6e20be39b0ce6f33d9b56808169212818833cf85929ca2d69b3f5f62c346619c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-DiscoveryReadSkippedException-identities.json",
+      "sha256": "2b3d0c13f4582158b9e19dfa5264e7d620711c7267576cc25d43044f769f3e63"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-DiscoveryReadSkippedException.cs.txt",
+      "sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-identities.json",
+      "sha256": "ce78d23d2f8a1bc758c354c04b3b0082e059833a4c6b8e540c7f7a4f0686add4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-source.cs.txt",
+      "sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/file-identities.json",
+      "sha256": "539d5895cec568443e7408264eb91ba6f5c24ffee1868e02ac76051f6db03b56"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/output-identities.json",
+      "sha256": "841c02582dad5183cce16f0a850044ed331329a3ba85abd7b09104271fb2b417"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/product.patch",
+      "sha256": "c00893c28c7b215f129b6b68e36a8240b2b34d5eec511da7fc4df8a082e29651"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/report.md",
+      "sha256": "435f579ca76e1f81ef8e01519e8e5bf40bf2e707f05aeda19785ecf9abb2c54e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/verification.json",
+      "sha256": "97d9c4b8d24cef95dd82bc9aa139a140e801e76f8988b32eea15dc160c49b8e3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/verification.json",
+      "sha256": "5f91b5c04df09867e4050aafb558bda9c2dc4aaa01bd9108b5fc97c767f163af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/verify_static.py",
+      "sha256": "6bce025ed7d0b7ad0f5ada24455fad33c0c885d685f050c4f23f19401b09f09e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/xml-checks.json",
+      "sha256": "940b661cda4da28152983be5f11fb97ee293bc716eac2ee0c3d0654e545bac3d"
+    }
+  ]
+}

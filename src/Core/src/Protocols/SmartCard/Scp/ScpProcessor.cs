@@ -43,7 +43,7 @@ internal class ScpProcessor(
     /// </summary>
     public void Dispose() => State.Dispose();
 
-    /// <summary>9000, 62xx and 63xx: the status words a card answers with an R-MAC (SCP03 Amd D §6.2.5).</summary>
+    /// <summary>9000, 62xx and 63xx: response statuses protected when R-MAC is selected (SCP03 1.1.2 Public Release, §6.2.5).</summary>
     private static bool IsSuccessOrWarning(short sw) =>
         sw == SWConstants.Success || (sw & 0xFF00) is 0x6200 or 0x6300;
 
@@ -64,20 +64,22 @@ internal class ScpProcessor(
 
         byte[]? scpCommandData = null;
         byte[]? finalCommandData = null;
-        byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
+        byte[]? encryptedData = null; // Retain the encrypted copy for finally cleanup on every exit.
         Memory<byte> formattedApdu = default;
 
-        // Encrypt() advances the encryption counter and Mac() advances the MAC chain, both before the
-        // command reaches the card. A failure before either leaves host and card provably in step, so
-        // the session stays usable. A failure after either (provider, transport, bad R-MAC) means the
-        // host's state moved and the card's may or may not have: no later command can be trusted to
-        // chain correctly, so the protocol must latch "recovery required" with the original failure.
+        // Record completed Encrypt/Mac calls so subsequent failures notify the recovery owner. Encrypt
+        // increments its counter before AES can fail, whereas this flag is set only after it returns;
+        // an exception inside Encrypt can therefore escape this notification boundary. This flag alone
+        // is not proof that host/card state remains synchronized after every provider failure.
         var stateAdvanced = false;
 
         try
         {
             // Step 1: Encrypt command data if requested
-            // Note: Even empty data must be encrypted (padded) to maintain counter synchronization
+            // Current code pads and encrypts empty input too. When C-DECRYPTION and C-MAC are required,
+            // SCP03 1.1.2 Public Release §6.2.6 instead requires the off-card entity to advance the counter
+            // without encrypting an absent data field. Core's SCP03 initializer selects both in 0x33.
+            // Preserve that implementation/profile discrepancy separately from counter synchronization.
             var commandData = command.Data;
             if (encrypt)
             {
@@ -136,8 +138,8 @@ internal class ScpProcessor(
                 var unmacdData = State.Unmac(response.Data.Span, response.SW);
 
                 // Step 11: Decrypt response data
-                // Note: Response is ALWAYS encrypted once SCP session is established,
-                // regardless of whether the command data was encrypted
+                // This processor decrypts nonempty un-MACed response data, independently of command
+                // encryption. The decrypted temporary and the response's cloned owner are separate copies.
                 if (unmacdData.Length > 0)
                 {
                     try
@@ -153,10 +155,11 @@ internal class ScpProcessor(
                 return new ApduResponse(unmacdData, response.SW);
             }
 
-            // No data field. The card puts an R-MAC on every success or warning response, data or not
-            // (SCP03 Amd D §6.2.5), and none on an error. The one unauthenticated success is the
-            // EXTERNAL AUTHENTICATE reply, which precedes the R-MAC session. Anything else claiming
-            // success without an R-MAC did not come from the card.
+            // With R-MAC selected (as in Core's SCP03 level 0x33), SCP03 1.1.2 Public Release §6.2.5
+            // requires card R-MAC for 9000/62xx/63xx except EXTERNAL AUTHENTICATE. Error statuses return
+            // status only, without protection. R-MAC is optional across SCP03 security levels. The check
+            // below identifies the exception by INS 82 alone, not by handshake phase; later raw INS 82
+            // calls also reach it. Missing-R-MAC rejection is not universal phase-gating evidence.
             if (IsSuccessOrWarning(response.SW) && command.Ins != InsExternalAuthenticate)
             {
                 throw new BadResponseException(
@@ -165,9 +168,9 @@ internal class ScpProcessor(
 
             return response;
         }
-        // Includes cancellation: a token observed after Encrypt()/Mac() still leaves the counter or
-        // chain advanced. Report the original failure to the protocol so it refuses further exchanges
-        // (see PcscProtocol.MarkRecoveryRequired), then rethrow unchanged: no wrapping, no replay.
+        // After a completed Encrypt/Mac call, report the original failure (including cancellation) so
+        // the owner refuses further exchanges. Rethrow unchanged and without replay. Earlier internal
+        // counter mutation can precede this flag; see its declaration above.
         catch (Exception ex) when (stateAdvanced)
         {
             onSecureFailure?.Invoke(ex);

@@ -1,0 +1,54 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-C.md",
+    "sha256": "2066715093ac99d4c5dacfc7d4f3d679d0035dfb23de29ce7652c1b7744bd2c2"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/candidate-map.json",
+    "sha256": "c8016fdf7c264a3ae5130dd6a6889f85bb4f38499ae8a2c2427b5deb0e10ad61"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/capture-static.py",
+    "sha256": "1b3736d112bbc265b7b0079a998e144426b573f18ea0153ab64276fecb532c78"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/decisions.json",
+    "sha256": "b00e7cb2713ac61a352b707b1e396a24975a28a61ec760636cb1d945b2be7217"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+    "sha256": "bf5164b1c6184ce01971ba8d74904c1a5de9a1dbb3c83f294d85f91e6646d4da"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/files.json",
+    "sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/path-decisions.json",
+    "sha256": "6c2019708d284479d51c4b78493dd0b391304d56c7e558380f024293ec2fd044"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/shared-followups.md",
+    "sha256": "dc8dbe835e399656b945607d5ac735b2a70600d2f66c55baca983f46a74f7379"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/source-review.md",
+    "sha256": "e0f2895c77c2bb721e27b8c89d8d2d7e05a4c5791c06836bbc9f5ea315bc2fac"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/static-verification.json",
+    "sha256": "ce07931ea64ac8191aef5ccc4fb245c65ace4d8f8b1024eaabb11bb110c56bed"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/output-identities.json",
+    "sha256": "93c60a55efe4409a1d83448cd1a127baab36c20365d38e64da32400657ab224e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/review.md",
+    "sha256": "e946b59c54ccb1ff844bc57256adf3ef64cd4db53f9c7c29bf52ebf83980d9a5"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/review-identities.json",
+    "sha256": "84ead0eac92e5c273c7cc94ea240db75066985881ff4b58d6a3a4e8b1d5ead14"
+  }
+]

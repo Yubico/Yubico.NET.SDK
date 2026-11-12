@@ -1,0 +1,28 @@
+{
+  "routed_keys": [
+    "security-domain-001:SD-DEP-004",
+    "yubiotp-001:OTP-DEP-001",
+    "yubiotp-001:OTP-DEP-003",
+    "yubihsm-001:HSM-DEP-002",
+    "yubihsm-001:HSM-DEP-003",
+    "openpgp-001:PGP-CORE-002",
+    "openpgp-001:PGP-CORE-004",
+    "piv-001:PIVCORE-001",
+    "piv-001:PIVCORE-002",
+    "piv-001:PIVCORE-003",
+    "audit-v2-20261022-20261031:#22"
+  ],
+  "engineering_groups": [
+    "piv-001:PIVIMP-001",
+    "piv-001:PIVIMP-002",
+    "piv-001:PIVIMP-003",
+    "piv-001:PIVIMP-004",
+    "piv-001:PIVIMP-005",
+    "piv-001:PIVIMP-006",
+    "piv-001:PIVIMP-007",
+    "piv-001:PIVIMP-008",
+    "piv-001:PIVIMP-009",
+    "piv-001:PIVIMP-010"
+  ],
+  "status": "All original definitions/states remain unchanged; PIVIMP-005 confirmed/unfixed. No policy/implementation/physical qualification closure."
+}

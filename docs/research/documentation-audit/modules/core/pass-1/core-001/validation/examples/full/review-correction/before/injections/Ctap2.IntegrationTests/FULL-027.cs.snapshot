@@ -1,0 +1,44 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Ctap;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
+using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
+namespace Audit20261111.DocExamples.Test27;
+public sealed class DocumentationBody27
+{
+public async Task CompileOnly(ICtap2Session session)
+{
+// With an existing ICtap2Session session; only on a human-approved test device.
+using var protocol = new PinUvAuthProtocolV2();
+using var clientPin = new ClientPin(session, protocol);
+byte[] pin = Encoding.UTF8.GetBytes(Ctap2TestStateExtensions.KnownTestPinString);
+try
+{
+    await clientPin.SetPinAsync(pin);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+}
+}
+}

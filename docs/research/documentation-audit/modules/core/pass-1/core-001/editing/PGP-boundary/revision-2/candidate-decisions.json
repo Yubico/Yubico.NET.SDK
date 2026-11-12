@@ -1,0 +1,572 @@
+{
+  "revision": 2,
+  "facets": "Documentation only; original engineering/policy/qualification states held. See correction-review.md and preserved-provenance.json.",
+  "candidates": {
+    "CORE-PGP-X001": [
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; list actual IOpenPgpBackend? _backend and inherited ApplicationSession.FirmwareVersion. Detected version remains a logged local, not an invented _version field."
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/Kdf.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Complete synthetic responses, queue/command/prompt helpers and all bodies were read. UIF/cache/request-failure/pre-admission cancel/status paths are explicit. Signature helpers retain actual arrays for successful transfer and failure erasure; Decrypt resolution only checks exception/outcome. Cached-KDF disposal checks an aliased salt after async disposal, while throwing-KDF test checks sync detach. No held whole-workflow, native release, SCP reset, F9 replacement-disposal or certificate-resolution-failure oracle exists."
+      }
+    ],
+    "CORE-PGP-X004": [
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; list actual IOpenPgpBackend? _backend and inherited ApplicationSession.FirmwareVersion. Detected version remains a logged local, not an invented _version field."
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Ordinary SELECT DATA then GET/PUT/empty write spans separate guarded exchanges; ATT uses FC directly. Certificate parsing returns a new caller-owned X509 object, with ordinary6A88 absence only after successful selection. Workaround prefix depends on effective feature version. Public certificate TLV payloads are not private keys; occurrence selection is shared device state without whole-workflow exclusion."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Full payload/notification/formatting methods were read: RSA/ECDSA hash, EdDSA copies raw input; Decipher wraps ordinary EC but passes X25519 raw. Results have branch-specific transfer/clear scopes and callback-resolution ordering. Empty/malformed ECDSA response can fail formatting, with raw cleanup retained. Core transport/chaining/SCP staging remains a separate producer graph."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Both User modes use P2 correctly but extended logical identity selects Reset for KDF and retry fallback. KDF-derived inputs/combined arrays clear in finally; caller inputs stay borrowed. Two-mode Unverify, lazy F9 lookup and fallback C4 are separate exchanges. Change/reset routes differ deliberately; failures become either broad typed VERIFY or ordinary APDU exceptions. Generic Core guards supply no complete credential workflow lease."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Complete synthetic responses, queue/command/prompt helpers and all bodies were read. UIF/cache/request-failure/pre-admission cancel/status paths are explicit. Signature helpers retain actual arrays for successful transfer and failure erasure; Decrypt resolution only checks exception/outcome. Cached-KDF disposal checks an aliased salt after async disposal, while throwing-KDF test checks sync detach. No held whole-workflow, native release, SCP reset, F9 replacement-disposal or certificate-resolution-failure oracle exists."
+      }
+    ],
+    "CORE-PGP-X005": [
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; list actual IOpenPgpBackend? _backend and inherited ApplicationSession.FirmwareVersion. Detected version remains a logged local, not an invented _version field."
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The status callback awaits Reset, then prints default credentials without full readback. Existing remarks qualify unchecked statuses and ATT persistence, while executable ALL/private-key/factory-reset wording stays unchanged under the old sample finding. No independent state restoration is implemented by this command."
+      },
+      {
+        "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. All methods and helper calls were read: reset asserts3/0/3 only; generated signatures/public data mostly shape; certificate CRUD compares bytes; attestation checks decoded/nonempty and overwrite under ordinary User mode, not trust/key binding. Four-slot fingerprint/time expectations remain old-family qualifications. Two unequal challenges are no RNG qualification. Two RSA methods early-return through4.3.5; successful body operations leave state to external restoration."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      }
+    ],
+    "CORE-PGP-X006": [
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; list actual IOpenPgpBackend? _backend and inherited ApplicationSession.FirmwareVersion. Detected version remains a logged local, not an invented _version field."
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Ordinary SELECT DATA then GET/PUT/empty write spans separate guarded exchanges; ATT uses FC directly. Certificate parsing returns a new caller-owned X509 object, with ordinary6A88 absence only after successful selection. Workaround prefix depends on effective feature version. Public certificate TLV payloads are not private keys; occurrence selection is shared device state without whole-workflow exclusion."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Six valid single-byte BCD vectors and multi-byte valid/zero/high-invalid/low-invalid serial cases are explicit. These establish local arithmetic/admission assertions, not full GET VERSION response validation or firmware provenance."
+      }
+    ],
+    "CORE-PGP-X007": [
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; list actual IOpenPgpBackend? _backend and inherited ApplicationSession.FirmwareVersion. Detected version remains a logged local, not an invented _version field."
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/src/AlgorithmAttributes.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. RSA parse/encoding retains modulus/exponent/import format with explicit big-endian fields. EC factories consult Core concrete identity and module representation, choose construction/slot ID and reject non-EC; parsing retains received algorithm and trailing FF format while unknown OIDs fail. Default direct initialization and malformed/unknown admission remain PGP-IMP-018; exact roundtrip tests do not establish device support."
+      },
+      {
+        "path": "src/OpenPgp/src/Crt.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Ordinary static CRTs encode empty B6/B8/A4 values. ATT builds an inner 84 TLV then passes only inner.Value to B6, yielding B60181; the correct vendor nested encoding is B603840181. Borrowed static output must stay read-only. Preserve the confirmed ATT read defect and separate target-key FB attestation."
+      },
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/KeyRef.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The four slot values map through one switch to attributes/UIF/time/fingerprint/CRT. Ordinary mappings and static memory are public protocol metadata. ATT mapping preserves its malformed CRT qualification and persistent vendor exception; invalid slot values throw."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpKeyInfo.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Frozen module metadata derives ordinary named-curve OIDs from Core and adds legacy Ed/X25519 overrides plus RSA2048/3072/4096. DER value-octet encoding is cached nonsecret metadata; no secret AsnWriter cleanup finding applies. Optional metadata and exact OID lookup are representation, not a provider/card support assertion."
+      },
+      {
+        "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Independent dotted OID/value-octet literals cover all nine EC representations, lookup None rejection, optional RSA/symmetric metadata and RFC8410 distinction. These exact representation assertions are substantive and stay separate from provider execution, firmware/slot support and X25519 agreement."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Complete helpers reassemble outgoing APDU chunks, parse4D/7F48/5F48 and compare requested ordinary CRT/component bytes. Exponent rejection precedes wire; nonchangeable attrs branch is explicit. Named non-NIST scalar1 tests compare literal attributes/template and require a host provider with skip on unsupported curves. Source code checks no ATT or decipher flow, complete cryptographic import result or secret-producer cleanup."
+      }
+    ],
+    "CORE-PGP-X008": [
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; list actual IOpenPgpBackend? _backend and inherited ApplicationSession.FirmwareVersion. Detected version remains a logged local, not an invented _version field."
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangeAdminPinCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command obtains two disposable credential owners and awaits ChangeAdmin before they leave scope; known-current verification is performed by that applet method rather than a separate Verify. Supplied option strings outlive byte-owner disposal and the helper uses no confirmation reader. Keep runtime/help unchanged and retain PGP-IMP-015 input policy scope."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command owns current/new byte owners through awaited ChangePin and handles null input. It applies the generic credential helper rather than card C4 byte validation, and no new-PIN confirmation call occurs. Source strings and device persistent change have separate lifetimes; a success message establishes no independent state readback."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetResetCodeCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Admin verification and Reset Code write are sequential awaited operations under one borrowed session callback. Two disposable inputs remain alive through transmission. Reader length and card limits remain distinct; clearing option-derived bytes leaves immutable command-line strings."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetRetriesCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Admin verification precedes three-count mutation; the session validates 1..255 and leaves family/device acceptance to the card. The command displays requested values rather than independent readback. Preserve NEO default-credential effects and capability gaps under PGP-IMP-010/015."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessUnblockPinCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command separately collects Reset Code/new User PIN, retains both disposable owners through the reset-code route and reports completion. It neither borrows an Admin credential nor conditionally ignores a credential. It adds no card-profile byte checks or post-reset authentication assertion."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesDeleteCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Slot parsing/confirmation precedes credential collection, Admin verification and awaited deletion. The supplied session remains owned by the command base. ATT public certificate deletion is independent of private-key erasure and reset; existing destructive task caveats remain applicable."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The returned X509 object is not disposed; PEM/DER export branches use it and public output bytes need no secret erasure. DER branch disposes its stdout stream, not the certificate. Existing remarks accurately identify the missing owner and leave trust validation separate."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. File loading occurs before Admin input; the loaded certificate survives every return/exception without a disposal scope. Its subject/issuer/thumbprint display is metadata, never a trusted key-binding check. Existing comments retain that PGP-IMP-015 lifetime gap rather than advertising complete cleanup."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command refreshes app data, separately reads retries/counter/UIF and displays each known slot. Key status is inferred from nonempty fingerprint length, including zero-filled fields; current comment directs decisions to ListKeyInformation. Once display says per session although card access state is the real boundary; this executable string is retained under the existing tool finding, not edited here."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The settings declare --pin, while execution directly invokes Attest on a fresh session without reading/verifying that input; returned certificate is undisposed. Metadata/PEM display establishes neither signature/key binding nor chain trust. Existing caveat accurately preserves the engineering finding."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Admin input remains scoped through awaited Spectre status callback and generation; algorithm strings choose concrete ordinary algorithms, with no ROCA guard or capability proof beyond session checks. The command parser accepts ATT despite narrower help; malformed ATT CRT and persistent partial attribute changes remain qualified."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. PEM is read into an immutable string; PKCS8 DER is cleared in finally and returned private-key owner is disposed after import. RSA/EC PEM branches export private parameters into temporary arrays before SDK cloning; disposing providers/SDK keys leaves those separate exports outside explicit cleanup. Link C's private-array/provider ownership and existing PGP-IMP-015 rather than claiming the DER finally clears every producer."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command reads current UIF, refuses fixed values, confirms selected fixed policy, verifies Admin and writes policy. Its actual UI still overstates factory-reset recovery for ATT, accurately qualified by the current comment/README. Preserve output and the irreversible ATT replacement boundary."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The status callback awaits Reset, then prints default credentials without full readback. Existing remarks qualify unchecked statuses and ATT persistence, while executable ALL/private-key/factory-reset wording stays unchanged under the old sample finding. No independent state restoration is implemented by this command."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Output/OutputHelpers.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Delegated formatting/confirmation helpers forward public strings and data; WriteError writes raw exception text to stderr. This is diagnostic provenance rather than a central secret-redaction boundary. No helper creates a session, owns a credential or verifies a device result."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/DeviceSelector.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The actual selector delegates to Cli.Shared with SmartCard-only eligibility and FirstEligible noninteractive policy; noninteractive diagnostics are redirected to stderr. It passes a cancellation token but the command base invokes it with default. Selection is not independent physical identity attestation or authorisation for mutation."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The sample references OpenPgp/Core/Management/Cli.Shared/Cli.Commands and Spectre/Hosting packages; it is nonpackable and suppresses only the named example analyzer. Project configuration is retained, compilation and analyzer participation remain later gates; references supply no execution evidence."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The complete command tree registers info/reset/access/keys/certificates and invokes the Spectre runner synchronously. Reset's executable all-data description remains within PGP-IMP-015. Registration creates no SCP/prompt/credential policy or extra connection lifetime."
+      },
+      {
+        "path": "src/OpenPgp/tests/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The KDF test derives initial hashes, installs an aliased object, changes equal old/new credentials and checks cached properties plus ordinary verification; no fresh reload/extended transition proof. Generation tests mostly inspect attrs/public-key nonemptiness; Ed25519 checks64-byte output only. Initial hash finally does not clear all KDF/source/result copies and helper leaves state after body."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. RSA imports a host key and compares plaintext; P256 compares returned raw secret to host agreement with the same keys, a meaningful independent operation oracle. RSA's early return covers4.2.0..4.3.5 inclusive before setup despite imported-key mitigation. Successful plaintext/shared-secret/host-export arrays lack complete explicit cleanup; no X25519 decipher test exists here."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. RSA/P256/P384 and Aut imports verify card signatures using host-generated keys. Ed25519/X25519 import tests compare published RFC public points only; X25519 agreement remains untested. Helper parses7F49/86 using Core TLV copies. Host-exported private arrays and signature/result lifetimes retain the old cleanup finding; old RSA early return preserves exact inclusive bound."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpMultiCurveTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. P384 and Brainpool generation check attributes, public-key nonemptiness and/or generated status; signature case checks nonempty, never host verification. Retry configuration writes recovery code then5/3/5 and reads those counters; helper restores nothing after body. Core catalog support is not additional real-device evidence."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. All methods and helper calls were read: reset asserts3/0/3 only; generated signatures/public data mostly shape; certificate CRUD compares bytes; attestation checks decoded/nonempty and overwrite under ordinary User mode, not trust/key binding. Four-slot fingerprint/time expectations remain old-family qualifications. Two unequal challenges are no RNG qualification. Two RSA methods early-return through4.3.5; successful body operations leave state to external restoration."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Integration uses xunitv2/TestSDK/SkippableFact, explicit Core/OpenPgp/Tests.Shared references and nonparallel runner config. No current compile/runner/device result follows from these package declarations; preserve project bytes."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Literal RSA wire fields, EC constructor ID choices, parse preservation and non-EC rejection are checked. Roundtrips share production encoder/decoder; exact independent literals have stronger wire identity scope. The X25519 Aut factory case proves identifier selection, not supported card slot. No crypto operation or hardware proof follows."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Fixture encodes mandatory tags with production TLV helpers; tests check AID/capabilities/optional absence and collection content. Repeated parse test mutates original encoding and compares distinct actual fingerprint backing arrays, a meaningful ownership oracle. HistoricalBytes test only checks nonempty; it does not prove all optional field contents or unknown-profile behavior."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Slot import test inspects first short-chain CRT after attribute write; short-count S2K compares host SHA256 of explicit input, unsigned count checks encode/decode and one-above case names exact bytes. Libgcrypt-named tests compare retained literals while executing SDK only. Literal provenance remains historical qualification and no test ran in this packet."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Six valid single-byte BCD vectors and multi-byte valid/zero/high-invalid/low-invalid serial cases are explicit. These establish local arithmetic/admission assertions, not full GET VERSION response validation or firmware provenance."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. SHA256/384/512 literal headers are compared byte-exact; unsupported algorithm checks dispatch; Build checks total51, prefix and digest endpoint placement rather than full emitted-body equality. Retain that exact oracle scope and host/card padding distinction."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Tests distinguish raw KdfNone, byte-count SHA256 transcripts, length-only SHA512, unequal-salt outputs, null salt fallback, encode/parse fields and exact multiples. Several objects/output hashes remain undisposed/uncleared. Unknown algorithm fixture maps to KdfNone, without actually supplying empty input despite the method name. No transition or live credential identity proof is supplied by model tests."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpAidTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Known AID fields/raw bytes and one low-high-bit invalid-BCD negative serial are asserted. The fixture does not test the high-bit raw value that can produce a positive signed result; current public XML already preserves that condition. Too-short check alone is not the substantive sampling nominee."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Reflection asserts sealed object-derived read-only dictionary contracts, absence of mutable dictionary interfaces/public constructors. It does not assert immutable byte storage, parsed content or device state; ApplicationRelatedData tests carry the distinct array-ownership oracle."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Fake responses check63Cx,6983,6982/User/Admin/extended Reset count and unavailable count. Extended test intentionally records the defect. CancelOnPwStatusLookupConnection cancels its own CTS and returns Task.FromCanceled regardless of supplied token; the test proves exception propagation rather than admitted native cancellation. Recorder/application-data helpers were read completely; F9 6A82 is broad fallback evidence, not absence."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Independent dotted OID/value-octet literals cover all nine EC representations, lookup None rejection, optional RSA/symmetric metadata and RFC8410 distinction. These exact representation assertions are substantive and stay separate from provider execution, firmware/slot support and X25519 agreement."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Complete helpers reassemble outgoing APDU chunks, parse4D/7F48/5F48 and compare requested ordinary CRT/component bytes. Exponent rejection precedes wire; nonchangeable attrs branch is explicit. Named non-NIST scalar1 tests compare literal attributes/template and require a host provider with skip on unsupported curves. Source code checks no ATT or decipher flow, complete cryptographic import result or secret-producer cleanup."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Complete synthetic responses, queue/command/prompt helpers and all bodies were read. UIF/cache/request-failure/pre-admission cancel/status paths are explicit. Signature helpers retain actual arrays for successful transfer and failure erasure; Decrypt resolution only checks exception/outcome. Cached-KDF disposal checks an aliased salt after async disposal, while throwing-KDF test checks sync detach. No held whole-workflow, native release, SCP reset, F9 replacement-disposal or certificate-resolution-failure oracle exists."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The custom descriptor helper independently parses one/two-byte BER lengths; tests inspect tags, concatenated components, optional public field count and header/value widths using deliberately tiny noncryptographic key data. They establish serialization layout, not provider-valid keys, all byte equality or card import. Sensitive fixture encodings/dictionary copies are not comprehensively cleared."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PwStatusTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Seven-byte literals assert policy/three limits/retries and logical lookup selection; raw format bits, unknown policies and extended-mode identity are outside these tests. The default fixture explicitly uses Always, distinct from historical reset hardware Once; no universal device default is inferred."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Unit project uses xunitv3 MTP executable with explicit library and private Tests.Shared reference; no traditional TestSDK runner is declared. Keep test framework distinctions and no-runtime source outcome explicit."
+      }
+    ],
+    "CORE-PGP-X002": [
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/Kdf.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The exception retains SW and nullable retry count for VerifyPin/VerifyAdmin only. XML already qualifies broad non-PIN failure mapping, extended Reset-counter mismatch and supported User recovery. No new Core status-decoder fix closes applet identity/error policy."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Both User modes use P2 correctly but extended logical identity selects Reset for KDF and retry fallback. KDF-derived inputs/combined arrays clear in finally; caller inputs stay borrowed. Two-mode Unverify, lazy F9 lookup and fallback C4 are separate exchanges. Change/reset routes differ deliberately; failures become either broad typed VERIFY or ordinary APDU exceptions. Generic Core guards supply no complete credential workflow lease."
+      },
+      {
+        "path": "src/OpenPgp/src/Pw.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Logical User/Reset/Admin values intentionally overlap VERIFY User-other-mode byte82. Current Reset XML explicitly separates recovery identity from access-mode encoding, preserving the confirmed identity defect rather than normalizing it as intended behavior."
+      },
+      {
+        "path": "src/OpenPgp/src/PwStatus.cs",
+        "decision": "RETAIN",
+        "reason": "RETAIN: unchanged illustrative protocol/layout XML body now explicitly inventoried and hash-checked. Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Seven raw bytes map policy/limits/retries, unknown policy falls to Once and raw format bits remain inside integer limits. GetMaxLen/GetAttempts select logical credentials and reject invalid enum values. Literal tests cover ordinary counts/limits, not format-bit parsing or all card profiles."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Fake responses check63Cx,6983,6982/User/Admin/extended Reset count and unavailable count. Extended test intentionally records the defect. CancelOnPwStatusLookupConnection cancels its own CTS and returns Task.FromCanceled regardless of supplied token; the test proves exception propagation rather than admitted native cancellation. Recorder/application-data helpers were read completely; F9 6A82 is broad fallback evidence, not absence."
+      }
+    ],
+    "CORE-PGP-X003": [
+      {
+        "path": "src/OpenPgp/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain reviewed boundary corrections; distinguish Task ResetAsync cache refresh from ResetAndInspectAsync additional GetApplicationRelatedDataAsync read/return. All example bodies unchanged; incomplete reset/SCP/ATT and engineering qualifications preserved."
+      },
+      {
+        "path": "src/OpenPgp/src/Kdf.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Full payload/notification/formatting methods were read: RSA/ECDSA hash, EdDSA copies raw input; Decipher wraps ordinary EC but passes X25519 raw. Results have branch-specific transfer/clear scopes and callback-resolution ordering. Empty/malformed ECDSA response can fail formatting, with raw cleanup retained. Core transport/chaining/SCP staging remains a separate producer graph."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Both User modes use P2 correctly but extended logical identity selects Reset for KDF and retry fallback. KDF-derived inputs/combined arrays clear in finally; caller inputs stay borrowed. Two-mode Unverify, lazy F9 lookup and fallback C4 are separate exchanges. Change/reset routes differ deliberately; failures become either broad typed VERIFY or ordinary APDU exceptions. Generic Core guards supply no complete credential workflow lease."
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+        "decision": "EDIT",
+        "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Tests distinguish raw KdfNone, byte-count SHA256 transcripts, length-only SHA512, unequal-salt outputs, null salt fallback, encode/parse fields and exact multiples. Several objects/output hashes remain undisposed/uncleared. Unknown algorithm fixture maps to KdfNone, without actually supplying empty input despite the method name. No transition or live credential identity proof is supplied by model tests."
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The custom descriptor helper independently parses one/two-byte BER lengths; tests inspect tags, concatenated components, optional public field count and header/value widths using deliberately tiny noncryptographic key data. They establish serialization layout, not provider-valid keys, all byte equality or card import. Sensitive fixture encodings/dictionary copies are not comprehensively cleared."
+      }
+    ]
+  }
+}

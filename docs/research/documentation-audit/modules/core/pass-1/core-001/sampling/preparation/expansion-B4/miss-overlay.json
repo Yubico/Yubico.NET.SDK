@@ -1,0 +1,28 @@
+[
+  {
+    "id": "core-001:unit:001c58b1d1862d76",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "coordinator_finding": "SAMPLE-B4-001",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict": "DOCUMENTATION-MISS",
+    "coordinator_note": "SAMPLE-B4-001: generic collections need not box struct elements; no-GC/deep-immutability and machine-word claims need qualification. Bounded guide correction reviewed separately.",
+    "final_clean_credit": 0,
+    "source_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "range_sha256": "1416aeac6ae4fba9eb51454d0b7a5e2d3a552dee8d8e00cae10133b92dca10c6",
+    "correction": "Focused two-document patch has independent PASS at 3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623; transfer/final canonical mapping remain separate."
+  },
+  {
+    "id": "core-001:unit:a9e434874ba55d57",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "coordinator_finding": "SAMPLE-B4-002",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict": "DOCUMENTATION-MISS",
+    "coordinator_note": "SAMPLE-B4-002: internalization wording must distinguish retired extension points/internal protocol composition from actual public raw/utility surfaces.",
+    "final_clean_credit": 0,
+    "source_sha256": "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2",
+    "range_sha256": "7247e4fe58b861d736ec834417ec98b43a9a2de10d2ff6c412beed466fc7ddbc",
+    "correction": "Focused two-document patch has independent PASS at 3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623; transfer/final canonical mapping remain separate."
+  }
+]

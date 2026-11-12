@@ -1,0 +1,79 @@
+{
+  "failures": [],
+  "markdown_checks": [
+    {
+      "path": "TOOLCHAIN.md",
+      "local_links_checked": 4,
+      "fences": "balanced"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "local_links_checked": 13,
+      "fences": "balanced"
+    },
+    {
+      "path": "src/Tests.Shared/CLAUDE.md",
+      "local_links_checked": 3,
+      "fences": "balanced"
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "local_links_checked": 3,
+      "fences": "balanced"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-external.md",
+      "local_links_checked": 0,
+      "fences": "balanced"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/citations-and-handoff.md",
+      "local_links_checked": 0,
+      "fences": "balanced"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-attempts.md",
+      "local_links_checked": 0,
+      "fences": "balanced"
+    }
+  ],
+  "all_125_current_hashes_match": true,
+  "git_diff_check": "PASS",
+  "status": [
+    " M TOOLCHAIN.md",
+    " M docs/migration/v1-to-v2.md",
+    " M src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    " M src/Cli.Commands/src/Otp/OtpCommands.cs",
+    " M src/Cli.Shared/src/Device/DeviceSelector.cs",
+    " M src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+    " M src/Cli.Shared/src/Output/PinPrompt.cs",
+    " M src/Cli.Shared/src/Output/SecureCredential.cs",
+    " M src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    " M src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    " M src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    " M src/Tests.Shared/CLAUDE.md",
+    " M src/Tests.Shared/IYubiKeyFilter.cs",
+    " M src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    " M src/Tests.Shared/Infrastructure/TestCategories.cs",
+    " M src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    " M src/Tests.Shared/README.md",
+    " M src/Tests.Shared/RecordingSmartCardConnection.cs",
+    " M src/Tests.Shared/YubiKeyTestState.cs",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/edit-external.md",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/allowlist.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/boundary-referrals.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/candidate-decisions.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/citations-and-handoff.md",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/example-bodies.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/final-checks.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/input-identities.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/outside-owner-followups.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/path-decisions.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/record.py",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/source.patch",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-attempts.md",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-preservation.json",
+    "?? docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/supplemental-dependencies.json"
+  ],
+  "limits": "Static local target existence/fences/hash/scope checks, not anchor-resolution, compiler or runtime verification."
+}

@@ -1,0 +1,20 @@
+{
+  "scope": "Read-only exact three-comment-input transition and retained old outputs; no compiler/checker run or whole-framework requalification.",
+  "final_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-edits.json",
+    "bytes": 72510,
+    "sha256": "db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1"
+  },
+  "original_participants": 248,
+  "changed_participants": [
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Process.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Results.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/TestTargets.cs"
+  ],
+  "unchanged_participants": 245,
+  "preserved_mutable_old_files": 45,
+  "old_profile_seal_captures_preserved": true,
+  "binder_logger_checker_sources_unchanged": true,
+  "final_build_status": "pending bounded independent review and coordinator checker-bound-build-final-edits",
+  "old_live_seal": "Intentionally not replayed against changed toolchain inputs."
+}

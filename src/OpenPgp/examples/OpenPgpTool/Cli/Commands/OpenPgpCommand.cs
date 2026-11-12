@@ -89,6 +89,8 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     /// <remarks>
     ///     Disposing the result clears its byte storage. A supplied command-line option remains in an immutable
     ///     string and can be exposed through process arguments; prefer application-owned input buffers for secrets.
+    ///     A supplied string bypasses reader length limits. The reader path counts UTF-16 code units before
+    ///     UTF-8 encoding; neither path adds card credential-format or encoded-byte-limit validation.
     /// </remarks>
     protected static IMemoryOwner<byte>? GetCredential(string? provided, CredentialReaderOptions options)
     {
@@ -105,19 +107,19 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     }
 
     /// <summary>
-    ///     Gets User PIN input with reader limits 6–127; the application also applies card byte/profile limits.
+    ///     Gets User PIN input; the reader path permits 6–127 UTF-16 code units. Supplied strings bypass those limits.
     /// </summary>
     protected static IMemoryOwner<byte>? GetPin(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpPin());
 
     /// <summary>
-    ///     Gets Admin PIN input with reader limits 8–127; the application also applies card byte/profile limits.
+    ///     Gets Admin PIN input; the reader path permits 8–127 UTF-16 code units. Supplied strings bypass those limits.
     /// </summary>
     protected static IMemoryOwner<byte>? GetAdminPin(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpAdminPin());
 
     /// <summary>
-    ///     Gets Reset Code input with reader limits 8–127; the application also applies card byte/profile limits.
+    ///     Gets Reset Code input; the reader path permits 8–127 UTF-16 code units. Supplied strings bypass those limits.
     /// </summary>
     protected static IMemoryOwner<byte>? GetResetCode(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpResetCode());

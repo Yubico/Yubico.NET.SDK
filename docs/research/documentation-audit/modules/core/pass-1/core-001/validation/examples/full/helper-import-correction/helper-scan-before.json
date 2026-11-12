@@ -1,0 +1,713 @@
+{
+  "source_count": 56,
+  "rows": [
+    {
+      "id": "FULL-010",
+      "context": "Ctap2.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-010.cs",
+        "bytes": 1275,
+        "sha256": "931f54a62c1616c02171d2ebf0618e0bc7e82aa85f2e7a4d9dcb4a085fb12825"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-011",
+      "context": "Ctap2.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-011.cs",
+        "bytes": 1816,
+        "sha256": "0fa63bf282b9c70ae11cfb7f77e2e195838f4d5325ead14ad8c54dde95383ed5"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-030",
+      "context": "Ctap2.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-030.cs",
+        "bytes": 1380,
+        "sha256": "809052b686267d608cf2136eaf9f38d8ae5e47c9c92d8513b2125bcd4ecd8629"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-012",
+      "context": "Ctap2.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-012.cs",
+        "bytes": 1299,
+        "sha256": "12873d2d5be7f231d19e5667ce6f846038009f102e94094d0f0b4f2ae4637f81"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-026",
+      "context": "Ctap2.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-026.cs",
+        "bytes": 2764,
+        "sha256": "aaf4ee44e575b9d00f06692f526179e11103ca711bac43f2c1ad04a69bdb1885"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithCtap2SessionAsync"
+          ],
+          "import_present": true,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-027",
+      "context": "Ctap2.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-027.cs",
+        "bytes": 1347,
+        "sha256": "361deea5df62a1614fe38c5de2d7dd651a5c6937b36b5ec8176fe7f9f1a27408"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-032",
+      "context": "WebAuthn.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs",
+        "bytes": 1181,
+        "sha256": "6d7d82a0b0fbba0909878e27f61f4defe0ce2d8b4cf918526f45a82b69938cc8"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-037",
+      "context": "WebAuthn.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-037.cs",
+        "bytes": 1766,
+        "sha256": "16795078975a98491762a33796e0e20f30433b80a5500d28412f80cfb44c101e"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs",
+          "namespace": "Yubico.YubiKit.WebAuthn.IntegrationTests",
+          "symbols": [
+            "WebAuthnTestHelpers"
+          ],
+          "import_present": true,
+          "kind": "static-helper"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-060",
+      "context": "Core.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-060.cs",
+        "bytes": 1033,
+        "sha256": "7eb096821ce8a3280757d0db23cfe517d31187e630684f495f0b1f60a29df876"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-142",
+      "context": "Core.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-142.cs",
+        "bytes": 836,
+        "sha256": "949f5195183049c610f4632c4a9e07cebca54fc0b674d7672303c512f0c14f3d"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-204",
+      "context": "Core.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-204.cs",
+        "bytes": 980,
+        "sha256": "718411f756db3fa29ea10c48b430f9dc0ce72167f65d508e1976eba011ff76d8"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-205",
+      "context": "Core.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-205.cs",
+        "bytes": 1053,
+        "sha256": "77b86d7c941b055f24d06b2c8ed30619e7c4288a720dfac258eb73226d1e0a57"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-211",
+      "context": "Core.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-211.cs",
+        "bytes": 1112,
+        "sha256": "c831150b9a796cfb77b54e7620ed95cb3b4c67ffde9db26abee71ce73af57a75"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-133",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-133.cs",
+        "bytes": 1773,
+        "sha256": "167214466984d0579afacf62e59928c1536766c57d1e5fbd6ab36000716d4e2f"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-134",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-134.cs",
+        "bytes": 1005,
+        "sha256": "3966f8b56915e6f025d08fa9671aabdfb7ceb73372c8a821bbb50e8b14f7ed70"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-135",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-135.cs",
+        "bytes": 1373,
+        "sha256": "f86668df8d960d2e684b357299d9d66da41ac9e353cd27d7cbe70504dbc11eae"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-137",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-137.cs",
+        "bytes": 1113,
+        "sha256": "6da691242bd98475cbb752b1e2a21769be9e9c7a3ee3b74040346aa6fd1e6da9"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-138",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-138.cs",
+        "bytes": 1308,
+        "sha256": "bad9d82a684743df2da731547f68bd7537719a86054d3697b425f6751fa1cd73"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-241",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-241.cs",
+        "bytes": 1057,
+        "sha256": "76e096b28aa878c4fd440296bc80bdc1f185c38e53c5be61ba512c84a23e78fa"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-242",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-242.cs",
+        "bytes": 903,
+        "sha256": "b07953f11c061900afb31888c933d78467c0d743774283190d2553fdeb4797f1"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-243",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-243.cs",
+        "bytes": 1122,
+        "sha256": "d2084d45cd2992bc83d3686332be355cbe8432ec406d847360b72d18f51b5eb1"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-244",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-244.cs",
+        "bytes": 1235,
+        "sha256": "061334440222e4d7921a0cc1ca258228d408315efcab8159aa9b0bb4892075d7"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-252",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-252.cs",
+        "bytes": 1115,
+        "sha256": "c1869edeffc021faf463619bd06cd772edfbd7c1b521857b07677ec98b595bc8"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-253",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-253.cs",
+        "bytes": 1155,
+        "sha256": "6046f4c809f891a4bb3457338d2bdd7ad071cb87dd36c1f9acf296968c7e6c5b"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-254",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-254.cs",
+        "bytes": 1096,
+        "sha256": "5b265795e2db6a1d5245632d02fca1c8ee15f82fea6c2fbdb151886c17278102"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-255",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-255.cs",
+        "bytes": 1291,
+        "sha256": "ce96ff7e9f4823ffb25d76b75add839b4e734829064519f2e32ad5d079c5d7f6"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-256",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-256.cs",
+        "bytes": 1281,
+        "sha256": "2fc267efcb1078ae2fb385e0842bb4a05dc148ef697ada24c8c3dd3a1d984b40"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-257",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-257.cs",
+        "bytes": 1269,
+        "sha256": "e22c68c0797eee38860d98ac0b24704bfa11dca003fa28f6571a372f534fa9b8"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-258",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-258.cs",
+        "bytes": 1474,
+        "sha256": "7f39bfa277f7d505f64fe21fea50f9bbb04058d2855a10d6eeddd2f50c16548d"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-259",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-259.cs",
+        "bytes": 1858,
+        "sha256": "89f11aa6b35f5e3e0997d78c3ab7630ee493567c48e709b0339265a64b6c87d4"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-260",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-260.cs",
+        "bytes": 1217,
+        "sha256": "c5d8127df281d281cb706d0cd261194eb1d604f6c80e90cd8503d9db26ad40ce"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-261",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-261.cs",
+        "bytes": 1045,
+        "sha256": "9dfab861dc1e610b9a4be22396b979d2bc065d49eb93ef3d713a430fd9939804"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-262",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-262.cs",
+        "bytes": 899,
+        "sha256": "e1c15de3c16e5fa2c31a03d9fd2f5320de55e18e9e4f8f15c50b84b692a10f13"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-288",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-288.cs",
+        "bytes": 1118,
+        "sha256": "8fab13d956810097a9c7b71984e2e31e2f32a7aef322ff69a26ddc92504f8d45"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-289",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-289.cs",
+        "bytes": 1149,
+        "sha256": "70f74c9b10eddb41647a0a24743781166a7f0841ab3fbbf45767d13e0d852443"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-206",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-206.cs",
+        "bytes": 1710,
+        "sha256": "b1069b9e003a0eb6a8c26d757aba55137a7b759e1ddf85ba39e6e8e5b54824fc"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-210",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-210.cs",
+        "bytes": 1344,
+        "sha256": "550c39ddc8b408d6c66dc2d9e93bbd40d4763048c2d09061c95183aa34dfd3ab"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-215",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-215.cs",
+        "bytes": 1823,
+        "sha256": "d78599207517847dcf80c699b822d5f2dd30559c174fa6bc1832c4c414cac8a5"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-216",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-216.cs",
+        "bytes": 1366,
+        "sha256": "bb98d6f7aa9d25ae2f9b617609187e995b7677029c1dd18541da23cd0061e66d"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-227",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-227.cs",
+        "bytes": 1638,
+        "sha256": "df69d782a0904dba709b825f5705ccd1cd7fc70509d6d8c54cddcf718f8f997d"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-230",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-230.cs",
+        "bytes": 1225,
+        "sha256": "2f769fef653dd26fca4697945c5015e2f5ac681e654fa52f91c93486e460da2e"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-232",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-232.cs",
+        "bytes": 1520,
+        "sha256": "94e0699b6f3ff4f7d76cb34eff16c28221c2fe2e19f02b39b1ff0a3c2dc05abe"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-233",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-233.cs",
+        "bytes": 1274,
+        "sha256": "29dfab98daf759ba21cb5ca2455aa8c5931c5050094a8036c901e5013788270c"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-235",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-235.cs",
+        "bytes": 1252,
+        "sha256": "805dcd625c8f4e3ff4dbd5a2d2a132714505c9959a0fe59049d8ced0081167b4"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-240",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-240.cs",
+        "bytes": 1151,
+        "sha256": "d10eda49776bf5155e44749441bcd3cab13f9b9a2b61e9d61422f9306494fab6"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-241",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-241.cs",
+        "bytes": 1118,
+        "sha256": "1bac5f2e252ca71c30973964d6810811f25ea6ff103dcd55539919693d8aca40"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-242",
+      "context": "Management.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-242.cs",
+        "bytes": 1272,
+        "sha256": "45223354550c1a5556470d8e62109be407d54a6298dd7f95d79ab3705da23cbf"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-212",
+      "context": "Core.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.IntegrationTests/FULL-212.cs",
+        "bytes": 1033,
+        "sha256": "983bb56d0987d60973e019aaba6e1707d256187919f18741446d679d37c7c547"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+          "namespace": "Yubico.YubiKit.Core.IntegrationTests",
+          "symbols": [
+            "IntegrationTestBase"
+          ],
+          "import_present": true,
+          "kind": "base-class"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-239",
+      "context": "Core.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.IntegrationTests/FULL-239.cs",
+        "bytes": 1044,
+        "sha256": "a32efd1b6422b95feeb8173f59c26480be0cdc520981e2a02987fe4ab9d4323b"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+          "namespace": "Yubico.YubiKit.Core.IntegrationTests",
+          "symbols": [
+            "IntegrationTestBase"
+          ],
+          "import_present": true,
+          "kind": "base-class"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-302",
+      "context": "SecurityDomain.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-302.cs",
+        "bytes": 1405,
+        "sha256": "154ce9459a9ef62eb9efbc0ecfb9b5acbec37c8a3533300690c1a91abbe404f2"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": false,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": [
+        "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions"
+      ]
+    },
+    {
+      "id": "FULL-303",
+      "context": "SecurityDomain.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-303.cs",
+        "bytes": 1969,
+        "sha256": "a57bb44f26c3bfe797840f3e095f6cc5c782f53a2213d28f8677a395d984662a"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "ResetSecurityDomainAsync",
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": false,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": [
+        "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions"
+      ]
+    },
+    {
+      "id": "FULL-306",
+      "context": "SecurityDomain.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-306.cs",
+        "bytes": 1339,
+        "sha256": "8dbaf8c62f6beeb59dba3f0bfbe6e639e9c521ac950a144bbae77163778edf0a"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": false,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": [
+        "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions"
+      ]
+    },
+    {
+      "id": "EXT-231",
+      "context": "SecurityDomain.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/EXT-231.cs",
+        "bytes": 1409,
+        "sha256": "48efab792bfb0cf2a20039282da05aa90b02485edf2d093d28dc44c9014ff282"
+      },
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": true,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-375",
+      "context": "Piv.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Piv.IntegrationTests/FULL-375.cs",
+        "bytes": 1074,
+        "sha256": "94fcaceef54ca218e4b9d31d77ea48455529a1c4b35fff9510d7c420d76bb58e"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-204",
+      "context": "Oath.IntegrationTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Oath.IntegrationTests/EXT-204.cs",
+        "bytes": 1447,
+        "sha256": "98f1bbe00e355d6dd72211081ff39356fe839b426cbc0f8fb185c717859aaac8"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-061",
+      "context": "Management.UnitTests",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.UnitTests/FULL-061.cs",
+        "bytes": 1274,
+        "sha256": "bdd7bcbacb58d5d4ee8f4392bdcd01f4e99dacd9aa816b10e14b1512a8575812"
+      },
+      "provider_requirements": [],
+      "missing_namespaces": []
+    }
+  ],
+  "missing_ids": [
+    "FULL-302",
+    "FULL-303",
+    "FULL-306"
+  ]
+}

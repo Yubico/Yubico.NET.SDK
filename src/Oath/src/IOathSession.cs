@@ -19,17 +19,30 @@ namespace Yubico.YubiKit.Oath;
 /// <summary>
 ///     Interface for interacting with the OATH application on a YubiKey.
 /// </summary>
+/// <remarks>
+///     Inherited IsAuthenticated records Core SCP setup, not OATH password validation or ongoing channel
+///     health. IsLocked and IsPasswordProtected describe this session's observed applet state. Cached
+///     metadata getters can retain historical values after disposal; operations refuse a terminal session.
+///     Await complete public tasks before disposal or input cleanup. Aggregate followups, authentication
+///     retry and user-presence callbacks extend beyond Core's individual guarded exchanges. Keep borrowed
+///     inputs and callback/prompt resources alive until those tasks finish, without reentrant disposal.
+/// </remarks>
 public interface IOathSession : IApplicationSession
 {
     /// <summary>
-    ///     Gets the stable device identifier, computed as <c>Base64(SHA256(salt)[:16])</c> with padding stripped.
-    ///     Changes on factory reset.
+    ///     Gets this session's device identifier, computed as <c>Base64(SHA256(salt)[:16])</c> with padding stripped.
+    ///     A fresh session after factory reset reads the new salt and identifier; this cached value is not refreshed.
     /// </summary>
     string DeviceId { get; }
 
     /// <summary>
     ///     Gets the raw salt bytes from the OATH applet SELECT response.
     /// </summary>
+    /// <remarks>
+    ///     Borrows session-owned storage until disposal, which clears existing views. Copy only when
+    ///     independent storage is needed. Successful RESET ends the session; create a fresh session for
+    ///     the new salt and identity rather than reading historical cached state from this one.
+    /// </remarks>
     ReadOnlyMemory<byte> Salt { get; }
 
     /// <summary>
@@ -50,10 +63,10 @@ public interface IOathSession : IApplicationSession
     ///     current session has already been unlocked via <see cref="ValidateAsync" />.
     /// </summary>
     /// <remarks>
+    ///     Reflects SELECT and successful password changes in this session, not a fresh device query.
     ///     Unlike <see cref="IsLocked" />, which becomes <see langword="false" /> once the current
-    ///     session successfully validates, this property stays <see langword="true" /> for the
-    ///     lifetime of the session as long as a password is configured on the device. Use this to
-    ///     distinguish "no password configured" from "password already unlocked this session" —
+    ///     session successfully validates, this property remains <see langword="true" /> after validation.
+    ///     Use this to distinguish "no password configured" from "password already unlocked this session" —
     ///     for example, to decide whether a "remove password" UI action should be shown, or whether
     ///     a key-change flow needs to prompt for the current password.
     /// </remarks>
@@ -332,6 +345,8 @@ public interface IOathSession : IApplicationSession
     /// <returns>The result of the (possibly retried) <paramref name="operation" /> call.</returns>
     /// <remarks>
     ///     Authentication uses this session's outstanding challenge, as required by <see cref="ValidateAsync" />.
+    ///     Await this entire workflow, including the provider and retried operation, before disposing
+    ///     resources. A completed exchange does not mean the password provider or retry has finished.
     /// </remarks>
     /// <exception cref="OathException">
     ///     The device rejected access-key validation, or the wrapped operation reported an OATH failure.

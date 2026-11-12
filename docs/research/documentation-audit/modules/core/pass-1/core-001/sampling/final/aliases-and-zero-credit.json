@@ -1,0 +1,1182 @@
+[
+  {
+    "id": "core-001:unit:711e47d18bab0742",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-001-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "711e47d18bab0742",
+      "verdict_text": "\n\n- **SAMPLE-A001 \u2014 `711e47d18bab0742`**, `HotplugSignals.Dispose`: the summary describes completed\n  cleanup, but three `BestEffort` loops suppress cleanup failures; a throwing logger can also interrupt\n  later work. Describe ordered attempts and the actual completion boundary. The complete current\n  `HotplugSignals.cs` was read, including `TryStart` and `BestEffort`.\n- **SAMPLE-A002 \u2014 `c085f1cd3632e7c2` and `076b4d4328825902`**, skip-cause enum/type explanation:\n  `InterfaceLeaseHeld` also covers another discovery lease. `SharedDeviceInfoRead` maps failed\n  availability/acquisition to this cause; `DeviceConnectionRegistry.TryAcquireDiscovery` checks\n  `_discoveryActive` as well as connection holders/waiters. The existing explanation names only\n  connections. Correct the actor scope while preserving the enum and runtime behavior.\n\nThe A editor owns these bounded comment corrections. Remove corrected overlaps from the clean\ndenominator and expand A's XML-contract and enum-value strata. These findings add documentation\ncorrections, not new independently demonstrated runtime defects.\n\n",
+      "scope": "Coordinator exact first-batch material-miss section"
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A001",
+      "SAMPLE-A002"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:c085f1cd3632e7c2",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-001-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "c085f1cd3632e7c2",
+      "verdict_text": "\n\n- **SAMPLE-A001 \u2014 `711e47d18bab0742`**, `HotplugSignals.Dispose`: the summary describes completed\n  cleanup, but three `BestEffort` loops suppress cleanup failures; a throwing logger can also interrupt\n  later work. Describe ordered attempts and the actual completion boundary. The complete current\n  `HotplugSignals.cs` was read, including `TryStart` and `BestEffort`.\n- **SAMPLE-A002 \u2014 `c085f1cd3632e7c2` and `076b4d4328825902`**, skip-cause enum/type explanation:\n  `InterfaceLeaseHeld` also covers another discovery lease. `SharedDeviceInfoRead` maps failed\n  availability/acquisition to this cause; `DeviceConnectionRegistry.TryAcquireDiscovery` checks\n  `_discoveryActive` as well as connection holders/waiters. The existing explanation names only\n  connections. Correct the actor scope while preserving the enum and runtime behavior.\n\nThe A editor owns these bounded comment corrections. Remove corrected overlaps from the clean\ndenominator and expand A's XML-contract and enum-value strata. These findings add documentation\ncorrections, not new independently demonstrated runtime defects.\n\n",
+      "scope": "Coordinator exact first-batch material-miss section"
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A001",
+      "SAMPLE-A002"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:076b4d4328825902",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-001-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "076b4d4328825902",
+      "verdict_text": "\n\n- **SAMPLE-A001 \u2014 `711e47d18bab0742`**, `HotplugSignals.Dispose`: the summary describes completed\n  cleanup, but three `BestEffort` loops suppress cleanup failures; a throwing logger can also interrupt\n  later work. Describe ordered attempts and the actual completion boundary. The complete current\n  `HotplugSignals.cs` was read, including `TryStart` and `BestEffort`.\n- **SAMPLE-A002 \u2014 `c085f1cd3632e7c2` and `076b4d4328825902`**, skip-cause enum/type explanation:\n  `InterfaceLeaseHeld` also covers another discovery lease. `SharedDeviceInfoRead` maps failed\n  availability/acquisition to this cause; `DeviceConnectionRegistry.TryAcquireDiscovery` checks\n  `_discoveryActive` as well as connection holders/waiters. The existing explanation names only\n  connections. Correct the actor scope while preserving the enum and runtime behavior.\n\nThe A editor owns these bounded comment corrections. Remove corrected overlaps from the clean\ndenominator and expand A's XML-contract and enum-value strata. These findings add documentation\ncorrections, not new independently demonstrated runtime defects.\n\n",
+      "scope": "Coordinator exact first-batch material-miss section"
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A001",
+      "SAMPLE-A002"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:10653b759a2209f8",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-002-verdicts.json",
+    "raw_category": "source-observation",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:10653b759a2209f8",
+      "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+      "range_sha256": "b01709e374ade5884fc4700be4accffe81fa78cf8ec190023158c5bb677291d1",
+      "current_file_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+      "original_unit_present_in_current": true,
+      "verdict": "DEFERRED-SOURCE-OBSERVATION",
+      "note": "SAMPLE-A004: attestation command receives a newly constructed X509Certificate2 but lacks deterministic disposal. No permanent leak or native runtime reproduction claimed; implementation remains unchanged."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A004"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:cf1e2081af8b8ac4",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-002-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:cf1e2081af8b8ac4",
+      "path": "docs/architecture/event-driven-device-discovery.md",
+      "range_sha256": "54530cfe088e7bdfd9ccc6f78c181be3b03c88df9f002a9b602de34866ffa547",
+      "current_file_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-A001/A003: unconditional listener cleanup and normal completion of every active subscription need the actual best-effort/healthy-versus-faulted qualification; SHARED correction assigned."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:e7b21994e1483471",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B1-verdicts.json",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:e7b21994e1483471",
+      "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+      "range_sha256": "a16c04a1fa570dd36e276bf640e3ec75123d091facede9fb69128852c170b7cb",
+      "current_file_sha256": "53395c3f41bb3d12aa31142c365d47407f01b380fc4d7d1d67194b70460420a0",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-DORMANT-ILLUSTRATION",
+      "note": "Only commented-out getAtr prototype; no active API or meaningful current contract. Preserve historical text, exclude clean quota."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:9715fd23161cbcd7",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B1-verdicts.json",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:9715fd23161cbcd7",
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "range_sha256": "3f919957675fa54052174ece060e9159a7ca0daa43ab3f56f3c8999385b623b5",
+      "current_file_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "Only license/imports/namespace and blank lines; actual class begins after this unit. Exclude from clean quota and replace if required."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:f1d4372202bdaa9b",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B1-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:f1d4372202bdaa9b",
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "range_sha256": "17384a772c2220cfb379751697e13d19d9cb105b8a00b5cded17d21833895f81",
+      "current_file_sha256": "c4e33e77acd4e1727750a8d458a0a282f356757dc00e23094c1fe8c3897ce5dd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Historical-report basis verified by reading 64efe844:docs/plans/session-contention/phase1-findings.md: key103/macOS/5.8.0, PIV interference4/4 and bothHID transports1/1. Raw ephemeral harness/log absent; no fresh physical qualification or current parallel-ownership permission."
+    },
+    "preserved_finding_fields": {
+      "sampling_credit_adjudication": {
+        "id": "core-001:unit:f1d4372202bdaa9b",
+        "owner": "B1",
+        "path": "docs/architecture/connection-ownership-and-contention.md",
+        "original_qualification_record": {
+          "id": "core-001:unit:f1d4372202bdaa9b",
+          "owner": "B1",
+          "path": "docs/architecture/connection-ownership-and-contention.md",
+          "status": "HISTORICAL-REPORT-SUPPORT; FINAL-ELIGIBILITY-ADJUDICATION-PENDING",
+          "authority": "investigation/B1/sampling-history-clarification.md",
+          "report_commit": "64efe84487143235a42121db962c9328cfec0aa8",
+          "report_path": "docs/plans/session-contention/phase1-findings.md",
+          "report_blob": "738d5c433b5583aab2590b8b72391b3d2b01f796",
+          "report_sha256": "fb602ed05f1fe4f9a6253d72195756879995df9b3e31e4a3ef36815fad78851b",
+          "scope": "Astra/owner verified historical report scope; original raw captures/harness missing. No fresh physical verification, universal state claim or raw-capture attestation. Not independently re-investigated here.",
+          "clean_credit_by_this_preparer": 0
+        },
+        "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+        "actually_read_by": "Astra; original B1/B2 selected reading retained",
+        "final_clean_credit": 0,
+        "rationale": "Exact report at 64efe844 was checked by Astra/owner; original raw capture/harness missing. Retain historical rig/repeats and no fresh physical attestation.",
+        "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+      }
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:5c0f333d06ef9126",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:5c0f333d06ef9126",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "range_sha256": "2207b51f3945973ef6872a1b6489728942394f5e49b8cd1b1aa2156f04ee9513",
+      "current_file_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B2-002: event-source factory runs for a new listener-session attempt, not every Start invocation; already-started guard returns first."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-B2-002"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:7a90c15f7fb4a767",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:7a90c15f7fb4a767",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "range_sha256": "52059f37083dfb05e60717748db08dba1c00c4b64bd0bc812c5db8e508d34e92",
+      "current_file_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B2-001: void shutdown signal attempts may no-op or log failed/short writes; indefinite poll wake/loop completion is not acknowledged. Related bounded-exit wording requires scope qualification."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-B2-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:2ab3cc1db2ed4269",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:2ab3cc1db2ed4269",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "range_sha256": "4d95c55a7f81e7e80c8b071e54bb55bfd4a720bcb01b2d28c6b4e8060d8d437f",
+      "current_file_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B2-001: void shutdown signal attempts may no-op or log failed/short writes; indefinite poll wake/loop completion is not acknowledged. Related bounded-exit wording requires scope qualification."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-B2-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:95ad4b56865f1456",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:95ad4b56865f1456",
+      "path": "docs/research/linux-fido-async-lifetime.md",
+      "range_sha256": "33612d9aba3d144a4928531260270cafc900962ba32fb380c5c9571e8776081b",
+      "current_file_sha256": "9cd6e5c387ec005f26fb5be7b7a56f032c5c870a7e1c93c2bdd1678b9347bfc4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    "preserved_finding_fields": {
+      "sampling_credit_adjudication": {
+        "id": "core-001:unit:95ad4b56865f1456",
+        "owner": "B2",
+        "path": "docs/research/linux-fido-async-lifetime.md",
+        "original_qualification_record": {
+          "id": "core-001:unit:95ad4b56865f1456",
+          "owner": "B2",
+          "path": "docs/research/linux-fido-async-lifetime.md",
+          "first_line": 78,
+          "last_line": 93,
+          "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+          "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+          "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+          "clean_credit_by_this_preparer": 0,
+          "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+        },
+        "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+        "actually_read_by": "Astra; original B1/B2 selected reading retained",
+        "final_clean_credit": 0,
+        "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+        "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+      }
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:b37c3e449550734a",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:b37c3e449550734a",
+      "path": "docs/research/linux-managed-acceptance.md",
+      "range_sha256": "a20490dc02d71388b61c1b78512e7690b821eb6244e89e0c0a80bcc14f5ae5c6",
+      "current_file_sha256": "34a88eed8ff8cc2dbe75da225c103638fe204a5259eac16af1c043a5daa5afc3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    "preserved_finding_fields": {
+      "sampling_credit_adjudication": {
+        "id": "core-001:unit:b37c3e449550734a",
+        "owner": "B2",
+        "path": "docs/research/linux-managed-acceptance.md",
+        "original_qualification_record": {
+          "id": "core-001:unit:b37c3e449550734a",
+          "owner": "B2",
+          "path": "docs/research/linux-managed-acceptance.md",
+          "first_line": 9,
+          "last_line": 30,
+          "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+          "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+          "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+          "clean_credit_by_this_preparer": 0,
+          "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+        },
+        "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+        "actually_read_by": "Astra; original B1/B2 selected reading retained",
+        "final_clean_credit": 0,
+        "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+        "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+      }
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:cfea2933573b757f",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:cfea2933573b757f",
+      "path": "docs/research/linux-native-acceptance.md",
+      "range_sha256": "6f5a60a77806c46bbdc346c582155e81ce13772202e270b74ec3c4fe47999272",
+      "current_file_sha256": "4c9ba74f1c0b3ee0e7f40d6bebe6385053d571b208df2c79a6aa2c8a0a941e7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    "preserved_finding_fields": {
+      "sampling_credit_adjudication": {
+        "id": "core-001:unit:cfea2933573b757f",
+        "owner": "B2",
+        "path": "docs/research/linux-native-acceptance.md",
+        "original_qualification_record": {
+          "id": "core-001:unit:cfea2933573b757f",
+          "owner": "B2",
+          "path": "docs/research/linux-native-acceptance.md",
+          "first_line": 411,
+          "last_line": 446,
+          "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+          "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+          "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+          "clean_credit_by_this_preparer": 0,
+          "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+        },
+        "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+        "actually_read_by": "Astra; original B1/B2 selected reading retained",
+        "final_clean_credit": 0,
+        "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+        "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+      }
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:6612f3e188e74e2b",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:6612f3e188e74e2b",
+      "path": "docs/research/linux-native-report-access.md",
+      "range_sha256": "665df72eed31cc679a905308db39d8e6b9cbde5dec01be8b0b2bb4c952dbd407",
+      "current_file_sha256": "137a3ae7cb705435bde5a66ab9145d9d3e85fbb5913b5c648cba553a303cd467",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    "preserved_finding_fields": {
+      "sampling_credit_adjudication": {
+        "id": "core-001:unit:6612f3e188e74e2b",
+        "owner": "B2",
+        "path": "docs/research/linux-native-report-access.md",
+        "original_qualification_record": {
+          "id": "core-001:unit:6612f3e188e74e2b",
+          "owner": "B2",
+          "path": "docs/research/linux-native-report-access.md",
+          "first_line": 1,
+          "last_line": 7,
+          "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+          "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+          "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+          "clean_credit_by_this_preparer": 0,
+          "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+        },
+        "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+        "actually_read_by": "Astra; original B1/B2 selected reading retained",
+        "final_clean_credit": 0,
+        "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+        "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+      }
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:094e7f926bf428c5",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:094e7f926bf428c5",
+      "path": "docs/research/linux-otp-async-lifetime.md",
+      "range_sha256": "7af0f6261915b82fd5d2dffed4ca7f3c813e49efb5ea8da527f845fe8e9127b6",
+      "current_file_sha256": "1b6379a822f311c56e64ccaf17c00cceefc9e253fca028e9a7044a501ad26cd5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    "preserved_finding_fields": {
+      "sampling_credit_adjudication": {
+        "id": "core-001:unit:094e7f926bf428c5",
+        "owner": "B2",
+        "path": "docs/research/linux-otp-async-lifetime.md",
+        "original_qualification_record": {
+          "id": "core-001:unit:094e7f926bf428c5",
+          "owner": "B2",
+          "path": "docs/research/linux-otp-async-lifetime.md",
+          "first_line": 8,
+          "last_line": 30,
+          "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+          "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+          "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+          "clean_credit_by_this_preparer": 0,
+          "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+        },
+        "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+        "actually_read_by": "Astra; original B1/B2 selected reading retained",
+        "final_clean_credit": 0,
+        "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+        "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+      }
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:ebf81d7eeea93827",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:ebf81d7eeea93827",
+      "path": "docs/research/linux-otp-async-lifetime.md",
+      "range_sha256": "b49990895acfed2eb062fa4c798b0d230e2f06015040dc557588604bf18c77c0",
+      "current_file_sha256": "1b6379a822f311c56e64ccaf17c00cceefc9e253fca028e9a7044a501ad26cd5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    "preserved_finding_fields": {
+      "sampling_credit_adjudication": {
+        "id": "core-001:unit:ebf81d7eeea93827",
+        "owner": "B2",
+        "path": "docs/research/linux-otp-async-lifetime.md",
+        "original_qualification_record": {
+          "id": "core-001:unit:ebf81d7eeea93827",
+          "owner": "B2",
+          "path": "docs/research/linux-otp-async-lifetime.md",
+          "first_line": 95,
+          "last_line": 108,
+          "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+          "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+          "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+          "clean_credit_by_this_preparer": 0,
+          "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+        },
+        "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+        "actually_read_by": "Astra; original B1/B2 selected reading retained",
+        "final_clean_credit": 0,
+        "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+        "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+      }
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:c7edeed9fe6d2e6c",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:c7edeed9fe6d2e6c",
+      "path": "src/Core/src/Native/Linux/Libc/LibcFcntlConstants.cs",
+      "range_sha256": "aea2a7eb1c8a630a97c1afdff8d1f46abad92dc7b31dcea16d477445fc9029a5",
+      "current_file_sha256": "8b9f23386e009c0bbd35291aee55906d4084f1f6b0d080b9878ebbfc4a8f8b1a",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "License, warning directive and namespace only; no substantive declaration/explanation. Preserve bytes, exclude clean quota."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:fc1fb9627bba154a",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:fc1fb9627bba154a",
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "range_sha256": "100e9bf1234f86b836af026b391c17b371fc972cf153acfb869bd3b953f0a87a",
+      "current_file_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:f8412d69f0903d78",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B3-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:f8412d69f0903d78",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "range_sha256": "e1c59ac5aa5c5193f00ec7822e25c9d2a30c2771e4db9fbe93c538fe5ae519ce",
+      "current_file_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B3-001: one-for-one/no-policy seam description overstates implementation. CreateDevice combines lookup/create/release and status handling; owner/test logic, not seam alone, supplies drain ordering. Bounded comment correction assigned."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-B3-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:9ea1794bce816ec8",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B4-verdicts.json",
+    "raw_category": "protected-output-qualification",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:9ea1794bce816ec8",
+      "path": "scripts/toolchain/Output.cs",
+      "range_sha256": "a2841ff16ebd3bcfba919cb04c4135a9b06fdb50246a8ff8366f7ddf272390b0",
+      "current_file_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "original_unit_present_in_current": true,
+      "verdict": "KNOWN-DEFERRED-PROTECTED-OUTPUT",
+      "note": "Runtime help strings are preserved, not documentation-editable. Existing no-tests target/result-policy qualification applies; actual checked target behavior is authoritative and this protected-output unit gets no final clean credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:001c58b1d1862d76",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B4-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:001c58b1d1862d76",
+      "path": "CLAUDE.md",
+      "range_sha256": "1416aeac6ae4fba9eb51454d0b7a5e2d3a552dee8d8e00cae10133b92dca10c6",
+      "current_file_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B4-001: generic collections need not box struct elements; no-GC/deep-immutability and machine-word claims need qualification. Bounded guide correction reviewed separately."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-B4-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:a9e434874ba55d57",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B4-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:a9e434874ba55d57",
+      "path": "docs/v1-to-v2-comparison.md",
+      "range_sha256": "7247e4fe58b861d736ec834417ec98b43a9a2de10d2ff6c412beed466fc7ddbc",
+      "current_file_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B4-002: internalization wording must distinguish retired extension points/internal protocol composition from actual public raw/utility surfaces."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-B4-002"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:c7319c1c1182a4be",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B5-verdicts.json",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:c7319c1c1182a4be",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationIdsTests.cs",
+      "range_sha256": "3175b0a745ba27daa52a5adba196c441ccb072b71565ee1fdc768b72924cbc18",
+      "current_file_sha256": "36daee6e9c6f6c910706edfde90c82a6656355870b4084d60f43ac8b37d70177",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "License/imports/namespace only, no substantive declaration or explanation; exclude clean quota and replace if required."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:5bcf834655fef594",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B5-verdicts.json",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:5bcf834655fef594",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "a0157353a96b61e88bee47866710e61e3eb7f7de1d4bc4deba4414c49da8bf4e",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "License/imports/namespace only, no substantive declaration or explanation; exclude clean quota and replace if required."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:b0c0d59299e1e832",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B6-verdicts.json",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:b0c0d59299e1e832",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "13ca40dfcd1b3136e00d9370d5ec1a50d9a48963671e2a43541199abb3ee435a",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:8e9040753e759723",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B6-verdicts.json",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:8e9040753e759723",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "372aa59d11d2414c2c87b5c3f2bc9c7c293dbc834ae25ccf8a5c52a0304bbffc",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:53f3eee8233f9a20",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B6-verdicts.json",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:53f3eee8233f9a20",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "6cd51745fd65115dd86853c3f608e04361f7643f35a2f29a629954bf5e6bddba",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:e7354a1214c8ba41",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B6-verdicts.json",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:e7354a1214c8ba41",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "803c4574dbf6995c6fc7d120c81185a81a67fc34d06164fa713930fb47a190a8",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:5f18c0d67c2c7815",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B6-verdicts.json",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:5f18c0d67c2c7815",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "d6c57d1e7708babd2f01dea32789b5f6f817796a6d94859d39634627a621370a",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:59c33b8c7c8f294c",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B6-verdicts.json",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:59c33b8c7c8f294c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.rsp",
+      "range_sha256": "7661e28b856fbe789aef528c3b056c06b2b91c1f246d64403201692c77123897",
+      "current_file_sha256": "7661e28b856fbe789aef528c3b056c06b2b91c1f246d64403201692c77123897",
+      "original_unit_present_in_current": true,
+      "verdict": "REFERENCE-DATA-QUALIFIED",
+      "note": "Complete555-line CAVS reference file read: algorithm/length sections and COUNT/Z/SharedInfo/key_data records, including521-bit material. No cryptographic outputs recomputed, original NIST archive gap unchanged; no final clean-contract quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:ed3e115f81fd126c",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-SecurityDomain-verdicts.json",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "id": "core-001:unit:ed3e115f81fd126c",
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "range_sha256": "34ac08f4e3d402064aefdac1b267410d3abb36e3f796fabcd7a1fc4d665e20ec",
+      "current_file_sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-SD-001: related-module bullets misplace StaticKeys and omit Protocols in SCP namespace; actual StaticKeys namespace verified and bounded correction assigned."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-SD-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:c8377e0a58dac11c",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn-verdicts.md",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "suffix": "c8377e0a58dac11c",
+      "id": "core-001:unit:c8377e0a58dac11c",
+      "verdict_text": "Administrative maintenance policy: read and retained, but no substantive clean contract credit. Replace for quota if needed."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:7fe08c46f10afee5",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn-verdicts.md",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "suffix": "7fe08c46f10afee5",
+      "id": "core-001:unit:7fe08c46f10afee5",
+      "verdict_text": "Ineligible preamble: license/imports/namespace only; zero clean credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:e29522f04d40349a",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "e29522f04d40349a",
+      "id": "core-001:unit:e29522f04d40349a",
+      "verdict_text": "**SAMPLE-WA-001 documentation miss:** assertions compare CredentialId/Signature bytes and one backend call, not instance identity or all response fields. Focused patch `d70a50aa\u2026` passed review and remains queued until compilation releases the primary tree. Zero clean credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-WA-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:c6719030f9881ef4",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn-verdicts.md",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "suffix": "c6719030f9881ef4",
+      "id": "core-001:unit:c6719030f9881ef4",
+      "verdict_text": "Ineligible preamble: license/imports/namespace only; zero clean credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:8b2a95f01db9bf2c",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-OpenPgp-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "8b2a95f01db9bf2c",
+      "id": "core-001:unit:8b2a95f01db9bf2c",
+      "verdict_text": "**SAMPLE-PGP-001:** advisory UIF fallback calls the logger before choosing PolicyMayRequire; a throwing provider can interrupt it. The unconditional comment needs qualification. Isolated editor correction assigned."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-PGP-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:710814862611f595",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-OpenPgp-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "710814862611f595",
+      "id": "core-001:unit:710814862611f595",
+      "verdict_text": "**SAMPLE-PGP-001:** the matching guide's unconditional failed-read fallback statement needs the same logging-success condition. Zero clean credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-PGP-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:a579b6a5cf4242e4",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Piv-verdicts.md",
+    "raw_category": "known-implementation-qualified",
+    "raw_verdict_payload": {
+      "suffix": "a579b6a5cf4242e4",
+      "id": "core-001:unit:a579b6a5cf4242e4",
+      "verdict_text": "**Known deferred qualification, zero clean credit:** PIN allocation precedes awaited discovery outside try. Already owned by CORE-PIV-X006 / PIVIMP-006, not a new issue or runtime fix."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "CORE-PIV-X006",
+      "PIVIMP-006"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:8fc815177a95b970",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Piv-verdicts.md",
+    "raw_category": "known-implementation-qualified",
+    "raw_verdict_payload": {
+      "suffix": "8fc815177a95b970",
+      "id": "core-001:unit:8fc815177a95b970",
+      "verdict_text": "**Known deferred qualification, zero clean credit:** management-key bytes likewise precede discovery outside the clearing scope; same preserved finding."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:89c5d1ecb6fd0e8d",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Piv-verdicts.md",
+    "raw_category": "edited-overlap",
+    "raw_verdict_payload": {
+      "suffix": "89c5d1ecb6fd0e8d",
+      "id": "core-001:unit:89c5d1ecb6fd0e8d",
+      "verdict_text": "**Edited overlap, zero clean credit:** the pinned example's post-PIN setup precedes try; accepted PIV revision2 moved that setup into the protected scope. Read history is preserved, not counted as unchanged clean content."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:f24674b7449e617e",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "suffix": "f24674b7449e617e",
+      "verdict_text": "Historical migration changelog; read and retained, zero clean quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:7b5daf3c140bfbc6",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "suffix": "7b5daf3c140bfbc6",
+      "verdict_text": "Historical baseline changelog; zero clean quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:13971cb61434ba4c",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "suffix": "13971cb61434ba4c",
+      "verdict_text": "Historical firmware measurement; no fresh physical or exact device-run proof supplied by this excerpt. Qualified context, zero clean quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:3ccf06e816f277d2",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md",
+    "raw_category": "source-observation",
+    "raw_verdict_payload": {
+      "suffix": "3ccf06e816f277d2",
+      "verdict_text": "**SAMPLE-A004 additional caller:** newly loaded certificate lacks deterministic disposal on output/PIN/import paths. Same lifetime concern as the earlier PIV CLI observation; preserve as a caller-specific deferred facet, not a permanent-leak claim. Zero clean credit."
+    },
+    "preserved_finding_fields": {
+      "related_existing_finding": "SAMPLE-A004; additional caller facet, not permanent-leak/runtime proof or new unique bug"
+    },
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A004"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:297e68004991d4a8",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md",
+    "raw_category": "protected-output-qualification",
+    "raw_verdict_payload": {
+      "suffix": "297e68004991d4a8",
+      "verdict_text": "Source read with protected-output qualification: reported key status is inferred from fingerprint presence and PIN policy text is runtime output. Existing applet metadata/PIN-state limits remain; no independent key existence or workflow lifetime proof, zero clean quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:cf3538431462d4ab",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md",
+    "raw_category": "known-implementation-qualified",
+    "raw_verdict_payload": {
+      "suffix": "cf3538431462d4ab",
+      "verdict_text": "Source behavior read: algorithm switch requests selected key/slot combination; retained OpenPGP key applicability defects remain open. No clean credit for unresolved applicability."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:4089aedab94d4e23",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-A-verdicts.md",
+    "raw_category": "known-implementation-qualified",
+    "raw_verdict_payload": {
+      "suffix": "4089aedab94d4e23",
+      "verdict_text": "Source-only cleanup qualification: HMAC key exists before generated-key output and access-code parsing outside try. A failure there bypasses its clearing finally. Same pre-protected-scope cleanup class, no new runtime experiment. Zero clean credit."
+    },
+    "preserved_finding_fields": {
+      "existing_class": "Pre-protected-scope cleanup qualification; no new experiment or category-wide expansion"
+    },
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:cf330b6a639970cd",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+    "raw_category": "edited-overlap",
+    "raw_verdict_payload": {
+      "suffix": "cf330b6a639970cd",
+      "verdict_text": "**edited overlap**, zero clean credit. Its \u201cEach Start\u201d wording was already\n  corrected by the accepted Linux sampling patch to account for the started guard."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:82f001f6db22d507",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "suffix": "82f001f6db22d507",
+      "verdict_text": "**source-qualified**, zero clean credit. Null receive and possible event loss\n  are supported; \u201cmost likely\u201d event-storm frequency is not independently established. Preserve\n  the uncertainty rather than treating the likelihood claim as verified native evidence."
+    },
+    "preserved_finding_fields": {
+      "editor_followup": "SAMPLE-B2-003 frequency wording correction; original XML stratum already expanded, no further full-category quota added."
+    },
+    "literal_finding_reference_tokens": [
+      "SAMPLE-B2-003"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:4c955b22a2de68df",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "suffix": "4c955b22a2de68df",
+      "verdict_text": "Historical build/result receipt and specific artifact-count claims: read as qualified evidence, zero clean contract credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:0b2135f2f301e2c1",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "suffix": "0b2135f2f301e2c1",
+      "verdict_text": "Historical test/inventory accounting: qualified evidence, zero clean quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:4330e60d07cd5417",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+    "raw_category": "source-evidence-qualified",
+    "raw_verdict_payload": {
+      "suffix": "4330e60d07cd5417",
+      "verdict_text": "Historical physical checkpoint and measurements: qualified evidence only, zero clean quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:f5a358ec89b4c4ce",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "suffix": "f5a358ec89b4c4ce",
+      "verdict_text": "administrative documentation-maintenance policy; zero clean contract credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:7070cc291aec3e7e",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "suffix": "7070cc291aec3e7e",
+      "verdict_text": "administrative module/router preamble; zero clean contract credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:d27f5051f8d21199",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md",
+    "raw_category": "known-implementation-qualified",
+    "raw_verdict_payload": {
+      "suffix": "d27f5051f8d21199",
+      "verdict_text": "Known pre-protected-scope cleanup class: static-password configuration exists before access-code parsing outside try; parsing failure bypasses configuration disposal. Source-only deferred caller facet, not a permanent leak or new runtime test."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:0b5f8163f489c670",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "0b5f8163f489c670",
+      "verdict_text": "SAMPLE-A003 propagation miss: hosted-monitor paragraph still promises normal completion of every active enumeration. Carry the already established healthy/faulted and conditional-cleanup limits into this guide. Isolated correction assigned."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A003"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:c2de2d6f26065229",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "c2de2d6f26065229",
+      "verdict_text": "Same SAMPLE-A003 propagation miss in Core README; zero credit and isolated correction assigned."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-A003"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:287e6410db16f0e7",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md",
+    "raw_category": "documentation-miss",
+    "raw_verdict_payload": {
+      "suffix": "287e6410db16f0e7",
+      "verdict_text": "SAMPLE-TESTING-001: manual runner table incorrectly assigns `-m/--method` to the configured MTP runner, whose actual toolchain uses `--filter-method`. Package/version detection also needs the central-package context. Isolated guide correction assigned."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "SAMPLE-TESTING-001"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:606c7462df485c41",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md",
+    "raw_category": "known-implementation-qualified",
+    "raw_verdict_payload": {
+      "suffix": "606c7462df485c41",
+      "verdict_text": "Existing OpenPGP X25519 import reversal concern remains unresolved; no clean credit or new duplicate issue."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:be11505c581308a5",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md",
+    "raw_category": "known-implementation-qualified",
+    "raw_verdict_payload": {
+      "suffix": "be11505c581308a5",
+      "verdict_text": "Existing CORE-PIV-X006/PIVIMP-006 pre-try discovery/PIN cleanup gap, now at the CSR caller; zero credit, not a new finding."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [
+      "CORE-PIV-X006",
+      "PIVIMP-006"
+    ],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  },
+  {
+    "id": "core-001:unit:f7fc274baa684518",
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/remaining-53-verdicts.md",
+    "raw_category": "specific-ineligible",
+    "raw_verdict_payload": {
+      "suffix": "f7fc274baa684518",
+      "verdict_text": "Pure test imports/license/namespace preamble; zero clean quota credit."
+    },
+    "preserved_finding_fields": {},
+    "literal_finding_reference_tokens": [],
+    "unique_new_engineering_bug_allocation": 0,
+    "qualification": "Exact Astra qualifications/aliases retained; corrected samples stay zero, acceptance of prose never creates bug or clean-unit credit."
+  }
+]

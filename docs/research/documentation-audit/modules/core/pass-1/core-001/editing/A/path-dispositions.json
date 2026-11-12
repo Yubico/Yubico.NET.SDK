@@ -1,0 +1,1211 @@
+[
+  {
+    "path": "src/Core/src/Abstractions/DeviceCorrelation.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "c6aba60f9246a6a5815e8adc5a8728b44e7232f929f50897ea76fe311703063b",
+    "base_sha256": "c6aba60f9246a6a5815e8adc5a8728b44e7232f929f50897ea76fe311703063b",
+    "current_sha256": "c6aba60f9246a6a5815e8adc5a8728b44e7232f929f50897ea76fe311703063b",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Abstractions/IDevice.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "7afd6405680d7a6b1339b1213145dd6866b4cb868929bea9b7924e029afdc4de",
+    "base_sha256": "7afd6405680d7a6b1339b1213145dd6866b4cb868929bea9b7924e029afdc4de",
+    "current_sha256": "7afd6405680d7a6b1339b1213145dd6866b4cb868929bea9b7924e029afdc4de",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Abstractions/IYubiKey.cs",
+    "candidate_ids": [
+      "CORE-A-C003",
+      "CORE-A-C007",
+      "CORE-A-C021"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "3ba053c772725075a827c7f0ab83362f4a4d20cddbb1901bc094c71b248fbe5a",
+    "base_sha256": "3ba053c772725075a827c7f0ab83362f4a4d20cddbb1901bc094c71b248fbe5a",
+    "current_sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/DeviceListenerStatus.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "920712a93d64267e5a2ff5995ec8ef25a615fc8d46ac6484fe1dc3387af62437",
+    "base_sha256": "920712a93d64267e5a2ff5995ec8ef25a615fc8d46ac6484fe1dc3387af62437",
+    "current_sha256": "920712a93d64267e5a2ff5995ec8ef25a615fc8d46ac6484fe1dc3387af62437",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+    "candidate_ids": [
+      "CORE-A-C009",
+      "CORE-A-C010",
+      "CORE-A-C011",
+      "CORE-A-C020"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+    "base_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+    "current_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/CompositeMetadataReader.cs",
+    "candidate_ids": [
+      "CORE-A-C008",
+      "CORE-A-C020"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "71ce0cba0b61925cc24a2dc005b96ad26debfa2daf44f4d832273e222c3874c6",
+    "base_sha256": "71ce0cba0b61925cc24a2dc005b96ad26debfa2daf44f4d832273e222c3874c6",
+    "current_sha256": "da79a689b7796657916a063cafcae3f42780ebdd75460bd0c8f9c823e7d392ec",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/ConnectionType.cs",
+    "candidate_ids": [
+      "CORE-A-C002"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "c260e803d107b002e46a7fd7ad4487a1e79f831df55aedfef95db887ab499eb7",
+    "base_sha256": "c260e803d107b002e46a7fd7ad4487a1e79f831df55aedfef95db887ab499eb7",
+    "current_sha256": "a2c8ad1644c0f3f62c70121556d7db18a29f5fa10a6fcacfaad3075f18c65e37",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737",
+    "base_sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737",
+    "current_sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/ConnectionTypeMapper.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "10b1c26c35663555416309563b82d32cfe00cb339bcf4622956b4e5197cf7f5e",
+    "base_sha256": "10b1c26c35663555416309563b82d32cfe00cb339bcf4622956b4e5197cf7f5e",
+    "current_sha256": "10b1c26c35663555416309563b82d32cfe00cb339bcf4622956b4e5197cf7f5e",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C006"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "a6b7f49f9475daf5c026a8eb372e19fab10e7435213f504795b9c5a86f9ed1ac",
+    "base_sha256": "a6b7f49f9475daf5c026a8eb372e19fab10e7435213f504795b9c5a86f9ed1ac",
+    "current_sha256": "411eba67b0dc877cfd7aa8697fa6743ed85d5ec442fceac3000fb62e3aa565f3",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceChange.cs",
+    "candidate_ids": [
+      "CORE-A-C007",
+      "CORE-A-C012"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "f507e6a513cbfe90f35f05119deba0fa2c32191fc88075d533b0a356bec80690",
+    "base_sha256": "f507e6a513cbfe90f35f05119deba0fa2c32191fc88075d533b0a356bec80690",
+    "current_sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+    "base_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+    "current_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceFlags.cs",
+    "candidate_ids": [
+      "CORE-A-C002"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "38f1220a2521543f5515272a7474998ce34fd0298ff8ca291e5b30cf9dfbfe00",
+    "base_sha256": "38f1220a2521543f5515272a7474998ce34fd0298ff8ca291e5b30cf9dfbfe00",
+    "current_sha256": "7f8985ff2a8a8d0317d4821a4df80307a82bd5fabb667fba030905bf16c7d884",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceInfo.cs",
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C003",
+      "CORE-A-C004",
+      "CORE-A-C005",
+      "CORE-A-C006",
+      "CORE-A-C015",
+      "CORE-A-C016"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+    "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+    "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+    "candidate_ids": [
+      "CORE-A-C003"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "75f07413d79f617a6a4be26081d02840abb6a57caabeb69a25e438718d43fa70",
+    "base_sha256": "75f07413d79f617a6a4be26081d02840abb6a57caabeb69a25e438718d43fa70",
+    "current_sha256": "b997455d9083553111e134ff972f439356e1271b5837edcd89d6e61c18eda350",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryBudgets.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "d93fcb438b491d975f5ba1d4fe53ee08363bb560c8cbba7ad15adc550b388da7",
+    "base_sha256": "d93fcb438b491d975f5ba1d4fe53ee08363bb560c8cbba7ad15adc550b388da7",
+    "current_sha256": "c9c644d13dec23e08b732e01024e8b239ea6c9c5f6b327b674588e5106ccf6e2",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "cbacefb90b7d52085b981ebf911fdf60e5eaabdf9abfef60212d130b2b673423",
+    "base_sha256": "cbacefb90b7d52085b981ebf911fdf60e5eaabdf9abfef60212d130b2b673423",
+    "current_sha256": "aa1dcb809f31374d15236b35bb0fa12069a228cbf019314d2d8eaa7996a7e640",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "70b233fec5bc94cbdb12785c776130206d764ebbab42991b7b0fd1c5f8daf163",
+    "base_sha256": "70b233fec5bc94cbdb12785c776130206d764ebbab42991b7b0fd1c5f8daf163",
+    "current_sha256": "1d7ee756959e44f2067332c3282ec0d3f8700aa8d045d14dff442671451215d9",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryReadAdmission.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "abbb245f2cc4f77f0edd2c59954aa2a3fc4196f2f1042762ff8ab58196051150",
+    "base_sha256": "abbb245f2cc4f77f0edd2c59954aa2a3fc4196f2f1042762ff8ab58196051150",
+    "current_sha256": "abbb245f2cc4f77f0edd2c59954aa2a3fc4196f2f1042762ff8ab58196051150",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryReadScope.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "cdd9ab546d01806a15af19fcd60f11eea17493046200699c5923cea469046f61",
+    "base_sha256": "cdd9ab546d01806a15af19fcd60f11eea17493046200699c5923cea469046f61",
+    "current_sha256": "07545c692d1b70ef6534fb45db9af115aa55c9095a0559d256411e3fb347b776",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+    "base_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+    "current_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryWorkerAdmission.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "491a9a218172ebb220ad4989a11eae2b4e88c71acd6da53125a2204ea549ae50",
+    "base_sha256": "491a9a218172ebb220ad4989a11eae2b4e88c71acd6da53125a2204ea549ae50",
+    "current_sha256": "491a9a218172ebb220ad4989a11eae2b4e88c71acd6da53125a2204ea549ae50",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "candidate_ids": [
+      "CORE-A-C002",
+      "CORE-A-C015"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "base_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "current_sha256": "40e111b46516aa81eca2d53cbfc9b890f39d4c659d7c75a9ca983779dae38318",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/FindYubiKeys.cs",
+    "candidate_ids": [
+      "CORE-A-C009",
+      "CORE-A-C017",
+      "CORE-A-C021"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+    "base_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+    "current_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/FirmwareVersion.cs",
+    "candidate_ids": [
+      "CORE-A-C015"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+    "base_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+    "current_sha256": "8dcf389cde5f6f6f2e1d3ddc9960a1aa972cd33f21ff5b2d729a3a71658cb822",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/FormFactor.cs",
+    "candidate_ids": [
+      "CORE-A-C005"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "fcacadc8201154fa09c4b579ebed7f6738651523294b32742d87a7b5d6a327ab",
+    "base_sha256": "fcacadc8201154fa09c4b579ebed7f6738651523294b32742d87a7b5d6a327ab",
+    "current_sha256": "928557d20487d2a3f8b72ba42d0f399fda94be87508817b74bb0bbd25c0488ad",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/HotplugSignals.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+    "base_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+    "current_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+    "candidate_ids": [
+      "CORE-A-C009"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "b27a0d9655f85a3b154ed90390e651cab4a3c24fa196ca98a401a1b5b8f414bd",
+    "base_sha256": "b27a0d9655f85a3b154ed90390e651cab4a3c24fa196ca98a401a1b5b8f414bd",
+    "current_sha256": "9c0a8df4166168199c8d84b26c72c2af015ee141beed01480d5ae827fd1b8d63",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/IDiscoveryConnectionProvider.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "ff018d20f2a1d0238abf72ad4e57f736eb8600981151c989f0e953a308ab7f21",
+    "base_sha256": "ff018d20f2a1d0238abf72ad4e57f736eb8600981151c989f0e953a308ab7f21",
+    "current_sha256": "ff018d20f2a1d0238abf72ad4e57f736eb8600981151c989f0e953a308ab7f21",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/IMonitoredDiscovery.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "67204ef3a1b8134b72624b39dec05f19a79d8209ecf20d044d22d00fcc462fee",
+    "base_sha256": "67204ef3a1b8134b72624b39dec05f19a79d8209ecf20d044d22d00fcc462fee",
+    "current_sha256": "67204ef3a1b8134b72624b39dec05f19a79d8209ecf20d044d22d00fcc462fee",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/IYubiKeyConnectionSlot.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "4d401d4043579aa6eadbe926c1796d7eba9fbca45923ef74f0d8b592ab3fb84c",
+    "base_sha256": "4d401d4043579aa6eadbe926c1796d7eba9fbca45923ef74f0d8b592ab3fb84c",
+    "current_sha256": "4d401d4043579aa6eadbe926c1796d7eba9fbca45923ef74f0d8b592ab3fb84c",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "9bb5821dd74c14252ac73e53be8901ec05d98090489929023500d13778dd906a",
+    "base_sha256": "9bb5821dd74c14252ac73e53be8901ec05d98090489929023500d13778dd906a",
+    "current_sha256": "c6b19c10e85e53bd57929b1118c7d555fe38db9a75e5b4c779e4f94493699f58",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/ReaderNamePidParser.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "51e04afa59e797b5f7625e71dce53b6ea987d634b1643c91365f2a208ec7305b",
+    "base_sha256": "51e04afa59e797b5f7625e71dce53b6ea987d634b1643c91365f2a208ec7305b",
+    "current_sha256": "51e04afa59e797b5f7625e71dce53b6ea987d634b1643c91365f2a208ec7305b",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/RescanScheduler.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+    "base_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+    "current_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "0fd928454eac72d56b199eb23e92a4539a88b6814c8e7fef624267d9a1d28d70",
+    "base_sha256": "0fd928454eac72d56b199eb23e92a4539a88b6814c8e7fef624267d9a1d28d70",
+    "current_sha256": "aa7bdd0872f1558de3fe53ed7a92d92e1420b2816a3a15c38f0566f624412838",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/SnapshotDiff.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "429e256cbbc3ba5eaac574fb07cbc263e1626cad47476d2090065666d3184a62",
+    "base_sha256": "429e256cbbc3ba5eaac574fb07cbc263e1626cad47476d2090065666d3184a62",
+    "current_sha256": "429e256cbbc3ba5eaac574fb07cbc263e1626cad47476d2090065666d3184a62",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/VersionQualifier.cs",
+    "candidate_ids": [
+      "CORE-A-C001"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "156df98ca4c9621ed13f8e89906ef13f9bdd338bcacc346939919d34feb1455b",
+    "base_sha256": "156df98ca4c9621ed13f8e89906ef13f9bdd338bcacc346939919d34feb1455b",
+    "current_sha256": "49e4da583adf701744ae22c473ebe6b64067c5ef6f1a358dcad42e297c0ec39d",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+    "candidate_ids": [
+      "CORE-A-C009"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "bd88e4c665bc58a7f983ddaf8b5fb7bffbc19bcf4d466a851a861278fb35a35a",
+    "base_sha256": "bd88e4c665bc58a7f983ddaf8b5fb7bffbc19bcf4d466a851a861278fb35a35a",
+    "current_sha256": "5f71a78c58e7781bb0cbf7c905e905813cb6185f171db4c86c79ebd0857ea56a",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+    "candidate_ids": [
+      "CORE-A-C009"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "6a06eb32ddccf3a30ce104a342356ef308689840424a1c4b742b44a38a8b02ad",
+    "base_sha256": "6a06eb32ddccf3a30ce104a342356ef308689840424a1c4b742b44a38a8b02ad",
+    "current_sha256": "cb499bcf262c92f001179ddbd561ba3063ef81bbe838beef32ac7a1ee7c2b102",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyDevice.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",
+    "base_sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",
+    "current_sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyDiscovery.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "0a2fd4175971723c42bddb873e79cda7c9f9462be066b994c71a944b914cb7a5",
+    "base_sha256": "0a2fd4175971723c42bddb873e79cda7c9f9462be066b994c71a944b914cb7a5",
+    "current_sha256": "0a2fd4175971723c42bddb873e79cda7c9f9462be066b994c71a944b914cb7a5",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyManager.cs",
+    "candidate_ids": [
+      "CORE-A-C007",
+      "CORE-A-C011",
+      "CORE-A-C012"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "23d965dbe0ed71a1ef857815ad366e6b8d4d6d29707cadf7f91da42f907b8090",
+    "base_sha256": "23d965dbe0ed71a1ef857815ad366e6b8d4d6d29707cadf7f91da42f907b8090",
+    "current_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+    "candidate_ids": [
+      "CORE-A-C007",
+      "CORE-A-C008",
+      "CORE-A-C012"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "1145218451f56567275d848d9bdfd04082a557fd49e88f2d2c536c08d01c83f1",
+    "base_sha256": "1145218451f56567275d848d9bdfd04082a557fd49e88f2d2c536c08d01c83f1",
+    "current_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/src/ProductAtrs.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "956b7fc7c32868563625a757b2326d790a882ff352af1b55bd639b857b265c55",
+    "base_sha256": "956b7fc7c32868563625a757b2326d790a882ff352af1b55bd639b857b265c55",
+    "current_sha256": "956b7fc7c32868563625a757b2326d790a882ff352af1b55bd639b857b265c55",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/src/Transport.cs",
+    "candidate_ids": [
+      "CORE-A-C002"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "c66914c8e99337754566657e7814450e49118575324838ab50db18c6469f39da",
+    "base_sha256": "c66914c8e99337754566657e7814450e49118575324838ab50db18c6469f39da",
+    "current_sha256": "77deae45f285c6449f27eaf098975c5b9a709a8b7136db90955d6973333794f7",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "d768e34541472ea6c346cecab3d76beb8724338df1ca8e202ef52d6473e43157",
+    "base_sha256": "d768e34541472ea6c346cecab3d76beb8724338df1ca8e202ef52d6473e43157",
+    "current_sha256": "ce5c091da33607cde9717174c4fee9092ce393dcffd09895ea4ad1fca47ee408",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryRetentionTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "b8e506334e88c425decbe04ff0200d48f95d8d347822577aa9f36739105e097f",
+    "base_sha256": "b8e506334e88c425decbe04ff0200d48f95d8d347822577aa9f36739105e097f",
+    "current_sha256": "b8e506334e88c425decbe04ff0200d48f95d8d347822577aa9f36739105e097f",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs",
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+    "base_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+    "current_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "6d4a0a3c36cb62fbe06965e430cb01e6602d7f899f4c2d2d3b4ce00ec6bc1de9",
+    "base_sha256": "6d4a0a3c36cb62fbe06965e430cb01e6602d7f899f4c2d2d3b4ce00ec6bc1de9",
+    "current_sha256": "5ba047b54e86ebcc66b12a6b314d2ed7ce305337f06e21551ffee251b2aaab0f",
+    "noncomment_lines_identical": true,
+    "base_final_newline": true,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "e76d8046728e3a162524a6276c615c2669c41264de8097db4b57af1fad6598a8",
+    "base_sha256": "e76d8046728e3a162524a6276c615c2669c41264de8097db4b57af1fad6598a8",
+    "current_sha256": "2725180d951f0eaadc3635379f97d5eddfdd595dcc1818e7f43d93f882664115",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/MonitorSnapshot.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "155f444f0dee2f3fac8ac6586e76fb20fae2e699d6ff85da5765923a5cf70192",
+    "base_sha256": "155f444f0dee2f3fac8ac6586e76fb20fae2e699d6ff85da5765923a5cf70192",
+    "current_sha256": "155f444f0dee2f3fac8ac6586e76fb20fae2e699d6ff85da5765923a5cf70192",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+    "candidate_ids": [
+      "CORE-A-C012"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "09ae4b338ff25c37ca28f91377481be0fbcd756d580f5fb8900f38df0d29c2b3",
+    "base_sha256": "09ae4b338ff25c37ca28f91377481be0fbcd756d580f5fb8900f38df0d29c2b3",
+    "current_sha256": "36daf0fd92f19d386d3d43d22b48a262ebd1014530427e40c70207566eeb06af",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+    "candidate_ids": [
+      "CORE-A-C004",
+      "CORE-A-C006"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+    "base_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+    "current_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+    "candidate_ids": [
+      "CORE-A-C010"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "73041fea1e611a5e7720f26da78aaf37a618836315933d32e85a344b09a2bffd",
+    "base_sha256": "73041fea1e611a5e7720f26da78aaf37a618836315933d32e85a344b09a2bffd",
+    "current_sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159",
+    "noncomment_lines_identical": true,
+    "base_final_newline": true,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+    "candidate_ids": [
+      "CORE-A-C010",
+      "CORE-A-C011"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "d9b6c411a93d0a3600f488a03cc313b8dfe1bfec0ba504c9fa594ae8fc9347f9",
+    "base_sha256": "d9b6c411a93d0a3600f488a03cc313b8dfe1bfec0ba504c9fa594ae8fc9347f9",
+    "current_sha256": "09cb1d140127384964aa370f69c97279e7c1e07d742533d897567ebb8e4a7315",
+    "noncomment_lines_identical": true,
+    "base_final_newline": true,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionTypeMapperTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "914ea51a1376be50f74526cd3a1bb26bdc970b446eeba4103652bd16f9be0fa4",
+    "base_sha256": "914ea51a1376be50f74526cd3a1bb26bdc970b446eeba4103652bd16f9be0fa4",
+    "current_sha256": "914ea51a1376be50f74526cd3a1bb26bdc970b446eeba4103652bd16f9be0fa4",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionTypeTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "1c7d6159e9f88f9da5c3b53ec5aad6e9f358e5a9391f5c336bfd62239e9c3cd5",
+    "base_sha256": "1c7d6159e9f88f9da5c3b53ec5aad6e9f358e5a9391f5c336bfd62239e9c3cd5",
+    "current_sha256": "1c7d6159e9f88f9da5c3b53ec5aad6e9f358e5a9391f5c336bfd62239e9c3cd5",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceChangeFeedTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "9669997f6a9aff0e5c7c2210ada816c3c8624907db7df75a553b78dfce76ec49",
+    "base_sha256": "9669997f6a9aff0e5c7c2210ada816c3c8624907db7df75a553b78dfce76ec49",
+    "current_sha256": "9669997f6a9aff0e5c7c2210ada816c3c8624907db7df75a553b78dfce76ec49",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+    "candidate_ids": [
+      "CORE-A-C007"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+    "base_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+    "current_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+    "candidate_ids": [
+      "CORE-A-C001",
+      "CORE-A-C002",
+      "CORE-A-C006",
+      "CORE-A-C016"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+    "base_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+    "current_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+    "candidate_ids": [
+      "CORE-A-C012",
+      "CORE-A-C015"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "9c684e4e91480e3daf2e295463f711a8bafa3d3b46010243bda6504e57b6e19c",
+    "base_sha256": "9c684e4e91480e3daf2e295463f711a8bafa3d3b46010243bda6504e57b6e19c",
+    "current_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+    "candidate_ids": [
+      "CORE-A-C003",
+      "CORE-A-C004",
+      "CORE-A-C005"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "e83a6dc1758df5b10472c7e54c1f8dd6d7c9550069b10db0fbf94788eb95f73d",
+    "base_sha256": "e83a6dc1758df5b10472c7e54c1f8dd6d7c9550069b10db0fbf94788eb95f73d",
+    "current_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "073feb03b5fed675b1a42e02839a62204d51f54bc99afb4d1cad27110790de05",
+    "base_sha256": "073feb03b5fed675b1a42e02839a62204d51f54bc99afb4d1cad27110790de05",
+    "current_sha256": "7fb638eb701db765ada5fbd04796f272baa78fae19cb213e7c4f7cf66c5957c2",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856",
+    "base_sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856",
+    "current_sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+    "base_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+    "current_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryWorkerAdmissionCollection.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "2cc151cbc6c0314d94b8b5d66e472a8b8cc747ecd0791b95730a035b815085f9",
+    "base_sha256": "2cc151cbc6c0314d94b8b5d66e472a8b8cc747ecd0791b95730a035b815085f9",
+    "current_sha256": "2cc151cbc6c0314d94b8b5d66e472a8b8cc747ecd0791b95730a035b815085f9",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FeatureTests.cs",
+    "candidate_ids": [
+      "CORE-A-C015"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e",
+    "base_sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e",
+    "current_sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysEnumerationBudgetTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "14d4a83b5684d5478ad7f4b9ac8b51d2d48f137755fee7440a61a6e804562171",
+    "base_sha256": "14d4a83b5684d5478ad7f4b9ac8b51d2d48f137755fee7440a61a6e804562171",
+    "current_sha256": "14d4a83b5684d5478ad7f4b9ac8b51d2d48f137755fee7440a61a6e804562171",
+    "noncomment_lines_identical": true,
+    "base_final_newline": true,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+    "candidate_ids": [
+      "CORE-A-C008",
+      "CORE-A-C017",
+      "CORE-A-C021"
+    ],
+    "disposition": "EDIT",
+    "reason": "Source-supported documentation edit; executable lines and assertions preserved.",
+    "source_pin_sha256": "1ed0d5eca00f1c69cbe5109cb2cebce251a5406c621cdad75a3e2e08317e4f25",
+    "base_sha256": "1ed0d5eca00f1c69cbe5109cb2cebce251a5406c621cdad75a3e2e08317e4f25",
+    "current_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysPidMergeTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "2ed38592f771e440f6b13313b5badd33df221710a2806c45222aa899ba3636f0",
+    "base_sha256": "2ed38592f771e440f6b13313b5badd33df221710a2806c45222aa899ba3636f0",
+    "current_sha256": "2ed38592f771e440f6b13313b5badd33df221710a2806c45222aa899ba3636f0",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+    "base_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+    "current_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "3ed50f2772f39efefa028a8285c44e7e39d1378fd21555308969d95c5bc76125",
+    "base_sha256": "3ed50f2772f39efefa028a8285c44e7e39d1378fd21555308969d95c5bc76125",
+    "current_sha256": "3ed50f2772f39efefa028a8285c44e7e39d1378fd21555308969d95c5bc76125",
+    "noncomment_lines_identical": true,
+    "base_final_newline": true,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FirmwareVersionSelectResponseTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "a68f7ea10a23a40ad64016e03d88fe37e0609b0ba4cd629e0d172e689360d982",
+    "base_sha256": "a68f7ea10a23a40ad64016e03d88fe37e0609b0ba4cd629e0d172e689360d982",
+    "current_sha256": "a68f7ea10a23a40ad64016e03d88fe37e0609b0ba4cd629e0d172e689360d982",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HotplugSignalsTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af",
+    "base_sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af",
+    "current_sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PhysicalYubiKeyTests.cs",
+    "candidate_ids": [
+      "CORE-A-C002"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+    "base_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+    "current_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ReaderNamePidParserTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "2f3c17e04b5f907451e590cc882f16a5700f50515e47e14f85e41c8e0181ccb7",
+    "base_sha256": "2f3c17e04b5f907451e590cc882f16a5700f50515e47e14f85e41c8e0181ccb7",
+    "current_sha256": "2f3c17e04b5f907451e590cc882f16a5700f50515e47e14f85e41c8e0181ccb7",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/RescanSchedulerTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "84d9cbc0cf2dffe1e82443b2dcedd23a0dd5936ac03a5b4a72a1ce915775c6c5",
+    "base_sha256": "84d9cbc0cf2dffe1e82443b2dcedd23a0dd5936ac03a5b4a72a1ce915775c6c5",
+    "current_sha256": "84d9cbc0cf2dffe1e82443b2dcedd23a0dd5936ac03a5b4a72a1ce915775c6c5",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SnapshotDiffTests.cs",
+    "candidate_ids": [
+      "CORE-A-C007"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+    "base_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+    "current_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+    "candidate_ids": [
+      "CORE-A-C009"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+    "base_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+    "current_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+    "candidate_ids": [
+      "CORE-A-C003"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+    "base_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+    "current_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "5a2faefe0ac1588e2cf8919863cc503a05670c8139db9768eb9c217d9763773c",
+    "base_sha256": "5a2faefe0ac1588e2cf8919863cc503a05670c8139db9768eb9c217d9763773c",
+    "current_sha256": "5a2faefe0ac1588e2cf8919863cc503a05670c8139db9768eb9c217d9763773c",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "807f3fd50aa10faffd4233fb828e260cf6efb57108e42307f1ecd896afd0435e",
+    "base_sha256": "807f3fd50aa10faffd4233fb828e260cf6efb57108e42307f1ecd896afd0435e",
+    "current_sha256": "807f3fd50aa10faffd4233fb828e260cf6efb57108e42307f1ecd896afd0435e",
+    "noncomment_lines_identical": true,
+    "base_final_newline": true,
+    "current_final_newline": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorAcceptanceTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "c51bbcda36c0038c8e14736a5121509e1bd36c04affbdc28876f50f1dc03652b",
+    "base_sha256": "c51bbcda36c0038c8e14736a5121509e1bd36c04affbdc28876f50f1dc03652b",
+    "current_sha256": "c51bbcda36c0038c8e14736a5121509e1bd36c04affbdc28876f50f1dc03652b",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorTests.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633",
+    "base_sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633",
+    "current_sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/AsyncWait.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "42616a2053b76e96bd0cf7257874027df77bdab9abfaabdeeffcbfe67483651b",
+    "base_sha256": "42616a2053b76e96bd0cf7257874027df77bdab9abfaabdeeffcbfe67483651b",
+    "current_sha256": "42616a2053b76e96bd0cf7257874027df77bdab9abfaabdeeffcbfe67483651b",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/DeviceChangeWatcher.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "ce429da64d8c5657c6b4f37c176e72c496edf90117578b7f1f843e73c61e66bd",
+    "base_sha256": "ce429da64d8c5657c6b4f37c176e72c496edf90117578b7f1f843e73c61e66bd",
+    "current_sha256": "ce429da64d8c5657c6b4f37c176e72c496edf90117578b7f1f843e73c61e66bd",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/FakeYubiKey.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "5c4e5fff6adece702e4a7b736d985b6866f5024d987a634aff6ecc8bd931bf61",
+    "base_sha256": "5c4e5fff6adece702e4a7b736d985b6866f5024d987a634aff6ecc8bd931bf61",
+    "current_sha256": "5c4e5fff6adece702e4a7b736d985b6866f5024d987a634aff6ecc8bd931bf61",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/ObservedTimeProvider.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "f9e0c12fd31627a11d7b316d00d81cf78d11a61b3ce4506992bd7ea14e692b4b",
+    "base_sha256": "f9e0c12fd31627a11d7b316d00d81cf78d11a61b3ce4506992bd7ea14e692b4b",
+    "current_sha256": "f9e0c12fd31627a11d7b316d00d81cf78d11a61b3ce4506992bd7ea14e692b4b",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs",
+    "candidate_ids": [],
+    "disposition": "RETAIN",
+    "reason": "Accurate existing wording/assertions retained; no preference-only rewrite.",
+    "source_pin_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+    "base_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+    "current_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/TransientScanRetryTests.cs",
+    "candidate_ids": [
+      "CORE-A-C008"
+    ],
+    "disposition": "RETAIN",
+    "reason": "Retain accurate existing commentary; stronger runtime/oracle or policy work is held. See edit-A.md.",
+    "source_pin_sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d",
+    "base_sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d",
+    "current_sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d",
+    "noncomment_lines_identical": true,
+    "base_final_newline": false,
+    "current_final_newline": false
+  }
+]

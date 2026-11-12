@@ -1,0 +1,123 @@
+{
+  "original_assigned_units": 14044,
+  "original_READ_CLEAN": 9763,
+  "eligibility_counts": {
+    "excluded-original-disposition": 4281,
+    "candidate-eligible": 9352,
+    "provisionally-excluded-pending-edit-overlap": 112,
+    "excluded-administrative-preamble": 160,
+    "excluded-accepted-edited-overlap": 111,
+    "excluded-derived-rendering": 14,
+    "excluded-API-support": 3,
+    "excluded-historical": 11
+  },
+  "candidate_population_after_accepted_edits_only": 9464,
+  "candidate_population_after_known_pending_edit_overlaps": 9352,
+  "candidate_global_minimum": 936,
+  "proposed_selected": 983,
+  "included_code_only": 6218,
+  "owner_minimums": {
+    "A": {
+      "eligible": 1722,
+      "minimum": 3,
+      "ten_percent": 173,
+      "selected": 176
+    },
+    "B1": {
+      "eligible": 1076,
+      "minimum": 3,
+      "ten_percent": 108,
+      "selected": 111
+    },
+    "B2": {
+      "eligible": 1168,
+      "minimum": 3,
+      "ten_percent": 117,
+      "selected": 120
+    },
+    "B3": {
+      "eligible": 1056,
+      "minimum": 3,
+      "ten_percent": 106,
+      "selected": 110
+    },
+    "B4": {
+      "eligible": 1174,
+      "minimum": 3,
+      "ten_percent": 118,
+      "selected": 121
+    },
+    "B5": {
+      "eligible": 690,
+      "minimum": 3,
+      "ten_percent": 69,
+      "selected": 73
+    },
+    "B6": {
+      "eligible": 264,
+      "minimum": 3,
+      "ten_percent": 27,
+      "selected": 29
+    },
+    "C": {
+      "eligible": 595,
+      "minimum": 3,
+      "ten_percent": 60,
+      "selected": 62
+    },
+    "Ctap2": {
+      "eligible": 75,
+      "minimum": 3,
+      "ten_percent": 8,
+      "selected": 9
+    },
+    "Management": {
+      "eligible": 203,
+      "minimum": 3,
+      "ten_percent": 21,
+      "selected": 23
+    },
+    "Oath": {
+      "eligible": 156,
+      "minimum": 3,
+      "ten_percent": 16,
+      "selected": 18
+    },
+    "OpenPgp": {
+      "eligible": 198,
+      "minimum": 3,
+      "ten_percent": 20,
+      "selected": 22
+    },
+    "Piv": {
+      "eligible": 372,
+      "minimum": 3,
+      "ten_percent": 38,
+      "selected": 40
+    },
+    "SecurityDomain": {
+      "eligible": 106,
+      "minimum": 3,
+      "ten_percent": 11,
+      "selected": 12
+    },
+    "WebAuthn": {
+      "eligible": 162,
+      "minimum": 3,
+      "ten_percent": 17,
+      "selected": 19
+    },
+    "YubiHsm": {
+      "eligible": 79,
+      "minimum": 3,
+      "ten_percent": 8,
+      "selected": 10
+    },
+    "YubiOtp": {
+      "eligible": 256,
+      "minimum": 3,
+      "ten_percent": 26,
+      "selected": 28
+    }
+  }
+}

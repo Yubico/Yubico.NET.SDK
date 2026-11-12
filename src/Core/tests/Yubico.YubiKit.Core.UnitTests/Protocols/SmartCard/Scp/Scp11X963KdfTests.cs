@@ -57,7 +57,7 @@ public class Scp11X963KdfTests
         var sharedSecret = Scp11X963Kdf.GetSharedSecret(ephemeralOceEcka, skOceEcka, pkSdEcka, epkSdEckaTlvBytes);
 
         // Expected shared secret: concatenation of ka1 and ka2
-        // For test purposes, we can compute expected manually or assert length
+        // This case asserts only the combined width, not independently expected shared-secret bytes.
         Assert.Equal(64, sharedSecret.Length); // 32 bytes each for P-256
     }
 
@@ -208,14 +208,14 @@ public class Scp11X963KdfTests
     [Fact]
     public void TestDeriveSessionKeys_WithDeterministicData()
     {
-        // Deterministic test using fixed cryptographic material captured from a real SCP11b session
-        // This validates the entire SCP11b key derivation pipeline: ECDH + X9.63 KDF + AES-CMAC
+        // Fixed-input ECDH/KDF/receipt regression. The original claimed device capture has no retained
+        // capture identity here; treat the literals as deterministic fixtures, not device qualification.
         //
         // Test setup (artificial but deterministic):
-        // - Both OCE and YubiKey use the SAME static keypair (private key imported into YubiKey SD)
-        // - SCP11b uses same key for ephemeral and static OCE (both use the private key below)
-        // - YubiKey generates its own ephemeral key for the session
-        // - With fixed keys, ECDH produces deterministic shared secrets → deterministic receipt
+        // - The fixed OCE keypair also supplies the fixture's static SD public key.
+        // - Both OCE agreement inputs reuse that private key, as in the normal SCP11b key-role shape.
+        // - A separate fixed SD ephemeral point supplies the response fixture.
+        // - Fixed inputs make the expected receipt reproducible without a live device.
 
         // Private key (same for both OCE ephemeral, OCE static, and YubiKey static)
         var privateKeyBytes =
@@ -227,12 +227,11 @@ public class Scp11X963KdfTests
             Convert.FromHexString(
                 "04680103F07EBE8E9F8C56A39BA96CC7A0F236D94F68410A05C62A1675C14712079A93453F9A52F76EB87E75C5A0D600AD88C843B260820A6DF978205B2B388BAC");
 
-        // YubiKey's ephemeral public key TLV (from AUTHENTICATE response in the captured session)
-        // This is a different key that the YubiKey generated for this specific session
+        // Fixed SD ephemeral public-key TLV used as the authenticate-response fixture.
         var epkSdEckaTlvBytes = Convert.FromHexString(
             "5F494104182899E51687194868973A16A397EE4BED7DC76800B5614747828DF04446BB4E01AE0614B481317115EEC5A5D09F1E18119BE57B716D87D739288D15BF051167");
 
-        // Expected sdReceipt computed from these inputs (captured from real YubiKey)
+        // Fixed expected receipt for these inputs; original capture provenance remains unverified.
         var expectedSdReceipt = Convert.FromHexString("171632BF1F7B2CCC8A7BA3254F987AAA");
 
         // Reconstruct ECDH keys
@@ -274,7 +273,7 @@ public class Scp11X963KdfTests
         Assert.NotNull(sessionKeys);
 
         // The fact that DeriveSessionKeys didn't throw means the computed receipt matched expectedSdReceipt
-        // This validates the entire ECDH + X9.63 KDF + AES-CMAC pipeline
+        // This checks receipt agreement and a nonnull owner, not each returned session-key value or wire step.
     }
 
     private static ECDiffieHellman CreateECDiffieHellmanFromPrivateKey(byte[] privateKeyBytes)

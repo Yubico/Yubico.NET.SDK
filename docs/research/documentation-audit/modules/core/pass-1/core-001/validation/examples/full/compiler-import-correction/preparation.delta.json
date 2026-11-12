@@ -1,0 +1,86 @@
+{
+  "changes": [
+    {
+      "path": "contexts.py",
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/contexts.py",
+        "bytes": 23538,
+        "sha256": "ea90736bb459c9cb1f5ae1520227859ff744062c4d4d89bb811611ff0c451f42"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/contexts.py",
+        "bytes": 23589,
+        "sha256": "5cae3217a67f34b967687859a1bde3d9269e36437bbc38d3683cc7c5f937d9fe"
+      },
+      "diff": "--- before/contexts.py\n+++ imports-fixed/contexts.py\n@@ -2,8 +2,11 @@\n import json\n from pathlib import Path\n import re\n+import sys\n \n HERE = Path(__file__).resolve().parent\n+sys.path.insert(0,str(HERE))\n+from compiler_imports import compose\n COMMON = '''using System;\n using System.Buffers;\n using System.Collections.Generic;\n@@ -34,7 +37,6 @@\n using Yubico.YubiKit.Ctap2.Cose;\n using Yubico.YubiKit.Ctap2.Credentials;\n using Yubico.YubiKit.Ctap2.CredentialManagement;\n-using Yubico.YubiKit.Ctap2.Ctap;\n using Yubico.YubiKit.Ctap2.Extensions;\n using Yubico.YubiKit.Ctap2.Pin;\n '''\n@@ -271,7 +273,7 @@\n         split = compiled.index('sealed class MonitorLifetime')\n         secondary, compiled = compiled[split:], compiled[:split]\n     # Distinct document contexts prevent accidental global-text deduplication across ownership contracts.\n-    pre = imports + original_imports\n+    pre = compose(imports,original_imports)\n     if mode != 'complete-file':\n         pre += '\\nnamespace Audit20261111.DocExamples.Full'\n         pre += ('.Context' + str(number) + ';\\n') if mode == 'top-level-type' else ';\\ninternal ' + ('sealed' if mode == 'members-instance' else 'static') + ' class Body' + str(number) + (' : IUserPresencePrompt' if number == 200 else '') + '\\n{\\n'\n"
+    },
+    {
+      "path": "external-contexts.py",
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/external-contexts.py",
+        "bytes": 5143,
+        "sha256": "130333bea3a9a072b9fa55b2c33bea277be0b642de77f46726b161e395cf0ee2"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/external-contexts.py",
+        "bytes": 5273,
+        "sha256": "7ef74fe319ade5de70f3a5695fa43e304c6ca0b5b804169c2c28d06d0ea4b43d"
+      },
+      "diff": "--- before/external-contexts.py\n+++ imports-fixed/external-contexts.py\n@@ -3,8 +3,11 @@\n import json\n from pathlib import Path\n import hashlib\n+import sys\n \n HERE=Path(__file__).resolve().parent\n+sys.path.insert(0,str(HERE))\n+from compiler_imports import correct_prefix\n ROOT=HERE.parents[9]\n spec=importlib.util.spec_from_file_location('literal_full_contexts',HERE/'contexts.py')\n base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)\n@@ -50,6 +53,7 @@\n                     prefix+='internal '+('async Task' if number==235 else 'void')+' CompileOnly('+('FilterCriteria criteria, int serialNumber' if number==210 else '')+')\\n{\\n'\n                     suffix='\\n}\\n}\\n'\n             path=HERE/'injections'/group/(row['id']+'.cs')\n+        prefix=correct_prefix(prefix,imports)\n         key=(group,row['decoded_sha256'],'owned-connection-session-and-caller-scp-parameters' if number in (204,234) else row['path'])\n         alias=aliases.get(key)\n         if alias is None:\n"
+    },
+    {
+      "path": "test-contexts.py",
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/test-contexts.py",
+        "bytes": 8726,
+        "sha256": "e34f9f79e98b7805596a80024f5c77ad791bcf8394e777c78960ac8be5631ea8"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/test-contexts.py",
+        "bytes": 8850,
+        "sha256": "2a573364480efd7ef27d9b05702abfb5be4b7464b21313585f4fc422e9ae7763"
+      },
+      "diff": "--- before/test-contexts.py\n+++ imports-fixed/test-contexts.py\n@@ -2,8 +2,11 @@\n import json\n from pathlib import Path\n import re\n+import sys\n \n HERE = Path(__file__).resolve().parent\n+sys.path.insert(0,str(HERE))\n+from compiler_imports import correct_prefix\n ROOT = HERE.parents[9]\n GROUPS = {\n  'Core.UnitTests': [60,142,204,205,206,211,238],\n@@ -45,7 +48,7 @@\n                             'using Yubico.YubiKit.Management;\\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\\n')\n             if module == 'Ctap2':\n                 imports += ('using System.Formats.Cbor;\\nusing Yubico.YubiKit.Ctap2;\\n'\n-                            'using Yubico.YubiKit.Ctap2.Ctap;\\nusing Yubico.YubiKit.Ctap2.Credentials;\\n'\n+                            'using Yubico.YubiKit.Ctap2.Credentials;\\n'\n                             'using Yubico.YubiKit.Ctap2.Pin;\\nusing Yubico.YubiKit.Ctap2.Extensions;\\n')\n                 imports += ('using NSubstitute;\\n' if group.endswith('UnitTests') else\n                             'using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;\\n')\n@@ -97,6 +100,7 @@\n                     suffix = '\\n}\\n}\\n'\n             if number == 27:\n                 prefix = 'using System.Text;\\n' + prefix\n+            prefix=correct_prefix(prefix,match.group(0) if match else '')\n             raw = (prefix + body + suffix).encode()\n             path = directory / (row['id'] + '.cs')\n             alias = compiled.get(row['decoded_sha256'])\n"
+    },
+    {
+      "path": "verify.py",
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 6078,
+        "sha256": "059953b5e0ad5076381682a6ebc43991067b6f3b7780e5d58197d96ddd5bf038"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 6230,
+        "sha256": "ec0de5178ee262f6d367476545eadb9a24b0a36b0d73cbccb0e68933c4024896"
+      },
+      "diff": "--- before/verify.py\n+++ imports-fixed/verify.py\n@@ -22,7 +22,7 @@\n \n \n def main():\n-    manifest=json.loads((HERE/'manifest-admitted.json').read_bytes())\n+    manifest=json.loads((HERE/'manifest-imports-fixed.json').read_bytes())\n     plan=json.loads((HERE/'compiled-contexts.json').read_bytes())\n     assert len(manifest['records'])==662 and manifest['counts']['total_authority_records']==703\n     prepared=[]\n@@ -86,6 +86,7 @@\n     assert not hook.findall('.//NoWarn') and not hook.findall('.//IsAotCompatible')\n     for source in HERE.glob('*.py'):ast.parse(source.read_bytes(),filename=str(source))\n     correction=load('full_bounded_review_regressions',HERE/'review-correction/verify.py').main()\n+    imports=load('full_import_regressions',HERE/'compiler-import-correction/verify.py').main()\n     for name in ('pilot-output-preservation.json',):\n         preserved=json.loads((HERE/name).read_bytes())\n         assert preserved['accepted_pilot_sha256']=='4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6'\n@@ -97,6 +98,7 @@\n                 counts=manifest['counts'],exact_additional_compiled_source_files=len(generated),\n                 pilot_current_record_bytes_unchanged=True,source_regions_and_wrappers_unchanged=True,\n                 bounded_review_correction=correction,\n+                compiler_import_correction=imports,\n                 proposed_qualifications='34 source-backed noncompiled qualifications accepted by original Full review; scope unchanged.',\n                 actual_full_build='not-run',final_checker_binding='Separate existing-binder profile db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1; no rebuild by this worker.')\n \n"
+    },
+    {
+      "path": "review-correction/verify.py",
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/review-correction/verify.py",
+        "bytes": 5507,
+        "sha256": "bc5ad40a2d58c23784b9590748424b4c241bf367047ac5d4afca8de3b330585d"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/review-correction/verify.py",
+        "bytes": 5512,
+        "sha256": "ba1e1db1446faede24d32cc4e0e283fa417581d8de9dfc7090aeb2905e025ab7"
+      },
+      "diff": "--- before/review-correction/verify.py\n+++ imports-fixed/review-correction/verify.py\n@@ -54,7 +54,7 @@\n     assert generator.import_prefix('using System;\\nusing static System.Math;\\n\\nclass C {}').group(1)=='using System;\\nusing static System.Math;\\n'\n     for body in ('using var owner = Acquire();\\n\\nUse(owner);','using (var owner = Acquire()) { }\\n\\nUse();'):\n         assert generator.import_prefix(body) is None\n-    manifest=json.loads((FULL/'manifest-admitted.json').read_bytes())\n+    manifest=json.loads((FULL/'manifest-imports-fixed.json').read_bytes())\n     sources={row['id']:row for row in manifest['records']}\n     for id in ('FULL-027','FULL-211','FULL-238','FULL-244'):\n         row=sources[id];compiled=row['compiled'];path=FULL/compiled['path'];code=path.read_text()\n"
+    }
+  ],
+  "added_preparation_sources": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler_imports.py",
+      "bytes": 1712,
+      "sha256": "340afccbfa53947733f842eafae99bef9be1e0738bfabb0126926eceaf8e88bd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler-import-correction/verify.py",
+      "bytes": 7242,
+      "sha256": "26f0bacc4afa269136d2dee89f7a8eaa853217671f22865b4f9b6192b262e33d"
+    }
+  ]
+}

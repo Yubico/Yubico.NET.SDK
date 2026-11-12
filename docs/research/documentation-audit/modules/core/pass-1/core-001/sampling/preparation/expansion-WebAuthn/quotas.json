@@ -1,0 +1,54 @@
+{
+  "material_test_expansion": {
+    "original_population": 104,
+    "original_full_quota": 11,
+    "additional_full_quota": 11,
+    "proposed_total": 22,
+    "known_miss_clean_credit": 0
+  },
+  "eligibility_slot_repairs": [
+    {
+      "owner": "WebAuthn",
+      "stratum": "tests-and-helpers",
+      "original_population": 104,
+      "working_population": 102,
+      "original_quota": 11,
+      "working_minimum": 11,
+      "specific_ineligible_ids": [
+        "core-001:unit:7fe08c46f10afee5",
+        "core-001:unit:c6719030f9881ef4"
+      ],
+      "retained_original_slots_after_eligibility_only": 9,
+      "material_miss_in_retained_slots": 1,
+      "actual_original_clean_credit_candidates_after_miss": 8,
+      "other_edited_selected": [],
+      "required_eligibility_replacements": 2,
+      "replacement_ids": [
+        "core-001:unit:889cfdef6f963950",
+        "core-001:unit:f7fc274baa684518"
+      ],
+      "qualification": "Slot repair is separate from the 11-unit miss expansion; SAMPLE-WA-001 receives zero credit throughout. Final canonical quotas and actual replacement reads remain pending."
+    },
+    {
+      "owner": "WebAuthn",
+      "stratum": "narrative-examples-and-maps",
+      "original_population": 33,
+      "working_population": 32,
+      "original_quota": 4,
+      "working_minimum": 4,
+      "specific_ineligible_ids": [
+        "core-001:unit:c8377e0a58dac11c"
+      ],
+      "retained_original_slots_after_eligibility_only": 3,
+      "material_miss_in_retained_slots": 0,
+      "actual_original_clean_credit_candidates_after_miss": 3,
+      "other_edited_selected": [],
+      "required_eligibility_replacements": 1,
+      "replacement_ids": [
+        "core-001:unit:aeadc0996d07ac60"
+      ],
+      "qualification": "Slot repair is separate from the 11-unit miss expansion; SAMPLE-WA-001 receives zero credit throughout. Final canonical quotas and actual replacement reads remain pending."
+    }
+  ],
+  "final_denominator": null
+}

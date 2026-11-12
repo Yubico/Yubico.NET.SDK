@@ -1,0 +1,110 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+  },
+  {
+    "path": "README.md",
+    "sha256": "880a27ff7d753d32ae70b882bbd5d90adfd6125a3cc32fe193b7b3c6ecb322f0"
+  },
+  {
+    "path": "docs/CRYPTO-APIS.md",
+    "sha256": "7105fb2135f1a41ea5dd1325266e279b8bd1146dc8e90e968b9ea7f23a9daa36"
+  },
+  {
+    "path": "docs/LOGGING.md",
+    "sha256": "f7deba4e7bc6624b4fc3262d49f565960fe9c4fe7da452a129f229df97cd3027"
+  },
+  {
+    "path": "docs/MEMORY-MANAGEMENT.md",
+    "sha256": "021e50e33f8de3d4ae281935a333669396ce3d6644bdcc28b682f9fea1989005"
+  },
+  {
+    "path": "docs/NATIVE-AOT.md",
+    "sha256": "2c9f215b859253aec25290dece7a97109f1dadc4de073340b802deaa5b54b1a0"
+  },
+  {
+    "path": "docs/SDK-HOUSE-STYLE.md",
+    "sha256": "992fcf31949f90c1707be1e3f77ca3438d2e3ff8f607dc7e314b91fc568756d7"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+  },
+  {
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "sha256": "c4e33e77acd4e1727750a8d458a0a282f356757dc00e23094c1fe8c3897ce5dd"
+  },
+  {
+    "path": "docs/architecture/device-discovery-guarantees.md",
+    "sha256": "265259281e30477e2cdfc2c2ddeee0bfb79891e3ed26509b53de091066aed8f2"
+  },
+  {
+    "path": "docs/architecture/device-identity.md",
+    "sha256": "526cb5bfda5e6716a641b121564b6e8a07a0fa26dcc72e667b21da7521e87875"
+  },
+  {
+    "path": "docs/architecture/event-driven-device-discovery.md",
+    "sha256": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c"
+  },
+  {
+    "path": "docs/architecture/physical-device-model.md",
+    "sha256": "476f0a922f7c8f176d9f3c49301be1b7f5c45121c841541e88a29d543399f6b5"
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "sha256": "7ecaf86bafda5516a810a34ac5b09b170bf774d487421b2d34c2ce2a2ba91fc1"
+  },
+  {
+    "path": "docs/architecture/sdk-architecture-diagrams.md",
+    "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+  },
+  {
+    "path": "docs/architecture/sdk-architecture-map.yml",
+    "sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21"
+  },
+  {
+    "path": "docs/architecture/webauthn-extension-processing.md",
+    "sha256": "3b6d71d6832ce6b38697666d701d9c7d1af8b114c8ad407bb410e0432b384a02"
+  },
+  {
+    "path": "docs/linux-setup.md",
+    "sha256": "5bc7f0a7e8cd2bdd990284fbbc1b5f1a20976addb2d7ab32661b973f06ff1d35"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+  },
+  {
+    "path": "docs/usage/tlv-processing.md",
+    "sha256": "68dd783ff47dd63d0001bd07e0b14fa7af8ad4e25fee08b1f5da296a62899be8"
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "sha256": "7a57752e981f8d3110119bba78a871690469416b56d96a22e937470b902bf8da"
+  },
+  {
+    "path": "docs/v1-to-v2-comparison.md",
+    "sha256": "4797f0c57ce247952d35bf2e03a63a826f3b63f21b995d4da877484249dafb13"
+  },
+  {
+    "path": "docs/v2-highlights.md",
+    "sha256": "2772db478fe8c7eed4705ad49b1be2931f7f5736d7d1082b6ae530cb6756169d"
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd"
+  },
+  {
+    "path": "src/Core/README.md",
+    "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+  },
+  {
+    "path": "src/Core/src/Devices/README.md",
+    "sha256": "e7e06959fac0cac0a1af7ec74e3c8f3c47eefea9c1e17ff489307ceda48dbe44"
+  },
+  {
+    "path": "src/Core/tests/CLAUDE.md",
+    "sha256": "6ead47ab0e401351f6050e3f54ec022ac35753f0b65d880965b75a4577d7eb75"
+  }
+]

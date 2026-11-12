@@ -1,0 +1,13 @@
+{
+  "scope": "Read-only current run classification/Git-clean inspection while writers remain active. This is neither a final manifest/freeze nor staged-byte acceptance.",
+  "observed_files": 1990,
+  "passed": 1990,
+  "kind_counts": {
+    "utf8-text": 1397,
+    "utf8-json": 585,
+    "original-specification-pdf": 7,
+    "original-source-html": 1
+  },
+  "failures": [],
+  "record_population_sha256": "daa30b039d1c33b0d2d6b47d0bbf371ce136fd8b4d4b645d1d410c867da4690f"
+}

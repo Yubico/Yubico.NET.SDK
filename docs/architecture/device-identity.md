@@ -1,8 +1,9 @@
 # Device identity and physical-device correlation
 
-**Status:** accepted; stage D' identity contract decided and shipped, including the metadata-retry
-policy (retry-every-scan, measured and pinned — see the stage D' section of
-`docs/plans/flat-device-model.md`)
+The current identity contract retains monitor objects while their interface and connection sets stay
+unchanged and no known serial contradicts them. The stage D' decision and hardware observations below
+are historical evidence. Current caching retries failed reads, but can retain a successful serial-less
+metadata result; the old retry-every-scan description is not a promise for that case.
 
 ## Context
 
@@ -27,6 +28,11 @@ G6. Publishing this encoding would expose driver strings as API and would not sa
 contract.
 
 ## Canonical yubikit evidence
+
+This section preserves the earlier comparison as historical rationale. The short Rust commit and the
+Python paths below have not been independently recovered as a complete immutable source set in this
+audit. Use the C# source and current contract sections for SDK behavior; these comparisons establish no
+current interoperability or runtime qualification.
 
 The comparison below was made against `yubikey-manager-rust-auto` commit `7d7a7455`.
 
@@ -184,9 +190,9 @@ correlate with `SameDeviceAs` (D3 recipe).
 ### D7: single-interface devices keep their transport-shaped `DeviceId` — decided
 
 A one-slot flat device keeps its `pcsc:*` / `hid:*` identifier. A lone interface observation carries
-only transport-level evidence; a `ykphysical:*` name would claim a physical-identity discovery never
-established. The `DeviceId` prefix therefore remains truthful about the evidence tier that produced
-it: `ykphysical:*` appears only when grouping evidence proved a physical key.
+only transport-level evidence. A `ykphysical:*` prefix names the grouping tier rather than attesting
+physical identity; the PID-completeness tier retains the complementary-partials bound described in
+[discovery guarantees](device-discovery-guarantees.md#g2-the-epistemic-bound).
 
 ## Answers to the user-story questions
 
@@ -211,6 +217,11 @@ it: `ykphysical:*` appears only when grouping evidence proved a physical key.
    remains the plausible explanation for earlier multi-key observations.
 
 ## Hardware evidence
+
+The following paragraphs are retained historical observations of their named rigs and host revisions.
+They do not qualify the current owned-monitor implementation, every interface's live identity, or
+all platform/native producers. In particular, expected-shape/count assertions are narrower than an
+independent physical-key census.
 
 On 2026-09-01, macOS enumerated five allow-listed USB keys, all PID `0x0407`, with serials `20260533`,
 `125`, `103`, `31683481`, and `31683268`. Six non-user-presence tests in
@@ -248,6 +259,10 @@ event stream and records which layer observed the removal, so a recurrence will 
   The identity fault-injection test verifies exactly three attempts across repeated scans and that a
   failing interface does not amplify reads of a healthy sibling. See the stage D' section of
   `docs/plans/flat-device-model.md` for the measurements.
+- Successful metadata without a serial is different: the monitor can cache it without rereading on
+  unchanged scans. The identity cache validates Product ID; the metadata cache currently keys successful
+  values by member identifiers without the same PID check. Use a fresh Find for an independent observation
+  and Management for current configuration, while keeping native discovery cleanup separate from waiter completion.
 - A derived product name ("YubiKey 5C NFC"-style, per Rust's `name()` convenience) is deferred: it
   requires the PID/version/form-factor naming table.
 - Run the repeatable `HotPlugIdentityContractTests` ceremony (`RequiresUserPresence`) as one narrowly

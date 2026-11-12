@@ -1,0 +1,816 @@
+[
+  {
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "sha256": "2fb6f493041718623418bea7370f071700b7145c35dd0013e6d3ccd2a97dbdba",
+    "pinned_sha256": "2fb6f493041718623418bea7370f071700b7145c35dd0013e6d3ccd2a97dbdba",
+    "git_blob": "27ee96445b210f00817b1c8a871e7892818e1031",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete contributor flow and examples. Current shallow facade/backend, exact selected catch and reset omission are accurate. Retain plaintext-pool cleanup scope without promising all temporaries; expand concrete contained parameter/first-MAC/effective-version and failed-reset disposal context. Key-reference log example is public metadata.",
+    "candidates": [
+      "CORE-SD-X001",
+      "CORE-SD-X002",
+      "CORE-SD-X004",
+      "CORE-SD-X005"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:e78b601fc7a46187",
+      "core-001:unit:f4f4684d6134f45c",
+      "core-001:unit:e02a91097cd322b3",
+      "core-001:unit:bad5a492c238318d",
+      "core-001:unit:1643a4c447cf1851",
+      "core-001:unit:2fc46e9e34079eef",
+      "core-001:unit:ebc307f42397a227",
+      "core-001:unit:9d5846951c8e739d",
+      "core-001:unit:bb88560e8fd2e15c",
+      "core-001:unit:e25d9531f1de042f",
+      "core-001:unit:056bb2d2ee7dccd2",
+      "core-001:unit:572767bad7b1779f",
+      "core-001:unit:c0ad4d4139db7d25",
+      "core-001:unit:135b835907349ee1",
+      "core-001:unit:66d0e687f4281ae3",
+      "core-001:unit:08e01e64b80243fa",
+      "core-001:unit:88f7711407125b8d",
+      "core-001:unit:ed3e115f81fd126c"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/PACKAGE_README.md",
+    "sha256": "854d204ed4b648c436209aba6b87f055a0133b92a458a0b5f597bb8375386b9b",
+    "pinned_sha256": "854d204ed4b648c436209aba6b87f055a0133b92a458a0b5f597bb8375386b9b",
+    "git_blob": "b3b931dc876ef97062ca9f041f020505a49f23d7",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete package task/alpha/install/link text. Correctly calls reset destructive and says completion does not verify factory contents. No lifetime or universal conformance assurance added; retain unchanged.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:f9bc2597f91828a9",
+      "core-001:unit:4f87e781c6cd81fd"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/README.md",
+    "sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1",
+    "pinned_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1",
+    "git_blob": "e6363a47c8da6317387ceb6513ab31e6923e952f",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read all complete tasks and nearby prerequisites. Default03 and rotation source/finally scopes are useful. SCP11 creation needs known-version condition beside the recipe; contained certificate/private-key identity and returned response-owner lifetime need actionable explanation. Keep draft and per-command authority qualifications, reset attempt limits and fresh-session workaround.",
+    "candidates": [
+      "CORE-SD-X001",
+      "CORE-SD-X002",
+      "CORE-SD-X003",
+      "CORE-SD-X004",
+      "CORE-SD-X006"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:5f636711739239fe",
+      "core-001:unit:bba63cfd2e959369",
+      "core-001:unit:d263901258eac8d1",
+      "core-001:unit:35c65401f68c4f04",
+      "core-001:unit:0d64e57897a15be3",
+      "core-001:unit:e1121aa69ba90312",
+      "core-001:unit:283244cd37231bac",
+      "core-001:unit:2fcb3ff5ddb5b6e7",
+      "core-001:unit:e4e22f2c24fb5771",
+      "core-001:unit:00e95db1f526e238",
+      "core-001:unit:7627cd13e06e5bbb",
+      "core-001:unit:e8085f0234238b3c",
+      "core-001:unit:e88d5c949eb92d45"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/Backend/ISecurityDomainBackend.cs",
+    "sha256": "1d61b48541d0f7d5447239f6453d749d819898619c6ca82a29335b167dbed5fa",
+    "pinned_sha256": "1d61b48541d0f7d5447239f6453d749d819898619c6ca82a29335b167dbed5fa",
+    "git_blob": "1e3070a1239643341934a111c7a75a001dcab0c8",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete narrow interface. Select and Send do not own connection/protocol lifetime or add policy. Send carries throwOnError/token, response owner retained only until facade strips it. Keep forwarding contract; X003/X007 are caller consequences.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:44625c901c89a596"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+    "sha256": "b6b783bf00f399fdeba43c79792fec96232ab8644b9f7475a904596dc1ad39c3",
+    "pinned_sha256": "b6b783bf00f399fdeba43c79792fec96232ab8644b9f7475a904596dc1ad39c3",
+    "git_blob": "c3f6e12d69fe1502246919c5f9a96199ab19e54d",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete implementation. Fixed SecurityDomain AID delegates selection to current protocol; Send forwards command/status/token. Rebound after wrapper changes. No applet authentication, independent lease, retry or cleanup policy; retain unchanged implementation and accurate forwarding explanation.",
+    "candidates": [
+      "CORE-SD-X007"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:689f32fadc037e53",
+      "core-001:unit:059d45e9cb60930f",
+      "core-001:unit:03e44d501350ff8b",
+      "core-001:unit:6c20505a704de0a4"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/CaIdentifier.cs",
+    "sha256": "ade7b669a29a9833a2b09403a127af09f2e34557e12714e99bfd678c5c580678",
+    "pinned_sha256": "ade7b669a29a9833a2b09403a127af09f2e34557e12714e99bfd678c5c580678",
+    "git_blob": "8b2ff499b86b8837355a9baddddba554376831e2",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete record/XML. Parsed reference and independent copied identifier value are public metadata, not cert/trust proof. Exposed ROM constructor can also accept caller memory; no immutability or secret-erasure promise present. Retain XML; malformed parser policy stays original SD-IMP-004.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:766c8b064f05aa05"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/CaIdentifierType.cs",
+    "sha256": "a58b215bb44e78e617f89c9e58d37102137ab9e067908be92e7e1fb73ab166c5",
+    "pinned_sha256": "a58b215bb44e78e617f89c9e58d37102137ab9e067908be92e7e1fb73ab166c5",
+    "git_blob": "e93fda68c898a1aa8513b34f11a0aac2b3df825f",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete enum. Flags select KLOC=1/KLCC=2/None=0; None is not valid retrieval request. No extra Core transport/profile inference. Supplemental disposition path has no assigned unit; full file read retained.",
+    "candidates": [],
+    "assigned_unit_ids": [],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": true
+  },
+  {
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "sha256": "d3c00fed7f2368d136b7646f9ccf48ce142f3f496b91cdb1adbef725eebc5705",
+    "pinned_sha256": "d3c00fed7f2368d136b7646f9ccf48ce142f3f496b91cdb1adbef725eebc5705",
+    "git_blob": "c12ee06bb63658688598225d63d765118fb38cf6",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read all XML/contracts including inventory-omitted GET DATA/recognition/CA/STORE/reset declarations. Correct draft permissions, trusted certificate/caller disposal and partial-reset limitations remain. Clarify hidden response ROM, zero Le/format bounds, logical versus physical STORE, a/c phase and reset recovery without endorsing defects.",
+    "candidates": [
+      "CORE-SD-X003",
+      "CORE-SD-X004",
+      "CORE-SD-X006",
+      "CORE-SD-X007"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:56b8da77691b7471",
+      "core-001:unit:edfd285e8f310bd1",
+      "core-001:unit:fab93bc1d63af27a",
+      "core-001:unit:00cd107a3b873560",
+      "core-001:unit:bacdd9d548aac6ed",
+      "core-001:unit:7be5ad4456fe5702",
+      "core-001:unit:d4fa90235dfc1afe",
+      "core-001:unit:f0b6d17044cd4bbe",
+      "core-001:unit:e1adfb161a17c112",
+      "core-001:unit:b038b5b7e2a05f37",
+      "core-001:unit:01cc52928a9e6339",
+      "core-001:unit:d252c792fb79f218"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+    "sha256": "6b3adbaf0f02fe0535a5692b590135c67ea15cc2d970a7b8c878f001db4dd349",
+    "pinned_sha256": "6b3adbaf0f02fe0535a5692b590135c67ea15cc2d970a7b8c878f001db4dd349",
+    "git_blob": "fa29211d941445d67fde7889bb64572456431cf5",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read both complete extensions. SmartCard-only resolution and copied settings, one open/no fallback, borrowed direct creation then OwnConnection transfer, await-using one-shot list. Caller parameters remain borrowed; prompt not forwarded. Existing selected-wrap/ownership XML is retained, refined version/failed-reset task condition referred.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:8b1e458d91207c53"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/KeyInfo.cs",
+    "sha256": "8c8b78b68447431ce2775b38d3edc0c2d43e9a32303e6b5443d94e801a8ded83",
+    "pinned_sha256": "8c8b78b68447431ce2775b38d3edc0c2d43e9a32303e6b5443d94e801a8ded83",
+    "git_blob": "ff81c3b905cf5ae016bf950b535749236039b873",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read both records/XML. Component tag/value and reference/list are parsed public metadata, no key bytes/raw entry. List does not claim deep immutable ownership. Keep accurate definitions; original parser/raw-escape policy retained SD-IMP-004.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:2ab4581b5509884e"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+    "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read whole nullable-enable empty shipped API snapshot. Supplemental bookkeeping only, not a substantive clean nominee or evidence of compilation.",
+    "candidates": [],
+    "assigned_unit_ids": [],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": true
+  },
+  {
+    "path": "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+    "sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+    "pinned_sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+    "git_blob": "ee78cabaed48de322b73f2c59d1fe2b38142bd5a",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete snapshot, reconcile session/interface operations, factory options, extension/static representations, feature descriptors, data records and exception constructors/status against source. Compiler-generated clone/equality/accessor entries retained as API context, not invented authored prose or compiled binding proof.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:c45e0e1e5111737b"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/SecureChannelException.cs",
+    "sha256": "a2bc6c316f3e241106149dca933d5a5a9d791261b428c59bbe912dd59edf0af4",
+    "pinned_sha256": "a2bc6c316f3e241106149dca933d5a5a9d791261b428c59bbe912dd59edf0af4",
+    "git_blob": "c093f117f429a2b78f2ba50185c7104001d9083b",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete type/constructors/XML/message helper. Immediate Apdu status only, null inner guarded; default message embeds inner.Message. Selected factory/reset wrapping is accurate. Keep XML unchanged; diagnostics/provider provenance and nested NotSupported status consequence recorded.",
+    "candidates": [
+      "CORE-SD-X005"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:3b3ec012c64bda87"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/SecurityDomainKeyMaterial.cs",
+    "sha256": "460c287a76894853a38cceeb26d395ac3ddf25c0aa5f63c65b2fa1930290baf7",
+    "pinned_sha256": "460c287a76894853a38cceeb26d395ac3ddf25c0aa5f63c65b2fa1930290baf7",
+    "git_blob": "9f583814860f3e3aa0cc9cc20716f3746fa86858",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete checksum/component/KCV helpers and finally. Fixed-time compares; KCV validation minimum10, ignores version/trailing data. Pooled plaintext copy zeroed in finally; kcv/encrypted secret-derived temporaries separately unzeroed. AES/KCV source input initialized to01, IV cleared, provider disposed. Preserve SD-IMP-006/008; no execution or universal-zeroing claim.",
+    "candidates": [
+      "CORE-SD-X002"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:c4294de8202acc80",
+      "core-001:unit:f8768ea616de70c2",
+      "core-001:unit:3e30a952f1b50945"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "sha256": "cbd56f7fe8a2c2285178855d47f7e98dfc1ec95ec30c2ca903af99c79a27489a",
+    "pinned_sha256": "cbd56f7fe8a2c2285178855d47f7e98dfc1ec95ec30c2ca903af99c79a27489a",
+    "git_blob": "bc30e5ae9948228ecd9396f524e799ed2ea50aaf",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read all 955 lines. Prepare/select/configure/rebind precedes ready; retained exact SCP params, local assumed version and gate, ROM-only response helper, typed key imports, certificate partial cleanup, raw reset bypass and post-loop teardown/reinit. Existing parsed metadata/range limitations remain original SD findings, not new Core groups. Detailed tables and candidate anchors distinguish lifetimes and error phases.",
+    "candidates": [
+      "CORE-SD-X001",
+      "CORE-SD-X002",
+      "CORE-SD-X003",
+      "CORE-SD-X004",
+      "CORE-SD-X005",
+      "CORE-SD-X007"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:f41c70602bef197c",
+      "core-001:unit:d7528501229916fe",
+      "core-001:unit:75d424217a4e94ef",
+      "core-001:unit:77bb7bd87fd8f6e6",
+      "core-001:unit:394639d39386bc76",
+      "core-001:unit:694547a6ace019a6",
+      "core-001:unit:08b2448f7d6ebcaf",
+      "core-001:unit:d0d7e8b770c92a2c",
+      "core-001:unit:1cf5ec7944e3f10c",
+      "core-001:unit:0add514122d569f5",
+      "core-001:unit:f76a3d02a3f6308a",
+      "core-001:unit:7679f0f25aae49de",
+      "core-001:unit:05bcceb4a33b3560",
+      "core-001:unit:be8874030127bad3",
+      "core-001:unit:001300a60363f3fb",
+      "core-001:unit:929489743e0ed49b",
+      "core-001:unit:3f08ba87e54ee774",
+      "core-001:unit:18814128d1d0c534",
+      "core-001:unit:ec357204141b02e2",
+      "core-001:unit:c6506349a5d175fc",
+      "core-001:unit:842b393cc20af845",
+      "core-001:unit:22b6b96cfe89c9cd",
+      "core-001:unit:9ac1377fc8e41615",
+      "core-001:unit:2c283ac5c6fb485c",
+      "core-001:unit:9f597c08121aed63",
+      "core-001:unit:146f01dad742c161",
+      "core-001:unit:b8f13c293f467f33",
+      "core-001:unit:1a2b7762f0c01cde",
+      "core-001:unit:df1c91e3d5ac42a2",
+      "core-001:unit:be1e851b1430035b",
+      "core-001:unit:d876d24346376dab",
+      "core-001:unit:d8e941dfbcb52d89",
+      "core-001:unit:deba85819a3b2725",
+      "core-001:unit:8607d417d3f92c3c"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/SecurityDomainTlvEncoding.cs",
+    "sha256": "9fb61783ebbc99019a0199722d0b4798e770847535f4bcbceb35d1e5f854bc99",
+    "pinned_sha256": "9fb61783ebbc99019a0199722d0b4798e770847535f4bcbceb35d1e5f854bc99",
+    "git_blob": "08735b26bc4c915d5990b607b8b1fdb6863b5e67",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete delete normalization/encoding. Both-zero input rejected before SCP03 component KID normalization; component+KVN0 can become empty filter. Nonzero fields encode D0/D2 through Core helper. Preserve SD-IMP-002; current public warning accurate. Retain source/no new boundary mechanism.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:b0252542c35e2470",
+      "core-001:unit:149381ab8b8a2ee9"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+    "sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0",
+    "pinned_sha256": "2b8f192c64eca7bdbceec5ae15fd14cfdf4596f2b18598aef62d65ccbeb58555",
+    "git_blob": "93238510d9cb920afd4fb0a29bf06c6d1b6925b0",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": false,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read full project. Assembly/root namespace, module package description/tags, shared SDK/AOT opt-in and only Core project reference. No direct platform loader or test execution. Keep packaging unchanged.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:46c50ef1b1611364"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/CLAUDE.md",
+    "sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+    "pinned_sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+    "git_blob": "6f1480570bb7f2279fa4586d415d09e326e7a84a",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read all examples/helper/setup/reset/firmware/oracle conditions. Owned default parameters enclose session helper; multi-session example has independent60-second cleanup and labels persistence not auth. Existing scopes/limits useful. Reopen version/failed reset and actual test adequacy explanations only as mapped; examples uncompiled.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:2a9c2940a6ea2da5",
+      "core-001:unit:e67777417701f3be",
+      "core-001:unit:f52e98947c25e96d",
+      "core-001:unit:9c68644d40e4da86",
+      "core-001:unit:b8002f5e30905a18",
+      "core-001:unit:e4fb5806e742c6e9",
+      "core-001:unit:f952a6db7aa67162",
+      "core-001:unit:d7da650bac923ce7",
+      "core-001:unit:72d3f4ff348a581c"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/README.md",
+    "sha256": "83b15cd245f2eefafb833af830b25cbeed0f616b8845d81345e170541ed1c1f8",
+    "pinned_sha256": "83b15cd245f2eefafb833af830b25cbeed0f616b8845d81345e170541ed1c1f8",
+    "git_blob": "9b0070576081906309a1f838dfdb6291794f7afd",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete setup/project/runner/examples. Distinguishes hardware integration from unit, selected firmware floors and destructive reset attempts. Owned parameter example correct; reset helper opens fresh session with config/version. Strengthen coverage/resource conditions without claiming all native or physical qualification.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:4542ca1afacc90a1",
+      "core-001:unit:b79d31a41eabd316",
+      "core-001:unit:b7d3eacfdf0a47f1",
+      "core-001:unit:f05ab37f8cdb8839",
+      "core-001:unit:4ae11e89797878f6",
+      "core-001:unit:82add99f705f4e08",
+      "core-001:unit:576d3c49accbc07e"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/Scp11TestData.cs",
+    "sha256": "9026fcdd5e12f4735834cf7cbbfa3468acf1e5585b3453bb9878cd9ae340d346",
+    "pinned_sha256": "9026fcdd5e12f4735834cf7cbbfa3468acf1e5585b3453bb9878cd9ae340d346",
+    "git_blob": "dea218fc5266e0b44f7037caf80b770700c4fca5",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete public PEM/base64 PKCS12/password data. Source bytes kept unchanged; no container decrypted/imported. Reused B6 public DER serial observation is qualified separately. This supplemental file hands future fixture-oracle work to SD-IMP-007/008 owner, not to Core key mathematics.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": true
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+    "sha256": "afff71fb205952db92f40bb3a410f45aa0771d7c05df751687775d58ed284068",
+    "pinned_sha256": "afff71fb205952db92f40bb3a410f45aa0771d7c05df751687775d58ed284068",
+    "git_blob": "92ad1d8ca784cf226131e90a7195daf557dcd09a",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read full name/key-usage sorter, root/leaf extraction and leftover exception. Identity references passed through, no trust verification/disposal owner. Root matches issuer/subject only. Caller helpers own loaded objects and failure cleanup; SD-IMP-008, X008. Supplemental path read fully.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": true
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+    "sha256": "cb4256ccb2a427de68aedfbfa88811ded09a4fff072b639c256f5b4cb6ef2c29",
+    "pinned_sha256": "cb4256ccb2a427de68aedfbfa88811ded09a4fff072b639c256f5b4cb6ef2c29",
+    "git_blob": "d966498a085418bf1e38754b514affa5659a0e40",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read both full negative scenarios. Wrong b public key after generation and wrong03 after reset each accept any Exception; cannot identify authentication phase/cause. b Track base cleanup,03 no Track; static CTS and inline defaults/wrappers have separate lifetime gaps. Wrong StaticKeys scoped. No execution.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:046fa07b5caa508d",
+      "core-001:unit:9fad6a0a857ad2a0"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+    "sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+    "pinned_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+    "git_blob": "742ce23d8a260b0c547d3f283670cb8cc449432b",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete seven-session import/delete and four-session rotation. Inner APDU wrapper assertions, retained/deleted version listing, fresh rotated nonnull factory checked. Scoped static clones; wrappers/inline defaults/source bytes not all disposed/cleared. Local finally same possibly canceled token plus Track independent base cleanup; no final factory-state assertion.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:d5e6888410468242",
+      "core-001:unit:87a4fdb35e367783"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+    "sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+    "pinned_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+    "git_blob": "f86d67273f039d854d923626f15aeb1b4a19002b",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read full factory/list/plain reset/import/recognition/GET/CA tests. Count3/4+FF is factory expectation, not universal; reset test plain only; fresh import factory nonnull and old reference APDU inner. CA wire regression constrains KID11/13/15 and nonempty identifier. Cleanup/inline defaults/tokens and Track vary per method; see test-oracles.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:98b89636718cd9a3",
+      "core-001:unit:a7219dfa0bd19379",
+      "core-001:unit:82a8a43a3422cddf",
+      "core-001:unit:be143f94e8d9f03b",
+      "core-001:unit:04336a18c61d42bd",
+      "core-001:unit:f530e58c9df8141c",
+      "core-001:unit:5346c2b3860e5f98",
+      "core-001:unit:474a3cdcd35ff811",
+      "core-001:unit:784200f7518e35ce"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+    "sha256": "70762acbdbe91adc9e493da27a06baefe212e4fe663afbf1244c4e1bc85655aa",
+    "pinned_sha256": "70762acbdbe91adc9e493da27a06baefe212e4fe663afbf1244c4e1bc85655aa",
+    "git_blob": "9f76bcf1afb3d6082d6fbd39f56978ed2232c0ca",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read all six tests and four provisioning/parser helpers. Generated P-256 point/provider import plus later plain persistence; a admitted chain not negative allowlist proof; b import flag only; b authority broad APDU over Generate+Delete; certificate count/thumbprint not trust. PKCS12 D clone/omitted roots/PEM partial load/GetSki view have separate cleanup, several providers/certs/params undisposed.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:8649ba16a2d8af11",
+      "core-001:unit:3115aa88a2ac305b",
+      "core-001:unit:0649770e70ca6ed1",
+      "core-001:unit:22061801680f8e90",
+      "core-001:unit:caf0f0962d92c616",
+      "core-001:unit:fc2db58cb088c298",
+      "core-001:unit:18be8a285d491df9",
+      "core-001:unit:1218c1d899ef8e9d"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+    "sha256": "b008cca577a123b8e7de0e0f764d2cc68dbe87f2b1629c9eef8311b574219783",
+    "pinned_sha256": "b008cca577a123b8e7de0e0f764d2cc68dbe87f2b1629c9eef8311b574219783",
+    "git_blob": "3ac01d4dd779637456692f95f653f7798a2b2a2c",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete c test and provisioning/PKCS12/PEM/SKI helpers. Admin setup over03, later c flag and protected public key listing. Listing no privilege proof. Name sorter/trust, exported D clone, selected/omitted certificate owners and undisposed provider/params/TLV same caller cleanup questions as a; no crypto/device execution.",
+    "candidates": [
+      "CORE-SD-X006",
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:fadb854aa0b0f703",
+      "core-001:unit:f92eab8aac772796",
+      "core-001:unit:e25fda345f7fdf96"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainStateRestoringTests.cs",
+    "sha256": "6a7725030d06e9a92d0e2e3a2215ba7941bc24b27724d4f1abd36fa79e9bcc51",
+    "pinned_sha256": "6a7725030d06e9a92d0e2e3a2215ba7941bc24b27724d4f1abd36fa79e9bcc51",
+    "git_blob": "a9a40cfd8a194d05c38fcfd9347fd9f6bb582bde",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read full Track and IAsyncLifetime. One tracked state, independent60-second cleanup source, no cleanup if untracked; reset remains attempt not verified contents. Supplemental full read, accurate remarks retained. Token does not bound admitted native work.",
+    "candidates": [],
+    "assigned_unit_ids": [],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": true
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+    "sha256": "fe661501a0a2b0a52e0bfa37ca6c7c10320537a3a3014fb9897e2f4fad625b5e",
+    "pinned_sha256": "fe661501a0a2b0a52e0bfa37ca6c7c10320537a3a3014fb9897e2f4fad625b5e",
+    "git_blob": "4680df79040856687a2b1eadd031374187c290e6",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete helper and reset extension. Await shared WithConnection callback, separate lexical resetSession scope then session scope. Config/version passed each fresh factory; params borrowed and action token not injected. Same connection sequential reuse, caller-owned defaults must enclose call. Raw reset reinit loss not repaired by first session itself.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:5e71acb3d7ce7db6"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+    "sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909",
+    "pinned_sha256": "8ecc6ca0634df5ffe45f11b7c42fce5f2dd958400780004f61e9b48cd24bae14",
+    "git_blob": "be4b9649866500ff0739935f586b94f761cec7af",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": false,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read full project: net10 xUnit2/TestSdk/skippable/traditional runner, shared/Core/SD refs, runner config copy. No new runtime/runner claim; retain configuration context.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:487eb5020839d77e"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs",
+    "sha256": "2719b01755d036e72f724570ed109798f1503c0e67faa353bbdcdf7cb4387a8b",
+    "pinned_sha256": "2719b01755d036e72f724570ed109798f1503c0e67faa353bbdcdf7cb4387a8b",
+    "git_blob": "6f94b284ed2179eef5b96d1612f6e22ea3d196e4",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read both full YESDK-1634 tests. Empty collection produces no transmit; explicit clear sends one E2 and exact A6/ref/empty70. Consequential restriction-removal wire oracle, no final/vendor counter or device claim. Await-using session, fake caller scope separate.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:350a0f3bb0448eae",
+      "core-001:unit:58172ff4d770bcd1"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+    "sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+    "pinned_sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+    "git_blob": "87b34028a31b1d55dcce984842e9684e222661f3",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete scripted seven-step fixture and independent CMAC implementation. Derives challenge-dependent keys/one9000 reply, accepts host cryptogram/MAC without validation, no generic simulator. Dispose clears static keys only; derived secret arrays/captures separate. Exact useful scenario and KAT limits already explained. Wrapper regression not final SCP conformance.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:fd3d50e4074e3465",
+      "core-001:unit:19a93e6a896c9867",
+      "core-001:unit:4427682270d0dfc3",
+      "core-001:unit:f5c2e5170b9de83d",
+      "core-001:unit:0b7e6cea26f3a635",
+      "core-001:unit:741f4f1ae149d595",
+      "core-001:unit:5c5244db0397faf7",
+      "core-001:unit:a08ecb53105cdaad",
+      "core-001:unit:6ef39b1f61d0b65d",
+      "core-001:unit:1c4edc65a24bed3a",
+      "core-001:unit:bb442e3ff307e9d7",
+      "core-001:unit:3e9dd0cbac1d4409",
+      "core-001:unit:3d8e078bd81ae375"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnectionTests.cs",
+    "sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+    "pinned_sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+    "git_blob": "573cae7889d7c75ec2dc2ef743e3721924682bad",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete four RFC4493 §4 length0/16/40/64 tuples and whole-tag equality. Public source KAT data, primitive only, not KDF/handshake or executed proof. Retain substantive clean nominee.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:de9d48abdf1759d5"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+    "sha256": "66999fb68ddfada76820229b7cb0f41133d5197e0d7059e6e8fc8cf4a710b0a8",
+    "pinned_sha256": "66999fb68ddfada76820229b7cb0f41133d5197e0d7059e6e8fc8cf4a710b0a8",
+    "git_blob": "dc619b1b35026f475bfe2a3c235fcfa0b6c2b5e7",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read all six full tests. Raw ready3 transmissions,03 rejected status, local cryptogram mismatch, explicit too-old version, later malformed-list unwrapped, and scripted secure reset reinit rejection/false flags. Complete assertion scope documented accurately. Missing fake disposal and state owner gaps retained X008/B6, not implied proof from wrapper.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:d106aa249ee8ccb3",
+      "core-001:unit:08b292ed933fd418",
+      "core-001:unit:a8b47dc23a984de1",
+      "core-001:unit:bbdee5e42ed1fb0a",
+      "core-001:unit:206e5c5423dd4202",
+      "core-001:unit:989d5977d9ec79b9"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs",
+    "sha256": "77c9c7bcb956e0c1add350029aa3efbf1a0deb773e63c9d42a3f4b9c31e0c807",
+    "pinned_sha256": "77c9c7bcb956e0c1add350029aa3efbf1a0deb773e63c9d42a3f4b9c31e0c807",
+    "git_blob": "b5bd240163e2cd38d784480bf510642cd0c27c27",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read complete real-loader observer tests/helper. Corrupt later cert disposes first two actual handles, success preserves order/identity/DER through session disposal then caller finally clears handles; ECDsa/certificate helper scoped. Exact-scope historical consideration-5 resolution supported in source; not executed or trust validation.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:aa6d02c22a70d020",
+      "core-001:unit:52c46bed2ec7d440"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+    "sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+    "pinned_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+    "git_blob": "41c2076b579d538dfcf1ef9a78e31ac2809ed300",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": true,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read all745 lines including parser-omitted wire/reset/guard tests. Factory nonnull versus actual wire/status/flags/detachment oracles distinguished; convenience disposal observes transmit only. Complete assertions/cleanup listed in test-oracles. Recording/no-hardware objects cannot prove native release, active cancellation or complete config propagation.",
+    "candidates": [
+      "CORE-SD-X008"
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:9e3bad7982f63212",
+      "core-001:unit:d442c74abcc4d2d7",
+      "core-001:unit:9c70abf7fa89a278",
+      "core-001:unit:94659dceb6eff32b",
+      "core-001:unit:63745f73bca85f74",
+      "core-001:unit:8ed4d3276ff806e4",
+      "core-001:unit:b76fb2b32ece5893",
+      "core-001:unit:c7e80dbb3894556d",
+      "core-001:unit:bb46ee371909afc1",
+      "core-001:unit:dcd6c17901ddf340",
+      "core-001:unit:ca8e6ba488dfaee5",
+      "core-001:unit:892dd66b317ed92a",
+      "core-001:unit:a21b6e7220a0c9ed",
+      "core-001:unit:d5b43a4ad6695944",
+      "core-001:unit:33ee4ec6fc2e664d",
+      "core-001:unit:17c629d64c466e15",
+      "core-001:unit:d92ee37f9f3dd8fa",
+      "core-001:unit:09f1ca477aff67b2",
+      "core-001:unit:63eeb771075f74d3",
+      "core-001:unit:8f748e51f984fda5",
+      "core-001:unit:62cfcc1c3b736efe",
+      "core-001:unit:25342d332c4a918b",
+      "core-001:unit:67a2df596ddf1fd8",
+      "core-001:unit:3e833c7361a5b118",
+      "core-001:unit:516951cb427bbd37",
+      "core-001:unit:e1bbcd3ac97031aa",
+      "core-001:unit:081164e205cf2383",
+      "core-001:unit:d341902c0351a9d5",
+      "core-001:unit:d4e3174a6bf5afce",
+      "core-001:unit:85abd663363b0bc3",
+      "core-001:unit:8a1687d8c796fc41"
+    ],
+    "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  },
+  {
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+    "sha256": "af1a9564844531b0dd815462cc1005f46162eff27d7c77e15bb29e1a8a8f59a9",
+    "pinned_sha256": "e5e1d2ed2db0b55f1d113f68193dec7372fdb94c565c92bee63aad076ac94385",
+    "git_blob": "3776da0d590d421cdc0fc973887b76e04de6e0f7",
+    "normalized_pin_equal": true,
+    "raw_pin_equal": false,
+    "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+    "note": "Read full net10 executable xUnit3/MTP project, NSubstitute/logging DI refs and shared SD/test refs. No compiler/analyzer execution inferred; retain configuration context.",
+    "candidates": [],
+    "assigned_unit_ids": [
+      "core-001:unit:35649950e5de8147"
+    ],
+    "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+    "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+    "supplemental": false
+  }
+]

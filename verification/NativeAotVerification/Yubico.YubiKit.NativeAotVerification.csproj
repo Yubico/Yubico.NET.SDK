@@ -5,7 +5,7 @@
     so the Native AOT compiler processes reachable entry types from each assembly.
 
     This project is intentionally excluded from the main solution and from `dotnet toolchain.cs` package
-    discovery (it lives outside `src/` and isn't named `Yubico.YubiKit.*`), and it is never packed or
+    discovery (it lives outside `src/` and declares IsPackable=false), and it is never packed or
     published as a NuGet package. See docs/NATIVE-AOT.md for the evidence this host provides.
   -->
   <PropertyGroup>
@@ -21,7 +21,7 @@
     <IsPackable>false</IsPackable>
     <IsYubiKitSdkLibrary>false</IsYubiKitSdkLibrary>
 
-    <!-- Native AOT publish settings (only take effect when publishing, not on ordinary builds). -->
+    <!-- Native AOT publish settings. An ordinary build is not a native publish or execution result. -->
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>

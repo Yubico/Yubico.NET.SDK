@@ -1,0 +1,19 @@
+{
+  "candidate_state": "READY FOR ASTRA AND INDEPENDENT SAMPLING REVIEW",
+  "identity_refresh": "COMPLETE",
+  "actual_verdict_join": "COMPLETE",
+  "EOF_byte_and_range_reconciliation": "COMPLETE",
+  "Astra": {
+    "state": "PENDING REVIEW",
+    "review_record": null
+  },
+  "independent": {
+    "state": "PENDING REVIEW",
+    "review_record": null
+  },
+  "acceptance_must_be_additive": "Create hash-bound review/adjudication successor; do not mutate sealed files.",
+  "accepted_clean_count": null,
+  "accepted_denominator": null,
+  "sampler_PASS": null,
+  "compiler_completion_claim": false
+}

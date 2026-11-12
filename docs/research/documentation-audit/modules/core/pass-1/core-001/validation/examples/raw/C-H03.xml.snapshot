@@ -1,0 +1,6 @@
+
+//         ///   SHA-1     RsaFormat.Sha1     20 bytes
+//         ///   SHA-256   RsaFormat.Sha256   32 bytes
+//         ///   SHA-384   RsaFormat.Sha384   48 bytes
+//         ///   SHA-512   RsaFormat.Sha512   64 bytes
+//         /// 

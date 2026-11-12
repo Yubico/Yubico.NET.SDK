@@ -1,0 +1,11 @@
+--- accepted-39/src/SecurityDomain/CLAUDE.md
++++ SAMPLE-SD-001/src/SecurityDomain/CLAUDE.md
+@@ -238,6 +238,6 @@
+ 
+ ## Related Modules
+ 
+-- **Core.SmartCard.Scp**: Base SCP protocol implementations
+-- **Core.Cryptography**: ECPrivateKey, ECPublicKey, StaticKeys
++- **Core.Protocols.SmartCard.Scp**: Base SCP protocol implementations and `StaticKeys`
++- **Core.Cryptography**: `ECPrivateKey` and `ECPublicKey`
+ - **Tests.Shared**: YubiKeyTestState, test infrastructure

@@ -1,0 +1,91 @@
+{
+  "id": "core-001:unit:4886f819fa316d28",
+  "findings": [
+    "SAMPLE-WA-002",
+    "FULL-032"
+  ],
+  "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/compiler-WA-logging-retraction.md",
+  "authority_sha256": "bbb5a99343f90a0abec1d65083cf9b67bab461c60766c07ca95a1b7671a0d61a",
+  "authority_text": "# Compiler finding supersedes the sampled WebAuthn logging verdict\n\n**SAMPLE-WA-002 / FULL-032:** retract clean-content credit for original unit\n`core-001:unit:4886f819fa316d28` (`src/WebAuthn/CLAUDE.md`, Logging). The earlier manual read\nrecognized the intended logging policy but missed its assembly-access restriction.\n\n`examples-full-webauthn-first` emitted CS1929 for the example's call to\n`YubiKitLogging.CreateLogger<PreviewSignProcessor>()`. Astra checked the actual Core declarations:\n`CreateLogger<T>` is internal, and Core's explicit friend assemblies include neither WebAuthn nor\nits integration-test assembly. A genuine WebAuthn context cannot compile that call.\n\nThe FIDO editor is correcting the guide to use the public `YubiKitLogging.LoggerFactory` with the\nreal Microsoft.Extensions.Logging extension. No new friend assembly, helper shim or API change is\nauthorized. Preserve the failed compile and earlier verdict as history; this unit now receives zero\nclean credit. The changed body must pass independent review and actual compilation.\n\nExpand the WebAuthn narrative category by its existing original quota and replace the lost credit,\nwithout reducing the broad denominator or borrowing another category's surplus. This is a documentation\nAPI-access error, not an observed runtime logging failure or a new unique Core implementation bug.\n",
+  "earlier_manual_verdict": {
+    "id": "core-001:unit:4886f819fa316d28",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/WebAuthn/CLAUDE.md",
+    "first_line": 70,
+    "last_line": 87,
+    "source_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "range_sha256": "2e2e12d41b2e47c35231ac15f1be5c27b63e314df7429acadcdec111ab62075c",
+    "actually_read_by": "Astra",
+    "raw_category": "supported-pending-final-eligibility",
+    "raw_verdict_payload": {
+      "suffix": "4886f819fa316d28",
+      "id": "core-001:unit:4886f819fa316d28",
+      "verdict_text": "Supported: source has no logger calls; guidance explicitly separates underlying/application logging and sensitive-data policy."
+    },
+    "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn-verdicts.md",
+    "authority_sha256": "82002499795b048303db19b620ed3a92db049540c4e6076f4c7fbd54fdc571e3",
+    "original_reading_material": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn.md",
+    "preparer_content_verdict": null,
+    "known_accepted_edited_overlap": [],
+    "known_reviewed_pending_overlap": [],
+    "pending_uncaptured_PGP_correction": false,
+    "credit_withholding_reasons": [],
+    "provisional_credit_state": "SOURCE-CONTENT-SUPPORTED; FINAL-ELIGIBILITY/MAPPING/QUOTA-PENDING",
+    "final_clean_credit": null,
+    "current_mapping_record": "current-mapping.json",
+    "final_candidate_reconciliation": "population-and-range-reconciliation.json#core-001:unit:4886f819fa316d28",
+    "candidate_credit": 1,
+    "original_selection": true,
+    "all_proposal_occurrences": [
+      {
+        "id": "core-001:unit:4886f819fa316d28",
+        "proposal_record": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/selection.json",
+        "proposal_index": 931,
+        "original_rank": null,
+        "original_seed": "core-001-clean-sampling-preparation-v1",
+        "proposed_only_is_not_actual_read": true,
+        "ordering_scope": "Exact within-record index/rank; file listing order is not a new global chronological assertion."
+      }
+    ]
+  },
+  "original_source_identity": {
+    "id": "core-001:unit:4886f819fa316d28",
+    "path": "src/WebAuthn/CLAUDE.md",
+    "source_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "range_sha256": "2e2e12d41b2e47c35231ac15f1be5c27b63e314df7429acadcdec111ab62075c",
+    "start_character": 3824,
+    "end_character_exclusive": 4618,
+    "first_line": 70,
+    "last_line": 87,
+    "category": "narrative-section-with-complete-examples",
+    "label": "## Logging",
+    "assigned_family": "BOUNDARY-WebAuthn",
+    "stage": "BOUNDARY-WebAuthn",
+    "status": "UNREAD",
+    "review_status": "UNASSIGNED",
+    "sample_status": "INELIGIBLE-UNTIL-READ",
+    "scope_rationale": "Read complete Core-facing unit and neighboring lifetime/cleanup context.",
+    "features": {
+      "xml": false,
+      "comments": false,
+      "todo": false,
+      "specification": false,
+      "code_only": false,
+      "tests": false
+    }
+  },
+  "effective_content_disposition": "RETRACTED CLEAN-CONTENT CREDIT: compiler-confirmed assembly API-access documentation error",
+  "candidate_credit": 0,
+  "read_count_change": 0,
+  "unique_Core_runtime_bug_allocation": 0,
+  "no_observed_runtime_logging_failure": true,
+  "pending_fix": "FIDO guide body correction to public LoggerFactory plus real logging extension; no friend/API/runtime change authorized.",
+  "acceptance_gates": [
+    "Actual independent content/body review",
+    "Actual compilation in genuine WebAuthn assembly context",
+    "Exact corrected body/span/current hash refresh",
+    "Final sampler/coordinator reconciliation"
+  ],
+  "predecessor_status": "1,067-unit candidate is immutable PREDECESSOR, not current final acceptance"
+}

@@ -1,0 +1,1726 @@
+{
+  "current_manifest": "editing/integration/current-products.json",
+  "current_manifest_sha256": "8012cb83332a4ffc6aaae251ee97bb489986e48305cd566aa226d4889a57673e",
+  "accepted_product_paths": 360,
+  "accepted_receipts": [
+    {
+      "path": "editing/integration/accepted-A-C.json",
+      "product_paths": 91,
+      "scope": "Reviewed documentation transfer; final compiler/token/API/example validation pending"
+    },
+    {
+      "path": "editing/integration/accepted-protocols.json",
+      "product_paths": 57,
+      "scope": "Content-reviewed protocol documentation transfer; combined compiler validation pending"
+    },
+    {
+      "path": "editing/integration/accepted-FIDO.json",
+      "product_paths": 15,
+      "scope": "Content-reviewed FIDO documentation transfer; combined validation pending"
+    },
+    {
+      "path": "editing/integration/accepted-transports.json",
+      "product_paths": 62,
+      "scope": "Content-reviewed transport documentation transfer; combined validation pending"
+    },
+    {
+      "path": "editing/integration/accepted-SHARED.json",
+      "product_paths": 26,
+      "scope": "Content-reviewed shared-guide transfer; final example/combined validation pending"
+    },
+    {
+      "path": "editing/integration/accepted-applets.json",
+      "product_paths": 39,
+      "scope": "Content-reviewed five-applet documentation transfer; final combined validation pending"
+    },
+    {
+      "path": "editing/integration/accepted-PGP-PIV.json",
+      "product_paths": 30,
+      "scope": "Content-reviewed OpenPGP/PIV documentation transfer; final combined validation pending"
+    },
+    {
+      "path": "editing/integration/accepted-sampling-A.json",
+      "product_paths": 3,
+      "scope": "Reviewed additive sampling documentation corrections; original accepted batches preserved"
+    },
+    {
+      "path": "editing/integration/accepted-sampling-SHARED.json",
+      "product_paths": 1,
+      "scope": "Reviewed sampling lifecycle correction; previous full guide acceptance retained"
+    },
+    {
+      "path": "editing/integration/accepted-external.json",
+      "product_paths": 37,
+      "scope": "Reviewed external documentation transfer; initial raw-byte admission rejected one newline-only project-file difference, retained and reconciled to exact reviewed bytes"
+    }
+  ],
+  "actual_diff_scope": [
+    "docs/TESTING.md",
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/architecture/device-discovery-guarantees.md",
+    "docs/architecture/device-identity.md",
+    "docs/architecture/event-driven-device-discovery.md",
+    "docs/architecture/physical-device-model.md",
+    "docs/architecture/sdk-architecture-diagrams.md",
+    "docs/linux-setup.md",
+    "docs/migration/v1-to-v2.md",
+    "docs/usage/device-discovery.md",
+    "docs/v2-highlights.md",
+    "scripts/toolchain/TestTargets.cs",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Core/CLAUDE.md",
+    "src/Core/README.md",
+    "src/Core/src/Devices/README.md",
+    "src/Tests.Shared/CLAUDE.md",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/README.md",
+    "src/Tests.Shared/YubiKeyTestState.cs"
+  ],
+  "actual_diff_scope_meaning": "All accepted current product paths capable of intersecting either A target-role candidate population; not a new final campaign-wide canonical reconciliation.",
+  "diff_sha256": "7ffc537aee2c39681ed9f81239680594c1baecd8d07d7d82ffcd32f706a6ee72",
+  "diff_bytes": 147122,
+  "command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--no-renames",
+    "--unified=3",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+    "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "--",
+    "docs/TESTING.md",
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/architecture/device-discovery-guarantees.md",
+    "docs/architecture/device-identity.md",
+    "docs/architecture/event-driven-device-discovery.md",
+    "docs/architecture/physical-device-model.md",
+    "docs/architecture/sdk-architecture-diagrams.md",
+    "docs/linux-setup.md",
+    "docs/migration/v1-to-v2.md",
+    "docs/usage/device-discovery.md",
+    "docs/v2-highlights.md",
+    "scripts/toolchain/TestTargets.cs",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Core/CLAUDE.md",
+    "src/Core/README.md",
+    "src/Core/src/Devices/README.md",
+    "src/Tests.Shared/CLAUDE.md",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/README.md",
+    "src/Tests.Shared/YubiKeyTestState.cs"
+  ],
+  "pure_parser_reuse_sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+  "original_coordinate_changed_spans": {
+    "docs/TESTING.md": [
+      {
+        "start_character": 4532,
+        "end_character_exclusive": 4589,
+        "old_first_line": 127,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4637,
+        "end_character_exclusive": 4692,
+        "old_first_line": 129,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5983,
+        "end_character_exclusive": 5983,
+        "old_first_line": 156,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6671,
+        "end_character_exclusive": 6937,
+        "old_first_line": 177,
+        "old_line_count": 3,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11657,
+        "end_character_exclusive": 11657,
+        "old_first_line": 275,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 24463,
+        "end_character_exclusive": 24463,
+        "old_first_line": 535,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 24473,
+        "end_character_exclusive": 24551,
+        "old_first_line": 536,
+        "old_line_count": 2,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 24553,
+        "end_character_exclusive": 24625,
+        "old_first_line": 539,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 24626,
+        "end_character_exclusive": 24724,
+        "old_first_line": 542,
+        "old_line_count": 4,
+        "added_lines": 0,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 24756,
+        "end_character_exclusive": 24797,
+        "old_first_line": 547,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 25066,
+        "end_character_exclusive": 25066,
+        "old_first_line": 567,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 25236,
+        "end_character_exclusive": 25327,
+        "old_first_line": 575,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "docs/architecture/connection-ownership-and-contention.md": [
+      {
+        "start_character": 358,
+        "end_character_exclusive": 540,
+        "old_first_line": 9,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1872,
+        "end_character_exclusive": 2120,
+        "old_first_line": 39,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2293,
+        "end_character_exclusive": 2385,
+        "old_first_line": 45,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2727,
+        "end_character_exclusive": 2727,
+        "old_first_line": 52,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2747,
+        "end_character_exclusive": 3026,
+        "old_first_line": 54,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6356,
+        "end_character_exclusive": 6457,
+        "old_first_line": 109,
+        "old_line_count": 1,
+        "added_lines": 11,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10544,
+        "end_character_exclusive": 10544,
+        "old_first_line": 169,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 11127,
+        "end_character_exclusive": 11565,
+        "old_first_line": 175,
+        "old_line_count": 4,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12646,
+        "end_character_exclusive": 12747,
+        "old_first_line": 195,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12948,
+        "end_character_exclusive": 13053,
+        "old_first_line": 198,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14233,
+        "end_character_exclusive": 14290,
+        "old_first_line": 218,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16382,
+        "end_character_exclusive": 16578,
+        "old_first_line": 243,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16621,
+        "end_character_exclusive": 16722,
+        "old_first_line": 248,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16925,
+        "end_character_exclusive": 17009,
+        "old_first_line": 251,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "docs/architecture/device-discovery-guarantees.md": [
+      {
+        "start_character": 126,
+        "end_character_exclusive": 313,
+        "old_first_line": 5,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2228,
+        "end_character_exclusive": 2355,
+        "old_first_line": 36,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2859,
+        "end_character_exclusive": 2941,
+        "old_first_line": 44,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4198,
+        "end_character_exclusive": 4377,
+        "old_first_line": 59,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 17531,
+        "end_character_exclusive": 17638,
+        "old_first_line": 231,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 17745,
+        "end_character_exclusive": 17852,
+        "old_first_line": 233,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 19340,
+        "end_character_exclusive": 19602,
+        "old_first_line": 259,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22495,
+        "end_character_exclusive": 22665,
+        "old_first_line": 308,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 27965,
+        "end_character_exclusive": 28269,
+        "old_first_line": 367,
+        "old_line_count": 4,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 28270,
+        "end_character_exclusive": 28624,
+        "old_first_line": 372,
+        "old_line_count": 4,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 29270,
+        "end_character_exclusive": 29499,
+        "old_first_line": 387,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 29560,
+        "end_character_exclusive": 29770,
+        "old_first_line": 391,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 30241,
+        "end_character_exclusive": 30531,
+        "old_first_line": 404,
+        "old_line_count": 3,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 30955,
+        "end_character_exclusive": 31173,
+        "old_first_line": 416,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "docs/architecture/device-identity.md": [
+      {
+        "start_character": 51,
+        "end_character_exclusive": 261,
+        "old_first_line": 3,
+        "old_line_count": 3,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1680,
+        "end_character_exclusive": 1680,
+        "old_first_line": 31,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12471,
+        "end_character_exclusive": 12750,
+        "old_first_line": 187,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14550,
+        "end_character_exclusive": 14550,
+        "old_first_line": 215,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 17607,
+        "end_character_exclusive": 17607,
+        "old_first_line": 251,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      }
+    ],
+    "docs/architecture/event-driven-device-discovery.md": [
+      {
+        "start_character": 4419,
+        "end_character_exclusive": 4419,
+        "old_first_line": 68,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 5750,
+        "end_character_exclusive": 5750,
+        "old_first_line": 87,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 7092,
+        "end_character_exclusive": 7305,
+        "old_first_line": 104,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8106,
+        "end_character_exclusive": 8419,
+        "old_first_line": 119,
+        "old_line_count": 3,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8608,
+        "end_character_exclusive": 8802,
+        "old_first_line": 127,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9223,
+        "end_character_exclusive": 9271,
+        "old_first_line": 135,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9272,
+        "end_character_exclusive": 9368,
+        "old_first_line": 137,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9560,
+        "end_character_exclusive": 9658,
+        "old_first_line": 142,
+        "old_line_count": 1,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9760,
+        "end_character_exclusive": 10215,
+        "old_first_line": 144,
+        "old_line_count": 5,
+        "added_lines": 7,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "docs/architecture/physical-device-model.md": [
+      {
+        "start_character": 236,
+        "end_character_exclusive": 343,
+        "old_first_line": 5,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1576,
+        "end_character_exclusive": 1780,
+        "old_first_line": 26,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2746,
+        "end_character_exclusive": 2854,
+        "old_first_line": 38,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5102,
+        "end_character_exclusive": 5591,
+        "old_first_line": 85,
+        "old_line_count": 5,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6529,
+        "end_character_exclusive": 6731,
+        "old_first_line": 110,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10364,
+        "end_character_exclusive": 10574,
+        "old_first_line": 178,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14121,
+        "end_character_exclusive": 14449,
+        "old_first_line": 250,
+        "old_line_count": 3,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 15489,
+        "end_character_exclusive": 15765,
+        "old_first_line": 275,
+        "old_line_count": 3,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16773,
+        "end_character_exclusive": 16875,
+        "old_first_line": 290,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "docs/architecture/sdk-architecture-diagrams.md": [
+      {
+        "start_character": 758,
+        "end_character_exclusive": 803,
+        "old_first_line": 12,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2644,
+        "end_character_exclusive": 2733,
+        "old_first_line": 79,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2893,
+        "end_character_exclusive": 2982,
+        "old_first_line": 82,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9875,
+        "end_character_exclusive": 10028,
+        "old_first_line": 236,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16673,
+        "end_character_exclusive": 16748,
+        "old_first_line": 389,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16990,
+        "end_character_exclusive": 17153,
+        "old_first_line": 393,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 18667,
+        "end_character_exclusive": 18772,
+        "old_first_line": 418,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "docs/linux-setup.md": [
+      {
+        "start_character": 724,
+        "end_character_exclusive": 724,
+        "old_first_line": 21,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1785,
+        "end_character_exclusive": 1953,
+        "old_first_line": 42,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2360,
+        "end_character_exclusive": 2439,
+        "old_first_line": 54,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2448,
+        "end_character_exclusive": 2783,
+        "old_first_line": 57,
+        "old_line_count": 8,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3184,
+        "end_character_exclusive": 3262,
+        "old_first_line": 87,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3263,
+        "end_character_exclusive": 3293,
+        "old_first_line": 89,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3294,
+        "end_character_exclusive": 3573,
+        "old_first_line": 91,
+        "old_line_count": 8,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3581,
+        "end_character_exclusive": 3612,
+        "old_first_line": 100,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3675,
+        "end_character_exclusive": 3675,
+        "old_first_line": 104,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      }
+    ],
+    "docs/migration/v1-to-v2.md": [
+      {
+        "start_character": 1151,
+        "end_character_exclusive": 1450,
+        "old_first_line": 21,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4681,
+        "end_character_exclusive": 4681,
+        "old_first_line": 48,
+        "old_line_count": 0,
+        "added_lines": 8,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 5038,
+        "end_character_exclusive": 5061,
+        "old_first_line": 53,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5072,
+        "end_character_exclusive": 5324,
+        "old_first_line": 56,
+        "old_line_count": 6,
+        "added_lines": 21,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5537,
+        "end_character_exclusive": 5537,
+        "old_first_line": 66,
+        "old_line_count": 0,
+        "added_lines": 10,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6333,
+        "end_character_exclusive": 6568,
+        "old_first_line": 78,
+        "old_line_count": 1,
+        "added_lines": 17,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 46526,
+        "end_character_exclusive": 46649,
+        "old_first_line": 722,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 46660,
+        "end_character_exclusive": 46660,
+        "old_first_line": 725,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 46688,
+        "end_character_exclusive": 46822,
+        "old_first_line": 727,
+        "old_line_count": 4,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 46824,
+        "end_character_exclusive": 47008,
+        "old_first_line": 732,
+        "old_line_count": 4,
+        "added_lines": 15,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 47342,
+        "end_character_exclusive": 47342,
+        "old_first_line": 743,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 58966,
+        "end_character_exclusive": 58966,
+        "old_first_line": 856,
+        "old_line_count": 0,
+        "added_lines": 19,
+        "kind": "insertion-point"
+      }
+    ],
+    "docs/usage/device-discovery.md": [
+      {
+        "start_character": 1787,
+        "end_character_exclusive": 1878,
+        "old_first_line": 45,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8969,
+        "end_character_exclusive": 9073,
+        "old_first_line": 164,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9836,
+        "end_character_exclusive": 9836,
+        "old_first_line": 176,
+        "old_line_count": 0,
+        "added_lines": 13,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 19986,
+        "end_character_exclusive": 19986,
+        "old_first_line": 342,
+        "old_line_count": 0,
+        "added_lines": 7,
+        "kind": "insertion-point"
+      }
+    ],
+    "docs/v2-highlights.md": [
+      {
+        "start_character": 3853,
+        "end_character_exclusive": 3957,
+        "old_first_line": 75,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4178,
+        "end_character_exclusive": 4296,
+        "old_first_line": 81,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6011,
+        "end_character_exclusive": 6174,
+        "old_first_line": 122,
+        "old_line_count": 3,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "scripts/toolchain/TestTargets.cs": [
+      {
+        "start_character": 7148,
+        "end_character_exclusive": 7424,
+        "old_first_line": 158,
+        "old_line_count": 3,
+        "added_lines": 0,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7525,
+        "end_character_exclusive": 7525,
+        "old_first_line": 162,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 7532,
+        "end_character_exclusive": 8126,
+        "old_first_line": 163,
+        "old_line_count": 6,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs": [
+      {
+        "start_character": 923,
+        "end_character_exclusive": 1094,
+        "old_first_line": 23,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4683,
+        "end_character_exclusive": 4684,
+        "old_first_line": 118,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Cli.Commands/src/Otp/OtpCommands.cs": [
+      {
+        "start_character": 6629,
+        "end_character_exclusive": 6729,
+        "old_first_line": 211,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7772,
+        "end_character_exclusive": 7843,
+        "old_first_line": 231,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 27975,
+        "end_character_exclusive": 27976,
+        "old_first_line": 808,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Cli.Shared/src/Device/DeviceSelector.cs": [
+      {
+        "start_character": 1139,
+        "end_character_exclusive": 1241,
+        "old_first_line": 28,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10930,
+        "end_character_exclusive": 10931,
+        "old_first_line": 245,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/CLAUDE.md": [
+      {
+        "start_character": 2867,
+        "end_character_exclusive": 2930,
+        "old_first_line": 61,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3013,
+        "end_character_exclusive": 3013,
+        "old_first_line": 66,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3202,
+        "end_character_exclusive": 3202,
+        "old_first_line": 70,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6635,
+        "end_character_exclusive": 6744,
+        "old_first_line": 110,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22670,
+        "end_character_exclusive": 22727,
+        "old_first_line": 312,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22892,
+        "end_character_exclusive": 22929,
+        "old_first_line": 321,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 23904,
+        "end_character_exclusive": 24002,
+        "old_first_line": 349,
+        "old_line_count": 3,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 24003,
+        "end_character_exclusive": 24285,
+        "old_first_line": 353,
+        "old_line_count": 6,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 27133,
+        "end_character_exclusive": 27521,
+        "old_first_line": 410,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 28428,
+        "end_character_exclusive": 28428,
+        "old_first_line": 443,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 32303,
+        "end_character_exclusive": 33017,
+        "old_first_line": 488,
+        "old_line_count": 8,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34367,
+        "end_character_exclusive": 34454,
+        "old_first_line": 518,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34455,
+        "end_character_exclusive": 34598,
+        "old_first_line": 520,
+        "old_line_count": 3,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34603,
+        "end_character_exclusive": 34603,
+        "old_first_line": 525,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 35604,
+        "end_character_exclusive": 36157,
+        "old_first_line": 536,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 36700,
+        "end_character_exclusive": 36700,
+        "old_first_line": 544,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 37757,
+        "end_character_exclusive": 37757,
+        "old_first_line": 555,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 51181,
+        "end_character_exclusive": 51245,
+        "old_first_line": 723,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52018,
+        "end_character_exclusive": 52070,
+        "old_first_line": 751,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52099,
+        "end_character_exclusive": 52231,
+        "old_first_line": 754,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52261,
+        "end_character_exclusive": 52310,
+        "old_first_line": 758,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52429,
+        "end_character_exclusive": 52473,
+        "old_first_line": 764,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 53656,
+        "end_character_exclusive": 53789,
+        "old_first_line": 789,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54090,
+        "end_character_exclusive": 54160,
+        "old_first_line": 805,
+        "old_line_count": 3,
+        "added_lines": 0,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54218,
+        "end_character_exclusive": 54218,
+        "old_first_line": 810,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 54506,
+        "end_character_exclusive": 54596,
+        "old_first_line": 826,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54676,
+        "end_character_exclusive": 54930,
+        "old_first_line": 828,
+        "old_line_count": 3,
+        "added_lines": 11,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54971,
+        "end_character_exclusive": 55043,
+        "old_first_line": 838,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55045,
+        "end_character_exclusive": 55101,
+        "old_first_line": 840,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55165,
+        "end_character_exclusive": 55221,
+        "old_first_line": 844,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55300,
+        "end_character_exclusive": 55549,
+        "old_first_line": 852,
+        "old_line_count": 12,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55550,
+        "end_character_exclusive": 55753,
+        "old_first_line": 865,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 56462,
+        "end_character_exclusive": 56660,
+        "old_first_line": 882,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 57003,
+        "end_character_exclusive": 58948,
+        "old_first_line": 884,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 61763,
+        "end_character_exclusive": 61867,
+        "old_first_line": 895,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/README.md": [
+      {
+        "start_character": 563,
+        "end_character_exclusive": 606,
+        "old_first_line": 12,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1337,
+        "end_character_exclusive": 1438,
+        "old_first_line": 24,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1630,
+        "end_character_exclusive": 1630,
+        "old_first_line": 28,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2971,
+        "end_character_exclusive": 3306,
+        "old_first_line": 66,
+        "old_line_count": 3,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9478,
+        "end_character_exclusive": 9478,
+        "old_first_line": 156,
+        "old_line_count": 0,
+        "added_lines": 8,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12608,
+        "end_character_exclusive": 13020,
+        "old_first_line": 209,
+        "old_line_count": 4,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 17798,
+        "end_character_exclusive": 17871,
+        "old_first_line": 299,
+        "old_line_count": 1,
+        "added_lines": 9,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 21214,
+        "end_character_exclusive": 21214,
+        "old_first_line": 359,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 30721,
+        "end_character_exclusive": 30846,
+        "old_first_line": 497,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 30847,
+        "end_character_exclusive": 30936,
+        "old_first_line": 500,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 31093,
+        "end_character_exclusive": 31093,
+        "old_first_line": 506,
+        "old_line_count": 0,
+        "added_lines": 13,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 38097,
+        "end_character_exclusive": 38194,
+        "old_first_line": 604,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 40832,
+        "end_character_exclusive": 41133,
+        "old_first_line": 634,
+        "old_line_count": 4,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 41426,
+        "end_character_exclusive": 41523,
+        "old_first_line": 641,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Devices/README.md": [
+      {
+        "start_character": 1877,
+        "end_character_exclusive": 1877,
+        "old_first_line": 28,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      }
+    ],
+    "src/Tests.Shared/CLAUDE.md": [
+      {
+        "start_character": 317,
+        "end_character_exclusive": 399,
+        "old_first_line": 9,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1675,
+        "end_character_exclusive": 1675,
+        "old_first_line": 32,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2949,
+        "end_character_exclusive": 2975,
+        "old_first_line": 65,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3235,
+        "end_character_exclusive": 3284,
+        "old_first_line": 71,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3318,
+        "end_character_exclusive": 4271,
+        "old_first_line": 75,
+        "old_line_count": 28,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4296,
+        "end_character_exclusive": 4348,
+        "old_first_line": 105,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4802,
+        "end_character_exclusive": 4842,
+        "old_first_line": 121,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5381,
+        "end_character_exclusive": 5563,
+        "old_first_line": 138,
+        "old_line_count": 4,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9440,
+        "end_character_exclusive": 9674,
+        "old_first_line": 243,
+        "old_line_count": 6,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10163,
+        "end_character_exclusive": 10230,
+        "old_first_line": 272,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs": [
+      {
+        "start_character": 3451,
+        "end_character_exclusive": 3484,
+        "old_first_line": 86,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7246,
+        "end_character_exclusive": 7493,
+        "old_first_line": 180,
+        "old_line_count": 4,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11554,
+        "end_character_exclusive": 11604,
+        "old_first_line": 261,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13018,
+        "end_character_exclusive": 13107,
+        "old_first_line": 288,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13872,
+        "end_character_exclusive": 13957,
+        "old_first_line": 306,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13974,
+        "end_character_exclusive": 13975,
+        "old_first_line": 310,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Tests.Shared/README.md": [
+      {
+        "start_character": 187,
+        "end_character_exclusive": 271,
+        "old_first_line": 9,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2517,
+        "end_character_exclusive": 2632,
+        "old_first_line": 60,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2839,
+        "end_character_exclusive": 3146,
+        "old_first_line": 77,
+        "old_line_count": 4,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3465,
+        "end_character_exclusive": 3628,
+        "old_first_line": 88,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8519,
+        "end_character_exclusive": 8575,
+        "old_first_line": 201,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8663,
+        "end_character_exclusive": 8720,
+        "old_first_line": 204,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8723,
+        "end_character_exclusive": 8869,
+        "old_first_line": 207,
+        "old_line_count": 3,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8871,
+        "end_character_exclusive": 8929,
+        "old_first_line": 211,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8935,
+        "end_character_exclusive": 9123,
+        "old_first_line": 213,
+        "old_line_count": 4,
+        "added_lines": 7,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11410,
+        "end_character_exclusive": 11514,
+        "old_first_line": 271,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11525,
+        "end_character_exclusive": 11625,
+        "old_first_line": 274,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11626,
+        "end_character_exclusive": 11814,
+        "old_first_line": 278,
+        "old_line_count": 3,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11999,
+        "end_character_exclusive": 11999,
+        "old_first_line": 284,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12671,
+        "end_character_exclusive": 12961,
+        "old_first_line": 303,
+        "old_line_count": 3,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13693,
+        "end_character_exclusive": 13756,
+        "old_first_line": 321,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Tests.Shared/YubiKeyTestState.cs": [
+      {
+        "start_character": 2116,
+        "end_character_exclusive": 2242,
+        "old_first_line": 51,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 17275,
+        "end_character_exclusive": 17354,
+        "old_first_line": 408,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 17506,
+        "end_character_exclusive": 17506,
+        "old_first_line": 412,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 17638,
+        "end_character_exclusive": 17726,
+        "old_first_line": 415,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 17879,
+        "end_character_exclusive": 17879,
+        "old_first_line": 419,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 20337,
+        "end_character_exclusive": 20338,
+        "old_first_line": 494,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ]
+  }
+}

@@ -280,7 +280,9 @@ public class WebAuthnClientCeremonyFrameTests
         await _backend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
     }
 
-    /// <summary>After the probe the token is re-minted with MakeCredential only (5.8.0: a used token no longer authorises).</summary>
+    /// <summary>Checks combined probe permissions followed by a new MakeCredential-only token request.</summary>
+    /// <remarks>Earlier commentary attributes re-minting to used-token behavior on firmware 5.8.0.
+    /// This fake-backend test does not measure or qualify that firmware behavior.</remarks>
     [Fact]
     public async Task MakeCredential_AfterExcludeListProbe_RemintsTokenWithMakeCredentialOnly()
     {
@@ -402,8 +404,9 @@ public class WebAuthnClientCeremonyFrameTests
     }
 
     /// <summary>
-    ///     With a token the probe is signed and the same token signs the assertion: a getAssertion accepts a token
-    ///     already used for an up:false probe (only makeCredential does not, see the registration test).
+    ///     Checks one GetAssertion permission-token acquisition and nonnull auth parameters on both the
+    ///     probe and final assertion requests. The fake backend and noncryptographic protocol exercise the
+    ///     SDK's token-reuse choice, not authenticator acceptance or command-specific token invalidation.
     /// </summary>
     [Fact]
     public async Task GetAssertion_AllowList_WithToken_SignsProbeAndAssertionWithOneToken()

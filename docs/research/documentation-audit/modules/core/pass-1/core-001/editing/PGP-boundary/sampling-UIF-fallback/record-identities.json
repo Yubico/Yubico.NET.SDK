@@ -1,0 +1,70 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/after/src/OpenPgp/CLAUDE.md",
+    "sha256": "1d48c7feea15a2ea287841d109d7ad02db24c4f817189cade61d0febf761e422"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/after/src/OpenPgp/src/OpenPgpSession.cs",
+    "sha256": "a94cc912faad198fb7adc595cb0a6846d98a53b8bf33a489e0e69637451d550e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/before/src/OpenPgp/CLAUDE.md",
+    "sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/before/src/OpenPgp/src/OpenPgpSession.cs",
+    "sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/before-identities.json",
+    "sha256": "23594f513ae03d128348d57dda54f310d0994ead3225256dfab4bdd089bf9709"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/changed-files.json",
+    "sha256": "01a5b1a5c4535b08f0381abf49e2e0d0337ac17ae3eab3a689e3bbf3dea49a48"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/export-attempt-1.txt",
+    "sha256": "93c21d6c5209c7de8eb5175ffdf1901ce251d57f3d660624b19b9a4788643208"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/focused.patch",
+    "sha256": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/local-source-identities.json",
+    "sha256": "89eb3e74a3d2632cf66b45df969be3997d3ce8e533cca9ee9c6a693de9d59dfb"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/prior-record-identities.json",
+    "sha256": "65416cf7701e3d9a792cfab43085382014cd8490e0ca526392a2aaf224de753f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/report.md",
+    "sha256": "1a7b76c24668be8c0b36e967dec5dc952eb147b7d7d7e60173372633a8b3a0a0"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/source-evidence.md",
+    "sha256": "ecdff6650a7e11610ea791d57e0cd6186bd417c3abd16c243f2dcec60b265e92"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/source-manifest.json",
+    "sha256": "f9df65e409a3c8683e5fbd2c6616244e577abd0f5a7d9b29798f48f31ce05d2a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/sources/Logger-v10.0.2.cs",
+    "sha256": "e55dfdcffc528b0f08ffe50ada8ad54d5ef192814df0e13fcb2e6e508ad08692"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/sources/LoggerExtensions-v10.0.2.cs",
+    "sha256": "33da05f947734950bf28fcdbea3c744963cf05d27474727c3d038cd089703b39"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/static-verification.json",
+    "sha256": "2815156512dca78daab6f1e9ebeb1fe92986b4daddc0210e244c6a06b071460c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/unit-miss-map.json",
+    "sha256": "d2ea1cc45223ff2f92c84efce1b8d0c86565695c6560bc12e9628b7b1c35681d"
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "status": "STATIC-RECORD-CHECKS-PASSED",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "assigned_units": 160,
+  "candidate_files": 53,
+  "candidate_groups": 7,
+  "dependent_source_ranges": 30,
+  "inherited_keys": 15,
+  "clean_nominees": 17,
+  "dispositions": {
+    "READ-CANDIDATE": 8,
+    "READ-CONTEXT": 73,
+    "READ-CLEAN": 79
+  },
+  "links_fences_ids_hashes_and_pin": "CHECKED",
+  "corrected_static_test_message_check": {
+    "expected": "Invalid credential password",
+    "actual_helper": "Invalid credential password",
+    "result": "MATCH-NO-FINDING",
+    "test_source_sha256": "a9f10ae1a4a9e63236d3d102c7166114123239901fff73013b73706cfce1add9",
+    "implementation_source_sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+    "executed": false
+  },
+  "independent_content_review": "PENDING",
+  "build_test_crypto_native_device_connector_executions": 0,
+  "git_index_ref_or_product_writes": 0
+}

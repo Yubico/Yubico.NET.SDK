@@ -1,0 +1,30 @@
+{
+  "corrections": {
+    "SAMPLE-PGP-001": {
+      "state": "FOCUSED-CONTENT-PASS; queued and untransferred",
+      "patch_sha256": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5",
+      "review_path": "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/review.md",
+      "original_record": "../reconciliation-2/sampling-findings.json#findings/SAMPLE-PGP-001",
+      "final_clean_credit": 0,
+      "transfer_state": "QUEUED-UNTRANSFERRED"
+    },
+    "SAMPLE-WA-001": {
+      "state": "FOCUSED-CONTENT-PASS; queued and untransferred",
+      "patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+      "review_path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review.md",
+      "original_record": "../reconciliation-2/sampling-findings.json#findings/SAMPLE-WA-001",
+      "final_clean_credit": 0,
+      "transfer_state": "QUEUED-UNTRANSFERRED"
+    },
+    "SAMPLE-B2-003": {
+      "state": "FOCUSED-CONTENT-PASS; queued and untransferred",
+      "patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+      "review_path": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/review.md",
+      "full_identity_record": "pf01-sampling-overlay.json",
+      "final_clean_credit": 0,
+      "transfer_state": "QUEUED-UNTRANSFERRED"
+    }
+  },
+  "source_registry": "editing/integration/queued-sampling-corrections.md",
+  "rule": "Additive to existing accepted batches, not replacements. No primary transfer, new sample read, clean credit or engineering finding in this response."
+}

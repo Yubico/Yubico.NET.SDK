@@ -1,0 +1,259 @@
+{
+  "registry_sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+  "counting": "14 original source-run keys in four nonadditive groups; no central state mutation",
+  "rows": [
+    {
+      "key": "oath-pilot-and-fixes-wave-002:DEC-007",
+      "source_run": "oath-pilot-and-fixes-wave-002",
+      "original_id": "DEC-007",
+      "group": "scp-effective-version",
+      "authoritative_state_unchanged": "policy-known-rationale-gap",
+      "authoritative_conclusion_unchanged": "OATH's effective 5.6.3 policy has pinned Python corroboration for 5.0.0 <= version < 5.6.3. Core's SCP03 5.3.0 and SCP11 5.7.2 gates are separate. Earliest physical support/workaround rationale remains bounded evidence debt.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-002",
+      "source_run": "openpgp-001",
+      "original_id": "PGP-CORE-002",
+      "group": "shared-exchange-ownership",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "Core async session disposal dispatches DisposeAsyncCore then derived Dispose(bool) in finally; connection ownership remains borrowed unless transferred. OpenPGP KDF cache alias/disposal and SCP applicability need separate applet verification.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-003",
+      "source_run": "openpgp-001",
+      "original_id": "PGP-CORE-003",
+      "group": "scp-effective-version",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "Keep raw 0.0.1, device metadata 5.8 beta and effective override distinct; Feature major-zero bypass is a host compatibility policy, not physical-firmware proof.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-004",
+      "source_run": "openpgp-001",
+      "original_id": "PGP-CORE-004",
+      "group": "shared-exchange-ownership",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "Exchange serialization and session disposal do not alone prove whole PIN/key/reset workflow atomicity. Preserve 6600/Failed and fresh-session recovery without native-interruption claims.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "piv-001:PIVCORE-002",
+      "source_run": "piv-001",
+      "original_id": "PIVCORE-002",
+      "group": "shared-exchange-ownership",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "Check multi-APDU authentication/recovery/reset overlap beyond individual protocol exchange guards. The session has no in-flight operation admission lease; disposal may race a larger workflow between exchanges.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "security-domain-001:SD-DEP-003",
+      "source_run": "security-domain-001",
+      "original_id": "SD-DEP-003",
+      "group": "scp-effective-version",
+      "authoritative_state_unchanged": "changed-source-review-pending",
+      "authoritative_conclusion_unchanged": "The current readiness completion boundary is centralized. SD's omitted reset configuration/explicit version was a local SD-IMP-005 question; compare reset callback arguments separately before calling options preserved.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "security-domain-001:SD-DEP-004",
+      "source_run": "security-domain-001",
+      "original_id": "SD-DEP-004",
+      "group": "shared-exchange-ownership",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "A direct factory borrows its connection; protocol exchange admission/drain is distinct from a whole multi-command workflow. APDU response copies and Le formatting need the SD GetData call-site trace.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-001",
+      "source_run": "yubihsm-001",
+      "original_id": "HSM-DEP-001",
+      "group": "scp-effective-version",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "Core Feature major-zero acceptance explains a compatibility query, not raw applet/metadata identity. Recheck HSM SELECT fallback, override and reset version retention locally.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-002",
+      "source_run": "yubihsm-001",
+      "original_id": "HSM-DEP-002",
+      "group": "shared-exchange-ownership",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "Connection/prompt borrowing and admitted native drain need the CALCULATE path. Historical 6982/Failed plus fresh-session recovery is measured outcome, not proof of native cancellation or timeout causality.",
+      "boundary_recommendation": "RELATED-CORE-MECHANISM-APPLICABILITY-ONLY",
+      "current_observation": "This YubiOTP trace confirms use of the shared effective-version or exchange/response ownership mechanism. Preserve the authoritative original state and applet-specific decision/physical gap. The named other applet boundary owns full source/profile closure; YubiOTP does not inherit or impose its firmware floor/reset/authorization policy.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-001",
+      "source_run": "yubiotp-001",
+      "original_id": "OTP-DEP-001",
+      "group": "shared-exchange-ownership",
+      "authoritative_state_unchanged": "changed-source-review-pending",
+      "authoritative_conclusion_unchanged": "Owned Linux typed HID opens now transfer grouped claims before native acquisition. Current ApplicationSession owns protocol disposal and only convenience factories own hidden connections. Recheck YubiOTP selection/failure cleanup with these routes.",
+      "boundary_recommendation": "SOURCE-TRACE-COMPLETE-QUALIFIED",
+      "current_observation": "Hidden/direct connection ownership, no-fallback selection, binding and failure cleanup traced. Native release and whole-workflow limits remain B1/B2/B3/B4/B5; X001 supplies current applet applicability.",
+      "candidates": [
+        "CORE-OTP-X001"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-002",
+      "source_run": "yubiotp-001",
+      "original_id": "OTP-DEP-002",
+      "group": "otp-hid-framing",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "OTP HID builds outbound CRC, polls programming sequence and resets after abandonment; inbound CRC belongs to the consuming command. Report length assumptions and failed-reset/reuse behavior need custom as well as typed Linux route checks.",
+      "boundary_recommendation": "SOURCE-TRACE-COMPLETE-RETAINED-CONCERNS",
+      "current_observation": "Built-in eight-byte invariant versus custom unchecked reports, outbound Core CRC versus inbound applet CRC, status/sequence, touch polling and awaited abort/reset latch traced. X002/X003 reuse B5 mechanisms; SmartCard permissiveness stays OTP-IMP-005.",
+      "candidates": [
+        "CORE-OTP-X002",
+        "CORE-OTP-X003",
+        "CORE-OTP-X009"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-003",
+      "source_run": "yubiotp-001",
+      "original_id": "OTP-DEP-003",
+      "group": "shared-exchange-ownership",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "SmartCard admitted exchange uses uncancellable constituent work. UserPresence fallback cannot reclaim a sensitive result after transfer if resolution throws; applet producer owns resolution-before-transfer and cleanup.",
+      "boundary_recommendation": "SOURCE-TRACE-COMPLETE-RETAINED-CONCERNS",
+      "current_observation": "Admitted SmartCard exchange uses None; backend resolves before sensitive result transfer. Source, serialized input, raw transport, ApduResponse Data/prefix and outer one-shot result are distinct owners. X004 adds an outer teardown-failure transfer concern; no shared mechanism is counted twice.",
+      "candidates": [
+        "CORE-OTP-X001",
+        "CORE-OTP-X003",
+        "CORE-OTP-X004",
+        "CORE-OTP-X005"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-004",
+      "source_run": "yubiotp-001",
+      "original_id": "OTP-DEP-004",
+      "group": "scp-effective-version",
+      "authoritative_state_unchanged": "source-mapped-review-pending",
+      "authoritative_conclusion_unchanged": "Feature admits major-zero development firmware; applet raw status, metadata and effective override remain separate. Initial OTP protocol indexes report bytes before returning status; exact route invariants require review.",
+      "boundary_recommendation": "SOURCE-TRACE-COMPLETE-DECISION-QUALIFIED",
+      "current_observation": "First HID report/version, second cached status, SmartCard Management/OTP selection and effective override are separate. Major-zero gates remain optimistic policy; support, NEO rationale, raw/effective prompt and sequence policy retain qualifications.",
+      "candidates": [
+        "CORE-OTP-X002",
+        "CORE-OTP-X006"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-005",
+      "source_run": "yubiotp-001",
+      "original_id": "OTP-DEP-005",
+      "group": "otp-relocation-evidence",
+      "authoritative_state_unchanged": "missing-evidence",
+      "authoritative_conclusion_unchanged": "Legacy/FIPS configuration relocation was unverified, not an established missing Core feature. Search actual current public surfaces in the boundary packet and retain point-in-time migration distinctions.",
+      "boundary_recommendation": "RELOCATION-SOURCE-INVENTORY-COMPLETE",
+      "current_observation": "Device-info route exists through Management and Core OTP capabilities/page/CRC reader. No typed FIPS-mode query or legacy four-byte mode mutator was found in complete current public snapshots and owning interfaces. Modern Management TLV writes are separate; device/profile parity remains qualified.",
+      "candidates": [
+        "CORE-OTP-X008"
+      ],
+      "documentation": "REOPEN-ONLY-AS-MAPPED; fresh editor/reviewer pending",
+      "runtime": "UNCHANGED",
+      "qualification": "NO-NEW-EXECUTION; original physical/profile qualifications retained"
+    }
+  ],
+  "extra_provenance": [
+    "audit-v2-20261022-20261031:N3",
+    "fixes-wave-001:CORE-001"
+  ],
+  "extra_provenance_disposition": "N3 unified CLI encoding/redirected confirmation fix retains exact scope; standalone OTP-IMP-009 persists. Historical serial 9681620 failure remains unexplained, with no physical closure."
+}

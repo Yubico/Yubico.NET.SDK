@@ -1,0 +1,153 @@
+"""One selected real compile context per qualified logger lease; final profile required."""
+import argparse
+import importlib.util
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import sys
+import xml.etree.ElementTree as ET
+
+HERE = Path(__file__).resolve().parent
+V = HERE.parents[1]
+sys.path.insert(0, str(V))
+from foundation import ROOT, RUNTIME, BASELINE, require, sha, git
+
+
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+capture = load('full_context_capture', HERE / 'capture.py')
+
+
+def project_closure(project, seen=None):
+    seen = set() if seen is None else seen
+    if project in seen:
+        return seen
+    require(project.is_file() and not project.is_symlink(), 'Missing/redirected actual project')
+    seen.add(project)
+    for node in ET.parse(project).getroot().findall('.//ProjectReference'):
+        include = node.attrib['Include'].replace('$(DocExamplesRoot)', str(ROOT)).replace('$(MSBuildThisFileDirectory)', '').replace('\\', '/')
+        require('$(' not in include and not node.attrib.get('Condition'), 'New conditional project reference needs explicit context review')
+        project_closure((project.parent / include).resolve(), seen)
+    return seen
+
+
+def context(name):
+    record = next(row for row in json.loads((HERE / 'compiled-contexts.json').read_bytes())['contexts'] if row['name'] == name)
+    return dict(name=name, project=str(ROOT / record['project']), body_ids=record['body_ids'],
+                injections=[str(HERE / value) for value in record['injections']])
+
+
+def checked_profile(path, digest, k):
+    require(path.is_file() and not path.is_symlink() and sha(path.read_bytes()) == digest, 'Use the exact independently accepted final profile SHA')
+    profile = json.loads(path.read_bytes())
+    require(profile['status'] == 'prepared-final-inputs' and profile['source_baseline'] == BASELINE,
+            'Final accepted-source input preparation is still pending')
+    k.verify(profile['files'])
+    return profile
+
+
+def source_state(selected, profile, k):
+    projects = sorted(project_closure(Path(selected['project'])))
+    files = {Path(row['path']) for row in profile['files']}
+    for project in projects:
+        current={path for path in project.parent.rglob('*') if path.is_file() and not {'bin', 'obj'}.intersection(path.relative_to(project.parent).parts)}
+        require({str(path) for path in current if path.suffix=='.cs'} <= set(profile['compile_sources']),
+                'An unreviewed compile source entered the fixed project closure')
+        files.update(current)
+    return dict(projects=[str(path) for path in projects], files=[k.identity(path) for path in sorted(files)],
+                source_baseline=BASELINE, metadata_head=git('rev-parse', 'HEAD').decode().strip())
+
+
+def preserve_mutable(directory, k, label):
+    rows = {}
+    for name, keys in [('before.json', ('inputs',)), ('compiler.json', ('inputs','outputs')),
+                       ('finish.json', ('inputs','outputs','compiler_outputs'))]:
+        path = directory / name
+        if not path.exists():
+            continue
+        data = json.loads(path.read_bytes())
+        for key in keys:
+            for row in data[key]:
+                source = Path(row['path'])
+                if (source.is_relative_to(ROOT / 'src') and {'bin','obj'}.intersection(source.parts)) or source.is_relative_to(RUNTIME / 'jobs'):
+                    require(row['path'] not in rows or rows[row['path']] == row, 'Mutable output has contradictory captured identities')
+                    rows[row['path']] = row
+    destination = RUNTIME / 'full-example-preservation' / label
+    destination.mkdir(parents=True, exist_ok=False)
+    mapping = []
+    for index, row in enumerate(sorted(rows.values(), key=lambda row: row['path'])):
+        require(k.identity(row['path']) == row, 'Original mutable build output changed before preservation')
+        target = destination / (f'{index:04}-' + Path(row['path']).name)
+        with target.open('xb') as output:
+            output.write(Path(row['path']).read_bytes())
+        retained = k.identity(target)
+        require(retained['bytes'] == row['bytes'] and retained['sha256'] == row['sha256'], 'Output preservation bytes differ')
+        mapping.append(dict(original=row, retained=retained))
+    k.write(directory / 'mutable-output-preservation.json', dict(files=mapping, scope='Only mutable local outputs/refs/generated compiler inputs. SDK/framework/NuGet caches and reconstructible source corpus are excluded.'))
+    return mapping
+
+
+def main(args):
+    require(re.fullmatch(r'[a-z0-9][a-z0-9-]*', args.label), 'Use a fresh simple context attempt label')
+    selected = context(args.context)
+    k = capture.kernel(Path(selected['project']))
+    profile = checked_profile(args.profile.resolve(), args.profile_sha256, k)
+    selected['known_compile_sources']=profile['compile_sources']
+    helper_path = V / 'checker-binding/bind.py'
+    require(sha(helper_path.read_bytes()) == 'a6c2c0954772242d99fed2460f7c473780835605752c59732d32b76002cb8cee', 'Qualified environment helper changed')
+    load('qualified_full_example_environment', helper_path).safe_environment()
+    before = source_state(selected, profile, k)
+    directory = HERE / 'attempts' / args.label
+    directory.mkdir(parents=True, exist_ok=False)
+    values = dict(DirectoryBuildTargetsPath=str(HERE / 'capture.targets'), DocExamplesCapture=str(directory),
+                  DocExamplesRoot=str(ROOT), DocExamplesSelectedProject=selected['project'],
+                  DocExamplesFullCaptureScript=str(HERE / 'capture.py'), DocExamplesInjectionFiles=';'.join(selected['injections']))
+    require(not any(os.environ.get(key) for key in values), 'Existing full-example capture override needs reconciliation')
+    os.environ.update(values)
+    k.write(directory / 'context.json', selected)
+    k.write(directory / 'source-before.json', before)
+    adapter = load('qualified_full_example_logger', V / 'run-command.py').load()
+    command = ['--label', args.label, '--toolchain', '--expect-target', 'build', '--',
+               'dotnet', 'toolchain.cs', '--', 'build', '--project', Path(selected['project']).stem, '--clean']
+    code = adapter.capture(adapter.parser().parse_args(command))
+    after = source_state(selected, profile, k)
+    k.write(directory / 'source-after.json', after)
+    preserved = preserve_mutable(directory, k, args.label)
+    require(before['files'] == after['files'] and before['projects'] == after['projects'], 'Actual source/configuration context changed across build')
+    require(code == 0, 'Failed context retained; send literal body diagnostics to the document editor')
+    receipt = V / 'commands-v2' / args.label / 'receipt.json'
+    result = json.loads(receipt.read_bytes())
+    require(result['status'] == 'passed' and result['exit_code'] == 0 and result['stream_complete'] and result['retention_complete']
+            and result['quiescent'] and result['result_counts']['warnings'] == result['result_counts']['failed'] == 0, 'Actual compile receipt is incomplete or failed')
+    finish = json.loads((directory / 'finish.json').read_bytes())
+    k.verify(finish['inputs'])
+    k.verify(finish['outputs'])
+    checked_profile(args.profile.resolve(), args.profile_sha256, k)
+    k.write(directory / 'accepted-compilation.json', dict(context=selected, command_receipt=k.identity(receipt),
+           profile=k.identity(args.profile.resolve()), source_before=k.identity(directory / 'source-before.json'),
+           captures=[k.identity(directory / name) for name in ('before.json','compiler.json','finish.json','source-after.json')],
+           retained_outputs=k.identity(directory / 'mutable-output-preservation.json'), preserved_local_files=len(preserved),
+           scope='Exact current source and original compiled/retained outputs at this context checkpoint; no test/example execution or later-path equivalence claim.', execution_status='not-run'))
+
+
+if __name__ == '__main__':
+    def interrupted(signum, frame):
+        raise KeyboardInterrupt('Full example wrapper received SIGTERM')
+    signal.signal(signal.SIGTERM, interrupted)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--context', required=True)
+    parser.add_argument('--label', required=True)
+    parser.add_argument('--profile', type=Path, required=True)
+    parser.add_argument('--profile-sha256', required=True)
+    try:
+        main(parser.parse_args())
+    except (Exception, KeyboardInterrupt) as error:
+        print(f'Full example compilation unaccepted: {type(error).__name__}: {error}', file=sys.stderr)
+        sys.exit(1)

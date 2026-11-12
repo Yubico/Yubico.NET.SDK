@@ -1,0 +1,21 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "product_patch_sha256": "3267ab5d547b281f19c28b3b709ef509a7cd54ee82439b6386b33a842030b937",
+  "allowed_document_count": 33,
+  "edited_document_count": 26,
+  "retained_document_count": 7,
+  "local_candidate_count": 103,
+  "proposal_count": 102,
+  "example_body_count": 193,
+  "new_missing_local_paths": 0,
+  "unclosed_fences": 0,
+  "git_diff_check_exit": 0,
+  "git_diff_check_output": "",
+  "product_patch_reverse_check_exit": 0,
+  "product_patch_reverse_check_output": "",
+  "no_csharp_config_asset_or_frozen_tracked_changes": true,
+  "index_unchanged": true,
+  "build_tests_compiler_formatter_native_crypto_device": "NOT RUN",
+  "independent_review": "pending"
+}

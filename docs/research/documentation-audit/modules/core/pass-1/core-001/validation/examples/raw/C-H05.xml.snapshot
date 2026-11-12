@@ -1,0 +1,12 @@
+
+//         ///   Signer:
+//         ///     message --> Digest(message) --> signer's digest
+//         ///     signer's digest --> format --> RSA(privateKey, formattedData) --> signature
+//         ///     send message + signature
+//         ///<br/>
+//         ///   Verifier:
+//         ///     message --> Digest(message) --> verifier's digest
+//         ///     signature --> RSA(publicKey, signature) --> formattedDigest
+//         ///     formattedDigest --> parse --> signer's digest
+//         ///     compare verifier's digest with signer's digest
+//         /// 

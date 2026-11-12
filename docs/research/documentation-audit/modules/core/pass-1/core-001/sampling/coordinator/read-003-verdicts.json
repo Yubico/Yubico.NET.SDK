@@ -1,0 +1,464 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of 50 pinned test/helper units and relevant source contexts; final overlap/mapping reconciliation pending",
+  "reading_file": "read-003.md",
+  "reading_sha256": "e632b684221564d78d642da4630956f0e7fbca40148557773c63f779cfd00f3d",
+  "additional_context": [
+    "DeviceIdentityContractTests third-party implementations",
+    "FindYubiKeysFaultInjectionTests ScriptedIdentityFactory and ConnectFor",
+    "DeviceInfoReaderTests concrete fake protocol implementations",
+    "DeviceInfoReader page-length control flow previously read"
+  ],
+  "units": [
+    {
+      "id": "core-001:unit:2a9641be276feaca",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+      "range_sha256": "37ff226a2f8ac8d7bf8436709599bb5e28aa0696093a2ac64702f517d5681cce",
+      "current_file_sha256": "2725180d951f0eaadc3635379f97d5eddfdd595dcc1818e7f43d93f882664115",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:84f185f37bd981c0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+      "range_sha256": "6b2d5d0ae07b426424db51c277676905376b15778ad5557c4973504ea7dbcfa1",
+      "current_file_sha256": "2725180d951f0eaadc3635379f97d5eddfdd595dcc1818e7f43d93f882664115",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:ffe76af0995b6cc7",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+      "range_sha256": "a41b67921588b12cadf768e6f780b168a835394ef3bd17634c453aff549d55af",
+      "current_file_sha256": "36daf0fd92f19d386d3d43d22b48a262ebd1014530427e40c70207566eeb06af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:241694d8cc9f58ee",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+      "range_sha256": "b3488613007ed16a8d5adf0e169a86035501d5a74d47ef3aeacc93fe8edee680",
+      "current_file_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:ada359febf4d2cad",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "range_sha256": "1d5bffec9fbe7983a85c9d28bdc8a0bb9d6a1218404be38a6dd9340d3d6cdea5",
+      "current_file_sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:ee0a17e4473a845f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "range_sha256": "29b63b93900570bb1d02b4fc8a297b7c91a3bb9cba8149334d768d41429fbd14",
+      "current_file_sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:6f4d2bce814292ac",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionTypeTests.cs",
+      "range_sha256": "949b2a1600ee81dc492c013f131dff4dcddafc5c93e73e784808053f6e4da249",
+      "current_file_sha256": "1c7d6159e9f88f9da5c3b53ec5aad6e9f358e5a9391f5c336bfd62239e9c3cd5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:d371f276b0b17d55",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "c8bc96eb5d2940fbbdb3d57d482084331b9741c972a83bd8de4e6973dd4ca03f",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:b8b678a2e86cffac",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "1b8fb28e1d96896e1199fe57bab6114cd81230dfa499953ce9d3ff6729a1acaf",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:6cae9db755d5bd3e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "71684e50a106e4de8b06d4bad09e4964bc867d67976420a02d8a81b064aa26bf",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:129c402fc85f1cea",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "1d2c6fac815859b1e144c7b589fc22005593092b5431f3c2347f56893cec18d5",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:88137649bb50251c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "84145e589c29bf4109dcb088a17049392aaabe273fb83af7f36468c0c166d3ed",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:7e041972161b3438",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "54b0acbdeb8bacde087d144d5240fa72e6100a598784006f41222e6cfd651408",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:c84fdf084fc2b106",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "6d8334b3f258f5434e4f2fa20fb1a9b85967877ef4f85f42397097dfaec5476f",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:1d6c3d9681522a9b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "cf89c37dfe25fcf4c060b9a24fff41940a329b5ccbc01f64153a34ece526190d",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:c6bd7a57ecbcdb99",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "range_sha256": "fc51bd64a20f29b2af577b27d256b0a75ee5b0e0cbe53b099e1a03bbf08bbb79",
+      "current_file_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:df7b185fc050c276",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "range_sha256": "a9f1a775a1880853f428408efe4e5c19efc0f451ab35b73f54215c1ce12f2e75",
+      "current_file_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:5819f85c176432a0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "range_sha256": "5a18ed337687efe15cd303bcd2cafc937b519294670c95c17b123b0ba3a3fe93",
+      "current_file_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:0985fedf9fa9be5c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "range_sha256": "3ff9dbac308d9c789ebb26903bbd7b1c378404d75d1d3a788c93b930325f6db3",
+      "current_file_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:3f42a5d73901f082",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "range_sha256": "8771e73600133a8634e0d90fd8d757a6fcf655367d005fad7e36cb4975ec5c18",
+      "current_file_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:a44c5039d794914f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "range_sha256": "878a51aa5419df3e3b43143b1ec7b4432ae5a534aae28c3c33b2062f5c364d3d",
+      "current_file_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:f765dbcbbf891d58",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "range_sha256": "642ed88ba2a165a2558406762ff9d4a2f0299bd39a31cfff77fc0a15aa5827af",
+      "current_file_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:178443944681bf16",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "range_sha256": "8771e73600133a8634e0d90fd8d757a6fcf655367d005fad7e36cb4975ec5c18",
+      "current_file_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:5c75f53b740f7a56",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "range_sha256": "089b4fe0b5e0f43f07dce7f0ac62df87d82686eaab70d59ec2503931cccd6ea8",
+      "current_file_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:5248e323347ed4ed",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "range_sha256": "5b344d7b33fc3952a4f405c3ffda8b918435644d1ac89a08578d517136661668",
+      "current_file_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:5b10960d28bc25d8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+      "range_sha256": "c874b699c2ef035551e5184643e69cb03ce1a006bb0092750ad2b6bd112df095",
+      "current_file_sha256": "7fb638eb701db765ada5fbd04796f272baa78fae19cb213e7c4f7cf66c5957c2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:264b9a61da0148c8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs",
+      "range_sha256": "35309d1857e5d6374378e967b91997a197699890ffe063efb7f17178e037819e",
+      "current_file_sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Held-disposal fake and sibling-open timeout/count assertions are explicit; finally releases the hold and uses uncancelled bounded fake drain. This is not native hardware teardown evidence."
+    },
+    {
+      "id": "core-001:unit:06d91e3f9f9dbfde",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "range_sha256": "d84a257461ee9cdf17d52a21b12058a5959211ded4a9c7c6e7e11f1fcc2e4d87",
+      "current_file_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "One waiter cancellation and later timed-out wait retain one connect call; finally signals connection failure. The test-token cleanup wait is not unconditional drain under runner cancellation."
+    },
+    {
+      "id": "core-001:unit:7272d5c9e7cc2028",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "range_sha256": "d737ee6314af2bd8d6b613eacec54d7ee6ff98ff774d3e4f86c2361ed9903136",
+      "current_file_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:ccd03d010c5e42ee",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "range_sha256": "9d4371b764850cf82a19f8030348ef7a679edf16b39f394c36c6ec3fa221b011",
+      "current_file_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:30569540689bd08c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "range_sha256": "d737ee6314af2bd8d6b613eacec54d7ee6ff98ff774d3e4f86c2361ed9903136",
+      "current_file_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:e59a7fc4150cd7c1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "range_sha256": "229f72f33db81f87b928230c59df04f33dafdeba6f3b89114ac602f3bd044de9",
+      "current_file_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:fd5536c255cb40d9",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "range_sha256": "d737ee6314af2bd8d6b613eacec54d7ee6ff98ff774d3e4f86c2361ed9903136",
+      "current_file_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:21e721dfeef0acc0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "range_sha256": "3a091cb1e7db67c6c140a7ea9aaf208856ee4eac7787bda4623e5d56ae6e16e1",
+      "current_file_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:e1750f48a7e48d56",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FeatureTests.cs",
+      "range_sha256": "ef6c72ae943d87e1ca78330ad1604b2baf20bf3284a2df743e0253f7bda1fd62",
+      "current_file_sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:ee61d4edd0255704",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysEnumerationBudgetTests.cs",
+      "range_sha256": "76363f7f43a8da978dba6bcc18f7f9638a4c5c86afc21e9f469e41d5e60df4dd",
+      "current_file_sha256": "14d4a83b5684d5478ad7f4b9ac8b51d2d48f137755fee7440a61a6e804562171",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Watchdog is outside the TimeoutException assertion; zero enumeration budget, later recovery count and pending-enumerator release are exact fake-oracle scope."
+    },
+    {
+      "id": "core-001:unit:1d6488ddfeddc05b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysEnumerationBudgetTests.cs",
+      "range_sha256": "9af58fa993e33e49ffcd63025d8ff99642f6b2ecafddfebd10c416ac5187a493",
+      "current_file_sha256": "14d4a83b5684d5478ad7f4b9ac8b51d2d48f137755fee7440a61a6e804562171",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:6f9b6d5f4aa9c49c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysEnumerationBudgetTests.cs",
+      "range_sha256": "8c412fdd86e26a01d6a48f1c4730bfe9f4c5098695a3f1dcc01026537701fbd3",
+      "current_file_sha256": "14d4a83b5684d5478ad7f4b9ac8b51d2d48f137755fee7440a61a6e804562171",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:8ad47adcb57fb1ec",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "f6673569db24bc7af1e9fbc98bd4da39ccd13eb5b69792ceacbb8899dfae59cb",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:fc02fc15609161b7",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "b78a8f181542d712c5eea2da4cfa527d19bbde37270b501dcb689dfa68c526f2",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:a04e1e78211fc8ee",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "bc972e5096869789d4358b2a6d9455beb2d135095da73f8ebc24722737eb6e9b",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:e8433d7f15d34b70",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "2ce5d7adde00c6f98cfaab475bcc41db2820026224e019ee0ced4d4d65c106d4",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:457eb72bbf026185",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "3b010d3c13783f1ff9ea05b72e3eec186f14668821c39da5bbf9787c1d271d93",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:c0b686c061e5e6d6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "80068127b657064b051dbe6e73c89887abcbb2d7b7b8af5b689fda2cd5ddd4c9",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:42d5bf06a4834d36",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "01f957a8ef2af92dba1ef1337e40d8a77b45b978afea8d839713fb91a93ac10b",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:1b00e9525e807878",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "723c43afff679535adcbfd4805c43e030268506ca92d8be4f564c22f97ea61b8",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Sticky volatile flag and existing ConcurrentBag entries checked with ConnectFor. Supports registered pending work and later calls observing the flag; no atomic concurrent-registration/drain guarantee accepted."
+    },
+    {
+      "id": "core-001:unit:6d9764a032730fca",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysPidMergeTests.cs",
+      "range_sha256": "c3af7ee94bc99c6e8a81ec147a15b974a89421c9ea331f0bc435aac77976f179",
+      "current_file_sha256": "2ed38592f771e440f6b13313b5badd33df221710a2806c45222aa899ba3636f0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:9146747552870875",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysPidMergeTests.cs",
+      "range_sha256": "fbf3dd472dc7c5082374f49934fdc7de18fbf56ec9c812bfc74eda7bc659822f",
+      "current_file_sha256": "2ed38592f771e440f6b13313b5badd33df221710a2806c45222aa899ba3636f0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:0f08c4ac8fa60582",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysPidMergeTests.cs",
+      "range_sha256": "91a18d5e98f33f7bb6a1811d3820904332520b6b3816c0f9b0b9261f53b3961c",
+      "current_file_sha256": "2ed38592f771e440f6b13313b5badd33df221710a2806c45222aa899ba3636f0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    },
+    {
+      "id": "core-001:unit:4c687969a62af799",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+      "range_sha256": "d697e8ecc1c7566a525b5bfc98a49611b4ab0f518fa213a2289d06d73fe42f69",
+      "current_file_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled test/helper unit read by Astra; declaration, scripted state or exact assertion scope is supported. No hardware, global cleanup or conformance conclusion is inferred."
+    }
+  ]
+}

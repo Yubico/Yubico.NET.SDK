@@ -1,0 +1,72 @@
+{
+  "review_kind": "focused-independent-sampling-correction-content-review",
+  "decision": "PASS",
+  "acceptance_scope": "Exact two-file additive documentation patch only; apply after accepted transport revision2. Not a replacement full patch, broad audit or runtime qualification.",
+  "accepted_focused_patch_sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049",
+  "accepted_focused_patch_bytes": 3124,
+  "accepted_predecessor_full_patch_sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+  "source_files": [
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "before_raw_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "accepted_after_raw_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+      "finding": "SAMPLE-B2-001",
+      "original_unit_ids": ["core-001:unit:2ab3cc1db2ed4269", "core-001:unit:7a90c15f7fb4a767"],
+      "accepted_current_documentation_lines": [[57, 97]],
+      "reviewed_control_flow": ["WaitForEvent194-241", "SignalShutdown265-298", "WriteShutdownSignal356-394", "LinuxHidDeviceListener.Stop119-149", "ListenerThreadProc151-169", "RunEventLoop171-205"],
+      "conclusion": "Attempted wake has no acknowledgment; missing/invalid/disposed and failed/short-write paths do not establish wake, loop exit, drain or release. EAGAIN may mean already pending signal, not necessarily failure to wake. Four EINTR attempts bound attempts, not wall time."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "before_raw_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "accepted_after_raw_sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+      "finding": "SAMPLE-B2-002",
+      "original_unit_ids": ["core-001:unit:5c0f333d06ef9126"],
+      "related_consistency_unit": "core-001:unit:cf330b6a639970cd",
+      "accepted_current_documentation_lines": [[19, 67]],
+      "reviewed_control_flow": ["Start70-116; Started guard74-77; factory86; Initialize89; session96"],
+      "conclusion": "Factory invoked once for new-session event-source creation attempt, not already-started no-op calls; factory invocation does not establish successful initialization/session startup."
+    }
+  ],
+  "test_evidence": {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+    "reviewed_lines": [[33, 92], [95, 262], [278, 356]],
+    "oracle": "Supplied failure outcomes assert Error, disposal and one wait; caller Stop of blocked fake asserts under4 seconds, Stopped/disposed and one wait. Fake wait/wake uses ManualResetEventSlim, not native poll/eventfd.",
+    "execution": "READ-ONLY; NOT-EXECUTED",
+    "qualification": "Managed loop/caller-stop evidence only, not production native completion, all wake-failure behavior or shutdown deadline."
+  },
+  "accepted_input_records_relative_to_sampling_correction": {
+    "report.md": "b57b46c9b81e14385cda3647a7fb8dac763d1437bbdd21086385dcd8afacba49",
+    "inputs.json": "22cb5dc4ba229c5c9b5b443c0d8a3b1371da26cab7683d81c5307ff233f79473",
+    "file-dispositions.json": "ae10cc1d379bb43807cfd432969f31249ecdf185c01406a20909ce78174157c4",
+    "finding-dispositions.json": "4c7a233f13059315dd7a6873449409cea83ae9344326d11b810cda67522c8357",
+    "original-unit-anchors.json": "4c7532c5b16f5ef1a0afd198426cdc38edc89747d93cf0fca37201fe6beeccbf",
+    "return-identities.json": "e721030d7839a8ad9978aeb978786b1ea1a7eca9242fc40c4938a45e994299e7",
+    "static-preservation.json": "92eab64ba9f05d06c74b6c49c06845ab6601e95199886a64488f993bc3a29956",
+    "xml-check.json": "3ab4dd23c62d5aa8d1e01e4d7d000966923231b83ca86703f90227e2d8d770f4"
+  },
+  "independent_static_checks": {
+    "result": "PASS",
+    "discrepancies": [],
+    "two_saved_before_texts_equal_primary_current_bytes": true,
+    "two_before_hashes_match_accepted_revision2": true,
+    "two_after_hashes_match_records": true,
+    "focused_patch_equals_independently_regenerated_delta": true,
+    "nonblank_non_full_line_comment_lines_unchanged": true,
+    "bom_and_final_newline_preserved": true,
+    "other_eligible_source_files_byte_unchanged": 211,
+    "prior_editor_review_records_hash_exact": 27,
+    "original_selected_and_consistency_unit_identities_match_B2_ledger": 4,
+    "listed_correction_editor_record_hashes_match": 8,
+    "no_examples_added_or_changed": true,
+    "existing_three_example_inventory_preserved": true,
+    "limitation": "Static text/hash comparisons, not compiler/tokenizer/API-binding/runtime verification."
+  },
+  "remaining_mandatory_corrections": [],
+  "sampler_ownership": "Sampler alone owns edited-overlap exclusion/zero-credit accounting and XML-category expansion; this review assigns no sampling or coverage credit.",
+  "coordinator_validation": "Separate and not claimed passed; no new compilation or test execution.",
+  "qualifications": "All prior native, physical, deployment, producer and platform gaps remain unchanged; no wake, shutdown, drain, release or device result is newly qualified.",
+  "execution": "Read-only source/assertion/record inspection and Python text/hash comparisons; no product/editor-record edits, broad audit, new tooling, build/tests/native/device/SDK-crypto/formatter/Git commands or mutations/subagents.",
+  "owned_writes": ["editing/transports/sampling-correction/review.md", "editing/transports/sampling-correction/review-identities.json"],
+  "stopping_point": "Core Pass1 publication and deferred finding handoff, then stop. No additional campaign authorized."
+}

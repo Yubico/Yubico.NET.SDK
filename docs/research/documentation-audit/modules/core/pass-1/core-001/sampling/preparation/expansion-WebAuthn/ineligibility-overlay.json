@@ -1,0 +1,32 @@
+[
+  {
+    "id": "core-001:unit:7fe08c46f10afee5",
+    "owner": "WebAuthn",
+    "stratum": "tests-and-helpers",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict_text": "Ineligible preamble: license/imports/namespace only; zero clean credit.",
+    "final_clean_credit": 0,
+    "classification": "Specific pure-preamble exclusion",
+    "scope": "Only these exact IDs; no broader private/internal/test or narrative-policy narrowing"
+  },
+  {
+    "id": "core-001:unit:c6719030f9881ef4",
+    "owner": "WebAuthn",
+    "stratum": "tests-and-helpers",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict_text": "Ineligible preamble: license/imports/namespace only; zero clean credit.",
+    "final_clean_credit": 0,
+    "classification": "Specific pure-preamble exclusion",
+    "scope": "Only these exact IDs; no broader private/internal/test or narrative-policy narrowing"
+  },
+  {
+    "id": "core-001:unit:c8377e0a58dac11c",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict_text": "Administrative maintenance policy: read and retained, but no substantive clean contract credit. Replace for quota if needed.",
+    "final_clean_credit": 0,
+    "classification": "Specific administrative maintenance policy; no substantive contract clean credit",
+    "scope": "Only these exact IDs; no broader private/internal/test or narrative-policy narrowing"
+  }
+]

@@ -1,0 +1,8 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core.Devices;
+
+namespace Audit20261111.DocExamples;
+internal static class ExampleA03
+{

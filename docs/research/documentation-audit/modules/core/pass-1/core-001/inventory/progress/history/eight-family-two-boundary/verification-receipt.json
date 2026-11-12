@@ -1,0 +1,60 @@
+{
+  "result": "PASS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_record_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "completed_family_count": 8,
+  "completed_static_boundary_count": 2,
+  "completed_units": 12022,
+  "family_only_units": 11101,
+  "boundary_only_units": 921,
+  "remaining_units": 2022,
+  "completed_Core_units": 9020,
+  "remaining_Core_units": 0,
+  "completed_external_units": 3002,
+  "remaining_external_units": 2022,
+  "completed_primary": 10319,
+  "completed_shared": 1703,
+  "source_depth_limit": "One whole Core API Unshipped snapshot qualified support/type context; zero clean or all-member binding credit.",
+  "Management_source_boundary": "B4/B6 source follow-ups reconciled; independent/runtime gates pending",
+  "CTAP2_source_boundary": "Static reads and B4/B6 source follow-ups complete; WebAuthn return OPEN",
+  "B1_platform_source": "B3 macOS and B4 Windows supplied, zero additional IDs; late Windows delta/native qualifications OPEN",
+  "current_source_paths_checked": 574,
+  "missing_extra_overlapping_IDs": 0,
+  "original_inventory_files_unchanged": 38,
+  "original_coverage_packets_investigator_records": "UNCHANGED",
+  "active_partial_boundary_records_read_or_credited": 0,
+  "report_lines": 28,
+  "historical_five_family_receipt": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/five-family/receipt.json",
+  "historical_five_family_receipt_sha256": "daa7c031e31851aee6d79d1a711d7f6780340bae63a03791f04d05186dd5d8d3",
+  "preserved_preparation_failures": [
+    {
+      "attempt": 1,
+      "error": "git show fe342:docs/research/documentation-audit/core.md exited 128; active metadata handoff is absent at the source pin",
+      "correction": "Check its original inventory hash and published 01a114d4 bytes as post-pin metadata context, explicitly recorded; all actual source paths remain pinned."
+    },
+    {
+      "operation": "record patch",
+      "error": "One multi-hunk patch rejected for unmatched result context; no envelope applied.",
+      "correction": "Applied only matching hunks; no source or investigator input changed."
+    }
+  ],
+  "review_edit_runtime": "PENDING; provisional groups not accepted bugs; no final clean sampling denominator",
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/coverage-progress.json",
+      "sha256": "8e309057c394b070530329cb5ce256dcda9f87b778a31eb31a96d3806968b125"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/coverage-progress.md",
+      "sha256": "ca5a431cf52e54ecb9468d33f5a1dfe12c9a1826d24aab934478f1eec00a4755"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/aggregate-all-families.py",
+      "sha256": "93be593f171ac819cc080dceeb0f7235a540e6e954c29300adad9a763d1d61bc"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/all-families.stdout.json",
+      "sha256": "f03005a045c329548557e3aee6fc6ad534c26cfa089c15044f8ea1836d11feb7"
+    }
+  ]
+}

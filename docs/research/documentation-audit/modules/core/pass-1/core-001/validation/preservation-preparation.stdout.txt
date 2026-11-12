@@ -1,0 +1,14 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "metadata_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+  "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "frozen_manifests": 8,
+  "frozen_artifacts": 5366,
+  "frozen_nontext_artifacts": 9,
+  "integration_records": 8325,
+  "integration_bytes": 226365754,
+  "prior_piv_files": 114,
+  "original_user_files": 4,
+  "protected_git_clean": true,
+  "other_worktrees": "outside this phase; no unchanged-HEAD requirement"
+}

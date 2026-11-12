@@ -1,0 +1,12 @@
+{
+  "predecessor_identity_seal": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/identity-seal.json",
+  "predecessor_seal_sha256": "b93a2584b10dc6ee35c264417b452cc3c80d93d5b4183451bdc121cc67ab61fb",
+  "actual_verdict_base": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/actual-current-read-verdicts.json",
+  "population_base": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/population-current-range-overlay.json",
+  "replacement_rule": "Replace rows by exact id from affected overlays; all other rows, verdicts, aliases, counted allocations and qualification histories inherit byte-exact predecessor records.",
+  "actual_overlay": "affected-actual-read-map-overlay.json",
+  "population_overlay": "affected-population-range-overlay.json",
+  "quotas": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/owner-role-quotas.json",
+  "owners": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/owner-totals.json",
+  "current_products": "current-products-at-successor-capture.json"
+}

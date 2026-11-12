@@ -1,0 +1,233 @@
+{
+  "files": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0002-Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.deps.json",
+        "bytes": 37512,
+        "sha256": "d0faf1aa367830a130569ce103a1f31ae6c6288947609e099f024f91eb059686"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0003-Yubico.YubiKit.Piv.IntegrationTests.deps.json",
+        "bytes": 37512,
+        "sha256": "d0faf1aa367830a130569ce103a1f31ae6c6288947609e099f024f91eb059686"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0004-Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0005-Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0006-Yubico.YubiKit.Piv.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0007-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1232,
+        "sha256": "10f7162b8f2f8b9394277414c2f6528cf09cd9c032f5c4e9953e2fbe8c5c0a9a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0008-Yubico.YubiKit.Piv.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1232,
+        "sha256": "10f7162b8f2f8b9394277414c2f6528cf09cd9c032f5c4e9953e2fbe8c5c0a9a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 744,
+        "sha256": "abfa3351e07b935b74c77af7596317004d5d4e2210023a91b8d5f1bac6dc7459"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0009-Yubico.YubiKit.Piv.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 744,
+        "sha256": "abfa3351e07b935b74c77af7596317004d5d4e2210023a91b8d5f1bac6dc7459"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0010-Yubico.YubiKit.Piv.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0011-Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0012-Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0013-Yubico.YubiKit.Piv.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 68608,
+        "sha256": "609bb03a48d71fcceddd6fc1bc55b454e786ba7fa8bc08e25973de6593d5863c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0014-Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 68608,
+        "sha256": "609bb03a48d71fcceddd6fc1bc55b454e786ba7fa8bc08e25973de6593d5863c"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0015-Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0016-Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/project.assets.json",
+        "bytes": 191975,
+        "sha256": "0a58806b7d376955bfea12a9abc490ee01dffe576b99fde0ebd48506700419e2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0017-project.assets.json",
+        "bytes": 191975,
+        "sha256": "0a58806b7d376955bfea12a9abc490ee01dffe576b99fde0ebd48506700419e2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0018-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      }
+    }
+  ],
+  "scope": "Only mutable local outputs/refs/generated compiler inputs. SDK/framework/NuGet caches and reconstructible source corpus are excluded."
+}

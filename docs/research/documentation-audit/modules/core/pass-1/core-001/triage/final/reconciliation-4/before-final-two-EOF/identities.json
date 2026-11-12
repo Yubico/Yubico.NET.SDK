@@ -1,0 +1,60 @@
+{
+  "scope": "Preserve first reconciliation-4 draft before latest two-EOF transfer update; historical pending states remain exact.",
+  "files": {
+    "closing-results-placeholders.json": {
+      "snapshot": "closing-results-placeholders.json.snapshot",
+      "sha256": "19829a43bcda4292955f29bc324a2876b1780bbae80e4f0b9fcf6b3414e0f843",
+      "bytes": 1999
+    },
+    "compilation-and-checkpoints.json": {
+      "snapshot": "compilation-and-checkpoints.json.snapshot",
+      "sha256": "d2cb0842c652d60a53af3a05e4aeac3bacc1a2964aa3e94e8f8ade91ab697e24",
+      "bytes": 1739109
+    },
+    "deferred-finding-continuity.json": {
+      "snapshot": "deferred-finding-continuity.json.snapshot",
+      "sha256": "6177a7a9553c633af9908bd97c1f5196f7ea9899160ce6d017d0af7b4c1a9406",
+      "bytes": 10172
+    },
+    "deferred-findings.reconciliation-3.md.snapshot": {
+      "snapshot": "deferred-findings.reconciliation-3.md.snapshot.snapshot",
+      "sha256": "1c6f3001b3dbc54b5f31947aba422b6e2d1a85e77975f5f414c16047e30139e4",
+      "bytes": 36845
+    },
+    "formatter-state.json": {
+      "snapshot": "formatter-state.json.snapshot",
+      "sha256": "18de719d1e3131d7728b1205dc43e29fca57ad9f99e4376db78d88e5707460e5",
+      "bytes": 93119
+    },
+    "history-preservation.json": {
+      "snapshot": "history-preservation.json.snapshot",
+      "sha256": "a9ec419cd6985e9865613183b55e96040e805fe1d243099fa31007a3d703b0e7",
+      "bytes": 8080
+    },
+    "logging-body-retraction.json": {
+      "snapshot": "logging-body-retraction.json.snapshot",
+      "sha256": "ffd0296292fa17fcbb6c06a2632d990da245bae41627c7be2760097feb6bf6ff",
+      "bytes": 14820
+    },
+    "reconcile.py": {
+      "snapshot": "reconcile.py.snapshot",
+      "sha256": "b1ad9d0b4b6eeb7ed1085a73bbf97162f2eccb5d4517300a722d4dd96e080212",
+      "bytes": 21441
+    },
+    "sampling-state.json": {
+      "snapshot": "sampling-state.json.snapshot",
+      "sha256": "786bc4d8cd3e24e7edf1cbc58eca34f1f340a84f50293071a8e001e18647acb0",
+      "bytes": 3549518
+    },
+    "transfers-and-PF02.json": {
+      "snapshot": "transfers-and-PF02.json.snapshot",
+      "sha256": "43b81efc687c04062db91f55b69d54235dc03487e877785ffb37bdae2b7b58b5",
+      "bytes": 649960
+    },
+    "verification.json": {
+      "snapshot": "verification.json.snapshot",
+      "sha256": "4bb89b4ba7ed6183b623e70e8cbfafc789ca5169518c2a44f8667bbb709f03b1",
+      "bytes": 13783
+    }
+  }
+}

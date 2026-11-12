@@ -1,0 +1,11 @@
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -111,7 +111,7 @@
+ > Deep dive: `docs/CRYPTO-APIS.md` (load when computing hashes/HMAC, AES, RNG, or replacing legacy crypto patterns).
+ 
+ **Logging:**
+-- ✅ Use static `YubiKitLogging.CreateLogger<T>()` — NEVER inject `ILogger`
++- ✅ Use a static logger: call internal `YubiKitLogging.CreateLogger<T>()` where Core/friend access is available; otherwise use public `YubiKitLogging.LoggerFactory.CreateLogger<T>()` with `Microsoft.Extensions.Logging`. Configure the factory before first use and keep its providers alive through all captured logger use — NEVER inject `ILogger`.
+ - ❌ NEVER log PIN/key/credential values; log lengths and IDs only
+ 
+ > Deep dive: `docs/LOGGING.md` (load when adding logging, choosing log level, or configuring providers).

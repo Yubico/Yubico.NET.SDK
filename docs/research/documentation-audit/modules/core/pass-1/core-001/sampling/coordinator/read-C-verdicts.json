@@ -1,0 +1,570 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of62 complete pinned C units and relevant retained originals; final eligibility/mapping pending",
+  "reading_sha256": "3624b65a8e5621645719a4b22e4b6c516fb3fa5435c4efa57006810676748421",
+  "originals": [
+    "RFC8410 \u00a73/\u00a710.2",
+    "RFC5639 \u00a74.1",
+    "RFC7517 AppendixA.2"
+  ],
+  "units": [
+    {
+      "id": "core-001:unit:5a12583307568a0a",
+      "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "range_sha256": "593a8e6b6f64d98426f80d7eaeec2060cc3e2827687c556f80c901fc60ac51a7",
+      "current_file_sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:8136013eac673552",
+      "path": "src/Core/src/Credentials/IUserPresencePrompt.cs",
+      "range_sha256": "3e469cbf18f5cf43f491879d772ce5be4e95131ccdbb68a8e9a8e78d1a7c1ad8",
+      "current_file_sha256": "a569b9dd7c0a0386554ecae71c3de0b5854441c75e16d2bb8e4ba6ea734811c9",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:a4915672d200fafe",
+      "path": "src/Core/src/Credentials/UserPresenceApplications.cs",
+      "range_sha256": "23363f1f4ea4108eeaf8e926644ba6ef4dc36aa1ab1e4831e62daed0227324f9",
+      "current_file_sha256": "8bb35f828eadb9e8cbe84a1a0fdbeb96539b8dce9920ce3d41853436cc07fcf7",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:719384e829908b14",
+      "path": "src/Core/src/Credentials/UserPresenceOperations.cs",
+      "range_sha256": "97ee5dd6122c1b68d082b557e0e800e8aa11fe6d3a127b2d1e93370e5606fa86",
+      "current_file_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:2f3a453051016bf1",
+      "path": "src/Core/src/Credentials/UserPresenceOperations.cs",
+      "range_sha256": "a9f7238cf6d0152e15e776e5234f06d16d2065f2569cb3c2ac9b2f4215dbe35f",
+      "current_file_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:720f2bf625934af1",
+      "path": "src/Core/src/Credentials/UserPresenceOperations.cs",
+      "range_sha256": "88c2981e383d143cf50002f6ee07daea040d4e8d5062a391de59892771a9dcd0",
+      "current_file_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:76337fd3c2c48418",
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "range_sha256": "d005e9da7f1ab194465b8d3ab6c055b608f42a2d3410d43ace3c8235b4ba7f4a",
+      "current_file_sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:c07b65f7049672fd",
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "range_sha256": "a79faed51cd0dcb24e0093e94c0f9c04ee90080841e38b33773f945f36e03a20",
+      "current_file_sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:05d91bd48cc4ba9f",
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "range_sha256": "a750f2f22de74a295772ecbf1f811e1761f0d633a22ba8f29fdab1594cee835b",
+      "current_file_sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:abc4e9861f35daf8",
+      "path": "src/Core/src/Cryptography/CmacPrimitives.cs",
+      "range_sha256": "9fe204176ded3913df1dbd2665bb8d7e85e45b83d4f01e584eef70021c480c18",
+      "current_file_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:f5ca60315dba1804",
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+      "range_sha256": "10141459db9b9b7a9cce7ecbd4d8a22350321feb185ccefb5de667917a62f28f",
+      "current_file_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:cb619071acc9bba8",
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+      "range_sha256": "21cbfd975fa753e5baf6084095915afd62e3d50c1c3c520718e7d1c781e63892",
+      "current_file_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:64d441b7b1bb1484",
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+      "range_sha256": "8af03706ca11f5a52980a2ed0fb51b0f95ef5fb2e2372a764588d859a60b2e1f",
+      "current_file_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:dceaa831d1742f95",
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+      "range_sha256": "4966002f3daae1b0e17c4305f8397d6989f76c91fc11703ebb3e3d67636e7779",
+      "current_file_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:0b78e34a16aba2d2",
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+      "range_sha256": "f43a30d12ab294793c2032c7f2eaa909c7d692bb242074947fd983ad788f30e4",
+      "current_file_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:60b8bbc5afbaceb8",
+      "path": "src/Core/src/Cryptography/CurveInfo.cs",
+      "range_sha256": "b294e15880394338d7b132ee9e49abcdf9b6e6f53fe80931051cbdc8994a7097",
+      "current_file_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:4848f6c1538b430a",
+      "path": "src/Core/src/Cryptography/CurveInfo.cs",
+      "range_sha256": "6a953055e8ec3c27523510d0966ebb9b4adf36651c9199b3d447de3d7d643f7f",
+      "current_file_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:361e6cdfab43c71d",
+      "path": "src/Core/src/Cryptography/CurveInfo.cs",
+      "range_sha256": "1d69efcecbcd84db3aa3bd3bd8e09eedc56e033e6d3e6158f942aaad1b52b436",
+      "current_file_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:f160af6cad1f3e94",
+      "path": "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+      "range_sha256": "f2a2399d499846b461b308d8d65ebd02b0eee151517ed25517bfdcdc2edcfee8",
+      "current_file_sha256": "bb760af5e5690885675018e5be005770f9c97f6c4f7497fa502c684135294bdb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:d9b9e31e257e7796",
+      "path": "src/Core/src/Cryptography/Oids.cs",
+      "range_sha256": "9f064f7949266dba3aa88bb19feab985af5037b7cd1a353f646b9b24d1ee6409",
+      "current_file_sha256": "31af57e783095af7a7d62939706e81efc6974085577c15699975b472f721c2e2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Retained RFC8410 \u00a73 and \u00a710.2 original text checked: Ed25519 OID/absent parameters and X25519 SPKI offset115/raw point match; no expanded profile/provider claim."
+    },
+    {
+      "id": "core-001:unit:c8eec8d48a4c1a53",
+      "path": "src/Core/src/Cryptography/Oids.cs",
+      "range_sha256": "9cbca300475a4141a00280dddc0887d13b767f9d51114478f373dc264fcaa046",
+      "current_file_sha256": "31af57e783095af7a7d62939706e81efc6974085577c15699975b472f721c2e2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Retained RFC5639 \u00a74.1 OID tree and versionOne13 explicitly yield1.3.36.3.3.2.8.1.1.13; Informational status retained."
+    },
+    {
+      "id": "core-001:unit:2a1d93e88d87f1d5",
+      "path": "src/Core/src/Cryptography/PublicKey.cs",
+      "range_sha256": "e16397fa81f296d77bb7615291d10b4dd270542fc89338d3523229794e2fd9c4",
+      "current_file_sha256": "338ae06b1b5fb64f401a86bc9eed7ac5f2180f6f7c1c7d247c758fddd8a2056d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:aa2f54c40c8e100c",
+      "path": "src/Core/src/Utilities/Base32.cs",
+      "range_sha256": "a1ef995499992d8fa0869d52ff872d5ea107bb1ee5a96b7b279e9cae4ef02e24",
+      "current_file_sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Overlap/AsBytes admission precedes clearing scope; admitted DecodeCore exceptions clear destination, not borrowed source. Overflow is UTF16 byte-view length, not an applet PIN byte budget."
+    },
+    {
+      "id": "core-001:unit:7deaa6b3f76664e4",
+      "path": "src/Core/src/Utilities/MultiString.cs",
+      "range_sha256": "b87d6b664ee46db47d798d95d2c4b508747a835a8cdd647fdd78abb04a4bbd1c",
+      "current_file_sha256": "45adcedd24700ced17e77bcd758de47b33ad50f1168d5b1c3446009ee7c13735",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:d8cc0aa0dc9300b5",
+      "path": "src/Core/src/Credentials/CredentialKind.cs",
+      "range_sha256": "b27fbe436df3c62df6e18a6744721e5140459b7714c315ec3012fcbc50099ef6",
+      "current_file_sha256": "31aea8d0c89266ac907f00b187e656e7c67f7556fb155c361b72b214f5c675dd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:7f76d577f673f224",
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "range_sha256": "5421ee57a37e5ce041bd874162dc3903ba8e86ff22db01dccf9804bbcb17e9ba",
+      "current_file_sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:5d739810055c9f09",
+      "path": "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+      "range_sha256": "6992ddaab38bdc32108e49139c138daa74f05e3a8d824a550c5c5d1347643395",
+      "current_file_sha256": "39dc6cb4e51935d0834e60a947f8ac766e7d1bb2bab32984ad154ecfa6457dde",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:30292c6fb683371c",
+      "path": "src/Cli.Shared/src/Output/ConsoleUserPresencePrompt.cs",
+      "range_sha256": "825fc095e86854884895ace68dcf9c247bef9fa348288c4ca023bfb8d70ec04f",
+      "current_file_sha256": "a1da36d2b2a84b2c608e79c08e24b7338509aee605a74975b283ba984a5c0192",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:3361e11010d6e697",
+      "path": "src/Core/src/Credentials/IConsoleInputSource.cs",
+      "range_sha256": "d607bd0c910678d5f343855ba402a4405e346b62a9fa82ca866dd45bac906fc0",
+      "current_file_sha256": "1c5d1758ba6add46dc7f393d1eff07613da7d9a23c446455cf9c3dfe98ab38d2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:79dffe8684b8c5b7",
+      "path": "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+      "range_sha256": "f972b398dd4dbcb2a5ccba220f96c6de7e648d8a257a72050c75611cadd53fca",
+      "current_file_sha256": "39dc6cb4e51935d0834e60a947f8ac766e7d1bb2bab32984ad154ecfa6457dde",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:b8a65ee27fc78501",
+      "path": "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs",
+      "range_sha256": "71151866bd7e4bcb117d8c8173871e688bf6da31360b90c8fa53c4a5828ad1d1",
+      "current_file_sha256": "bf4b9b50f28551e6bea8c969a5ca4f7c7cda7da1c71377b579c9e8ee56b05e2e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:5439bcf06648bd8c",
+      "path": "src/Core/src/Cryptography/CmacPrimitives.cs",
+      "range_sha256": "098be149edca2875b2b4b2b5636ace0e1a13d1855c6d1a42648bc9ac1d5100af",
+      "current_file_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:56d58ec2173bbf1a",
+      "path": "src/Core/src/Cryptography/CmacPrimitives.cs",
+      "range_sha256": "2de8dbcf6727d0960b80823ada81bb07d65587895d8a0d4a6aacb2cacf042051",
+      "current_file_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:9bb620ed76fdd0f3",
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+      "range_sha256": "270125fe485ddca0f43283724f01fc43ab2e14174c5a4ce4987de664ceafd429",
+      "current_file_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:ff3f23e7387cb746",
+      "path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+      "range_sha256": "cfaa8d56336eb169efe380907078456e0169449f8858b6c1506b66c97641f1d4",
+      "current_file_sha256": "6a1a905f9c9b655f5d0c617891a78e0d8dfa7f9e40ff497798d0b2e292495724",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:34cd91fd41729511",
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/ConsoleUserPresencePromptTests.cs",
+      "range_sha256": "50a86ee3da75f54dc6aba6274490ad2335c0b1275ec5072276de2ef60ec6e960",
+      "current_file_sha256": "25347854de907087dee7d06480ccd168bd1c018ad9d873f0db24a838564b8981",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:b334fdf119dbbfd3",
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/ConsoleUserPresencePromptTests.cs",
+      "range_sha256": "9c5b2e7f2ab1f962fc67066020eecb72cf42eced9a480f2bf4695feb86d6010f",
+      "current_file_sha256": "25347854de907087dee7d06480ccd168bd1c018ad9d873f0db24a838564b8981",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:460986605acc85a7",
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/ConsoleUserPresencePromptTests.cs",
+      "range_sha256": "d258d8c26411f772f0b80907953b1b57d59d545cc5b7e72ce854a6846b8229fa",
+      "current_file_sha256": "25347854de907087dee7d06480ccd168bd1c018ad9d873f0db24a838564b8981",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:9f62ea84d8758ba3",
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/ConsoleUserPresencePromptTests.cs",
+      "range_sha256": "87430d7a4befdf917cd8742f5760e16154f0d8a7028100ba75d61f068f1c911e",
+      "current_file_sha256": "25347854de907087dee7d06480ccd168bd1c018ad9d873f0db24a838564b8981",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:032798b4fc91ebdd",
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/PinPromptTests.cs",
+      "range_sha256": "80dbe31cc471e799594b54e4c64cde208904263d2ff8aec140f63538649fcb58",
+      "current_file_sha256": "ea5f2ee8eae17fd3d30a151acd989818852b5a63e4fb88c6cb2ec8a595c62ee4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:921ec54140918360",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/HexParsingTests.cs",
+      "range_sha256": "68e4d5ea370c0471d037b999831297c037cc21ac9abb5d2c719c45ec4e6f89b6",
+      "current_file_sha256": "88b9e489b25d68f425b6320d36a84a213bb882b8d3a66db4e092e304ae39cea4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:d2454b088aa8beac",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/UserPresenceIntentTests.cs",
+      "range_sha256": "87bfb8f0a4b03bbd1e314522d2bb48defa1653ded3b97dc274951a2ff293e1ad",
+      "current_file_sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:f1e20cac55e48d42",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/UserPresenceIntentTests.cs",
+      "range_sha256": "7fd4e8344160b3e5873b60948588d093130079ef75450e9910cbb9615063f8d6",
+      "current_file_sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:2c9ec2cab002ab5d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AlgorithmIdentifierParameterTests.cs",
+      "range_sha256": "1492d1e1ecaf07f4cb9a2731d9a2cc5e23a367092f6f3c8b534823b92aadfc2c",
+      "current_file_sha256": "1e392325edcc90d627a0dfd65a1f58a912c2fe20f5adacffc536f70352d9f768",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Helper rebuilds key container with replaced AlgorithmIdentifier parameters, owns writer Reset in finally and returns independent encoding; caller input/output and provider storage remain separate."
+    },
+    {
+      "id": "core-001:unit:7b9d951edf0e42b3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+      "range_sha256": "68fd35eda2488dea77de75fe63b6c3a3c43581f1c4e7626bff8c7d38b185215b",
+      "current_file_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Retained RFC8410 \u00a73 and \u00a710.2 original text checked: Ed25519 OID/absent parameters and X25519 SPKI offset115/raw point match; no expanded profile/provider claim."
+    },
+    {
+      "id": "core-001:unit:fefb527db102790a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+      "range_sha256": "62e89e5210c4fa7ccebdb5243e8cea0b2ac5dbc20937489799b2bdfbb95d4470",
+      "current_file_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:df139e68d3c46022",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+      "range_sha256": "93c0f8e5d1449a3621b083893050731c54bc246ba53ced481e7edaa71216b0ae",
+      "current_file_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Retained RFC8410 \u00a73 and \u00a710.2 original text checked: Ed25519 OID/absent parameters and X25519 SPKI offset115/raw point match; no expanded profile/provider claim."
+    },
+    {
+      "id": "core-001:unit:deb12c6dc5e5dad5",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicDefinitionsTests.cs",
+      "range_sha256": "e375d51e5753eb0b17c670f87e65dba0f90a0d834240142db4ccaa2c6572f64f",
+      "current_file_sha256": "26d450371b0ad0de2af0a23a5f5f4ad36cc2ea1c9c38f964adb272017bb4ce00",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:7cc410f5a51db597",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/Curve25519PrivateKeyTests.cs",
+      "range_sha256": "ba0f1208bf86dc75f9575ffe957baa97fd215c98dc98372784ee23e99051c0d8",
+      "current_file_sha256": "7a41e3311bd2d0e8849584a11264437a688c2b416f6cd238630608b351df1ecc",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:bc0fa8e079704b98",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/KnownPrivateKeyVectors.cs",
+      "range_sha256": "470dc7f5783281490d6032bb7ed309158e3b3d6e7d96f55ce79be59211eef7d2",
+      "current_file_sha256": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read RFC7517 AppendixA.2 d value and compared base64url decoding to the complete256-byte C# hexadecimal literal; exact representation match, no cryptographic output computation."
+    },
+    {
+      "id": "core-001:unit:8196d33310623fdc",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+      "range_sha256": "2e2e59f6824cb62ba1d78731cc01360961b72fc9f005ccd95c64a5c4861e885f",
+      "current_file_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Tests substitute another key component and assert rejection; randomized provider-backed setup is not every-provider qualification or complete exported-secret cleanup proof."
+    },
+    {
+      "id": "core-001:unit:62c982eb667d5210",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+      "range_sha256": "8d7beb9f9c404b542a4603be3417f3dda79e401bec60f60c128102991757bfee",
+      "current_file_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Tests substitute another key component and assert rejection; randomized provider-backed setup is not every-provider qualification or complete exported-secret cleanup proof."
+    },
+    {
+      "id": "core-001:unit:c96b32548ca7a275",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+      "range_sha256": "0c37c8c15de6f5e5f1a8c0ab888fcab7d0d2914a548408118bd4e7f951d5eb85",
+      "current_file_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:3752027db9a798b9",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+      "range_sha256": "0ac278947a28fd4c387567fd1ea01f0af0dd1d2bde1eebb70758aaa0aebe5e84",
+      "current_file_sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:04dffa6613a85a0c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableTlvListTests.cs",
+      "range_sha256": "d5c86ff95316837eebc728c54afea05b366f385a1c2493d69680eb9268fe4112",
+      "current_file_sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:f147b8be51f14f4c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableTlvListTests.cs",
+      "range_sha256": "41c5b9ade8cdb057456ee51f2a062a9b28b4f75b5e3d27911b744294be6ee7bb",
+      "current_file_sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:34fe797e985d886a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvTests.cs",
+      "range_sha256": "95b490042908ad048212f3b00ae76613cc64c3aacf259d129fb30096ed227294",
+      "current_file_sha256": "0de8bda5324ae6b29f00245df91ddae8a6aa33a34b375f703695f655260de92a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:5632a5298da7f3dd",
+      "path": "src/Core/src/Credentials/IConsoleInputSource.cs",
+      "range_sha256": "4f77e2a2a761df824c0020d79d21ed3dd8b26f2624a7823ae42ba2cb164934d6",
+      "current_file_sha256": "1c5d1758ba6add46dc7f393d1eff07613da7d9a23c446455cf9c3dfe98ab38d2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:ccd14dceb9360243",
+      "path": "src/Core/src/Credentials/UserPresenceOperations.cs",
+      "range_sha256": "773621f536821edf41700901e4029e38ead270074d7eccd77b82bb6eb6ef990e",
+      "current_file_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:459ee132eb757e46",
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "range_sha256": "0c8193fe5c108432edd6466189378c840c9e9c9d9a49a72e256b7c0183e58ecd",
+      "current_file_sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:2af033748d9a7e55",
+      "path": "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+      "range_sha256": "6f6d4c78ee6b9fca9ec77a51799ab706aa23c71ec6065d336f97d169dcf33426",
+      "current_file_sha256": "bb760af5e5690885675018e5be005770f9c97f6c4f7497fa502c684135294bdb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:b01defda889ad3bd",
+      "path": "src/Core/src/Utilities/Crc13239.cs",
+      "range_sha256": "d021adf22a0bfda45ad6148748642190552a4dbb524c6061caa72940725a580d",
+      "current_file_sha256": "5d35425361675fc7ec4e8ee4c21203e17bf9f7af9677fc9c3e7d1c22a0d49619",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; interface responsibility, structural metadata, local encoding/ownership or exact test oracle supported. No provider/device/profile or all-copy erasure acceptance inferred."
+    }
+  ]
+}

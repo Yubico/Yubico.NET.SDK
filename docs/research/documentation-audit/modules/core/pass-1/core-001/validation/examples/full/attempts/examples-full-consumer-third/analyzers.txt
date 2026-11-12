@@ -1,0 +1,15 @@
+/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
+/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.AspNetCore.App.Analyzers.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.AspNetCore.App.CodeFixes.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.AspNetCore.App.SourceGenerators.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.AspNetCore.Components.Analyzers.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Extensions.Validation.ValidationsGenerator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Extensions.Logging.Generators.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Extensions.Options.SourceGeneration.dll

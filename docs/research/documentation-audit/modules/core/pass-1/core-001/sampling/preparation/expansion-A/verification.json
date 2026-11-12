@@ -1,0 +1,69 @@
+{
+  "result": "STRUCTURAL-EXPANSION-CHECKS-PASSED; NO CONTENT VERDICTS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "additional_ids": 23,
+  "XML_additional": 19,
+  "enum_additional": 4,
+  "original_selection": 983,
+  "proposed_union": 1006,
+  "overlaps_with_original_selection": 0,
+  "known_material_miss_overlay_ids": 3,
+  "miss_final_clean_credit": 0,
+  "nominal_union_after_known_misses": 1003,
+  "nominal_is_not_accepted_sampling_credit": true,
+  "original_population_and_selection_and_coordinator_records": "UNCHANGED; exact input hashes below",
+  "exact_source_and_range_hashes_verified": 26,
+  "original_source_paths": 22,
+  "other_owner_role_changes": 0,
+  "final_denominator": null,
+  "current_mapping": "DEFERRED until final accepted combined diff; no live source chasing",
+  "pending_dependencies": [
+    "External final 35-file patch",
+    "New A comment corrections",
+    "Three new toolchain comments",
+    "Final accepted combined diff, overlap exclusion/replacements and actual Astra verdicts"
+  ],
+  "input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/expand.py": "558cd48602d03bf1fcb310b7b363c4ef4196382a69dc779de24034105a20c1a4",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/admission.md": "20791dedf2b5674e05e068be78cd262c429b62559c7b10d93d5b08b244f3975c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-001-verdicts.md": "1edd8737c8030cb907537133b6eaac860ede9debae6f3e5a918b60e2e0cc18fb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/population.json": "48442fdec87f94bf432608b9dd07d9004d8f117e558e3db668f7e346b9c2a75c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/selection.json": "c1cfa09bdee585d72a51729f445706a10e1095bc6bcb7e831f2e6db316216eb2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/strata.json": "96d2f8237a8195eef7cdbaa8e110c424393450e120e8bd516717cf22c246b1e8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/summary.json": "f3f83fedcb88a8acae885357297e5d5415f86b5bf2533e4d77bbbfbdd0244230",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90"
+  },
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/additional-selection.json",
+      "bytes": 24273,
+      "sha256": "f25aba912998b4e64055f736e8e076e9f729d885ddc67f6a695efde97d2fb778"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/expand.py",
+      "bytes": 11326,
+      "sha256": "558cd48602d03bf1fcb310b7b363c4ef4196382a69dc779de24034105a20c1a4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/miss-overlay.json",
+      "bytes": 2350,
+      "sha256": "6329f032c9f671592e03e82286c15bff720ac91b2ff0e8c5a021d9a705b36235"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/original-units.md",
+      "bytes": 15205,
+      "sha256": "9b8ca9e079e19245ed73175d19e6e97b268187646d5f63b1933474a09723fe13"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/quotas.json",
+      "bytes": 3051,
+      "sha256": "fe208fe113dcc31d7ee68696f32e19cbd01ce8e6bb04e93d28fbd000a36711a7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/read-plan.md",
+      "bytes": 6464,
+      "sha256": "e797c2484c83a7209219a03d9706560f94236b47fe436d357b8ed50b2360a145"
+    }
+  ]
+}

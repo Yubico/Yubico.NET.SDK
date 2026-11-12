@@ -1,0 +1,101 @@
+[
+  {
+    "candidate": "CORE-B4-C008",
+    "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+    "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+    "source_record": "investigation/B4/unit-dispositions.json",
+    "proposal": "RETAIN the existing project values and preserve the finished exact-owner referral. Refer evaluated compiler/analyzer/AOT and installed-native-producer assertions to the existing validation/evidence owner.",
+    "facet_reason": "The completed source record covers net10/language/warnings, NativeShims 1.18.1 opt-in, late AOT metadata/analyzer participation, API AdditionalFiles and friend declarations. These declarations identify intended inputs; they do not prove actual compiler participation, package selection or a deployed producer. C008's historical multi-target/static-AOT prose corrections do not require changing this project configuration.",
+    "held_qualification": "Actual evaluated inputs/link/native artifact correspondence and final compilation retain their separate evidence gates. No package/framework/flag/friend/API-input value is accepted for alteration.",
+    "reopen_when": "Project/package/AOT/analyzer/API-input declarations or their evaluated participation change; recheck the associated support/AOT/compiler claims at those identities.",
+    "adjudication_owner": "Astra with the existing Core project/validation owner"
+  },
+  {
+    "candidate": "CORE-B4-C008",
+    "path": "verification/NativeCompatibilityVerification/baseline-exports.json",
+    "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+    "source_record": "investigation/B4/unit-dispositions.json",
+    "proposal": "RETAIN the canonical 36-name historical export fixture; preserve its exact-owner/evidence referral.",
+    "facet_reason": "The completed B4 disposition identifies a 36-name canonical old native export set, including names beyond the historical managed-import calls. It is an export-name census oracle, not a signature, calling-convention, successful-transmit or native-lifetime oracle. Changing names merely to complete this join would change the fixture rather than correct the scoped evidence claim.",
+    "held_qualification": "Historical package/platform and actual per-function execution remain qualified. No new stable-package, Windows/Linux or all-export ABI acceptance follows from retaining this data.",
+    "reopen_when": "The deliberately selected native baseline/export set or the checker expectation changes, with the original fixture and historical evidence retained separately.",
+    "adjudication_owner": "Astra with the existing native compatibility/evidence owner"
+  },
+  {
+    "candidate": "CORE-B4-C008",
+    "path": "verification/NativeCompatibilityVerification/missing-baseline-export.json",
+    "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+    "source_record": "investigation/B4/unit-dispositions.json",
+    "proposal": "RETAIN the intentional missing-symbol negative fixture, including its 36-entry shape; preserve the exact-owner referral.",
+    "facet_reason": "The completed source record says this same-cardinality control replaces Transmit with MissingFixture so the missing-symbol assertion fails rather than an invalid-fixture-shape check. The missing export is deliberate negative evidence, not a broken configuration to repair or a demonstrated production failure.",
+    "held_qualification": "A meaningful negative oracle remains separate from actual native signature/lifetime execution and from a successful full compatibility lane.",
+    "reopen_when": "The negative-control target or baseline export grammar changes; retain the deliberate wrong-name/control purpose and distinguish its classified failure from a product failure.",
+    "adjudication_owner": "Astra with the existing native compatibility/evidence owner"
+  },
+  {
+    "candidate": "CORE-B4-C010",
+    "path": "docs/architecture/sdk-architecture-map.yml",
+    "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+    "source_record": "investigation/B4/unit-dispositions.json",
+    "proposal": "RETAIN the current structural map bytes and preserve the finished diagram-owner referral. Submit C010's project-edge/type/teaching-label consistency facet explicitly to Astra; do not infer semantic acceptance of the entire map from its schema or rendering identity.",
+    "facet_reason": "B4's completed shared map dispositions compare assigned graph/map/diagram sections and distinguish the indirect WebAuthn-to-Ctap2 dependency, sealed-class ApduResponse and conceptual pipeline teaching boxes. Its candidate return says the indirect exception is already represented in graph/map while the appendix teaching prose needed correction. Preserve those distinctions: no YAML edge, symbol, label or asset digest is changed to discharge this ledger gap.",
+    "held_qualification": "The existing exact-owner hold is a completed referral, not a final claim that every structured-map value is semantically correct or that a rendered pipeline proves native timing/wire conformance. Any actual map-value correction requires separate explicit coordinator disposition.",
+    "reopen_when": "Project edges, source type representation, conceptual pipeline labels or the map/source/artifact relationship changes; reconcile only that affected architecture facet with the accepted narrative and its owner.",
+    "adjudication_owner": "Astra with the existing architecture map/SHARED owner"
+  },
+  {
+    "candidate": "CORE-OATH-X003",
+    "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+    "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+    "source_record": "boundaries/Oath/file-dispositions.json",
+    "proposal": "RETAIN project references, linked SecurityDomain handshake-fake source and scoped RFC4493 primitive attribution; preserve the finished editor hold/referral.",
+    "facet_reason": "The completed OATH file disposition reads the xUnit v3 project/runner links and distinguishes linked handshake fake source from a cryptographic conformance library. X003 explicitly retains the project comment's primitive-versus-whole-SCP scope while qualifying the actual reset fake elsewhere. Neither that linkage nor primitive tests establishes outbound protected command/MAC validation or live secure terminal reset.",
+    "held_qualification": "Actual project/helper compiler context and secure-wire/device qualification remain separate. The fourteen resolved OATH implementation scopes and terminal-reset contract remain intact.",
+    "reopen_when": "Linked fake/primitive source or project participation changes, or an exact independent secure-reset/wire result changes the test-oracle explanation; no project-value change is proposed here.",
+    "adjudication_owner": "Astra with the existing OATH test/project owner"
+  },
+  {
+    "candidate": "CORE-OTP-X008",
+    "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+    "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+    "source_record": "boundaries/YubiOtp/unchanged-paths.json",
+    "proposal": "RETAIN the exact API snapshot and link the existing investigator UNCHANGED decision directly. Preserve the completed editor API-value hold; apply named-surface relocation qualifications in their authorized documentation owners, not by inventing snapshot members.",
+    "facet_reason": "The completed snapshot reconciliation finds typed configurations/session/extension/slot/flag carriers but no typed YubiOTP FIPS-mode query, legacy device-config or device-info method. Management's delegated GetDeviceInfo is a different named surface; equal enum-alias bits are not extra capabilities. X008's migration clarification requires this present/absent distinction, not an API change.",
+    "held_qualification": "Snapshot identity is not compiler overload binding, legacy-key compatibility, physical FIPS-mode evidence or successful modern/legacy execution.",
+    "reopen_when": "A named device-info, FIPS query or legacy configuration API is introduced/removed, or the modern/legacy gates and device qualification change; recheck the corresponding migration/reference statements.",
+    "adjudication_owner": "Astra with the existing YubiOTP public API/migration owner"
+  },
+  {
+    "candidate": "CORE-HSM-X007",
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+    "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+    "source_record": "boundaries/YubiHsm/file-dispositions.json",
+    "proposal": "RETAIN the actual HSM/Core/Management/shared CLI references and Spectre/Hosting package participation; preserve the completed editor project hold/referral.",
+    "facet_reason": "The completed HSM source disposition identifies the real tool/helper project context required for compilation. X007's diagnostic input/output/dispatch/resource and exception-XML qualifications are caller/oracle concerns, not a missing dependency or reason to alter this project graph. Generic Core crypto metadata is not external HSM/connector authentication.",
+    "held_qualification": "Actual full tool/helper compilation remains an existing validation gate. No production-input/output safety, asymmetric dispatch repair or live HSM/connector result is inferred from project declarations.",
+    "reopen_when": "The tool/helper dependency/context or actual diagnostic caller behavior changes; recheck its source/profile/resource guidance without treating reference presence as execution proof.",
+    "adjudication_owner": "Astra with the existing HSM tool/project and validation owners"
+  },
+  {
+    "candidate": "CORE-HSM-X007",
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+    "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+    "source_record": "boundaries/YubiHsm/file-dispositions.json",
+    "proposal": "RETAIN the .NET 10/xUnit v2 traditional-runner, hardware parallelism and actual Tests.Shared/Core/HSM reference configuration; preserve the completed editor hold/referral.",
+    "facet_reason": "The completed file disposition explicitly distinguishes this integration project's traditional xUnit v2 runner and hardware configuration from the v3/MTP unit project. X007's fixture/token/cleanup/assertion limits are not resolved by changing packages or runner metadata. Metadata filtering and runner participation do not establish device execution or persistent-state restoration.",
+    "held_qualification": "Use this real project context for the existing separate compilation gate; hardware/HSM/connector/native and exact cleanup outcomes stay qualified and unrun in this reconciliation.",
+    "reopen_when": "Runner/parallelism/shared-helper participation or the actual hardware fixture, cleanup and assertion contract changes; reconcile declared selection with actual retained execution counts separately.",
+    "adjudication_owner": "Astra with the existing HSM integration-test/project owner"
+  },
+  {
+    "candidate": "CORE-HSM-X007",
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+    "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+    "source_record": "boundaries/YubiHsm/file-dispositions.json",
+    "proposal": "RETAIN the .NET 10/xUnit v3 executable/MTP runner and actual shared/helper references, including the absence of a direct traditional test SDK; preserve the completed editor hold/referral.",
+    "facet_reason": "The completed HSM unit-project disposition supplies this concrete runner/context distinction. Its declaration is a compiler/test-host prerequisite, not proof of stronger independent KATs, all-failure cleanup or real-device behavior. X007's retained oracle/diagnostic facets remain; the retry-message mismatch is retracted and supplies no reason to change this project.",
+    "held_qualification": "Actual genuine unit-project compilation/execution remains separate. No test assertion, reference, SDK package or runner behavior changes are authorized to close the accounting join.",
+    "reopen_when": "MTP/runner/helper/project context or the corresponding real assertion/cleanup contract changes; preserve the HSM retry-message retraction and original applet uncertainties.",
+    "adjudication_owner": "Astra with the existing HSM unit-test/project owner"
+  }
+]

@@ -1,0 +1,2014 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C002",
+        "proposal_id": "FPT-068",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C015",
+        "proposal_id": "FPT-081",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C017",
+        "proposal_id": "FPT-099",
+        "facets": [
+          "D",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "product_pin_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "current_sha256": "87abcc9ba6eff172ac2b64e791258c0707b01011cee31427481e0ed24b7261ff",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "README.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B2-C001",
+        "proposal_id": "FPT-034",
+        "facets": [
+          "D",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C004",
+        "proposal_id": "FPT-037",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "Q"
+        ]
+      }
+    ],
+    "base_sha256": "64e9b92eae3bb689f364f6a13fef2b35bdc7d954b7636b0f5275a616d5314543",
+    "product_pin_sha256": "64e9b92eae3bb689f364f6a13fef2b35bdc7d954b7636b0f5275a616d5314543",
+    "current_sha256": "880a27ff7d753d32ae70b882bbd5d90adfd6125a3cc32fe193b7b3c6ecb322f0",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/CRYPTO-APIS.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-C-C011",
+        "proposal_id": "FPT-093",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C012",
+        "proposal_id": "FPT-094",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C013",
+        "proposal_id": "FPT-095",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C017",
+        "proposal_id": "FPT-099",
+        "facets": [
+          "D",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "75ce8e83fd598143a34625be40fd548737f6a9940edd4022c96368fb41104311",
+    "product_pin_sha256": "75ce8e83fd598143a34625be40fd548737f6a9940edd4022c96368fb41104311",
+    "current_sha256": "7105fb2135f1a41ea5dd1325266e279b8bd1146dc8e90e968b9ea7f23a9daa36",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/CSHARP-PATTERNS.md",
+    "decision": "retain",
+    "reason": "Retain existing text; no released candidate correction selected here. No new whole-file semantic acceptance claimed.",
+    "candidate_associations": [],
+    "base_sha256": "e96af24746804bed802b897349127090b72a99ef1a6ca3fbf5d0eb15abab77bd",
+    "product_pin_sha256": "e96af24746804bed802b897349127090b72a99ef1a6ca3fbf5d0eb15abab77bd",
+    "current_sha256": "e96af24746804bed802b897349127090b72a99ef1a6ca3fbf5d0eb15abab77bd",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/DEV-GUIDE.md",
+    "decision": "retain",
+    "reason": "Retain existing text; no released candidate correction selected here. No new whole-file semantic acceptance claimed.",
+    "candidate_associations": [],
+    "base_sha256": "3d900ab69f2d253bd96676f45b1c34c79ca4e9b6a85854c368b3c9688bb31655",
+    "product_pin_sha256": "3d900ab69f2d253bd96676f45b1c34c79ca4e9b6a85854c368b3c9688bb31655",
+    "current_sha256": "3d900ab69f2d253bd96676f45b1c34c79ca4e9b6a85854c368b3c9688bb31655",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/LOGGING.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B4-C007",
+        "proposal_id": "FPT-054",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C014",
+        "proposal_id": "FPT-080",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C008",
+        "proposal_id": "FPT-090",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f",
+    "product_pin_sha256": "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f",
+    "current_sha256": "a3e9f6c20f08c76316c059bdf8cfb7fcec3f0d66a9c9a59cb7d4650ffccb2c60",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/MEMORY-MANAGEMENT.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B5-C005",
+        "proposal_id": "FPT-062",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C002",
+        "proposal_id": "FPT-068",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C007",
+        "proposal_id": "FPT-073",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C013",
+        "proposal_id": "FPT-095",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C017",
+        "proposal_id": "FPT-099",
+        "facets": [
+          "D",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "8b86a03aa55fc10c7259cd4c8982c1735c0f2bfe79365774c9637a183bc7c20b",
+    "product_pin_sha256": "8b86a03aa55fc10c7259cd4c8982c1735c0f2bfe79365774c9637a183bc7c20b",
+    "current_sha256": "021e50e33f8de3d4ae281935a333669396ce3d6644bdcc28b682f9fea1989005",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/NATIVE-AOT.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B2-C001",
+        "proposal_id": "FPT-034",
+        "facets": [
+          "D",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C004",
+        "proposal_id": "FPT-037",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C008",
+        "proposal_id": "FPT-046",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C006",
+        "proposal_id": "FPT-053",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C008",
+        "proposal_id": "FPT-055",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "f486bf67d4162bb3c0143eebeda0c38963cd4dfc92a60d15ac2f79ef598ee7a3",
+    "product_pin_sha256": "f486bf67d4162bb3c0143eebeda0c38963cd4dfc92a60d15ac2f79ef598ee7a3",
+    "current_sha256": "2c9f215b859253aec25290dece7a97109f1dadc4de073340b802deaa5b54b1a0",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/SDK-HOUSE-STYLE.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C006",
+        "proposal_id": "FPT-063",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20",
+    "product_pin_sha256": "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20",
+    "current_sha256": "992fcf31949f90c1707be1e3f77ca3438d2e3ff8f607dc7e314b91fc568756d7",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/TESTING.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C018",
+        "proposal_id": "FPT-018",
+        "facets": [
+          "D",
+          "E",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "product_pin_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "current_sha256": "1e6ec7b28c9b3482718217fdb14746a19cb9f57b56b1e19ea8857b42c1059907",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/TESTING_PLATFORM_FINDINGS.md",
+    "decision": "retain",
+    "reason": "Retain runner direction; Windows access candidate is dependency context only.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B4-C004",
+        "proposal_id": "FPT-051",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "fa3274b97c86b6dec0f147fbab9cc4071ca4ead4621fd64822c660d7e22fb3ff",
+    "product_pin_sha256": "fa3274b97c86b6dec0f147fbab9cc4071ca4ead4621fd64822c660d7e22fb3ff",
+    "current_sha256": "fa3274b97c86b6dec0f147fbab9cc4071ca4ead4621fd64822c660d7e22fb3ff",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/applet-public-api.md",
+    "decision": "retain",
+    "reason": "Retain existing text; no released candidate correction selected here. No new whole-file semantic acceptance claimed.",
+    "candidate_associations": [],
+    "base_sha256": "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c",
+    "product_pin_sha256": "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c",
+    "current_sha256": "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/architecture-docs-automation.md",
+    "decision": "retain",
+    "reason": "Retain existing text; no released candidate correction selected here. No new whole-file semantic acceptance claimed.",
+    "candidate_associations": [],
+    "base_sha256": "092dfb5a15868b7a97c8d674e1e98d388acb49a519f6e4c4fa515ec28a6b9e39",
+    "product_pin_sha256": "092dfb5a15868b7a97c8d674e1e98d388acb49a519f6e4c4fa515ec28a6b9e39",
+    "current_sha256": "092dfb5a15868b7a97c8d674e1e98d388acb49a519f6e4c4fa515ec28a6b9e39",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B1-C002",
+        "proposal_id": "FPT-023",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C005",
+        "proposal_id": "FPT-026",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C006",
+        "proposal_id": "FPT-027",
+        "facets": [
+          "D",
+          "E",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C007",
+        "proposal_id": "FPT-028",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C008",
+        "proposal_id": "FPT-029",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C012",
+        "proposal_id": "FPT-033",
+        "facets": [
+          "D",
+          "E",
+          "M"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C002",
+        "proposal_id": "FPT-035",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C001",
+        "proposal_id": "FPT-040",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C001",
+        "proposal_id": "FPT-048",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C004",
+        "proposal_id": "FPT-051",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "0dba03bde9f77cd59de9dc118f1ab621d0712439fb0e9ddd136492f3ffb97a60",
+    "product_pin_sha256": "0dba03bde9f77cd59de9dc118f1ab621d0712439fb0e9ddd136492f3ffb97a60",
+    "current_sha256": "46375a7a74209148352fb1e32db1657caaab9d15bbfe935fc4b6bb99c6e07123",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/device-discovery-guarantees.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C009",
+        "proposal_id": "FPT-009",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C010",
+        "proposal_id": "FPT-010",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C011",
+        "proposal_id": "FPT-011",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C012",
+        "proposal_id": "FPT-012",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C020",
+        "proposal_id": "FPT-020",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C021",
+        "proposal_id": "FPT-021",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M"
+        ]
+      }
+    ],
+    "base_sha256": "d8a5b25b029c374f7504727ae9afdb5b6c618dae4807608e4a6576e5e2c2ff47",
+    "product_pin_sha256": "d8a5b25b029c374f7504727ae9afdb5b6c618dae4807608e4a6576e5e2c2ff47",
+    "current_sha256": "265259281e30477e2cdfc2c2ddeee0bfb79891e3ed26509b53de091066aed8f2",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/device-identity.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C012",
+        "proposal_id": "FPT-012",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C020",
+        "proposal_id": "FPT-020",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "25d5671a309d43cb785e42e57ddd8d4ee0a3f20fea9a94f5a028fee7a54c00fe",
+    "product_pin_sha256": "25d5671a309d43cb785e42e57ddd8d4ee0a3f20fea9a94f5a028fee7a54c00fe",
+    "current_sha256": "526cb5bfda5e6716a641b121564b6e8a07a0fa26dcc72e667b21da7521e87875",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/event-driven-device-discovery.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C008",
+        "proposal_id": "FPT-008",
+        "facets": [
+          "D",
+          "Q"
+        ]
+      }
+    ],
+    "base_sha256": "fb3e8538fa9a4bc5809cc71d552e1041a004d5d89e574280dd06bd87ce0c3643",
+    "product_pin_sha256": "fb3e8538fa9a4bc5809cc71d552e1041a004d5d89e574280dd06bd87ce0c3643",
+    "current_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/physical-device-model.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C003",
+        "proposal_id": "FPT-003",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C007",
+        "proposal_id": "FPT-007",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C011",
+        "proposal_id": "FPT-011",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C017",
+        "proposal_id": "FPT-017",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M"
+        ]
+      }
+    ],
+    "base_sha256": "b38d5053935ca3e26cc2821c0487e7dbf43bc764eb6bc1b11cc2156b6911a482",
+    "product_pin_sha256": "b38d5053935ca3e26cc2821c0487e7dbf43bc764eb6bc1b11cc2156b6911a482",
+    "current_sha256": "476f0a922f7c8f176d9f3c49301be1b7f5c45121c841541e88a29d543399f6b5",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B1-C005",
+        "proposal_id": "FPT-026",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C006",
+        "proposal_id": "FPT-027",
+        "facets": [
+          "D",
+          "E",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C007",
+        "proposal_id": "FPT-028",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C002",
+        "proposal_id": "FPT-035",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C006",
+        "proposal_id": "FPT-039",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C007",
+        "proposal_id": "FPT-045",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C008",
+        "proposal_id": "FPT-046",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C001",
+        "proposal_id": "FPT-048",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C002",
+        "proposal_id": "FPT-059",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C003",
+        "proposal_id": "FPT-060",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C004",
+        "proposal_id": "FPT-061",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C006",
+        "proposal_id": "FPT-063",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C007",
+        "proposal_id": "FPT-064",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C008",
+        "proposal_id": "FPT-065",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C001",
+        "proposal_id": "FPT-067",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C003",
+        "proposal_id": "FPT-069",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C007",
+        "proposal_id": "FPT-073",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C015",
+        "proposal_id": "FPT-081",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "product_pin_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "current_sha256": "3b9e91852853284dc3c8959fe327616d145fd2d344f3723eb47bb81bbbcd668b",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/sdk-architecture-diagrams.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+    "product_pin_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+    "current_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/architecture/webauthn-extension-processing.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-C-C011",
+        "proposal_id": "FPT-093",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C018",
+        "proposal_id": "FPT-100",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "56ce5bf608fa1452402100b3d6e51af6b8a3b8277d0f3ada1e8b4b342bffe09c",
+    "product_pin_sha256": "56ce5bf608fa1452402100b3d6e51af6b8a3b8277d0f3ada1e8b4b342bffe09c",
+    "current_sha256": "3b6d71d6832ce6b38697666d701d9c7d1af8b114c8ad407bb410e0432b384a02",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/linux-setup.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B2-C001",
+        "proposal_id": "FPT-034",
+        "facets": [
+          "D",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C003",
+        "proposal_id": "FPT-036",
+        "facets": [
+          "D",
+          "P",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C004",
+        "proposal_id": "FPT-037",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "Q"
+        ]
+      }
+    ],
+    "base_sha256": "cb0d6b8d7d4e9308faa296094298bcc8225695ec94e9abaa0794422ab4b1a3dc",
+    "product_pin_sha256": "cb0d6b8d7d4e9308faa296094298bcc8225695ec94e9abaa0794422ab4b1a3dc",
+    "current_sha256": "5bc7f0a7e8cd2bdd990284fbbc1b5f1a20976addb2d7ab32661b973f06ff1d35",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C002",
+        "proposal_id": "FPT-002",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C003",
+        "proposal_id": "FPT-003",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C009",
+        "proposal_id": "FPT-009",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C011",
+        "proposal_id": "FPT-011",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C012",
+        "proposal_id": "FPT-012",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C016",
+        "proposal_id": "FPT-016",
+        "facets": [
+          "M",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C017",
+        "proposal_id": "FPT-017",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C021",
+        "proposal_id": "FPT-021",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C002",
+        "proposal_id": "FPT-023",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C003",
+        "proposal_id": "FPT-024",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C002",
+        "proposal_id": "FPT-041",
+        "facets": [
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "360a2a8be9ccdd6b5f30dc015c6ae9ef90c0ebee56842003e832c182436b6a7f",
+    "product_pin_sha256": "360a2a8be9ccdd6b5f30dc015c6ae9ef90c0ebee56842003e832c182436b6a7f",
+    "current_sha256": "ea91eea91b9a82319420c20e386f1807762b09da1a84716d39e0e3f0571aeb4d",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/usage/tlv-processing.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-C-C005",
+        "proposal_id": "FPT-087",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C006",
+        "proposal_id": "FPT-088",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C007",
+        "proposal_id": "FPT-089",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M"
+        ]
+      }
+    ],
+    "base_sha256": "5a2a9ac7aaa87230c4f18f4c25bf1aec51ff17ad94915bbb8b96de7bf2b6d7df",
+    "product_pin_sha256": "5a2a9ac7aaa87230c4f18f4c25bf1aec51ff17ad94915bbb8b96de7bf2b6d7df",
+    "current_sha256": "68dd783ff47dd63d0001bd07e0b14fa7af8ad4e25fee08b1f5da296a62899be8",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B3-C006",
+        "proposal_id": "FPT-031",
+        "facets": [
+          "M",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C005",
+        "proposal_id": "FPT-062",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C006",
+        "proposal_id": "FPT-063",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C001",
+        "proposal_id": "FPT-083",
+        "facets": [
+          "D",
+          "M"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C002",
+        "proposal_id": "FPT-084",
+        "facets": [
+          "D",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C003",
+        "proposal_id": "FPT-085",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C004",
+        "proposal_id": "FPT-086",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C008",
+        "proposal_id": "FPT-090",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "product_pin_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "current_sha256": "7a57752e981f8d3110119bba78a871690469416b56d96a22e937470b902bf8da",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/v1-to-v2-comparison.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2",
+    "product_pin_sha256": "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2",
+    "current_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "docs/v2-highlights.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B4-C008",
+        "proposal_id": "FPT-055",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C009",
+        "proposal_id": "FPT-056",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "c867924a199f6be44ba5f9048768cc39ceaf9a4f2477241bbe2549191eed2085",
+    "product_pin_sha256": "c867924a199f6be44ba5f9048768cc39ceaf9a4f2477241bbe2549191eed2085",
+    "current_sha256": "2772db478fe8c7eed4705ad49b1be2931f7f5736d7d1082b6ae530cb6756169d",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C002",
+        "proposal_id": "FPT-002",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C015",
+        "proposal_id": "FPT-015",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C001",
+        "proposal_id": "FPT-022",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C002",
+        "proposal_id": "FPT-023",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C003",
+        "proposal_id": "FPT-024",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C004",
+        "proposal_id": "FPT-025",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C007",
+        "proposal_id": "FPT-028",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C011",
+        "proposal_id": "FPT-032",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C002",
+        "proposal_id": "FPT-035",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C004",
+        "proposal_id": "FPT-043",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C005",
+        "proposal_id": "FPT-044",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C008",
+        "proposal_id": "FPT-046",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C001",
+        "proposal_id": "FPT-048",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C002",
+        "proposal_id": "FPT-049",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C003",
+        "proposal_id": "FPT-050",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C005",
+        "proposal_id": "FPT-052",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C002",
+        "proposal_id": "FPT-059",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C004",
+        "proposal_id": "FPT-061",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C006",
+        "proposal_id": "FPT-063",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C008",
+        "proposal_id": "FPT-065",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C001",
+        "proposal_id": "FPT-067",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C002",
+        "proposal_id": "FPT-068",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C007",
+        "proposal_id": "FPT-073",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C009",
+        "proposal_id": "FPT-075",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C012",
+        "proposal_id": "FPT-078",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C015",
+        "proposal_id": "FPT-081",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C005",
+        "proposal_id": "FPT-087",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C008",
+        "proposal_id": "FPT-090",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C009",
+        "proposal_id": "FPT-091",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C015",
+        "proposal_id": "FPT-097",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C020",
+        "proposal_id": "FPT-102",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "product_pin_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "current_sha256": "bc8000f655ebe9a44f5af41d1848058d067accd4a6d10c6bfed57abd613bf3ad",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "src/Core/PACKAGE_README.md",
+    "decision": "retain",
+    "reason": "Retain accurate short Find/watch ownership and live Management pointer.",
+    "candidate_associations": [],
+    "base_sha256": "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74",
+    "product_pin_sha256": "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74",
+    "current_sha256": "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "src/Core/README.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C002",
+        "proposal_id": "FPT-002",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C003",
+        "proposal_id": "FPT-003",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C015",
+        "proposal_id": "FPT-015",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C001",
+        "proposal_id": "FPT-022",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C006",
+        "proposal_id": "FPT-027",
+        "facets": [
+          "D",
+          "E",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C007",
+        "proposal_id": "FPT-028",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C001",
+        "proposal_id": "FPT-034",
+        "facets": [
+          "D",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C002",
+        "proposal_id": "FPT-035",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C004",
+        "proposal_id": "FPT-037",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C006",
+        "proposal_id": "FPT-039",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C007",
+        "proposal_id": "FPT-045",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C008",
+        "proposal_id": "FPT-046",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C001",
+        "proposal_id": "FPT-048",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C002",
+        "proposal_id": "FPT-059",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C003",
+        "proposal_id": "FPT-060",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C004",
+        "proposal_id": "FPT-061",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C006",
+        "proposal_id": "FPT-063",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C008",
+        "proposal_id": "FPT-065",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C001",
+        "proposal_id": "FPT-067",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C002",
+        "proposal_id": "FPT-068",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C003",
+        "proposal_id": "FPT-069",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C007",
+        "proposal_id": "FPT-073",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C009",
+        "proposal_id": "FPT-075",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C015",
+        "proposal_id": "FPT-081",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C005",
+        "proposal_id": "FPT-087",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C008",
+        "proposal_id": "FPT-090",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C009",
+        "proposal_id": "FPT-091",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C010",
+        "proposal_id": "FPT-092",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C015",
+        "proposal_id": "FPT-097",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C020",
+        "proposal_id": "FPT-102",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "product_pin_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "current_sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "src/Core/src/Devices/README.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [],
+    "base_sha256": "e1cdbc46c7e3bd85e35722cb93298b35b0fbbf26c8bca47207a5381a5502b5a4",
+    "product_pin_sha256": "e1cdbc46c7e3bd85e35722cb93298b35b0fbbf26c8bca47207a5381a5502b5a4",
+    "current_sha256": "e7e06959fac0cac0a1af7ec74e3c8f3c47eefea9c1e17ff489307ceda48dbe44",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "src/Core/tests/CLAUDE.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B1-C011",
+        "proposal_id": "FPT-032",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C005",
+        "proposal_id": "FPT-038",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C013",
+        "proposal_id": "FPT-079",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "product_pin_sha256": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "current_sha256": "6ead47ab0e401351f6050e3f54ec022ac35753f0b65d880965b75a4577d7eb75",
+    "base_equals_product_pin": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md",
+    "decision": "retain",
+    "reason": "Retain existing source-site/link-registry/sentinel and native-execution limitations.",
+    "candidate_associations": [],
+    "base_sha256": "b185c6e2ab5bc0eb303a25b3bbeb5a46186712094620a44b253315ec7c030b9e",
+    "product_pin_sha256": "b185c6e2ab5bc0eb303a25b3bbeb5a46186712094620a44b253315ec7c030b9e",
+    "current_sha256": "b185c6e2ab5bc0eb303a25b3bbeb5a46186712094620a44b253315ec7c030b9e",
+    "base_equals_product_pin": true
+  }
+]

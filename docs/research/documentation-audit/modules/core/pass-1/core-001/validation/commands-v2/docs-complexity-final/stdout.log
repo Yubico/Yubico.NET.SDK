@@ -1,0 +1,64 @@
+▶ toolchain: docs-qa docs-architecture complexity  (log: artifacts/toolchain/runs/20261112-061749-059-docs-qa+docs-architecture+complexity/run.log)
+
+▶ target: docs-qa
+
+=== Validating active documentation ===
+
+▶ RUN dotnet msbuild /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj -getProperty:YubiKitDocsBranch -getProperty:PackageProjectUrl -nologo (output captured)
+✓ Validated 74 active documentation file(s)
+✓ Validated 10 package readme(s)
+
+▶ target: docs-architecture
+
+=== Validating architecture diagrams (evidence map + image freshness) ===
+
+▶ RUN bash "scripts/architecture/check-architecture-map.sh"
+architecture map OK: 6 diagram entries, all evidence + project edges resolve; coverage matches 6 diagram heading level(s).
+▶ RUN bash "scripts/architecture/check-architecture-images.sh"
+architecture images OK: 7 diagrams present and fresh (manifest matches source blocks).
+✓ Architecture diagrams validated (map resolves; images present and fresh)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs --base fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef
+  files        211
+  methods      63
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    14    23  unchanged  Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader.ReadCredentialCore
+                         src/Core/src/Credentials/ConsoleCredentialReader.cs:212-294
+    13    18  unchanged  Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.ListenerThreadProc
+                         src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs:216-280
+    12    18  unchanged  Yubico.YubiKit.Core.Utilities.Tlv.ParseData
+                         src/Core/src/Utilities/Tlv.cs:203-265
+    11    15  unchanged  Yubico.YubiKit.Core.Devices.CompositeDeviceMerger.MergeSamePidBySerialWithDeduction
+                         src/Core/src/Devices/CompositeDeviceMerger.cs:293-357
+    11    12  unchanged  Yubico.YubiKit.Core.Devices.YubiKeyMonitor.RunAsync
+                         src/Core/src/Devices/YubiKeyMonitor.cs:136-181
+    12    11  unchanged  Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpProcessor.TransmitAsync
+                         src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs:58-186
+    16     9  unchanged  Yubico.YubiKit.OpenPgp.OpenPgpSession.GetUserPresenceContextAsync
+                         src/OpenPgp/src/OpenPgpSession.cs:327-378
+    14     7  unchanged  Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpState.Scp11InitAsync
+                         src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs:51-163
+    11     7  unchanged  Yubico.YubiKit.Ctap2.Backend.SmartCardBackend.SendCborAsync
+                         src/Ctap2/src/Backend/SmartCardBackend.cs:69-152
+
+9 of 63 methods exceed a threshold: 0 need action (new or worse), 9 are existing debt.
+Existing debt only: simplifying these methods is welcome but optional.
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- docs-qa docs-architecture complexity --complexity-args "--base fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef")
+Targets:
+  ✓ docs-qa               0.3s
+  ✓ docs-architecture     0.2s
+  ✓ complexity            3.0s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261112-061749-059-docs-qa+docs-architecture+complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

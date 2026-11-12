@@ -97,6 +97,11 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     ///     to acquire an owned connection automatically. Parsed mandatory algorithm fields must be understood
     ///     for initialization to succeed. Version checks use session configuration; preserve applet/device
     ///     version provenance when diagnosing development-device feature checks.
+    ///     The session binds to the connection before device I/O; failed initialization disposes and detaches
+    ///     the session while leaving this caller-owned connection open. Selection and version discovery precede
+    ///     optional SCP setup; application-data parsing uses the configured protocol before readiness is published.
+    ///     FirmwareVersionOverride selects the effective framing/feature version without skipping the version probe
+    ///     or consulting physical-device metadata. Keep borrowed SCP inputs alive through factory completion.
     /// </remarks>
     public static Task<OpenPgpSession> CreateAsync(
         ISmartCardConnection connection,
@@ -357,7 +362,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         }
         catch (Exception ex)
         {
-            // UIF is advisory metadata. A failed read must not replace the cryptographic operation.
+            // UIF is advisory metadata. If diagnostic logging succeeds, a failed read falls back to
+            // PolicyMayRequire so the cryptographic operation can proceed. Logging failures propagate.
             _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
             basis = UserPresenceBasis.PolicyMayRequire;
         }
@@ -396,6 +402,9 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
     // ── Disposal ──────────────────────────────────────────────────────
 
+    // Synchronous disposal reaches this cleanup before base protocol drain. Asynchronous disposal awaits
+    // Core protocol/owned-connection teardown first, then invokes this override in finally, even on failure.
+    // Neither path waits for an entire multi-exchange public workflow: callers must await it before disposal.
     protected override void Dispose(bool disposing)
     {
         Kdf? kdf = null;

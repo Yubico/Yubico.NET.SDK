@@ -1,0 +1,159 @@
+{
+  "manifest": "editing/integration/current-products.json",
+  "manifest_sha256": "45ca220e401ba48082e14f138d703df0e29a969dd7ae7d5edc89d2ad805075c2",
+  "accepted_paths": 361,
+  "accepted_target_role_paths": [
+    "src/WebAuthn/CLAUDE.md",
+    "src/WebAuthn/README.md",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs"
+  ],
+  "command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--no-renames",
+    "--unified=3",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+    "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "--",
+    "src/WebAuthn/CLAUDE.md",
+    "src/WebAuthn/README.md",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs"
+  ],
+  "diff_sha256": "652320ee1058b21f643d11bdb983a0f715e9cda242d8e1920647ac53c84f97f3",
+  "diff_bytes": 11361,
+  "focused_review_record": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review-identities.json",
+  "focused_patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+  "focused_primary_before_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+  "focused_transfer": "QUEUED; primary read-only until coordinator compilation cycle ends",
+  "original_changed_spans": {
+    "src/WebAuthn/CLAUDE.md": [
+      {
+        "start_character": 8599,
+        "end_character_exclusive": 8599,
+        "old_first_line": 173,
+        "old_line_count": 0,
+        "added_lines": 8,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 16169,
+        "end_character_exclusive": 16169,
+        "old_first_line": 284,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      }
+    ],
+    "src/WebAuthn/README.md": [
+      {
+        "start_character": 11235,
+        "end_character_exclusive": 11413,
+        "old_first_line": 196,
+        "old_line_count": 2,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13440,
+        "end_character_exclusive": 13440,
+        "old_first_line": 243,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 28007,
+        "end_character_exclusive": 28584,
+        "old_first_line": 454,
+        "old_line_count": 2,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs": [
+      {
+        "start_character": 14782,
+        "end_character_exclusive": 14917,
+        "old_first_line": 283,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 21433,
+        "end_character_exclusive": 21655,
+        "old_first_line": 405,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 23585,
+        "end_character_exclusive": 23586,
+        "old_first_line": 441,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs": [
+      {
+        "start_character": 1053,
+        "end_character_exclusive": 1253,
+        "old_first_line": 27,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2770,
+        "end_character_exclusive": 2876,
+        "old_first_line": 69,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3320,
+        "end_character_exclusive": 3438,
+        "old_first_line": 81,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8694,
+        "end_character_exclusive": 8695,
+        "old_first_line": 207,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs": [
+      {
+        "start_character": 5855,
+        "end_character_exclusive": 5904,
+        "old_first_line": 155,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 21146,
+        "end_character_exclusive": 21147,
+        "old_first_line": 533,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ]
+  },
+  "parser_reuse_sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d"
+}

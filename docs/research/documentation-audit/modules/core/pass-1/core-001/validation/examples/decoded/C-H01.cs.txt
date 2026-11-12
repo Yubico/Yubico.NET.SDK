@@ -1,0 +1,2 @@
+//         ///   00 || 01 || FF FF ... FF || 00 || DigestInfo(digest)
+//         /// 

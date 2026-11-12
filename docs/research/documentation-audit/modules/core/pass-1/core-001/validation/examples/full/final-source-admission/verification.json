@@ -1,0 +1,170 @@
+{
+  "status": "FINAL_STATIC_SOURCE_BODY_PROFILE_GUARDS_PASS_READY_FOR_FOCUSED_REVIEW",
+  "scope": "No SDK build/test/capture phase or replay, Git command/mutation, formatter, native/device/provider execution or subagent. Filesystem/hash/XML/source checks only.",
+  "profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/reviewed-inputs.json",
+    "bytes": 972734,
+    "sha256": "070b721e14ab9ec4d19705301ab2ac3d103bac0f78b9b157cc13b737493a5daf"
+  },
+  "static": {
+    "status": "FINAL_SOURCE_STATIC_ADMISSION_READY_FOR_FOCUSED_REVIEW_NOT_COMPILER_ACCEPTANCE",
+    "completed_receipts": 9,
+    "whole_file_transition_steps": 252,
+    "unique_transition_paths": 250,
+    "accepted_product_paths": 363,
+    "eof_paths_verified": 241,
+    "source_body_rows_reextracted": 538,
+    "raw_and_generated_body_changes": [
+      "FULL-032"
+    ],
+    "unchanged_canonical_body_source_pairs": 299,
+    "pilot_bodies_unchanged": 41,
+    "accepted_contexts_preserved": 9,
+    "accepted_body_occurrences": 298,
+    "retained_local_files": 169,
+    "source_alias_rows_updated": 95,
+    "qualified_toolchain_and_friendship_inputs_unchanged": true,
+    "existing_capture_runtime_entrypoint_fixes_unchanged": true,
+    "scope": "Static final source/body/known-receipt reconciliation only; no build/capture/test/native/device/Git/subagent action.",
+    "qualification": "Nine original checkpoints remain original exact evidence. Fresh actual WA then Oath Csc proofs remain coordinator-owned; no old-binary/current-source equivalence claimed."
+  },
+  "context_membership": [
+    {
+      "name": "consumer",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj",
+      "closure_projects": 15,
+      "expected_compile_sources": 244,
+      "selected_injections": 0
+    },
+    {
+      "name": "Ctap2.UnitTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+      "closure_projects": 3,
+      "expected_compile_sources": 52,
+      "selected_injections": 3
+    },
+    {
+      "name": "Ctap2.IntegrationTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+      "closure_projects": 5,
+      "expected_compile_sources": 34,
+      "selected_injections": 3
+    },
+    {
+      "name": "WebAuthn.IntegrationTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj",
+      "closure_projects": 6,
+      "expected_compile_sources": 10,
+      "selected_injections": 2
+    },
+    {
+      "name": "Core.UnitTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+      "closure_projects": 2,
+      "expected_compile_sources": 180,
+      "selected_injections": 5
+    },
+    {
+      "name": "Management.IntegrationTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "closure_projects": 4,
+      "expected_compile_sources": 46,
+      "selected_injections": 34
+    },
+    {
+      "name": "Core.IntegrationTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+      "closure_projects": 4,
+      "expected_compile_sources": 16,
+      "selected_injections": 2
+    },
+    {
+      "name": "SecurityDomain.IntegrationTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+      "closure_projects": 5,
+      "expected_compile_sources": 14,
+      "selected_injections": 4
+    },
+    {
+      "name": "Piv.IntegrationTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj",
+      "closure_projects": 5,
+      "expected_compile_sources": 26,
+      "selected_injections": 1
+    },
+    {
+      "name": "Oath.IntegrationTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj",
+      "closure_projects": 5,
+      "expected_compile_sources": 9,
+      "selected_injections": 1
+    },
+    {
+      "name": "Management.UnitTests",
+      "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+      "closure_projects": 3,
+      "expected_compile_sources": 8,
+      "selected_injections": 1
+    }
+  ],
+  "fixed_rows": 1930,
+  "changed_predecessor_rows": 232,
+  "manifest_replacements": 1,
+  "added_rows": 160,
+  "unchanged_predecessor_rows": 1537,
+  "known_compile_sources_unchanged": 1337,
+  "projects_unchanged": 26,
+  "contexts_unchanged": 11,
+  "accepted_product_paths": 363,
+  "accepted_map": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+    "bytes": 104259,
+    "sha256": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b"
+  },
+  "only_changed_prepared_body": "FULL-032",
+  "unchanged_generated_body_source_pairs": 299,
+  "nine_original_accepted_body_occurrences": 298,
+  "nine_original_retained_files": 169,
+  "old_binary_current_source_equivalence_claim": false,
+  "whole_file_transition_steps": 252,
+  "unique_receipted_product_paths": 250,
+  "qualified_toolchain_and_capture_runtime_kernel_unchanged": true,
+  "existing_doccheck_qualification": "db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1/b358 unchanged; no rebuild/reseal",
+  "new_generated_gzip_in_profile": false,
+  "profile_delta": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/profile-delta.json",
+    "bytes": 200518,
+    "sha256": "524a241a169362206dd5e8bf5a4592cc65b69a10e35ddcc326fb2ea5b862d602"
+  },
+  "current_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/manifest.json",
+    "bytes": 2315007,
+    "sha256": "84e70ceed63320f4ddcf8210c2cf69ebd0a08259d2f39b16923dcfd657c8206b"
+  },
+  "body_alias_delta": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/body-and-alias-delta.json",
+    "bytes": 75992,
+    "sha256": "89d78cd545c8652dc3a33744acad492ac881ac4feb53ea3c151245059654a535"
+  },
+  "body_checkpoint_match": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/body-checkpoint-match.json",
+    "bytes": 418056,
+    "sha256": "f9014b8b378cac77afc18828ee3cd73020ea66ab35200dbbd65e4135b578d464"
+  },
+  "pilot_source_match": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/pilot-source-match.json",
+    "bytes": 34846,
+    "sha256": "a9d416e3d61b57bc5d24ff24fad0c3de39885ef9b6b496f966900342a8713dd7"
+  },
+  "handoff": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/handoff.md",
+    "bytes": 8864,
+    "sha256": "e0177ab3414fee75fa3e1bdbc000991c9367ee12f8303cb87041d6ffeadb56a6"
+  },
+  "next_gates": [
+    "Coordinator actual WA second at fresh profile after focused review",
+    "Coordinator actual Oath first after WA proof accepted",
+    "Coordinator ordinary uninjected clean solution build before tests"
+  ],
+  "actual_new_compiler_result": "not-run by this worker"
+}

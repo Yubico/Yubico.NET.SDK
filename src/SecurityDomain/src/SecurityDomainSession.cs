@@ -128,6 +128,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     cannot detect firmware: creation uses the supplied override or configures with 5.3.0.
     ///     Supply an exact version for the local SCP11 generation gate. Reset currently does not forward
     ///     the original configuration/version; create a fresh session to reapply them after reset.
+    ///     SCP11 setup itself requires a known supported override, normally 5.7.2 or later: the default
+    ///     5.3.0 fails Core's gate before the handshake. Keep the retained parameters and their shared
+    ///     contained key/certificate owners alive through every reset and session using them.
     /// </remarks>
     /// <exception cref="SecureChannelException">
     ///     SCP parameters were supplied and secure-channel configuration threw ApduException,
@@ -785,6 +788,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             await BlockKeyAsync(instruction, overrideKeyRef, cancellationToken).ConfigureAwait(false);
         }
 
+        // All configured attempts finished; this does not verify restoration. Reinitialization below
+        // reuses parameters but omits the original configuration/version, including SCP11's prerequisite.
         _logger.LogInformation("Security Domain reset complete; reinitializing session");
 
         Protocol?.Dispose();
@@ -819,6 +824,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     {
         EnsureInitializedBackend();
         var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+        // This alias keeps final response storage alive but hides its supported Clear owner. A caller
+        // copy has a separate lifetime; session disposal does not erase this result or earlier copies.
         return response.Data;
     }
 

@@ -1,0 +1,43 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "earlier_citation_notes": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/citations-and-handoff.md",
+      "bytes": 11996,
+      "sha256": "f5f9b8944410291205cffc135eed635e43adecee1a720ea13222808404e7bf9f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/edit-external-revision-2.md",
+      "bytes": 13379,
+      "sha256": "1d0f2a686bd9cf0c765f054b7d779d009b80f74f2012f52eb3ff4db972c8da0a"
+    }
+  ],
+  "exact_revision3_anchors": {
+    "scripts/toolchain/TestTargets.cs": [
+      "TranslateToMtpFilter at base lines158-256; branches171-187,190-220,224-256",
+      "investigation-A.md:320-331, CORE-A-C018"
+    ],
+    "scripts/toolchain/Results.cs": [
+      "Gates.EnsureTestsRan at base lines97-109; actual predicates103-108",
+      "scripts/toolchain/TestTargets.cs at base lines97-117, classifier",
+      "investigation/B4/file-evidence.md:177-191; investigation-B4.md:131-138"
+    ],
+    "scripts/toolchain/Process.cs": [
+      "Exec.Run/Mask at base lines29-85,114-115; Dotnet.Capture130-150",
+      "scripts/toolchain/RunLog.cs:55-64,451-467",
+      "investigation/B4/file-evidence.md:177-191; investigation-B4.md:125-138"
+    ]
+  },
+  "source_authority": "Pinned implementation and completed family reports, not a new normative requirement or independent citation acceptance.",
+  "runner_qualification": "CORE-A-C018/A-E05: exact xUnit3.0.0 same-kind selection remains unrun; no AND/OR result inferred from emitted flags.",
+  "example_inventory": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/example-bodies.json",
+    "bytes": 290568,
+    "sha256": "9dd8d13ac9144cc1505e1b590d46759f7f26c98ea3651616963bc3c26cbb1109"
+  },
+  "initial_example_bodies": 243,
+  "retained_extra_bodies": 4,
+  "new_example_bodies": 0,
+  "all_example_compilation": "NOT-RUN",
+  "no_new_protocol_citation": true
+}

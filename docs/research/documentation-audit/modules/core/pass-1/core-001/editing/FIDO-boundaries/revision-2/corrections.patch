@@ -1,0 +1,52 @@
+--- a/src/Ctap2/README.md
++++ b/src/Ctap2/README.md
+@@ -298,8 +298,11 @@
+ `Core.Cryptography.Cose.CoseKeyInfo` (kty/crv, not alg). Core `CoseAlgorithmIdentifier` uses
+ `Es256`, `Es384`, `Es512`, `EdDsa`, `Rs256`, and `EcdhEsHkdf256`. CTAP2's `CoseAlgorithm` remains open-valued
+ with its existing PascalCase constants and unknown-value preservation. A Core COSE mapping is not CTAP2
+-operation/profile support; PIN/UV curve and algorithm checks remain strict. Operation applicability in the
+-catalog must never broaden CTAP2 profile checks or restrict unknown numeric response identifiers.
++operation/profile support. CTAP's PIN/UV key-agreement profile requires EC2/P-256, alg=-25, 32-byte X/Y
++coordinates, an on-curve point and no other optional key parameters. The current helper checks coordinate
++storage types and lengths and imports the point as P-256 through the provider, but omits peer kty/crv/alg
++and optional-parameter checks. This is a validation gap, not intended forward compatibility. Catalog
++applicability supplies none of those missing checks and must not restrict unknown numeric response identifiers.
+ 
+ Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
+ preparation directly; there is no applet-selection step.
+--- a/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
++++ b/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
+@@ -157,10 +157,10 @@
+     /// <param name="auth">The ceremony's token owner.</param>
+     /// <param name="decision">The UV decision in force (its method is reused for a re-mint).</param>
+     /// <param name="remintPermissions">
+-    /// When set, the token is re-minted with these permissions after the probe. Authenticators may refuse
+-    /// to reuse a token consumed by a getAssertion(up:false) probe for a following makeCredential, so
+-    /// registration passes <c>MakeCredential</c>; a following getAssertion accepts the same token, so
+-    /// selection passes null.
++    /// When set and a token exists, the token is re-minted with these permissions after the probe.
++    /// Registration passes <c>MakeCredential</c>; authentication selection passes null and reuses its
++    /// existing token for the final assertion. This is the SDK's reuse choice, not a guarantee of
++    /// authenticator acceptance; the authenticator's token state and expiry conditions still apply.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     private async Task<PublicKeyCredentialDescriptor?> ProbeCredentialsAsync(
+@@ -231,4 +231,4 @@
+             ? Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex)
+             : MapCtapStatusToWebAuthnError(ex);
+     }
+-}+}
+--- a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
++++ b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
+@@ -404,8 +404,9 @@
+     }
+ 
+     /// <summary>
+-    ///     With a token the probe is signed and the same token signs the assertion: a getAssertion accepts a token
+-    ///     already used for an up:false probe (only makeCredential does not, see the registration test).
++    ///     Checks one GetAssertion permission-token acquisition and nonnull auth parameters on both the
++    ///     probe and final assertion requests. The fake backend and noncryptographic protocol exercise the
++    ///     SDK's token-reuse choice, not authenticator acceptance or command-specific token invalidation.
+     /// </summary>
+     [Fact]
+     public async Task GetAssertion_AllowList_WithToken_SignsProbeAndAssertionWithOneToken()

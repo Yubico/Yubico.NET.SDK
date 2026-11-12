@@ -1,0 +1,19 @@
+▶ toolchain: docs-architecture  (log: artifacts/toolchain/runs/20261112-022850-535-docs-architecture/run.log)
+
+▶ target: docs-architecture
+
+=== Validating architecture diagrams (evidence map + image freshness) ===
+
+▶ RUN bash "scripts/architecture/check-architecture-map.sh"
+architecture map OK: 6 diagram entries, all evidence + project edges resolve; coverage matches 6 diagram heading level(s).
+▶ RUN bash "scripts/architecture/check-architecture-images.sh"
+architecture images OK: 7 diagrams present and fresh (manifest matches source blocks).
+✓ Architecture diagrams validated (map resolves; images present and fresh)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- docs-architecture)
+Targets:
+  ✓ docs-architecture     0.2s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261112-022850-535-docs-architecture/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

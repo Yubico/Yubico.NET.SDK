@@ -1,0 +1,31 @@
+{
+  "scan": {
+    "before": {
+      "sources": 300,
+      "duplicate_import_files": 46,
+      "nonexistent_repo_namespace_directives": 37,
+      "invalid_namespace_counts": {
+        "Yubico.YubiKit.Ctap2.Ctap": 37
+      },
+      "static_type_directives": [
+        {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-236.cs",
+          "type": "Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions"
+        }
+      ]
+    },
+    "after": {
+      "sources": 300,
+      "duplicate_import_files": 0,
+      "nonexistent_repo_namespace_directives": 0,
+      "invalid_namespace_counts": {},
+      "static_type_directives": [
+        {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-236.cs",
+          "type": "Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions"
+        }
+      ]
+    }
+  },
+  "note": "Supersedes initial scan-before namespace heuristic: using static CryptographicDefinitions names a real type, not a namespace defect. No accepted directive removed."
+}

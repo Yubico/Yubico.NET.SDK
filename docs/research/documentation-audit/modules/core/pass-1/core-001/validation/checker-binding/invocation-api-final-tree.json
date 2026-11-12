@@ -1,0 +1,32 @@
+{
+  "scope": "Exact current reviewed checker inputs and sealed original outputs, before and after invocation.",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "profile_sha256": "db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1",
+  "seal": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-final-edits/sealed.json",
+    "bytes": 150380,
+    "sha256": "b3583ce08b5b31e7f6b6947ca8764120c46f5d706308c7afd70dd7e5c268b1bc"
+  },
+  "command": [
+    "/home/rupicola/.local/share/mise/dotnet-root/dotnet",
+    "exec",
+    "--roll-forward",
+    "Disable",
+    "--fx-version",
+    "10.0.15",
+    "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+    "api",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET"
+  ],
+  "exit_code": 0,
+  "runtime_dll": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+  "runtime_version": "10.0.15",
+  "command_receipt": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/api-final-tree/receipt.json",
+    "bytes": 3607,
+    "sha256": "8405a50cc428eb93c3db49ef6e932464f91c03fd957324c8f18bce37ae65f151"
+  },
+  "status": "passed",
+  "errors": [],
+  "before_after_identical": true
+}

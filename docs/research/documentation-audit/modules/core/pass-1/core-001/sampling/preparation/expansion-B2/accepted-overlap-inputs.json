@@ -1,0 +1,1029 @@
+{
+  "manifest": "editing/integration/current-products.json",
+  "manifest_sha256": "8012cb83332a4ffc6aaae251ee97bb489986e48305cd566aa226d4889a57673e",
+  "accepted_paths": 360,
+  "target_role_paths": [
+    "docs/NATIVE-AOT.md",
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/migration/v1-to-v2.md",
+    "src/Core/CLAUDE.md",
+    "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+    "src/Core/src/Devices/HidConnectionSlot.cs",
+    "src/Core/src/Devices/PcscConnectionSlot.cs",
+    "src/Core/src/Devices/RegisteredConnections.cs",
+    "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+    "src/Core/src/Native/Linux/Linux.Libraries.cs",
+    "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+    "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+    "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+    "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+    "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+    "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+    "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+    "src/Tests.Shared/CLAUDE.md"
+  ],
+  "command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--no-renames",
+    "--unified=3",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+    "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "--",
+    "docs/NATIVE-AOT.md",
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/migration/v1-to-v2.md",
+    "src/Core/CLAUDE.md",
+    "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+    "src/Core/src/Devices/HidConnectionSlot.cs",
+    "src/Core/src/Devices/PcscConnectionSlot.cs",
+    "src/Core/src/Devices/RegisteredConnections.cs",
+    "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+    "src/Core/src/Native/Linux/Linux.Libraries.cs",
+    "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+    "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+    "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+    "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+    "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+    "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+    "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+    "src/Tests.Shared/CLAUDE.md"
+  ],
+  "diff_sha256": "dd71e4957db1a392d6d6c035fc71d8e0b3f74244a8c423397f453509605d6d29",
+  "diff_bytes": 90519,
+  "pure_parser_sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+  "original_changed_spans": {
+    "docs/NATIVE-AOT.md": [
+      {
+        "start_character": 2129,
+        "end_character_exclusive": 2129,
+        "old_first_line": 35,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 9126,
+        "end_character_exclusive": 9126,
+        "old_first_line": 151,
+        "old_line_count": 0,
+        "added_lines": 9,
+        "kind": "insertion-point"
+      }
+    ],
+    "docs/architecture/connection-ownership-and-contention.md": [
+      {
+        "start_character": 358,
+        "end_character_exclusive": 540,
+        "old_first_line": 9,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1872,
+        "end_character_exclusive": 2120,
+        "old_first_line": 39,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2293,
+        "end_character_exclusive": 2385,
+        "old_first_line": 45,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2727,
+        "end_character_exclusive": 2727,
+        "old_first_line": 52,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2747,
+        "end_character_exclusive": 3026,
+        "old_first_line": 54,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6356,
+        "end_character_exclusive": 6457,
+        "old_first_line": 109,
+        "old_line_count": 1,
+        "added_lines": 11,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10544,
+        "end_character_exclusive": 10544,
+        "old_first_line": 169,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 11127,
+        "end_character_exclusive": 11565,
+        "old_first_line": 175,
+        "old_line_count": 4,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12646,
+        "end_character_exclusive": 12747,
+        "old_first_line": 195,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12948,
+        "end_character_exclusive": 13053,
+        "old_first_line": 198,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14233,
+        "end_character_exclusive": 14290,
+        "old_first_line": 218,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16382,
+        "end_character_exclusive": 16578,
+        "old_first_line": 243,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16621,
+        "end_character_exclusive": 16722,
+        "old_first_line": 248,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16925,
+        "end_character_exclusive": 17009,
+        "old_first_line": 251,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "docs/migration/v1-to-v2.md": [
+      {
+        "start_character": 1151,
+        "end_character_exclusive": 1450,
+        "old_first_line": 21,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4681,
+        "end_character_exclusive": 4681,
+        "old_first_line": 48,
+        "old_line_count": 0,
+        "added_lines": 8,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 5038,
+        "end_character_exclusive": 5061,
+        "old_first_line": 53,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5072,
+        "end_character_exclusive": 5324,
+        "old_first_line": 56,
+        "old_line_count": 6,
+        "added_lines": 21,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5537,
+        "end_character_exclusive": 5537,
+        "old_first_line": 66,
+        "old_line_count": 0,
+        "added_lines": 10,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6333,
+        "end_character_exclusive": 6568,
+        "old_first_line": 78,
+        "old_line_count": 1,
+        "added_lines": 17,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 46526,
+        "end_character_exclusive": 46649,
+        "old_first_line": 722,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 46660,
+        "end_character_exclusive": 46660,
+        "old_first_line": 725,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 46688,
+        "end_character_exclusive": 46822,
+        "old_first_line": 727,
+        "old_line_count": 4,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 46824,
+        "end_character_exclusive": 47008,
+        "old_first_line": 732,
+        "old_line_count": 4,
+        "added_lines": 15,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 47342,
+        "end_character_exclusive": 47342,
+        "old_first_line": 743,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 58966,
+        "end_character_exclusive": 58966,
+        "old_first_line": 856,
+        "old_line_count": 0,
+        "added_lines": 19,
+        "kind": "insertion-point"
+      }
+    ],
+    "src/Core/CLAUDE.md": [
+      {
+        "start_character": 2867,
+        "end_character_exclusive": 2930,
+        "old_first_line": 61,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3013,
+        "end_character_exclusive": 3013,
+        "old_first_line": 66,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3202,
+        "end_character_exclusive": 3202,
+        "old_first_line": 70,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6635,
+        "end_character_exclusive": 6744,
+        "old_first_line": 110,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22670,
+        "end_character_exclusive": 22727,
+        "old_first_line": 312,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22892,
+        "end_character_exclusive": 22929,
+        "old_first_line": 321,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 23904,
+        "end_character_exclusive": 24002,
+        "old_first_line": 349,
+        "old_line_count": 3,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 24003,
+        "end_character_exclusive": 24285,
+        "old_first_line": 353,
+        "old_line_count": 6,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 27133,
+        "end_character_exclusive": 27521,
+        "old_first_line": 410,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 28428,
+        "end_character_exclusive": 28428,
+        "old_first_line": 443,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 32303,
+        "end_character_exclusive": 33017,
+        "old_first_line": 488,
+        "old_line_count": 8,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34367,
+        "end_character_exclusive": 34454,
+        "old_first_line": 518,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34455,
+        "end_character_exclusive": 34598,
+        "old_first_line": 520,
+        "old_line_count": 3,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34603,
+        "end_character_exclusive": 34603,
+        "old_first_line": 525,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 35604,
+        "end_character_exclusive": 36157,
+        "old_first_line": 536,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 36700,
+        "end_character_exclusive": 36700,
+        "old_first_line": 544,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 37757,
+        "end_character_exclusive": 37757,
+        "old_first_line": 555,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 51181,
+        "end_character_exclusive": 51245,
+        "old_first_line": 723,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52018,
+        "end_character_exclusive": 52070,
+        "old_first_line": 751,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52099,
+        "end_character_exclusive": 52231,
+        "old_first_line": 754,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52261,
+        "end_character_exclusive": 52310,
+        "old_first_line": 758,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52429,
+        "end_character_exclusive": 52473,
+        "old_first_line": 764,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 53656,
+        "end_character_exclusive": 53789,
+        "old_first_line": 789,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54090,
+        "end_character_exclusive": 54160,
+        "old_first_line": 805,
+        "old_line_count": 3,
+        "added_lines": 0,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54218,
+        "end_character_exclusive": 54218,
+        "old_first_line": 810,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 54506,
+        "end_character_exclusive": 54596,
+        "old_first_line": 826,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54676,
+        "end_character_exclusive": 54930,
+        "old_first_line": 828,
+        "old_line_count": 3,
+        "added_lines": 11,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54971,
+        "end_character_exclusive": 55043,
+        "old_first_line": 838,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55045,
+        "end_character_exclusive": 55101,
+        "old_first_line": 840,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55165,
+        "end_character_exclusive": 55221,
+        "old_first_line": 844,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55300,
+        "end_character_exclusive": 55549,
+        "old_first_line": 852,
+        "old_line_count": 12,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55550,
+        "end_character_exclusive": 55753,
+        "old_first_line": 865,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 56462,
+        "end_character_exclusive": 56660,
+        "old_first_line": 882,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 57003,
+        "end_character_exclusive": 58948,
+        "old_first_line": 884,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 61763,
+        "end_character_exclusive": 61867,
+        "old_first_line": 895,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Devices/DeviceConnectionRegistry.cs": [
+      {
+        "start_character": 1072,
+        "end_character_exclusive": 1233,
+        "old_first_line": 27,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1375,
+        "end_character_exclusive": 1552,
+        "old_first_line": 32,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Devices/HidConnectionSlot.cs": [
+      {
+        "start_character": 3554,
+        "end_character_exclusive": 3642,
+        "old_first_line": 82,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Devices/PcscConnectionSlot.cs": [
+      {
+        "start_character": 3602,
+        "end_character_exclusive": 3827,
+        "old_first_line": 92,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Devices/RegisteredConnections.cs": [
+      {
+        "start_character": 778,
+        "end_character_exclusive": 1303,
+        "old_first_line": 22,
+        "old_line_count": 5,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Devices/YubiKeyConnectionExtensions.cs": [
+      {
+        "start_character": 11219,
+        "end_character_exclusive": 11219,
+        "old_first_line": 231,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 11393,
+        "end_character_exclusive": 11482,
+        "old_first_line": 234,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11894,
+        "end_character_exclusive": 11894,
+        "old_first_line": 239,
+        "old_line_count": 0,
+        "added_lines": 22,
+        "kind": "insertion-point"
+      }
+    ],
+    "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs": [
+      {
+        "start_character": 759,
+        "end_character_exclusive": 843,
+        "old_first_line": 20,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Native/Linux/Linux.Libraries.cs": [
+      {
+        "start_character": 722,
+        "end_character_exclusive": 722,
+        "old_first_line": 20,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      }
+    ],
+    "src/Core/src/Native/Linux/Udev/Udev.Interop.cs": [
+      {
+        "start_character": 6374,
+        "end_character_exclusive": 6521,
+        "old_first_line": 124,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8713,
+        "end_character_exclusive": 8860,
+        "old_first_line": 166,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9650,
+        "end_character_exclusive": 9666,
+        "old_first_line": 182,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10263,
+        "end_character_exclusive": 10410,
+        "old_first_line": 194,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12775,
+        "end_character_exclusive": 12844,
+        "old_first_line": 242,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs": [
+      {
+        "start_character": 7712,
+        "end_character_exclusive": 7806,
+        "old_first_line": 193,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs": [
+      {
+        "start_character": 4743,
+        "end_character_exclusive": 4784,
+        "old_first_line": 130,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4803,
+        "end_character_exclusive": 4803,
+        "old_first_line": 132,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 5061,
+        "end_character_exclusive": 5102,
+        "old_first_line": 139,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5121,
+        "end_character_exclusive": 5121,
+        "old_first_line": 141,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 11115,
+        "end_character_exclusive": 11347,
+        "old_first_line": 328,
+        "old_line_count": 4,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12246,
+        "end_character_exclusive": 12326,
+        "old_first_line": 360,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs": [
+      {
+        "start_character": 894,
+        "end_character_exclusive": 982,
+        "old_first_line": 25,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6090,
+        "end_character_exclusive": 6271,
+        "old_first_line": 191,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8337,
+        "end_character_exclusive": 8392,
+        "old_first_line": 267,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13840,
+        "end_character_exclusive": 13895,
+        "old_first_line": 473,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/SmartCard/FindPcscDevices.cs": [
+      {
+        "start_character": 260,
+        "end_character_exclusive": 260,
+        "old_first_line": 9,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 296,
+        "end_character_exclusive": 296,
+        "old_first_line": 11,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 397,
+        "end_character_exclusive": 397,
+        "old_first_line": 14,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1633,
+        "end_character_exclusive": 1633,
+        "old_first_line": 45,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6812,
+        "end_character_exclusive": 6812,
+        "old_first_line": 173,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      }
+    ],
+    "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs": [
+      {
+        "start_character": 2697,
+        "end_character_exclusive": 2697,
+        "old_first_line": 51,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3565,
+        "end_character_exclusive": 3565,
+        "old_first_line": 63,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      }
+    ],
+    "src/Core/src/Transports/SmartCard/PcscNativeResources.cs": [
+      {
+        "start_character": 4645,
+        "end_character_exclusive": 4766,
+        "old_first_line": 118,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs": [
+      {
+        "start_character": 4210,
+        "end_character_exclusive": 4326,
+        "old_first_line": 68,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4494,
+        "end_character_exclusive": 4494,
+        "old_first_line": 73,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 5497,
+        "end_character_exclusive": 5839,
+        "old_first_line": 104,
+        "old_line_count": 4,
+        "added_lines": 14,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/SmartCard/SmartCardSharing.cs": [
+      {
+        "start_character": 763,
+        "end_character_exclusive": 1075,
+        "old_first_line": 22,
+        "old_line_count": 3,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1382,
+        "end_character_exclusive": 1578,
+        "old_first_line": 28,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2076,
+        "end_character_exclusive": 2076,
+        "old_first_line": 37,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2134,
+        "end_character_exclusive": 2268,
+        "old_first_line": 41,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2589,
+        "end_character_exclusive": 2689,
+        "old_first_line": 49,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Tests.Shared/CLAUDE.md": [
+      {
+        "start_character": 317,
+        "end_character_exclusive": 399,
+        "old_first_line": 9,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1675,
+        "end_character_exclusive": 1675,
+        "old_first_line": 32,
+        "old_line_count": 0,
+        "added_lines": 3,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2949,
+        "end_character_exclusive": 2975,
+        "old_first_line": 65,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3235,
+        "end_character_exclusive": 3284,
+        "old_first_line": 71,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3318,
+        "end_character_exclusive": 4271,
+        "old_first_line": 75,
+        "old_line_count": 28,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4296,
+        "end_character_exclusive": 4348,
+        "old_first_line": 105,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4802,
+        "end_character_exclusive": 4842,
+        "old_first_line": 121,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5381,
+        "end_character_exclusive": 5563,
+        "old_first_line": 138,
+        "old_line_count": 4,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9440,
+        "end_character_exclusive": 9674,
+        "old_first_line": 243,
+        "old_line_count": 6,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10163,
+        "end_character_exclusive": 10230,
+        "old_first_line": 272,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ]
+  }
+}

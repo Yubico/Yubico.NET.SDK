@@ -1,0 +1,398 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/record-edit.py",
+    "sha256": "bda442a67317615b5dac746a3b7e396df9fcd8638bc759896d603007f8601721"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/changed-files.json",
+    "sha256": "c60e96270a153e9ed3c0ff58d18f15256e216bb45a373679f2018388ad774b0e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/path-decisions.json",
+    "sha256": "09a3a9ca8016b438e97e5b59deaa88bf9719c854099cd2f2fd98d96af9e458ab"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/outside-owner-handoffs.json",
+    "sha256": "8a959edd158c3c0492ddac07102e7b72a576f9ba3bbda8a0544d47458f6c7bdc"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/example-inventory.json",
+    "sha256": "2cfba94f36d205664f00d93a731c9a2542dd13662876b458658920b5f54b5d6b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/local-links.json",
+    "sha256": "6ca70356df8d8c0ee2877d97845996ebbbb3cfd966ec2c5194ca6c98bfad14c9"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/input-identities.json",
+    "sha256": "50ce357e9a9a14eb03143428aac420a57f4e02a9ee2fb63599d869741febacca"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/preserved-provenance.json",
+    "sha256": "fcba6a43ee285f82d65aa5dbf2ba7ff1173f2bf93281eb0f59184431be18393f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/product.patch",
+    "sha256": "dac49659e9357569fd836922bd2f52fe9622a6f7794fcabe320d84d29933134a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/static-verification.json",
+    "sha256": "b98b8f3571aeb4780b1f9c715eb95a6e9689bb98e1880658535ae8c7134c8715"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/candidate-decisions.md",
+    "sha256": "4786509309c94f23e67bb6d59e542a4dcf926a8fd1b43e7b4693dc862b80f5bf"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/citation-notes.md",
+    "sha256": "e52abc63eec192853abd015d732ef86f1cfe15d69eeaeefc3f0d387b0c8f0e11"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/verification-notes.md",
+    "sha256": "ed7c4f8a553128f4518ba67299e9e6525c7833c36d02a3f0a81f6f04becf9c70"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/review.md",
+    "sha256": "a5a387caaac844d45ef247f80f0a9ee5976aa48b28f01859e7aefb07183cc889"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/review-identities.json",
+    "sha256": "1528f450efe28ac6106754233d3bbb456ca9622394a5093ef986af75f0881e12"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-identities.json",
+    "sha256": "b30879d7ed07ddbd2cccd1638dc22d77264686f4f0cfcd143c0f15f04bcb5fd7"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/changed-files.json",
+    "sha256": "e657d32b3c9bdf1af2452c76a56958710ac190e7659bc2770ed9fbefe28ed2a1"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/correction-ranges.json",
+    "sha256": "639ea442ad0b54403903fff9f976192a17d193c89452fa4565dac4abb9c833ed"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/successor-delta.patch",
+    "sha256": "ea4ada3491c1f89d366aceee13c1421f3ce87bfeceaff2c4b75874355095b210"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/product.patch",
+    "sha256": "7766e7411dd9847aaaf57b86937a61c720fe0c1a02a8ba7c790f711b61ce47b4"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/path-decisions.json",
+    "sha256": "a86e942e564779c2764ae11eb85e9b1bd0edb6f83344e7dbde3b0114fd00851b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/example-inventory.json",
+    "sha256": "ea82ddf1f05b936ec25229052ca07a43a3e39854c48c900a92e485c730ba86a3"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/local-links.json",
+    "sha256": "8e435b633eafdbcee4238792f05da83d17823b7b262596738dc7e8c2e8e29930"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/outside-owner-handoffs.json",
+    "sha256": "8a959edd158c3c0492ddac07102e7b72a576f9ba3bbda8a0544d47458f6c7bdc"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/preserved-provenance.json",
+    "sha256": "fcba6a43ee285f82d65aa5dbf2ba7ff1173f2bf93281eb0f59184431be18393f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/input-identities.json",
+    "sha256": "50ce357e9a9a14eb03143428aac420a57f4e02a9ee2fb63599d869741febacca"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/static-verification.json",
+    "sha256": "49dc6798be03ddf6ae54442705953e11e4640a6173d684b9c34266245d487851"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/report.md",
+    "sha256": "c09b5f9d37c01d08483f94bad8df8ce764978b0070fae39e603eae5bc0a24d39"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/correction-review.md",
+    "sha256": "7df398dcc3b264681358b23b0aa5155c701c91bc75827f51514dc3509706b388"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/candidate-decisions.json",
+    "sha256": "b950820f5d0e9b3725f8023633a0182ce6b61dc2ed9a07cb4bdc4a1de15e2647"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/final-verification.json",
+    "sha256": "34b350b50d70fc9dd97269cc3b954ad7ee8c8aa3dc020aba83c2f2efa0091c9e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/record-identities.json",
+    "sha256": "3f6999cf651281a9ff824e8b25bd20e21009476fd0a0a5f29bbd06dd4e552617"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/review.md",
+    "sha256": "7acbae907e242a7177cc21b3efd8594336f16d837cb9ae327b3f200f062d01cb"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/review-identities.json",
+    "sha256": "d029be7ae548300bc12e29af3d5ef16d1287403cbe641f7e0514ea35c0708fb7"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/CLAUDE.md",
+    "sha256": "7e7b584bfe6ef745f19b5d4adc10768b1b0826c9811a91b25bb4662980e43745"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/README.md",
+    "sha256": "4f6f671e61970d04c7fb06d2e6c5ba08f78208c4e18fca30d739e39692123229"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/IOpenPgpSession.cs",
+    "sha256": "0869eb6ee872f520132e4856cfe492cdb3fb6e06f6c69d185b03e2cecd6a6988"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/IYubiKeyExtensions.cs",
+    "sha256": "3e2cc825ab4bd1227f7b19bf26e37504c0f2f4dba0704929f9e0a099c9069e83"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/Kdf.cs",
+    "sha256": "899a908e9b7a0a14979ab68225533128855aa50b6462cf24a069b7dfd9c65d15"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/OpenPgpSession.Config.cs",
+    "sha256": "ab35501aff68ffe955c16f210b031abfa1302653e28c9451651ff5889472f807"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/OpenPgpSession.Keys.cs",
+    "sha256": "56c1ec91bf7e5e230866432662d38ba407ab42494c25684881007eae616ffc19"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/OpenPgpSession.Reset.cs",
+    "sha256": "1509f0e864ab5424dbc5d9482978ad020951304545c9732212c5e375d33e4663"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/OpenPgpSession.cs",
+    "sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/PrivateKeyImport.cs",
+    "sha256": "2281e630a43346e33376365cfaaf5bd578add06e8c8f26876c5caf1c4571c0f7"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/PrivateKeyTemplate.cs",
+    "sha256": "8143bdcf68b605697757b386fe31c37017bd9e54fa30012aa0a9d6042ccf0701"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/tests/CLAUDE.md",
+    "sha256": "4d5017e2de94d53b1c215ff755f81c1ac534f2a6b3383b62b9b5e6509f7b901e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+    "sha256": "7d4338b27a41d8516806f62466b3276464f1560c82fd18f64c7487dc62e1f7bd"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+    "sha256": "8fd707acf4c1f4db33393908dcbe6d009096c94bb6fa7ea4256c76b09d9cc931"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+    "sha256": "0a652dbd773cdd634a357e5cd9f7adddb654761404babf34a768517614502b15"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+    "sha256": "4127df8af0efee371c0dbe851cb061e17571e2a182c853d0c883162855c024d9"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/revision-2/predecessor-products/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "sha256": "23c3985a3fd1b9fa344917db33b8186ec2c350718e11c765f91edb1074bc57e9"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/decisions.md",
+    "sha256": "3bcea6901ef4e96cb09a230ccfaf283289c1a930f9b392a571e305c0c7333c0c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/citation-notes.md",
+    "sha256": "704734523df979502366ec889f46d2a3e674ed86aa5a17a5a5861b0a3ffe94cc"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/changed-files.json",
+    "sha256": "d301576e6a8f1bdcb3a32062df3e9e7c35a98ae3e0854c497b8b5a78deb813f7"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/path-decisions.json",
+    "sha256": "8a8bbad3c73fb6b198f5e9894ab15cc81cdb8178b28e94a907b3a466f00b5041"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/example-inventory.json",
+    "sha256": "dbfa4577695f64849ca9d1d801e4eb510eb4fb644b08903129aed49209ce8d76"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/outside-owner-handoffs.json",
+    "sha256": "8ebb35bbcda9f87c2145da18419d9a9a9ae2b0acc1e80c0a64182dd0621e680e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/local-links.json",
+    "sha256": "5a772d7376b93bc4d774910e661bc268e89237b52d7ee012c19354293b71ee2c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/preserved-provenance.json",
+    "sha256": "aed3a5bb95de5d95867dd58945814cb77e5d1cdaaf231fb0da2511633f9c3552"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/input-identities.json",
+    "sha256": "9d8e5308a4673b7665c59023c377c2cef8495c1f0f3799717bfb63cb2d87340d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/product.patch",
+    "sha256": "5a442195caab2674e3162a35bdffe9d4ab58e54ad72d7f33f6beeb20ab1ae3dd"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/static-verification.json",
+    "sha256": "a756ece203e2ab7699b0477b48ab56558e472e4286c1751dbec135b70896c617"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/final-delivery-verification.json",
+    "sha256": "a0ab70eae774b66c37dfe1a28282aa8cb38574bff47aa6f0f4deafaaab942f34"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/review.md",
+    "sha256": "75970798b1c55c11fea87c21b04b1a73597c0f0d0ebefe534270bdb63567c40f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/review-identities.json",
+    "sha256": "af59fdfd92cc2a011cc58759371c94a18d71fa2e350fdac401df20692f6b706d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-identities.json",
+    "sha256": "63f4a70daaeb4758ae99a8e8ec10fea945d0a9d2f0bac4f9f7c75a46c5ac4015"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/changed-files.json",
+    "sha256": "2ef09fa02f02c143f1d2cde4385188f28f00bd5188d184187dfa09df823e92b7"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/correction-ranges.json",
+    "sha256": "15fe2b818a0e1b27ad77e4d5e60ac8eda334a2db7b89cd0ed1ae8c5fa8a56524"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/successor-delta.patch",
+    "sha256": "ab97bd5d8df7afaf7d4b9f1e6b591d8c9c701ab7acc1066930cfe03fd0205b72"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/product.patch",
+    "sha256": "dc35e1032236c9363640a280dc722b9c10c33c8c2567433946d5521da514a8ce"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/path-decisions.json",
+    "sha256": "8ed1fef9e7ea17ed105e8e41133e85b01067e551b0fbceddf0fc85ef84d00ade"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/example-inventory.json",
+    "sha256": "dbabb661d8280899731c6685ba9da125b2d10cf05c09f1500a13e5f9ef8b2625"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/local-links.json",
+    "sha256": "5a772d7376b93bc4d774910e661bc268e89237b52d7ee012c19354293b71ee2c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/outside-owner-handoffs.json",
+    "sha256": "8ebb35bbcda9f87c2145da18419d9a9a9ae2b0acc1e80c0a64182dd0621e680e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/preserved-provenance.json",
+    "sha256": "aed3a5bb95de5d95867dd58945814cb77e5d1cdaaf231fb0da2511633f9c3552"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/input-identities.json",
+    "sha256": "9d8e5308a4673b7665c59023c377c2cef8495c1f0f3799717bfb63cb2d87340d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/static-verification.json",
+    "sha256": "db971fe14e088f9a2191016be965fcbf3dff152ce3eef704ef84c825a546b8a9"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/report.md",
+    "sha256": "975d8fff680ad2a4003f2db15f75afaa8f1874bc5aa623e6fc61d70e43a9b06f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/correction-review.md",
+    "sha256": "df387fa4546770ab32a856447277ef855e795ebb8904b88fc2a70e375f98b3b3"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/candidate-decisions.json",
+    "sha256": "9d3c8d06be5d4a0e811703f6ae118b688ebbf4323e32290afd6027fb68e8be9a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/final-verification.json",
+    "sha256": "34b350b50d70fc9dd97269cc3b954ad7ee8c8aa3dc020aba83c2f2efa0091c9e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/record-identities.json",
+    "sha256": "32714fda72b4f69ec1d07b935bcd394554bc1227a82e409b844a2ebeec2a84b1"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/review.md",
+    "sha256": "bc96a40b283b64eb92b84d7c9ddedb9aaae5c314f7f28541ad0ef308500feea1"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/review-identities.json",
+    "sha256": "3c01b374e45eea779d29e8c981ad3fd79c392fcf7f89c21077bea6c6a4470a66"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/CLAUDE.md",
+    "sha256": "de79b8e299566ab1260fe758bb5fff3dd42da89bb3ef69524cfdf7a47f75577a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/README.md",
+    "sha256": "c3ef3a2cbc1fabde7177e3c7255558a7b2bb38098c94c96ee08ea9be8bf046c6"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/src/IPivSession.cs",
+    "sha256": "6cf9b7d917d852316d6292c840cec4b9b15739ff437c98cff926b7a9f672db7f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/src/IYubiKeyExtensions.cs",
+    "sha256": "951665fa054ab7906a06cee19784f4b91f2d1dc03050db879206e2b0c2c0f46c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/src/PivSession.cs",
+    "sha256": "cba2261e6c6f591de3d6cb189fc092dfab8f1295b748c18b7ab1715d0dc9349a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+    "sha256": "cdbc621258158f25578792a576c0463d5e1694f08ff44ed7ac090caf566e6bb5"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+    "sha256": "3d304c794c59f59b4b7ade5f5f285c97598e2650566f4119847687080901e9c5"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+    "sha256": "9d2699c1e4d1516d1e146e8c439d8fcd5c0d70caa1bd07036e3ebc5ac0d991d7"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+    "sha256": "6b77a88bb23a9afa0b47eccc56ccec6ee16301995c08401b0efd1394e175ec70"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+    "sha256": "62124c562e12fa72dbd982b4b704aeb867526f833ed1489a4f50974f7940c68c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+    "sha256": "01797e8aed2d0f884f8033201779db7717927bb6829f8179ae7ea58fb4da2f4b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/src/Keys/KeyProtocol.cs",
+    "sha256": "cbb73402f1c4ae839c8ca6efe7c3930603c5f596351a20e251b8c9d71691b73f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/predecessor-products/src/Piv/examples/PivTool/README.md",
+    "sha256": "899ad7a7119ab202fcd98955f81b051d626b505943259df6b354568b4db01320"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-PGP-boundary.md",
+    "sha256": "8ce092f1e8ba503ae3b94ed69e5fecdc3a28f0f2ed5a8f64856267583bd3650a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-PIV-boundary.md",
+    "sha256": "9a32edd729f65619cbd00651ad8662fe44cc6b14da541072c5ff49bb3fc9a3ef"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "Astra": "PENDING REVIEW",
+  "fresh_independent": "PENDING REVIEW",
+  "identity_refresh": "COMPLETE",
+  "no_product_changes_remaining_reported": true,
+  "accepted_clean_count": null,
+  "accepted_denominator": null,
+  "sampler_PASS": null,
+  "review_must_be_additive": "Append hash-bound adjudication; do not mutate predecessor or successor sealed files.",
+  "compiler_complete_claim": false
+}

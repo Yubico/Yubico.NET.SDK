@@ -1,0 +1,4 @@
+//         ///   M-prime || H
+//         ///     M-prime is (2 * digest length) + 8 bytes long,
+//         ///     H is digest length bytes long
+//         /// 

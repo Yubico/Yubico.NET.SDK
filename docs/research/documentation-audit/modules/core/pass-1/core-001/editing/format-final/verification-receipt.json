@@ -1,0 +1,74 @@
+{
+  "verification": "proposal-only; no formatter/build/test replay",
+  "patch_dry_run_exit_code": 0,
+  "patch_dry_run_checked_paths": 239,
+  "patch_dry_run_fuzz": 0,
+  "patch_dry_run_stdout_sha256": "3f89987b88efd9851a6c8f1b0ebb03adc1bf71d715a9b73322e34d4c52484a45",
+  "snapshot_entries_checked": 478,
+  "primary_accepted_hashes_checked": 363,
+  "primary_mismatches": [],
+  "eof_proofs_checked": 239,
+  "xml_comment_final_lines": 0,
+  "directive_final_lines": 0,
+  "non_brace_final_units": [
+    {
+      "path": "src/Core/src/Devices/DeviceChange.cs",
+      "last_line": "public sealed record SnapshotComplete(long Revision) : DeviceChange(Revision);"
+    },
+    {
+      "path": "src/Core/src/Devices/HotplugSignals.cs",
+      "last_line": "internal readonly record struct ListenerSource(ConnectionType Transport, Func<IDeviceChangeListener> Create);"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+      "last_line": "public delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);"
+    }
+  ],
+  "patch_sha256": "ee6f3b9e8198dcdcaea69c3016ba7de9352dc4788fe1a6058bb40d616220d516",
+  "retained_generated_records": [
+    {
+      "path": "baseline-context.json",
+      "sha256": "356ac71f65489c5f6767fad924f6682c2535e05af4aca6b7b30ecba902514bd6",
+      "bytes": 11128
+    },
+    {
+      "path": "baseline-findings.json",
+      "sha256": "b0b3752d4436e24a531abbc20c086e0432f66cbd6199c13013647b253778d3e7",
+      "bytes": 12029
+    },
+    {
+      "path": "eof-identities.json",
+      "sha256": "ecb98825cd981f9b372652f38f68e728ea204edfc6c60af229579bb3fc217ae4",
+      "bytes": 158324
+    },
+    {
+      "path": "eof-only.patch",
+      "sha256": "ee6f3b9e8198dcdcaea69c3016ba7de9352dc4788fe1a6058bb40d616220d516",
+      "bytes": 100335
+    },
+    {
+      "path": "format-membership.json",
+      "sha256": "2e7f5fdd3e750b2b92ebbf0f87d9dbabe0aa3051af926c8e0fd67c7e9e9cfbc5",
+      "bytes": 102149
+    },
+    {
+      "path": "preparation-receipt.json",
+      "sha256": "eb0f97e160c4616fa138d4cfd64c550874bfb37acda51ac89b4be1e7f062e98c",
+      "bytes": 2614
+    },
+    {
+      "path": "prepare-evidence.py",
+      "sha256": "f7cafc2c537e399d808fc3a8369a02346e3f2b627b62cce651e8bf6e4b101cdd",
+      "bytes": 9635
+    },
+    {
+      "path": "source-snapshots.tar.gz",
+      "sha256": "0f2bbee75e18f18e6ac46262c18a5e93fc3d01bef0c81080ab0ef5e9c774db14",
+      "bytes": 931644
+    }
+  ],
+  "final_report_sha256": "92854f3d03f738a5e6d2b5d408000b103f95d89bf48e6d3834cfa7bcd3fb8358",
+  "fresh_primary_accepted_hashes_checked": 363,
+  "fresh_primary_mismatches": [],
+  "final_patch_dry_run_exit_code": 0
+}

@@ -17,8 +17,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <summary>
 ///     Why a best-effort discovery device-info read was skipped. Carried on
 ///     <see cref="DiscoveryReadSkippedException" /> so logs and diagnostics can distinguish unsupported
-///     discovery access, active connection ownership, worker-admission saturation, and transport
-///     supersession.
+///     discovery access, another discovery lease or an active or waiting connection, worker-admission
+///     saturation, and transport supersession.
 /// </summary>
 internal enum DiscoveryReadSkipCause
 {
@@ -26,7 +26,8 @@ internal enum DiscoveryReadSkipCause
     NoDiscoveryProvider,
 
     /// <summary>
-    ///     A connection in this process owns (or is waiting for) the interface; discovery must not clobber it.
+    ///     Another discovery lease, an active connection, or a waiting connection prevents discovery
+    ///     admission for this interface in this process.
     /// </summary>
     InterfaceLeaseHeld,
 
@@ -46,9 +47,9 @@ internal enum DiscoveryReadSkipCause
 
 /// <summary>
 ///     Thrown when a best-effort discovery device-info read is intentionally skipped because the target does
-///     not support the internal discovery-only connection path, an active or waiting connection prevents
-///     exclusive access, bounded worker admission is saturated, or transport activity superseded the read
-///     before it opened the interface (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />). The read does
+///     not support the internal discovery-only connection path, another discovery lease or an active or
+///     waiting connection prevents exclusive access, bounded worker admission is saturated, or transport activity
+///     superseded the read before it opened the interface (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />). The read does
 ///     not open a normal session connection or transmit. Callers degrade like any other failed best-effort
 ///     read: identity unknown / try next transport.
 /// </summary>

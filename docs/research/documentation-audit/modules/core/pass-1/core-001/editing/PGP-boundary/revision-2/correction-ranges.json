@@ -1,0 +1,128 @@
+[
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "before_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+    "after_sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 37,
+        "before_count": 2,
+        "after_start": 37,
+        "after_count": 3
+      },
+      {
+        "before_start": 54,
+        "before_count": 2,
+        "after_start": 55,
+        "after_count": 4
+      },
+      {
+        "before_start": 58,
+        "before_count": 1,
+        "after_start": 61,
+        "after_count": 10
+      },
+      {
+        "before_start": 86,
+        "before_count": 0,
+        "after_start": 98,
+        "after_count": 6
+      },
+      {
+        "before_start": 191,
+        "before_count": 0,
+        "after_start": 209,
+        "after_count": 2
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "7e7b584bfe6ef745f19b5d4adc10768b1b0826c9811a91b25bb4662980e43745",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 37,
+        "before_count": 2,
+        "after_start": 37,
+        "after_count": 3
+      }
+    ]
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "after_sha256": "d2035cf8a57f16dd5ba4f895b90c408d384c67e7b6f3535d75a60ba92a0b5762",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 32,
+        "before_count": 2,
+        "after_start": 32,
+        "after_count": 4
+      },
+      {
+        "before_start": 75,
+        "before_count": 3,
+        "after_start": 77,
+        "after_count": 23
+      },
+      {
+        "before_start": 88,
+        "before_count": 0,
+        "after_start": 110,
+        "after_count": 2
+      },
+      {
+        "before_start": 221,
+        "before_count": 0,
+        "after_start": 245,
+        "after_count": 10
+      },
+      {
+        "before_start": 396,
+        "before_count": 0,
+        "after_start": 430,
+        "after_count": 2
+      },
+      {
+        "before_start": 473,
+        "before_count": 4,
+        "after_start": 509,
+        "after_count": 10
+      },
+      {
+        "before_start": 487,
+        "before_count": 2,
+        "after_start": 529,
+        "after_count": 9
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X002",
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "4f6f671e61970d04c7fb06d2e6c5ba08f78208c4e18fca30d739e39692123229",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 529,
+        "before_count": 2,
+        "after_start": 529,
+        "after_count": 3
+      }
+    ]
+  }
+]

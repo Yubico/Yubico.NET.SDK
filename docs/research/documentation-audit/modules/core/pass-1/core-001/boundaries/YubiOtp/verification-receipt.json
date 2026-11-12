@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "exact_units": 324,
+  "disposition_paths": 62,
+  "candidate_groups": 9,
+  "inherited_keys": 14,
+  "clean_nominees": 7,
+  "qualification": "Static identities/accounting only; independent content review and all SDK/native/device/crypto executions remain unrun."
+}

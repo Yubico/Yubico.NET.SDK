@@ -1,0 +1,13 @@
+$ dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj (in 624 ms).
+  Checker binding blocked: ValueError: Actual executed Csc arguments missing/response-file profile unsupported
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/hook.targets(42,5): error MSB3073: The command "python3 -B "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/bind.py" capture --directory "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-first" compile" exited with code 1. [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj]
+
+Build FAILED.
+
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/hook.targets(42,5): error MSB3073: The command "python3 -B "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/bind.py" capture --directory "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-first" compile" exited with code 1. [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:03.10

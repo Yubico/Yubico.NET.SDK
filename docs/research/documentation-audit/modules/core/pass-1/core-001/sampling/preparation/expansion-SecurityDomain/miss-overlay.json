@@ -1,0 +1,13 @@
+{
+  "id": "core-001:unit:ed3e115f81fd126c",
+  "owner": "SecurityDomain",
+  "stratum": "narrative-examples-and-maps",
+  "coordinator_finding": "SAMPLE-SD-001",
+  "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+  "coordinator_verdict": "DOCUMENTATION-MISS",
+  "coordinator_note": "SAMPLE-SD-001: related-module bullets misplace StaticKeys and omit Protocols in SCP namespace; actual StaticKeys namespace verified and bounded correction assigned.",
+  "final_clean_credit": 0,
+  "source_sha256": "2fb6f493041718623418bea7370f071700b7145c35dd0013e6d3ccd2a97dbdba",
+  "range_sha256": "34ac08f4e3d402064aefdac1b267410d3abb36e3f796fabcd7a1fc4d665e20ec",
+  "correction": "Confirmed two-line documentation correction awaiting review; final patch/mapping remains a coordinator gate, no new runtime claim."
+}

@@ -1,0 +1,22 @@
+{
+  "old_product_diff_sha256": "6c3797572fc9dcc7cb7fff70f4f1122f2736101462a43289ff95f7085a71a568",
+  "unchanged_editor_report_and_record_files": {
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-applet-boundaries.md": "c323f03719a0978a4e38de30e6a3b386d047212c4e5b58b692bf507282f46bc3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/citations.md": "601a5afd4456f434ebeb0ed45de05fced2548bbc298b9ee52a62d45e26bb9c73",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/collect-static.py": "52616353ce089b371db79e83e013893fb1faf1865bdae25d339d07595e1ba8af",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/decisions-and-referrals.md": "19a28517feccc744682611e21b63e5695133b1e762f3efc6a6e95635f4c5df54",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/examples.json": "5e8622a44f7ad1d71695937b9d3640236b741ee5044cb29f32d10a38d126b41d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/input-identities.json": "df4f8507d48c821faec5f95932c0785291714f80c6c7d42e4edd97f175aca42c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/outside-scope-paths.json": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/owned-output-identities.json": "0405a4e09b362fd991863555c5f62ae598c20e482bb071355c3b478fbfc6c6ea",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/path-decisions.json": "2ead959df2dad01d21030dff11bbc4ef39911aa7aa6c42d857fddef11d0ad46e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/product.diff": "6c3797572fc9dcc7cb7fff70f4f1122f2736101462a43289ff95f7085a71a568",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/review-identities.json": "c9f57dc90615e472944a61ca1cb0d05a03672ffb4fefd555953bc53dbae41ccc",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/review.md": "7b08f04f7fc375bd77c97103978c4f322610eecaaa3cf6546a89fbefdced0951",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/static-attempt-1.txt": "7383b41c87ee665d6ca75ab27cba7a354d28ecc6f6cfde3ea91013a123b4b872",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/static-checks.json": "52b96a60e1f28e247901b67800bde4e70d78f8fac365de7b08de7958a2c615f2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/validation-notes.md": "df4d5b2d8b8f280a87f50a439b11289e7a4abc13cf3ea1efce13adbe0f35b4b0"
+  },
+  "all_37_reviewed_product_paths_unchanged": true,
+  "note": "The two added R2 paths were retained, not among the 37 first-edit paths. Original collector not run."
+}

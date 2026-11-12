@@ -1,0 +1,8 @@
+{
+  "source_count": 300,
+  "consumer_sources": 244,
+  "selected_test_sources": 56,
+  "duplicate_imports": [],
+  "nonexistent_repo_namespace_imports": [],
+  "scope": "All 244 consumer and 56 selected existing-test source preparations; namespace directives checked against actual source declarations. Static type imports are not misclassified as namespaces."
+}

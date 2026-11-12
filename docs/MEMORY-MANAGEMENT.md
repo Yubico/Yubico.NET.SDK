@@ -41,7 +41,10 @@ ReadOnlySpan<byte> body = apduData.AsSpan()[5..];
 public void ProcessData(ReadOnlySpan<byte> data) { }
 ```
 
-**Limitations:** cannot be used in async methods, cannot be stored in fields (ref struct), limit `stackalloc` to ≤512 bytes.
+**Lifetime:** with C# 14, span/ref-struct locals can be used in synchronous segments of an async method,
+provided they do not cross an `await` or `yield` suspension boundary. They cannot be stored in ordinary
+class fields. Keep `stackalloc` bounded to ≤512 bytes and initialize every byte before reading it;
+stack allocation alone does not promise zero-filled storage.
 
 ### 2. `Memory<byte>` and `ReadOnlyMemory<byte>`
 
@@ -168,16 +171,38 @@ finally { ArrayPool<byte>.Shared.Return(buffer); }
 
 ## APDU and Protocol Buffers
 
-Prefer Span for APDU data:
+`ApduCommand` borrows its `ReadOnlyMemory<byte>` payload instead of cloning it. Copying that command
+copies the view, so all copies refer to the same caller-owned storage. Keep it alive and unchanged until
+the original exchange task is terminal; cancellation of an outer wait does not end the borrow. This
+complete method borrows a raw session and clears the request buffer it allocates:
 
 ```csharp
-public readonly struct CommandApdu
+using System.Security.Cryptography;
+
+static async Task SendAsync(
+    Yubico.YubiKit.Core.Sessions.RawSmartCardSession session, CancellationToken cancellationToken)
 {
-    private readonly ReadOnlyMemory<byte> _data;
-
-    public ReadOnlySpan<byte> AsSpan() => _data.Span;
-
-    public CommandApdu(ReadOnlySpan<byte> data) => _data = data.ToArray(); // only allocate for storage
+    // Illustrative request bytes: choose a valid command/payload for the selected applet.
+    byte[] request = [0x01];
+    try
+    {
+        var command = new Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand(
+            0x00, 0xCA, 0x00, 0x00, request);
+        var response = await session.TransmitAndReceiveAsync(
+            command, throwOnError: false, cancellationToken: cancellationToken);
+        try
+        {
+            Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
+        }
+        finally
+        {
+            response.Clear();
+        }
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(request);
+    }
 }
 ```
 
@@ -200,5 +225,24 @@ Cross-reference `.claude/skills/domain-secure-credential-prompt/SKILL.md` for th
 
 - `Span<byte>` on the stack → call `CryptographicOperations.ZeroMemory(span)` before scope exits
 - `ArrayPool` rented buffer → zero before `Return(buffer, clearArray: false)`
-- Sealed `IDisposable` class → zero in `Dispose()` (never store sensitive `byte[]` in a struct — copies can't all be zeroed)
-- `using var` for crypto objects: `Aes.Create()`, `RSA.Create()`, `HMACSHA256` — keys auto-zeroed on dispose
+- Sealed `IDisposable` class → use one reference owner for privately cloned secrets and zero in `Dispose()`.
+  Copying an array-bearing struct copies references, not array contents: zeroing shared storage reaches
+  its aliases. The hazard is shared mutation and ambiguous disposal/lifetime ownership, rather than an
+  inability to reach those aliases. A borrowed view such as `ApduCommand.Data` has a different contract.
+- `using var` for crypto objects → release provider-owned state deterministically. Separately clear
+  caller arrays, exports, SDK temporaries, and other copies. Disposal is not a universal native-erasure proof.
+
+`ApduResponse` owns a constructor copy; `Clear()` reaches that array and its views, including status
+bytes, but leaves source/transport/decrypted-temporary owners separate. `Tlv.Value` borrows the TLV's
+encoding; dispose the TLV/list and clear source, intermediate, and returned encodings separately. Use
+the [TLV guide](usage/tlv-processing.md) for complete nested cleanup scopes.
+
+Key parameter structs can expose mutable arrays owned by an RSA/EC wrapper. Treat them as aliases,
+not fresh exports to mutate independently. `AsnWriter.Encode()` returns a copy and retains writer storage;
+the inspected .NET v10.0.0 `Reset()` clears its written prefix. Current private-key encoders do not
+reset that writer, so clearing only the returned encoding establishes no all-copy erasure. Provider
+and actual native memory behavior require their own qualification.
+
+Exceptional paths need the same owner-by-owner review. For example, current AES-CBC helpers allocate
+key and IV copies before entering their cleanup `try`; a later allocation failure can bypass that
+protected cleanup scope. Describe the actual scope rather than promising every local copy is always erased.

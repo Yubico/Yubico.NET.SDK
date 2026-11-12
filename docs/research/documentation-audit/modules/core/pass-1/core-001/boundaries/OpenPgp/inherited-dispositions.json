@@ -1,0 +1,620 @@
+[
+  {
+    "key": "ctap2-001:CTAP-IMP-006",
+    "dedup_group": "credential-length-units",
+    "original_registry_state": "needs-decision",
+    "original_registry_conclusion": "CTAP PIN byte checks and Unicode/code-point/final-NUL rules remain an input-layer allocation decision; a Core reader preset alone cannot enforce the full authenticator policy.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 46,
+      "end_line": 46,
+      "text": "| CTAP-IMP-006 | B-04: PIN validation checks only 4–63 bytes, not UTF-8/NFC/code points/device minimum/final NUL. | Decide input-layer versus SDK enforcement without unsafe silent normalization; add meaningful byte/Unicode/state tests. Reopen PIN params/errors, prompts and both layer guides. |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Ctap2/README.md",
+        "src/Ctap2/CLAUDE.md"
+      ],
+      "precise_trigger": "| CTAP-IMP-006 | B-04: PIN validation checks only 4–63 bytes, not UTF-8/NFC/code points/device minimum/final NUL. | Decide input-layer versus SDK enforcement without unsafe silent normalization; add meaningful byte/Unicode/state tests. Reopen PIN params/errors, prompts and both layer guides. |",
+      "sample_test_reopening_paths": [
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Shared reader mechanism applies to OpenPGP presets only. CTAP-specific NFC/code-point/device-minimum enforcement remains CTAP owner work; no transfer of that profile or closure.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "ctap2-001:CTAP-XREF-003",
+    "dedup_group": "credential-length-units",
+    "original_registry_state": "reproducible-from-source",
+    "original_registry_conclusion": "ConsoleCredentialReader applies MinLength/MaxLength to UTF-16 char counts before Encoding.GetByteCount/GetBytes. Ctap2's 4..63 preset therefore differs from UTF-8 bytes/code-point/NFC/device-minimum policy. Allocation of enforcement is still a decision; preserve CTAP-IMP-006.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 216,
+      "end_line": 216,
+      "text": "- **CTAP-XREF-003 (proposed, no separate Core bug count):** C-012/B-04/F-10;"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/Core/src/Credentials/CredentialReaderOptions.cs",
+        "src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs",
+        "src/Ctap2/README.md",
+        "src/WebAuthn/README.md",
+        "docs/usage/user-interaction.md",
+        "docs/migration/v1-to-v2.md"
+      ],
+      "precise_trigger": "- **CTAP-XREF-003 (proposed, no separate Core bug count):** C-012/B-04/F-10;",
+      "sample_test_reopening_paths": [
+        "src/Ctap2/examples/FidoTool/Program.cs",
+        "src/Ctap2/examples/FidoTool/README.md",
+        "src/Ctap2/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/Ctap2/src/Ctap2Session.cs",
+        "src/Ctap2/src/ICtap2Session.cs",
+        "src/Ctap2/src/IYubiKeyExtensions.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Shared reader mechanism applies to OpenPGP presets only. CTAP-specific NFC/code-point/device-minimum enforcement remains CTAP owner work; no transfer of that profile or closure.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "oath-pilot-and-fixes-wave-002:DEC-007",
+    "dedup_group": "scp-effective-version",
+    "original_registry_state": "policy-known-rationale-gap",
+    "original_registry_conclusion": "OATH's effective 5.6.3 policy has pinned Python corroboration for 5.0.0 <= version < 5.6.3. Core's SCP03 5.3.0 and SCP11 5.7.2 gates are separate. Earliest physical support/workaround rationale remains bounded evidence debt.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/implementation-followups.md",
+      "start_line": 228,
+      "end_line": 239,
+      "text": "## DEC-007 — Establish OATH secure-channel gate provenance\n\n- **Source:** OATH-004-F12.\n- **State:** actual source gate confirmed; hardware/policy rationale unresolved; deferred to closeout.\n- **Proposed owner:** SDK maintainer with vendor/firmware input.\n- **Observation:** OATH enforces effective firmware5.6.3 for any SCP parameters. Core gates SCP03at5.3.0 and SCP11at5.7.2. Published vendor material gives generic5.3.0 SCP03 support without explaining an OATH-specific5.6.3 floor.\n- **Evidence:** [technical manual](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html), [legacy SDK SCP guide](https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/secure-channel-protocol.html), OathSession/ScpInitializer source. Legacy example syntax is not v2 API authority.\n- **Decision:** hardware minimum, workaround, or inherited SDK policy; define supported compatibility before changing the gate. Do not lower it based on generic support prose alone.\n- **Documentation dependency:** distinguish device requirements from SDK/effective-version gates now; update factory/version guidance if the policy later changes. Remove unnecessary NEO physical-firmware shorthand rather than inventing a supported NEO contract.\n\n**New direction/evidence:** The user authorizes Python sibling-SDK firmware checks as the policy reference. At local revision `4ca60f706af930459138d8dc0f0f953480e1c7a4`, `yubikit/oath.py:279–282` rejects SCP for `5.0.0 <= version < 5.6.3`, and rename requires5.3.1 at438. This establishes the reference policy for supported YubiKey5 devices. The shallow clone does not establish historical hardware rationale, and this policy is not proof of earliest physical support. Implementation review will preserve the distinction and Core's separate SCP gates.\n"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Oath/README.md",
+        "src/Oath/CLAUDE.md"
+      ],
+      "precise_trigger": "## DEC-007 — Establish OATH secure-channel gate provenance\n\n- **Source:** OATH-004-F12.\n- **State:** actual source gate confirmed; hardware/policy rationale unresolved; deferred to closeout.\n- **Proposed owner:** SDK maintainer with vendor/firmware input.\n- **Observation:** OATH enforces effective firmware5.6.3 for any SCP parameters. Core gates SCP03at5.3.0 and SCP11at5.7.2. Published vendor material gives generic5.3.0 SCP03 support without explaining an OATH-specific5.6.3 floor.\n- **Evidence:** [technical manual](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html), [legacy SDK SCP guide](https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/secure-channel-protocol.html), OathSession/ScpInitializer source. Legacy example syntax is not v2 API authority.\n- **Decision:** hardware minimum, workaround, or inherited SDK policy; define supported compatibility before changing the gate. Do not lower it based on generic support prose alone.\n- **Documentation dependency:** distinguish device requirements from SDK/effective-version gates now; update factory/version guidance if the policy later changes. Remove unnecessary NEO physical-firmware shorthand rather than inventing a supported NEO contract.\n\n**New direction/evidence:** The user authorizes Python sibling-SDK firmware checks as the policy reference. At local revision `4ca60f706af930459138d8dc0f0f953480e1c7a4`, `yubikit/oath.py:279–282` rejects SCP for `5.0.0 <= version < 5.6.3`, and rename requires5.3.1 at438. This establishes the reference policy for supported YubiKey5 devices. The shallow clone does not establish historical hardware rationale, and this policy is not proof of earliest physical support. Implementation review will preserve the distinction and Core's separate SCP gates.\n",
+      "sample_test_reopening_paths": [
+        "src/Oath/examples/OathTool/Program.cs",
+        "src/Oath/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/Oath/src/IOathSession.cs",
+        "src/Oath/src/IYubiKeyExtensions.cs",
+        "src/Oath/src/OathSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "OpenPGP detected/effective/metadata version trace supplied. OATH floor, SD omitted reset options, HSM SELECT/reset and OTP status provenance remain their own boundary findings. Generic Core gates grant no new applet firmware acceptance.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "openpgp-001:PGP-CORE-001",
+    "dedup_group": "credential-length-units",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Core text lengths count UTF-16 chars before encoding. OpenPGP credential-option factories and each card-profile byte limit need the boundary check; no blanket CTAP PIN policy transfers to PW1/PW3/reset code.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+      "start_line": 88,
+      "end_line": 88,
+      "text": "| PGP-CORE-001 | Credential reader limits/units and credential-option factories versus device-profile requirements (C001/C018). | PIN/options XML and user-input examples |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Credentials/CredentialReaderOptions.cs",
+        "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/OpenPgp/README.md",
+        "src/OpenPgp/CLAUDE.md"
+      ],
+      "precise_trigger": "| PGP-CORE-001 | Credential reader limits/units and credential-option factories versus device-profile requirements (C001/C018). | PIN/options XML and user-input examples |",
+      "sample_test_reopening_paths": [
+        "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "src/OpenPgp/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/OpenPgp/src/IOpenPgpSession.cs",
+        "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Source answer complete: presets count UTF-16 before UTF-8; provided CLI strings bypass the reader; session does not validate card byte/profile lengths. C reader mechanisms linked at actual callers; applet identity/error/profile choices remain open.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "openpgp-001:PGP-CORE-002",
+    "dedup_group": "shared-exchange-ownership",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Core async session disposal dispatches DisposeAsyncCore then derived Dispose(bool) in finally; connection ownership remains borrowed unless transferred. OpenPGP KDF cache alias/disposal and SCP applicability need separate applet verification.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+      "start_line": 89,
+      "end_line": 89,
+      "text": "| PGP-CORE-002 | Factory/connection ownership, async disposal dispatch, SCP applicability and KDF cache cleanup boundaries (C003/C021). | Factory/GetKdf/disposal/borrowed-connection guide |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/OpenPgp/README.md",
+        "src/OpenPgp/CLAUDE.md"
+      ],
+      "precise_trigger": "| PGP-CORE-002 | Factory/connection ownership, async disposal dispatch, SCP applicability and KDF cache cleanup boundaries (C003/C021). | Factory/GetKdf/disposal/borrowed-connection guide |",
+      "sample_test_reopening_paths": [
+        "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "src/OpenPgp/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/OpenPgp/src/IOpenPgpSession.cs",
+        "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Source answer complete: direct borrowed versus hidden owned connection and failed initialization cleanup traced. Async teardown reaches derived KDF disposal in finally; sync clears before drain. Replacement/reset aliases and complete-operation lease remain open.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "openpgp-001:PGP-CORE-003",
+    "dedup_group": "scp-effective-version",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Keep raw 0.0.1, device metadata 5.8 beta and effective override distinct; Feature major-zero bypass is a host compatibility policy, not physical-firmware proof.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+      "start_line": 90,
+      "end_line": 90,
+      "text": "| PGP-CORE-003 | Effective firmware/development/override policy, raw applet 0.0.1 versus metadata5.8beta and protocol framing (C010/C021). | Firmware constants/factory/requirements and old-family qualifications |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/OpenPgp/README.md",
+        "src/OpenPgp/CLAUDE.md"
+      ],
+      "precise_trigger": "| PGP-CORE-003 | Effective firmware/development/override policy, raw applet 0.0.1 versus metadata5.8beta and protocol framing (C010/C021). | Firmware constants/factory/requirements and old-family qualifications |",
+      "sample_test_reopening_paths": [
+        "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "src/OpenPgp/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/OpenPgp/src/IOpenPgpSession.cs",
+        "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Source answer complete: BCD detected version or broad1.0.0 fallback, optional effective override, major-zero Feature/framing and reset retention traced. Physical metadata is not consulted. Historical0.0.1/5.8beta/CLI5.8 values remain separate.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "openpgp-001:PGP-CORE-004",
+    "dedup_group": "shared-exchange-ownership",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Exchange serialization and session disposal do not alone prove whole PIN/key/reset workflow atomicity. Preserve 6600/Failed and fresh-session recovery without native-interruption claims.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+      "start_line": 91,
+      "end_line": 91,
+      "text": "| PGP-CORE-004 | SmartCard admitted cancellation, session serialization, operation drain and prompt ownership/outcome (C008/C012). | Crypto/presence/cancellation/resource guidance and actual ceremony tests |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Utilities/ExchangeGuard.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/OpenPgp/README.md",
+        "src/OpenPgp/CLAUDE.md"
+      ],
+      "precise_trigger": "| PGP-CORE-004 | SmartCard admitted cancellation, session serialization, operation drain and prompt ownership/outcome (C008/C012). | Crypto/presence/cancellation/resource guidance and actual ceremony tests |",
+      "sample_test_reopening_paths": [
+        "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+        "src/OpenPgp/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/OpenPgp/src/IOpenPgpSession.cs",
+        "src/OpenPgp/src/IYubiKeyExtensions.cs",
+        "src/OpenPgp/src/OpenPgpSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Source answer complete: logical exchange guard/None after admission, complete-workflow gaps and applet callback/output owners traced. Historical6600/Failed and recovery preserved without native-interruption causality.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "piv-001:PIVCORE-002",
+    "dedup_group": "shared-exchange-ownership",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Check multi-APDU authentication/recovery/reset overlap beyond individual protocol exchange guards. The session has no in-flight operation admission lease; disposal may race a larger workflow between exchanges.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+      "start_line": null,
+      "end_line": null,
+      "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Utilities/ExchangeGuard.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/Piv/README.md",
+        "src/Piv/CLAUDE.md"
+      ],
+      "precise_trigger": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found.",
+      "sample_test_reopening_paths": [
+        "src/Piv/examples/PivTool/Program.cs",
+        "src/Piv/examples/PivTool/README.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/Piv/src/IPivSession.cs",
+        "src/Piv/src/IYubiKeyExtensions.cs",
+        "src/Piv/src/PivSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Shared connection/exchange/prompt mechanism linked to actual OpenPGP callers. Other applet wire, sensitive-result, reset and physical-policy details retain their original boundary owners; no cross-applet closure.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "security-domain-001:SD-DEP-003",
+    "dedup_group": "scp-effective-version",
+    "original_registry_state": "changed-source-review-pending",
+    "original_registry_conclusion": "The current readiness completion boundary is centralized. SD's omitted reset configuration/explicit version was a local SD-IMP-005 question; compare reset callback arguments separately before calling options preserved.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+      "start_line": 52,
+      "end_line": 52,
+      "text": "| SD-DEP-003 | ApplicationSession/Feature effective firmware/configuration after reset; local omitted arguments and explicit-version flag | Feature/reset/version contracts, SD-IMP-005 |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/SecurityDomain/README.md",
+        "src/SecurityDomain/CLAUDE.md"
+      ],
+      "precise_trigger": "| SD-DEP-003 | ApplicationSession/Feature effective firmware/configuration after reset; local omitted arguments and explicit-version flag | Feature/reset/version contracts, SD-IMP-005 |",
+      "sample_test_reopening_paths": [
+        "src/SecurityDomain/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "OpenPGP detected/effective/metadata version trace supplied. OATH floor, SD omitted reset options, HSM SELECT/reset and OTP status provenance remain their own boundary findings. Generic Core gates grant no new applet firmware acceptance.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "security-domain-001:SD-DEP-004",
+    "dedup_group": "shared-exchange-ownership",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "A direct factory borrows its connection; protocol exchange admission/drain is distinct from a whole multi-command workflow. APDU response copies and Le formatting need the SD GetData call-site trace.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+      "start_line": 53,
+      "end_line": 53,
+      "text": "| SD-DEP-004 | Session/connection lease, cancellation, response-memory lifetime and APDU Le semantics; factory/OwnConnection/GetData call sites | Factory/connection and raw-data contracts |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/SecurityDomain/README.md",
+        "src/SecurityDomain/CLAUDE.md"
+      ],
+      "precise_trigger": "| SD-DEP-004 | Session/connection lease, cancellation, response-memory lifetime and APDU Le semantics; factory/OwnConnection/GetData call sites | Factory/connection and raw-data contracts |",
+      "sample_test_reopening_paths": [
+        "src/SecurityDomain/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+        "src/SecurityDomain/src/SecurityDomainSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Shared connection/exchange/prompt mechanism linked to actual OpenPGP callers. Other applet wire, sensitive-result, reset and physical-policy details retain their original boundary owners; no cross-applet closure.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "yubihsm-001:HSM-DEP-001",
+    "dedup_group": "scp-effective-version",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Core Feature major-zero acceptance explains a compatibility query, not raw applet/metadata identity. Recheck HSM SELECT fallback, override and reset version retention locally.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+      "start_line": 55,
+      "end_line": 55,
+      "text": "| HSM-DEP-001 | ApplicationSession/Feature/FirmwareVersion effective development/override semantics versus metadata filtering and applet SELECT | Feature table/XML, reset version policy, old-firmware and development qualification |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/YubiHsm/README.md",
+        "src/YubiHsm/CLAUDE.md"
+      ],
+      "precise_trigger": "| HSM-DEP-001 | ApplicationSession/Feature/FirmwareVersion effective development/override semantics versus metadata filtering and applet SELECT | Feature table/XML, reset version policy, old-firmware and development qualification |",
+      "sample_test_reopening_paths": [
+        "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+        "src/YubiHsm/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiHsm/src/IHsmAuthSession.cs",
+        "src/YubiHsm/src/IYubiKeyExtensions.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "OpenPGP detected/effective/metadata version trace supplied. OATH floor, SD omitted reset options, HSM SELECT/reset and OTP status provenance remain their own boundary findings. Generic Core gates grant no new applet firmware acceptance.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "yubihsm-001:HSM-DEP-002",
+    "dedup_group": "shared-exchange-ownership",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Connection/prompt borrowing and admitted native drain need the CALCULATE path. Historical 6982/Failed plus fresh-session recovery is measured outcome, not proof of native cancellation or timeout causality.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+      "start_line": 56,
+      "end_line": 56,
+      "text": "| HSM-DEP-002 | SmartCard admitted cancellation/drain and connection/prompt ownership; public outcomes versus native guarantees | Factory/README ownership, cancellation/presence guidance, shared interaction and touch-test explanations |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Credentials/UserPresenceNotification.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/YubiHsm/README.md",
+        "src/YubiHsm/CLAUDE.md"
+      ],
+      "precise_trigger": "| HSM-DEP-002 | SmartCard admitted cancellation/drain and connection/prompt ownership; public outcomes versus native guarantees | Factory/README ownership, cancellation/presence guidance, shared interaction and touch-test explanations |",
+      "sample_test_reopening_paths": [
+        "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+        "src/YubiHsm/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/YubiHsm/src/HsmAuthSession.cs",
+        "src/YubiHsm/src/IHsmAuthSession.cs",
+        "src/YubiHsm/src/IYubiKeyExtensions.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Shared connection/exchange/prompt mechanism linked to actual OpenPGP callers. Other applet wire, sensitive-result, reset and physical-policy details retain their original boundary owners; no cross-applet closure.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "yubiotp-001:OTP-DEP-001",
+    "dedup_group": "shared-exchange-ownership",
+    "original_registry_state": "changed-source-review-pending",
+    "original_registry_conclusion": "Owned Linux typed HID opens now transfer grouped claims before native acquisition. Current ApplicationSession owns protocol disposal and only convenience factories own hidden connections. Recheck YubiOTP selection/failure cleanup with these routes.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+      "start_line": 60,
+      "end_line": 60,
+      "text": "| OTP-DEP-001 / D001 | ApplicationSession/device helpers physical lease, initialization failure cleanup, selected transport/no fallback and disposal | Factory/extension/README ownership, OtpTool creation, migration and architecture |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Devices/YubiKeyDevice.cs",
+        "src/Core/src/Devices/HidConnectionSlot.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/YubiOtp/README.md",
+        "src/YubiOtp/CLAUDE.md"
+      ],
+      "precise_trigger": "| OTP-DEP-001 / D001 | ApplicationSession/device helpers physical lease, initialization failure cleanup, selected transport/no fallback and disposal | Factory/extension/README ownership, OtpTool creation, migration and architecture |",
+      "sample_test_reopening_paths": [
+        "src/YubiOtp/examples/OtpTool/Program.cs",
+        "src/YubiOtp/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Shared connection/exchange/prompt mechanism linked to actual OpenPGP callers. Other applet wire, sensitive-result, reset and physical-policy details retain their original boundary owners; no cross-applet closure.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "yubiotp-001:OTP-DEP-003",
+    "dedup_group": "shared-exchange-ownership",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "SmartCard admitted exchange uses uncancellable constituent work. UserPresence fallback cannot reclaim a sensitive result after transfer if resolution throws; applet producer owns resolution-before-transfer and cleanup.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+      "start_line": 62,
+      "end_line": 62,
+      "text": "| OTP-DEP-003 / D003 | SmartCard admitted cancellation/drain, serialized-copy lifetime and notification exception/cleanup guarantees | Response/input ownership, README cancellation, backend comments/shared interaction and IMP003 |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Sessions/ApplicationSession.cs",
+        "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "src/Core/src/Credentials/UserPresenceNotification.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/YubiOtp/README.md",
+        "src/YubiOtp/CLAUDE.md"
+      ],
+      "precise_trigger": "| OTP-DEP-003 / D003 | SmartCard admitted cancellation/drain, serialized-copy lifetime and notification exception/cleanup guarantees | Response/input ownership, README cancellation, backend comments/shared interaction and IMP003 |",
+      "sample_test_reopening_paths": [
+        "src/YubiOtp/examples/OtpTool/Program.cs",
+        "src/YubiOtp/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "Shared connection/exchange/prompt mechanism linked to actual OpenPGP callers. Other applet wire, sensitive-result, reset and physical-policy details retain their original boundary owners; no cross-applet closure.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  },
+  {
+    "key": "yubiotp-001:OTP-DEP-004",
+    "dedup_group": "scp-effective-version",
+    "original_registry_state": "source-mapped-review-pending",
+    "original_registry_conclusion": "Feature admits major-zero development firmware; applet raw status, metadata and effective override remain separate. Initial OTP protocol indexes report bytes before returning status; exact route invariants require review.",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+      "start_line": 63,
+      "end_line": 63,
+      "text": "| OTP-DEP-004 / D004 | FirmwareVersion alpha/beta/override, HID status normalization and raw/effective mismatch | Firmware/status/presence docs and IMP004/006 |"
+    },
+    "original_documentation": {
+      "state": "initial rebaseline; family/boundary review pending",
+      "reopen_paths": [
+        "src/Core/src/Devices/FirmwareVersion.cs",
+        "src/Core/src/Devices/Feature.cs",
+        "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "src/Core/README.md",
+        "src/Core/CLAUDE.md",
+        "docs/architecture/raw-access-tiers.md",
+        "docs/migration/v1-to-v2.md",
+        "src/YubiOtp/README.md",
+        "src/YubiOtp/CLAUDE.md"
+      ],
+      "precise_trigger": "| OTP-DEP-004 / D004 | FirmwareVersion alpha/beta/override, HID status normalization and raw/effective mismatch | Firmware/status/presence docs and IMP004/006 |",
+      "sample_test_reopening_paths": [
+        "src/YubiOtp/examples/OtpTool/Program.cs",
+        "src/YubiOtp/tests/CLAUDE.md"
+      ],
+      "module_xml_reopening_paths": [
+        "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "src/YubiOtp/src/IYubiOtpSession.cs",
+        "src/YubiOtp/src/YubiOtpSession.cs"
+      ],
+      "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+    },
+    "boundary_outcome": "OpenPGP detected/effective/metadata version trace supplied. OATH floor, SD omitted reset options, HSM SELECT/reset and OTP status provenance remain their own boundary findings. Generic Core gates grant no new applet firmware acceptance.",
+    "documentation_status": "SOURCE-ANSWER-READY-FOR-TRIAGE; FRESH-EDIT-REVIEW-PENDING",
+    "implementation_status": "ORIGINAL-APPLET-OR-SHARED-FINDING-PRESERVED",
+    "hardware_status": "NO-NEW-EXECUTION; ORIGINAL-QUALIFICATIONS-PRESERVED",
+    "central_registry_mutated": false
+  }
+]

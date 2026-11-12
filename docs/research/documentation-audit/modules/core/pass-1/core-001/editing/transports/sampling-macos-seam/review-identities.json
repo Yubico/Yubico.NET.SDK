@@ -1,0 +1,58 @@
+{
+  "review_kind": "focused-independent-overview-content-review",
+  "sample_finding": "SAMPLE-B3-001",
+  "decision": "PASS",
+  "acceptance_scope": "Exact one-file additive interface/production-class overview XML patch only; no broader implementation acceptance or sampling credit.",
+  "accepted_patch_sha256": "a097122a13ba002f9126de2e00bbf8d7bd2d73fc2ae4a9d9d890d873083b1206",
+  "accepted_patch_bytes": 2909,
+  "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+  "before_raw_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+  "accepted_after_raw_sha256": "18d3f8ef6d7d2b72d0bb668ed6301eee634a2659c20ed89e2d8b75e1a69dadd3",
+  "accepted_current_overview_lines": [[23, 41], [119, 122]],
+  "original_selected_unit": "core-001:unit:f8412d69f0903d78",
+  "related_production_type_unit": "core-001:unit:573ce86308ec45e3",
+  "reviewed_evidence": [
+    {"path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs", "scope": "Complete current file and full before text; CreateDevice130-151, OpenDevice153-166, CloseDeviceChecked172 and remaining forwarders/helpers174-196."},
+    {"path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs", "sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8", "read_lines": [[128, 167], [339, 393]], "conclusion": "Owner invokes admitted work before Close, closes admission through shared shutdown and checks native cleanup before registration release. Unproven native cleanup retains rooted owner/claim; seam alone supplies no drain/release proof."},
+    {"path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs", "sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731", "read_lines": [[88, 112]], "conclusion": "Separate FIDO bridge forwards production lifetime helpers; injecting this seam alone is not every FIDO route or native report proof."}
+  ],
+  "content_conclusion": "Interceptable operations with small managed composition/status handling accurately describe lookup/create/service-release, open-status translation, checked-close Boolean and helper forwarders. Connection owners implement ordering; injected tests can observe ordering but are not native release proof.",
+  "accepted_input_records_relative_to_sampling_macos_seam": {
+    "report.md": "98944c867c48c022a69b8c1a10b6b96864715209be0941442bf86e0731f91fe2",
+    "inputs.json": "e3864651fb063bf3e076b5cef26a82c00b7ac0716c015bd24f91169768048206",
+    "file-disposition.json": "b25e34e9c7fdbbc1d2bafd810db83e9eddf384f937cf8d887d19d786f59e4c84",
+    "source-evidence.json": "f0eb74f24dd2f2e6721707c85e5764081306a1ea8490503b0942bdd940e4ed82",
+    "return-identities.json": "b34a276ecfd6f09a9752809491e24fbac86861109372192c8b81605348c96e5c",
+    "static-preservation.json": "8b7bfcdaced6fde11084be77634d2df246b0b4832768f7b481926d2dc0e64412"
+  },
+  "prior_patch_identities_preserved": [
+    "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+    "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+    "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049"
+  ],
+  "independent_static_checks": {
+    "result": "PASS",
+    "discrepancies": [],
+    "before_text_matches_accepted_primary_bytes": true,
+    "before_hash_and_full_decision_object_match_accepted_revision2": true,
+    "after_hash_matches": true,
+    "focused_patch_equals_independently_regenerated_delta": true,
+    "exactly_two_top_level_overview_blocks_changed": true,
+    "everything_except_two_overview_blocks_exact": true,
+    "all_member_documentation_and_executable_implementation_unchanged": true,
+    "bom_and_final_newline_preserved": true,
+    "other_eligible_source_paths_unchanged_against_revision2_plus_Linux_sampling": 212,
+    "protected_prior_records_exact": 38,
+    "listed_editor_record_hashes_match": 6,
+    "original_unit_identity_range_hash_mappings_match_B3_ledger": 2,
+    "owner_bridge_evidence_hashes_match": 2,
+    "examples_unchanged": true,
+    "limitation": "Read-only source/text/hash checks; not compiler/analyzer/cref/token/API/runtime/native/device validation. Editor XML/Git results were not rerun by reviewer."
+  },
+  "remaining_mandatory_corrections": [],
+  "sampling_ownership": "Quota, XML-stratum expansion and edited-overlap exclusion remain coordinator/sampler-owned; no sampling credit or coverage change allocated.",
+  "qualifications": "All prior runtime/native/physical/producer/platform gaps and held decisions remain unchanged. No injected test or native/device execution newly qualified.",
+  "execution": "Complete target-file and narrow owner/bridge source reading plus static Python text/hash comparisons only. No product/editor-record edits, build/tests/native/device/SDK-crypto/formatter/Git commands or mutations/subagents/new tooling/broader audit.",
+  "owned_writes": ["editing/transports/sampling-macos-seam/review.md", "editing/transports/sampling-macos-seam/review-identities.json"],
+  "stopping_point": "Existing coordinator validation, Core Pass1 publication and deferred finding handoff, then stop."
+}

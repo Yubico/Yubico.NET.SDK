@@ -1,0 +1,505 @@
+{
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "test",
+    "--filter",
+    "Category!=RequiresHardware&Category!=RequiresUserPresence"
+  ],
+  "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "logger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+    "bytes": 1670,
+    "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-12T05:36:43.813194+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [
+    "test"
+  ],
+  "expected_projects": [
+    "test:Cli.Commands.UnitTests",
+    "test:Cli.Shared.UnitTests",
+    "test:Core.UnitTests",
+    "test:Ctap2.UnitTests",
+    "test:Management.UnitTests",
+    "test:Oath.UnitTests",
+    "test:OpenPgp.UnitTests",
+    "test:Piv.UnitTests",
+    "test:PublicApi.UnitTests",
+    "test:SecurityDomain.UnitTests",
+    "test:WebAuthn.UnitTests",
+    "test:YubiHsm.UnitTests",
+    "test:YubiOtp.UnitTests"
+  ],
+  "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/unit-tests-final-tree",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 3784483,
+    "sid": 3784483,
+    "leader_start_ticks": 83959365,
+    "before": {
+      "members": [
+        {
+          "pid": 3784611,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784612,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784613,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784614,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784615,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784617,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784620,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784621,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959455
+        },
+        {
+          "pid": 3784798,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959539
+        },
+        {
+          "pid": 3784902,
+          "state": "S",
+          "ppid": 3784611,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83959654
+        },
+        {
+          "pid": 3787063,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83965601
+        },
+        {
+          "pid": 3787065,
+          "state": "S",
+          "ppid": 3784456,
+          "pgid": 3784483,
+          "sid": 3784483,
+          "start_ticks": 83965601
+        }
+      ],
+      "escaped": []
+    },
+    "signals": [
+      {
+        "signal": "SIGTERM",
+        "proven_members": [
+          {
+            "pid": 3784611,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784612,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784613,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784614,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784615,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784617,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784620,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784621,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959455
+          },
+          {
+            "pid": 3784798,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959539
+          },
+          {
+            "pid": 3784902,
+            "state": "S",
+            "ppid": 3784611,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83959654
+          },
+          {
+            "pid": 3787063,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83965601
+          },
+          {
+            "pid": 3787065,
+            "state": "S",
+            "ppid": 3784456,
+            "pgid": 3784483,
+            "sid": 3784483,
+            "start_ticks": 83965601
+          }
+        ]
+      }
+    ],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "test"
+    ],
+    "projects": 13,
+    "executed": 4442,
+    "skipped": 5,
+    "failed": 0,
+    "warnings": 0
+  },
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/01-test-Cli.Commands.UnitTests.log",
+        "bytes": 813,
+        "sha256": "678bf816c9ebd978d5c25586aec99d7828a33f67953a883a8b344620910994fe"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/01-test-Cli.Commands.UnitTests.log",
+        "bytes": 813,
+        "sha256": "678bf816c9ebd978d5c25586aec99d7828a33f67953a883a8b344620910994fe"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/02-test-Cli.Shared.UnitTests.log",
+        "bytes": 595,
+        "sha256": "ef7496b05a8c4add5c03cf21e5eb452c3940c6c4242b90c86e7e69afc82d6a28"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/02-test-Cli.Shared.UnitTests.log",
+        "bytes": 595,
+        "sha256": "ef7496b05a8c4add5c03cf21e5eb452c3940c6c4242b90c86e7e69afc82d6a28"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/03-test-Core.UnitTests.log",
+        "bytes": 4403,
+        "sha256": "73a1724e27e7a68a4fe203a64b99d12fe82c510f2e06b8498633dc46b0b1acc6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/03-test-Core.UnitTests.log",
+        "bytes": 4403,
+        "sha256": "73a1724e27e7a68a4fe203a64b99d12fe82c510f2e06b8498633dc46b0b1acc6"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/04-test-Ctap2.UnitTests.log",
+        "bytes": 567,
+        "sha256": "c8e03ebdc028d5e12e205cd32c084c17ef7e14eb617758824d883d25b828511d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/04-test-Ctap2.UnitTests.log",
+        "bytes": 567,
+        "sha256": "c8e03ebdc028d5e12e205cd32c084c17ef7e14eb617758824d883d25b828511d"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/05-test-Management.UnitTests.log",
+        "bytes": 595,
+        "sha256": "35c509b688b2b10f5e77e1f786e2578d8c6d33eeddf7f920b3a324b849e20fa8"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/05-test-Management.UnitTests.log",
+        "bytes": 595,
+        "sha256": "35c509b688b2b10f5e77e1f786e2578d8c6d33eeddf7f920b3a324b849e20fa8"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/06-test-Oath.UnitTests.log",
+        "bytes": 39309,
+        "sha256": "0b2ded339118badfb38d8e1a84634d603553708459872ecd0589059339e51673"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/06-test-Oath.UnitTests.log",
+        "bytes": 39309,
+        "sha256": "0b2ded339118badfb38d8e1a84634d603553708459872ecd0589059339e51673"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/07-test-OpenPgp.UnitTests.log",
+        "bytes": 579,
+        "sha256": "d2491d4acd4938b990b1987c7d90ddae30185fde46c93cff14c110cfce8e8c10"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/07-test-OpenPgp.UnitTests.log",
+        "bytes": 579,
+        "sha256": "d2491d4acd4938b990b1987c7d90ddae30185fde46c93cff14c110cfce8e8c10"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/08-test-Piv.UnitTests.log",
+        "bytes": 555,
+        "sha256": "e3714093fad5552b1c1fd50e143a4aa3d69ffdaaf0bfdc526fabd98575ace0b8"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/08-test-Piv.UnitTests.log",
+        "bytes": 555,
+        "sha256": "e3714093fad5552b1c1fd50e143a4aa3d69ffdaaf0bfdc526fabd98575ace0b8"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/09-test-PublicApi.UnitTests.log",
+        "bytes": 589,
+        "sha256": "9f466acf9327d56d7d8072ba2f123dafec7c986f6c6cd82e1b538910d649a685"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/09-test-PublicApi.UnitTests.log",
+        "bytes": 589,
+        "sha256": "9f466acf9327d56d7d8072ba2f123dafec7c986f6c6cd82e1b538910d649a685"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/10-test-SecurityDomain.UnitTests.log",
+        "bytes": 619,
+        "sha256": "84b716fcf6cfda0c39e2d598decae95718db971f78d7831e110f22de70db7cf8"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/10-test-SecurityDomain.UnitTests.log",
+        "bytes": 619,
+        "sha256": "84b716fcf6cfda0c39e2d598decae95718db971f78d7831e110f22de70db7cf8"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/11-test-WebAuthn.UnitTests.log",
+        "bytes": 585,
+        "sha256": "b6e7358afbc87b5bb3d69ac879369f28925801d7d82d59fd2eda9eb9b0b0b0c3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/11-test-WebAuthn.UnitTests.log",
+        "bytes": 585,
+        "sha256": "b6e7358afbc87b5bb3d69ac879369f28925801d7d82d59fd2eda9eb9b0b0b0c3"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/12-test-YubiHsm.UnitTests.log",
+        "bytes": 577,
+        "sha256": "f3c2f4021630b25457e54849c646d3bccaec2f89a67b05af6663033607609ef6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/12-test-YubiHsm.UnitTests.log",
+        "bytes": 577,
+        "sha256": "f3c2f4021630b25457e54849c646d3bccaec2f89a67b05af6663033607609ef6"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/13-test-YubiOtp.UnitTests.log",
+        "bytes": 579,
+        "sha256": "986ea728c78f20d82727193133e1a1b48c4e9019bb8fd79f3be255ccc9e108a5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/13-test-YubiOtp.UnitTests.log",
+        "bytes": 579,
+        "sha256": "986ea728c78f20d82727193133e1a1b48c4e9019bb8fd79f3be255ccc9e108a5"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/result.json",
+        "bytes": 4877,
+        "sha256": "3ab9bc2bc4bb146cc6c9ce214687a09115f7e27f9c130fcbfaace788bcfe0008"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/result.json",
+        "bytes": 4877,
+        "sha256": "3ab9bc2bc4bb146cc6c9ce214687a09115f7e27f9c130fcbfaace788bcfe0008"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/result.txt",
+        "bytes": 1404,
+        "sha256": "7f5e0a395924b5b1f69af71b23d300ae5f1cc3226a44d7da87bc90d1a1e04c28"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/result.txt",
+        "bytes": 1404,
+        "sha256": "7f5e0a395924b5b1f69af71b23d300ae5f1cc3226a44d7da87bc90d1a1e04c28"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-063644-180-test/run.log",
+        "bytes": 7265,
+        "sha256": "1c5dae19be5430141b03f6a928643c3668a0e3f38ac5cba6d7dbd3bd2ca1bedd"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/toolchain/20261112-063644-180-test/run.log",
+        "bytes": 7265,
+        "sha256": "1c5dae19be5430141b03f6a928643c3668a0e3f38ac5cba6d7dbd3bd2ca1bedd"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/stdout.log",
+      "bytes": 6915,
+      "sha256": "096f8f15e4704e46e483ffddaaf186beb6d63681523d1dd51f2fa063c2040186"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-final-tree/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-12T05:38:02.297836+00:00",
+  "reuse": {
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+    "files": [
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+        "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+        "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+        "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+        "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "sample_finding": "SAMPLE-B2-003",
+  "focused_patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+  "focused_patch_bytes": 1052,
+  "before_matches_current_primary_including_a994": true,
+  "well_formed_xml_comment_blocks": 22,
+  "final_fresh_checks": {
+    "result": "PASS",
+    "errors": [],
+    "source_scope": "One ReceiveEvent XML block only",
+    "before_matches_current_primary_including_a994": true,
+    "primary_one_file_still_accepted_before_bytes": true,
+    "noncomment_lines_bom_final_newline_preserved": true,
+    "all_other_text_in_same_file_including_no_wake_ack_unchanged": true,
+    "well_formed_xml_comment_blocks": 22,
+    "other_eligible_source_files_byte_unchanged": 212,
+    "prior_patch_editor_and_review_records_byte_exact": 47,
+    "unchanged_existing_patch_identities": [
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+        "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch",
+        "sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/source.patch",
+        "sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source.patch",
+        "sha256": "a097122a13ba002f9126de2e00bbf8d7bd2d73fc2ae4a9d9d890d873083b1206"
+      }
+    ],
+    "focused_patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+    "git_diff_check": "PASS; fresh scoped command exit 0",
+    "focused_patch_reverse_apply_check": "PASS; fresh read-only command exit 0",
+    "cached_diff_empty": true,
+    "head_unchanged": "da66f5d01ba594993974ddd26723e8c300c0a454",
+    "limits": "Static source/text/hash/XML/JSON and read-only Git checks, not compilation or native/device/runtime proof. Independent content acceptance pending; sampler owns sampling accounting."
+  },
+  "compiler_native_device_execution": "NOT-RUN",
+  "independent_review": "PENDING"
+}

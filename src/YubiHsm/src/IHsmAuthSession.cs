@@ -20,6 +20,12 @@ namespace Yubico.YubiKit.YubiHsm;
 ///     Defines the public contract for interacting with the YubiHSM Auth applet on a YubiKey.
 ///     This applet stores credentials used to authenticate to YubiHSM 2 hardware security modules.
 /// </summary>
+/// <remarks>
+///     Inherited IsAuthenticated records Core SCP setup, not management-key/credential-password authority,
+///     ongoing channel health, or completion of the external HSM handshake. Await complete public tasks
+///     before another operation or disposal, keeping borrowed inputs and prompt resources alive. LIST
+///     policy lookup, CALCULATE, parsing and callbacks extend beyond individual guarded exchanges.
+/// </remarks>
 public interface IHsmAuthSession : IApplicationSession
 {
     /// <summary>
@@ -193,6 +199,10 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Reset permanently erases all credentials, restores the 16-zero-byte management key and resets
     ///     retry counters. The session reselects the applet over its existing protocol and retains its
     ///     resolved feature-version policy, including any caller-supplied firmware override.
+    ///     It retains no SCP parameters and performs no fresh handshake. With SCP, RESET uses the secure
+    ///     graph but re-SELECT passes through unprotected, retaining old host state and readiness/auth flags.
+    ///     These values do not prove a usable post-reset channel. After reset or uncertainty, dispose the
+    ///     session/connection and create fresh scopes with required options rather than assuming recovery.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task ResetAsync(CancellationToken cancellationToken = default);

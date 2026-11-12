@@ -1,0 +1,12 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "before_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+    "primary_before_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+  },
+  {
+    "path": "docs/v1-to-v2-comparison.md",
+    "before_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+    "primary_before_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1"
+  }
+]

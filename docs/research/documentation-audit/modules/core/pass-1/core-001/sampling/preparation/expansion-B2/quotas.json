@@ -1,0 +1,95 @@
+{
+  "material_XML": {
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "original_population": 167,
+    "original_full_quota": 17,
+    "additional_full_quota": 17,
+    "proposed_total": 34,
+    "original_misses_with_zero_final_credit": 3
+  },
+  "eligibility_replacements": [
+    {
+      "owner": "B1",
+      "stratum": "lifetime-protocol-internal-contracts",
+      "original_population": 238,
+      "original_sample_quota": 24,
+      "adjudicated_ineligible_ids": [
+        "core-001:unit:9715fd23161cbcd7",
+        "core-001:unit:e7b21994e1483471"
+      ],
+      "current_accepted_overlap_ids": [],
+      "working_population_after_explicit_exclusions": 236,
+      "working_10_percent_minimum": 24,
+      "original_valid_selected": 22,
+      "required_replacements": 2,
+      "replacement_ids": [
+        "core-001:unit:9b2517c252b41c26",
+        "core-001:unit:21cfb83cdc2b4263"
+      ],
+      "qualification": "Candidate role-level calculation only; final canonical population/denominator and actual replacement reads remain pending."
+    },
+    {
+      "owner": "B2",
+      "stratum": "native-interop-contracts",
+      "original_population": 136,
+      "original_sample_quota": 14,
+      "adjudicated_ineligible_ids": [
+        "core-001:unit:c7edeed9fe6d2e6c"
+      ],
+      "current_accepted_overlap_ids": [],
+      "working_population_after_explicit_exclusions": 135,
+      "working_10_percent_minimum": 14,
+      "original_valid_selected": 13,
+      "required_replacements": 1,
+      "replacement_ids": [
+        "core-001:unit:1dc08e7d03f341ef"
+      ],
+      "qualification": "Candidate role-level calculation only; final canonical population/denominator and actual replacement reads remain pending."
+    }
+  ],
+  "conditional_history_replacements": [
+    {
+      "owner": "B1",
+      "stratum": "narrative-examples-and-maps",
+      "qualified_history_ids": [
+        "core-001:unit:f1d4372202bdaa9b"
+      ],
+      "explicit_accepted_overlap_ids": [],
+      "conditional_population": 8,
+      "conditional_minimum": 1,
+      "valid_original_if_history_withheld": 0,
+      "conditional_replacement_need": 1,
+      "proposed_conditional_ids": [
+        "core-001:unit:4c48c7d8d8d2e37a"
+      ],
+      "decision": "Astra decides whether exact historical-report claim review qualifies for this narrative denominator. These candidates have no read/clean credit; research-path context can itself need historical-scope adjudication."
+    },
+    {
+      "owner": "B2",
+      "stratum": "narrative-examples-and-maps",
+      "qualified_history_ids": [
+        "core-001:unit:094e7f926bf428c5",
+        "core-001:unit:6612f3e188e74e2b",
+        "core-001:unit:95ad4b56865f1456",
+        "core-001:unit:b37c3e449550734a",
+        "core-001:unit:cfea2933573b757f",
+        "core-001:unit:ebf81d7eeea93827"
+      ],
+      "explicit_accepted_overlap_ids": [],
+      "conditional_population": 52,
+      "conditional_minimum": 6,
+      "valid_original_if_history_withheld": 0,
+      "conditional_replacement_need": 6,
+      "proposed_conditional_ids": [
+        "core-001:unit:4c955b22a2de68df",
+        "core-001:unit:0b2135f2f301e2c1",
+        "core-001:unit:d8f176c067aa0fd3",
+        "core-001:unit:b45b5794aa92008c",
+        "core-001:unit:4330e60d07cd5417",
+        "core-001:unit:457a4879daaf1b55"
+      ],
+      "decision": "Astra decides whether exact historical-report claim review qualifies for this narrative denominator. These candidates have no read/clean credit; research-path context can itself need historical-scope adjudication."
+    }
+  ]
+}

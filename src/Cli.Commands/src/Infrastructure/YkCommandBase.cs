@@ -20,8 +20,9 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
     where TSettings : GlobalSettings
 {
     /// <summary>
-    ///     Connection types this applet uses, in preference order. The first type
-    ///     is auto-selected in non-interactive mode when multiple devices are present.
+    ///     Connection types this applet supports, in device-selection preference order.
+    ///     With multiple devices in non-interactive mode, prefer a device exposing the first type.
+    ///     This does not pin the operation's transport; only an explicit transport option does that.
     /// </summary>
     protected abstract ConnectionType[] AppletTransports { get; }
 

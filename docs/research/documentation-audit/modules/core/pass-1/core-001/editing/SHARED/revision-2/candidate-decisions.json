@@ -1,0 +1,36 @@
+{
+  "review_refs": {
+    "R1": [
+      "CORE-B6-C001",
+      "CORE-C-C017",
+      "CORE-B4-C010"
+    ],
+    "R2": [
+      "CORE-B1-C012",
+      "CORE-B1-C005",
+      "CORE-B4-C001"
+    ],
+    "R3": [
+      "CORE-C-C015"
+    ],
+    "R4": [
+      "CORE-A-C008",
+      "CORE-B1-C002",
+      "CORE-C-C008",
+      "CORE-B6-C014"
+    ],
+    "R5": [
+      "CORE-B5-C002"
+    ],
+    "R6": [
+      "CORE-C-C017",
+      "CORE-B6-C015",
+      "CORE-B5-C009"
+    ]
+  },
+  "separate_boundary_refs": [
+    "CORE-CTAP-X006",
+    "ctap2-001:CTAP-IMP-007"
+  ],
+  "changes": "Documentation/record corrections only; original local/proposal IDs and holds unchanged."
+}

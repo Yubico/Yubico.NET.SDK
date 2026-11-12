@@ -19,14 +19,14 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Smart-card application state is card-wide, not per handle: NIST SP 800-73-5 Part 2 §2.4.2 lists the
-/// PIV PIN among the application security status indicators, so once a PIN is verified any handle on
-/// the card can use a PIN=ONCE key until the card is reset. By default the built-in SDK factory requires
+/// Other clients using a shared card can select applications and affect application security state.
+/// A PC/SC handle does not provide an independent application-state boundary. The built-in factory requires
 /// exclusive PC/SC access and fails with <see cref="Devices.ConnectionInUseException" /> on contention,
 /// without a shared retry. PC/SC exclusivity excludes other PC/SC clients through the resource manager;
 /// it is not a guarantee about other transports or arbitrary custom connection implementations.
-/// All built-in modes request power-off on release (<c>SCARD_UNPOWER_CARD</c>) to clear card-wide state.
-/// Shared access permits other clients to use that state while the card remains powered;
+/// All built-in modes request power-off on release (<c>SCARD_UNPOWER_CARD</c>) and check native release
+/// statuses. The requested disposition does not establish observed power-off or physical PIN-state clearing.
+/// Shared access accepts interference from other card clients;
 /// <see cref="ISmartCardConnection.IsExclusive" /> reports the acquired mode, and an explicitly selected
 /// fallback to shared access is logged as a warning.
 /// </para>
@@ -34,11 +34,13 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
 /// Set the process-wide mode through <see cref="SmartCardConnectionFactory.DefaultSharing" />, or pass one
 /// to <see cref="SmartCardConnectionFactory(SmartCardSharing)" />. Applications migrating from the former
 /// fallback default must opt in explicitly if they need coexistence with other smart-card clients.
+/// The factory policy is initially <see cref="Exclusive" />; the zero-valued enum member remains
+/// <see cref="ExclusiveWithSharedFallback" />.
 /// </para>
 /// </remarks>
 public enum SmartCardSharing
 {
-    /// <summary>Explicit opt-in: open exclusively; on a sharing violation, retry shared and accept shared card-wide state.</summary>
+    /// <summary>Explicit opt-in: open exclusively; on a sharing violation, retry shared and accept shared application state.</summary>
     ExclusiveWithSharedFallback,
 
     /// <summary>The factory default: open exclusively or fail with <see cref="Devices.ConnectionInUseException" />; never retry shared.</summary>
@@ -46,7 +48,7 @@ public enum SmartCardSharing
 
     /// <summary>
     /// Open shared, for applications that must coexist with other smart-card users (gpg-agent, browsers,
-    /// the OS smart-card service) and accept that card-wide state is reachable from their handles.
+    /// the OS smart-card service) and accept shared application state and application-selection interference.
     /// </summary>
     Shared
 }

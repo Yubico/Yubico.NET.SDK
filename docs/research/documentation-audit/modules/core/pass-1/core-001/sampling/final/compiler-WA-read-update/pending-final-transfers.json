@@ -1,0 +1,25 @@
+[
+  {
+    "scope": "SAMPLE-WA-002/FULL-032 WebAuthn guide body",
+    "handoff_reference": "fb137...",
+    "reference_is_abbreviated_not_a_verified_full_hash": true,
+    "status": "User reports accepted guide-body patch changes one fence; final transfer/identity handoff pending",
+    "product_path": "src/WebAuthn/CLAUDE.md",
+    "already_in_last_verified_363_path_map": true,
+    "corrected_original_unit_credit": 0
+  },
+  {
+    "scope": "Root logging bullet",
+    "handoff_reference": "b43...",
+    "reference_is_abbreviated_not_a_verified_full_hash": true,
+    "status": "User reports pending review; exact final patch/transfer identities not inspected or inferred",
+    "product_path": "CLAUDE.md"
+  },
+  {
+    "scope": "Dedicated format-owner final-newline changes",
+    "reported_file_count": 239,
+    "status": "Owner preparing EOF-only C# changes; await explicit final transfer handoff, do not poll owner or scan/re-pin unknown product files",
+    "actual_EOF_changed_files_verified_in_this_update": 0,
+    "automatic_semantic_or_whole_file_exclusion": false
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "self_excluded": true,
+  "artifacts": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/annotation.json",
+      "sha256": "1b35173dacb40035ac75035adc14f53b4a82509f87e0b616a4e4b725d7172255"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/before-DeviceChangeFeed-identities.json",
+      "sha256": "3b52c099b8188af6968a75d3daef920aa5ae7a4c983bc2707662d0ee38e1cf4e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/before-DeviceChangeFeed.cs.txt",
+      "sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/file-identities.json",
+      "sha256": "0ad3edf88c9594bcd9ecb939a5f8aa5ea46a97ae1bbde92b3cfa31e14e532400"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/predecessor-identities.json",
+      "sha256": "941758ca82e529bdad31387fb4ceba1ed6a5c49458c71e468ee390bfa7e1f390"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/product.patch",
+      "sha256": "f50744c7d3c81a515ca0f43c84e5dd22e84f87c368260308d61034cc0ecc3aae"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/report.md",
+      "sha256": "4bd1ee22409bad944d6d5bfdb6ac7ca39ec5134ddeeaa9af92b723938e77c5dc"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-feed-completion/verification.json",
+      "sha256": "bedf72f27cc3acef85f18e285c8abe7f5ce7467e5793ce323c9b30269bb71c31"
+    }
+  ]
+}

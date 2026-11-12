@@ -29,6 +29,10 @@ namespace Yubico.YubiKit.SecurityDomain;
 ///     establish final-specification or YubiKey-profile behavior. SCP11b authenticates the device, not
 ///     the host; channel establishment alone does not grant authority for a particular operation.
 ///     Cancellation does not roll back persistent changes already accepted by the device.
+///     IsAuthenticated records Core channel setup, not ongoing channel health or administrative authority.
+///     The same Public Review draft, §4.3, includes the first correct-MAC APDU after setup in a/c host
+///     authentication. Await entire public tasks before disposal; individual guarded exchanges do not
+///     serialize a complete reset or multi-query workflow.
 /// </remarks>
 public interface ISecurityDomainSession : IApplicationSession
 {
@@ -37,14 +41,23 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="dataObject">Data object identifier in the range 0x0000–0xFFFF, encoded as P1/P2.</param>
     /// <param name="requestData">Optional request payload sent alongside the GET DATA command.</param>
-    /// <param name="expectedResponseLength">Optional expected response length encoded in the Le field.</param>
+    /// <param name="expectedResponseLength">Le value, default zero; not an exact returned-byte count.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The response data, without the status word.</returns>
     /// <remarks>
     ///     The caller supplies any object-specific request encoding. The current implementation sends
     ///     only the low two bytes of <paramref name="dataObject" />; it does not validate that range.
+    ///     Keep requestData valid and unchanged until the actual task completes. The selected formatter
+    ///     appends Le: short format accepts 0..255 and encodes zero as 00; extended format accepts
+    ///     0..65536 and encodes zero or 65536 as 0000. These zero encodings request the format's maximum
+    ///     response length, not an empty response; the actual result still depends on the device.
+    ///     The result aliases response storage and remains reachable after session disposal; it is not
+    ///     a pooled loan. The facade hides the response's supported clear handle. Clearing a caller copy
+    ///     does not clear that owner or earlier transport/SCP copies, so no complete secret-result erasure
+    ///     guarantee is provided for arbitrary data objects.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The expected response length is negative.</exception>
+    /// <exception cref="ArgumentException">The expected response length exceeds the selected formatter's bounds.</exception>
     Task<ReadOnlyMemory<byte>> GetDataAsync(
         int dataObject,
         ReadOnlyMemory<byte> requestData = default,
@@ -284,7 +297,8 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <param name="data">Caller-encoded BER-TLV payload for the selected Security Domain operation.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
-    ///     Sends one STORE DATA command with header 00 E2 90 00. The SDK does not validate the payload,
+    ///     Sends one logical STORE DATA command with header 00 E2 90 00; Core may fragment it into
+    ///     chained APDUs. The SDK does not validate the payload,
     ///     select a different application, or implement a multi-block personalization flow. The caller
     ///     supplies valid operation-specific encoding and device-accepted administrative authority;
     ///     lack of authority is not checked locally by this method.
@@ -324,6 +338,9 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     Failure or cancellation can leave persistent partial changes and cannot roll them back.
     ///     Currently reinitialization omits the original protocol configuration and firmware override.
     ///     Dispose this session and create a fresh one with those options when they are required after reset.
+    ///     SCP11 reinitialization can fail at the local version gate before a new handshake. After a
+    ///     failed/cancelled reset, await completion and dispose/reopen rather than relying on retained
+    ///     readiness/authentication flags; raw attempts can have changed device/channel state before flags clear.
     /// </remarks>
     /// <exception cref="SecureChannelException">
     ///     Retained SCP parameters cause a selected secure-channel configuration failure during reinitialization.

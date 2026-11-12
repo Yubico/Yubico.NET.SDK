@@ -1,0 +1,1000 @@
+{
+  "finding": "PF-02",
+  "direct_path_count": 9,
+  "dispositions": [
+    {
+      "response_index": 0,
+      "candidate": "CORE-B4-C008",
+      "run_qualified_facet": "core-001:CORE-B4-C008#documentation",
+      "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "existing_completed_editor_decision": {
+        "record": "editing/SHARED/outside-scope-followups.json",
+        "record_sha256": "88d57881b2f045993b53bb6ce39a194ec0265ce7afd78a4ef26a0f1f55c05086",
+        "json_pointer": "/292",
+        "original_decision": {
+          "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+          "local_id": "CORE-B4-C008",
+          "proposal_id": "FPT-055",
+          "decision": "hold-for-exact-owner",
+          "reason": "Outside SHARED writable product scope; preserve bytes and route to C#/applet/migration/config/diagram/historical owner as applicable.",
+          "next_action": "Reopen after harness/gate/link/profile changes or exact artifacts; no new tests needed merely to correct assertion descriptions."
+        },
+        "accepted_batch_scope_review": "editing/SHARED/revision-2/review.md",
+        "review_sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/2141",
+          "row": {
+            "id": "core-001:unit:ef67fb2f9054a507",
+            "ownership": "assigned-shared",
+            "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+            "first_line": 1,
+            "last_line": 63,
+            "label": "src/Core/src/Yubico.YubiKit.Core.csproj",
+            "start_character": 0,
+            "end_character_exclusive": 3088,
+            "source_sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+            "range_sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+            "actual_range_sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+            "family": "assigned-shared",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "net10/language/warnings and package1.18.1 opt-in, late AOT metadata/analyzer/API AdditionalFiles/friend declarations reviewed together. Configuration is not evaluated compiler input or binary producer evidence. Historical multi-target wording and current static-AOT publication need scoped correction. Exact unit: src/Core/src/Yubico.YubiKit.Core.csproj (1–63).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C008"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 support editor; coordinator assigns compilation/execution",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "READ-CANDIDATE",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/0",
+      "source_identity": {
+        "inventory_raw_sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+        "pinned_git_blob_from_inventory": "3a254225f677786feb76b4d1d0deac7cb3f2bae4",
+        "current_raw_sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-B4-C008",
+        "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+        "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+        "source_record": "investigation/B4/unit-dispositions.json",
+        "proposal": "RETAIN the existing project values and preserve the finished exact-owner referral. Refer evaluated compiler/analyzer/AOT and installed-native-producer assertions to the existing validation/evidence owner.",
+        "facet_reason": "The completed source record covers net10/language/warnings, NativeShims 1.18.1 opt-in, late AOT metadata/analyzer participation, API AdditionalFiles and friend declarations. These declarations identify intended inputs; they do not prove actual compiler participation, package selection or a deployed producer. C008's historical multi-target/static-AOT prose corrections do not require changing this project configuration.",
+        "held_qualification": "Actual evaluated inputs/link/native artifact correspondence and final compilation retain their separate evidence gates. No package/framework/flag/friend/API-input value is accepted for alteration.",
+        "reopen_when": "Project/package/AOT/analyzer/API-input declarations or their evaluated participation change; recheck the associated support/AOT/compiler claims at those identities.",
+        "adjudication_owner": "Astra with the existing Core project/validation owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 1,
+      "candidate": "CORE-B4-C008",
+      "run_qualified_facet": "core-001:CORE-B4-C008#documentation",
+      "path": "verification/NativeCompatibilityVerification/baseline-exports.json",
+      "existing_completed_editor_decision": {
+        "record": "editing/SHARED/outside-scope-followups.json",
+        "record_sha256": "88d57881b2f045993b53bb6ce39a194ec0265ce7afd78a4ef26a0f1f55c05086",
+        "json_pointer": "/303",
+        "original_decision": {
+          "path": "verification/NativeCompatibilityVerification/baseline-exports.json",
+          "local_id": "CORE-B4-C008",
+          "proposal_id": "FPT-055",
+          "decision": "hold-for-exact-owner",
+          "reason": "Outside SHARED writable product scope; preserve bytes and route to C#/applet/migration/config/diagram/historical owner as applicable.",
+          "next_action": "Reopen after harness/gate/link/profile changes or exact artifacts; no new tests needed merely to correct assertion descriptions."
+        },
+        "accepted_batch_scope_review": "editing/SHARED/revision-2/review.md",
+        "review_sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1454",
+          "row": {
+            "id": "core-001:unit:c0236a400a5589a5",
+            "ownership": "primary",
+            "path": "verification/NativeCompatibilityVerification/baseline-exports.json",
+            "first_line": 1,
+            "last_line": 38,
+            "label": "verification/NativeCompatibilityVerification/baseline-exports.json",
+            "start_character": 0,
+            "end_character_exclusive": 1057,
+            "source_sha256": "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc",
+            "range_sha256": "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc",
+            "actual_range_sha256": "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc",
+            "family": "external-verification-hosts",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "36-name canonical old native export set, includes more than historical managed imports; names supply no signature/native-lifetime acceptance. Exact unit: verification/NativeCompatibilityVerification/baseline-exports.json (1–38).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C008"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 documentation editor; Pass2 implementation reviewer separately assigned",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "READ-CANDIDATE",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/1",
+      "source_identity": {
+        "inventory_raw_sha256": "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc",
+        "pinned_git_blob_from_inventory": "46448655071e00a3b61d319bfa08b78c5aee1ec1",
+        "current_raw_sha256": "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-B4-C008",
+        "path": "verification/NativeCompatibilityVerification/baseline-exports.json",
+        "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+        "source_record": "investigation/B4/unit-dispositions.json",
+        "proposal": "RETAIN the canonical 36-name historical export fixture; preserve its exact-owner/evidence referral.",
+        "facet_reason": "The completed B4 disposition identifies a 36-name canonical old native export set, including names beyond the historical managed-import calls. It is an export-name census oracle, not a signature, calling-convention, successful-transmit or native-lifetime oracle. Changing names merely to complete this join would change the fixture rather than correct the scoped evidence claim.",
+        "held_qualification": "Historical package/platform and actual per-function execution remain qualified. No new stable-package, Windows/Linux or all-export ABI acceptance follows from retaining this data.",
+        "reopen_when": "The deliberately selected native baseline/export set or the checker expectation changes, with the original fixture and historical evidence retained separately.",
+        "adjudication_owner": "Astra with the existing native compatibility/evidence owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 2,
+      "candidate": "CORE-B4-C008",
+      "run_qualified_facet": "core-001:CORE-B4-C008#documentation",
+      "path": "verification/NativeCompatibilityVerification/missing-baseline-export.json",
+      "existing_completed_editor_decision": {
+        "record": "editing/SHARED/outside-scope-followups.json",
+        "record_sha256": "88d57881b2f045993b53bb6ce39a194ec0265ce7afd78a4ef26a0f1f55c05086",
+        "json_pointer": "/304",
+        "original_decision": {
+          "path": "verification/NativeCompatibilityVerification/missing-baseline-export.json",
+          "local_id": "CORE-B4-C008",
+          "proposal_id": "FPT-055",
+          "decision": "hold-for-exact-owner",
+          "reason": "Outside SHARED writable product scope; preserve bytes and route to C#/applet/migration/config/diagram/historical owner as applicable.",
+          "next_action": "Reopen after harness/gate/link/profile changes or exact artifacts; no new tests needed merely to correct assertion descriptions."
+        },
+        "accepted_batch_scope_review": "editing/SHARED/revision-2/review.md",
+        "review_sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1455",
+          "row": {
+            "id": "core-001:unit:6d0fd7e28a3b4819",
+            "ownership": "primary",
+            "path": "verification/NativeCompatibilityVerification/missing-baseline-export.json",
+            "first_line": 1,
+            "last_line": 38,
+            "label": "verification/NativeCompatibilityVerification/missing-baseline-export.json",
+            "start_character": 0,
+            "end_character_exclusive": 1063,
+            "source_sha256": "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7",
+            "range_sha256": "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7",
+            "actual_range_sha256": "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7",
+            "family": "external-verification-hosts",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "Same36 negative fixture replaces Transmit with MissingFixture; cardinality stays36 so missing-symbol assertion rather than invalid fixture shape must fail. Exact unit: verification/NativeCompatibilityVerification/missing-baseline-export.json (1–38).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C008"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 documentation editor; Pass2 implementation reviewer separately assigned",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "READ-CANDIDATE",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/2",
+      "source_identity": {
+        "inventory_raw_sha256": "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7",
+        "pinned_git_blob_from_inventory": "4be18b211b23c151dffe7d5e9e0161dbd8e84d37",
+        "current_raw_sha256": "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-B4-C008",
+        "path": "verification/NativeCompatibilityVerification/missing-baseline-export.json",
+        "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+        "source_record": "investigation/B4/unit-dispositions.json",
+        "proposal": "RETAIN the intentional missing-symbol negative fixture, including its 36-entry shape; preserve the exact-owner referral.",
+        "facet_reason": "The completed source record says this same-cardinality control replaces Transmit with MissingFixture so the missing-symbol assertion fails rather than an invalid-fixture-shape check. The missing export is deliberate negative evidence, not a broken configuration to repair or a demonstrated production failure.",
+        "held_qualification": "A meaningful negative oracle remains separate from actual native signature/lifetime execution and from a successful full compatibility lane.",
+        "reopen_when": "The negative-control target or baseline export grammar changes; retain the deliberate wrong-name/control purpose and distinguish its classified failure from a product failure.",
+        "adjudication_owner": "Astra with the existing native compatibility/evidence owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 3,
+      "candidate": "CORE-B4-C010",
+      "run_qualified_facet": "core-001:CORE-B4-C010#documentation",
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "existing_completed_editor_decision": {
+        "record": "editing/SHARED/outside-scope-followups.json",
+        "record_sha256": "88d57881b2f045993b53bb6ce39a194ec0265ce7afd78a4ef26a0f1f55c05086",
+        "json_pointer": "/311",
+        "original_decision": {
+          "path": "docs/architecture/sdk-architecture-map.yml",
+          "local_id": "CORE-B4-C010",
+          "proposal_id": "FPT-057",
+          "decision": "hold-for-exact-owner",
+          "reason": "Outside SHARED writable product scope; preserve bytes and route to C#/applet/migration/config/diagram/historical owner as applicable.",
+          "next_action": "Compile actual snippets later; SmartCard class GUID remains source-qualified pending provenance. Snapshot is support/type reconciliation only."
+        },
+        "accepted_batch_scope_review": "editing/SHARED/revision-2/review.md",
+        "review_sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1682",
+          "row": {
+            "id": "core-001:unit:849900d9f955f3f1",
+            "ownership": "assigned-shared",
+            "path": "docs/architecture/sdk-architecture-map.yml",
+            "first_line": 1,
+            "last_line": 37,
+            "label": "(map preamble and schema)",
+            "start_character": 0,
+            "end_character_exclusive": 1971,
+            "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+            "range_sha256": "3e871ebf675894f39bc24c86b462b72ba573a8aadf4e088dc1ee6f4aca252970",
+            "actual_range_sha256": "3e871ebf675894f39bc24c86b462b72ba573a8aadf4e088dc1ee6f4aca252970",
+            "family": "assigned-shared",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions. Exact unit: (map preamble and schema) (1–37).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C010"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 support editor; coordinator assigns compilation/execution",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "UNREAD",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        },
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1683",
+          "row": {
+            "id": "core-001:unit:dc20880031e418c0",
+            "ownership": "assigned-shared",
+            "path": "docs/architecture/sdk-architecture-map.yml",
+            "first_line": 38,
+            "last_line": 46,
+            "label": "L0-context:",
+            "start_character": 1971,
+            "end_character_exclusive": 2207,
+            "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+            "range_sha256": "f2805077349f2aee274f81c2f85ee25a82a1e6c94f80e869a2474cedba1b902d",
+            "actual_range_sha256": "f2805077349f2aee274f81c2f85ee25a82a1e6c94f80e869a2474cedba1b902d",
+            "family": "assigned-shared",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions. Exact unit: L0-context: (38–46).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C010"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 support editor; coordinator assigns compilation/execution",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "UNREAD",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        },
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1684",
+          "row": {
+            "id": "core-001:unit:dd6c3967323a33e1",
+            "ownership": "assigned-shared",
+            "path": "docs/architecture/sdk-architecture-map.yml",
+            "first_line": 47,
+            "last_line": 83,
+            "label": "L1-assembly-deps:",
+            "start_character": 2207,
+            "end_character_exclusive": 4579,
+            "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+            "range_sha256": "c084aaa1af269232c4456c1f8ad3d2836cc840485685fa3c6f13990b1a8952a6",
+            "actual_range_sha256": "c084aaa1af269232c4456c1f8ad3d2836cc840485685fa3c6f13990b1a8952a6",
+            "family": "assigned-shared",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions. Exact unit: L1-assembly-deps: (47–83).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C010"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 support editor; coordinator assigns compilation/execution",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "UNREAD",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        },
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1685",
+          "row": {
+            "id": "core-001:unit:9081bf97fe2c9fb3",
+            "ownership": "assigned-shared",
+            "path": "docs/architecture/sdk-architecture-map.yml",
+            "first_line": 84,
+            "last_line": 113,
+            "label": "L2-layered-stack:",
+            "start_character": 4579,
+            "end_character_exclusive": 6282,
+            "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+            "range_sha256": "04ac2d19369bd58d850a5975ec20fb367ca823cf3388aa9086e9a02bc92f569d",
+            "actual_range_sha256": "04ac2d19369bd58d850a5975ec20fb367ca823cf3388aa9086e9a02bc92f569d",
+            "family": "assigned-shared",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions. Exact unit: L2-layered-stack: (84–113).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C010"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 support editor; coordinator assigns compilation/execution",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "UNREAD",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        },
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1686",
+          "row": {
+            "id": "core-001:unit:0fb8a0528e26d6d7",
+            "ownership": "assigned-shared",
+            "path": "docs/architecture/sdk-architecture-map.yml",
+            "first_line": 114,
+            "last_line": 132,
+            "label": "L3-apdu-sequence:",
+            "start_character": 6282,
+            "end_character_exclusive": 7362,
+            "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+            "range_sha256": "da951b631b395c82f193a13727e4d9520713845ca61363523aead6eba3e5db0c",
+            "actual_range_sha256": "da951b631b395c82f193a13727e4d9520713845ca61363523aead6eba3e5db0c",
+            "family": "assigned-shared",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions. Exact unit: L3-apdu-sequence: (114–132).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C010"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 support editor; coordinator assigns compilation/execution",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "UNREAD",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        },
+        {
+          "record": "investigation/B4/unit-dispositions.json",
+          "record_sha256": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+          "json_pointer": "/1687",
+          "row": {
+            "id": "core-001:unit:a4dbc5b8c7e1ddcb",
+            "ownership": "assigned-shared",
+            "path": "docs/architecture/sdk-architecture-map.yml",
+            "first_line": 133,
+            "last_line": 147,
+            "label": "L3b-fido2-ctap-sequence:",
+            "start_character": 7362,
+            "end_character_exclusive": 7926,
+            "source_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+            "range_sha256": "6c23b2adb6cc9939e42b3357da6836b53f1f002eaac6883f76093c7fe30cbd6f",
+            "actual_range_sha256": "6c23b2adb6cc9939e42b3357da6836b53f1f002eaac6883f76093c7fe30cbd6f",
+            "family": "assigned-shared",
+            "complete_context_read": true,
+            "status": "READ-CANDIDATE",
+            "reason": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions. Exact unit: L3b-fido2-ctap-sequence: (133–147).",
+            "pending_context": null,
+            "candidate_ids": [
+              "CORE-B4-C010"
+            ],
+            "documentation_status": "LOCAL-CANDIDATE",
+            "implementation_status": "NOT-ACCEPTED-BY-THIS-AUDIT",
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED",
+            "platform_execution": "UNRUN",
+            "sample_eligible": false,
+            "assigned_scope_disposition_complete": true,
+            "scope": "Exact assigned implementation/comment/assertion or artifact content",
+            "disposition_owner": "B4 support editor; coordinator assigns compilation/execution",
+            "qualification": "Exact assigned implementation/comment/assertion or artifact content",
+            "previous_checkpoint_status": "UNREAD",
+            "evidence_record": "file-evidence.md; candidates.md; sources/register.md"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/3",
+      "source_identity": {
+        "inventory_raw_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "pinned_git_blob_from_inventory": "aba2d8df0c848ab546a9bef06e6bcad230759b97",
+        "current_raw_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-B4-C010",
+        "path": "docs/architecture/sdk-architecture-map.yml",
+        "finished_decision_record": "editing/SHARED/outside-scope-followups.json",
+        "source_record": "investigation/B4/unit-dispositions.json",
+        "proposal": "RETAIN the current structural map bytes and preserve the finished diagram-owner referral. Submit C010's project-edge/type/teaching-label consistency facet explicitly to Astra; do not infer semantic acceptance of the entire map from its schema or rendering identity.",
+        "facet_reason": "B4's completed shared map dispositions compare assigned graph/map/diagram sections and distinguish the indirect WebAuthn-to-Ctap2 dependency, sealed-class ApduResponse and conceptual pipeline teaching boxes. Its candidate return says the indirect exception is already represented in graph/map while the appendix teaching prose needed correction. Preserve those distinctions: no YAML edge, symbol, label or asset digest is changed to discharge this ledger gap.",
+        "held_qualification": "The existing exact-owner hold is a completed referral, not a final claim that every structured-map value is semantically correct or that a rendered pipeline proves native timing/wire conformance. Any actual map-value correction requires separate explicit coordinator disposition.",
+        "reopen_when": "Project edges, source type representation, conceptual pipeline labels or the map/source/artifact relationship changes; reconcile only that affected architecture facet with the accepted narrative and its owner.",
+        "adjudication_owner": "Astra with the existing architecture map/SHARED owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 4,
+      "candidate": "CORE-OATH-X003",
+      "run_qualified_facet": "core-001:CORE-OATH-X003#documentation",
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+      "existing_completed_editor_decision": {
+        "record": "editing/applet-boundaries/outside-scope-paths.json",
+        "record_sha256": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd",
+        "json_pointer": "/16",
+        "original_decision": {
+          "module": "Oath",
+          "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+          "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+          "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+          "before_git_HEAD_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+          "after_worktree_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+          "before_worktree_source_ledger_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+          "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+          "original_boundary_disposition": {
+            "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+            "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+            "pinned_raw_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+            "normalized_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+            "pinned_git_blob": "e40ac1245673ad63316c041747e68ba40d6fd739",
+            "pin_equality": "BOM-CRLF-NORMALIZED-EQUAL",
+            "lines": 37,
+            "full_file_read": true,
+            "credit": "assigned selected units only; other units are related context",
+            "candidates": [
+              "CORE-OATH-X003"
+            ],
+            "observation": "Complete xUnitv3 runner/project links read. Links SecurityDomain handshake fake source, not a cryptographic conformance library; RFC4493 primitive tests are scoped. References full OathTool and Tests.Shared; no compiler/analyzer execution credited.",
+            "product_disposition": "UNCHANGED",
+            "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+          }
+        },
+        "accepted_batch_scope_review": "editing/applet-boundaries/revision-2/review.md",
+        "review_sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "boundaries/Oath/file-dispositions.json",
+          "record_sha256": "0731ab9fd88e6c6f92e4a49aae34eb4af86bfa18271a464dc146fdde834fecbc",
+          "json_pointer": "/55",
+          "row": {
+            "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+            "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+            "pinned_raw_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+            "normalized_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+            "pinned_git_blob": "e40ac1245673ad63316c041747e68ba40d6fd739",
+            "pin_equality": "BOM-CRLF-NORMALIZED-EQUAL",
+            "lines": 37,
+            "full_file_read": true,
+            "credit": "assigned selected units only; other units are related context",
+            "candidates": [
+              "CORE-OATH-X003"
+            ],
+            "observation": "Complete xUnitv3 runner/project links read. Links SecurityDomain handshake fake source, not a cryptographic conformance library; RFC4493 primitive tests are scoped. References full OathTool and Tests.Shared; no compiler/analyzer execution credited.",
+            "product_disposition": "UNCHANGED",
+            "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/4",
+      "source_identity": {
+        "inventory_raw_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+        "pinned_git_blob_from_inventory": "e40ac1245673ad63316c041747e68ba40d6fd739",
+        "current_raw_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-OATH-X003",
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+        "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+        "source_record": "boundaries/Oath/file-dispositions.json",
+        "proposal": "RETAIN project references, linked SecurityDomain handshake-fake source and scoped RFC4493 primitive attribution; preserve the finished editor hold/referral.",
+        "facet_reason": "The completed OATH file disposition reads the xUnit v3 project/runner links and distinguishes linked handshake fake source from a cryptographic conformance library. X003 explicitly retains the project comment's primitive-versus-whole-SCP scope while qualifying the actual reset fake elsewhere. Neither that linkage nor primitive tests establishes outbound protected command/MAC validation or live secure terminal reset.",
+        "held_qualification": "Actual project/helper compiler context and secure-wire/device qualification remain separate. The fourteen resolved OATH implementation scopes and terminal-reset contract remain intact.",
+        "reopen_when": "Linked fake/primitive source or project participation changes, or an exact independent secure-reset/wire result changes the test-oracle explanation; no project-value change is proposed here.",
+        "adjudication_owner": "Astra with the existing OATH test/project owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 5,
+      "candidate": "CORE-OTP-X008",
+      "run_qualified_facet": "core-001:CORE-OTP-X008#documentation",
+      "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+      "existing_completed_editor_decision": {
+        "record": "editing/applet-boundaries/outside-scope-paths.json",
+        "record_sha256": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd",
+        "json_pointer": "/19",
+        "original_decision": {
+          "module": "YubiOtp",
+          "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+          "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+          "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+          "before_git_HEAD_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+          "after_worktree_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+          "before_worktree_source_ledger_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+          "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+          "original_boundary_disposition": {
+            "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+            "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "raw_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+            "pinned_git_blob": "02b359e01bb6cfc338910ddb3507541400e3e86b",
+            "pinned_content_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+            "normalized_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+            "normalized_pin_equal": true,
+            "raw_pin_equal": true,
+            "read_scope": "complete file, including full callers/helpers/assertions and enclosing cleanup",
+            "unit_ids": [
+              "core-001:unit:73de73d0945fd38d"
+            ],
+            "candidates": [
+              "CORE-OTP-X008"
+            ],
+            "outcome": "READ-CANDIDATE-CONTEXT",
+            "semantic_observation": "Complete snapshot reconciles typed configurations, session operations, extension block/static signatures, slot/flag carriers and protected base members. There is no typed YubiOTP FIPS-mode query, legacy device-config or device-info method. Enum alias spelling in mask output reflects equal numeric bits, not extra update capabilities. Compiler binding remains unrun.",
+            "unchanged_reason": "Investigation-only assignment preserves product bytes; localized candidate facets await triage, a fresh editor and independent review.",
+            "review_status": "PENDING-INDEPENDENT-REVIEW",
+            "runtime_status": "NOT-EXECUTED"
+          }
+        },
+        "accepted_batch_scope_review": "editing/applet-boundaries/revision-2/review.md",
+        "review_sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "boundaries/YubiOtp/unchanged-paths.json",
+          "record_sha256": "7ae0974fba1a9bef5ffb84bac76b41a4e133b2197e2683b297dfaf7e26f5f4cc",
+          "json_pointer": "/64",
+          "row": {
+            "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+            "candidates": [
+              "CORE-OTP-X008"
+            ],
+            "disposition": "UNCHANGED",
+            "reason": "Complete snapshot reconciles typed configurations, session operations, extension block/static signatures, slot/flag carriers and protected base members. There is no typed YubiOTP FIPS-mode query, legacy device-config or device-info method. Enum alias spelling in mask output reflects equal numeric bits, not extra update capabilities. Compiler binding remains unrun.",
+            "owner": "YubiOTP future fresh editor; this worker owns records only",
+            "reopening_details": "candidates.md; flow-and-verification.md",
+            "precise_reopening_triggers": [
+              {
+                "candidate": "CORE-OTP-X008",
+                "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+              }
+            ],
+            "sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/5",
+      "source_identity": {
+        "inventory_raw_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+        "pinned_git_blob_from_inventory": "02b359e01bb6cfc338910ddb3507541400e3e86b",
+        "current_raw_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-OTP-X008",
+        "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+        "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+        "source_record": "boundaries/YubiOtp/unchanged-paths.json",
+        "proposal": "RETAIN the exact API snapshot and link the existing investigator UNCHANGED decision directly. Preserve the completed editor API-value hold; apply named-surface relocation qualifications in their authorized documentation owners, not by inventing snapshot members.",
+        "facet_reason": "The completed snapshot reconciliation finds typed configurations/session/extension/slot/flag carriers but no typed YubiOTP FIPS-mode query, legacy device-config or device-info method. Management's delegated GetDeviceInfo is a different named surface; equal enum-alias bits are not extra capabilities. X008's migration clarification requires this present/absent distinction, not an API change.",
+        "held_qualification": "Snapshot identity is not compiler overload binding, legacy-key compatibility, physical FIPS-mode evidence or successful modern/legacy execution.",
+        "reopen_when": "A named device-info, FIPS query or legacy configuration API is introduced/removed, or the modern/legacy gates and device qualification change; recheck the corresponding migration/reference statements.",
+        "adjudication_owner": "Astra with the existing YubiOTP public API/migration owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 6,
+      "candidate": "CORE-HSM-X007",
+      "run_qualified_facet": "core-001:CORE-HSM-X007#documentation",
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "existing_completed_editor_decision": {
+        "record": "editing/applet-boundaries/outside-scope-paths.json",
+        "record_sha256": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd",
+        "json_pointer": "/23",
+        "original_decision": {
+          "module": "YubiHsm",
+          "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+          "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+          "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+          "before_git_HEAD_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+          "after_worktree_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+          "before_worktree_source_ledger_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+          "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+          "original_boundary_disposition": {
+            "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+            "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+            "pinned_git_blob": "23c9c8dc4304e39910ee393a23a7e27fb22431ab",
+            "pinned_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+            "normalized_lf_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+            "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+            "line_count": 26,
+            "read_status": "READ-COMPLETE",
+            "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+            "candidate_ids": [
+              "CORE-HSM-X007"
+            ],
+            "authored_context": "Actual HSM/Core/Management/Cli.Shared/Cli.Commands references and Spectre/Hosting package participation. Compilation needs full project/helper context, no build conducted.",
+            "unit_ids": [
+              "core-001:unit:f2d244364ba202c5"
+            ],
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED"
+          }
+        },
+        "accepted_batch_scope_review": "editing/applet-boundaries/revision-2/review.md",
+        "review_sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "boundaries/YubiHsm/file-dispositions.json",
+          "record_sha256": "5566701bf63281b194662c195f8235ec0c4486689e74fe6a032e3eda5604c227",
+          "json_pointer": "/23",
+          "row": {
+            "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+            "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+            "pinned_git_blob": "23c9c8dc4304e39910ee393a23a7e27fb22431ab",
+            "pinned_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+            "normalized_lf_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+            "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+            "line_count": 26,
+            "read_status": "READ-COMPLETE",
+            "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+            "candidate_ids": [
+              "CORE-HSM-X007"
+            ],
+            "authored_context": "Actual HSM/Core/Management/Cli.Shared/Cli.Commands references and Spectre/Hosting package participation. Compilation needs full project/helper context, no build conducted.",
+            "unit_ids": [
+              "core-001:unit:f2d244364ba202c5"
+            ],
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/6",
+      "source_identity": {
+        "inventory_raw_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+        "pinned_git_blob_from_inventory": "23c9c8dc4304e39910ee393a23a7e27fb22431ab",
+        "current_raw_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-HSM-X007",
+        "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+        "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+        "source_record": "boundaries/YubiHsm/file-dispositions.json",
+        "proposal": "RETAIN the actual HSM/Core/Management/shared CLI references and Spectre/Hosting package participation; preserve the completed editor project hold/referral.",
+        "facet_reason": "The completed HSM source disposition identifies the real tool/helper project context required for compilation. X007's diagnostic input/output/dispatch/resource and exception-XML qualifications are caller/oracle concerns, not a missing dependency or reason to alter this project graph. Generic Core crypto metadata is not external HSM/connector authentication.",
+        "held_qualification": "Actual full tool/helper compilation remains an existing validation gate. No production-input/output safety, asymmetric dispatch repair or live HSM/connector result is inferred from project declarations.",
+        "reopen_when": "The tool/helper dependency/context or actual diagnostic caller behavior changes; recheck its source/profile/resource guidance without treating reference presence as execution proof.",
+        "adjudication_owner": "Astra with the existing HSM tool/project and validation owners"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 7,
+      "candidate": "CORE-HSM-X007",
+      "run_qualified_facet": "core-001:CORE-HSM-X007#documentation",
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+      "existing_completed_editor_decision": {
+        "record": "editing/applet-boundaries/outside-scope-paths.json",
+        "record_sha256": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd",
+        "json_pointer": "/27",
+        "original_decision": {
+          "module": "YubiHsm",
+          "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+          "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+          "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+          "before_git_HEAD_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+          "after_worktree_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+          "before_worktree_source_ledger_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+          "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+          "original_boundary_disposition": {
+            "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+            "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+            "pinned_git_blob": "026c2a2fe4c4f81dc81a3f65600e75007b4a3c18",
+            "pinned_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+            "normalized_lf_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+            "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+            "line_count": 42,
+            "read_status": "READ-COMPLETE",
+            "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+            "candidate_ids": [
+              "CORE-HSM-X007"
+            ],
+            "authored_context": ".NET 10, xUnit v2/traditional runner, hardware parallelism config and actual Tests.Shared/Core/HSM references. Metadata filtering and runner participation are not actual device execution.",
+            "unit_ids": [
+              "core-001:unit:38c5a121ce477d50"
+            ],
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED"
+          }
+        },
+        "accepted_batch_scope_review": "editing/applet-boundaries/revision-2/review.md",
+        "review_sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "boundaries/YubiHsm/file-dispositions.json",
+          "record_sha256": "5566701bf63281b194662c195f8235ec0c4486689e74fe6a032e3eda5604c227",
+          "json_pointer": "/42",
+          "row": {
+            "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+            "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+            "pinned_git_blob": "026c2a2fe4c4f81dc81a3f65600e75007b4a3c18",
+            "pinned_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+            "normalized_lf_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+            "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+            "line_count": 42,
+            "read_status": "READ-COMPLETE",
+            "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+            "candidate_ids": [
+              "CORE-HSM-X007"
+            ],
+            "authored_context": ".NET 10, xUnit v2/traditional runner, hardware parallelism config and actual Tests.Shared/Core/HSM references. Metadata filtering and runner participation are not actual device execution.",
+            "unit_ids": [
+              "core-001:unit:38c5a121ce477d50"
+            ],
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/7",
+      "source_identity": {
+        "inventory_raw_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+        "pinned_git_blob_from_inventory": "026c2a2fe4c4f81dc81a3f65600e75007b4a3c18",
+        "current_raw_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-HSM-X007",
+        "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+        "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+        "source_record": "boundaries/YubiHsm/file-dispositions.json",
+        "proposal": "RETAIN the .NET 10/xUnit v2 traditional-runner, hardware parallelism and actual Tests.Shared/Core/HSM reference configuration; preserve the completed editor hold/referral.",
+        "facet_reason": "The completed file disposition explicitly distinguishes this integration project's traditional xUnit v2 runner and hardware configuration from the v3/MTP unit project. X007's fixture/token/cleanup/assertion limits are not resolved by changing packages or runner metadata. Metadata filtering and runner participation do not establish device execution or persistent-state restoration.",
+        "held_qualification": "Use this real project context for the existing separate compilation gate; hardware/HSM/connector/native and exact cleanup outcomes stay qualified and unrun in this reconciliation.",
+        "reopen_when": "Runner/parallelism/shared-helper participation or the actual hardware fixture, cleanup and assertion contract changes; reconcile declared selection with actual retained execution counts separately.",
+        "adjudication_owner": "Astra with the existing HSM integration-test/project owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    },
+    {
+      "response_index": 8,
+      "candidate": "CORE-HSM-X007",
+      "run_qualified_facet": "core-001:CORE-HSM-X007#documentation",
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+      "existing_completed_editor_decision": {
+        "record": "editing/applet-boundaries/outside-scope-paths.json",
+        "record_sha256": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd",
+        "json_pointer": "/28",
+        "original_decision": {
+          "module": "YubiHsm",
+          "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+          "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+          "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+          "before_git_HEAD_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+          "after_worktree_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+          "before_worktree_source_ledger_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+          "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+          "original_boundary_disposition": {
+            "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+            "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+            "pinned_git_blob": "20e0c7065c5537fdf565f7116d5792e676980212",
+            "pinned_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+            "normalized_lf_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+            "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+            "line_count": 31,
+            "read_status": "READ-COMPLETE",
+            "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+            "candidate_ids": [
+              "CORE-HSM-X007"
+            ],
+            "authored_context": ".NET 10/xUnit v3 executable/MTP runner and actual shared/helper references; no direct traditional test SDK. Test-source inspection only.",
+            "unit_ids": [
+              "core-001:unit:2429245cbf9bcf06"
+            ],
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED"
+          }
+        },
+        "accepted_batch_scope_review": "editing/applet-boundaries/revision-2/review.md",
+        "review_sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760",
+        "limit": "Finished outside-owner hold/referral link, not independent configuration/data/API semantic acceptance."
+      },
+      "original_source_dispositions": [
+        {
+          "record": "boundaries/YubiHsm/file-dispositions.json",
+          "record_sha256": "5566701bf63281b194662c195f8235ec0c4486689e74fe6a032e3eda5604c227",
+          "json_pointer": "/52",
+          "row": {
+            "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+            "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+            "source_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+            "pinned_git_blob": "20e0c7065c5537fdf565f7116d5792e676980212",
+            "pinned_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+            "normalized_lf_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+            "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+            "line_count": 31,
+            "read_status": "READ-COMPLETE",
+            "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+            "candidate_ids": [
+              "CORE-HSM-X007"
+            ],
+            "authored_context": ".NET 10/xUnit v3 executable/MTP runner and actual shared/helper references; no direct traditional test SDK. Test-source inspection only.",
+            "unit_ids": [
+              "core-001:unit:2429245cbf9bcf06"
+            ],
+            "review_status": "INDEPENDENT-REVIEW-PENDING",
+            "validation_status": "VALID-NOT-CHECKED"
+          }
+        }
+      ],
+      "direct_response_link": "pf02-dispositions.json#/dispositions/8",
+      "source_identity": {
+        "inventory_raw_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+        "pinned_git_blob_from_inventory": "20e0c7065c5537fdf565f7116d5792e676980212",
+        "current_raw_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+        "unchanged_raw_bytes": true
+      },
+      "coordinator_retain_hold_referral_proposal": {
+        "candidate": "CORE-HSM-X007",
+        "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+        "finished_decision_record": "editing/applet-boundaries/outside-scope-paths.json",
+        "source_record": "boundaries/YubiHsm/file-dispositions.json",
+        "proposal": "RETAIN the .NET 10/xUnit v3 executable/MTP runner and actual shared/helper references, including the absence of a direct traditional test SDK; preserve the completed editor hold/referral.",
+        "facet_reason": "The completed HSM unit-project disposition supplies this concrete runner/context distinction. Its declaration is a compiler/test-host prerequisite, not proof of stronger independent KATs, all-failure cleanup or real-device behavior. X007's retained oracle/diagnostic facets remain; the retry-message mismatch is retracted and supplies no reason to change this project.",
+        "held_qualification": "Actual genuine unit-project compilation/execution remains separate. No test assertion, reference, SDK package or runner behavior changes are authorized to close the accounting join.",
+        "reopen_when": "MTP/runner/helper/project context or the corresponding real assertion/cleanup contract changes; preserve the HSM retry-message retraction and original applet uncertainties.",
+        "adjudication_owner": "Astra with the existing HSM unit-test/project owner"
+      },
+      "record_gap_state": "DIRECT-FINISHED-HOLD-OR-REFERRAL-LINK-PROVIDED; 9-path accounting gap addressed",
+      "Astra_adjudication": "PENDING for the facet-specific coordinator proposal; no authorization inferred",
+      "new_product_config_or_API_changes": false,
+      "new_source_read_or_bug": false
+    }
+  ],
+  "scope": "Explicit final retain/hold/referral accounting from completed source and editor records. Proposal reasons are facet-specific; source reads and immutable values remain intact.",
+  "acceptance_limit": "This records owner addresses the link/proposal gap. Astra adjudicates coordinator proposals; final evidence reviewer controls final acceptance. No blanket retained-path PASS."
+}

@@ -294,6 +294,8 @@ internal static partial class NativeMethods
     */
     [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    // Registration retains the native buffer beyond this call: any use of this array seam needs a persistent
+    // pin and rooted context until callbacks drain. Active FIDO input uses the bridge's native-owned buffer.
     public static partial void IOHIDDeviceRegisterInputReportCallback(
         IntPtr device, // IOHIDDeviceRef
         byte[] report, // uint8_t*

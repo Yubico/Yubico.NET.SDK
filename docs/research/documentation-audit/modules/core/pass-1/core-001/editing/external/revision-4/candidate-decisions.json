@@ -1,0 +1,497 @@
+{
+  "inherited": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/candidate-decisions.json",
+    "bytes": 3904,
+    "sha256": "99d0d212eb5475a9577702b474c8a54a28e446634b642167f81f62e62bf7e905"
+  },
+  "ids": [
+    "CORE-A-C013",
+    "FPT-013",
+    "management-001:MGMT-XREF-003"
+  ],
+  "reason": "R1 completes the existing released authorization D facet on previously retained passages; no new family, canonical ID or authorization policy.",
+  "original_local_record": {
+    "local_id": "CORE-A-C013",
+    "original_definition": {
+      "id": "CORE-A-C013",
+      "status": "candidate",
+      "accepted_finding_id": null,
+      "title": "Shared authorization and placeholder prose differ from source",
+      "classification": [
+        "documentation"
+      ],
+      "citations": [
+        {
+          "path": "src/Tests.Shared/CLAUDE.md",
+          "first_line": 73,
+          "last_line": 109
+        },
+        {
+          "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+          "first_line": 17,
+          "last_line": 50
+        },
+        {
+          "path": "src/Tests.Shared/YubiKeyTestState.cs",
+          "first_line": 46,
+          "last_line": 54
+        },
+        {
+          "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+          "first_line": 175,
+          "last_line": 308
+        }
+      ],
+      "test_oracle_paths": [],
+      "reopening_paths": [
+        "src/Tests.Shared/CLAUDE.md",
+        "src/Tests.Shared/README.md",
+        "src/Tests.Shared/IYubiKeyFilter.cs",
+        "src/Tests.Shared/YubiKeyTestState.cs"
+      ],
+      "exact_reopening_trigger": "Fixture initialization, authorization order, live-versus-cached metadata, placeholder binding, or no-authorized-device policy changes.",
+      "inherited_aliases": [
+        "management-001:MGMT-XREF-003"
+      ],
+      "counting": "nonadditive where inherited aliases identify the same question",
+      "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+      "implementation_state": "unchanged; no runtime closure implied",
+      "execution_state": "source/assertion inspection only; no new SDK or physical run",
+      "detail": "investigation-A.md#local-candidates-and-reopening-map"
+    },
+    "completed_report": "investigation-A.md",
+    "qualified_source_register": "investigation/A/sources/notes.md",
+    "latest_authority_addenda": [],
+    "continuation_scope": null,
+    "continuation_anchors": [],
+    "evidence_unit_refs": [
+      {
+        "unit_id": "core-001:unit:152de45877baf309",
+        "relation": "direct"
+      },
+      {
+        "unit_id": "core-001:unit:4f3c7b5aad361aa3",
+        "relation": "direct"
+      },
+      {
+        "unit_id": "core-001:unit:95aea68013140589",
+        "relation": "direct"
+      },
+      {
+        "unit_id": "core-001:unit:a208d0ef2f4384b9",
+        "relation": "direct"
+      }
+    ],
+    "documentation_surface_refs": [
+      "src/Tests.Shared/CLAUDE.md",
+      "src/Tests.Shared/IYubiKeyFilter.cs",
+      "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "src/Tests.Shared/README.md",
+      "src/Tests.Shared/YubiKeyTestState.cs"
+    ],
+    "disposition": {
+      "documentation": "Proposed; unchanged product, fresh editor/reviewer pending",
+      "implementation": "Unchanged; concerns and intended policy remain distinct",
+      "independent_source_review": "Future fresh full-unit and original-citation acceptance",
+      "runtime_native_hardware": "No new execution in triage or family investigation"
+    },
+    "original_index_fields": null
+  },
+  "original_inherited_keys": [
+    "management-001:MGMT-XREF-003"
+  ],
+  "current_path_updates": [
+    {
+      "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "decision": "EDIT",
+      "reason": "EDIT R1 completion of CORE-A-C013/FPT-013: class and constructor XML reflect empty serials AND !AllowUnknownSerials as the only hard-exit condition; IsDeviceAllowed is Boolean. Harness filtering/binding and pre-authorization identification are separate. Attach this formerly generic retained path explicitly to the existing facet.",
+      "source_anchors": [
+        "AllowList.cs reviewed25-27,44-45; constructor47-66 condition55; Boolean predicate84-85"
+      ],
+      "candidates": [
+        {
+          "local_id": "CORE-A-C013",
+          "proposal_id": "FPT-013",
+          "facets": [
+            "D",
+            "B"
+          ],
+          "relation": "R1 explicit retained-path completion, not a claim that the original index named this path",
+          "inherited_association_keys": [
+            "management-001:MGMT-XREF-003"
+          ],
+          "original_definition": {
+            "id": "CORE-A-C013",
+            "status": "candidate",
+            "accepted_finding_id": null,
+            "title": "Shared authorization and placeholder prose differ from source",
+            "classification": [
+              "documentation"
+            ],
+            "citations": [
+              {
+                "path": "src/Tests.Shared/CLAUDE.md",
+                "first_line": 73,
+                "last_line": 109
+              },
+              {
+                "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+                "first_line": 17,
+                "last_line": 50
+              },
+              {
+                "path": "src/Tests.Shared/YubiKeyTestState.cs",
+                "first_line": 46,
+                "last_line": 54
+              },
+              {
+                "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+                "first_line": 175,
+                "last_line": 308
+              }
+            ],
+            "test_oracle_paths": [],
+            "reopening_paths": [
+              "src/Tests.Shared/CLAUDE.md",
+              "src/Tests.Shared/README.md",
+              "src/Tests.Shared/IYubiKeyFilter.cs",
+              "src/Tests.Shared/YubiKeyTestState.cs"
+            ],
+            "exact_reopening_trigger": "Fixture initialization, authorization order, live-versus-cached metadata, placeholder binding, or no-authorized-device policy changes.",
+            "inherited_aliases": [
+              "management-001:MGMT-XREF-003"
+            ],
+            "counting": "nonadditive where inherited aliases identify the same question",
+            "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+            "implementation_state": "unchanged; no runtime closure implied",
+            "execution_state": "source/assertion inspection only; no new SDK or physical run",
+            "detail": "investigation-A.md#local-candidates-and-reopening-map"
+          },
+          "source_anchors": [
+            "AllowList.cs reviewed25-27,44-45; constructor47-66 condition55; Boolean predicate84-85"
+          ],
+          "original_shared_units": [
+            {
+              "unit_id": "core-001:unit:72751f15917dc3bf",
+              "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+              "first_line": 1,
+              "last_line": 33,
+              "label": "src/Tests.Shared/Infrastructure/AllowList.cs",
+              "source_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:c1be8d9e9a606c66",
+              "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+              "first_line": 34,
+              "last_line": 35,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList",
+              "source_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:1d8b25dea198953a",
+              "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+              "first_line": 35,
+              "last_line": 36,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList :: private readonly HashSet<int> _allowedSerials;",
+              "source_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:26ab0adbe1e72b2b",
+              "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+              "first_line": 36,
+              "last_line": 66,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList :: public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null) ",
+              "source_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:38dd0a27a5efcc0d",
+              "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+              "first_line": 66,
+              "last_line": 77,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList :: public bool AllowUnknownSerials ",
+              "source_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:d0757dfa453abbeb",
+              "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+              "first_line": 77,
+              "last_line": 85,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList :: public bool IsDeviceAllowed(int? serialNumber) => serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);",
+              "source_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+              "investigation_owner": "A",
+              "investigation_stage": "A",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "decision": "EDIT",
+      "reason": "EDIT R1 completion of CORE-A-C013/FPT-013: XML JSON example replaces unread EnableHardFail with real AllowUnknownSerials=false and explains actual keys/serial-less scope. Runtime error-message raw string still advertises EnableHardFail and is an explicit non-D output handoff. No configuration value, runtime literal or constructor changed.",
+      "source_anchors": [
+        "AppSettingsAllowListProvider.cs reviewed24-32; keys37-39; GetList58-73; AllowUnknownSerials76-91; protected runtime example98-134"
+      ],
+      "candidates": [
+        {
+          "local_id": "CORE-A-C013",
+          "proposal_id": "FPT-013",
+          "facets": [
+            "D",
+            "B"
+          ],
+          "relation": "R1 explicit retained-path completion, not a claim that the original index named this path",
+          "inherited_association_keys": [
+            "management-001:MGMT-XREF-003"
+          ],
+          "original_definition": {
+            "id": "CORE-A-C013",
+            "status": "candidate",
+            "accepted_finding_id": null,
+            "title": "Shared authorization and placeholder prose differ from source",
+            "classification": [
+              "documentation"
+            ],
+            "citations": [
+              {
+                "path": "src/Tests.Shared/CLAUDE.md",
+                "first_line": 73,
+                "last_line": 109
+              },
+              {
+                "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+                "first_line": 17,
+                "last_line": 50
+              },
+              {
+                "path": "src/Tests.Shared/YubiKeyTestState.cs",
+                "first_line": 46,
+                "last_line": 54
+              },
+              {
+                "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+                "first_line": 175,
+                "last_line": 308
+              }
+            ],
+            "test_oracle_paths": [],
+            "reopening_paths": [
+              "src/Tests.Shared/CLAUDE.md",
+              "src/Tests.Shared/README.md",
+              "src/Tests.Shared/IYubiKeyFilter.cs",
+              "src/Tests.Shared/YubiKeyTestState.cs"
+            ],
+            "exact_reopening_trigger": "Fixture initialization, authorization order, live-versus-cached metadata, placeholder binding, or no-authorized-device policy changes.",
+            "inherited_aliases": [
+              "management-001:MGMT-XREF-003"
+            ],
+            "counting": "nonadditive where inherited aliases identify the same question",
+            "documentation_state": "proposed; no product edits; fresh editor/reviewer required",
+            "implementation_state": "unchanged; no runtime closure implied",
+            "execution_state": "source/assertion inspection only; no new SDK or physical run",
+            "detail": "investigation-A.md#local-candidates-and-reopening-map"
+          },
+          "source_anchors": [
+            "AppSettingsAllowListProvider.cs reviewed24-32; keys37-39; GetList58-73; AllowUnknownSerials76-91; protected runtime example98-134"
+          ],
+          "original_shared_units": [
+            {
+              "unit_id": "core-001:unit:16f5241504c7c271",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 1,
+              "last_line": 34,
+              "label": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:d1c0c4e1bce4bba7",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 35,
+              "last_line": 36,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:b96c5320ab5191d1",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 36,
+              "last_line": 37,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: private const string ConfigSection = ;",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:f9dfe6d98dd6cbdc",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 37,
+              "last_line": 38,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: private const string AllowedSerialsKey = ;",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:d618b410edf188d9",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 38,
+              "last_line": 39,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: private const string AllowUnknownSerialsKey = ;",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:e6fa1d4492b8835a",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 39,
+              "last_line": 41,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: private readonly IConfiguration _configuration;",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:4f390c1c4878c306",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 41,
+              "last_line": 52,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: public AppSettingsAllowListProvider(IConfiguration? configuration = null) ",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:fb0606e85ed82688",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 52,
+              "last_line": 73,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: public IReadOnlyList<int> GetList() ",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:b25838a6dde8dd23",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 73,
+              "last_line": 91,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: public bool AllowUnknownSerials ",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:1bbf416b3eb81e76",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 91,
+              "last_line": 135,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: public string OnInvalidInputErrorMessage() ",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            },
+            {
+              "unit_id": "core-001:unit:c2ebb6712bd34a32",
+              "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+              "first_line": 135,
+              "last_line": 146,
+              "label": "Yubico.YubiKit.Tests.Shared.Infrastructure.AppSettingsAllowListProvider :: private static IConfiguration BuildDefaultConfiguration() ",
+              "source_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+              "investigation_owner": "B",
+              "investigation_stage": "B4-windows-support",
+              "future_editor_owner": "SHARED",
+              "status": "UNREAD"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "decision": "EDIT",
+      "reason": "EDIT R1 completion of CORE-A-C013/FPT-013: overview and Known Limitations now distinguish empty-configuration exit with unknown serials disabled, filtered rejected/read-failed views, and empty-fixture SkipException at binding. No authorization policy or executable output change.",
+      "source_anchors": [
+        "Reviewed README9,333-334; current corrected overview/Known Limitations",
+        "YubiKeyTestInfrastructure.cs:203-206,216-260,263-290; YubiKeyTestState.cs:315-334"
+      ],
+      "candidates": [
+        {
+          "local_id": "CORE-A-C013",
+          "proposal_id": "FPT-013"
+        },
+        {
+          "local_id": "CORE-A-C014",
+          "proposal_id": "FPT-014"
+        },
+        {
+          "local_id": "CORE-A-C009",
+          "proposal_id": "FPT-009",
+          "relation": "editor-explicit adjacent dependency"
+        },
+        {
+          "local_id": "CORE-A-C010",
+          "proposal_id": "FPT-010",
+          "relation": "editor-explicit adjacent dependency"
+        },
+        {
+          "local_id": "CORE-A-C011",
+          "proposal_id": "FPT-011",
+          "relation": "editor-explicit adjacent dependency"
+        }
+      ]
+    }
+  ],
+  "R2_overlay": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/example-classification-overlay.json",
+    "bytes": 24600,
+    "sha256": "fae1694ca3434fb18ff84f6ca6c8e2965c1e358cc7b25bd8fd2ac08cb3b2c84e"
+  },
+  "review_state": "Corrections source-verified by editor; focused independent re-review pending, not full acceptance inherited from the earlier review."
+}

@@ -25,8 +25,11 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// or <see cref="ForHexKey"/> to create pre-configured options for common credential types.
 /// </para>
 /// <para>
-/// For module-specific presets (FIDO2, OpenPGP, OATH), see the credential options classes
-/// in each module's <c>Credentials</c> namespace.
+/// These are input presets, rather than applet validation rules. Select options appropriate to
+/// the operation's character, encoded-byte, and credential requirements.
+/// In the console reader, interactive limits include hex separators and count UTF-16 code units.
+/// Redirected hex input bypasses MinLength, MaxLength, and CharacterFilter, then checks hex syntax
+/// and ExpectedByteLength. ExpectedByteLength counts decoded bytes, excluding separators.
 /// </para>
 /// </remarks>
 public sealed record CredentialReaderOptions
@@ -42,12 +45,12 @@ public sealed record CredentialReaderOptions
     public string ConfirmPrompt { get; init; } = "Confirm credential: ";
 
     /// <summary>
-    /// Gets or sets the minimum allowed credential length.
+    /// Gets or sets the minimum input length in UTF-16 code units before text encoding.
     /// </summary>
     public int MinLength { get; init; } = 1;
 
     /// <summary>
-    /// Gets or sets the maximum allowed credential length.
+    /// Gets or sets the maximum input length in UTF-16 code units before text encoding.
     /// </summary>
     public int MaxLength { get; init; } = 128;
 
@@ -58,13 +61,14 @@ public sealed record CredentialReaderOptions
 
     /// <summary>
     /// Gets or sets a filter function that determines which characters are allowed.
-    /// Returns <c>true</c> to accept the character, <c>false</c> to reject it.
+    /// Returns <c>true</c> to accept a UTF-16 code unit. The console reader ignores disallowed
+    /// interactive characters but rejects a redirected text line containing one.
     /// </summary>
     public Func<char, bool>? CharacterFilter { get; init; }
 
     /// <summary>
     /// Gets or sets the encoding used to convert characters to bytes.
-    /// Defaults to UTF-8.
+    /// Defaults to UTF-8 with replacement fallback for malformed surrogate input.
     /// </summary>
     public Encoding Encoding { get; init; } = Encoding.UTF8;
 
@@ -77,7 +81,8 @@ public sealed record CredentialReaderOptions
 
     /// <summary>
     /// Gets or sets the expected byte length when <see cref="IsHexMode"/> is <c>true</c>.
-    /// A value of <c>null</c> means any length is accepted.
+    /// A value of <c>null</c> skips the decoded-length check. Empty decoded input currently fails
+    /// when the console reader allocates its positive-sized result owner.
     /// </summary>
     public int? ExpectedByteLength { get; init; }
 

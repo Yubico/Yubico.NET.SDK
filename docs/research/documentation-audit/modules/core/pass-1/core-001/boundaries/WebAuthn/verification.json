@@ -1,0 +1,30 @@
+{
+  "kind": "investigator-static-record-assembly",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "packet_sha256": "25e426f06bb8dd19af1053a62644133c45f7e997f2ee7dd6dfc055292de92979",
+  "assigned_units": 265,
+  "selected_paths": 95,
+  "candidate_paths": 129,
+  "inherited_keys": 31,
+  "local_concern_groups": 12,
+  "disposition_counts": {
+    "READ-CLEAN": 177,
+    "READ-CANDIDATE": 7,
+    "READ-RELATED-CANDIDATE-CONTEXT": 80,
+    "READ-EXCLUSION": 1
+  },
+  "clean_nominees": 14,
+  "unread_units": 0,
+  "independent_content_review": false,
+  "source_investigation": "COMPLETE-WITH-QUALIFICATIONS",
+  "accepted_core_ids": 0,
+  "product_edits": 0,
+  "sdk_builds": 0,
+  "sdk_tests": 0,
+  "native_device_crypto_experiments": 0,
+  "formatter": 0,
+  "git_index_ref_commit_push": 0,
+  "subagents": 0,
+  "scratch": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/BOUNDARY-WebAuthn",
+  "qualification": "No new WebAuthn ceremony qualification; independent review/triage/sampling/validation remain pending"
+}

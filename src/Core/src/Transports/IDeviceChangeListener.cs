@@ -29,11 +29,17 @@ public interface IDeviceChangeListener : IDisposable
     DeviceListenerStatus Status { get; }
 
     /// <summary>Establishes baseline state and begins monitoring subsequent changes.</summary>
-    /// <remarks>Set <see cref="Changed"/> first. Check <see cref="Status"/> after starting.</remarks>
-    /// <exception cref="ObjectDisposedException">The listener has been disposed.</exception>
+    /// <remarks>
+    ///     Set <see cref="Changed"/> first and check <see cref="Status"/> after starting. Starting a disposed
+    ///     instance is unsupported; create a new listener. Implementations do not uniformly throw on that path.
+    /// </remarks>
     void Start();
 
-    /// <summary>Stops monitoring and releases monitoring resources.</summary>
-    /// <remarks>Call outside the <see cref="Changed"/> callback to avoid waiting on that callback.</remarks>
+    /// <summary>Requests monitoring shutdown and platform resource cleanup.</summary>
+    /// <remarks>
+    ///     Call outside the <see cref="Changed"/> callback to avoid waiting on that callback. Platform timeout
+    ///     or native-unregister failure can leave ownership unresolved; a returned call or diagnostic status
+    ///     alone is not a portable proof of callback drain and native release.
+    /// </remarks>
     void Stop();
 }

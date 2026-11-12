@@ -6,8 +6,8 @@ This document defines the SDK's in-process ownership contract:
 > this process. A connection hosts at most one live session.
 > Connections and sessions are reused sequentially; overlapping ownership attempts throw.
 
-Cross-process contention is outside this registry's scope. Another process holding PC/SC may still
-surface an ordinary platform `SCardException` such as `SCARD_E_SHARING_VIOLATION`.
+Cross-process contention is outside this registry's scope. Built-in PC/SC strict-exclusive open maps a
+sharing violation to `ConnectionInUseException`; other platform failures can surface as `SCardException`.
 
 ## Why connection ownership is enforced
 
@@ -36,24 +36,28 @@ enforcement is bounded by the known-member scope described below.
 A composite ID describes the evidence tier that formed a group and can change between scans. Member
 IDs (PC/SC reader names and HID paths) are the stable ownership records.
 
-When discovery proves that interfaces belong to one flat `YubiKeyDevice`, it stores the interfaces in
-optional SmartCard, HID FIDO, and HID OTP slots with one sorted lease scope. Opening any slot atomically
-claims all IDs in that scope. Therefore:
+When discovery groups interfaces into one flat `YubiKeyDevice`, it stores the interfaces in
+optional SmartCard, HID FIDO, and HID OTP slots with one sorted lease scope. Opening any slot acquires
+the member claims in order before native open, rolling back earlier claims if acquisition fails. Therefore:
 
 - a second connection through the same interface throws `ConnectionInUseException`;
 - a second connection through another known member interface throws before native open;
-- disposing the first connection releases every member claim, in reverse acquisition order;
+- confirmed teardown releases the member claims; uncertain built-in native release can retain them;
 - standalone records retain a one-element scope and behave as before;
 - failed or canceled multi-member acquisition rolls back every earlier claim.
 
 Acquisition sorts IDs ordinally and removes duplicates. Racing connects use the same order, admit one
 winner, and do not deadlock. A connection never waits for another live connection to end.
 
+An earlier member's discovery read can still delay acquisition before a later held member is checked.
+The eventual live-connection refusal is not a guarantee of immediate rejection at method invocation;
+cancellation can end that discovery wait and roll back claims already acquired.
+
 ### Grouping bound
 
-Physical-device exclusivity is only as strong as discovery's evidence. When discovery cannot prove
-that standalone records belong to one key, it does not guess. Each record then has a one-element lease
-scope, so protection degrades conservatively to per-interface exclusion. See
+Physical-device exclusivity is only as strong as discovery's evidence. Separate records each have a
+one-element lease scope, reducing protection to per-interface exclusion. PID-completeness grouping also
+has a complementary-partials bound: a grouped record can contain slots from different same-PID keys. See
 [Device Discovery Guarantees](device-discovery-guarantees.md).
 
 The same bound applies to `YubiKeyManager.Find…Async(interfaces: ...)`: each returned `IYubiKey` is a scoped
@@ -106,7 +110,17 @@ borrow the connection and never dispose it. Convenience `IYubiKey.Create<App>Ses
 a hidden connection and call `OwnConnection()`, transferring that connection's lifetime to the returned
 session.
 
-`DisposalGate` tears down the physical connection before releasing its registry lease. Disposal runs
+For the generic `CreateSessionOverTransportAsync` callback helper, successful results need an explicit
+connection owner too. The helper cleans up an open when the callback fails; after success, it cannot
+infer that an arbitrary returned object owns the connection. Returning only a directly created borrowed
+session loses deterministic ownership unless the result also exposes/owns and disposes that connection.
+Prefer the applet/raw convenience factories or an explicit result owner with session-before-connection cleanup.
+
+`DisposalGate` sequences connection teardown before registry release. Built-in native owners distinguish
+terminal managed work, drained references, and proven physical release; unknown release retains the
+claim. A custom connection's successful `Dispose` supplies only that implementation's guarantee, and
+the pinned Windows HID compatibility route can defer actual SafeHandle close while native work holds
+a reference. Do not equate every managed disposal return with native release. Disposal runs
 once; all sync and async disposal callers observe the same completion and exception. Sessions have no
 finalizer recovery. Some built-in connections request best-effort native finalizer cleanup; it is not a
 guarantee of timely teardown or lease release. A leaked connection can retain the physical-device lease
@@ -166,16 +180,25 @@ first operation's next exchange to be refused. Each admitted exchange stays inta
 ordering or all-or-nothing guarantee spans exchanges. Callers must await each public operation before
 starting the next one on the same session.
 
+Session disposal drains the admitted exchange, not every remaining step of that public workflow.
+Post-exchange parsing, cache updates, later exchanges, and application callback work need the caller's
+complete awaited scope. Finish the operation before disposal. A callback must neither dispose its own
+session nor wait for a disposal that needs the callback to return.
+
 A token already canceled at entry throws before the guard is claimed. Once claimed, the logical
 exchange receives `CancellationToken.None` for constituent transmits so caller cancellation cannot
 interrupt APDU chaining, CTAP/OTP frames, or SCP state midway. Cancellation semantics therefore differ by
 protocol. A PC/SC or SCP exchange observes the caller token only at admission: if the token is canceled
 afterwards, the admitted exchange still runs to completion and returns its response or failure rather
 than `OperationCanceledException`. During a FIDO HID keep-alive, the caller
-token can signal `CTAPHID_CANCEL`; the protocol waits for a terminal response and drains its frames
-before reporting cancellation when that response is valid. A CTAP success (`0x00`) that arrives after
-the cancel is returned rather than discarded: the authenticator completed the work, and CTAP 2.3
-§11.2.9.1.5 only promises `CTAP2_ERR_KEEPALIVE_CANCEL` for a request that was actually cancelled. During an OTP HID touch wait, the caller
+token can signal `CTAPHID_CANCEL` after observing a keep-alive; the protocol then waits for the
+original terminal response and drains its frames. CANCEL has no response of its own. Core currently
+returns a late success payload beginning with `0x00` when the original command byte is unencoded CBOR
+`0x10`. An encoded `0x90` request can correlate with the terminal response but currently misses that
+success classification and can surface cancellation instead. This normalization gap remains separate
+from whether the authenticator actually canceled the request and from the no-response CANCEL rule.
+With no further report, the
+wait can remain pending indefinitely. During an OTP HID touch wait, the caller
 token can trigger a dummy-report reset;
 reuse requires that reset to succeed. Neither signal rolls back work already sent. A failed partial
 APDU exchange or failed OTP reset requires disposing and reopening the connection. The guard resets
@@ -192,10 +215,10 @@ What the drain leaves behind differs by protocol:
   exchange succeeds, a borrowed connection remains usable by the next session.
 - A FIDO HID disposal that finds no admitted exchange does not touch a borrowed connection, which remains
   usable by the next session.
-- If a FIDO HID exchange is admitted when disposal begins on the built-in macOS connection, disposal
+- If a FIDO HID exchange is admitted when disposal begins on the built-in macOS/Linux connection, disposal
   terminally wakes that connection's input so the drain cannot wait indefinitely for a report. The wake
   does not dispose the connection, but it may leave it unusable, even when the exchange finishes
-  concurrently with the wake. Other built-in FIDO HID connections receive no wake, and their drain waits
+  concurrently with the wake. Windows/custom compatibility connections receive no equivalent wake, and their drain waits
   for the exchange's native I/O.
 
 Treat a FIDO HID disposal that began while an exchange was active like a failed partial exchange: dispose
@@ -215,7 +238,8 @@ the deliberate tradeoff for never abandoning a stateful exchange halfway through
   option, owns in-process admission.
 - Windows OTP HID feature reports use `DESIRED_ACCESS.NONE`; keyboard collections reject ordinary
   read/write access.
-- Windows FIDO HID read/write access requires elevation.
+- Windows FIDO HID read/write access may require elevation under the host's access policy. Enumeration
+  metadata alone does not establish that a report handle can be opened or used.
 - Cross-process PC/SC contention is not converted into an SDK transport retry.
 
 ## Invariants and pinning tests
@@ -240,12 +264,17 @@ the deliberate tradeoff for never abandoning a stateful exchange halfway through
 - In-process only; other processes are governed by platform APIs.
 - Admission never waits for a live connection or active protocol exchange; only disposal drains an
   admitted exchange.
-- Conservative discovery may leave ungrouped interface records with independent one-element scopes.
-- Hotplug exception type is unspecified; failure must be bounded and must not strand the lease.
+- Separate discovery records have independent member scopes; PID-only grouping retains its G2 bound.
+- Hotplug exception type is unspecified. Native completion and release may remain unbounded; uncertain
+  cleanup is not permission to release a claim or reopen the interface.
 
 ## Troubleshooting: wedged macOS OTP HID
 
-If macOS OTP HID reports `IOHIDDeviceGetReport = 0xE00002E2` (`kIOReturnNotOpen`) and OTP interfaces
+If macOS OTP HID reports `IOHIDDeviceGetReport = 0xE00002E2` (`kIOReturnNotPermitted`) and OTP interfaces
 appear as standalone `hid:...` records, verify independently with `ykman --device <serial> otp info`.
 Do not truncate that command's output: it may otherwise continue over CCID and hide the HID failure.
-Replug the key first; restart the host only if replugging does not clear the fault.
+Check host privacy/access policy as well as device state. Apple's inspected IOHID implementation can
+return NotPermitted when required authorization is denied; the code alone does not identify that as
+the cause of every failure. `kIOReturnNotOpen` is the different value `0xE00002CD`. The retained numeric
+error belongs to the historical observation; correcting its name does not diagnose the original fault.
+Replugging can help a device-state fault, but cannot substitute for required host authorization.

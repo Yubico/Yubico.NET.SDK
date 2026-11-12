@@ -24,8 +24,8 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests;
 
 /// <summary>
 ///     WebAuthn forwards its session creation options to the underlying CTAP2 session and adds no independent
-///     transport logic. These tests prove the pass-through: WebAuthn sees the CTAP2 default (HID FIDO first),
-///     honors an explicit override, and surfaces the CTAP2 validation errors unchanged.
+///     transport selection in the inspected factory. These tests check selected connection types and
+///     pre-connect validation errors. The fake throws at Connect, before native open or CTAP initialization.
 /// </summary>
 public class IYubiKeyExtensionsTransportTests
 {
@@ -66,7 +66,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Null(device.RequestedConnection);
     }
 
-    // Default both transports -> HID FIDO (the CTAP2 default), proving WebAuthn adds no transport logic.
+    // With both transports exposed, this route requests HID FIDO, matching the CTAP2 default.
     [Fact]
     public async Task CreateWebAuthnClientAsync_DefaultBothTransports_PicksHidFido()
     {
@@ -78,7 +78,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
     }
 
-    // Default fallback: first choice (HID FIDO) absent -> SmartCard (proves the forwarded HidFido->SmartCard order).
+    // With HID FIDO absent, selection requests SmartCard; this is not retry after an opening failure.
     [Fact]
     public async Task CreateWebAuthnClientAsync_DefaultSmartCardOnly_FallsBackToSmartCard()
     {

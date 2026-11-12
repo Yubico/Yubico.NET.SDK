@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)../../../../../../../../Directory.Build.props" />
+  <PropertyGroup>
+    <AuditValidationWorkspace>/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs</AuditValidationWorkspace>
+    <BaseIntermediateOutputPath>$(AuditValidationWorkspace)/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(AuditValidationWorkspace)/$(MSBuildProjectName)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,151 @@
+{
+  "result": "PASS",
+  "completed": {
+    "total": 12022,
+    "scope": {
+      "external": 3002,
+      "Core": 9020
+    },
+    "scope_by_assignment": {
+      "primary": {
+        "external": 1380,
+        "Core": 8939
+      },
+      "shared": {
+        "external": 1622,
+        "Core": 81
+      }
+    },
+    "primary_shared": {
+      "primary": {
+        "read-candidate-context": 1173,
+        "read-clean": 7559,
+        "read-candidate": 1309,
+        "read-context": 267,
+        "read-related-context": 5,
+        "read-historical-exclusion": 3,
+        "read-exclusion": 2,
+        "read-source-qualified": 1
+      },
+      "shared": {
+        "read-candidate": 263,
+        "read-clean": 820,
+        "read-related-context": 366,
+        "read-historical-qualified": 158,
+        "read-candidate-context": 85,
+        "read-historical-context": 6,
+        "read-exclusion": 5
+      }
+    },
+    "dispositions": {
+      "read-candidate-context": 1258,
+      "read-clean": 8379,
+      "read-candidate": 1572,
+      "read-related-context": 371,
+      "read-context": 267,
+      "read-historical-qualified": 158,
+      "read-historical-context": 6,
+      "read-historical-exclusion": 3,
+      "read-exclusion": 7,
+      "read-source-qualified": 1
+    },
+    "category": {
+      "narrative-section-with-complete-examples": {
+        "read-candidate-context": 111,
+        "read-clean": 287,
+        "read-candidate": 148,
+        "read-historical-qualified": 158,
+        "read-related-context": 138,
+        "read-historical-context": 6,
+        "read-exclusion": 4
+      },
+      "member-contract-and-implementation": {
+        "read-clean": 6285,
+        "read-candidate": 1109,
+        "read-related-context": 132,
+        "read-candidate-context": 829,
+        "read-context": 193,
+        "read-source-qualified": 1
+      },
+      "type-contract": {
+        "read-clean": 767,
+        "read-candidate": 95,
+        "read-candidate-context": 94,
+        "read-related-context": 37,
+        "read-context": 55
+      },
+      "source-context-and-explanations": {
+        "read-candidate-context": 178,
+        "read-clean": 549,
+        "read-related-context": 23,
+        "read-candidate": 112,
+        "read-context": 18,
+        "read-historical-exclusion": 3,
+        "read-exclusion": 1
+      },
+      "enum-value": {
+        "read-clean": 429,
+        "read-candidate-context": 41,
+        "read-candidate": 88,
+        "read-related-context": 2
+      },
+      "derived-diagram": {
+        "read-clean": 7
+      },
+      "whole-source-context-parser-limit": {
+        "read-candidate": 2
+      },
+      "configuration-data-or-support-contract": {
+        "read-clean": 48,
+        "read-candidate": 11,
+        "read-context": 1,
+        "read-related-context": 5,
+        "read-exclusion": 1
+      },
+      "structured-map-entry": {
+        "read-related-context": 34,
+        "read-candidate": 7,
+        "read-candidate-context": 5,
+        "read-clean": 7,
+        "read-exclusion": 1
+      }
+    }
+  },
+  "remaining": {
+    "total": 2022,
+    "scope": {
+      "external": 2022
+    },
+    "scope_by_assignment": {
+      "primary": {
+        "external": 2022
+      }
+    },
+    "primary_shared": {
+      "primary": {
+        "pending-completed-return": 2022
+      }
+    },
+    "dispositions": {
+      "pending-completed-return": 2022
+    },
+    "category": {
+      "member-contract-and-implementation": {
+        "pending-completed-return": 1452
+      },
+      "narrative-section-with-complete-examples": {
+        "pending-completed-return": 237
+      },
+      "source-context-and-explanations": {
+        "pending-completed-return": 220
+      },
+      "type-contract": {
+        "pending-completed-return": 80
+      },
+      "configuration-data-or-support-contract": {
+        "pending-completed-return": 33
+      }
+    }
+  },
+  "current_source_paths_checked": 574
+}

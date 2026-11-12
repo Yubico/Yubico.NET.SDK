@@ -1,0 +1,77 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "incoming_pin": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "original_campaign_pin": "f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa",
+  "source_run": "docs/research/documentation-audit/integrations/core-upstream-20261111",
+  "reuse": [
+    {
+      "source": "validation/run-command-v2.py",
+      "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15",
+      "algorithm": "Unchanged process-session/subreaper ownership, bounded group stop, stream drain, immediate retention, atomic primary receipt and external durable fallback journal.",
+      "adapter": "validation/run-command.py",
+      "adaptations": [
+        "Set HERE to Core validation; set ROOT explicitly using Core's eight-level directory depth.",
+        "Set RUNTIME to the core-001 home-backed scratch root; default records stay in Core validation/commands-v2.",
+        "Replace original() with the pinned v1 helper loaded read-only and explicitly rebind its HERE and ROOT globals.",
+        "Set __file__ to the actual adapter; enrich immutable command receipts with the exact participating source identities and separate source-baseline/metadata-HEAD fields.",
+        "Wrap atomic_json with Core-record/home-runtime destination containment; preserve the original atomic write algorithm."
+      ]
+    },
+    {
+      "source": "validation/run-command.py",
+      "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+      "algorithm": "Use only check_result and active_guard through the v2 adapter; original capture is never called."
+    },
+    {
+      "source": "validation/qualify-logger-v2.py",
+      "sha256": "60040169cb713d1da60d9486ba7af820622af7980371455350807b3e932ab46a",
+      "adapter": "validation/qualify-logger.py",
+      "adaptations": [
+        "Rebind HERE, ROOT, RUNTIME, WORK, ATTEMPT and __file__; load the Core logger adapter in each subprocess.",
+        "Replace the single main-report logger identity read of run-command-v2.py with run-command.py, the actual Core adapter.",
+        "Keep the four disposable process/failure cases, fsync/overwrite checks and historical parser mutations unchanged."
+      ],
+      "retained_qualification": "recovery/logger-v2-qualification-second/qualification.json",
+      "current_run_status": "Prepared; actual Core process qualification awaits a separate coordinator assignment."
+    },
+    {
+      "source": "validation/check-records.py",
+      "sha256": "e287c3e35d6fec35d125c870125201816dc4d9822ae78ba94d7c0da167eeb3e4",
+      "adapter": "validation/check-records.py",
+      "algorithm": "Retain original enumeration, raw/LF/Git-clean/attribute proof and exact staged-set/object verification.",
+      "adaptations": [
+        "Rebind HERE, PACKET, ROOT and PREFIX to Core after loading the pinned source.",
+        "Replace only the original generated-directory/compound-suffix classification site with an actual UTF-8/JSON/content-kind wrapper and direct-payload suffix guard.",
+        "Record kind explicitly and verify classification/read hash equality; retained compound metadata names remain eligible when their actual payload is text."
+      ],
+      "lesson": "final-review-followup.md accepts seven exact historical exceptions; Core uses fresh text-kind classification and keeps every historical exception and receipt unchanged."
+    },
+    {
+      "source": "validation/check-preserved.py",
+      "sha256": "0581b55098c6c9f3276c9e0766a0bef88a4a3a4380ee7282e2a136f4eac82dfc",
+      "algorithm": "Reuse only historical_binaries for explicitly requested optional live-original prerequisites. Every registered original remains mandatory."
+    },
+    {
+      "source_run": "docs/research/documentation-audit/modules/piv/pass-1/piv-001",
+      "source": "validation/checker/src/Program.cs",
+      "sha256": "400b8242e144b4e152409f7b95d382cdbc9ab747ea90324639b7990f069ffd6c",
+      "adapter": "validation/checker/src/Program.cs",
+      "algorithm": "Reuse Roslyn C#14 full-fidelity token/directive/disabled/skipped-trivia identity, API byte equality and read-only Git byte capture.",
+      "adaptations": [
+        "Bind before identities to fe342, while reporting metadata commits separately.",
+        "Compare complete current executable C# membership outside frozen research/archive/completed/agent sources, including all root file-based tools and tracked generated source.",
+        "Preserve exact import order and all signatures/modifiers/attributes/defaults; remove using normalization and every source-mask exemption.",
+        "Derive the full current API snapshot set and require nonzero exact membership; remove the historical fixed count of twenty.",
+        "Add a pure synthetic checker selfcheck mode; coordinator compilation/execution remains pending."
+      ]
+    }
+  ],
+  "new_small_algorithms": {
+    "check-preserved.py": "Use current Core baseline/user receipts; check eight manifests, exact original payload bytes, actual Git-clean and protected index identities, integration raw/staged hashes, pinned ancestry and the primary user files. Other worktrees retain their owners.",
+    "preflight.py": "Mirror current recursive discovery and filename matching, verify exact canonical unit/resilience membership, checker import/output paths and installed SDK availability without invoking dotnet.",
+    "source-state.py": "Hash full baseline/current source and documentation, including HTML, outside preserved evidence and original user files; retain complete path membership and a canonical scope hash.",
+    "native-tokens.py": "Guard native preprocessing tokens/literals/directives for edited files; preserve unchanged raw sources directly. Splicing, trigraphs or directive digraphs in an edited source require an explicitly assigned compiler proof."
+  },
+  "versioning": "Each proof binds only its actual fixed participating inputs. An added unrelated helper leaves earlier proofs valid; changing an original participant requires review and a fresh proof.",
+  "ownership": "New Core validation records and validation-preparation.md only; frozen archives, original user work, SDK/product sources and other workers' records remain unchanged."
+}

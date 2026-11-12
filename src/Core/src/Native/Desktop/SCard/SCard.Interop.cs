@@ -79,6 +79,9 @@ internal static partial class NativeMethods
         ref int readerNamesLength
     );
 
+    // This wrapper currently encodes group filters and decodes reader names as ASCII, whereas Connect
+    // marshals UTF-8. Non-ASCII names can lose information here before reaching Connect. The published
+    // native shim forwards platform text; these managed conversions do not establish its deployed encoding.
     public static uint SCardListReaders(
         SCardContext context,
         string[]? groups,

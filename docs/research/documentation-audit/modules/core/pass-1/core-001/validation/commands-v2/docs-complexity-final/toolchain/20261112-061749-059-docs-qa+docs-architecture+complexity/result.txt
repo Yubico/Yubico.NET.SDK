@@ -1,0 +1,8 @@
+RESULT: PASSED  (dotnet toolchain.cs -- docs-qa docs-architecture complexity --complexity-args "--base fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef")
+Targets:
+  ✓ docs-qa               0.3s
+  ✓ docs-architecture     0.2s
+  ✓ complexity            3.0s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261112-061749-059-docs-qa+docs-architecture+complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

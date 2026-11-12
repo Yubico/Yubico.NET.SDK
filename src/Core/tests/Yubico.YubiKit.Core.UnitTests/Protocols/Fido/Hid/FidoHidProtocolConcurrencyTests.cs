@@ -19,11 +19,8 @@ using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.Fido.Hid;
 
 /// <summary>
-///     Proves and guards the serialization contract of <see cref="FidoHidProtocol" />: CTAP HID allows
-///     one transaction at a time per channel — a request is an init packet plus continuation packets,
-///     and a foreign init packet transmitted mid-request aborts the transaction on a real device
-///     (CTAP1_ERR_INVALID_SEQ / ERR_CHANNEL_BUSY). Overlapping operations are therefore refused, and lazy
-///     channel initialization must run exactly once.
+///     Checks managed exchange exclusion, lazy initialization count, payload correlation, and packet order
+///     using a scripted HID connection. These assertions are not physical-device arbitration evidence.
 /// </summary>
 public class FidoHidProtocolConcurrencyTests
 {
@@ -58,7 +55,7 @@ public class FidoHidProtocolConcurrencyTests
         var payloadA = CreatePayload(PayloadTagA, 100);
         var payloadB = CreatePayload(PayloadTagB, 100);
 
-        // Operation A's init packet goes out and is held in flight — its continuation packet is still owed.
+        // The first held send is lazy broadcast INIT, before application-message framing starts.
         fake.HoldSends();
         var operationA = protocol.SendCommandAsync(VendorCommandA, payloadA, cancellationToken: ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
@@ -109,8 +106,7 @@ public class FidoHidProtocolConcurrencyTests
         fake.ReleaseSends();
         var responseA = await operationA.WaitAsync(CompletionBound, ct);
 
-        // Exactly one CTAPHID_INIT exchange may reach the device; a second INIT mid-flight reassigns
-        // the channel and cross-delivers nonces.
+        // The script observes one lazy channel allocation and the first operation's echoed payload.
         Assert.Equal(1, fake.InitExchangeCount);
         Assert.Equal(payloadA.ToArray(), responseA.ToArray());
     }

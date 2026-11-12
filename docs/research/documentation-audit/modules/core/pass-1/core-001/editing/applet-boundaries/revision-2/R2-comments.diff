@@ -1,0 +1,43 @@
+diff --git c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
+index 742ce23d8..f729325ae 100644
+--- c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
++++ w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
+@@ -208,9 +208,10 @@ await state.WithSecurityDomainSessionAsync(false,
+         }
+         finally
+         {
+-            // The rotated key set replaced the defaults. Restore factory defaults so later tests and
+-            // suites can still authenticate with Scp03KeyParameters.Default.
++            // Session 2 replaces the original custom key set imported in Session 1, not the defaults.
++            // Request reset to attempt the default-key precondition for later tests and suites using
++            // Scp03KeyParameters.Default; this cleanup does not assert restored factory contents.
+             await state.ResetSecurityDomainAsync(ct);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
+index f86d67273..c5ac7e96f 100644
+--- c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
++++ w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
+@@ -111,9 +111,9 @@ await state.WithSecurityDomainSessionAsync(false,
+         }
+         finally
+         {
+-            // This test deliberately supersedes the default SCP03 keys and asserts they stop
+-            // working. Restore factory defaults so later tests and suites can still authenticate
+-            // with Scp03KeyParameters.Default.
++            // This test deliberately supersedes the default SCP03 keys. Request reset to attempt
++            // the default-key precondition needed by later tests and suites using
++            // Scp03KeyParameters.Default; this cleanup does not assert restored factory contents.
+             await state.ResetSecurityDomainAsync(CancellationTokenSource.Token);
+         }
+     }
+@@ -193,4 +193,4 @@ await state.WithSecurityDomainSessionAsync(true,
+             scpKeyParams: Scp03KeyParameters.Default,
+             configuration: new ProtocolConfiguration { ForceShortApdus = true },
+             cancellationToken: CancellationTokenSource.Token);
+-}
+\ No newline at end of file
++}

@@ -1,0 +1,88 @@
+{
+  "reader": "Astra",
+  "scope": "Actual complete boundary sample reads; final mapping/eligibility pending",
+  "reading_sha256": "0bfa9c75df54ec2a2b9347c957575139f5c67db4f20754a72c79d6fa0fee65ed",
+  "units": [
+    {
+      "id": "core-001:unit:4ca6e87f6dd1d2dc",
+      "path": "src/Ctap2/examples/FidoTool/Cli/Output/OutputHelpers.cs",
+      "range_sha256": "f583fb6e26eea13aacdea0e65191079a7bf4b3c522b4fcf8e90e1da9fa86936a",
+      "current_file_sha256": "419069ee0bdf7b90e397f9f26d9dc9be873527455f47e640303656d11ab25cbc",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:0ead92999bf55101",
+      "path": "src/Ctap2/examples/FidoTool/FidoExamples/GetAuthenticatorInfo.cs",
+      "range_sha256": "39cde8436363089d807411c44a3c3d306902b485b245d40270975dd6de097e6c",
+      "current_file_sha256": "7cca575b6bbe0a6c8cb2bb765954993aacdc216b83a502641c57617c74d16480",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Query scopes its session and converts CTAP/general exceptions to result errors, including cancellation via general catch; no exception-propagation guarantee stated."
+    },
+    {
+      "id": "core-001:unit:1bcc18573d7b9903",
+      "path": "src/Ctap2/examples/FidoTool/FidoTool.csproj",
+      "range_sha256": "3afca1e1da61588d000b80f452ace1649cb16b0168aee625f93bed1b43927af0",
+      "current_file_sha256": "3afca1e1da61588d000b80f452ace1649cb16b0168aee625f93bed1b43927af0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:b477d6cc126ee4d5",
+      "path": "src/Ctap2/PACKAGE_README.md",
+      "range_sha256": "36306441eea7d960933e44da825e206fe15ac48d235e65c6167f784209d76159",
+      "current_file_sha256": "38094b395d2eb392765ea581fb6e0dfe49187a3bbd2905510b6a4be6ae37580b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:1792a8f1c5bb3ba1",
+      "path": "src/Ctap2/README.md",
+      "range_sha256": "e517c3173bba88f26bd76a6e68e482430f3b176f26abf1ecb846e94e5a6767ba",
+      "current_file_sha256": "78da8838a98ddb4110d82b5f07a7188adb90cc4a932236f64738d0c766230891",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:f6d8011c4e3c3669",
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/BioEnrollment/BioEnrollmentModelsTests.cs",
+      "range_sha256": "baeb133e3b188c9531e707ccde9b1e2ae8a941700cb38ed70f2625e60dde209a",
+      "current_file_sha256": "41aa07192d6fb0eee3a59eec8cb0c8139faa4da1365e5d65df2bc878823154e0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:e0cd0f858f4da187",
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Cbor/CtapResponseParserTests.cs",
+      "range_sha256": "2df69f519aa88ca79cf0c8510b4af5b03570067c0192873f78bb0b8fa21a5c98",
+      "current_file_sha256": "5d9c9b2701229a143f891f2899f84fd20578d33166d4a1b2f5e1b9bc79a7ae50",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:c4935360f5100eac",
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Credentials/CredentialResponseTests.cs",
+      "range_sha256": "76e0dceff343a4c1c61153ea6b6cf30ac10104b061182a8efb4b1b0141f36910",
+      "current_file_sha256": "abd636a445241592cc58dea12e6a8ce459437ca0a704705354307d7b29cff699",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Descriptor requirement checked directly in retained CTAP2.0 response table2315\u20132320,2.1 table5445\u20135449 and2.3 table5715\u20135719; version distinction supported, fake signatures remain noncryptographic."
+    },
+    {
+      "id": "core-001:unit:0eb15437dd1797ab",
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Pin/PinUvAuthProtocolV2Tests.cs",
+      "range_sha256": "3dba0c3cd87e823041478a14a762bbd459f9fdfe0f0b5edc121f3e7dfc729deb",
+      "current_file_sha256": "aab2399ad4a31b37b9d2dcc41a6f477e5b724e2c63dd2da87256422feb5cde96",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    }
+  ]
+}

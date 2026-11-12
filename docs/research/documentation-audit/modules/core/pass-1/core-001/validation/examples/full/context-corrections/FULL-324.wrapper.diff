@@ -1,0 +1,11 @@
+--- pre-review/FULL-324
++++ current/FULL-324
+@@ -25,7 +25,7 @@
+ namespace Audit20261111.DocExamples.Full;
+ internal static class Body324
+ {
+-internal static async Task CompileOnly(IYubiOtpSession session, ReadOnlyMemory<byte> challenge)
++internal static async Task CompileOnly(IYubiOtpSession session, byte[] challenge)
+ {
+ ReadOnlyMemory<byte> response = default;
+ try

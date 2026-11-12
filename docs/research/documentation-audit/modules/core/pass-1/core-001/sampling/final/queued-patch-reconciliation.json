@@ -1,0 +1,106 @@
+[
+  {
+    "finding": "SAMPLE-WA-001",
+    "patch": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/focused.patch",
+    "patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+    "review": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review-identities.json",
+    "review_sha256": "dae83e2ddcb167b364433a9defc70b9f3d8a8195ad8db561fc8709b3e310343d",
+    "content_acceptance": "PASS in named independent review; no sampler credit from acceptance",
+    "products": [
+      {
+        "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+        "before_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+        "projected_AFTER_sha256": "9223a2299f63cd2f8ceb5479cf5cc56ed5fb99463c084db60590cf3123f4cff1",
+        "actual_transfer": "PENDING"
+      }
+    ]
+  },
+  {
+    "finding": "SAMPLE-PGP-001",
+    "patch": "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/focused.patch",
+    "patch_sha256": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5",
+    "review": "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/review-identities.json",
+    "review_sha256": "18a04dc034d44983c975a8654e1618eed2dd770c488186ca6a8b02c7e2bd261a",
+    "content_acceptance": "PASS in named independent review; no sampler credit from acceptance",
+    "products": [
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.cs",
+        "before_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+        "projected_AFTER_sha256": "a94cc912faad198fb7adc595cb0a6846d98a53b8bf33a489e0e69637451d550e",
+        "actual_transfer": "PENDING"
+      },
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "before_sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+        "projected_AFTER_sha256": "1d48c7feea15a2ea287841d109d7ad02db24c4f817189cade61d0febf761e422",
+        "actual_transfer": "PENDING"
+      }
+    ]
+  },
+  {
+    "finding": "SAMPLE-B2-003",
+    "patch": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/source.patch",
+    "patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+    "review": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/review-identities.json",
+    "review_sha256": "c9bef974129d76b5f8d44eeba03cb3737d2cfe56036267f5468388249fc7938a",
+    "content_acceptance": "PASS in named independent review; no sampler credit from acceptance",
+    "products": [
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "before_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+        "projected_AFTER_sha256": "27276323b17745eaddd0b16d1030d01304ae6122d49d516795a945620d040445",
+        "actual_transfer": "PENDING"
+      }
+    ]
+  },
+  {
+    "finding": "SAMPLE-A003 propagation / SAMPLE-TESTING-001",
+    "patch": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-final-guide/product.patch",
+    "patch_sha256": "2e5a12d5c057f999a67c46a89836b899f29615943b278ee09a1d120d4eda30f9",
+    "review": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-final-guide/review-identities.json",
+    "review_sha256": "6c7c2d24ff37b2c92a95d78e4216c55baf239b79b6401a0ceaed9dc5972c72fc",
+    "content_acceptance": "PASS in named independent review; no sampler credit from acceptance",
+    "products": [
+      {
+        "path": "docs/usage/device-discovery.md",
+        "before_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+        "projected_AFTER_sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09",
+        "actual_transfer": "PENDING"
+      },
+      {
+        "path": "src/Core/README.md",
+        "before_sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c",
+        "projected_AFTER_sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e",
+        "actual_transfer": "PENDING"
+      },
+      {
+        "path": "docs/TESTING.md",
+        "before_sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe",
+        "projected_AFTER_sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339",
+        "actual_transfer": "PENDING"
+      }
+    ]
+  },
+  {
+    "finding": "PF-02 architecture-map closeout",
+    "patch": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/product.patch",
+    "patch_sha256": "27a8d85cda33ec95f3e309a8d1d5665ec9f3cd6403d3a75acdf501aebae31c33",
+    "review": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/review-identities.json",
+    "review_sha256": "b49769272012f27040da1f36ee093034aedf218aba34d3318a0eb8525a79ed4e",
+    "content_acceptance": "PASS in named independent review; no sampler credit from acceptance",
+    "products": [
+      {
+        "path": "docs/architecture/sdk-architecture-map.yml",
+        "before_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+        "projected_AFTER_sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+        "actual_transfer": "PENDING"
+      },
+      {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "before_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+        "projected_AFTER_sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+        "actual_transfer": "PENDING"
+      }
+    ]
+  }
+]

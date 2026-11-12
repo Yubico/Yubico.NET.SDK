@@ -1,0 +1,317 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/csharp/language-reference/builtin-types/struct.md",
+    "source_status": "Microsoft .NET documentation, moving main snapshot; retrieved for this bounded correction, not a pinned runtime execution",
+    "sha256": "b2281eb170604925a0ce0b4a85a393b47c4b6d467e602b6866940e1a49e865ca",
+    "capture": "sources/struct.md",
+    "text": "---\ntitle: Structure types\ndescription: \"Structure types (struct) give C# lightweight, data-centric value types. See how value semantics, copying, and boxing work, and when to choose a class instead.\"\nms.date: 01/14/2026\nf1_keywords:\n  - \"struct_CSharpKeyword\"\nhelpviewer_keywords:\n  - \"struct keyword [C#]\"\n  - \"struct type [C#]\"\n  - \"structure type [C#]\"\n---\n# Structure types (C# reference)\n\nA *structure type* (or *struct type*) is a [value type](value-types.md) that can encapsulate data and related functionality.\n\n[!INCLUDE[csharp-version-note](../includes/initial-version.md)]\n\nUse the `struct` keyword to define a structure type:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"StructExample\":::\n\nFor information about `ref struct` and `readonly ref struct` types, see the [ref structure types](ref-struct.md) article.\n\nStructure types have *value semantics*. That is, a variable of a structure type contains an instance of the type. By default, the system copies variable values on assignment, when passing an argument to a method, and when returning a method result. For structure-type variables, the system copies an instance of the type. For more information, see [Value types](value-types.md).\n\nTypically, you use structure types to design small data-centric types that provide little or no behavior. For example, .NET uses structure types to represent a number (both [integer](integral-numeric-types.md) and [real](floating-point-numeric-types.md)), a [Boolean value](bool.md), a [Unicode character](char.md), and a [time instance](xref:System.DateTime). If you're focused on the behavior of a type, consider defining a [class](../keywords/class.md). Class types have *reference semantics*. That is, a variable of a class type contains a reference to an instance of the type, not the instance itself.\n\nBecause structure types have value semantics, we recommend you define *immutable* structure types.\n\n## `readonly` struct\n\nUse the `readonly` modifier to declare that a structure type is immutable. All data members of a `readonly` struct must be read-only as follows:\n\n- Any field declaration must have the [`readonly` modifier](../keywords/readonly.md).\n- Any property, including automatically implemented ones, must be read-only or [`init` only](../keywords/init.md). Init-only setters are only available from [C# version 9 onwards](../../whats-new/csharp-version-history.md).\n\nThis rule guarantees that no member of a `readonly` struct modifies the state of the struct. All other instance members except constructors are implicitly [`readonly`](#readonly-instance-members).\n\n> [!NOTE]\n> In a `readonly` struct, a data member of a mutable reference type still can mutate its own state. For example, you can't replace a <xref:System.Collections.Generic.List`1> instance, but you can add new elements to it.\n\nThe following code defines a `readonly` struct with init-only property setters:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"ReadonlyStruct\":::\n\n## `readonly` instance members\n\nUse the `readonly` modifier to declare that an instance member doesn't modify the state of a struct. If you can't declare the whole structure type as `readonly`, use the `readonly` modifier to mark the instance members that don't modify the state of the struct.\n\nWithin a `readonly` instance member, you can't assign to the structure's instance fields. However, a `readonly` member can call a non-`readonly` member. In that case, the compiler creates a copy of the structure instance and calls the non-`readonly` member on that copy. As a result, the original structure instance isn't modified.\n\nTypically, you apply the `readonly` modifier to the following kinds of instance members:\n\n- Methods:\n\n  :::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"ReadonlyMethod\":::\n\n  You can also apply the `readonly` modifier to methods that override methods declared in <xref:System.Object?displayProperty=nameWithType>:\n\n  :::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"ReadonlyOverride\":::\n\n- Properties and indexers:\n\n  :::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"ReadonlyProperty\":::\n\n  If you need to apply the `readonly` modifier to both accessors of a property or indexer, apply it in the declaration of the property or indexer.\n\n  > [!NOTE]\n  > The compiler declares a `get` accessor of an [automatically implemented property](../../programming-guide/classes-and-structs/auto-implemented-properties.md) as `readonly`, regardless of the presence of the `readonly` modifier in a property declaration.\n\n  You can apply the `readonly` modifier to a property or indexer with an `init` accessor:\n\n  :::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"ReadonlyWithInit\":::\n\nYou can apply the `readonly` modifier to static fields of a structure type, but not to any other static members, such as properties or methods.\n\nThe compiler can make use of the `readonly` modifier for performance optimizations. For more information, see [Avoiding allocations](../../advanced-topics/performance/index.md).\n\n## Nondestructive mutation\n\nUse the [`with` expression](../operators/with-expression.md) to create a copy of a structure-type instance with the specified properties and fields changed. Use [object initializer](../../programming-guide/classes-and-structs/object-and-collection-initializers.md) syntax to specify which members to modify and their new values, as the following example shows:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"WithExpression\":::\n\n## `record` struct\n\nYou can define record structure types. Record types provide built-in functionality for encapsulating data. You can define both `record struct` and `readonly record struct` types. A record struct can't be a [`ref struct`](ref-struct.md). For more information and examples, see [Records](record.md).\n\n## Inline arrays\n\nYou can declare *inline arrays* as a `struct` type:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"DeclareInlineArray\":::\n\nAn inline array is a structure that contains a contiguous block of N elements of the same type. It's a safe-code equivalent of the [fixed buffer](../unsafe-code.md#fixed-size-buffers) declaration available only in unsafe code. An inline array is a `struct` with the following characteristics:\n\n- It contains a single field.\n- The struct doesn't specify an explicit layout.\n\nIn addition, the compiler validates the <xref:System.Runtime.CompilerServices.InlineArrayAttribute?displayProperty=fullName> attribute:\n\n- The length must be greater than zero (`> 0`).\n- The target type must be a struct.\n\nIn most cases, you can access an inline array like an array, both to read and write values. You can also use the [range](../operators/member-access-operators.md#range-operator-) and [index](../operators/member-access-operators.md#indexer-access) operators.\n\nThere are minimal restrictions on the type of the single field of an inline array. It can't be a pointer type:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"DeclareInlineArrayWithPointer\":::\n\nBut it can be any reference type, or any value type:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"DeclareInlineArrayWithReferenceType\":::\n\nYou can use inline arrays with almost any C# data structure.\n\nInline arrays are an advanced language feature. They're intended for high-performance scenarios where an inline, contiguous block of elements is faster than other alternative data structures. You can learn more about inline arrays from [\u00a716.6 Inline arrays](~/_csharpstandard/standard/structs.md#166-inline-arrays) in the C# standard.\n\n## Struct initialization and default values\n\nA variable of a `struct` type directly contains the data for that `struct`. This direct data storage creates a distinction between an uninitialized `struct`, which has its default value, and an initialized `struct`, which stores values set by constructing it. For example, consider the following code:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"ParameterlessConstructor\":::\n\nAs the preceding example shows, the [default value expression](../operators/default.md) ignores a parameterless constructor and produces the [default value](default-values.md) of the structure type. Structure-type array instantiation also ignores a parameterless constructor and produces an array populated with the default values of a structure type.\n\nThe most common situation where you see default values is in arrays or in other collections where internal storage includes blocks of variables. The following example creates an array of 30 `TemperatureRange` structures, each of which has the default value:\n\n```csharp\n// All elements have default values of 0:\nTemperatureRange[] lastMonth = new TemperatureRange[30];\n```\n\nAll of a struct's member fields must be *definitely assigned* when created because `struct` types directly store their data. The `default` value of a struct *definitely assigns* all fields to 0. All fields must be definitely assigned when a constructor is invoked. You initialize fields by using the following mechanisms:\n\n- Add *field initializers* to any field or auto-implemented property.\n- Initialize any fields or auto properties in the body of the constructor.\n\nIf you don't initialize all fields in a struct, the compiler adds code to the constructor that initializes those fields to the default value. A struct assigned to its `default` value is initialized to the 0-bit pattern. A struct initialized with `new` is initialized to the 0-bit pattern, followed by executing any field initializers and a constructor.\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"FieldInitializer\":::\n\nEvery `struct` has a `public` parameterless constructor. If you write a parameterless constructor, it must be public. If a struct declares any field initializers, it must explicitly declare a constructor. That constructor need not be parameterless. If a struct declares a field initializer but no constructors, the compiler reports an error. Any explicitly declared constructor (with parameters, or parameterless) executes all field initializers for that struct. All fields without a field initializer or an assignment in a constructor are set to the [default value](default-values.md). For more information, see the [C# language specification\u2014Constructors](~/_csharpstandard/standard/structs.md#1689-constructors).\n\nA `struct` type can define a [primary constructor](../../programming-guide/classes-and-structs/instance-constructors.md#primary-constructors) as part of its declaration. Primary constructors provide a concise syntax for constructor parameters that can be used throughout the `struct` body, in any member declaration for that struct.\n\nIf all instance fields of a structure type are accessible, you can also instantiate it without the `new` operator. In that case, you must initialize all instance fields before the first use of the instance. The following example shows how to do that:\n\n:::code language=\"csharp\" source=\"snippets/shared/StructType.cs\" id=\"SnippetWithoutNew\":::\n\nFor the [built-in value types](value-types.md#built-in-value-types), use the corresponding literals to specify a value of the type.\n\n## Limitations with the design of a structure type\n\nStructs have most of the capabilities of a [class](../keywords/class.md) type. There are some exceptions:\n\n- A structure type can't inherit from other class or structure type and it can't be the base of a class. However, a structure type can implement [interfaces](../keywords/interface.md).\n- You can't declare a [finalizer](../../programming-guide/classes-and-structs/finalizers.md) within a structure type.\n- A constructor of a structure type must initialize all instance fields of the type.\n\n## Passing structure-type variables by reference\n\nWhen you pass a structure-type variable to a method as an argument or return a structure-type value from a method, the whole instance of a structure type is copied. Pass by value can affect the performance of your code in high-performance scenarios that involve large structure types. You can avoid value copying by passing a structure-type variable by reference. Use the `ref`, `out`, `in`, or `ref readonly` method parameter modifiers to indicate that an argument must be [passed by reference](../keywords/method-parameters.md#reference-parameters). Use [ref returns](../statements/jump-statements.md#the-return-statement) to return a method result by reference. For more information, see [Avoid allocations](../../advanced-topics/performance/index.md).\n\n## `struct` constraint\n\nUse the `struct` keyword in the [`struct` constraint](../../programming-guide/generics/constraints-on-type-parameters.md) to specify that a type parameter is a non-nullable value type. Both structure and [enumeration](enum.md) types satisfy the `struct` constraint.\n\n## Conversions\n\nFor any structure type (except [`ref struct`](ref-struct.md) types), [boxing and unboxing](../../programming-guide/types/boxing-and-unboxing.md) conversions exist to and from the <xref:System.ValueType?displayProperty=nameWithType> and <xref:System.Object?displayProperty=nameWithType> types. Boxing and unboxing conversions also exist between a structure type and any interface that it implements.\n\n## C# language specification\n\nFor more information, see the [Structs](~/_csharpstandard/standard/structs.md) section of the [C# language specification](~/_csharpstandard/standard/README.md), specifically the following clauses:\n\n- [Readonly structs](~/_csharpstandard/standard/structs.md#1622-struct-modifiers)\n- [Readonly instance members](~/_csharpstandard/standard/structs.md#163-struct-members)\n- [Parameterless struct constructors](~/_csharpstandard/standard/structs.md#1689-constructors)\n- [Allow `with` expression on structs](~/_csharpstandard/standard/expressions.md#1210-with-expressions)\n- [Record structs](~/_csharpstandard/standard/structs.md#165-record-structs)\n\nYou can also read about [Auto default structs](~/_csharpstandard/standard/structs.md#16881-field-initializers) in the C# language specification.\n\n## See also\n\n- [The C# type system](../../fundamentals/types/index.md)\n- [Design guidelines - Choosing between class and struct](../../../standard/design-guidelines/choosing-between-class-and-struct.md)\n- [Design guidelines - Struct design](../../../standard/design-guidelines/struct.md)\n- [Resolve errors and warnings with inline array declarations](../../language-reference/compiler-messages/inline-array-errors.md)\n"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/standard/collections/when-to-use-generic-collections.md",
+    "source_status": "Microsoft .NET documentation, moving main snapshot; retrieved for this bounded correction, not a pinned runtime execution",
+    "sha256": "05b8868b89ee482fb6021e9226d293d1318c6508a058e33dd69245fd236a5a06",
+    "capture": "sources/when-to-use-generic-collections.md",
+    "text": "---\ndescription: \"Learn more about: When to use generic collections\"\ntitle: \"When to Use Generic Collections\"\nms.date: 04/30/2020\nhelpviewer_keywords:\n  - \"collections [.NET], generic\"\n  - \"generic collections [.NET]\"\nms.assetid: e7b868b1-11fe-4ac5-bed3-de68aca47739\n---\n\n# When to use generic collections\n\nUsing generic collections gives you the automatic benefit of type safety without having to derive from a base collection type and implement type-specific members. Generic collection types also generally perform better than the corresponding nongeneric collection types (and better than types that are derived from nongeneric base collection types) when the collection elements are value types, because with generics, there's no need to box the elements.\n\nFor programs that target .NET Standard 1.0 or later, use the generic collection classes in the <xref:System.Collections.Concurrent> namespace when multiple threads might be adding or removing items from the collection concurrently. Additionally, when immutability is desired, consider the generic collection classes in the <xref:System.Collections.Immutable> namespace.\n\nThe following generic types correspond to existing collection types:\n\n- <xref:System.Collections.Generic.List`1> is the generic class that corresponds to <xref:System.Collections.ArrayList>.\n\n- <xref:System.Collections.Generic.Dictionary`2> and <xref:System.Collections.Concurrent.ConcurrentDictionary`2> are the generic classes that correspond to <xref:System.Collections.Hashtable>.\n\n- <xref:System.Collections.ObjectModel.Collection`1> is the generic class that corresponds to <xref:System.Collections.CollectionBase>. <xref:System.Collections.ObjectModel.Collection`1> can be used as a base class, but unlike <xref:System.Collections.CollectionBase>, it is not abstract, which makes it much easier to use.\n\n- <xref:System.Collections.ObjectModel.ReadOnlyCollection`1> is the generic class that corresponds to <xref:System.Collections.ReadOnlyCollectionBase>. <xref:System.Collections.ObjectModel.ReadOnlyCollection`1> is not abstract and has a constructor that makes it easy to expose an existing <xref:System.Collections.Generic.List`1> as a read-only collection.\n\n- The <xref:System.Collections.Generic.Queue`1>, <xref:System.Collections.Concurrent.ConcurrentQueue`1>, <xref:System.Collections.Immutable.ImmutableQueue`1>, <xref:System.Collections.Immutable.ImmutableArray`1>, <xref:System.Collections.Generic.SortedList`2>, and <xref:System.Collections.Immutable.ImmutableSortedSet`1> generic classes correspond to the respective nongeneric classes with the same names.\n\n## Additional Types\n\nSeveral generic collection types do not have nongeneric counterparts. They include the following:\n\n- <xref:System.Collections.Generic.LinkedList`1> is a general-purpose linked list that provides O(1) insertion and removal operations.\n\n- <xref:System.Collections.Generic.SortedDictionary`2> is a sorted dictionary with O(log `n`) insertion and retrieval operations, which makes it a useful alternative to <xref:System.Collections.Generic.SortedList`2>.\n\n- <xref:System.Collections.ObjectModel.KeyedCollection`2> is a hybrid between a list and a dictionary, which provides a way to store objects that contain their own keys.\n\n- <xref:System.Collections.Concurrent.BlockingCollection`1> implements a collection class with bounding and blocking functionality.\n\n- <xref:System.Collections.Concurrent.ConcurrentBag`1> provides fast insertion and removal of unordered elements.\n\n### Immutable builders\n\nWhen you desire immutability functionality in your app, the <xref:System.Collections.Immutable> namespace offers generic collection types you can use. All of the immutable collection types offer `Builder` classes that can optimize performance when you're performing multiple mutations. The `Builder` class batches operations in a mutable state. When all mutations have been completed, call the `ToImmutable` method to \"freeze\" all nodes and create an immutable generic collection, for example, an <xref:System.Collections.Immutable.ImmutableList`1>.\n\nThe `Builder` object can be created by calling the nongeneric `CreateBuilder()` method. From a `Builder` instance, you can call `ToImmutable()`. Likewise, from the `Immutable*` collection, you can call `ToBuilder()` to create a builder instance from the generic immutable collection. The following are the various `Builder` types.\n\n- <xref:System.Collections.Immutable.ImmutableArray`1.Builder>\n- <xref:System.Collections.Immutable.ImmutableDictionary`2.Builder>\n- <xref:System.Collections.Immutable.ImmutableHashSet`1.Builder>\n- <xref:System.Collections.Immutable.ImmutableList`1.Builder>\n- <xref:System.Collections.Immutable.ImmutableSortedDictionary`2.Builder>\n- <xref:System.Collections.Immutable.ImmutableSortedSet`1.Builder>\n\n## LINQ to Objects\n\nThe LINQ to Objects feature enables you to use LINQ queries to access in-memory objects as long as the object type implements the <xref:System.Collections.IEnumerable?displayProperty=nameWithType> or <xref:System.Collections.Generic.IEnumerable`1?displayProperty=nameWithType> interface. LINQ queries provide a common pattern for accessing data; are typically more concise and readable than standard `foreach` loops; and provide filtering, ordering, and grouping capabilities. LINQ queries can also improve performance. For more information, see [LINQ to Objects (C#)](../../csharp/linq/get-started/introduction-to-linq-queries.md), [LINQ to Objects (Visual Basic)](../../visual-basic/programming-guide/concepts/linq/linq-to-objects.md), and [Parallel LINQ (PLINQ)](../parallel-programming/introduction-to-plinq.md).\n\n## Additional Functionality\n\nSome of the generic types have functionality that is not found in the nongeneric collection types. For example, the <xref:System.Collections.Generic.List`1> class, which corresponds to the nongeneric <xref:System.Collections.ArrayList> class, has a number of methods that accept generic delegates, such as the <xref:System.Predicate`1> delegate that allows you to specify methods for searching the list, the <xref:System.Action`1> delegate that represents methods that act on each element of the list, and the <xref:System.Converter`2> delegate that lets you define conversions between types.\n\nThe <xref:System.Collections.Generic.List`1> class allows you to specify your own <xref:System.Collections.Generic.IComparer`1> generic interface implementations for sorting and searching the list. The <xref:System.Collections.Generic.SortedDictionary`2> and <xref:System.Collections.Generic.SortedList`2> classes also have this capability. In addition, these classes let you specify comparers when the collection is created. In similar fashion, the <xref:System.Collections.Generic.Dictionary`2> and <xref:System.Collections.ObjectModel.KeyedCollection`2> classes let you specify your own equality comparers.\n\n## See also\n\n- [Collections and Data Structures](index.md)\n- [Commonly Used Collection Types](commonly-used-collection-types.md)\n- [Generics](../generics/index.md)\n"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/standard/generics.md",
+    "source_status": "Microsoft .NET documentation, moving main snapshot; retrieved for this bounded correction, not a pinned runtime execution",
+    "sha256": "61ee70893b9e5f6c657ad8513a460b1d6754101c5eb205fb42024cee1998b85e",
+    "capture": "sources/generics.md",
+    "text": "---\ntitle: Generic types (generics) overview\ndescription: Learn how generics act as code templates that allow you to define type-safe data structures without committing to an actual data type.\nauthor: kuhlenh\nms.author: wiwagn\nms.date: 10/09/2018\n---\n# Generic types overview\n\nDevelopers use generics all the time in .NET, whether implicitly or explicitly. When you use LINQ in .NET, did you ever notice that you're working with <xref:System.Collections.Generic.IEnumerable`1>? Or if you ever saw an online sample of a \"generic repository\" for talking to databases using Entity Framework, did you see that most methods return `IQueryable<T>`? You may have wondered what the **T** is in these examples and why it's in there.\n\nGenerics are essentially a \"code template\" that allows developers to define [type-safe](/previous-versions/dotnet/netframework-4.0/hbzz1a9a(v=vs.100)) data structures without committing to an actual data type. For example, <xref:System.Collections.Generic.List`1> is a [generic collection](xref:System.Collections.Generic) that can be declared and used with any type, such as `List<int>`, `List<string>`, or `List<Person>`.\n\nTo understand why generics are useful, let's take a look at a specific class before and after adding generics: <xref:System.Collections.ArrayList>. In .NET Framework 1.0, the `ArrayList` elements were of type <xref:System.Object>. Any element added to the collection was silently converted into an `Object`. The same would happen when reading elements from the list. This process is known as [boxing and unboxing](../csharp/programming-guide/types/boxing-and-unboxing.md), and it impacts performance. Aside from performance, however, there's no way to determine the type of data in the list at compile time, which makes for some fragile code. Generics solve this problem by defining the type of data each instance of list will contain. For example, you can only add integers to `List<int>` and only add Persons to `List<Person>`.\n\nGenerics are also available at runtime. The runtime knows what type of data structure you're using and can store it in memory more efficiently.\n\nThe following example is a small program that illustrates the efficiency of knowing the data structure type at runtime:\n\n```csharp\n  using System;\n  using System.Collections;\n  using System.Collections.Generic;\n  using System.Diagnostics;\n\n  namespace GenericsExample {\n    class Program {\n      static void Main(string[] args) {\n        //generic list\n        List<int> ListGeneric = new List<int> { 5, 9, 1, 4 };\n        //non-generic list\n        ArrayList ListNonGeneric = new ArrayList { 5, 9, 1, 4 };\n        // timer for generic list sort\n        Stopwatch s = Stopwatch.StartNew();\n        ListGeneric.Sort();\n        s.Stop();\n        Console.WriteLine($\"Generic Sort: {ListGeneric}  \\n Time taken: {s.Elapsed.TotalMilliseconds}ms\");\n\n        //timer for non-generic list sort\n        Stopwatch s2 = Stopwatch.StartNew();\n        ListNonGeneric.Sort();\n        s2.Stop();\n        Console.WriteLine($\"Non-Generic Sort: {ListNonGeneric}  \\n Time taken: {s2.Elapsed.TotalMilliseconds}ms\");\n        Console.ReadLine();\n      }\n    }\n  }\n```\n\nThis program produces output similar to the following:\n\n```console\nGeneric Sort: System.Collections.Generic.List`1[System.Int32]\n Time taken: 0.0034ms\nNon-Generic Sort: System.Collections.ArrayList\n Time taken: 0.2592ms\n```\n\nThe first thing you can notice here is that sorting the generic list is significantly faster than sorting the non-generic list. You might also notice that the type for the generic list is distinct ([System.Int32]), whereas the type for the non-generic list is generalized. Because the runtime knows the generic `List<int>` is of type <xref:System.Int32>, it can store the list elements in an underlying integer array in memory, while the non-generic `ArrayList` has to cast each list element to an object. As this example shows, the extra casts take up time and slow down the list sort.\n\nAn additional advantage of the runtime knowing the type of your generic is a better debugging experience. When you're debugging a generic in C#, you know what type each element is in your data structure. Without generics, you would have no idea what type each element was.\n\n## See also\n\n- [C# Programming Guide - Generics](../csharp/fundamentals/types/generics.md)\n"
+  },
+  {
+    "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+    "sha256": "751e25ae9124b6a7bd0e3aa8e4b86b15c07e058fed55f99c5a9ac19dce3438af",
+    "declaration_lines": [
+      {
+        "line": 34,
+        "text": "public sealed class RawSmartCardSession : ApplicationSession"
+      },
+      {
+        "line": 50,
+        "text": "    public static Task<RawSmartCardSession> CreateAsync("
+      },
+      {
+        "line": 66,
+        "text": "    public static Task<RawSmartCardSession> CreateAsync("
+      },
+      {
+        "line": 125,
+        "text": "    public Task<ReadOnlyMemory<byte>> SelectAsync("
+      },
+      {
+        "line": 140,
+        "text": "    public Task<ApduResponse> TransmitAndReceiveAsync("
+      },
+      {
+        "line": 154,
+        "text": "    public void Configure("
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+    "sha256": "41bfe1a66795324aa3b3eb086ae627ae0ce81b5a249517be13418309f421687f",
+    "declaration_lines": [
+      {
+        "line": 28,
+        "text": "public sealed class RawCtapHidSession : ApplicationSession"
+      },
+      {
+        "line": 40,
+        "text": "    public static Task<RawCtapHidSession> CreateAsync("
+      },
+      {
+        "line": 64,
+        "text": "    public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync("
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+    "sha256": "f3063a8df9a21fff878cd632c78313091ac2ec33d5613725aebf92018b331e7d",
+    "declaration_lines": [
+      {
+        "line": 31,
+        "text": "public sealed class RawOtpHidSession : ApplicationSession"
+      },
+      {
+        "line": 43,
+        "text": "    public static Task<RawOtpHidSession> CreateAsync("
+      },
+      {
+        "line": 69,
+        "text": "    public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync("
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Abstractions/IConnection.cs",
+    "sha256": "3f0082b1471f4fc8904580375f1429201d747d2057706044e790aa703e294daa",
+    "declaration_lines": [
+      {
+        "line": 26,
+        "text": "public interface IConnection : IDisposable, IAsyncDisposable"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+    "sha256": "188da8f1dad0887acbc07681b77dfaed94c93af3cf21f07bbab17ef551507b86",
+    "declaration_lines": [
+      {
+        "line": 19,
+        "text": "public interface ISmartCardConnection : IConnection"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Utilities/Tlv.cs",
+    "sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+    "declaration_lines": [
+      {
+        "line": 25,
+        "text": "public sealed class Tlv : IDisposable"
+      },
+      {
+        "line": 42,
+        "text": "    public Tlv(int tag, ReadOnlySpan<byte> value)"
+      },
+      {
+        "line": 52,
+        "text": "    public Tlv(int tag, Memory<byte> value) : this(tag, value.Span) { }"
+      },
+      {
+        "line": 54,
+        "text": "    public Tlv(int tag, ReadOnlyMemory<byte> value) : this(tag, value.Span) { }"
+      },
+      {
+        "line": 60,
+        "text": "    public int Tag { get; private set; }"
+      },
+      {
+        "line": 65,
+        "text": "    public ReadOnlyMemory<byte> Value => _bytes.AsMemory(_offset, Length);"
+      },
+      {
+        "line": 70,
+        "text": "    public int Length { get; private set; }"
+      },
+      {
+        "line": 75,
+        "text": "    public int TotalLength => _bytes.AsMemory().Length;"
+      },
+      {
+        "line": 81,
+        "text": "    public void Dispose()"
+      },
+      {
+        "line": 163,
+        "text": "    public ReadOnlyMemory<byte> AsMemory() => _bytes.AsMemory();"
+      },
+      {
+        "line": 176,
+        "text": "    public ReadOnlySpan<byte> AsSpan() => _bytes.AsSpan();"
+      },
+      {
+        "line": 183,
+        "text": "    public static Tlv Create(ReadOnlySpan<byte> data)"
+      },
+      {
+        "line": 197,
+        "text": "    internal static (int Tag, int Length, byte[] Value) ParseData(ref ReadOnlySpan<byte> buffer)"
+      },
+      {
+        "line": 273,
+        "text": "    public override string ToString() =>"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Utilities/TlvHelper.cs",
+    "sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+    "declaration_lines": [
+      {
+        "line": 23,
+        "text": "public static class TlvHelper"
+      },
+      {
+        "line": 34,
+        "text": "    public static DisposableTlvList DecodeList(ReadOnlySpan<byte> tlvData)"
+      },
+      {
+        "line": 71,
+        "text": "    public static DisposableTlvList DecodeList(ReadOnlyMemory<byte> tlvData) => DecodeList(tlvData.Span);"
+      },
+      {
+        "line": 79,
+        "text": "    public static IDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlySpan<byte> tlvData)"
+      },
+      {
+        "line": 92,
+        "text": "    public static IDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlyMemory<byte> tlvData) =>"
+      },
+      {
+        "line": 112,
+        "text": "    public static Memory<byte> EncodeList(Tlv[] tlvData)"
+      },
+      {
+        "line": 156,
+        "text": "    public static Memory<byte> EncodeAndDisposeList(params Tlv[] tlvData)"
+      },
+      {
+        "line": 186,
+        "text": "    public static Memory<byte> GetValue(int expectedTag, ReadOnlySpan<byte> tlvData)"
+      },
+      {
+        "line": 205,
+        "text": "    public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value)"
+      },
+      {
+        "line": 234,
+        "text": "    public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Utilities/Base32.cs",
+    "sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+    "declaration_lines": [
+      {
+        "line": 15,
+        "text": "public static class Base32"
+      },
+      {
+        "line": 22,
+        "text": "    public static byte[] Decode(ReadOnlySpan<char> encoded)"
+      },
+      {
+        "line": 47,
+        "text": "    public static int Decode(ReadOnlySpan<char> encoded, Span<byte> destination)"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+    "sha256": "25d08bea3f633da73e2d8502fbefe5a054709e5a5efae83bc1f7f6433c88a4d2",
+    "declaration_lines": [
+      {
+        "line": 53,
+        "text": "    public static class CryptographyProviders"
+      },
+      {
+        "line": 93,
+        "text": "        public static Func<RandomNumberGenerator> RngCreator { get; set; } = RandomNumberGenerator.Create;"
+      },
+      {
+        "line": 131,
+        "text": "        public static Func<SHA1> Sha1Creator { get; set; } = SHA1.Create;"
+      },
+      {
+        "line": 169,
+        "text": "        public static Func<SHA256> Sha256Creator { get; set; } = SHA256.Create;"
+      },
+      {
+        "line": 207,
+        "text": "        public static Func<SHA384> Sha384Creator { get; set; } = SHA384.Create;"
+      },
+      {
+        "line": 245,
+        "text": "        public static Func<SHA512> Sha512Creator { get; set; } = SHA512.Create;"
+      },
+      {
+        "line": 283,
+        "text": "        public static Func<Aes> AesCreator { get; set; } = Aes.Create;"
+      },
+      {
+        "line": 310,
+        "text": "        internal static Func<IArkgPrimitives> ArkgPrimitivesCreator { get; set; } = ArkgPrimitives.Create;"
+      },
+      {
+        "line": 312,
+        "text": "        internal static Func<IEcdhPrimitives> EcdhPrimitivesCreator { get; set; } = EcdhPrimitives.Create;"
+      },
+      {
+        "line": 314,
+        "text": "        internal static Func<CmacBlockCipherAlgorithm, ICmacPrimitives> CmacPrimitivesCreator { get; set; } ="
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Protocols/ProtocolFactory.cs",
+    "sha256": "4a45f172706a618b4126289aa7f2fcd55f826362fffabd2bb64423910b087757",
+    "declaration_lines": [
+      {
+        "line": 27,
+        "text": "internal static class ProtocolFactory"
+      },
+      {
+        "line": 29,
+        "text": "    public static IProtocol Create(IConnection connection)"
+      },
+      {
+        "line": 43,
+        "text": "    public static ISmartCardProtocol Create(ISmartCardConnection connection)"
+      },
+      {
+        "line": 52,
+        "text": "    public static IFidoHidProtocol Create(IFidoHidConnection connection)"
+      },
+      {
+        "line": 61,
+        "text": "    public static IOtpHidProtocol Create(IOtpHidConnection connection)"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Abstractions/IProtocol.cs",
+    "sha256": "11880e1f5135d5990670e4f8d79056637955335749b6f596944b526977a596ae",
+    "declaration_lines": [
+      {
+        "line": 46,
+        "text": "internal interface IProtocol : IDisposable"
+      }
+    ]
+  }
+]

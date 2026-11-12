@@ -1,0 +1,21 @@
+--- old/scripts/toolchain/Process.cs
++++ accepted/scripts/toolchain/Process.cs
+@@ -9,10 +9,15 @@
+ sealed record ProcessResult(int ExitCode, string Output, string? LogPath);
+ 
+ /// <summary>
+-/// Every process the toolchain starts goes through here, so each one is announced with "▶ RUN", its
+-/// output reaches the run log, and in the default (non --verbose) mode only the lines that matter
+-/// reach the console. The full output of a step is always in its own log file.
++/// Runs processes dispatched through this helper, announces the command and captures output.
++/// ErrorsOnly mode shows compiler/MSBuild error lines live unless verbose output is enabled;
++/// a step log, when available, receives the full output. Other launch sites, including
++/// Dotnet.Capture and RunLog.Git, do not use this helper.
+ /// </summary>
++/// <remarks>
++/// Supplied secrets are masked in the displayed command, not in captured process output or the
++/// complete toolchain argument list separately retained by RunLog.Start. This is not end-to-end redaction.
++/// </remarks>
+ static class Exec
+ {
+     // MSBuild/compiler diagnostics ("file(1,2): error CS0029: ..." and "error MSB1009: ...").

@@ -27,7 +27,10 @@ namespace Yubico.YubiKit.Ctap2.Backend;
 /// <remarks>Uses a borrowed protocol. HID keep-alive status 0x02 can request a device-wait
 /// notification; the backend resolves the operation from the drained CTAP status before typed
 /// decoding. Completed means CTAP success, not verified presence, UV or RP authentication.
-/// Only an untransferred response is cleared here; a successful returned view has no cleanup owner.</remarks>
+/// A successful status-stripped view shares Core's accumulated response array and has no cleanup owner.
+/// Failure cleanup clears that untransferred array after terminal resolution, not independent input-report
+/// or decoded copies. A logging provider throwing while a secondary resolution failure is logged can
+/// bypass the later clearing statement.</remarks>
 internal sealed class HidBackend : ICtap2Backend
 {
     private readonly IFidoHidProtocol _protocol;

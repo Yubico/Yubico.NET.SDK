@@ -38,6 +38,9 @@ Session method
 
 This is preferred:
 
+The following is an illustrative method shape; `Ins`, `GetKeyInfoTag`, `_protocol`, and `ParseKeyInfo`
+stand for the owning applet's actual constants, backend, and parser.
+
 ```csharp
 public async Task<KeyInfo[]> ListKeyInformationAsync(CancellationToken cancellationToken = default)
 {
@@ -50,7 +53,7 @@ public async Task<KeyInfo[]> ListKeyInformationAsync(CancellationToken cancellat
         p2: 0x00,
         data: GetKeyInfoTag);
 
-    var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
+    var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
     return ParseKeyInfo(response.Data.Span);
 }
@@ -142,6 +145,15 @@ and optional SCP establishment. Backend rebinding and applet-specific state rema
 `InitializeSessionAsync` to set `IsInitialized` only after the applet initializer completes, including metadata
 discovery and cache population. Security Domain reset uses the same completion boundary after clearing readiness.
 Keep raw-session initialization contracts separate, including lazy raw FIDO channel initialization.
+
+Readiness means the initializer completed. It is separate from applet authorization and from the
+provenance of the effective firmware version. Raw HID sessions currently retain inherited `0.0.0`;
+major-zero feature checks are optimistic policy. Shared `IsSupported` queries do not guarantee runtime
+command success, and protected `EnsureSupports` remains derived-session enforcement machinery.
+
+Core guards logical exchanges, not complete multi-exchange public workflows. Callers await and
+serialize those workflows before disposal; a prompt callback must return without disposing its own
+session. Exchange drain supplies no lease for later parsing, cache updates, or callbacks.
 
 Pass creation-only SCP parameters directly to the initializer; retain them only when a later operation needs
 them, as Security Domain reinitialization does. `ApplicationSession.Protocol` owns protocol lifetime; avoid

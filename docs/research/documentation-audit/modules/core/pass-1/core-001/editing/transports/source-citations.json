@@ -1,0 +1,178 @@
+[
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/pcsc5-v2.01.01.pdf",
+    "sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+    "revision_status": "Part 5 revision 2.01.01, September 2005",
+    "reviewed_passage_and_limit": "Separately retained original PDF identity. Reviewed relevant retained text derivative; no new PDF extraction or NIST-PDF substitution.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/pcsc5-v2.01.01.txt",
+    "sha256": "4c3638b3b8d4692b2d2367c8cc4a3b8257f3682dcb8b9302bdb5aa59e6e0afb3",
+    "revision_status": "Part 5 revision 2.01.01",
+    "reviewed_passage_and_limit": "UNAWARE immediate return 929-934; Disconnect desired disposition 1208-1223; transaction/end if-possible scope in source register.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/nist-security-status-excerpt.md",
+    "sha256": "238fbd4d482ec3467335fb4b24577221435d6a42d569695d2c241d52451a1415",
+    "revision_status": "NIST SP800-73-5 Part2 July2024 final, Exa-attributed retrieval",
+    "reviewed_passage_and_limit": "Application/global status distinction; direct original-PDF request was 403. No independently verified NIST PDF or revised normative publication.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/pcsc-lite-api.html",
+    "sha256": "5d18b385a1d839fcbd7d71a8b9a549cdf6da90b383b8625b673cc69ee565c334",
+    "revision_status": "Access-date retained original API reference",
+    "reviewed_passage_and_limit": "Differences with Windows: DIRECT shared, unsupported-feature raw value; USER/TERMINAL unused. No native execution.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/libudev-monitor.c",
+    "sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+    "revision_status": "systemd v257",
+    "reviewed_passage_and_limit": "136-162 monitor unref drops reference and returns NULL.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/libudev-device.c",
+    "sha256": "aa082b13d383f21c00481146a15269b82bd9123772d498985625fa9fc169db8b",
+    "revision_status": "systemd v257",
+    "reviewed_passage_and_limit": "388-415 parent borrowed from child, lifetime tied to child.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/ubuntu-noble-libudev-dev.html",
+    "sha256": "6966adc9ef113cd59c9d3d412c633e632ab8904226556ae17000d1162dd27e48",
+    "revision_status": "Ubuntu noble amd64 retained file list",
+    "reviewed_passage_and_limit": "Unversioned /usr/lib/x86_64-linux-gnu/libudev.so present; package layout, not deployed load proof.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/ubuntu-noble-libudev1.html",
+    "sha256": "6da1c1a2da5cb72a1c0fc56b8a9e777a85bb2a6258b49e2e9b79c18961305220",
+    "revision_status": "Ubuntu noble amd64 retained file list",
+    "reviewed_passage_and_limit": "Only versioned libudev.so.1/1.7.8 in retained list; no universal distribution assertion.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/IOHIDDevice.h",
+    "sha256": "64aad6babb2e4bbbf31386f54c658fd16fbaa1aa271fb8f396126c22d6f833bd",
+    "revision_status": "Apple IOKitUser 323ead896d04424f87184d8f6ff0cce811aab106",
+    "reviewed_passage_and_limit": "87-118 non-seizing versus SeizeDevice and open/close result contracts.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/apple-IOReturn.h",
+    "sha256": "4767dd8a847d4b7dcff0b74c7a67013f0462f3ea6313e5a483f49fe046f93ab1",
+    "revision_status": "Apple XNU xnu-12377.1.9",
+    "reviewed_passage_and_limit": "140-198 gaps and native NotOpen/NotPermitted/ExclusiveAccess values; managed numeric repairs deferred.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/CFNumber.h",
+    "sha256": "5db6fc331db5b9d8834f89b230946bd613e6651eee1c738bd6baee7127e0f2c5",
+    "revision_status": "Apple CF-1153.18",
+    "reviewed_passage_and_limit": "49 CFNumberType over CFIndex; 111-123 lossy/out-of-range conversion returns false even with best-attempt output.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/CFBase.h",
+    "sha256": "99113f53a6724fc5fb07c8ec5791dc6b1f459c2a12113486b69f22c1099a55a1",
+    "revision_status": "Apple CF-1153.18",
+    "reviewed_passage_and_limit": "380-390 CFIndex native signed long on Apple LP64; value storage versus parameter type separate.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/createfile.html",
+    "sha256": "b946f24eb9b62fbb37093e74741e9bc3aad5c96cf82d6ed552ef716118d248eb",
+    "revision_status": "Retained Microsoft Win32 reference",
+    "reviewed_passage_and_limit": "Zero access allows some metadata; share compatibility and FILE_FLAG_OVERLAPPED contracts, not universal feature/elevation support.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/cm-unregister.html",
+    "sha256": "eacdd31a133642644779abe5a7144213e06e25591a02fa528a4c4913bf92092e",
+    "revision_status": "Retained Microsoft Win32 reference",
+    "reviewed_passage_and_limit": "CR_SUCCESS versus CR errors; waits pending callbacks; no callback-thread unregister.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/hidd-getfeature.html",
+    "sha256": "744407c7ab7fe1d1cecfe17229e8976ec4629738891d2a9a4107f38511cb2684",
+    "revision_status": "Retained Microsoft Win32 reference",
+    "reviewed_passage_and_limit": "Caller-owned report buffer, report-ID prefix, byte length; no universal elevation promise.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/safehandle-marshaller.cs",
+    "sha256": "d40e582fc5f12e671d741fe7d1734e46e86a20e3b9f1a9ac933f07c1ec4d12c1",
+    "revision_status": "dotnet/runtime v10.0.0",
+    "reviewed_passage_and_limit": "25-52 DangerousAddRef through native call and DangerousRelease in Free; concurrent Dispose does not prove borrow drain.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/official-cfgmgr32.h",
+    "sha256": "986a02619c81ffe5acef63e761bd41e25e3a4190ab1840c72600319342d4aa67",
+    "revision_status": "win32metadata 15fc870a5e96df7c560877ff30136c0fb5a21e9b",
+    "reviewed_passage_and_limit": "2279 PULONG; 2784 LPGUID and ULONG UTF16 capacity; native widths distinct from current managed declarations.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/official-hidsdi.h",
+    "sha256": "554213863d08da22bfae22639126b809e9886ce2f310c03972e3dbe06bf13147",
+    "revision_status": "win32metadata 15fc870a5e96df7c560877ff30136c0fb5a21e9b",
+    "reviewed_passage_and_limit": "HidD_GetFeature 191 BOOLEAN return, caller output buffer and ULONG byte capacity; Bool correction deferred.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/official-winsmcrd.h",
+    "sha256": "c34993b38e913253cac12a8398057b638078bec490b89d9828368efbe38d13eb",
+    "revision_status": "win32metadata 15fc870a5e96df7c560877ff30136c0fb5a21e9b",
+    "reviewed_passage_and_limit": "270-274 Windows PCI two DWORD fields; outside conditional Linux LP64 discrepancy.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/pcsclite-types.html",
+    "sha256": "ada3575bf7c6bc325b85e72852395c99f0429d25f234c95a8a4b5d8823414e1a",
+    "revision_status": "Retained original pcsc-lite Doxygen header",
+    "reviewed_passage_and_limit": "79-84 two unsigned long PCI fields; producer/headers must match deployed ABI, no Apple conclusion.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/shim-pcsc.c",
+    "sha256": "10654d81c4468bc1bf712667875c918fbeff335eba513458be692ba80051e39a",
+    "revision_status": "NativeShims1.18.1 commit dedba95b94946907112a7953cd82df8a15c22655",
+    "reviewed_passage_and_limit": "181-205 Native_SCardTransmit forwards PCI pointer directly, while converting receive count. Published source, not installed-producer identity.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  },
+  {
+    "retained_original": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/shim-Aot.targets",
+    "sha256": "76aea7798ce05301a3719ead63f2fbacf11ddc03586b4d3bb08acda8930126e9",
+    "revision_status": "NativeShims1.18.1 same release commit",
+    "reviewed_passage_and_limit": "PublishAot selects static RID archive/DirectPInvoke/system libraries and removes shared publish asset; target intent, not evaluated build.",
+    "authority_register": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "new_retrieval": false
+  }
+]

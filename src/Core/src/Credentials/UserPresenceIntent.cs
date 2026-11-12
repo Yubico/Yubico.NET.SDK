@@ -65,7 +65,8 @@ public static class UserPresenceIntent
     /// <param name="intent">
     ///     Display text describing why the user is performing the operation, written as a lowercase verb phrase such as
     ///     <c>"approve the transfer"</c> so it reads naturally after "Touch your YubiKey to". It is passed to the prompt
-    ///     unchanged and is never logged by the SDK.
+    ///     unchanged. Keep secrets out of this display text: an application callback can include it in
+    ///     an exception, and callback failures may be passed to logging providers.
     /// </param>
     /// <returns>An object that ends the scope when disposed.</returns>
     /// <exception cref="ArgumentException"><paramref name="intent" /> is empty or whitespace.</exception>

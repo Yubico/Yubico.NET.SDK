@@ -1,0 +1,422 @@
+"""Checker-only source/Csc/output admission; the accepted v2 supervisor remains unchanged."""
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import signal
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+HERE = Path(__file__).resolve().parent
+V = HERE.parent
+sys.path.insert(0, str(V))
+from foundation import ROOT, RUN, RUNTIME, BASELINE, environment, git, require, sha
+
+NAME = 'Yubico.YubiKit.Audit20261111.DocCheck'
+PROJECT = V / 'checker/src' / (NAME + '.csproj')
+PROGRAM = PROJECT.parent / 'Program.cs'
+JOBS = RUNTIME / 'jobs' / NAME
+REVIEW_SHA = 'b788cb19aa760041590b14d254a1a2e6d234b92b8b158f3e835d9fab8f61d371'
+GROUPS = ('sources', 'references', 'analyzers', 'configs', 'additional', 'projectrefs', 'other')
+SAFE_ENV = ('DirectoryBuildTargetsPath', 'CoreDocCheckCaptureDirectory', 'CoreDocCheckProfile',
+            'CoreDocCheckProfileSha256', 'CoreDocCheckGeneratedDirectory', 'TMPDIR', 'TMP', 'TEMP', 'PYTHONDONTWRITEBYTECODE')
+
+
+def read_file(path):
+    path = Path(path)
+    require(path.is_absolute() and path.is_file() and not path.is_symlink(), f'Require original regular input: {path}')
+    return path.read_bytes()
+
+
+def identity(path):
+    path = Path(path).resolve()
+    raw = read_file(path)
+    return dict(path=str(path), bytes=len(raw), sha256=sha(raw))
+
+
+def verify_rows(rows, read=read_file):
+    require(rows and len({row['path'] for row in rows}) == len(rows), 'Empty/duplicate identity population')
+    for row in rows:
+        raw = read(row['path'])
+        require(len(raw) == row['bytes'] and sha(raw) == row['sha256'], f'Input/output bytes changed: {row["path"]}')
+
+
+def save(path, value):
+    with path.open('x') as output:
+        json.dump(value, output, indent=2)
+        output.write('\n')
+
+
+def snapshot(path, directory):
+    row = identity(path)
+    raw = read_file(row['path'])
+    try:
+        raw.decode('utf-8-sig')
+        text = b'\0' not in raw and not raw.startswith((b'MZ', b'\x7fELF'))
+    except UnicodeError:
+        text = False
+    if text:
+        name = row['sha256'] + '-' + Path(row['path']).name + '.snapshot'
+        destination = directory / name
+        if not destination.exists():
+            with destination.open('xb') as output:
+                output.write(raw)
+        require(destination.read_bytes() == raw, 'Snapshot identity collision')
+    return row
+
+
+def profile(path, digest):
+    raw = read_file(Path(path).resolve())
+    require(sha(raw) == digest, 'Use the exact independently reviewed profile SHA-256')
+    result = json.loads(raw)
+    require(result['source_baseline'] == BASELINE and result['project'] == str(PROJECT), 'Profile belongs to another checker/source pin')
+    require(result['review_sha256'] == REVIEW_SHA and sha((RUN / 'validation-review.md').read_bytes()) == REVIEW_SHA,
+            'Original R1 review identity changed')
+    verify_rows(result['inputs'])
+    verify_rows(result['text_snapshots'])
+    require(Path(shutil.which('dotnet')).resolve() == Path(result['dotnet']), 'Canonical dotnet command resolves to another host')
+    return result
+
+
+def prepare(args):
+    """Static operation: collect a fixed profile for independent review before execution."""
+    require(args.output.resolve().parent == HERE and not args.output.exists(), 'Choose a new checker-binding profile')
+    sdk, runtime = args.sdk_directory.resolve(), args.runtime_directory.resolve()
+    dotnet = Path(shutil.which('dotnet')).resolve()
+    require(sdk.parent == dotnet.parent / 'sdk' and runtime.parent == dotnet.parent / 'shared/Microsoft.NETCore.App',
+            'Select SDK/runtime from the actual dotnet installation')
+    controls = [PROJECT, PROGRAM, V / 'Directory.Build.props', V / 'foundation.py', V / 'run-command.py',
+                HERE / 'bind.py', HERE / 'hook.targets', ROOT / 'global.json', ROOT / 'Directory.Build.props',
+                ROOT / 'Directory.Build.targets', ROOT / 'Directory.Packages.props', ROOT / '.editorconfig',
+                ROOT / 'nuget.config', ROOT / 'toolchain.cs']
+    # Freeze this invocation's actual include list, rather than matching future helper additions.
+    includes = re.findall(r'^#:include\s+(\S+)\s*$', (ROOT / 'toolchain.cs').read_text(), re.MULTILINE)
+    controls += [ROOT / value for value in includes]
+    sdk_files = [sdk / name for name in ('MSBuild.dll', 'Microsoft.Build.dll', 'Microsoft.Build.Tasks.Core.dll',
+                 'NuGet.Build.Tasks.dll', 'Roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll',
+                 'Roslyn/Microsoft.CSharp.Core.targets', 'Microsoft.Common.CurrentVersion.targets')]
+    sdk_files += [path for path in (sdk / 'Roslyn/bincore').iterdir() if path.is_file()]
+    runtime_files = [path for path in runtime.rglob('*') if path.is_file()]
+    directory = HERE / (args.output.stem + '-inputs')
+    directory.mkdir(exist_ok=False)
+    controls = sorted(set(path.resolve() for path in controls))
+    rows = [snapshot(path, directory) for path in controls]
+    rows += [identity(path) for path in sorted(set(sdk_files + runtime_files + [dotnet]))]
+    result = dict(schema='core-doccheck-binding-1', source_baseline=BASELINE,
+                  metadata_head=git('rev-parse', 'HEAD').decode().strip(), review_sha256=REVIEW_SHA,
+                  project=str(PROJECT), dotnet=str(dotnet), sdk_directory=str(sdk), runtime_directory=str(runtime),
+                  runtime_version=runtime.name, inputs=rows,
+                  text_snapshots=[identity(path) for path in sorted(directory.iterdir())],
+                  invocation_environment_policy='Named non-secret hook/temp properties; runtime injection variables are rejected.')
+    save(args.output, result)
+    print(json.dumps(identity(args.output), indent=2))
+
+
+def props(directory):
+    result = {}
+    previous = None
+    for line in (directory / 'properties.txt').read_text().splitlines():
+        if '=' not in line:
+            require(previous in ('NoWarn', 'WarningsAsErrors', 'WarningsNotAsErrors'), 'Unexpected split property item')
+            result[previous] += ';' + line
+            continue
+        key, value = line.split('=', 1)
+        require(key not in result, 'Duplicate evaluated property')
+        result[key] = value
+        previous = key
+    return result
+
+
+def paths(directory, suffix=''):
+    result = {}
+    for group in GROUPS:
+        values = (directory / (group + suffix + '.txt')).read_text().splitlines()
+        values = [str((PROJECT.parent / value).resolve()) for value in values if value.strip()]
+        require(group == 'other' or len(values) == len(set(values)), 'Duplicate actual checker item: ' + group)
+        result[group] = sorted(set(values)) if group == 'other' else sorted(values)
+    require(not result['additional'] and not result['projectrefs'], 'DocCheck has no AdditionalFiles or ProjectReference profile')
+    require(str(PROGRAM) in result['sources'] and all(path == str(PROGRAM) or Path(path).is_relative_to(JOBS)
+            for path in result['sources']), 'Actual Csc source acquired an unreviewed checker body')
+    return result
+
+
+def actual_arguments(directory, items):
+    lines = (directory / 'csc-arguments.txt').read_text().splitlines()
+    args = []
+    for line in lines:
+        value = shlex.split(line)
+        require(len(value) == 1, 'Expected one captured Csc argument per item')
+        args += value
+    require(args and not any(arg.startswith('@') for arg in args), 'Actual executed Csc arguments missing/response-file profile unsupported')
+    for group, switch in [('references', '/reference:'), ('analyzers', '/analyzer:'), ('configs', '/analyzerconfig:'), ('additional', '/additionalfile:')]:
+        values = [str((PROJECT.parent / arg[len(switch):]).resolve()) for arg in args if arg.startswith(switch)]
+        require(sorted(values) == items[group], 'Csc/item exact membership differs: ' + group)
+    sources = [str((PROJECT.parent / arg).resolve()) for arg in args if not re.match(r'^/[A-Za-z][A-Za-z0-9]*:', arg)
+               and arg.lower().endswith('.cs')]
+    require(sorted(sources) == items['sources'], 'Csc source arguments differ from actual Compile items')
+    file_switches = ('/sourcelink:', '/ruleset:', '/win32manifest:', '/win32res:', '/win32icon:',
+                     '/appconfig:', '/keyfile:', '/resource:', '/linkresource:', '/embed:')
+    other = {str((PROJECT.parent / arg[len(prefix):].split(',', 1)[0]).resolve())
+             for arg in args for prefix in file_switches if arg.startswith(prefix)}
+    require(other <= set(items.get('other', [])) | set(items['sources']), 'Actual Csc file input was absent from before capture')
+    require('/skipanalyzers+' not in args and any(arg.startswith('/warnaserror+') for arg in args), 'Csc strict compiler/analyzer policy differs')
+    return args
+
+
+def capture(args):
+    directory = args.directory.resolve()
+    require(directory.is_relative_to(HERE / 'attempts') and directory.is_dir(), 'Capture stays in a new Core binding attempt')
+    data = profile(Path(os.environ['CoreDocCheckProfile']), os.environ['CoreDocCheckProfileSha256'])
+    properties = props(directory)
+    require(properties['MSBuildProjectFullPath'] == str(PROJECT) and properties['NETCoreSdkVersion'] == Path(data['sdk_directory']).name,
+            'Actual project/SDK differs from the reviewed profile')
+    require(properties['Configuration'] == 'Release' and properties['TargetFramework'] == 'net10.0', 'Unexpected checker target/configuration')
+    require(properties['TreatWarningsAsErrors'] == 'true' and properties['RunAnalyzersDuringBuild'] == 'true' and
+            properties['SkipCompilerExecution'] == 'false' and properties['ProvideCommandLineArgs'] == 'true' and
+            properties['UseSharedCompilation'] == 'false', 'Actual Csc execution/policy prerequisite differs')
+    require(properties['CscEnvironment'] == '' and properties['CscToolExe'] in ('', 'csc.dll', 'csc.exe') and
+            (not properties['CscToolPath'] or Path(properties['CscToolPath']).resolve() == Path(data['sdk_directory']) / 'Roslyn/bincore'),
+            'Custom Csc executable/environment requires a separate profile')
+    if args.phase == 'before':
+        itemset = paths(directory)
+        command = [data['dotnet'], 'msbuild', str(PROJECT), '-nologo', '-p:Configuration=Release',
+                   '-preprocess:' + str(directory / 'preprocessed.xml.snapshot')]
+        complete = subprocess.run(command, cwd=ROOT, capture_output=True)
+        for name, raw in [('stdout', complete.stdout), ('stderr', complete.stderr)]:
+            with (directory / ('preprocess.' + name + '.txt')).open('xb') as stream:
+                stream.write(raw)
+        save(directory / 'preprocess-command.json', dict(command=command, exit_code=complete.returncode))
+        require(complete.returncode == 0, 'Preprocessed import-closure capture failed')
+        preprocessed = (directory / 'preprocessed.xml.snapshot').read_text()
+        imports = {Path(value.strip()).resolve() for value in re.findall(r'^\s*(/[^\r\n]+\.(?:props|targets|csproj))\s*$', preprocessed, re.MULTILINE)}
+        required = {PROJECT, V / 'Directory.Build.props', ROOT / 'Directory.Build.props', ROOT / 'Directory.Build.targets', HERE / 'hook.targets',
+                    Path(data['sdk_directory']) / 'Roslyn/Microsoft.CSharp.Core.targets'}
+        require(required <= imports, 'Reconcile the actual MSBuild preprocessed import markers before admission')
+        assets_path = Path(properties['ProjectAssetsFile'])
+        assets = json.loads(read_file(assets_path))
+        packages = []
+        files = set(imports) | {Path(path) for values in itemset.values() for path in values} | {assets_path}
+        files |= {Path(row['path']) for row in data['inputs']}
+        for package, library in assets['libraries'].items():
+            require(library['type'] == 'package', 'Checker restored a project/dependency outside its narrow profile')
+            found = [Path(folder) / library['path'] for folder in assets['packageFolders'] if (Path(folder) / library['path']).is_dir()]
+            require(len(found) == 1, 'Ambiguous/missing restored package location')
+            package_files = sorted(path for path in found[0].iterdir() if path.is_file() and path.suffix in ('.sha512', '.nuspec', '.nupkg'))
+            files.update(package_files)
+            packages.append(dict(id=package, assets_sha512=library.get('sha512'),
+                                 cache_identities=[identity(path) for path in package_files]))
+        require(any(row['id'].lower().startswith('microsoft.codeanalysis.netanalyzers/') for row in packages), 'Canonical analyzer package missing')
+        require(any(Path(path).name == 'Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll' for path in itemset['analyzers']), 'Canonical C# analyzer DLL did not participate')
+        snapshots = directory / 'inputs'
+        snapshots.mkdir()
+        inputs = [snapshot(path, snapshots) for path in sorted(files)]
+        save(directory / 'before.json', dict(inputs=inputs, items=itemset, properties=properties,
+             imports=[str(path) for path in sorted(imports)], packages=packages,
+             text_snapshots=[identity(path) for path in sorted(snapshots.iterdir())],
+             preprocess=identity(directory / 'preprocessed.xml.snapshot'),
+             environment={key: os.environ[key] for key in SAFE_ENV if key in os.environ}))
+    elif args.phase == 'compile':
+        before = json.loads((directory / 'before.json').read_bytes())
+        verify_rows(before['inputs'])
+        itemset = paths(directory, '-actual')
+        require(itemset == before['items'], 'Compiler source/reference/analyzer inputs changed after before capture')
+        arguments = actual_arguments(directory, itemset)
+        out = [arg[5:] for arg in arguments if arg.startswith('/out:')]
+        ref = [arg[8:] for arg in arguments if arg.startswith('/refout:')]
+        require(len(out) == len(ref) == 1, 'Require actual Csc implementation and reference output paths')
+        intermediate, reference = (identity(PROJECT.parent / value) for value in (out[0], ref[0]))
+        pdb_args = [arg[5:] for arg in arguments if arg.startswith('/pdb:')]
+        require(len(pdb_args) <= 1, 'Duplicate Csc PDB output switch')
+        pdb = identity(PROJECT.parent / pdb_args[0] if pdb_args else Path(intermediate['path']).with_suffix('.pdb'))
+        require(all(Path(row['path']).is_relative_to(JOBS) for row in (intermediate, reference)), 'Compiler output escaped checker jobs')
+        generated = Path(properties['CompilerGeneratedFilesOutputPath'])
+        generated_sources = [snapshot(path, directory / 'inputs') for path in sorted(generated.rglob('*.cs'))]
+        save(directory / 'compile.json', dict(actual_csc=True, inputs=before['inputs'], arguments=arguments,
+             intermediate=intermediate, reference=reference, pdb=pdb, generated_sources=generated_sources,
+             generated_snapshots=[identity(directory / 'inputs' / (row['sha256'] + '-' + Path(row['path']).name + '.snapshot'))
+                                  for row in generated_sources],
+             capture_text=[identity(directory / name) for name in ['csc-arguments.txt', 'properties.txt'] +
+                           [group + suffix + '.txt' for group in GROUPS for suffix in ('', '-actual')]],
+             evidence='TargetsTriggeredByCompilation called inside the source-pinned actual CoreCompile after Csc.'))
+    else:
+        before = json.loads((directory / 'before.json').read_bytes())
+        compiled = json.loads((directory / 'compile.json').read_bytes())
+        verify_rows(before['inputs'])
+        verify_rows([compiled['intermediate'], compiled['reference'], compiled['pdb']])
+        target = Path(properties['TargetPath']).resolve()
+        require(target == JOBS / 'bin/Release/net10.0' / (NAME + '.dll'), 'Unexpected actual checker DLL path')
+        output_dir = target.parent
+        outputs = [identity(path) for path in sorted(output_dir.rglob('*')) if path.is_file()]
+        names = {Path(row['path']).name for row in outputs}
+        require({NAME + suffix for suffix in ('.dll', '.pdb', '.deps.json', '.runtimeconfig.json')} <= names,
+                'Checker runtime/debug metadata output missing')
+        require(identity(output_dir / (NAME + '.pdb'))['sha256'] == compiled['pdb']['sha256'], 'Final PDB differs from actual Csc output')
+        for name in ('Microsoft.CodeAnalysis.dll', 'Microsoft.CodeAnalysis.CSharp.dll'):
+            require(identity(output_dir / name)['sha256'] == identity(Path(data['sdk_directory']) / 'Roslyn/bincore' / name)['sha256'],
+                    'Copied runtime Roslyn bytes differ from selected SDK reference owner')
+        save(directory / 'finish.json', dict(inputs=before['inputs'], outputs=outputs, compiled_dll=identity(target),
+             runtime_dll=str(target), properties=properties, reference=compiled['reference']))
+
+
+def admit(before, compiled, finish, receipt):
+    require(receipt['status'] == 'passed' and receipt['exit_code'] == 0 and receipt['stream_complete'] is True and
+            receipt['retention_complete'] is True and receipt['quiescent'] is True, 'Build was incomplete, failed or not quiescent')
+    counts = receipt['result_counts']
+    require(counts and counts['warnings'] == counts['failed'] == 0, 'Build warning/failure result differs')
+    require(compiled['actual_csc'] is True and compiled['arguments'], 'No actual executed Csc completion')
+    require(before['inputs'] == compiled['inputs'] == finish['inputs'], 'Source/config/compiler input identity changed across build')
+    require(finish['runtime_dll'] == finish['compiled_dll']['path'], 'Execution DLL path differs')
+    require(compiled['intermediate']['bytes'] == finish['compiled_dll']['bytes'] and
+            compiled['intermediate']['sha256'] == finish['compiled_dll']['sha256'], 'Final DLL differs from actual Csc output')
+    require(finish['compiled_dll'] in finish['outputs'], 'Final DLL missing from sealed outputs')
+
+
+def logger():
+    spec = importlib.util.spec_from_file_location('accepted_core_logger', V / 'run-command.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.load()
+
+
+def safe_environment():
+    require(not any(os.environ.get(key) for key in ('DOTNET_STARTUP_HOOKS', 'DOTNET_ADDITIONAL_DEPS',
+            'DOTNET_SHARED_STORE', 'CORECLR_ENABLE_PROFILING', 'COR_ENABLE_PROFILING')), 'Runtime injection/profile environment needs a separate assignment')
+    overrides = ('NoWarn', 'WarningsAsErrors', 'WarningsNotAsErrors', 'TreatWarningsAsErrors', 'AnalysisMode',
+                 'AnalysisLevel', 'RunAnalyzers', 'RunAnalyzersDuringBuild', 'EnableNETAnalyzers', 'SkipCompilerExecution',
+                 'ProvideCommandLineArgs', 'UseSharedCompilation', 'LangVersion', 'Nullable', 'TargetFramework',
+                 'TargetFrameworks', 'Configuration', 'CscToolPath', 'CscToolExe', 'CscEnvironment', 'DirectoryBuildPropsPath')
+    require(not any(os.environ.get(key) for key in overrides), 'Inherited compiler/policy overrides require explicit review')
+    return environment()
+
+
+def build(args):
+    data = profile(args.profile, args.profile_sha256)
+    safe_environment()
+    require(re.fullmatch(r'[a-z0-9][a-z0-9-]*', args.label), 'Use a fresh simple build label')
+    directory = HERE / 'attempts' / args.label
+    directory.mkdir(parents=True, exist_ok=False)
+    values = dict(DirectoryBuildTargetsPath=str(HERE / 'hook.targets'), CoreDocCheckCaptureDirectory=str(directory),
+                  CoreDocCheckProfile=str(args.profile.resolve()), CoreDocCheckProfileSha256=args.profile_sha256,
+                  CoreDocCheckGeneratedDirectory=str(JOBS / 'generated' / args.label))
+    require(not any(os.environ.get(key) for key in values), 'Existing capture/property override requires explicit reconciliation')
+    os.environ.update(values)
+    save(directory / 'started.json', dict(profile=identity(args.profile), profile_sha256=args.profile_sha256,
+         environment={key: os.environ[key] for key in SAFE_ENV}, source_baseline=BASELINE))
+    runner = logger()
+    command = ['--label', args.label, '--toolchain', '--expect-target', 'build', '--',
+               'dotnet', 'toolchain.cs', '--', 'build', '--project', 'Audit20261111.DocCheck', '--clean']
+    code = runner.capture(runner.parser().parse_args(command))
+    require(code == 0, 'Preserved checker build failed; choose a fresh attempt after correction')
+    receipt_path = V / 'commands-v2' / args.label / 'receipt.json'
+    receipt = json.loads(receipt_path.read_bytes())
+    before, compiled, finish = (json.loads((directory / name).read_bytes()) for name in ('before.json', 'compile.json', 'finish.json'))
+    admit(before, compiled, finish, receipt)
+    profile(args.profile, args.profile_sha256)
+    verify_rows(before['inputs'])
+    verify_rows(finish['outputs'] + [compiled['reference'], compiled['pdb']])
+    seal = dict(source_baseline=BASELINE, profile=identity(args.profile), build_receipt=identity(receipt_path),
+                captures=[identity(directory / name) for name in ('before.json', 'compile.json', 'finish.json')],
+                inputs=before['inputs'], outputs=finish['outputs'], reference=compiled['reference'], pdb=compiled['pdb'],
+                runtime_dll=finish['runtime_dll'], runtime_version=data['runtime_version'], dotnet=data['dotnet'])
+    save(directory / 'sealed.json', seal)
+    print(json.dumps(identity(directory / 'sealed.json'), indent=2))
+
+
+def bound(seal_path, digest, profile_sha):
+    raw = read_file(Path(seal_path).resolve())
+    require(sha(raw) == digest, 'Use the exact reviewed/accepted build seal SHA-256')
+    seal = json.loads(raw)
+    require(seal['source_baseline'] == BASELINE and seal['profile']['sha256'] == profile_sha, 'Build seal/profile source identity differs')
+    data = profile(Path(seal['profile']['path']), profile_sha)
+    verify_rows([seal['profile'], seal['build_receipt']] + seal['captures'])
+    verify_rows(seal['inputs'])
+    verify_rows(seal['outputs'] + [seal['reference'], seal['pdb']])
+    receipt = json.loads(read_file(seal['build_receipt']['path']))
+    before, compiled, finish = (json.loads(read_file(row['path'])) for row in seal['captures'])
+    verify_rows(before['text_snapshots'] + [before['preprocess']] + compiled['capture_text'] + compiled['generated_snapshots'])
+    if compiled['generated_sources']:
+        verify_rows(compiled['generated_sources'])
+    admit(before, compiled, finish, receipt)
+    require(seal['inputs'] == before['inputs'] and seal['outputs'] == finish['outputs'] and
+            seal['runtime_dll'] == finish['runtime_dll'] and seal['reference'] == compiled['reference'] and seal['pdb'] == compiled['pdb'] and
+            seal['runtime_version'] == data['runtime_version'] and seal['dotnet'] == data['dotnet'], 'Seal content differs from original build captures')
+    directory = Path(seal['runtime_dll']).parent
+    require({str(path.resolve()) for path in directory.rglob('*') if path.is_file()} == {row['path'] for row in seal['outputs']},
+            'Checker output directory membership changed')
+    return seal
+
+
+def run(args):
+    safe_environment()
+    require(re.fullmatch(r'[a-z0-9][a-z0-9-]*', args.label), 'Use a fresh simple invocation label')
+    seal = bound(args.seal, args.seal_sha256, args.profile_sha256)
+    command = [seal['dotnet'], 'exec', '--roll-forward', 'Disable', '--fx-version', seal['runtime_version'], seal['runtime_dll'], args.mode]
+    if args.mode != 'selfcheck':
+        command.append(str(ROOT))
+    save(HERE / ('invocation-' + args.label + '-started.json'), dict(source_baseline=BASELINE,
+         seal=identity(args.seal), profile_sha256=args.profile_sha256, command=command,
+         runtime_dll=seal['runtime_dll'], runtime_version=seal['runtime_version'], before_verified=True))
+    # v2 generic capture accepts an absolute dotnet host path; toolchain capture remains canonical.
+    runner = logger()
+    code = runner.capture(runner.parser().parse_args(['--label', args.label, '--', *command]))
+    receipt_path = V / 'commands-v2' / args.label / 'receipt.json'
+    receipt = json.loads(read_file(receipt_path))
+    errors = []
+    try:
+        after = bound(args.seal, args.seal_sha256, args.profile_sha256)
+        require(seal == after, 'Checker input/output binding changed during invocation')
+        require(code == 0 and receipt['exit_code'] == 0 and receipt['status'] == 'passed' and receipt['stream_complete'] and
+                receipt['retention_complete'] and receipt['quiescent'], 'Preserved checker invocation was incomplete/failed')
+        require(receipt['command'] == command, 'Actual checker command/path differs')
+    except Exception as error:
+        errors.append(f'{type(error).__name__}: {error}')
+    save(HERE / ('invocation-' + args.label + '.json'), dict(scope='Exact current reviewed checker inputs and sealed original outputs, before and after invocation.',
+         source_baseline=BASELINE, profile_sha256=args.profile_sha256, seal=identity(args.seal),
+         command=command, exit_code=code, runtime_dll=seal['runtime_dll'], runtime_version=seal['runtime_version'],
+         command_receipt=identity(receipt_path), status='failed' if errors else 'passed', errors=errors,
+         before_after_identical=not errors))
+    require(not errors, 'Checker result has no binding admission; inspect the retained failed sidecar')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest='operation', required=True)
+    prepare_parser = sub.add_parser('prepare')
+    prepare_parser.add_argument('--sdk-directory', type=Path, required=True)
+    prepare_parser.add_argument('--runtime-directory', type=Path, required=True)
+    prepare_parser.add_argument('--output', type=Path, required=True)
+    for name in ('build', 'run'):
+        command = sub.add_parser(name)
+        command.add_argument('--label', required=True)
+        command.add_argument('--profile-sha256', required=True)
+        if name == 'build':
+            command.add_argument('--profile', type=Path, required=True)
+        else:
+            command.add_argument('--seal', type=Path, required=True)
+            command.add_argument('--seal-sha256', required=True)
+            command.add_argument('mode', choices=('selfcheck', 'tokens', 'api'))
+    capture_parser = sub.add_parser('capture')
+    capture_parser.add_argument('--directory', type=Path, required=True)
+    capture_parser.add_argument('phase', choices=('before', 'compile', 'finish'))
+    args = parser.parse_args()
+    {'prepare': prepare, 'build': build, 'run': run, 'capture': capture}[args.operation](args)
+
+
+def interrupted(signum, frame):
+    # Match the accepted Core logger entry point: capture() owns the cleanup path.
+    raise KeyboardInterrupt(f'Core checker binding received signal {signum}')
+
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGTERM, interrupted)
+    try:
+        main()
+    except (Exception, KeyboardInterrupt) as error:
+        print(f'Checker binding blocked: {type(error).__name__}: {error}', file=sys.stderr)
+        sys.exit(1)

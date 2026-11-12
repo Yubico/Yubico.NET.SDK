@@ -1,0 +1,11 @@
+--- pre-review/FULL-323
++++ current/FULL-323
+@@ -25,7 +25,7 @@
+ namespace Audit20261111.DocExamples.Full;
+ internal static class Body323
+ {
+-internal static async Task CompileOnly(ISmartCardConnection connection, ReadOnlyMemory<byte> key)
++internal static async Task CompileOnly(ISmartCardConnection connection, byte[] key)
+ {
+ try
+ {

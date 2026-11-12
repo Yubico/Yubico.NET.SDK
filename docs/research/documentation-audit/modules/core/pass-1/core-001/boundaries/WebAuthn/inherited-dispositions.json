@@ -1,0 +1,1353 @@
+[
+  {
+    "key": "audit-v2-20261022-20261031:#4",
+    "source_run": "audit-v2-20261022-20261031",
+    "original_id": "#4",
+    "registry_state_preserved": "still-candidate-applet-profile",
+    "original_definition": {
+      "path": "docs/research/audit-v2-closeout-review.md",
+      "start_line": 17,
+      "end_line": 17,
+      "text": "| #4 / YESDK-1612 — dropped unsigned assertion outputs | Results of an unsupported direct largeBlob mechanism are discarded by the response decoder. | Deferred spec gap, not a completed fix; tested YubiKeys did not produce it. |"
+    },
+    "original_aliases": [
+      "YESDK-1612",
+      "CTAP-IMP-030",
+      "WA-IMP-017"
+    ],
+    "nonadditive_group": "ctap-unsigned-outputs",
+    "current_boundary_outcome": "Retain original dropped key8 output optional-profile gap, not closed by API removal or Core framing.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Credentials/GetAssertionResponse.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| #4 / YESDK-1612 — dropped unsigned assertion outputs | Results of an unsupported direct largeBlob mechanism are discarded by the response decoder. | Deferred spec gap, not a completed fix; tested YubiKeys did not produce it. |",
+    "original_module_xml_reopening_paths": [],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-DEC-002",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-DEC-002",
+    "registry_state_preserved": "needs-decision",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 76,
+      "end_line": 76,
+      "text": "- **CTAP-DEC-002:** G-011 selected native AuthenticationResponse display-field retention needs an actor/"
+    },
+    "original_aliases": [
+      "G-011",
+      "CTAP-IMP-026"
+    ],
+    "nonadditive_group": "native-selected-user-actor",
+    "current_boundary_outcome": "Source actor trace complete; native result retains full modeled User, no response upload serializer exists. Maintainer/coordinator must name disclosure boundary before policy change. No field stripping.",
+    "local_candidate_ids": [
+      "CORE-WA-X008"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "NEEDS-MAINTAINER-DECISION",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+      "src/Ctap2/src/Credentials/GetAssertionResponse.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "- **CTAP-DEC-002:** G-011 selected native AuthenticationResponse display-field retention needs an actor/",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-004",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-IMP-004",
+    "registry_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 44,
+      "end_line": 44,
+      "text": "| CTAP-IMP-004 | A-008/B-08: builder retains secret-bearing clones; generic request/response ownership lacks end-to-end cleanup. | Design explicit byte lifetime/cleanup without assuming read-only views are owners. Reopen builder/raw API, PIN/admin/extension consumers and WA-IMP-013 dependencies. |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-response-ownership",
+    "current_boundary_outcome": "Builder-held copies survive final encoded request clearing; actual WebAuthn tag copies and extension callers have separate owners.",
+    "local_candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "| CTAP-IMP-004 | A-008/B-08: builder retains secret-bearing clones; generic request/response ownership lacks end-to-end cleanup. | Design explicit byte lifetime/cleanup without assuming read-only views are owners. Reopen builder/raw API, PIN/admin/extension consumers and WA-IMP-013 dependencies. |",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-025",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-IMP-025",
+    "registry_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 65,
+      "end_line": 65,
+      "text": "| CTAP-IMP-025 | A-014 / framework probe: default Guid serialization is architecture-independent mixed-endian, while converter swaps only on little-endian hosts. | Code-inferred big-endian portability defect; current little-endian fixture passed, no big-endian execution. Correct serialization explanation now; defer conversion/test changes and avoid claiming unsupported platform qualification. Reopen AAGUID API/internal conversion and platform guidance. |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-aaguid-portability",
+    "current_boundary_outcome": "CTAP endian converter remains independent from default WebAuthn Aaguid; no big-endian run.",
+    "local_candidate_ids": [
+      "CORE-WA-X010"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Cbor/AaguidConverter.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "| CTAP-IMP-025 | A-014 / framework probe: default Guid serialization is architecture-independent mixed-endian, while converter swaps only on little-endian hosts. | Code-inferred big-endian portability defect; current little-endian fixture passed, no big-endian execution. Correct serialization explanation now; defer conversion/test changes and avoid claiming unsupported platform qualification. Reopen AAGUID API/internal conversion and platform guidance. |",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-027",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-IMP-027",
+    "registry_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 174,
+      "end_line": 174,
+      "text": "| CTAP-IMP-027 — ownership design gap; C-004/E-08 | S`Credentials/MakeCredentialResponse.cs:170–223` borrows statement/unsigned slices; get/make/authenticator/attested parsers and S`Extensions/Shared/ExtensionOutput.cs` materialize independent arrays, including largeBlobKey/secret-derived outputs, without disposable result owner. | Choose coherent explicit owner/view/failure lifetime, not a non-disposable RawData clone or advice to zero only one view. Dependencies IMP-004/030/034, B/E/F/G and WA-IMP-006/013. Reopen both response Decode/Raw/outputs/key XML, AuthenticatorData/AttestedCredentialData, attestation slices, all byte-bearing extension DTO/getter ownership and both-layer result-cleanup examples after ownership changes. |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-response-ownership",
+    "current_boundary_outcome": "Typed response/borrowed statement and independent authData/secret arrays survive session disposal; WebAuthn adds further copies.",
+    "local_candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Credentials/MakeCredentialResponse.cs",
+      "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "| CTAP-IMP-027 — ownership design gap; C-004/E-08 | S`Credentials/MakeCredentialResponse.cs:170–223` borrows statement/unsigned slices; get/make/authenticator/attested parsers and S`Extensions/Shared/ExtensionOutput.cs` materialize independent arrays, including largeBlobKey/secret-derived outputs, without disposable result owner. | Choose coherent explicit owner/view/failure lifetime, not a non-disposable RawData clone or advice to zero only one view. Dependencies IMP-004/030/034, B/E/F/G and WA-IMP-006/013. Reopen both response Decode/Raw/outputs/key XML, AuthenticatorData/AttestedCredentialData, attestation slices, all byte-bearing extension DTO/getter ownership and both-layer result-cleanup examples after ownership changes. |",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-029",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-IMP-029",
+    "registry_state_preserved": "needs-decision",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 176,
+      "end_line": 176,
+      "text": "| CTAP-IMP-029 — experimental compatibility/security decision; C-009/E-12 | S`Cose/CoseArkgP256SeedKey.cs:95–167` emits wrapped maps with kty2/alg-65700, accepts outer99 and padded coordinates without nested curve=1 check; expired draft-10 specifies different outer/direct-map profile. | Choose pinned vendor profile vs draft target and security-critical key checks; do not treat sibling agreement as authoritative or authorize production use. Dependencies DEC-003, Core delegated ARKG, E/G. Reopen CoseAlgorithm seed/signing identifiers, seed Encode/Decode/reconstruction XML, CoseKey dispatch, ARKG fixtures, PreviewSignCbor/GeneratedKey/DerivedKey and experimental support claims after profile/validation changes. |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-arkg-profile",
+    "current_boundary_outcome": "CTAP draft-10 wire/profile remains separate from Core draft-09 math; WebAuthn delegates, no silent upgrade.",
+    "local_candidate_ids": [
+      "CORE-WA-X010"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Cose/CoseArkgP256SeedKey.cs",
+      "src/Core/src/Cryptography"
+    ],
+    "reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "| CTAP-IMP-029 — experimental compatibility/security decision; C-009/E-12 | S`Cose/CoseArkgP256SeedKey.cs:95–167` emits wrapped maps with kty2/alg-65700, accepts outer99 and padded coordinates without nested curve=1 check; expired draft-10 specifies different outer/direct-map profile. | Choose pinned vendor profile vs draft target and security-critical key checks; do not treat sibling agreement as authoritative or authorize production use. Dependencies DEC-003, Core delegated ARKG, E/G. Reopen CoseAlgorithm seed/signing identifiers, seed Encode/Decode/reconstruction XML, CoseKey dispatch, ARKG fixtures, PreviewSignCbor/GeneratedKey/DerivedKey and experimental support claims after profile/validation changes. |",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-030",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-IMP-030",
+    "registry_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 177,
+      "end_line": 177,
+      "text": "| CTAP-IMP-030 — support/raw-preservation decision; C-010 | S`Credentials/MakeCredentialResponse.cs` models unsigned key6 but drops unknown outer fields; S`Credentials/GetAssertionResponse.cs` drops S23 key8 and has no complete raw envelope. | Decide unsigned-output/raw escape hatch with IMP-027 ownership, not mandatory support for every optional extension. Dependencies E/G, IMP-032/034. Reopen both response field tables/Decode/unsigned/raw guarantees, module forward-compatibility doctrine, extension raw codecs and WebAuthn boundary after support changes. Introduction-history claim remains unverified. |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-unsigned-outputs",
+    "current_boundary_outcome": "GetAssertion key8 unsigned outputs skipped; WebAuthn largeBlob storage route does not implement optional direct extension.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+      "src/Ctap2/src/Credentials/MakeCredentialResponse.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "| CTAP-IMP-030 — support/raw-preservation decision; C-010 | S`Credentials/MakeCredentialResponse.cs` models unsigned key6 but drops unknown outer fields; S`Credentials/GetAssertionResponse.cs` drops S23 key8 and has no complete raw envelope. | Decide unsigned-output/raw escape hatch with IMP-027 ownership, not mandatory support for every optional extension. Dependencies E/G, IMP-032/034. Reopen both response field tables/Decode/unsigned/raw guarantees, module forward-compatibility doctrine, extension raw codecs and WebAuthn boundary after support changes. Introduction-history claim remains unverified. |",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-039",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-IMP-039",
+    "registry_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 186,
+      "end_line": 186,
+      "text": "| CTAP-IMP-039 — actual algorithm propagation bug; E-14 | S`Extensions/PreviewSign/PreviewSignRegistrationOutput.cs:91–95` passes seed Algorithm(-65700) as DerivedKeyAlgorithm; PreviewSignCbor extraction passes actual derived alg; verifier always P256/SHA256. | Correct propagation and settle supported dispatch with meaningful both-accessor assertions. Dependencies IMP-029/041, C/G. Reopen both generated-key accessor XML, GeneratedKey.DerivedKeyAlgorithm/DerivePublicKey, DerivedKey.VerifySignature, seed/derived/signing identifiers and G generated-output mapping after change. |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-arkg-profile",
+    "current_boundary_outcome": "CTAP generated-key accessor algorithm propagation remains distinct; WebAuthn selected algorithm vs seed key roles and test reflection bridge do not settle it.",
+    "local_candidate_ids": [
+      "CORE-WA-X010"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "| CTAP-IMP-039 — actual algorithm propagation bug; E-14 | S`Extensions/PreviewSign/PreviewSignRegistrationOutput.cs:91–95` passes seed Algorithm(-65700) as DerivedKeyAlgorithm; PreviewSignCbor extraction passes actual derived alg; verifier always P256/SHA256. | Correct propagation and settle supported dispatch with meaningful both-accessor assertions. Dependencies IMP-029/041, C/G. Reopen both generated-key accessor XML, GeneratedKey.DerivedKeyAlgorithm/DerivePublicKey, DerivedKey.VerifySignature, seed/derived/signing identifiers and G generated-output mapping after change. |",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-XREF-001",
+    "source_run": "ctap2-001",
+    "original_id": "CTAP-XREF-001",
+    "registry_state_preserved": "resolved-docs-recheck-boundary",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/boundary-final.md",
+      "start_line": null,
+      "end_line": null,
+      "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+    },
+    "original_aliases": [
+      "WA-XREF-001"
+    ],
+    "nonadditive_group": "assertion-user-docs",
+    "current_boundary_outcome": "Preserve prior resolved User/descriptor documentation for exact scope. WA-IMP-010 recovery and CTAP-DEC-002 actor decision remain separately open.",
+    "local_candidate_ids": [
+      "CORE-WA-X007",
+      "CORE-WA-X008"
+    ],
+    "documentation_state": "PRIOR-RESOLUTION-PRESERVED",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+      "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "docs/migration/v1-to-v2.md",
+      "src/Ctap2/README.md",
+      "src/Ctap2/CLAUDE.md"
+    ],
+    "original_precise_trigger": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found.",
+    "original_module_xml_reopening_paths": [
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Ctap2/src/ICtap2Session.cs",
+      "src/Ctap2/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-001",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-001",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 66,
+      "end_line": 66,
+      "text": "| WA-IMP-001 | A-003: Enterprise does not send CTAP enterprise-attestation request; Indirect has no anonymization service | Enterprise/attestation policy or forwarding; enum, creation option, guide, backend |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-attestation-policy",
+    "current_boundary_outcome": "Retained applet policy: Enterprise is not forwarded and Indirect has no anonymization service; None/self policy is separate.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Preferences/AttestationPreference.cs",
+      "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs",
+      "src/WebAuthn/src/Client/WebAuthnBackend.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-001 | A-003: Enterprise does not send CTAP enterprise-attestation request; Indirect has no anonymization service | Enterprise/attestation policy or forwarding; enum, creation option, guide, backend |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-002",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-002",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 67,
+      "end_line": 67,
+      "text": "| WA-IMP-002 | A-005/B-007/B-012/C-D2: incomplete ceremony/extension error normalization and unsupported-previewSign policy | Error/isolation policy changes; public methods/errors, codecs/sessions, selection/blob/previewSign guidance |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-error-provenance",
+    "current_boundary_outcome": "Retained error/isolation policy: GetInfo/token acquisition/output failures lie outside attempt mapper; unsupported previewSign omitted.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "src/WebAuthn/src/Client/WebAuthnClient.PinUvAuth.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-002 | A-005/B-007/B-012/C-D2: incomplete ceremony/extension error normalization and unsupported-previewSign policy | Error/isolation policy changes; public methods/errors, codecs/sessions, selection/blob/previewSign guidance |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-003",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-003",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 68,
+      "end_line": 68,
+      "text": "| WA-IMP-003 | A-006: cooperative timeout can race success; oversized delay uses framework exception | Timeout input/return policy; both options, deadline, cancellation guide, hardware-test assumptions |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-timeout-outcome",
+    "current_boundary_outcome": "Retained cooperative timer and oversized-delay policy; Core native completion/drain is a separate mechanism.",
+    "local_candidate_ids": [
+      "CORE-WA-X005"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+      "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+      "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-003 | A-006: cooperative timeout can race success; oversized delay uses framework exception | Timeout input/return policy; both options, deadline, cancellation guide, hardware-test assumptions |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-004",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-004",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 69,
+      "end_line": 69,
+      "text": "| WA-IMP-004 | A-009: discouraged-UV hardware assertion lacks capability guards | Test owner adds device capability applicability; test comments and UV guidance |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-uv-test-applicability",
+    "current_boundary_outcome": "Retained test applicability: discouraged-UV hardware fixture lacks makeCredUvNotRqd/alwaysUv guards; existing comments disclose it.",
+    "local_candidate_ids": [
+      "CORE-WA-X012"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+      "src/WebAuthn/src/Client/WebAuthnBackend.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-004 | A-009: discouraged-UV hardware assertion lacks capability guards | Test owner adds device capability applicability; test comments and UV guidance |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-005",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-005",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 70,
+      "end_line": 70,
+      "text": "| WA-IMP-005 | A-012: manual escaping differs from exact CCDToString for controls; low-level builder validation boundary | Serializer/control/surrogate policy; client-data XML/tests and conformance statements |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-clientdata-serialization",
+    "current_boundary_outcome": "Retained manual CCDToString control-escape/low-level builder gap; browser serializer compliance is not supplied by Core.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/WebAuthnClientData.cs",
+      "src/WebAuthn/src/Client/WebAuthnClient.Validation.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-005 | A-012: manual escaping differs from exact CCDToString for controls; low-level builder validation boundary | Serializer/control/surrogate policy; client-data XML/tests and conformance statements |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-006",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-006",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 71,
+      "end_line": 71,
+      "text": "| WA-IMP-006 | A-013: borrowed attestation CBOR can diverge from parsed data if mutated | Decoder snapshot/ownership change; Decode/RawCbor/Encode and generated-key attestation guidance |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-response-ownership",
+    "current_boundary_outcome": "Confirmed borrowed attestation outer/statement lifetime; snapshot design remains applet-owned and documented.",
+    "local_candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Attestation/WebAuthnAttestationObject.cs",
+      "src/WebAuthn/src/Extensions/PreviewSign/GeneratedSigningKey.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-006 | A-013: borrowed attestation CBOR can diverge from parsed data if mutated | Decoder snapshot/ownership change; Decode/RawCbor/Encode and generated-key attestation guidance |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-007",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-007",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 72,
+      "end_line": 72,
+      "text": "| WA-IMP-007 | A-014: default Aaguid empty span and nonreflexive equality | Zero/default semantics fix; Aaguid docs and equality/default regression evidence |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-aaguid-portability",
+    "current_boundary_outcome": "Confirmed default Aaguid empty span/nonreflexive equality; separate CTAP endian conversion; registration uses explicit constructor.",
+    "local_candidate_ids": [
+      "CORE-WA-X010"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Cose/Aaguid.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-007 | A-014: default Aaguid empty span and nonreflexive equality | Zero/default semantics fix; Aaguid docs and equality/default regression evidence |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-008",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-008",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 73,
+      "end_line": 73,
+      "text": "| WA-IMP-008 | A-018: test checks disposal guard, not actual shared-memory zeroing | Test owner adds retained-view assertion; test documentation and verification claims |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-zeroing-test",
+    "current_boundary_outcome": "Retained oracle limitation: shared-secret test checks pre-disposal copy/access guard, not retained actual owner view.",
+    "local_candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X012"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Client/PinUvSharedSecret.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-008 | A-018: test checks disposal guard, not actual shared-memory zeroing | Test owner adds retained-view assertion; test documentation and verification claims |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-009",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-009",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 74,
+      "end_line": 74,
+      "text": "| WA-IMP-009 | A-021: protocol2 hardcoded, no protocol1 negotiation; built-in-UV token capability checks | Backend negotiation/UV support; prerequisites, UV table, protocol/context/PRF docs |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-pin-negotiation",
+    "current_boundary_outcome": "Confirmed V2-only backend; no V1 negotiation and built-in UV selects without full token capability preflight.",
+    "local_candidate_ids": [
+      "CORE-WA-X003",
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/WebAuthnBackend.cs",
+      "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-009 | A-021: protocol2 hardcoded, no protocol1 negotiation; built-in-UV token capability checks | Backend negotiation/UV support; prerequisites, UV table, protocol/context/PRF docs |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-010",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-010",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 75,
+      "end_line": 75,
+      "text": "| WA-IMP-010 | A-Q1: allowed final credential-descriptor omission publishes empty ID | Descriptor recovery; matcher/result/selection XML, guide, credential-specific extensions |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-descriptor-recovery",
+    "current_boundary_outcome": "Confirmed final omission loss after known/narrowed singleton probe. Request association must survive both matcher and response construction; no first-original-entry guess.",
+    "local_candidate_ids": [
+      "CORE-WA-X007"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs",
+      "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+      "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+      "src/WebAuthn/src/Client/CredentialFilter.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-010 | A-Q1: allowed final credential-descriptor omission publishes empty ID | Descriptor recovery; matcher/result/selection XML, guide, credential-specific extensions |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-011",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-011",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 76,
+      "end_line": 76,
+      "text": "| WA-IMP-011 | B-001/C-D1: PRF does not enforce verified variant as WebAuthn requires | Coordinated PRF UV policy; both ceremonies, input/processor/results, README/CLAUDE/architecture, relevant CTAP guidance |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-prf-uv",
+    "current_boundary_outcome": "Confirmed missing verified-PRF UV override; context/token/salt correctness is no replacement.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Processing/Processors/PrfProcessor.cs",
+      "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+      "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-011 | B-001/C-D1: PRF does not enforce verified variant as WebAuthn requires | Coordinated PRF UV policy; both ceremonies, input/processor/results, README/CLAUDE/architecture, relevant CTAP guidance |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-012",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-012",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 77,
+      "end_line": 77,
+      "text": "| WA-IMP-012 | B-002: credProtect enforcement flag ignored, including unsupported devices | Client enforcement and CTAP builder field use; input/output/processor/session XML and guide |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-credprotect",
+    "current_boundary_outcome": "Confirmed credProtect enforcement ignored on supported/unsupported paths; returned actual policy check happens after creation.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Inputs/CredProtectInput.cs",
+      "src/WebAuthn/src/Extensions/Processing/Processors/CredProtectProcessor.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-012 | B-002: credProtect enforcement flag ignored, including unsupported devices | Client enforcement and CTAP builder field use; input/output/processor/session XML and guide |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-013",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-013",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 78,
+      "end_line": 78,
+      "text": "| WA-IMP-013 | B-003: sensitive result ownership/zeroing absent, PRF intermediate copies/input salt temporary uncleared | Ownership API/cleanup pass with narrow CTAP dependencies; all PRF/blob/result/client lifetime docs and examples |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-response-ownership",
+    "current_boundary_outcome": "Confirmed layered PRF/blob/input/builder/result ownership gaps with local token/shared-secret clears. No Core-wide or all-buffer erasure closure.",
+    "local_candidate_ids": [
+      "CORE-WA-X006"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Codec/PrfCodec.cs",
+      "src/WebAuthn/src/Extensions/Outputs/PrfOutput.cs",
+      "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-013 | B-003: sensitive result ownership/zeroing absent, PRF intermediate copies/input salt temporary uncleared | Ownership API/cleanup pass with narrow CTAP dependencies; all PRF/blob/result/client lifetime docs and examples |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-014",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-014",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 79,
+      "end_line": 79,
+      "text": "| WA-IMP-014 | B-005: largeBlob Required can produce unsupported credential | Required registration policy; largeBlob enum/input/output, effective RK guidance, tests |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-blob-required",
+    "current_boundary_outcome": "Confirmed Required blob can return unsupported created credential for effective non-RK or missing response key.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Inputs/LargeBlobInput.cs",
+      "src/WebAuthn/src/Extensions/Inputs/LargeBlobSupport.cs",
+      "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-014 | B-005: largeBlob Required can produce unsupported credential | Required registration policy; largeBlob enum/input/output, effective RK guidance, tests |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-015",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-015",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 80,
+      "end_line": 80,
+      "text": "| WA-IMP-015 | B-006: largeBlob writes do not validate exactly one original allowed credential | Request validation; write input, session/processor/tests and guide |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-blob-cardinality",
+    "current_boundary_outcome": "Confirmed original exactly-one allowed credential check absent for blob writes; singleton narrowing does not satisfy it.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+      "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-015 | B-006: largeBlob writes do not validate exactly one original allowed credential | Request validation; write input, session/processor/tests and guide |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-016",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-016",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 81,
+      "end_line": 81,
+      "text": "| WA-IMP-016 | B-007: null array becomes present empty memory; isolated .NET check confirmed conversion | Blob result policy fix; Blob optionality/error documentation |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-blob-absence",
+    "current_boundary_outcome": "Confirmed source null byte[] conversion produces present empty memory; read-error/presence policy remains distinct.",
+    "local_candidate_ids": [
+      "CORE-WA-X006",
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Outputs/LargeBlobOutput.cs",
+      "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-016 | B-007: null array becomes present empty memory; isolated .NET check confirmed conversion | Blob result policy fix; Blob optionality/error documentation |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-017",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-017",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 82,
+      "end_line": 82,
+      "text": "| WA-IMP-017 | B-008: direct largeBlob route/pinless writes unsupported by current SDK path | Feature support decision, not automatically a required implementation; capability/permissions/storage/UV guidance |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-unsigned-outputs",
+    "current_boundary_outcome": "Retained optional direct-largeBlob/pinless-write support decisions; CTAP key8 drop keeps original #4/CTAP-IMP-030 aliases.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+      "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-017 | B-008: direct largeBlob route/pinless writes unsupported by current SDK path | Feature support decision, not automatically a required implementation; capability/permissions/storage/UV guidance |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-018",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-018",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 83,
+      "end_line": 83,
+      "text": "| WA-IMP-018 | B-010: MinPinLength Requested=false ignored when object present | Input handling decision; aggregate parameter, processor/codec and CTAP reused input |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-minpin-input",
+    "current_boundary_outcome": "Confirmed nonnull minPinLength input requests true regardless Requested; policy disclosure only.",
+    "local_candidate_ids": [
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Processing/Processors/MinPinLengthProcessor.cs",
+      "src/WebAuthn/src/Extensions/Codec/MinPinLengthCodec.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-018 | B-010: MinPinLength Requested=false ignored when object present | Input handling decision; aggregate parameter, processor/codec and CTAP reused input |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-019",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-019",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 84,
+      "end_line": 84,
+      "text": "| WA-IMP-019 | B-013: valid empty generated previewSign handles rejected by signing params | Constructor/round-trip policy; generated key/params/exception docs and tests |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "ctap-arkg-profile",
+    "current_boundary_outcome": "Confirmed empty generated handle cannot round-trip through WebAuthn signing params; separate from CTAP ARKG wire/math.",
+    "local_candidate_ids": [
+      "CORE-WA-X010",
+      "CORE-WA-X011"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+      "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-019 | B-013: valid empty generated previewSign handles rejected by signing params | Constructor/round-trip policy; generated key/params/exception docs and tests |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-020",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-020",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 85,
+      "end_line": 85,
+      "text": "| WA-IMP-020 | B-016: previewSign inner fixture includes non-required algorithm field | Test owner adds minimal flags-only inner shape; fixture commentary and decoder evidence |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-preview-fixture",
+    "current_boundary_outcome": "Retained minimal-inner fixture oracle gap; existing test uses extra algorithm and tolerated outer flags; no vendor variant proof.",
+    "local_candidate_ids": [
+      "CORE-WA-X012"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs",
+      "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-020 | B-016: previewSign inner fixture includes non-required algorithm field | Test owner adds minimal flags-only inner shape; fixture commentary and decoder evidence |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-021",
+    "source_run": "webauthn-001",
+    "original_id": "WA-IMP-021",
+    "registry_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 86,
+      "end_line": 86,
+      "text": "| WA-IMP-021 | B-R1: previewSign two-credential test does not assert returned-ID membership before selecting verification key | Test owner strengthens ID association assertions; test summary and returned-credential evidence |"
+    },
+    "original_aliases": [],
+    "nonadditive_group": "wa-preview-membership",
+    "current_boundary_outcome": "Retained dual-preview test membership gap: non-first reported ID selects second verification key without explicit membership check.",
+    "local_candidate_ids": [
+      "CORE-WA-X007",
+      "CORE-WA-X012"
+    ],
+    "documentation_state": "QUALIFICATIONS-RETAINED; REOPEN-ON-EXACT-TRIGGER",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs",
+      "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+      "src/Ctap2/src/Ctap2Session.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "reopening_paths": [
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/WebAuthn/README.md",
+      "src/WebAuthn/CLAUDE.md",
+      "docs/architecture/webauthn-extension-processing.md",
+      "docs/usage/user-interaction.md",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "original_precise_trigger": "| WA-IMP-021 | B-R1: previewSign two-credential test does not assert returned-ID membership before selecting verification key | Test owner strengthens ID association assertions; test summary and returned-credential evidence |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-XREF-001",
+    "source_run": "webauthn-001",
+    "original_id": "WA-XREF-001",
+    "registry_state_preserved": "resolved-docs-recheck-boundary",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 87,
+      "end_line": 87,
+      "text": "| WA-XREF-001 | A-002: CTAP2 GetAssertionResponse.User repeats inaccurate UV/discoverable restriction | Future CTAP2 documentation cycle; User entity/handle/display fields |"
+    },
+    "original_aliases": [
+      "CTAP-XREF-001"
+    ],
+    "nonadditive_group": "assertion-user-docs",
+    "current_boundary_outcome": "Preserve prior resolved User/descriptor documentation for exact scope. WA-IMP-010 recovery and CTAP-DEC-002 actor decision remain separately open.",
+    "local_candidate_ids": [
+      "CORE-WA-X007",
+      "CORE-WA-X008"
+    ],
+    "documentation_state": "PRIOR-RESOLUTION-PRESERVED",
+    "implementation_state": "NO-NEW-CLOSURE",
+    "decision_state": "ORIGINAL-APPLET-OR-MECHANISM-OWNER",
+    "qualification": "No fresh SDK/native/crypto/device execution; source boundary rebaseline only",
+    "current_implementation_paths": [
+      "src/Ctap2/src/Credentials/GetAssertionResponse.cs"
+    ],
+    "reopening_paths": [
+      "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+      "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+      "src/WebAuthn/README.md",
+      "src/Ctap2/README.md"
+    ],
+    "original_precise_trigger": "| WA-XREF-001 | A-002: CTAP2 GetAssertionResponse.User repeats inaccurate UV/discoverable restriction | Future CTAP2 documentation cycle; User entity/handle/display fields |",
+    "original_module_xml_reopening_paths": [
+      "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "src/WebAuthn/src/IYubiKeyExtensions.cs"
+    ],
+    "independent_review": "PENDING"
+  }
+]

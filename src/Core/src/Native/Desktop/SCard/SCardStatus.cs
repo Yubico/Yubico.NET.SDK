@@ -14,6 +14,7 @@
 
 namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
 
+/// <summary>Windows card-status values, distinct from state-change flags and pcsc-lite's status flags.</summary>
 internal enum SCARD_STATUS
 {
     UNKNOWN = 0,

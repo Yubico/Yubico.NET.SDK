@@ -1,0 +1,345 @@
+[
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "source_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 569,
+        "range_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "source_sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 80,
+        "range_sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+    "source_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 140,
+        "range_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "source_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 389,
+        "range_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+    "source_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 134,
+        "range_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "source_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 205,
+        "range_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "source_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 42,
+        "range_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Devices/FirmwareVersion.cs",
+    "source_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 277,
+        "range_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "source_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 207,
+        "range_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs",
+    "source_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 44,
+        "range_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "source_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 100,
+        "range_sha256": "d1f1c65a748969923832a2697b408b443f31e9e566b7575ea5bbd1f48efe65f6"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+    "source_sha256": "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 49,
+        "range_sha256": "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+    "source_sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 77,
+        "range_sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+    "source_sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 144,
+        "range_sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "source_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 210,
+        "range_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+    "source_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 60,
+        "range_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "source_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 121,
+        "range_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "source_sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 189,
+        "range_sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+    "source_sha256": "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 182,
+        "range_sha256": "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Utilities/Tlv.cs",
+    "source_sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+    "ranges": [
+      {
+        "first_line": 15,
+        "last_line": 204,
+        "range_sha256": "28b3ada8930a02e376ed04f9f7f349953a704aadaf0ae20af9899e6f851bbcef"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Utilities/TlvHelper.cs",
+    "source_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 269,
+        "range_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "source_sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 84,
+        "range_sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "source_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "ranges": [
+      {
+        "first_line": 175,
+        "last_line": 235,
+        "range_sha256": "cfd2a783845567b992f4a0ccd05c099b60a3f26cf02deea0251028aa2ebd51b4"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "source_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "ranges": [
+      {
+        "first_line": 807,
+        "last_line": 820,
+        "range_sha256": "10852d65982cf6df1d872c604a3ec44c94697dff0c017d1e9db39a82319ab757"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "source_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 125,
+        "range_sha256": "db195a52a00582b2a720c60bac1841105b2c8b3d72381b5fb1319b9ff44f8662"
+      }
+    ],
+    "role": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged.",
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes."
+  },
+  {
+    "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+    "role": "ROUTING-SEED-NOT-AN-OPENPGP-CALLER",
+    "reason": "OpenPGP resolves SmartCard only. HID slot/OTP machinery has no direct OpenPGP execution path; physical grouping and YubiKeyDevice opening mechanism reuse the completed A/B1 report, without claiming a fresh complete source read of this seed.",
+    "unit_credit": 0
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyDevice.cs",
+    "role": "ROUTING-SEED-NOT-AN-OPENPGP-CALLER",
+    "reason": "OpenPGP resolves SmartCard only. HID slot/OTP machinery has no direct OpenPGP execution path; physical grouping and YubiKeyDevice opening mechanism reuse the completed A/B1 report, without claiming a fresh complete source read of this seed.",
+    "unit_credit": 0
+  },
+  {
+    "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+    "role": "ROUTING-SEED-NOT-AN-OPENPGP-CALLER",
+    "reason": "OpenPGP resolves SmartCard only. HID slot/OTP machinery has no direct OpenPGP execution path; physical grouping and YubiKeyDevice opening mechanism reuse the completed A/B1 report, without claiming a fresh complete source read of this seed.",
+    "unit_credit": 0
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+    "well_formed_xml_comment_blocks": 3,
+    "result": "PASS",
+    "limitation": "XML syntax only; no cref resolution or compiler/analyzer execution."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+    "well_formed_xml_comment_blocks": 9,
+    "result": "PASS",
+    "limitation": "XML syntax only; no cref resolution or compiler/analyzer execution."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+    "well_formed_xml_comment_blocks": 3,
+    "result": "PASS",
+    "limitation": "XML syntax only; no cref resolution or compiler/analyzer execution."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+    "well_formed_xml_comment_blocks": 6,
+    "result": "PASS",
+    "limitation": "XML syntax only; no cref resolution or compiler/analyzer execution."
+  }
+]

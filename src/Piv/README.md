@@ -26,6 +26,12 @@ signing, decryption, ECDH key agreement, and attestation, on top of `Yubico.Yubi
 Yubico dates released-device AES management support to **5.4.2**; the SDK gate is 5.4.0. High-level
 `DecryptAsync` also needs metadata (5.3.0), even where raw RSA operations work on older firmware.
 
+Session creation selects PIV and reads its FD version before configuring framing and optional SCP. The detected
+applet version, Management/discovery metadata and the effective `FirmwareVersionOverride` are separate values;
+an override changes compatibility policy without skipping the probe or identifying physical firmware. Metadata
+determines the management-key type when available; the detected version, not the override, supplies its fallback
+at creation and reset. Major-zero versions use the SDK's optimistic development convention, not a physical 5.8 floor.
+
 ## Installation
 
 ```bash
@@ -61,6 +67,26 @@ the device reports success without a count, it throws `InvalidOperationException
 Later fragments assume these directives and a `device` obtained the same way. Run persistent-state
 examples only on a device you are authorized to provision: key generation can replace an existing key.
 
+The device extension opens a hidden SmartCard connection and transfers its ownership to the returned session.
+It selects that transport once; a failed open or initialization does not try HID. The direct
+`PivSession.CreateAsync(connection, ...)` factory instead borrows your open connection: dispose the session before
+reusing the connection, then dispose the connection in its enclosing `await using` scope. Both routes bind before
+SELECT and publish readiness after management-type discovery. Failed direct creation disposes/detaches the session
+without closing your connection; failed convenience creation also cleans up its hidden connection.
+
+For SCP, pass `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile and keep its inputs alive
+through actual factory completion. The session owns the effective protocol; its backend borrows it. The caller owns
+the SCP parameters: SCP03 parameter disposal disposes the retained `StaticKeys` owner, whose arrays are copies of
+the original inputs. SCP11 parameters copy certificate-list membership but retain the supplied objects; disposal
+disposes the OCE private key and certificates, not the SD public key. Record copies can share these contained owners.
+Keep one explicit cleanup owner and avoid disposing an alias during creation. See the [Core guide](../Core/README.md)
+for configuration; setup flags and generic version gates do not establish full PIV SCP/profile interoperability.
+
+Await and serialize complete public tasks before another operation or disposal. Core excludes overlapping logical
+APDU exchanges, including chaining/SCP, but management authentication uses two exchanges and PIN-only/reset workflows
+span several. Parsing, prompt callbacks and local RSA unpadding can continue after an exchange leaves the guard.
+Keep borrowed credentials, keys, peer objects and prompt services alive through that whole task.
+
 ## Common operations
 
 ### Authenticate and generate a key pair
@@ -94,6 +120,13 @@ Failed management authentication clears a previous recorded success; successful 
 updates the type and preserves authentication without retaining the supplied key bytes. A SET security-status
 failure clears the flag; other SET command failures preserve it. External card changes can still invalidate
 what a local observation tells you.
+
+`PinPolicy.Once` follows card-controlled verification state, including application-selection effects; it is not a
+per-managed-session isolation guarantee. Disposing a directly created session leaves its borrowed connection open
+and sends no explicit PIN-clear command. Built-in PC/SC connections default to strict Exclusive sharing. Opting into
+Shared or fallback accepts coexistence rather than establishing PIN isolation. Connection cleanup requests UNPOWER;
+that request and successful release checks are distinct from observing physical power or subsequent PIN state.
+See [PC/SC sharing and migration](../Core/README.md#pcsc-sharing-policy-and-migration) for the application-wide policy.
 
 To rotate a management key, authenticate the current key, securely back up the replacement, then call
 `SetManagementKeyAsync(newType, newKey, requireTouch: false, cancellationToken: token)`. Clear your buffers
@@ -147,11 +180,12 @@ a disposable host object containing public material only. The host verifies the 
 ```csharp
 await using var session = await device.CreatePivSessionAsync();
 
-byte[] pin = Encoding.UTF8.GetBytes("123456");
-byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
+byte[] digest = [];
 Memory<byte> signature = Memory<byte>.Empty;
+byte[] pin = Encoding.UTF8.GetBytes("123456");
 try
 {
+    digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
     await session.VerifyPinAsync(pin);
     var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
         ?? throw new InvalidOperationException("Generate a P-256 key first.");
@@ -185,11 +219,12 @@ using var certificate = await session.GetCertificateAsync(Slot.KeyManagement)
     ?? throw new InvalidOperationException("Provision a matching RSA certificate first.");
 using var rsa = certificate.GetRSAPublicKey()
     ?? throw new InvalidOperationException("The certificate must contain an RSA public key.");
-byte[] pin = Encoding.UTF8.GetBytes("123456");
-byte[] expected = Encoding.UTF8.GetBytes("known plaintext");
+byte[] expected = [];
 Memory<byte> plaintext = Memory<byte>.Empty;
+byte[] pin = Encoding.UTF8.GetBytes("123456");
 try
 {
+    expected = Encoding.UTF8.GetBytes("known plaintext");
     byte[] ciphertext = rsa.Encrypt(expected, RSAEncryptionPadding.OaepSHA256);
     await session.VerifyPinAsync(pin);
     plaintext = await session.DecryptAsync(Slot.KeyManagement, ciphertext, RSAEncryptionPadding.OaepSHA256);
@@ -208,6 +243,11 @@ finally
 `SignOrDecryptAsync` returns the padded representative. `CalculateSecretAsync` accepts a matching
 P-256/P-384 or X25519 peer public key and returns raw agreement bytes. Your protocol authenticates the peer,
 selects a KDF and derives application keys; clear the raw shared secret after derivation.
+
+Both examples enter `try` immediately after acquiring the PIN buffer, before hashing or allocating the known-plaintext
+fixture. Their `finally` blocks clear that PIN and each successfully assigned digest, signature, known-plaintext or
+output buffer, including when later setup fails. Keep this acquisition-to-cleanup scope when adapting them. Independent source,
+provider or application copies retain their own cleanup requirements; clearing these buffers does not clear those copies.
 
 ### Manage PIN/PUK retries and recover access
 
@@ -310,6 +350,10 @@ still throw after the reset has applied. Inspect fresh state before retrying. Bi
 device-reset route; the PIV implementation's Bio preflight remains unfinished. Consult the product's reset
 procedure before invoking this workflow on Bio hardware.
 
+Reset keeps the current backend/protocol and performs no reselection or fresh SCP handshake. The inherited channel
+authentication flag therefore supplies no post-reset restoration evidence. After uncertain reset or recovery, await
+actual work and teardown, reopen and inspect persistent state before retrying; retain independent key/recovery backups.
+
 ## User interaction
 
 - Verify the PIN before private-key operations in slots created with `PinPolicy.Once` or `Always`.
@@ -340,6 +384,13 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
 `Default`, and an empty slot are silent. A request callback failure prevents the private-key command.
 Cancellation is cooperative: await the operation's terminal result and transport drain before retrying,
 disposing or inspecting a possibly changed device. A token alone supplies no native-call deadline.
+
+The session retains but never disposes your prompt service. Keep it alive through final callback and public-task
+completion. PIV's request and resolution callbacks run outside the APDU exchange guard; protocol drain alone does
+not cover them or local unpadding. Cancellation is checked before each exchange is admitted. After admission the
+constituent traffic uses `CancellationToken.None`, so successful completion can follow cancellation; a later workflow
+exchange can still reject the canceled token. Ending an outer wait does not stop the original task or permit early
+input cleanup. No PIV `TimedOut` notification or native interruption guarantee follows from these callbacks.
 
 ## Constraints
 
@@ -395,6 +446,10 @@ development firmware retains Core's permissive compatibility handling.
   Clear owned plaintext, shared secrets, and temporary PINs with `CryptographicOperations.ZeroMemory(result.Span)`
   after use. This replaces read-only result memory from earlier previews. Internal parsers retain mutable
   owned buffers until transfer; raw APDU responses are cleared through their owner's `Clear()` method.
+  Clearing reaches that response's owned copy, including status bytes, not its constructor source, transport staging,
+  earlier chained fragments or SCP/provider intermediates. Each has a separate owner. TLV values alias their owner;
+  copy results before disposing the TLV. Public metadata/certificate copies need ownership accuracy rather than
+  automatic secret classification. PRINTED management keys, private inputs and agreement/plaintext outputs are sensitive.
 
 - PINs, PUKs, management keys, and temporary PINs cross the API as `ReadOnlyMemory<byte>`. The session never
   zeroes a buffer you passed in; zero it yourself with `CryptographicOperations.ZeroMemory` in a `finally`.
@@ -420,6 +475,14 @@ unattended coverage with `dotnet toolchain.cs -- test --integration --project Yu
 The qualified selector targets the module's test projects in a checkout that also contains archived audit hosts.
 These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch
 and hotplug tests need separate human coordination; multi-key contention tests need two attached keys.
+
+Interpret each assertion at its actual boundary. Actual-array observers in crypto/raw-object tests reach managed
+command/response owners, not the full native/chaining/SCP/provider copy graph. Request-callback cancellation is
+pre-wire; it does not demonstrate interruption of an admitted operation. Reset command-membership assertions check
+neither a complete sequence nor erasure. Hotplug tokens/windows do not bound admitted native work, and uncertain
+release can retain a claim. Physical PIN/power, separate-process isolation, touch, hotplug and touch-dependent
+cancellation/recovery remain separately qualified/deferred; historical test outcomes do not cover another device,
+firmware, transport or OS.
 
 ## Related
 

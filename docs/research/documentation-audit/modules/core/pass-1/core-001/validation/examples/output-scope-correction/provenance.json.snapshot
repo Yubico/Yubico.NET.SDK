@@ -1,0 +1,41 @@
+{
+  "scope": "One compile-only accepted A/C example pilot; no changes to qualified tooling or SDK source",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "readonly_reuse": [
+    {
+      "path": "validation/run-command.py",
+      "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "use": "Load/parser/capture API from the qualified v2 adapter. The example wrapper preserves the matching SIGTERM exception path, full command receipts/streams/retention/quiescence and home-backed environment."
+    },
+    {
+      "path": "validation/foundation.py",
+      "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "use": "Current Core root/runtime/source-pin and environment helpers; every global remains unchanged."
+    },
+    {
+      "path": "validation/checker-binding/bind.py",
+      "sha256": "a6c2c0954772242d99fed2460f7c473780835605752c59732d32b76002cb8cee",
+      "use": "Only compiler_file_arguments(lines), the qualified literal comma/quote-aware descriptor grammar. This pilot's captured file descriptors are absolute; no checker context globals are rebound, no checker build/capture/admission or binary execution is called."
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/consumer-proof/Capture.targets",
+      "sha256": "3242fe01c0f0ac6d7a1d27bd4539da21fb143e4c5b882aaee30e629532f4bf8a",
+      "use": "Readonly template for ProvideCommandLineArgs and AfterTargets=CoreCompile actual item/argument observation. New capture hook observes this example host only, waits for SDK Source Link inputs, and writes only the new examples attempt."
+    },
+    {
+      "path": "validation/commands-v2/sdk-info-first/receipt.json",
+      "sha256": "3ba578884d76fec9e3319d3f09da16c9a79b5b55f675391c64a8907931ba9bd8",
+      "use": "Existing passed SDK observation; reuse instead of issuing a duplicate exclusive SDK-info label."
+    },
+    {
+      "path": "validation/commands-v2/sdk-info-first/stdout.log",
+      "sha256": "d913f0b2eaca6e37408d93b9d50a5dd7c8ca90a27494a7219153176805d15572",
+      "use": "SDK 10.0.404 / runtime 10.0.15 host observation, separately checked against actual compiler policy at the future build."
+    }
+  ],
+  "body_sources": "A revision-2 example-bodies.json; C examples.json carried forward unchanged by accepted C revision-2 review. Only primary-checkout accepted bytes are extracted.",
+  "transformations": "Retain exact XML region bytes and source offsets. The compile derivative removes XML documentation prefixes/boundary blank lines and decodes XML entities. Wrappers add only imports, containing classes and typed method parameters. Manager's import prefix remains unchanged outside its containing class.",
+  "context": "One non-packable Library host with actual Core/Piv/WebAuthn ProjectReferences, including transitive Ctap2. Two internal A expressions retain explicit access qualification rather than implementation copies or a new IVT grant.",
+  "limits": "Static preparation only. Actual canonical clean compilation, effective analyzer/compiler observation and original output identity proof await the coordinator. No example, crypto/provider, prompt, WebAuthn, native or device code is executed.",
+  "extension": "Append only independently accepted later batch entries to a fresh plain manifest and source descriptor; preserve earlier manifests/attempts. Non-C#/output/historical/internal examples retain explicit dispositions. No generic new compiler framework or package interpreter."
+}

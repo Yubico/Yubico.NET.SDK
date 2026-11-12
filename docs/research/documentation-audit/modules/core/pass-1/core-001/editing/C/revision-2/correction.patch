@@ -1,0 +1,16 @@
+--- reviewed/src/Core/src/Cryptography/AesUtilities.cs
++++ revision-2/src/Core/src/Cryptography/AesUtilities.cs
+@@ -18,8 +18,11 @@
+ {
+     /// <summary>Internal raw AES helpers; callers supply protocol-specific integrity protection.</summary>
+     /// <remarks>
+-    /// Inputs remain borrowed and returned arrays are independent. Local key/IV copies are cleared,
+-    /// but plaintext input copies and MemoryStream storage have separate lifetimes and are not explicitly
++    /// Inputs remain borrowed and returned arrays are independent. The finally blocks clear local
++    /// key copies and, in the CBC paths, IV copies once their protected scopes are entered. In either
++    /// CBC path, failure while allocating the IV copy can leave the preceding key copy uncleared.
++    /// BlockCipher has one key-copy allocation before try, followed directly by its protected scope.
++    /// Plaintext input copies and MemoryStream storage have separate lifetimes and are not explicitly
+     /// cleared here. Disposing the crypto objects therefore does not establish all-buffer erasure.
+     /// </remarks>
+     internal static class AesUtilities

@@ -1,0 +1,125 @@
+{
+  "state": "CURRENT-MAPPING-SNAPSHOT-ONLY; REFRESH-AFTER-FINAL-INTEGRATION-FREEZE",
+  "meaning": "Current-primary editor transfers continued after the one mapping refresh. Original population, exact proposed IDs and bound patch inputs remain stable. Stop chasing active transfers; use pinned original whole units now, and require matching current hashes or refreshed mappings before current-context review.",
+  "changed_paths_observed": 14,
+  "changes": [
+    {
+      "path": "src/Oath/CLAUDE.md",
+      "captured_sha256": "e6a32ea3c95cf9f88028b9eb733965cb9ae127fbbf736fd076f83002c3e83a1c",
+      "observed_sha256": "33e4b003c3645448fa19af00ca1b6a443d07ba2b611fe4c8d35712a19a8a266e",
+      "selected_ids": [
+        "core-001:unit:1b7bc942bb2b181f"
+      ]
+    },
+    {
+      "path": "src/Oath/README.md",
+      "captured_sha256": "a6f5089467cf960f2ea86c34d836d585be86f2afc3dd7730e8e6ec5d53c3bcb1",
+      "observed_sha256": "a538193a8720ba3203e62a18c2855e0a8e968fc291e41ff32ae4c3505eb19750",
+      "selected_ids": [
+        "core-001:unit:bd9fbdc6508adac7"
+      ]
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+      "captured_sha256": "d3b104255bbf923fa921a0a3f69bd43b255fc8ecb21cf4f080e5d21009b001d6",
+      "observed_sha256": "25a0169945a7770594923505464a9b2632baa0ac9489fb42b357ae7c3df046a1",
+      "selected_ids": [
+        "core-001:unit:d7db7354164023a4"
+      ]
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "captured_sha256": "43faee4d94e9ee97ab48692481988425fbd97b22361af2d1d773975aecb0477a",
+      "observed_sha256": "3c1fa27dd653266d5177b1b165edf77ff3e4561a9cdf37bca5a0f97809971c97",
+      "selected_ids": [
+        "core-001:unit:9ab2dca35fa7c063"
+      ]
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "captured_sha256": "cbd56f7fe8a2c2285178855d47f7e98dfc1ec95ec30c2ca903af99c79a27489a",
+      "observed_sha256": "f7668dcadbe1af80f0cc874813e10504717c02f3fe94ca9096b74fefd952d875",
+      "selected_ids": [
+        "core-001:unit:d7528501229916fe",
+        "core-001:unit:75d424217a4e94ef",
+        "core-001:unit:394639d39386bc76"
+      ]
+    },
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "captured_sha256": "2fb6f493041718623418bea7370f071700b7145c35dd0013e6d3ccd2a97dbdba",
+      "observed_sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+      "selected_ids": [
+        "core-001:unit:ed3e115f81fd126c"
+      ]
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "captured_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1",
+      "observed_sha256": "b3d46b1fea71882743f393e64bd419bd4698c197770295f565bff132280a7341",
+      "selected_ids": [
+        "core-001:unit:e1121aa69ba90312"
+      ]
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "captured_sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+      "observed_sha256": "85b81c44c0ea5652eada4b39b21cccd81eae4ca9ad8fc9720f5227daa3922147",
+      "selected_ids": [
+        "core-001:unit:7d73ad99b0542ab5"
+      ]
+    },
+    {
+      "path": "src/YubiHsm/CLAUDE.md",
+      "captured_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+      "observed_sha256": "1cd895d999092727e9fcc42a19c6228f372a6ca40e19c34637b92e4d8692aced",
+      "selected_ids": [
+        "core-001:unit:969ca35d72262c60"
+      ]
+    },
+    {
+      "path": "src/YubiHsm/README.md",
+      "captured_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+      "observed_sha256": "1cbe224f2bbcadaeefeda7761005a84bce98e71bcc6f0d9e8e4426d9dcff705c",
+      "selected_ids": [
+        "core-001:unit:e2c611eac31ccf1c"
+      ]
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "captured_sha256": "663e4b8c7496f3fd6074550d689844b854f1640f61fb5f92f9e1abf4ed202a1e",
+      "observed_sha256": "650fb88348d7a3a13cde282bee0647de9ec7df06efad7b398d9a7576aa114992",
+      "selected_ids": [
+        "core-001:unit:a97df01d328e9157"
+      ]
+    },
+    {
+      "path": "src/YubiOtp/CLAUDE.md",
+      "captured_sha256": "e0f34a0379b9a3a1146d85425c5c08a16cf7e6953101b816d15c21e75a590f72",
+      "observed_sha256": "fb4570594450e7031362a983d6539b19bc935af350b5141584c9aa2a58c95890",
+      "selected_ids": [
+        "core-001:unit:f02eac5f2126a9c4"
+      ]
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "captured_sha256": "5ba4557b704e023e231e09208f584cdf8bbf1dc8753f8d437d8558ef2ff32eba",
+      "observed_sha256": "956333d0ffcd42d44c95ac7eb95df67a8b2bf82024ce8328ea55ba2a75f5c92e",
+      "selected_ids": [
+        "core-001:unit:6a99ceaa75ce028b"
+      ]
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "captured_sha256": "1ea72a87c5e4fef816bfe681ec4f8e67c8f4d1e299ac78c7a2f8e320eace848e",
+      "observed_sha256": "9d1509f4ba3bf6b0a455d559e0410a828291b9e18d170b9a8e4494da41031373",
+      "selected_ids": [
+        "core-001:unit:e79d924e62408464",
+        "core-001:unit:1bebb9d5f7f0877b"
+      ]
+    }
+  ],
+  "source_body_verdicts": 0,
+  "final_denominator": null,
+  "original_selection_stays_proposed": true
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-applet-boundaries.md",
+    "before": null,
+    "after_sha256": "c323f03719a0978a4e38de30e6a3b386d047212c4e5b58b692bf507282f46bc3",
+    "bytes": 8345
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/citations.md",
+    "before": null,
+    "after_sha256": "601a5afd4456f434ebeb0ed45de05fced2548bbc298b9ee52a62d45e26bb9c73",
+    "bytes": 7673
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/collect-static.py",
+    "before": null,
+    "after_sha256": "52616353ce089b371db79e83e013893fb1faf1865bdae25d339d07595e1ba8af",
+    "bytes": 11599
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/decisions-and-referrals.md",
+    "before": null,
+    "after_sha256": "19a28517feccc744682611e21b63e5695133b1e762f3efc6a6e95635f4c5df54",
+    "bytes": 13978
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/examples.json",
+    "before": null,
+    "after_sha256": "5e8622a44f7ad1d71695937b9d3640236b741ee5044cb29f32d10a38d126b41d",
+    "bytes": 108071
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/input-identities.json",
+    "before": null,
+    "after_sha256": "df4f8507d48c821faec5f95932c0785291714f80c6c7d42e4edd97f175aca42c",
+    "bytes": 22673
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/outside-scope-paths.json",
+    "before": null,
+    "after_sha256": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd",
+    "bytes": 52815
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/path-decisions.json",
+    "before": null,
+    "after_sha256": "2ead959df2dad01d21030dff11bbc4ef39911aa7aa6c42d857fddef11d0ad46e",
+    "bytes": 599141
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/product.diff",
+    "before": null,
+    "after_sha256": "6c3797572fc9dcc7cb7fff70f4f1122f2736101462a43289ff95f7085a71a568",
+    "bytes": 95225
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/static-attempt-1.txt",
+    "before": null,
+    "after_sha256": "7383b41c87ee665d6ca75ab27cba7a354d28ecc6f6cfde3ea91013a123b4b872",
+    "bytes": 1344
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/static-checks.json",
+    "before": null,
+    "after_sha256": "52b96a60e1f28e247901b67800bde4e70d78f8fac365de7b08de7958a2c615f2",
+    "bytes": 9220
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/validation-notes.md",
+    "before": null,
+    "after_sha256": "df4d5b2d8b8f280a87f50a439b11289e7a4abc13cf3ea1efce13adbe0f35b4b0",
+    "bytes": 1545
+  }
+]

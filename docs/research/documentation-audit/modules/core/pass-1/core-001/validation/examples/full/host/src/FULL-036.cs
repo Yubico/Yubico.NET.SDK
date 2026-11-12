@@ -1,0 +1,59 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cbor;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.CredentialManagement;
+using Yubico.YubiKit.Ctap2.Pin;
+using Yubico.YubiKit.WebAuthn;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+
+namespace Audit20261111.DocExamples.Full;
+internal static class Body36
+{
+internal static void CompileOnly(GeneratedSigningKey generatedKey, ReadOnlyMemory<byte> toBeSigned, ReadOnlyMemory<byte> algorithmSpecificAdditionalArgs, ReadOnlyMemory<byte> credentialId)
+{
+// Registration: request a generated signing key.
+var registrationExtensions = new RegistrationExtensionInputs(
+    PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.Es256));
+
+// Authentication: provide keyHandle, algorithm-specific tbs, and optional raw additionalArgs.
+var signingParams = new PreviewSignSigningParams(
+    keyHandle: generatedKey.KeyHandle,
+    tbs: toBeSigned,
+    additionalArgs: algorithmSpecificAdditionalArgs);
+
+var authenticationExtensions = new AuthenticationExtensionInputs(
+    PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
+        new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
+        {
+            [credentialId] = signingParams
+        }));
+}
+
+}

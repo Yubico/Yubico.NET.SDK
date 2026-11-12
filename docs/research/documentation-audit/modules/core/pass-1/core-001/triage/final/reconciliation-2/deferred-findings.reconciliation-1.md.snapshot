@@ -1,0 +1,206 @@
+# Core source findings and deferred handoff — draft
+
+**Draft: source reconciliation is complete; editing, independent review and Pass‑1 closeout remain
+pending.** This handoff accounts for **185 original candidates: 103 Core-family and 82 boundary
+candidates**, with every original ID and exact-scope inherited outcome preserved. These are source
+concerns and traceability records, rather than accepted bug counts. No new `CORE-DOC-*`/`CORE-IMP-*`
+layer was needed: references use `core-001:<original-ID>#documentation`, `#engineering`, `#decision`
+or `#qualification`. A reference labels evidence and responsibility; it accepts no unrun claim.
+
+The original source pin remains **`fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef`**. Current primary comments
+legitimately include the accepted discovery/crypto edits. Original source/range checks therefore use
+pinned Git blobs and recorded BOM/newline representations, independently of current documentation hashes.
+The earlier preliminary/full-family maps, reports, helpers and results remain byte-identical.
+
+**Stopping point:** finish and publish Core Pass 1 with this deferred-finding handoff, then stop.
+This document is findings/status/evidence, not a Pass‑2 plan, implementation assignment, experiment
+plan, new tooling project or permission for physical work.
+
+## Exact reconciliation records
+
+All new companion records are under [triage/final](triage/final/).
+
+| Record | Content |
+| --- | --- |
+| [Candidate rows](triage/final/rows.md) | All 185 original IDs, source concern, completed editor associations and remaining review state |
+| [Candidate reconciliation](triage/final/candidate-reconciliation.json) | Every candidate/dimension → observed versus proposed or unselected behavior, exact source passage/unit/range evidence, documentation paths, editor/path decisions, review scope and reopening condition |
+| [Deferred facets](triage/final/deferred-facets.json) | Engineering, decision and qualification dimensions with the same evidence/owner/reopening references; no executable work selected or scheduled |
+| [Editor returns](triage/final/editor-returns.json) | Snapshots of completed returns, exact original path decisions and review texts; accepted A/C primary hashes and existing coordinator validation receipts |
+| [Relationships](triage/final/relationships.json) | Exact-facet nonadditive relationships and explicit mechanism separations; no exclusive accepted-defect total |
+| [Inherited reconciliation](triage/final/inherited-reconciliation.json) | All 100 authoritative provenance rows / 70 existing groups, successor boundary observations, original aliases, states, source identities and all 21 PGP-DEP labels |
+| [Protected dispositions](triage/final/protected-dispositions.json) | Fourteen scoped OATH IMP resolutions, OATH decisions, resolved descriptor/User XREFs, retracted HSM observation and retained PIV/OpenPGP/HSM/OTP/SD applet findings |
+| [Source follow-ups](triage/final/source-followups.json) | Additive Management B4/B6 and CTAP2 B4/B6/WebAuthn completion authority and other exact qualifications |
+| [Coverage](triage/final/coverage-reconciliation.json) / [verification](triage/final/verification.json) | Disjoint original IDs, pin/range joins, source-depth qualifications, editor/hash boundaries and exact consumed input hashes |
+| [Prior-map preservation](triage/final/preserved-inputs.json) / [assembly notes](triage/final/record-assembly-notes.md) | Earlier record hashes and retained records-only preparation failures/corrections |
+
+`candidate-reconciliation.json` normalizes repeated source evidence and document surfaces once.
+Each candidate retains its complete original definition and index, source-unit references and four
+separate dimensions. Its `completed_review_path_scope` identifies exact returned decisions, scope,
+review status and accepted primary transfer where applicable. A same-path edit for another concern
+never closes a held facet. Historical proposal text remains evidence of the question; it grants no new
+implementation or probe authorization.
+
+## Completed source populations
+
+| Source assignment | Original candidate IDs | Assigned unit dispositions |
+| --- | ---: | ---: |
+| A, B1–B6, C — eight Core families | 103 | 11,101 |
+| Management | 3 | 331 |
+| CTAP2 | 23 | 590 |
+| Security Domain | 8 | 193 |
+| OATH | 6 | 239 |
+| WebAuthn | 12 | 265 |
+| YubiOTP | 9 | 324 |
+| YubiHSM Auth | 7 | 160 |
+| OpenPGP | 8 | 328 |
+| PIV | 6 | 513 |
+| **Total** | **185** | **14,044 disjoint original IDs** |
+
+All nine source packets and their named source follow-ups have returns. Earlier “B4/B6 active” or
+“WebAuthn return pending” text is historical, superseded only in that source-reading dimension.
+It supplies no automatic independent review, implementation, physical qualification or publication.
+
+B4 retains **105 full-file reads plus one qualified whole Unshipped snapshot support/type
+reconciliation**; unrelated member signatures remain context. Boundary snapshot/context exclusions
+remain explicit. CTAP2 180 selected/181 disposition paths, OTP 61/62 and OpenPGP 91/93 are different
+recorded populations, not missing units to invent. Independent sampling retains its own denominator
+and removes later edited overlaps.
+
+## Editing and independent review at the consumed return identities
+
+Only completed returns were consumed; active partial product work receives no credit. Worktree record
+snapshots retain their exact hashes because their owners may publish successor revisions later.
+
+| Batch / current owner | Completed return and review state | Remaining gate |
+| --- | --- | --- |
+| Discovery A | Revision 2 content/citation **PASS**; 37 edited paths, with the original retained-path review scope preserved. Patch `028c2a45…` transferred to primary. | Shared/caller facets, held questions, exact-source examples and final campaign gates remain separate. R1 removed unsupported convergence; R2 scopes topology to the SDK's null resolver. |
+| Crypto C | Revision 2 content/citation **PASS**; 54 edited paths. Patch `159a59af…` transferred to primary. | C019 has no D release; C020 refers to B6/shared/applets. CBC allocation-before-try, independent copies, providers and profile questions remain open. |
+| Transports B1–B4 | Completed 62 edit / 135 retain / 16 hold return. Independent review requires **M1–M3**. | Integer-property pre-open lifetime; metadata zero-access then read/write fallback; remaining listener cleanup/finalizer assurance. No batch PASS credited. |
+| Protocols B5–B6 | Completed revision 2: 57 edit / 22 retain / 12 hold. Editor returned R1–R4 corrections. | Focused independent successor re-review pending at consumed snapshot. Use corrected citation/condition authority below; editor correction is not review PASS. |
+| CTAP2/WebAuthn | Completed 14-file editor return and 35 candidate decisions. Review requires **R1/R2**. | Correct retained peer-label-validation assurance and token-reuse/device-acceptance claims in test and caller. No batch PASS credited. |
+| SHARED guides | Completed 26 edit / 7 retain return; 193 bodies classified. | Independent content/citation review and late HSM/OpenPGP/PIV/final-editor reconciliation remain pending. Examples are not thereby compiled. |
+| Management/SD/OATH/OTP/HSM | Completed five-module return: 37 edit / 196 retain, all 33 local groups. | Fresh independent review, transfer and final validation pending. Existing applet uncertainties remain intact. |
+| OpenPGP | Completed 17-file return with 93 path decisions, eight groups and 25 outside-owner referrals. | Independent review/transfer pending; no PIV edit credit inherited from the worktree name. |
+| PIV / PGP-PIV editor | PIV source return is complete; worktree active per coordinator steering. | No completed PIV edit/review return was consumed. Candidate/path decisions and review remain pending. |
+| External commentary | Explicit CLI/shared-test/verification/benchmark ownership exists. | No completed external return was consumed; scripts/config/assets outside that release need explicit owner disposition. |
+
+Primary currently matches all **91 accepted A/C edited hashes**. Existing coordinator receipts after
+that transfer record **1,320 C# token/directive comparisons and 20 API snapshots with zero failures**, plus
+**three Core projects compiled with zero warnings**. These are positive, scoped existing gates, not new
+executions by this worker, SDK test execution, compiled-example acceptance or a final all-batch gate.
+Later edit transfers require their own exact final identities and the remaining agreed validation.
+
+## Latest qualified review authority
+
+The full source definitions stay historical. Fresh editors and the final verifier should use the
+qualified successors, rather than repeating an initial report's inaccurate locator or assurance.
+
+- **A:** accepted revision-2 review permits stale groups to persist; no one-scan/age-based convergence
+  is promised. Null-resolver assertions establish this SDK's current choice, rather than OS impossibility.
+- **C:** accepted revision-2 review scopes local AES key/IV clearing to entry into the protected scope.
+  CBC's second pre-try allocation can fail after the key copy exists. The latest accepted BER,
+  supplied-Q and AsnWriter qualifications remain: inspected X.690 reading is complete; supplying Q skips
+  the checked .NET v10.0.0 absent-Q extraction; Encode retains writer storage and Reset clears its written
+  prefix. Actual installed runtime/native cleanup remains separately qualified.
+- **Protocol R1:** in retained SCP11 **1.3.0.13 Public Review**, a/c request is **§7.6.2.3** and response
+  **§7.6.3.1/Table 7-18**; b request is **§7.7.2.3** and response **§7.7.3.1/Table 7-22**. INTERNAL
+  AUTHENTICATE is **§7.7**; **§7.1.1** describes parameter coding. SCP03 **1.1.2 Public Release** response
+  is **§7.1.1.6/Table 7-3**, with 29 mandatory bytes plus its conditional three-byte counter; the explicit
+  initial EXTERNAL AUTHENTICATE zero-chain rule is **§6.2.3**. Initial combined request/response locators
+  remain preserved input limitations, not the authority for new wording.
+- **Protocol R2:** null firmware fails configured-processor admission before the support branch.
+  Broad exception tests establish neither that support branching nor a handshake was reached.
+- **Protocol R3:** protected 9000/62xx/63xx claims retain **R-MAC selected** applicability; Core SCP03
+  selects `0x33`. The inspected **§6.2.6** empty-command/counter rule applies when **C-DECRYPTION and
+  C-MAC are both required**. The error-status-only rule, genuine EXTERNAL AUTHENTICATE exception and
+  current instruction-only later-INS82 concern remain separate. Current fake/Python padding agreement
+  supplies no independent resolution of the selected encryption-path discrepancy.
+- **Protocol R4:** two 32-byte P-256 agreements concatenate to **64 bytes**; X9.63 then derives
+  **80 bytes**, split into five 16-byte values. This is a qualified source width correction, not a
+  recomputed crypto result.
+- **FIDO review:** current CTAP peer helper checks coordinates/P-256 provider import, without all
+  required peer COSE labels. A prescriptive strict-profile target is different from implemented checks.
+  Scripted token acquisition/reuse tests establish the SDK choice, not authenticator acceptance.
+
+Protocol correction/qualification authority is the completed independent review plus the revision-2
+editor/citation return in `editor-returns.json`; independent successor acceptance remains pending.
+This reconciliation read those records, not runtime/test bodies or original standards anew.
+
+## Unresolved findings, decisions and evidence — exact scope retained
+
+Every entry below is indexed down to original candidate facets, source units and reopening paths in
+the companion records. Shared mechanisms receive one exact-facet relationship; different storage,
+actor, phase or caller responsibilities retain separate questions.
+
+| Retained question | Exact original scope / reopening condition |
+| --- | --- |
+| Metadata ownership/decoding/cache | A C003–C006/C016/C017/C021 and Management X002: timeout alias/equality/hash, FIPS tag mapping/width, flagged form factor, wider capability bits, raw representation and evidence expiry. Stronger ownership/stability or decoding claims require their recorded decision/evidence; corrected prose changes none of them. |
+| Native/connection/listener lifetimes | B1 C002–C006/C009–C012; B3 C002/C005/C006; B4 C001/C002/C003/C005/C006/C009: early context cleanup, cadence, partial startup, post-open logger cleanup, custom versus successful-deferred Windows disposal, context flow, admission precedence, exact declarations and backend interpretation. Native pending, terminal, drained and release proven stay distinct. |
+| Complete workflow/callback ownership | B5 C006 and actual nine-boundary callers: one Core exchange guard supplies no whole public-operation/ceremony lease. Reset/cache, detached callbacks, post-exchange parsing and sequential applet operations retain their actual owners. PIV's callbacks outside its guard differ from OTP's self-wait path. |
+| Input and layered sensitive storage | C input/TLV/crypto concerns, B4 C007, B5 C005, B6 C002 and each applet: UTF-16/code-point/UTF-8/profile enforcement, redirected strings, independent copies, exceptional cleanup, report ownership and read-only result clearing need their exact policy/owner. Public metadata/status alone is not secret by direction. |
+| Wire/profile/state | B5 raw grammar/control/recovery/version and B6 C001/C003–C012/C015/C016: Le/remaining-command limits, partial failures, counter mutation/phase latch, later INS82, startup cleanup/DEK, parameter clones, SCP11 profile/trust, protected chaining, reselect, KeyReference and ATR value semantics remain separate. Use the corrected selected-level conditions above. |
+| Applet reset/auth/version | SD omitted reset options/raw bypass, HSM/OpenPGP retained graph/plain reselect, Management family/reset-success state and OATH's different terminal RESET contract retain distinct policies. Setup flags supply no ongoing channel health, applet PIN/UV/lock authorization or device-phase proof. |
+| CTAP/WebAuthn applet requirements | All old CTAP/WA aliases survive. WA-IMP-010 descriptor recovery remains separate from resolved descriptor prose; CTAP-DEC-002 native DTO/platform/browser/RP serializer intent still needs maintainer decision. No field stripping is authorized. PIN peer/profile, ARKG wire/math, response/envelope/blob/parser/range and extension policies remain their actual applet owners. |
+| HSM format and external authentication | HSM-IMP-008 / HSM X005 retains historical supplied-cryptogram **56 versus 48 bytes**, unknown raw key/tail regions, firmware/response grammar and result/receipt ownership. Omitted-cryptogram three-key agreement is different from successful HSM/connector enrollment, peer verification, host authentication and protected commands. |
+| PIV/OpenPGP confirmed applet/tool scopes | **PIVIMP-005 remains confirmed/unfixed**: actual tool RSA failed original-message verification; Ed25519 verified SHA256(message); direct SDK controls passed. OpenPGP's historical PIN/KDF identity, X25519 framing and ATT read findings remain confirmed for their recorded scopes. Core catalog/owner prose supplies no repair. |
+| Test/sample/tooling scope | Actual fixture, assertion-failure drain, cleanup, output/argv, input/certificate/result and semantic-oracle questions retain their original IDs. A compiler result, method name, callback count or disposal invocation supplies no unobserved lifetime/erasure/restoration. Source descriptions can be corrected without treating those runtime questions as fixed or intended policy. |
+| Source/native/provider/deployment evidence | Original NIST-PIV PDF, final NIST table/sample archive bytes, missing Rust/generator/comparator captures, final SCP11/vendor/ISO clauses, exact installed NativeShims producer/header/flags, actual providers and historical platform artifacts retain bounded gaps. Published source or local headers identify no loaded producer. |
+
+These are deferred status/evidence entries, not a selected implementation backlog. Questions with no
+new implementation defect remain explicit qualifications or referrals, rather than open bugs counted
+from every dimension. All earlier proposed experiments remain **unexecuted**; none is implemented,
+rescheduled or newly authorized by this handoff.
+
+## Resolutions, retraction and physical limits protected
+
+- All **14 OATH IMP resolutions** retain their precise source scopes, including seed/Base32/input,
+  raw VALIDATE/calculation cleanup and terminal RESET. OATH DEC-001's provenance correction is resolved
+  while broader failure usability remains open; DEC-005 timestamp policy stays resolved. Other URI,
+  raw-key, padding, HOTP and firmware-rationale questions retain their old scope. Lower Core copies,
+  workflow or SCP evidence do not reopen the fourteen fixes wholesale.
+- **CTAP-XREF-001 / WA-XREF-001** remain documentation-resolved for their User/descriptor prose.
+  Recovery and disclosure intent keep their different IDs. All 21 PGP-DEP labels remain documentation
+  dependencies, outside new Core bug counts.
+- **HSM retry-message mismatch: RETRACTED.** The helper and asymmetric retry test both use
+  `Invalid credential password`. Preserve `corrections.md` and the failed checker history. This is no
+  open bug or reason to reopen historical passing evidence. X007's actual exception XML and diagnostic/
+  test-oracle concerns remain separate.
+- PIV's exact older fixes, source-confirmed PIVIMP-009 date issue, PIVIMP-010 object encoding and other
+  retained uncertainties stay in `protected-dispositions.json`; historical PIV 86/89 canonical methods
+  and supplemental outcomes keep their original rig/profile/restore limitations. OpenPGP's fourteen
+  engineering groups, HSM's eight and OTP's twelve retain their definitions and current source scope.
+- SCP03 **1.1.2 Public Release** is distinct from code-cited **1.1.2.6 Public Review**. Retained SCP11
+  **1.3.0.13 Public Review** supplies draft-specific actor/phase evidence; final 1.4 publication does not
+  supply inspected final clauses or a complete YubiKey profile. Independent exact-source acceptance
+  remains required at the qualified locators and conditions.
+- B4's PCI discrepancy is conditional on the published selected **Linux LP64** producer/header route:
+  native two unsigned longs versus managed two four-byte values. Windows uses two 32-bit DWORDs;
+  macOS framework selection needs its own producer/header evidence. This supplies no all-OS mismatch
+  claim, installed-producer identity or observed transmit failure.
+- Serial **9681620** remains the unexplained historical two-key abandoned HID read. Serial **125** had
+  two `6A88` results during INITIALIZE UPDATE, **before EXTERNAL AUTHENTICATE and RESET**. Plain or
+  synthetic success supplies no missing secure-reset execution.
+- The user's Windows CCID/HID ready handoff remains **unready/unreviewed** and requires its separate
+  pinned delta/impact review when supplied. It leaves truthful current-baseline documentation available
+  for review. PIV physical touch/hotplug and touch-dependent cancellation/recovery remain **deferred**.
+  No new device, native, credential, reset or crypto operation was requested or performed.
+
+## Verification and closeout boundary
+
+The records-only join verifies **14,044 disjoint assigned IDs**, all **185 original candidate IDs**,
+all **100 inherited rows / 70 groups / 21 labels**, and the earlier-map preservation hashes. Original
+bytes for **1,397 pinned paths** and **14,041 original ranges** reconcile through pinned Git objects.
+The remaining three ranges are the explicitly post-pin Core campaign handoff metadata; their original
+inventory/range identities remain retained, without fictitious source-pin byte proof. The exact
+candidate-to-document map covers **859 associated paths** and names current edit owners, returned
+decisions and pending cases. No central coverage file was changed.
+
+This worker ran record/schema/hash/Git-object checks only. It edited no product, assertions, API,
+central registry/coverage, Git index/ref or prior map; it started no subagent, SDK build/test/formatter,
+native/device/crypto run or implementation project. Current raw documentation hashes are recorded
+separately from source evidence, with the A/C accepted-transfer comparison made explicitly.
+
+Remaining Pass‑1 gates are exact successor reviews, completed remaining editor/path dispositions,
+coordinator integration, source/example/compiler validation at final identities, required sampling,
+fresh final evidence acceptance and publication/handoff. This draft claims none of those complete.
+After the agreed Core Pass‑1 publication and deferred handoff, **stop**.

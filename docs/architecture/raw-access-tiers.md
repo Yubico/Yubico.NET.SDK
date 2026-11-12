@@ -33,6 +33,12 @@ enforces its minimum firmware version. Bypassing applet checks does not bypass p
 sessions still participate in the one-live-connection-per-physical-key and one-live-session-per-connection
 contracts.
 
+Readiness has a narrow meaning at this tier. Raw HID creation performs no wire initialization; the
+first exchange initializes lazily, and the inherited raw HID `FirmwareVersion` currently remains
+`0.0.0` even after protocol discovery. A configured version is effective SDK policy, not hardware
+attestation. Major-zero versions pass optimistic feature checks. Use applet sessions for their actual
+selection, version discovery, authorization, and command-specific prerequisites.
+
 ### SmartCard/APDU
 
 ```csharp
@@ -50,12 +56,17 @@ ApduResponse response = await raw.TransmitAndReceiveAsync(
 ```
 
 When `throwOnError` is `false`, inspect `response.Data`, `response.SW1`, and `response.SW2` directly.
+For sensitive data, put consumption in `try` and `response.Clear()` in `finally`; clearing also
+invalidates status bytes and all aliases into that response owner. Clear source and copied buffers
+separately. These snippets are composable fragments whose APDU, AID, payload, version, device, and token
+inputs come from the caller's protocol implementation.
 The `IYubiKey` extension opens exactly the SmartCard transport and transfers ownership of the hidden connection
 to the returned session. Disposing the session therefore disposes that connection.
 
-If a chained command or response continuation fails, the original exception is returned and that protocol
-instance refuses further transmissions, selections, and configuration; it does not replay or drain the
-unfinished exchange. Dispose and reopen the connection before continuing, including when a raw session borrowed
+When the protocol marks a failed command chain or response continuation unrecoverable, it refuses
+further transmissions, selections, and configuration without replaying the exchange. Its current
+offset-based detection does not cover every uncertain first-fragment failure; a released guard alone
+is not proof of recovery. Dispose and reopen after an interrupted or uncertain exchange, including when a raw session borrowed
 the connection: replacing only the session over the same connection is not a recovery procedure. The protocol
 cannot guard direct raw calls or a different protocol instance using that connection.
 
@@ -93,6 +104,15 @@ The caller supplies and interprets the CTAPHID command payload. This API does no
 request semantics. A final response command must match the request; `CTAPHID_KEEPALIVE` is accepted only while
 waiting, and `CTAPHID_ERROR` fails the exchange instead of returning an apparently successful payload.
 
+Supply ordinary request/response commands to `SendAndReceiveAsync`. `CTAPHID_CANCEL` is a no-response
+control command, not a request with a cancel acknowledgment. Core's caller-token cancellation sends it
+only after a keep-alive and then drains the original response; silence can leave that drain pending.
+The late-success exception currently requires the original unencoded CBOR command byte `0x10` and a
+response payload beginning with `0x00`. Encoded `0x90` can pass terminal-command correlation, which masks
+the initialization bit, but misses that success classification and can surface cancellation instead.
+This is a current normalization gap, not a different intended CBOR grammar or authenticator requirement.
+Malformed control data or a partial FIDO failure does not establish a general safe-reuse guarantee.
+
 ### OTP HID
 
 ```csharp
@@ -124,19 +144,54 @@ without replaying the command. The original exchange error is preserved on abort
 does not issue an abort. Recovery after a failed reset requires disposal and reopening the connection; a new
 session over the same borrowed connection is not a recovery procedure.
 
+OTP status polling and touch-wait conditions use local deadlines; they do not impose a deadline on an
+already-dispatched native GET/SET. The current NEO refresh path also catches broader failures than
+cancellation alone, and tight status polling has no general backoff guarantee. Treat those as current
+limits when diagnosing latency, rather than assuming vendor/Python timing policy is enforced here.
+
 ### Raw SmartCard With SCP
 
-Load SCP parameters from secure application storage; do not embed or log real keys:
+Select the applet on a plain borrowed session before establishing a raw secure channel. This complete
+method borrows caller-supplied parameters and request data; the caller keeps those alive through the
+await and clears sensitive source buffers afterward. It consumes only status and length, then clears
+the response. The command and selected applet must be valid for the provisioned SCP profile:
 
 ```csharp
-using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
-await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
-    scpParameters,
-    firmwareVersion,
-    cancellationToken: cancellationToken);
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 
-await raw.SelectAsync(applicationId, cancellationToken);
-ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
+static async Task SendProtectedAsync(
+    Yubico.YubiKit.Core.Abstractions.IYubiKey yubiKey,
+    ScpKeyParameters scpParameters,
+    FirmwareVersion firmwareVersion,
+    ReadOnlyMemory<byte> applicationId,
+    ApduCommand command,
+    CancellationToken cancellationToken)
+{
+    await using ISmartCardConnection connection =
+        await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+    await using (var plain = await RawSmartCardSession.CreateAsync(connection, cancellationToken))
+    {
+        plain.Configure(firmwareVersion);
+        await plain.SelectAsync(applicationId, cancellationToken);
+    }
+
+    await using var secure = await RawSmartCardSession.CreateAsync(
+        connection, scpParameters, firmwareVersion, cancellationToken: cancellationToken);
+    ApduResponse response = await secure.TransmitAndReceiveAsync(
+        command, throwOnError: false, cancellationToken: cancellationToken);
+    try
+    {
+        Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
+    }
+    finally
+    {
+        response.Clear();
+    }
+}
 ```
 
 Configuration is applied to the base APDU processor before SCP establishment. An SCP raw session cannot be
@@ -145,6 +200,20 @@ the secure-channel framing assumptions. The existing Core SCP processor owns sec
 The caller retains the normal ownership obligations of the supplied key-parameter type and source key buffers.
 Pass a `ProtocolConfiguration` during creation only when the target requires a non-default framing option, such as
 forcing short APDUs.
+
+`SelectAsync` after SCP sends a plain SELECT while retaining the existing processor graph. It is not
+a reauthentication/recovery procedure. Prefer an applet factory when its modeled operation fits.
+SCP setup and `IsAuthenticated` supply no PIN, UV, or management authorization. SCP11b authenticates
+the card to the host; a/c setup completion is distinct from the device's first protected-command phase.
+The current fixed P-256/AES-128 SCP11 implementation and supplied certificate/key references need a
+matching provisioned device profile; accepted constructor shapes alone establish neither trust-chain
+validation nor full SCP conformance.
+
+For source comparisons, keep GlobalPlatform editions separate: SCP03 1.1.2 is the March 2019 Public
+Release; code-cited 1.1.2.6 is a December 2019 Public Review. The inspected SCP11 1.3.0.13 is an August
+2023 Public Review, not the published final 1.4. Final/profile clause verification and independent wire
+qualification remain outstanding. In particular, current empty-command and protected response/error
+handling should not be presented as complete conformance established by synthetic tests.
 
 ## Tier 2: Raw Connections
 
@@ -162,6 +231,11 @@ the public interfaces also admit custom implementations and do not promise that 
 cancelled while waiting may detach its reader while the input owner remains active; the next report can still
 arrive. A built-in OTP report already dispatched may succeed after cancellation. Neither case proves the
 device protocol is reset. Custom connections define their own scheduling, cancellation and release behavior.
+
+If an outer `WaitAsync` times out or is canceled, retain and observe the original operation task. Its
+completion controls the borrowed-memory lifetime; the outer wait supplies no native completion or
+release evidence. Windows compatibility report calls can execute synchronously before returning a task
+and do not honor cancellation tokens like the built-in macOS/Linux native owners.
 
 The built-in PC/SC connection enforces the caller-exclusion rule at native admission: a second raw operation is
 refused immediately rather than queued. Open, transmit, transaction begin/end, disconnect, and context release use
@@ -203,6 +277,11 @@ The feature-report connection drains an admitted report before release; overlapp
 refused. Direct report opens do not acquire a grouped-key claim. The macOS input-owner
 behavior does not establish drain guarantees for all public synchronous entry points.
 
+Direct macOS IO descriptor metadata can describe lengths other than 64, while the shared FIDO owner
+normalizes received input to 64 bytes. Direct feature GET separately returns eight-byte storage and can
+pad a short successful native report. Descriptor metadata alone therefore does not promise arbitrary
+input lengths or exact native transfer counts on those facades.
+
 The Core [source-site inventory](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md)
 classifies waits and pre-task-return dispatch, but a listed site is not automatically a public boundary
 or a verified drain. The [finite public entry registry](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs)
@@ -239,7 +318,9 @@ for either case. These Core-only inventories do not certify other SDK-wide bound
 - Dispose session N before creating session N+1 over the same caller-owned connection.
 - `Raw*Session.CreateAsync(connection)` borrows the connection; the caller disposes both.
 - `IYubiKey.CreateRaw*SessionAsync(...)` owns its hidden connection and disposes it with the returned session.
-- Overlapping operations on one raw session throw `InvalidOperationException` immediately.
+- Overlapping guarded exchanges on one raw session throw `InvalidOperationException` immediately.
+  Await the complete public workflow before starting another or disposing the session; exchange drain
+  does not cover later workflow exchanges, parsing, or callback work.
 - Overlapping raw calls on a built-in SmartCard connection also throw `InvalidOperationException` immediately.
 - Once admitted, constituent I/O in a stateful session exchange is not cancelled mid-frame. A SmartCard
   exchange observes the token only at admission; canceling afterwards lets the exchange finish and return
@@ -259,10 +340,13 @@ for either case. These Core-only inventories do not certify other SDK-wide bound
 
 ## Sensitive Buffers
 
-FIDO and OTP protocols clear SDK-owned outgoing payload copies, frames, and reports in `finally` after each awaited
-send, including failure paths. Caller-owned request memory is never modified. Returned response memory must remain
-valid after the method returns and therefore cannot be cleared by the SDK. The caller owns sensitive response-data
-handling: retain it only as long as required, avoid logging it, and zero any caller-owned mutable copy after use.
+FIDO and OTP protocols clear selected SDK-owned outgoing payload copies, frames, and report staging in
+`finally`. Incoming report arrays, accumulated responses, transport staging, and applet-decoded output
+are separate owners; cleanup of one does not erase the others. Caller-owned request memory remains
+unchanged. Retain sensitive response data only as long as needed and clear mutable storage you own.
+`ReadOnlyMemory<byte>` alone supplies neither a disposal contract nor permission to cast its backing
+storage writable. A separately cleared copy also leaves the original intact. For SmartCard responses,
+use the explicit `ApduResponse.Clear()` owner API after inspecting status.
 
 ## Migration From ProtocolFactory
 

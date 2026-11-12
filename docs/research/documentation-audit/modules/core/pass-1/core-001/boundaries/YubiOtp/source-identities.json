@@ -1,0 +1,42 @@
+[
+  {
+    "repository": "https://github.com/Yubico/yubikey-manager",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "path": "yubikit/core/otp.py",
+    "sha256": "da093d3fd225df32de247c3f88aed0467115458de9073c2d18abdcd17f2379a2",
+    "bytes": 9830,
+    "git_blob": "ab3af40eb3325991b14f1ea909239efcb932c487",
+    "read_scope": "complete source; no package import or execution"
+  },
+  {
+    "repository": "https://github.com/Yubico/yubikey-manager",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "path": "yubikit/yubiotp.py",
+    "sha256": "ac2f9d053e8c900300f82cb45bf4bb07df3e8985754ca6a57924e1aaff9d25d2",
+    "bytes": 31470,
+    "git_blob": "e0991ea8c684b87b40c6c236b5c37988e71741e1",
+    "read_scope": "complete source; no package import or execution"
+  },
+  {
+    "name": "ykcore.c",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykcore.c",
+    "accessed_utc": "2026-11-11T23:21:38.645289+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykcore.c",
+    "bytes": 19964,
+    "sha256": "89369ecce44fc853b0e502142e1696713b9f56e8138f28f77db026c1175e16f2",
+    "local_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ykcore.c",
+    "boundary_role": "independently read existing immutable-source capture; original access metadata retained"
+  },
+  {
+    "name": "ykdef.h",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykdef.h",
+    "accessed_utc": "2026-11-11T23:21:38.646111+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykdef.h",
+    "bytes": 14457,
+    "sha256": "c0ca58a5c1870ab2e4ab820956dbb65b2836f3a0d4e489c34f904b764786523a",
+    "local_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ykdef.h",
+    "boundary_role": "independently read existing immutable-source capture; original access metadata retained"
+  }
+]

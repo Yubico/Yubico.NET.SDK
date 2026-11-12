@@ -1,0 +1,53 @@
+{
+  "sample_finding": "SAMPLE-B2-003",
+  "conclusion": "CORRECTION SUPPORTED: retained sources establish possible no-event/error results, not the most-likely-during-event-storms frequency claim.",
+  "original_selected_unit": "core-001:unit:82f001f6db22d507",
+  "current_primary_before_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+  "evidence": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/libudev-monitor.c",
+      "sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+      "revision": "systemd v257, as identified by the retained B2 original-source register/manifest",
+      "read_lines": [
+        [
+          192,
+          218
+        ],
+        [
+          220,
+          249
+        ]
+      ],
+      "contract_and_implementation": "API comment returns a new device or NULL on error. The helper loops after filtered-out events; a zero-time readiness wait with no further message yields -EAGAIN. The public wrapper maps a negative result to NULL with errno. These paths support no available event or error; they provide no observed error-frequency distribution.",
+      "applicability_limit": "Exact retained source revision, not a fresh native run or deployed-binary correspondence claim."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "before_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+      "before_read_lines": [
+        [
+          82,
+          87
+        ],
+        [
+          243,
+          262
+        ]
+      ],
+      "contract_and_implementation": "The managed source returns null for a missing/invalid monitor or an invalid device returned by udev_monitor_receive_device. It does not inspect errno to identify cause or count error frequencies; successful event fields are copied as before."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+      "read_lines": [
+        [
+          220,
+          233
+        ]
+      ],
+      "contract_and_implementation": "A null ReceiveEvent result logs the existing warning and emits HidDeviceRescanHint.Unknown, requesting a recovery rescan rather than treating event delivery as complete. This is conservative recovery policy, not proof that a notification was lost."
+    }
+  ],
+  "new_lookup_or_native_execution": false,
+  "qualification": "Potential loss of notifications, including removals, remains a recovery rationale. No ranking of causes, event-storm reproduction, observed ENOBUFS or native/device result is claimed."
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "core-001:unit:076b4d4328825902",
+    "coordinator_finding": "SAMPLE-A002",
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "annotation": "MATERIAL-DOCUMENTATION-MISS; CORRECTION-OVERLAP-EXCLUDED-FROM-FINAL-CLEAN-CREDIT",
+    "final_clean_credit": 0,
+    "source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+    "range_sha256": "23290cb532f8ad35c9edc33f382085b9e00f55247a3ce3dc95d5e35cdfa2ca65",
+    "authority": "sampling/coordinator/read-001-verdicts.md",
+    "correction": "A editor verifying/correcting comments only; actual final patch overlap/re-review remains a separate coordinator gate."
+  },
+  {
+    "id": "core-001:unit:711e47d18bab0742",
+    "coordinator_finding": "SAMPLE-A001",
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Devices/HotplugSignals.cs",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "annotation": "MATERIAL-DOCUMENTATION-MISS; CORRECTION-OVERLAP-EXCLUDED-FROM-FINAL-CLEAN-CREDIT",
+    "final_clean_credit": 0,
+    "source_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+    "range_sha256": "3cb67fa588270fbe5d81dcabdbc82618a31a0dac0cb4081a923d14b909298c97",
+    "authority": "sampling/coordinator/read-001-verdicts.md",
+    "correction": "A editor verifying/correcting comments only; actual final patch overlap/re-review remains a separate coordinator gate."
+  },
+  {
+    "id": "core-001:unit:c085f1cd3632e7c2",
+    "coordinator_finding": "SAMPLE-A002",
+    "owner": "A",
+    "stratum": "enum-values",
+    "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "annotation": "MATERIAL-DOCUMENTATION-MISS; CORRECTION-OVERLAP-EXCLUDED-FROM-FINAL-CLEAN-CREDIT",
+    "final_clean_credit": 0,
+    "source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+    "range_sha256": "272daa5efb4dab19eb9a45a55f37d6e4e1371a2ca8e9ba1034e50b5362943a04",
+    "authority": "sampling/coordinator/read-001-verdicts.md",
+    "correction": "A editor verifying/correcting comments only; actual final patch overlap/re-review remains a separate coordinator gate."
+  }
+]

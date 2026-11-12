@@ -1,0 +1,14 @@
+{
+  "status": "STATIC-RECORD-IDENTITY-CHECKS-PASSED",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "checked_unit_ids": 160,
+  "checked_source_and_range_hashes": true,
+  "checked_complete_candidate_files_against_pin": 53,
+  "candidate_path_exhaustion": true,
+  "inherited_key_equality": true,
+  "python_original_hashes": true,
+  "independent_semantic_review": false,
+  "sdk_or_runtime_execution": false,
+  "limits": "Hash checks establish source/record identities, not semantic quality, passing SDK tests or physical release."
+}

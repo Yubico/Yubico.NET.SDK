@@ -1,0 +1,73 @@
+{
+  "outcome": "PASS",
+  "scope": "Full 15-path successor content/citation batch: focused closure of R1/R2 plus byte-preserved earlier accepted content. Not engineering, compiler, runtime or publication acceptance.",
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries",
+  "run": "docs/research/documentation-audit/modules/core/pass-1/core-001",
+  "full_product_patch_sha256": "8f34ede47c7e39c70a021393150b3a4c4fc4ae9cdc3d761f2de9444273b9740c",
+  "predecessor_review": {
+    "path": "editing/FIDO-boundaries/review.md",
+    "sha256": "13370b70854f61a61e96caeb805e274d19eecf61ed3cbdca3e1acd3962504c9e",
+    "identities_path": "editing/FIDO-boundaries/review-identities.json",
+    "identities_sha256": "2e40054960030646fbe6d836608ee770cd8f235d1e7bd79adf7efd695fb4118d",
+    "effect": "Only R1/R2 documentation holds superseded. Twelve accepted unchanged paths and all other boundaries carried forward. Historical files not overwritten."
+  },
+  "accepted_product_files": [
+    {"path":"src/Ctap2/CLAUDE.md","sha256":"00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17"},
+    {"path":"src/Ctap2/README.md","sha256":"78da8838a98ddb4110d82b5f07a7188adb90cc4a932236f64738d0c766230891","focused_resolution":"R1"},
+    {"path":"src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs","sha256":"6e59a89acffe19912d0a8432fd313deba0ac0fcb18f43eb3189f767c07f8f29b"},
+    {"path":"src/Ctap2/src/Backend/HidBackend.cs","sha256":"149367792f1fe0fb5b9c1389cd77dcc5dfc709daeee14e9c581df0bee7444f50"},
+    {"path":"src/Ctap2/src/Backend/SmartCardBackend.cs","sha256":"447797997e8f407d97bc30bec29c428d80c4c5f20370c23bcdc53a02b622a7df"},
+    {"path":"src/Ctap2/src/Ctap2Session.cs","sha256":"d2bf4fe2344bb17b49892fc97dbd824c1381f570ec882ba6a4f1ef16e4f14ff9"},
+    {"path":"src/Ctap2/src/ICtap2Session.cs","sha256":"30640a8723290b03020cf3448fe3e54d331510975854b79258974282d0c99dc3"},
+    {"path":"src/Ctap2/tests/CLAUDE.md","sha256":"2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8"},
+    {"path":"src/WebAuthn/CLAUDE.md","sha256":"8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"},
+    {"path":"src/WebAuthn/README.md","sha256":"fbfe9912165f654cedc40e72ab5a868d7b5c6b171de63d5a7fb9bb29e4dc7a5a"},
+    {"path":"src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs","sha256":"78f359a17f9743cda2fd9ab11e599219241a36ac10e414354c5d903ea04915e7","focused_resolution":"R2 retained caller changed to edit; CORE-WA-X012 associated"},
+    {"path":"src/WebAuthn/src/Client/WebAuthnClient.cs","sha256":"50e087309ced66d0fba57b6e9fb924e5995d0155c2f71082104672c45f4750ca"},
+    {"path":"src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs","sha256":"6e7831adf4b8e067d1f08687f0d0ca00ba848d05bbd11232935a710bca822e3f"},
+    {"path":"src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs","sha256":"543741db31d0b1aad86a96012f6d9a75cde6c613e33425242a6868f5022fff7a","focused_resolution":"R2 fake-test oracle"},
+    {"path":"src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs","sha256":"11d3038d26597aac1a85b5ee9bec85cd8d34b1f7d64e9131626e92a24441c187"}
+  ],
+  "revision_records_sha256": {
+    "source-correction-report.md":"1d4e52257fc6e564098c92271899d9d9d9e1f20262a68b87f0e600c2eeb0f9fc",
+    "corrections.patch":"fe5de6ae61ec5d2c43db75c9ef8c438a4b4219608f172880802e48c5abf9af01",
+    "product.patch":"8f34ede47c7e39c70a021393150b3a4c4fc4ae9cdc3d761f2de9444273b9740c",
+    "changed-files.json":"c0967717233888bcbbff0f53ae91346fd490a095ac7658c09e6c097ad6714655",
+    "path-decisions.json":"341495341b518f659afafe934f92e668520cc5da871e04bf112d9cb233a49b09",
+    "candidate-decisions.json":"ab52e9dd455ba6c3e3bf2823b06183d00ef450cd79aa01ac95cd250497d93a7b",
+    "examples.json":"e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a",
+    "preserved-inputs.json":"83e13e40c0443c238b04f91d3f05ab4e1bbe63a18be0d25c3a87ed6ce5878d06",
+    "source-identities.json":"eae23e54a3cffddd5c803394c03c6a51a752f08b438b79d4b6f8294e839010c8",
+    "verification.json":"0bb9f7f8f422f99322b95b4bae993a5171c737f3b3d33b3aa980e0d75bd9d2ae"
+  },
+  "retained_original": {
+    "path":"/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap21.txt",
+    "sha256":"97960d3aff3b1d266cdcb6e8e1ee2802df5629b0c420bc6e0192d6b1841ed71f",
+    "edition":"CTAP 2.1 Proposed Standard 2021-06-15, errata edition 2022-06-21",
+    "ranges":[[6299,6310],[7020,7032],[8227,8230],[8272,8292],[8321,8325]],
+    "actors_and_force":"Platform MAY manage its token copy and SHOULD erase it when unneeded; authenticator expiry is separate. Authenticator peer-output COSE key MUST include alg and MUST NOT include other optional parameters. getPublicKey/ecdh procedures define EC2/P-256/-25/coordinates/on-curve behavior; SDK enforcement checked separately."
+  },
+  "source_binding":"revision-2/source-identities.json binds the actual helper, caller, authentication source, fake test/protocol and original candidate/source records; all listed current hashes independently checked. Registration call at WebAuthnClient.Registration.cs:166-171 also read for MakeCredential remintPermissions.",
+  "independent_static_verification": {
+    "full_product_patch_equals_actual_diff":true,
+    "full_product_paths":15,
+    "focused_product_paths":3,
+    "preserved_historical_editor_review_records":12,
+    "other_packet_paths_preserved":307,
+    "current_path_hashes_verified":310,
+    "candidate_groups":35,
+    "candidate_records_changed_only":["CORE-CTAP-X006","CORE-WA-X012"],
+    "non_documentation_holds_and_original_definitions_unchanged":true,
+    "retained_caller_reclassified_edit_with_X012":true,
+    "focused_csharp_non_xml_text_unchanged":true,
+    "focused_csharp_xml_syntax_valid":true,
+    "actual_fence_bodies_and_classifications_unchanged":47
+  },
+  "remaining_gates":["coordinator compiler/token/API preservation","compiler/analyzer acceptance","XML cref/paramref binding","consumer and example compilation","existing coordinator validation","publication"],
+  "preserved_holds":{"WA-XREF-001":"documentation-resolved","CTAP-XREF-001":"documentation-resolved","WA-IMP-010":"implementation gap","CTAP-DEC-002":"native-output actor/future serializer decision, no stripping authorized","future_windows":"UNREADY / UNREVIEWED","native_physical_profile_piv":"unchanged deferred-owner qualifications"},
+  "not_run":["SDK build/tests","formatter","crypto","native","device","Git mutation","subagents","full re-audit","new tooling framework"],
+  "owned_writes":["editing/FIDO-boundaries/revision-2/review.md","editing/FIDO-boundaries/revision-2/review-identities.json"],
+  "stopping_boundary":"Coordinator finishes/publishes Core Pass 1 through existing gates, delivers deferred findings, then stops."
+}

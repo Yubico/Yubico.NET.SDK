@@ -1,0 +1,63 @@
+{
+  "original_projected_spans": {
+    "src/WebAuthn/CLAUDE.md": [
+      {
+        "start_character": 3836,
+        "end_character_exclusive": 3933,
+        "projection": "EXACT-PINNED-LINE-PROJECTION",
+        "before_first_line": 72,
+        "before_line_count": 1,
+        "after_first_line": 72,
+        "after_line_count": 8
+      },
+      {
+        "start_character": 4134,
+        "end_character_exclusive": 4152,
+        "projection": "EXACT-PINNED-LINE-PROJECTION",
+        "before_first_line": 77,
+        "before_line_count": 1,
+        "after_first_line": 84,
+        "after_line_count": 4
+      },
+      {
+        "start_character": 4162,
+        "end_character_exclusive": 4256,
+        "projection": "EXACT-PINNED-LINE-PROJECTION",
+        "before_first_line": 79,
+        "before_line_count": 1,
+        "after_first_line": 89,
+        "after_line_count": 1
+      },
+      {
+        "start_character": 34072,
+        "end_character_exclusive": 34148,
+        "projection": "EXACT-PINNED-LINE-PROJECTION",
+        "before_first_line": 558,
+        "before_line_count": 1,
+        "after_first_line": 568,
+        "after_line_count": 1
+      }
+    ],
+    "CLAUDE.md": [
+      {
+        "start_character": 8385,
+        "end_character_exclusive": 8460,
+        "projection": "EXACT-PINNED-LINE-PROJECTION",
+        "before_first_line": 114,
+        "before_line_count": 1,
+        "after_first_line": 114,
+        "after_line_count": 1
+      }
+    ]
+  },
+  "WA_file_fences": 8,
+  "changed_WA_fences": [
+    {
+      "fence": 2,
+      "before_body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+      "after_body_sha256": "692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860"
+    }
+  ],
+  "compiler_completion_claim": false,
+  "qualification": "Exact bytes and accepted body hashes only; no new content or compiler verdict."
+}

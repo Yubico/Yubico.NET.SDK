@@ -23,6 +23,12 @@ using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.Nativ
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
 /// <summary>macOS HID topology listener. The run-loop thread owns each generation's native lifetime.</summary>
+/// <remarks>
+///     Static unmanaged callbacks recover a rooted generation from its GCHandle context. Normal shutdown
+///     retains that generation until the run-loop thread exits and performs cleanup. A timed-out callback can
+///     drain later; ambiguous registration followed by failed thread startup can instead retain a generation
+///     with no worker to finish cleanup. Neither path permits restart while native ownership remains uncertain.
+/// </remarks>
 internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
 {
     private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);

@@ -1,0 +1,47 @@
+{
+  "batch": "PIV-boundary",
+  "revision": 2,
+  "review_date": "2026-11-12",
+  "verdict": "PASS",
+  "scope": "Full documentation batch acceptance through predecessor independent content/citation review plus focused authorized correction recheck; not compiler/runtime acceptance",
+  "metadata_checkpoint": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_patch_sha256": "dc35e1032236c9363640a280dc722b9c10c33c8c2567433946d5521da514a8ce",
+  "accepted_product_manifest": {
+    "path": "changed-files.json",
+    "sha256": "2ef09fa02f02c143f1d2cde4385188f28f00bd5188d184187dfa09df823e92b7",
+    "all_after_hashes_independently_verified": 13
+  },
+  "correction_delta_sha256": "ab97bd5d8df7afaf7d4b9f1e6b591d8c9c701ab7acc1066930cfe03fd0205b72",
+  "successor_record_index_sha256": "32714fda72b4f69ec1d07b935bcd394554bc1227a82e409b844a2ebeec2a84b1",
+  "successor_indexed_records_verified": 16,
+  "predecessor_identity_manifest_sha256": "63f4a70daaeb4758ae99a8e8ec10fea945d0a9d2f0bac4f9f7c75a46c5ac4015",
+  "predecessor_files_verified_unchanged": 15,
+  "predecessor_review_sha256": "75970798b1c55c11fea87c21b04b1a73597c0f0d0ebefe534270bdb63567c40f",
+  "predecessor_review_identities_sha256": "af59fdfd92cc2a011cc58759371c94a18d71fa2e350fdac401df20692f6b706d",
+  "accepted_correction_product_after_sha256": {
+    "src/Piv/README.md": "4d5af3e8939230a5c2247821f97742a33182d1a53d6d25ce1adfab4f7e00a05f",
+    "src/Piv/examples/PivTool/README.md": "c5fc7c6d5bc7c09d96157477afd22a8e9e238427d7ac348342dddd100b28f580"
+  },
+  "example_inventory_sha256": "dbabb661d8280899731c6685ba9da125b2d10cf05c09f1500a13e5f9ef8b2625",
+  "accepted_changed_example_body_sha256": {
+    "src/Piv/README.md signing fence index 4": "103e840c132a11514d5eb311163470add49d4ca27ba7ff272905154a08b79abb",
+    "src/Piv/README.md decryption fence index 5": "bcc54c0acd350e75df97a2de3ca16fd64247245ca5f6dba6a7d0cfecaaa93818"
+  },
+  "current_path_decisions_sha256": "8ed1fef9e7ea17ed105e8e41133e85b01067e551b0fbceddf0fc85ef84d00ade",
+  "fresh_checks": {
+    "full_patch_equals_current_product_diff": true,
+    "saved_predecessor_products_match_original_review": 13,
+    "CSharp_files_byte_identical_to_reviewed_predecessors": 10,
+    "current_path_hashes_verified": 121,
+    "Markdown_bodies_total": 19,
+    "Markdown_bodies_changed": 2,
+    "Markdown_bodies_unchanged": 17,
+    "XML_bodies_unchanged": 23,
+    "provenance_and_referrals_byte_identical_to_predecessor": true,
+    "git_diff_check": "PASS"
+  },
+  "remaining_mandatory_corrections": [],
+  "coordinator_gates_pending": ["compiler", "independent token/API validation", "cref binding", "example compilation", "runtime qualification"],
+  "engineering_policy_physical_and_future_Windows_holds": "UNCHANGED; no closure or stronger evidence claimed"
+}

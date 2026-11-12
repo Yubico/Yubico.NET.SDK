@@ -74,9 +74,9 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                 // making the finalizer unreachable while registered — an owner that drops the
                 // listener without Dispose() would leak the native registration forever and keep
                 // pumping events into an abandoned object graph. The Weak handle keeps the
-                // finalizer reachable so it can unregister (draining in-flight callbacks) and
-                // free this handle. During normal operation the owner strongly roots the
-                // listener, so callbacks never observe a collected target.
+                // finalizer reachable so it can attempt unregister. Successful unregister drains callbacks;
+                // the current paths discard its status, so invocation alone supplies no drain proof.
+                // During explicit use the caller must keep the listener alive through shutdown.
                 _marshalableThisPtr = GCHandle.Alloc(this, GCHandleType.Weak);
 
                 // Build the notification filter for HID device interfaces
@@ -159,8 +159,8 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         var handle = GCHandle.FromIntPtr(context);
         if (!handle.IsAllocated || handle.Target is not WindowsHidDeviceListener listener)
         {
-            // Weak handle target collected (listener dropped without Dispose); the finalizer
-            // will unregister the native notification. Drop the hint until then.
+            // Weak handle target collected (listener dropped without Dispose). Drop the hint;
+            // the finalizer can attempt unregister, but this path supplies no successful-unregister proof.
             Logger.LogDebug("HID notification received for a collected listener; ignoring");
             return 0;
         }

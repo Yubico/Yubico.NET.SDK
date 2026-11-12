@@ -1,0 +1,42 @@
+# dotnet toolchain.cs -- build --project Yubico.YubiKit.WebAuthn.IntegrationTests --clean
+# started:   2026-11-12 05:52:28 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ da66f5d01 (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: build  (log: artifacts/toolchain/runs/20261112-055228-229-build/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261112-055228-229-build/01-clean-WebAuthn.IntegrationTests.log
+▶ RUN dotnet build src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261112-055228-229-build/02-build-WebAuthn.IntegrationTests.log
+  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs(29,42): error CS1929: 'YubiKitLogging' does not contain a definition for 'CreateLogger' and the best extension method overload 'LoggerFactoryExtensions.CreateLogger<PreviewSignProcessor>(ILoggerFactory)' requires a receiver of type 'Microsoft.Extensions.Logging.ILoggerFactory' [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj]
+✗ build: `dotnet build src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-055228-229-build/02-build-WebAuthn.IntegrationTests.log
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- build --project Yubico.YubiKit.WebAuthn.IntegrationTests --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✗ build                      8.0s  `dotnet build src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-055228-229-build/02-build-WebAuthn.IntegrationTests.log
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261112-055228-229-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

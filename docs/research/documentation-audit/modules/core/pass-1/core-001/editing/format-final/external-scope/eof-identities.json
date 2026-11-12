@@ -1,0 +1,44 @@
+{
+  "applied_to_primary": false,
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "files": [
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "baseline_terminal_lf": false,
+      "baseline_sha256": "f9bbf5907ba6bb7af56a0865d6b2c66c8122f017b1e244f9b5ae8b19e93eefda",
+      "report": {
+        "LineNumber": 65,
+        "CharNumber": 68,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "removed_hex": "0a",
+      "all_preceding_bytes_identical": true,
+      "before_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "after_sha256": "faba33e119d3ea2361dd390943adc57fbb36ae1741a31283c817c56658d476a1",
+      "before_bytes": 3213,
+      "after_bytes": 3212,
+      "final_line": "internal sealed partial class EvidenceJson : JsonSerializerContext;"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "baseline_terminal_lf": false,
+      "baseline_sha256": "d437ca74350a4220c03e982bdbda61df3091b51ed341064bc2ea37f17bdf507d",
+      "report": {
+        "LineNumber": 134,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "removed_hex": "0a",
+      "all_preceding_bytes_identical": true,
+      "before_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "after_sha256": "194b29775d29323ae1ce2d94ccc35abbf162ac15de858ca58a63295c90e4652d",
+      "before_bytes": 7419,
+      "after_bytes": 7418,
+      "final_line": "}"
+    }
+  ],
+  "total_removed_bytes": 2,
+  "runtime_copies": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/format-final-reconciliation/external-scope"
+}

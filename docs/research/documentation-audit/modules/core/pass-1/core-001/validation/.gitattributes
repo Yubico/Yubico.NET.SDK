@@ -1,0 +1,5 @@
+# Preserve captured compiler/source and command bytes exactly; normal prose follows repository policy.
+*.snapshot -text
+*.log -text
+*.stdout.txt -text
+*.stderr.txt -text

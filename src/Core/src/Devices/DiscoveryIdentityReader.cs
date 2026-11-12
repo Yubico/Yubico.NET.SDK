@@ -21,15 +21,12 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     device, used to disambiguate multiple same-PID physical keys during composite discovery.
 /// </summary>
 /// <remarks>
-///     This opens a short-lived connection over the interface and reads device info via the Core-owned
-///     <see cref="DiscoveryDeviceInfoReader" />, with a hard per-attempt wall-clock budget so a card that is busy
-///     with a long applet operation (e.g. RSA key generation) cannot stall the scan — the attempt is
-///     abandoned, not aborted (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />). It retries transient
-///     PC/SC failures (e.g. sharing violations) because, unlike the metadata read, a correct serial here is
-///     required to tell two same-model keys apart; a budget timeout is NOT retried because it indicates a
-///     busy card, and retrying would only extend the stall. Any failure is swallowed and reported as
-///     <c>null</c> so discovery degrades to conservative no-merge rather than aborting. It uses only Core
-///     primitives and introduces no dependency on Management.
+///     Opens a discovery-owned connection through <see cref="DiscoveryDeviceInfoReader"/>. Each attempt has
+///     a bounded caller wait, including admission and teardown; already-dispatched native work can continue
+///     after that wait ends. Ordinary exceptions are retried up to three attempts, with 150 ms then 300 ms
+///     backoff. A skipped read or timeout returns null immediately; a timeout alone does not identify a busy
+///     card. Other failures return null after the final attempt, leaving grouping to the remaining evidence.
+///     Cancellation propagates. The shared read retains native ownership through actual cleanup.
 /// </remarks>
 internal static class DiscoveryIdentityReader
 {

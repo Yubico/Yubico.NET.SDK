@@ -128,7 +128,8 @@ public class HidDeviceListenerIntegrationTests
             // Act - wait briefly with listener running
             Thread.Sleep(500);
 
-            // Assert - no spurious events while running
+            // Count callbacks over this interval. Zero also passes if Start failed; this measures neither
+            // native registration success nor polling cadence.
             Assert.Equal(0, eventCount);
             _output.WriteLine("No spurious events fired during quiet period with listener running");
         }
@@ -159,6 +160,8 @@ public class HidDeviceListenerIntegrationTests
         var completedTask = await Task.WhenAny(disposeTask, Task.Delay(TimeSpan.FromSeconds(5)));
 
         // Assert
+        // The race and diagnostic status are observed, but the disposal task's result is not awaited.
+        // A fast fault can win; this supplies no successful native unregister/drain assertion.
         Assert.True(completedTask == disposeTask, "Dispose should complete within 5 seconds");
         Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
         _output.WriteLine("Dispose after Start() completed cleanly within timeout");

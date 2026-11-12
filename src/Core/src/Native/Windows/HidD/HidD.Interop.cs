@@ -17,6 +17,10 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
+// ABI findings: native HidD_* returns BOOLEAN (one byte), unlike Kernel32 ReadFile/WriteFile's
+// four-byte BOOL. The Bool annotations below remain pending a separate correction. Native HIDP_CAPS
+// fields are unsigned 16-bit values; short preserves width but not values above 32767, including lengths.
+// No architecture-specific runtime failure is established by these declaration comparisons alone.
 internal static partial class NativeMethods
 {
 

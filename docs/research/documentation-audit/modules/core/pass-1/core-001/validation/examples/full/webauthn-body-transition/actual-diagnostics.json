@@ -1,0 +1,17 @@
+{
+  "source_log": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-webauthn-first/toolchain/20261112-055228-229-build/02-build-WebAuthn.IntegrationTests.log",
+    "bytes": 2363,
+    "sha256": "d4367a895e5d479b36090a4f966e59b239af33086e2dfca355757bb8b5aa31b8"
+  },
+  "unique_diagnostics": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs",
+      "line": "29",
+      "column": "42",
+      "code": "CS1929",
+      "message": "'YubiKitLogging' does not contain a definition for 'CreateLogger' and the best extension method overload 'LoggerFactoryExtensions.CreateLogger<PreviewSignProcessor>(ILoggerFactory)' requires a receiver of type 'Microsoft.Extensions.Logging.ILoggerFactory'"
+    }
+  ],
+  "classification": "TRUE accepted documentation body/prose access error; not generated context. Owner-assigned public LoggerFactory correction awaits accepted editor return."
+}

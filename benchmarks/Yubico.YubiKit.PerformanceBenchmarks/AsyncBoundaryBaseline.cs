@@ -7,7 +7,8 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
 
-// One invocation per child. A killed process is censored: it says nothing about native cleanup.
+// Measure invocation return and task completion separately, with one invocation per child.
+// A killed child is censored, not evidence of cooperative SDK drain or native release.
 internal static class AsyncBoundaryBaseline
 {
     private const string Lifecycle = "lifecycle";
@@ -66,6 +67,8 @@ internal static class AsyncBoundaryBaseline
 
     internal static async Task WriteDatasetAsync(string artifact, string scenario, int serial, int count, int timeout, List<Sample> samples)
     {
+        // Compare a cached package asset with the file at the constructed deployment path.
+        // This does not observe the process-loaded library or identify its native producer.
         var deps = Path.Combine(AppContext.BaseDirectory, "Yubico.YubiKit.PerformanceBenchmarks.deps.json");
         using var depsJson = JsonDocument.Parse(await File.ReadAllTextAsync(deps));
         var nativeLibrary = depsJson.RootElement.GetProperty("libraries").EnumerateObject()
@@ -353,7 +356,8 @@ internal static class AsyncBoundaryBaseline
                     else
                     {
                         await using var session = await RawCtapHidSession.CreateAsync(connection);
-                        // CTAPHID_CBOR 0x10; authenticatorGetInfo 0x04, a non-mutating command.
+                        // CTAPHID_CBOR 0x10 carries authenticatorGetInfo 0x04. The check below requires
+                        // a nonempty response with success status; it does not decode the GetInfo map.
                         var operationWatch = Stopwatch.StartNew();
                         EmitProgress("invocation_started", operationWatch);
                         Task<ReadOnlyMemory<byte>> task;
@@ -379,6 +383,8 @@ internal static class AsyncBoundaryBaseline
 
                 if (scenario == Lifecycle)
                 {
+                    // Reopen and check another CTAP success status. This observes the managed route,
+                    // not native cancellation/close statuses or arbitrary recovery schedules.
                     await using (var reopened = await device.ConnectAsync<IFidoHidConnection>())
                     await using (var reopenedSession = await RawCtapHidSession.CreateAsync(reopened))
                     {

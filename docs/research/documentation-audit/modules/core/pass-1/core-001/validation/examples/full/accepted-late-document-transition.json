@@ -1,0 +1,333 @@
+{
+  "scope": "Only newly accepted source-document prose/coordinate changes; every original body remains exact. No compilation or earlier proof rewrite.",
+  "deltas": [
+    {
+      "id": "FULL-048",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-049",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-050",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-051",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-052",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-053",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-054",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-055",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-056",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-057",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-058",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-059",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-060",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-061",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-062",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-063",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    },
+    {
+      "id": "FULL-064",
+      "path": "CLAUDE.md",
+      "old_document": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "current_document": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "source_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json",
+        "sha256": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b"
+      },
+      "raw_body_unchanged": true
+    }
+  ],
+  "current_product_map": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+    "sha256": "d33ac76a90640420d868b77dcbfa285e9e1c84ac1c8ab10b644e314fcbb0d23f"
+  },
+  "previous_candidate_profile_sha256": "97c3c3af49d69502d29191c5b6587da5e92f1b7f61561d481d00ed4606ca0773"
+}

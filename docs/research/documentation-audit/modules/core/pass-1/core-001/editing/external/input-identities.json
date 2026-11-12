@@ -1,0 +1,170 @@
+[
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+    "bytes": 40551,
+    "sha256": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+    "bytes": 26371,
+    "sha256": "2dcfa9c987390940ad44e90298d91ebcccd4ad009ccea473a2995c9f67e8bc4d",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+    "bytes": 15340,
+    "sha256": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+    "bytes": 17584,
+    "sha256": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B4.md",
+    "bytes": 16679,
+    "sha256": "a6743e926ffdedd3157c80097736048f7ab287b7f5c60a904b804d4f23bf098b",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+    "bytes": 13553,
+    "sha256": "5c9b80dcf2351d22bf179584c9fd8a105f897a33efeebfff34e1cfd72e7ab186",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B6.md",
+    "bytes": 12998,
+    "sha256": "146bd5a53f6f1ca3971c8ea8151b6aaee980295e730f5ebfb5c723e55817fdc9",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+    "bytes": 19154,
+    "sha256": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Ctap2.md",
+    "bytes": 9704,
+    "sha256": "35fe15e38608882555a619b1cd79a41d89a86cbc90c412b50836d9aa660f6005",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Management.md",
+    "bytes": 32004,
+    "sha256": "e3d207a2b502b6dfd35365b50a1ff1a79ea6387380d53ebae7ed6520ecf11f9a",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Oath.md",
+    "bytes": 10722,
+    "sha256": "f76dfc32758b1219b0ce5ae01d9719632281d821aa0dafa99557447c8b0a5984",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-OpenPgp.md",
+    "bytes": 12038,
+    "sha256": "c0e9a4cef2a1d60f6105e19d6c415b2d6c8186e1878f24480378fb0b997b68b4",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Piv.md",
+    "bytes": 10953,
+    "sha256": "7c1a3bef1b85ba38c936c81695f81ccb4bbc1933224037dde82061933d29e4a8",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-SecurityDomain.md",
+    "bytes": 7780,
+    "sha256": "e5dd342fdef8407750bb884e10548a7f787bc897fd6c00dd5543d4469cb1f7dc",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-WebAuthn.md",
+    "bytes": 7933,
+    "sha256": "ffaeff5adc6e15dc317ad7031f52180b98c5fff4a262426b1f91c569d71f953c",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-YubiHsm.md",
+    "bytes": 11853,
+    "sha256": "fbb36ae91c63f1fbcb468627bcf0e33398ac6bdbf309262854ba96dba31a68ea",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-YubiOtp.md",
+    "bytes": 11131,
+    "sha256": "2ee6114c87c3cf27b991261e3668b0efc15645422ae39aaf83b24fc9d8ef7e68",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/full-family/map.json",
+    "bytes": 3144981,
+    "sha256": "ee023021f2fd2586b4d75fc0a488cba2e3bdbb1ea7fdb91a793dbbd8bb4a7dd8",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/triage-full-family.md",
+    "bytes": 28412,
+    "sha256": "6b8ac53e144eacbed43e0a508c1786b7096d01246b32454e7e05c61ba074e422",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-external/docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/shared-sections.json",
+    "bytes": 826725,
+    "sha256": "148a865f7883cd0bde059226553c6cb31b7ea80506bd9669d3e60da0ffabdd0e",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-external/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+    "bytes": 2970,
+    "sha256": "3b01360cf7e973b51e076ef02c3683228d007e96c783915e62a046e34bc8cc71",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-discovery/docs/research/documentation-audit/modules/core/pass-1/core-001/edit-A.md",
+    "bytes": 26289,
+    "sha256": "32854eda75d59d643bd7e951a148e6a15d09b285d8d6be14c81caeca8acc8f6a",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-crypto/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/shared-followups.md",
+    "bytes": 7133,
+    "sha256": "dc8dbe835e399656b945607d5ac735b2a70600d2f66c55baca983f46a74f7379",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/outside-owner-handoffs.json",
+    "bytes": 43067,
+    "sha256": "4888d6f64b07a2b7d3f84301decb1e54fc92c5c2b14307748219386a06eb08af",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+    "bytes": 310649,
+    "sha256": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+    "bytes": 15838,
+    "sha256": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/citations-and-handoff.md",
+    "bytes": 12614,
+    "sha256": "eb262fac144ab0408d29e355561f26515e23b364c343b342a5d440e0ac1267c6",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/candidate-decisions.json",
+    "bytes": 87707,
+    "sha256": "acd089d5a5306892bc00414cb82495905b03564d5a9b3d7ed14e54f3ab4e3a84",
+    "use": "Read-only completed source/referral input, not independent review acceptance."
+  }
+]

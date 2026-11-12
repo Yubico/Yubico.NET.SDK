@@ -22,9 +22,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 public class DiscoveryIdentityReaderTests
 {
     /// <summary>
-    ///     A discovery identity read against a device whose connection open never completes (modeling a card
-    ///     busy inside a long native operation, e.g. an in-flight RSA-4096 GENERATE ASYMMETRIC APDU that a
-    ///     CancellationToken cannot abort) must give up within a bounded time and degrade to
+    ///     A discovery identity read against a scripted connection open held past its wait budget returns
     ///     <c>null</c> ("serial unknown"), instead of stalling the discovery scan indefinitely while it holds
     ///     the scan lock.
     /// </summary>
@@ -60,10 +58,9 @@ public class DiscoveryIdentityReaderTests
     }
 
     /// <summary>
-    ///     Deliberately ignores the <see cref="CancellationToken" />: the production hang is
-    ///     <c>Task.Run(() => SCardTransmit(...))</c> / a blocking native connect, which cannot observe
-    ///     cancellation once in flight. A fix that only signals a token into ConnectAsync would not fix the
-    ///     real bug; the reader must abandon the wait (e.g. <c>Task.WaitAsync</c>) to stay bounded.
+    ///     Holds the open independently of the caller's token until FailConnect releases it. This models
+    ///     work that outlives a bounded caller wait; the test checks null within ten seconds and drains the
+    ///     fake afterward. It establishes no native cancellation or PC/SC release behavior.
     /// </summary>
     private sealed class HangingConnectYubiKey : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {

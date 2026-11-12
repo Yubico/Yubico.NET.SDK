@@ -1,0 +1,19 @@
+--- old/scripts/toolchain/Results.cs
++++ accepted/scripts/toolchain/Results.cs
+@@ -95,9 +95,14 @@
+     }
+ 
+     /// <summary>
+-    /// Fails the target when a project failed, or when <paramref name="requireExecution"/> is set and
+-    /// no project executed a test. A run that executed nothing is not a pass.
++    /// Rejects a failed project outcome and, when <paramref name="requireExecution"/> is set,
++    /// a nonempty result list whose outcomes are all <c>NoTestsExecuted</c>.
+     /// </summary>
++    /// <remarks>
++    /// This gate checks classified outcomes, not parsed execution counts. It does not reject an empty
++    /// list or a mixed list merely because some projects executed no tests. A passed outcome with
++    /// unknown counts is not proof that tests ran; inspect each project's counts and runner output.
++    /// </remarks>
+     public static void EnsureTestsRan(IReadOnlyList<ProjectResult> results, string kind, bool requireExecution = true)
+     {
+         var failCount = results.Count(r => r.Outcome == Outcome.Failed);

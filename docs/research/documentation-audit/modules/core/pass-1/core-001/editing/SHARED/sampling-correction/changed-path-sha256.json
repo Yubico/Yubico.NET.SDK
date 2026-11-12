@@ -1,0 +1,15 @@
+{
+  "path": "docs/architecture/event-driven-device-discovery.md",
+  "before_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+  "primary_current_before_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+  "after_sha256": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c",
+  "focused_patch_sha256": "37074361c54bb2232ff8406ae37af482a73c51b029a3dfd8328e467f697e274e",
+  "before_matches_primary_at_capture": true,
+  "sampling_refs": [
+    "SAMPLE-A001",
+    "SAMPLE-A003"
+  ],
+  "changed_unit": "core-001:unit:cf1e2081af8b8ac4",
+  "clean_sampling_credit": "excluded; coordinator owns expansion",
+  "independent_review": "pending"
+}

@@ -1,0 +1,46 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Management.Examples.ManagementTool.Features;
+using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
+
+namespace Audit20261111.DocExamples.Full;
+internal static class Body281
+{
+internal static async Task CompileOnly(IManagementSession session, Func<byte[]?> GetCurrentCode, Func<byte[]> GetNewCode, CancellationToken ct)
+{
+byte[]? current = null;
+byte[]? newCode = null;
+try
+{
+    current = GetCurrentCode();
+    newCode = GetNewCode();
+    await DeviceConfiguration.SetLockCodeAsync(session, current, newCode, ct);
+}
+finally
+{
+    if (current is not null) CryptographicOperations.ZeroMemory(current);
+    if (newCode is not null) CryptographicOperations.ZeroMemory(newCode);
+}
+}
+
+}

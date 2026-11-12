@@ -29,6 +29,7 @@ public sealed record DeviceInfoResult
     /// <summary>
     /// Gets the device information.
     /// </summary>
+    /// <remarks>Copies the DeviceInfo value, not its memory-backed timeout storage.</remarks>
     public DeviceInfo? DeviceInfo { get; init; }
 
     /// <summary>

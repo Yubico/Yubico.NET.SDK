@@ -280,7 +280,7 @@ internal static class PrivateKeyOperations
     /// <param name="slot">The slot containing the private key.</param>
     /// <param name="peerPublicKey">The peer's public key.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>The shared secret (x-coordinate for NIST curves, point for Curve25519).</returns>
+    /// <returns>Raw shared-secret bytes: the x-coordinate for NIST ECDH, or the 32-byte X25519 result.</returns>
     internal static async Task<byte[]> CalculateSecretAsync(
         IBackend backend,
         Slot slot,

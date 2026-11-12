@@ -1,0 +1,214 @@
+{
+  "reader": "Astra",
+  "scope": "Actual complete boundary sample reads; final mapping/eligibility pending",
+  "reading_sha256": "ebd3b51a4ada72ae2ac8a14e04ebaa4a0d1df110fad0490cc323ded229117e73",
+  "units": [
+    {
+      "id": "core-001:unit:a2cf98dcc1805fbf",
+      "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+      "range_sha256": "263f32aa64844517da280fca4dd768e0a25dba4d29db6c04bef421fc895ab96a",
+      "current_file_sha256": "8f26bd204c7878816faf7da90d84091a7e2a3f0681e6e3be081f14d6588f1030",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:a815cc370e465f4c",
+      "path": "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+      "range_sha256": "c1ff88a11b2a2283c859eb48e8f57b5f6d1a59b93664013f07ba9d2477035bad",
+      "current_file_sha256": "03004d4f3f006ca73a3b7ad9333cd3296f025c6d3c40af528b3e14ad99ce9a4c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:6dea5c78a8314291",
+      "path": "src/Management/src/Backend/OtpBackend.cs",
+      "range_sha256": "3683191c9fb4d5d24d0e9f286f4814840316484727ab56bf76b568d85323243a",
+      "current_file_sha256": "591e25bd39fe1e673681a5652e6343d90088b020c5239f719b18fba28b4724af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:417fbf395249474a",
+      "path": "src/Management/src/Backend/SmartCardBackend.cs",
+      "range_sha256": "ebcf73681f12c51c0296c81be659b9934a9f69d66c9391474f0d97cc787758cb",
+      "current_file_sha256": "f3a5b54ee4e66bef1ae9e3259b3a571d9ebf3e109fd65c094772e089def6a08d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:6cb194bebfaebec7",
+      "path": "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "range_sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad",
+      "current_file_sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:31d79bce8daf96b9",
+      "path": "src/Management/examples/ManagementTool/README.md",
+      "range_sha256": "d272ecb2ae6a7ffb473589df5bda36a8fe581093879d63432d6fe6b02608078c",
+      "current_file_sha256": "ff782044735d4f63037044e2d44f159d356cef4ed1ba4fde2972cc8b368fde6e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Task/recovery limits checked against preserved Management investigation E1\u2013E3 vendor quotations: SDK timeout bounds, CCID condition, NFC restriction5.7+/USB power3seconds, BioMPE reset scope; no fresh hardware result."
+    },
+    {
+      "id": "core-001:unit:555e3712647dbc07",
+      "path": "src/Management/examples/ManagementTool/README.md",
+      "range_sha256": "70f044443f913effdb2c80d1c65b9f84c804a3bd8fba0160a20fab8e919fa113",
+      "current_file_sha256": "ff782044735d4f63037044e2d44f159d356cef4ed1ba4fde2972cc8b368fde6e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:1dd329786aeabb6c",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionCapabilityTests.cs",
+      "range_sha256": "0f5a3c854fc3bf8685fdee92914ef280b5de0f8cbbc156fe94504d43cb589a9c",
+      "current_file_sha256": "f145c3e1171fb982dbfac0291bf755d8b93f2dd8f79bbfb7d065f26a6c98d20e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Test explicitly saves settings, changes one USB bit, reads persisted config and attempts restoration/readback in finally; no reboot or active-interface postcondition inferred."
+    },
+    {
+      "id": "core-001:unit:0ef7b0ff9c5e908c",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+      "range_sha256": "fec3d45fc5e4d544abeca386ed6a24132e5b230a44eed02f9870e45049ca33e5",
+      "current_file_sha256": "acad7cb1830a60f9bfadd845779ad366491faeebbdd615c588aa9a249cc944cd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:94cf1d1225852eb6",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+      "range_sha256": "b7b7e561c8c5eb1b53fc073a45f83dffd7913f84c53b08b99f701b1a9adfbf86",
+      "current_file_sha256": "acad7cb1830a60f9bfadd845779ad366491faeebbdd615c588aa9a249cc944cd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:02ae797f211c1fb1",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+      "range_sha256": "66fc8c8d3ed4ec958d5b3e18a018f7de4ee30411b7d3b4ecadcd28ac405bd204",
+      "current_file_sha256": "acad7cb1830a60f9bfadd845779ad366491faeebbdd615c588aa9a249cc944cd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:c2126db982bbfcb5",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionTests.cs",
+      "range_sha256": "70e69be9a5f79437e1054473123dc032aa38822cf569306d29f8a0298def1bae",
+      "current_file_sha256": "9e14a6f17b090ae88374454ca22ae92d0321ef021ee303d64cac1f7c5ad135a1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Cached-metadata comment verified correct: actual WithManagementAsync forwards state.DeviceInfo, not a new helper-entry read. The callback makes the separate fresh query."
+    },
+    {
+      "id": "core-001:unit:c5c41a16f0ac5681",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionTests.cs",
+      "range_sha256": "3aa966f28cb761c37719475326cd64b9c572f397a14bdb1769934aa66e95a8af",
+      "current_file_sha256": "9e14a6f17b090ae88374454ca22ae92d0321ef021ee303d64cac1f7c5ad135a1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:c486d9f36101dbbf",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs",
+      "range_sha256": "b4f0eb7aac944b376b5abb1de309477b443d358a63b6ee73984e014aac2144be",
+      "current_file_sha256": "863502e0a2960903529306e8013d6308dbfe937aac3f54d73f32cfe55ec33e2a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:61eb51979d55e830",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadinessTests.cs",
+      "range_sha256": "dd599e7c80d94a1530124e5f04ba97d7e4588620397e6dca71a159cc37cb303b",
+      "current_file_sha256": "18f4c3c56b24e6d565b24b95dc6cd221772813eef8b00085314690172b057e6a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:920aed6dbc2c5cd8",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "range_sha256": "672b8079d6bf08e94bf7aa463e3c6ba1d566fd15c84706b03d70dc1dda9fcf9d",
+      "current_file_sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:409d46be3df37198",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "range_sha256": "35f993ed16ec816cd1557259b4c413bf1df3e44c73d069bcce8b2b870a77b386",
+      "current_file_sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:a469b3cef18fecb5",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "range_sha256": "2e0a36c53d3f958fd9d05a07bbd9de13ad057baaf15d0270dea2c8c40f3f3efb",
+      "current_file_sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:30cfbefbd21e34c1",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "range_sha256": "436a2158e3e51ea4a18be14ecda7aba431894404301cd7a8f723b454c378a993",
+      "current_file_sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:ab1ac215210a05f3",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "range_sha256": "689cda6f9d9c204a70075673d2ea0ff4979ec7c8eee6080f4c575db222ca84c7",
+      "current_file_sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:0a4bf24a663dd6e8",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "range_sha256": "756e6b075162e14d4abe8b8cb0d41ddafbbf33cff1dcfe1e4efdeb070085d9e4",
+      "current_file_sha256": "906daac2d262529d5104083f6804869df2c008bb2968045b485e14af060ef661",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:20ce16d2fb7eff11",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementBackendLifecycleTests.cs",
+      "range_sha256": "642ed88ba2a165a2558406762ff9d4a2f0299bd39a31cfff77fc0a15aa5827af",
+      "current_file_sha256": "ce0f8245201cde725b60fb5a10992a94f94faebad857cc7b026769a39c475de5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    },
+    {
+      "id": "core-001:unit:1adf219a85f82c90",
+      "path": "src/Management/src/Backend/OtpBackend.cs",
+      "range_sha256": "e98efdb876acb77007278a43067306fa0b4f6d2f53dc3bf92bbee77aa98ce6c1",
+      "current_file_sha256": "591e25bd39fe1e673681a5652e6343d90088b020c5239f719b18fba28b4724af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact caller/metadata/fixture scope supported. Existing device/profile/native/persistent-state qualifications retained; no execution inferred."
+    }
+  ]
+}

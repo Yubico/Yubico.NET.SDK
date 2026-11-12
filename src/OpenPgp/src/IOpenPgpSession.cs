@@ -28,8 +28,14 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     Use a SmartCard session and await each operation before starting the next. Administrative writes
 ///     generally require prior Admin PIN verification; the card enforces access conditions and advertised
 ///     capabilities. PIN inputs are borrowed UTF-8 bytes. Keep them valid until the awaited call completes,
-///     then clear caller-owned buffers. Cancellation can leave a command or persistent change in progress;
-///     inspect device state before retrying a mutation.
+///     then clear caller-owned buffers. Core guards one logical exchange, including APDU chaining and SCP,
+///     rather than the whole public method. Certificate occurrence selection, key/cache updates and PIN/KDF
+///     workflows span separate exchanges. Await the complete public task before another call or disposal,
+///     and keep borrowed keys, input memory and prompt services alive through their last use.
+///     Cancellation is checked before each exchange is admitted; an admitted SmartCard exchange runs with
+///     CancellationToken.None. Ending an outer wait does not complete that task or permit input cleanup.
+///     Await actual completion/teardown and inspect fresh state before retrying a persistent mutation.
+///     Inherited IsAuthenticated describes SCP setup, while the card separately enforces User/Admin PIN access.
 /// </remarks>
 public interface IOpenPgpSession : IApplicationSession
 {
@@ -304,9 +310,11 @@ public interface IOpenPgpSession : IApplicationSession
     /// </summary>
     /// <remarks>
     ///     The algorithm attributes for the slot are derived from the key and written first (when the card
-    ///     allows changing them; otherwise only RSA 2048 can be imported). Supported keys: RSA 2048, 3072 and
-    ///     4096 with public exponent 65537, P-256, P-384, P-521, Ed25519 and X25519. The private key is not
-    ///     cleared by this method.
+    ///     allows changing them; otherwise only RSA 2048 can be imported). Modeled representations include
+    ///     RSA 2048, 3072 and 4096 with public exponent 65537; P-256, P-384, P-521, secp256k1,
+    ///     Brainpool P256r1/P384r1/P512r1, Ed25519 and X25519. Check host-provider, card and slot support
+    ///     separately: catalog representation alone establishes none of them. The private key is not cleared
+    ///     by this method.
     ///     The caller retains and disposes <paramref name="privateKey" />. Attribute writes can invalidate the
     ///     previous key before import succeeds; cancellation or refresh failure can follow a persistent change.
     ///     Inspect a fresh read before retrying. Certificates and fingerprint/time metadata are separate.
@@ -572,6 +580,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Lazily reads F9 and returns the same cached instance on later calls. An APDU read error currently
     ///     caches KdfNone. Treat the result as session-retained: keep it undisposed while the session uses it.
     ///     The session disposes its current cached KDF during disposal. Refreshing application data leaves it unchanged.
+    ///     Synchronous disposal clears that object before protocol drain; asynchronous disposal clears it after
+    ///     Core teardown, including on failure. Await complete PIN/KDF tasks before either disposal path.
     /// </remarks>
     Task<Kdf> GetKdfAsync(
         CancellationToken cancellationToken = default);
@@ -668,6 +678,10 @@ public interface IOpenPgpSession : IApplicationSession
     ///     normal return alone is insufficient to establish erasure. Read back keys, certificates, PIN/retry,
     ///     KDF and policy state independently. Failure/cancellation can leave PINs blocked or state partly changed.
     ///     The cached KDF reference is dropped without disposal; retain its cleanup scope through session teardown.
+    ///     Reset retains the effective version and any existing SCP processor graph. Reselection sends a plain
+    ///     SELECT through that graph, then uses its retained secure state for subsequent commands; it performs
+    ///     no fresh SCP handshake. The inherited authentication flag does not establish channel restoration.
+    ///     After uncertain reset/recovery, dispose and reopen, then inspect persistent state before retrying.
     /// </remarks>
     Task ResetAsync(
         CancellationToken cancellationToken = default);

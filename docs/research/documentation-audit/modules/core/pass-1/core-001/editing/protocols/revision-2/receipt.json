@@ -1,0 +1,89 @@
+{
+  "base_commit": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "current_commit": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_commit": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_full_diff_sha256": "4a89837083fd34826639a55d1bd988574565bc8a4da508975820e0acfa3755d1",
+  "full_transfer_diff_sha256": "7d2f50621bddf029cc3b494a256552ea9169d3a2d142caeb101a72d7ebd50b5e",
+  "correction_diff_sha256": "86e72eb988961fca3b8241905c548056316ce858b108e2530de7f9215812628e",
+  "current_primary_cs_paths": 91,
+  "current_decisions": {
+    "edit": 57,
+    "retain": 22,
+    "hold": 12
+  },
+  "revision_2_corrected_paths": [
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs"
+  ],
+  "old_editor_review_record_hashes_rechecked": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/artifact-manifest.json",
+      "sha256": "f8cfe65e3725c2d73bc72480f33b2bb990ee080440fedba4ad34cedb9f3b96a4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/candidate-decisions.json",
+      "sha256": "3f67aade37e54e741e44461a2480d610542b89c91ed9d949f9a9ef0276cf4fb6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/citations.md",
+      "sha256": "3e5a693f3905b4a7fa1f2cd4b88221045aa47dad67a089e7a5a17f9a46c0b626"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/examples.json",
+      "sha256": "03f6a50201591bcdd0df192e2ee544764ec206a5afec9760861bf792594a9366"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/full-product.diff",
+      "sha256": "4a89837083fd34826639a55d1bd988574565bc8a4da508975820e0acfa3755d1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/outside-owner-handoffs.json",
+      "sha256": "4888d6f64b07a2b7d3f84301decb1e54fc92c5c2b14307748219386a06eb08af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/path-decisions.json",
+      "sha256": "691127ced67913859f5ddc2a469dbbda17a6b4f22f602777094d46128671fda0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/receipt.json",
+      "sha256": "1dee31f152c73c6b6dd806cc93751308823909e135e7e59e6c54e3d13259d1ce"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/review-identities.json",
+      "sha256": "53c1df7dd500fdb3d61856a2408c0b11d2734f546e75948f44b9b0e3fb4a5bc2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/review.md",
+      "sha256": "5f831b0ca0b48c7ffbb068719b51c58e86b3e1e41e390674d2ad45adae64ab79"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/write-return.py",
+      "sha256": "07b02e261056386f8d28d6c537e31e76a1c64c8b92fb624a5afcb8fa8ec13733"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-protocols.md",
+      "sha256": "5084a4637a0005d1f8053e2ddb41fb102227d41aad570b12d77fd9b92a95683c"
+    }
+  ],
+  "retained_original_pdf_sha256": {
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.pdf": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0"
+  },
+  "limited_noncomment_line_comparison": "PASS for all 57 edited files against base and reviewed input; not a C# lexer/token/API check",
+  "xml_blocks_parsed": 308,
+  "xml_errors": 0,
+  "git_diff_check": "PASS; exit 0",
+  "examples": "Unchanged; use ../examples.json and original reviewed body hash",
+  "outside_owner_handoffs": "Unchanged; use ../outside-owner-handoffs.json",
+  "review_findings_contradicted": [],
+  "stronger_compiler_token_api_cref_checks": "PENDING existing coordinator checker",
+  "build_test_formatter_crypto_native_device": "NOT-RUN",
+  "git_mutations_subagents": "NONE",
+  "independent_revision_2_re_review": "PENDING"
+}

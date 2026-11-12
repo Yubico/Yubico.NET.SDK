@@ -1,0 +1,6 @@
+
+        ///   using (SHA384 sha384Object = CryptographyProviders.Sha384Creator())
+        ///   {
+        ///       // Use the hash object within this disposal scope.
+        ///   }
+        /// 

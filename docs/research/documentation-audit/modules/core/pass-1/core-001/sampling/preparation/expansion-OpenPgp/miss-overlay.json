@@ -1,0 +1,26 @@
+[
+  {
+    "id": "core-001:unit:8b2a95f01db9bf2c",
+    "coordinator_finding": "SAMPLE-PGP-001",
+    "raw_verdict": {
+      "suffix": "8b2a95f01db9bf2c",
+      "id": "core-001:unit:8b2a95f01db9bf2c",
+      "verdict_text": "**SAMPLE-PGP-001:** advisory UIF fallback calls the logger before choosing PolicyMayRequire; a throwing provider can interrupt it. The unconditional comment needs qualification. Isolated editor correction assigned."
+    },
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "final_clean_credit": 0,
+    "scope": "UIF advisory fallback logger-throw qualification in implementation/guide; isolated editor verifying comments. Actual correction patch not guessed or polled."
+  },
+  {
+    "id": "core-001:unit:710814862611f595",
+    "coordinator_finding": "SAMPLE-PGP-001",
+    "raw_verdict": {
+      "suffix": "710814862611f595",
+      "id": "core-001:unit:710814862611f595",
+      "verdict_text": "**SAMPLE-PGP-001:** the matching guide's unconditional failed-read fallback statement needs the same logging-success condition. Zero clean credit."
+    },
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "final_clean_credit": 0,
+    "scope": "UIF advisory fallback logger-throw qualification in implementation/guide; isolated editor verifying comments. Actual correction patch not guessed or polled."
+  }
+]

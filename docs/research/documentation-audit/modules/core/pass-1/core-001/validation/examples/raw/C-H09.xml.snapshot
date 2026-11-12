@@ -1,0 +1,10 @@
+
+//         ///   00 00 00 00 00 00 00 00 || digest || salt || H
+//         ///             8 bytes           dLen     dLen    dLen
+//         ///<br/>
+//         ///   For example, if the digest is SHA-256, then the
+//         ///   digest length is 32.
+//         ///<br/>
+//         ///   00 00 00 00 00 00 00 00 || digest || salt || H
+//         ///             8 bytes            32       32     32
+//         /// 

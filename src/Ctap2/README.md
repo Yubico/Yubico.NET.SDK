@@ -286,27 +286,53 @@ in-flight signal, so ordinary MakeCredential/GetAssertion report `PolicyRequires
 Notification completion reflects the exchange status before typed decoding, not proof of gesture, UV or
 RP acceptance. See [user interaction](../../docs/usage/user-interaction.md) for callback contracts.
 
+Keep the caller-owned prompt usable through terminal callbacks. Resolution uses an uncancelled token
+and can delay return after cancellation. A failed request callback receives no resolution callback.
+Cancellation requests neither interrupt a baseline Windows synchronous HID read nor impose a native
+completion deadline. If framing, transport or teardown leaves exchange state uncertain, dispose and
+reopen the connection rather than assuming it is reusable.
+
 ## Constraints
 
 Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes concrete identities and optional
 `Core.Cryptography.Cose.CoseKeyInfo` (kty/crv, not alg). Core `CoseAlgorithmIdentifier` uses
 `Es256`, `Es384`, `Es512`, `EdDsa`, `Rs256`, and `EcdhEsHkdf256`. CTAP2's `CoseAlgorithm` remains open-valued
 with its existing PascalCase constants and unknown-value preservation. A Core COSE mapping is not CTAP2
-operation/profile support; PIN/UV curve and algorithm checks remain strict. Operation applicability in the
-catalog must never broaden CTAP2 profile checks or restrict unknown numeric response identifiers.
+operation/profile support. CTAP's PIN/UV key-agreement profile requires EC2/P-256, alg=-25, 32-byte X/Y
+coordinates, an on-curve point and no other optional key parameters. The current helper checks coordinate
+storage types and lengths and imports the point as P-256 through the provider, but omits peer kty/crv/alg
+and optional-parameter checks. This is a validation gap, not intended forward compatibility. Catalog
+applicability supplies none of those missing checks and must not restrict unknown numeric response identifiers.
 
 Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
 preparation directly; there is no applet-selection step.
+
+The USB SmartCard gate uses detected GetInfo firmware before `FirmwareVersionOverride` configures the
+session and protocol. Missing firmware becomes `0.0.0`; major-zero versions pass the SDK's permissive
+feature policy, not a verified modern-firmware check. HID INIT vendor bytes, GetInfo firmware and
+Management firmware are separate observations. Later GetInfo reads do not reconfigure the session.
+Initial SmartCard SELECT/GetInfo precede options-based configuration. For major-zero firmware,
+Core chooses APDU format from connection support before its ordinary `ForceShortApdus` handling.
 
 - The default selects HID FIDO when exposed, otherwise SmartCard; it never retries another transport after
   opening/initialization failure. `SessionCreationOptions.PreferredConnectionType`
   forces one. `ConnectionType.HidOtp` throws `ArgumentException`, an unexposed one `NotSupportedException`.
 - SCP runs only over SmartCard. `ScpKeyParameters` without an explicit preference selects SmartCard; pairing
   them with `ConnectionType.HidFido` throws `NotSupportedException` during initialization.
-- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection;
-  a second session throws `ConnectionInUseException` until the first is disposed.
+- SDK-managed opens claim the selected device view's known member interface IDs in this process.
+  An overlapping claim throws `ConnectionInUseException`; disjoint scoped views, direct connection
+  factories and other processes need separate coordination. Each connection admits one live session.
 - Sessions from `device.CreateCtap2SessionAsync()` own the connection they opened; `Ctap2Session.CreateAsync`
   borrows yours and you dispose it. Use `await using` for both; there is no finalizer backstop.
+- Serialize and fully await complete operations and helper workflows before disposing the session,
+  protocol, token or borrowed connection. Core drains an admitted exchange, not a whole PIN-token,
+  begin/next, blob read-modify-write or post-exchange decoding/notification workflow. Callbacks must
+  not dispose or reenter the session whose operation is awaiting them.
+- SmartCard SCP setup follows plain FIDO selection/GetInfo, then rebinds the backend without another
+  SELECT or a protected CTAP probe. Setup success and `IsAuthenticated` do not establish device-side
+  authentication phase completion, applet-selection survival, FIDO-over-SCP product qualification or
+  PIN/UV permissions. Keep caller-owned SCP parameters in an outer scope around session creation;
+  their key/certificate owners are separate from the session's derived keys.
 - `ResetAsync` invalidates generated credentials, including non-discoverable/U2F credentials, erases
   discoverable credentials and clears the PIN. Storage/configuration effects depend on the applicable
   protocol/product. CTAP 2.1/2.3 require receipt within ten seconds of power-up for displayless devices;

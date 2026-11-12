@@ -26,6 +26,7 @@ internal static class DiscoveryBudgets
     internal static readonly TimeSpan IdentityRead = TimeSpan.FromSeconds(2);
     internal static readonly TimeSpan MetadataRead = TimeSpan.FromSeconds(3);
 
-    /// <summary>The combined wait budget for a scan's enumeration, identity, and metadata stages.</summary>
+    /// <summary>The arithmetic sum of the enumeration, one identity-attempt, and metadata wait budgets.</summary>
+    /// <remarks>Retries, backoff, scan-lock queueing, synchronous topology work, and logging lie outside this sum.</remarks>
     internal static TimeSpan ScanUpperBound => Enumeration + IdentityRead + MetadataRead;
 }

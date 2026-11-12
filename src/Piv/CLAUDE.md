@@ -77,6 +77,19 @@ the parsed output or performing local RSA padding removal, with `CancellationTok
 success responses therefore resolve as `Failed`, and raw or untransferred parsed output is cleared. PIV does not report
 `TimedOut` because these exchanges provide no confirmed touch-timeout status.
 
+Direct `PivSession.CreateAsync` borrows the connection; the device extension transfers its hidden connection only
+after successful initialization. Core binds before SELECT and owns protocol disposal during incomplete setup.
+PIV reads FD before effective-version configuration/SCP, rebinds its backend and discovers management type before
+readiness. The backend borrows the protocol. Keep caller-owned SCP parameters/contained owners alive through factory
+completion and the caller-owned prompt through all callbacks. Failed direct setup detaches without closing the
+borrowed connection; the convenience helper cleans up its failed hidden connection.
+
+Core guards logical exchanges, not complete authentication, metadata-plus-crypto, PIN-only or reset workflows.
+Await and serialize whole public tasks before other calls or disposal. PIV callbacks and RSA unpadding are outside
+the exchange guard and can outlive its drain; this is not OTP's callback-inside-guard self-wait path. Each exchange
+checks cancellation before admission, then uses None for constituent traffic. An outer canceled wait does not
+complete the underlying task or permit borrowed-input cleanup; admitted work may still succeed.
+
 ## Critical Security Requirements
 
 Raw APDU responses have a Core-owned `Clear()` operation. Internal crypto/data-object results stay in owned
@@ -210,6 +223,11 @@ No Bio-hardware coverage is implied by fake-protocol tests.
 
 Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of duplicating version checks. Be careful to distinguish device firmware from applet-reported firmware when beta hardware reports sentinel applet versions.
 
+Detected PIV FD, Management/discovery metadata and effective compatibility override have different provenance.
+The override controls framing/feature policy; detected firmware drives the management-type fallback while metadata
+takes precedence. Major-zero acceptance supplies no physical 5.8 minimum. Reset retains the existing backend/protocol
+without reselection or a new SCP handshake; the channel flag alone establishes no restoration evidence.
+
 `Features` is a public standalone PIV catalog; `IsSupported` stays public and `EnsureSupports` is protected.
 `Slot` replaces `PivSlot`; shared Core `KeyType` replaces `PivAlgorithm`. Only internal `KeyTypeEncoding`
 maps Core key types to protocol bytes. Never cast `KeyType` to byte. Metadata preserves unknown algorithm
@@ -227,7 +245,9 @@ detected firmware, independent of compatibility overrides.
 ## Known Gotchas
 
 1. **Management key first**: key generation/import and some metadata changes require management-key authentication.
-2. **PIN verification persists by session**: once verified, PIN state may remain until failure or disposal.
+2. **PIN verification is card state**: selection and card policy govern its lifetime. Direct-session disposal closes
+   no borrowed connection and explicitly clears no card PIN state. Strict Exclusive/explicit sharing and requested
+   UNPOWER remain distinct from observed PIN isolation, device power and separate-process behavior.
 3. **Touch policy timing**: cached touch policy caches for a short window after first touch.
 4. **Certificate size limits**: PIV certificates may need compression or careful object sizing.
 5. **Default credentials**: never assume defaults are acceptable outside explicit test/reset flows.

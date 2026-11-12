@@ -1,0 +1,194 @@
+{
+  "schema": "exact-Markdown-table-suffix-cells",
+  "prefix": "core-001:unit:",
+  "Oath": [
+    {
+      "suffix": "1bf9d5c2d8ded722",
+      "id": "core-001:unit:1bf9d5c2d8ded722",
+      "verdict_text": "Supported: delete-by-name workflow owns the returned session, confirms unless forced, and excludes cancellation from the ordinary error conversion."
+    },
+    {
+      "suffix": "ab98f777e0e5a2e5",
+      "id": "core-001:unit:ab98f777e0e5a2e5",
+      "verdict_text": "Supported: delegates to the shared Base32 decoder; returned independent bytes are caller-owned. Decoder permissiveness is separate from OATH nonempty-secret validation."
+    },
+    {
+      "suffix": "1da1115a6a2d8624",
+      "id": "core-001:unit:1da1115a6a2d8624",
+      "verdict_text": "Supported: empty key TLV is sent before the local protection flag changes; no transaction rollback or device-state readback promised."
+    },
+    {
+      "suffix": "054ed96fe3237098",
+      "id": "core-001:unit:054ed96fe3237098",
+      "verdict_text": "Supported: cancellation observed after opening disposes the returned session before throwing; cleanup failure can supersede cancellation."
+    },
+    {
+      "suffix": "d8dd51ea527f6add",
+      "id": "core-001:unit:d8dd51ea527f6add",
+      "verdict_text": "Supported: exact backend forwarding preserves command, throw-on-error and token arguments."
+    },
+    {
+      "suffix": "1b7bc942bb2b181f",
+      "id": "core-001:unit:1b7bc942bb2b181f",
+      "verdict_text": "Supported within source scope: SmartCard path, effective-version gates, creation pattern and individual-versus-bulk presence behavior retain their qualifications."
+    },
+    {
+      "suffix": "bd9fbdc6508adac7",
+      "id": "core-001:unit:bd9fbdc6508adac7",
+      "verdict_text": "Supported: current URI task guidance distinguishes parsing bounds, ignored fields, permissive unused Base32 bits and 14-byte storage padding from entropy. Example scopes credential and session. Firmware statement remains vendor-profile evidence, not a new physical result."
+    },
+    {
+      "suffix": "55b07354d429a6be",
+      "id": "core-001:unit:55b07354d429a6be",
+      "verdict_text": "Supported: test asserts a non-null six-digit result for one stored SHA-512 credential; it does not independently verify the computed OTP against a reference."
+    },
+    {
+      "suffix": "61c7599de7ec9de1",
+      "id": "core-001:unit:61c7599de7ec9de1",
+      "verdict_text": "Supported: fake checks preceding connection disposal and records the later cleanup token."
+    },
+    {
+      "suffix": "d4ac23565d565892",
+      "id": "core-001:unit:d4ac23565d565892",
+      "verdict_text": "Supported: fake distinguishes operation-token cancellation and later cleanup connections; no physical token-state recovery inferred."
+    },
+    {
+      "suffix": "74a5f93a6223fb56",
+      "id": "core-001:unit:74a5f93a6223fb56",
+      "verdict_text": "Supported: scripted cancellation occurs after the inner SET CODE response."
+    },
+    {
+      "suffix": "adb4dcb90b9853b3",
+      "id": "core-001:unit:adb4dcb90b9853b3",
+      "verdict_text": "Supported: explicit serial/version assertions describe the selected historical device lane; no current device baseline inferred."
+    },
+    {
+      "suffix": "a9579efc62584f84",
+      "id": "core-001:unit:a9579efc62584f84",
+      "verdict_text": "Supported: SCP03 session test checks metadata presence and salt; no additional authentication/reset guarantee inferred."
+    },
+    {
+      "suffix": "039b97880290cbc2",
+      "id": "core-001:unit:039b97880290cbc2",
+      "verdict_text": "Supported: two non-touch TOTP entries yield count/type/non-null six-digit assertions, not an independently calculated OTP oracle."
+    },
+    {
+      "suffix": "d7db7354164023a4",
+      "id": "core-001:unit:d7db7354164023a4",
+      "verdict_text": "Supported: cleanup visits captured command arrays and named reflected byte arrays before disposing the fake; no all-copy erasure claim."
+    },
+    {
+      "suffix": "9ab2dca35fa7c063",
+      "id": "core-001:unit:9ab2dca35fa7c063",
+      "verdict_text": "Supported: recorded presence-result tuple declaration."
+    },
+    {
+      "suffix": "b4961ad59e422291",
+      "id": "core-001:unit:b4961ad59e422291",
+      "verdict_text": "Supported: cancellation propagates with exactly one connection attempt and no waiting prompt start in the fake."
+    },
+    {
+      "suffix": "868041ae1b1ae700",
+      "id": "core-001:unit:868041ae1b1ae700",
+      "verdict_text": "Supported: initialization value carries version and array references; declaration makes no independent-owner or deep-immutability promise."
+    }
+  ],
+  "WebAuthn": [
+    {
+      "suffix": "b4125585d8579c68",
+      "id": "core-001:unit:b4125585d8579c68",
+      "verdict_text": "Supported: substantive registration-response summary, despite preceding imports/license."
+    },
+    {
+      "suffix": "7d926f1edba94468",
+      "id": "core-001:unit:7d926f1edba94468",
+      "verdict_text": "Supported: substantive credProtect translation summary."
+    },
+    {
+      "suffix": "06d5faa281acff8e",
+      "id": "core-001:unit:06d5faa281acff8e",
+      "verdict_text": "Supported: client options are validated before the underlying CTAP2 factory; a failed client construction disposes the newly opened session. Transport/version policy is delegated, not retried here."
+    },
+    {
+      "suffix": "ec91cffcba17a31e",
+      "id": "core-001:unit:ec91cffcba17a31e",
+      "verdict_text": "Supported: project dependency, test-proxy access and AOT opt-in comments match declarations; this is not an AOT runtime proof."
+    },
+    {
+      "suffix": "c8377e0a58dac11c",
+      "id": "core-001:unit:c8377e0a58dac11c",
+      "verdict_text": "Administrative maintenance policy: read and retained, but no substantive clean contract credit. Replace for quota if needed."
+    },
+    {
+      "suffix": "4886f819fa316d28",
+      "id": "core-001:unit:4886f819fa316d28",
+      "verdict_text": "Supported: source has no logger calls; guidance explicitly separates underlying/application logging and sensitive-data policy."
+    },
+    {
+      "suffix": "546f13cbc632a4a1",
+      "id": "core-001:unit:546f13cbc632a4a1",
+      "verdict_text": "Supported within the stated source limits: cooperative cancellation, late-success race, lower-level exceptions and no transport fallback remain distinct."
+    },
+    {
+      "suffix": "bf53e9ad2aa19caf",
+      "id": "core-001:unit:bf53e9ad2aa19caf",
+      "verdict_text": "Supported with the exact PRF citation above; no full conformance or erasure qualification."
+    },
+    {
+      "suffix": "a78b316e99da06d2",
+      "id": "core-001:unit:a78b316e99da06d2",
+      "verdict_text": "Supported: fake request captures `rk:true` on the advertised-capable path; no actual credential storage proof."
+    },
+    {
+      "suffix": "7fe08c46f10afee5",
+      "id": "core-001:unit:7fe08c46f10afee5",
+      "verdict_text": "Ineligible preamble: license/imports/namespace only; zero clean credit."
+    },
+    {
+      "suffix": "e29522f04d40349a",
+      "id": "core-001:unit:e29522f04d40349a",
+      "verdict_text": "**SAMPLE-WA-001 documentation miss:** assertions compare CredentialId/Signature bytes and one backend call, not instance identity or all response fields. Focused patch `d70a50aa\u2026` passed review and remains queued until compilation releases the primary tree. Zero clean credit."
+    },
+    {
+      "suffix": "2f2513b5ffd4c56b",
+      "id": "core-001:unit:2f2513b5ffd4c56b",
+      "verdict_text": "Supported: named null-prompt fixture declaration; no stronger behavior claimed by this unit."
+    },
+    {
+      "suffix": "1b932c40537768a9",
+      "id": "core-001:unit:1b932c40537768a9",
+      "verdict_text": "Supported: explicit key-count and ordered-key assertions validate the illustrated CTAP2 CBOR ordering."
+    },
+    {
+      "suffix": "651df80c5416339e",
+      "id": "core-001:unit:651df80c5416339e",
+      "verdict_text": "Supported: the exact storage-write failure yields Written=false; commentary excludes read failures and cancellation."
+    },
+    {
+      "suffix": "35e46ef0a6a3636d",
+      "id": "core-001:unit:35e46ef0a6a3636d",
+      "verdict_text": "Supported within the preserved previewSign draft-v4 scope: nested generated-key fields are checked, not attestation trust or signature verification."
+    },
+    {
+      "suffix": "4e15fa5e2d4d3425",
+      "id": "core-001:unit:4e15fa5e2d4d3425",
+      "verdict_text": "Supported: substantive processor test overview retains the experimental draft and selected-credential actor."
+    },
+    {
+      "suffix": "8705722ec03b98c1",
+      "id": "core-001:unit:8705722ec03b98c1",
+      "verdict_text": "Supported: non-concrete transport values throw before the fake records a connection request."
+    },
+    {
+      "suffix": "dd7a8c8d3beb3ad5",
+      "id": "core-001:unit:dd7a8c8d3beb3ad5",
+      "verdict_text": "Supported: selection-probe fixture declaration."
+    },
+    {
+      "suffix": "c6719030f9881ef4",
+      "id": "core-001:unit:c6719030f9881ef4",
+      "verdict_text": "Ineligible preamble: license/imports/namespace only; zero clean credit."
+    }
+  ],
+  "scope": "Exact original coordinator wording preserved; preparer allocates no new content verdicts."
+}

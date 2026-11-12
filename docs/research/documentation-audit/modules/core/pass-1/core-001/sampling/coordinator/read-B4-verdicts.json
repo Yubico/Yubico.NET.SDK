@@ -1,0 +1,1104 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of121 complete pinned B4 units, relevant current declarations and original header/documentation anchors; final eligibility/mapping pending",
+  "reading_sha256": "f829c0d65acab82b91edf650a7d3c536a9d0f07cc9fe5e8d8450877fae0c1a2d",
+  "context": [
+    "Cfgmgr32.DeviceProperties.cs adjacent inline-comment ownership",
+    "Retained official-winerror.h selected MessageId blocks",
+    "Retained official-cfgmgr32.h action/result constants",
+    "Retained official-devguid.h eleven selected GUIDs and official-hidclass.h",
+    "Microsoft SCARD_READERSTATE current/event flags",
+    "Microsoft .NET generic-collection/readonly-struct guidance"
+  ],
+  "units": [
+    {
+      "id": "core-001:unit:ca143a5e93e24ab0",
+      "path": "src/Core/src/Transports/Hid/HidDescriptorInfo.cs",
+      "range_sha256": "9f6677b8fbc1b2e24808c769c1970d08855955f572205a981930be453b2cbf5e",
+      "current_file_sha256": "85db44055bfab0358be9da0e5b1b9668b69d9d98cb96ec8b98253186e5df962a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:786cf2b8db7cd790",
+      "path": "src/Core/src/Transports/Hid/HidInterfaceClassifier.cs",
+      "range_sha256": "fc8eea9f60c5a4ab1e915bfc0f82fb6a29dab525bbcb46e1fc2fe41323248fe7",
+      "current_file_sha256": "7747646b872cbfeebb6248efcf6e59877bb6b5d77932c34541374002c8eeb5e2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:0f12bb2529841ebb",
+      "path": "src/Core/src/Transports/Hid/HidInterfaceType.cs",
+      "range_sha256": "c9408fb0ae812310c40b4cb929ab642cec4b216d784ae0df7ab85d8f061d68d8",
+      "current_file_sha256": "d9f86c6ab4c4d64b702f1fc4c7c719bed3c114cdbd7e59f5497582de737da353",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:5edf620e4c9511c1",
+      "path": "src/Core/src/Transports/Hid/HidReportDescriptorReader.cs",
+      "range_sha256": "87f9bac8ff2fca28dd6e8a8a770c7421e1ece589a0cd20dcb0b65d2ab81b6d6f",
+      "current_file_sha256": "c3ae8800dc34fd6118768ef608fbc40e84a06ece45ff9b4aa3f6de09c50eb264",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:7dca7d8127ba99c9",
+      "path": "src/Core/src/Transports/Hid/HidReportType.cs",
+      "range_sha256": "5a95c2abb210b9815ff8470ab5161bcfdcb73737607b4a74b073d9f817fce5ab",
+      "current_file_sha256": "6b53d74fb98a4d703b84439ed5a01a3ec1cfdf0376f66344ca9a77277d384d57",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:a974e10a3feb092e",
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "range_sha256": "cd3e6a070395bd57e83aa17d8537dcc427645fda0941d6f0818a2d13d0bc33c7",
+      "current_file_sha256": "e36965aadaee30ef241c45b7da5a2141b117a2e41495d1b391fdb0c0ede4507d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:46d8f841e1e6da66",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardState.cs",
+      "range_sha256": "ee4063860de0687e1c39e676142c5d0c54d3bb25b6af5635d2c1602ed75bd363",
+      "current_file_sha256": "998ff18f922bf0e0d82ba5a1bb93ec7fb5b59783377a857af052072af40f7cb2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Current/event actor distinctions checked against Microsoft SCARD_READERSTATE documentation via Context7; Windows API semantics are not independently executed cross-platform behavior."
+    },
+    {
+      "id": "core-001:unit:22ae808505eb5d7a",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardState.cs",
+      "range_sha256": "5a274268dcd9a66d0fe551d48626c7d078f110f255362dbd6f48a66d7887a64f",
+      "current_file_sha256": "998ff18f922bf0e0d82ba5a1bb93ec7fb5b59783377a857af052072af40f7cb2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Current/event actor distinctions checked against Microsoft SCARD_READERSTATE documentation via Context7; Windows API semantics are not independently executed cross-platform behavior."
+    },
+    {
+      "id": "core-001:unit:545dad17b3c12727",
+      "path": "src/Core/src/Native/NativeMethods.cs",
+      "range_sha256": "fb18eec639f88f33be41bb0a4c6bf33af2a3afba76af08adbfda0d658a32ff53",
+      "current_file_sha256": "00f56a5b00d35f5ebc60516b664295b081dcdf1078a7741492f43ff7e2919167",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:a0e16397556b7bfe",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.DeviceProperties.cs",
+      "range_sha256": "812f988546f57bfb7739a028c6f5e4ff25032827736de8170df3b975af92c741",
+      "current_file_sha256": "bd7b8c612cc2dd47fbc3786338ebc013f694b22a7b0b0deaa14dcdf6e206869e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Adjacent complete declarations read: leading extracted inline comment belongs to preceding declaration. BYTE unsigned8, INT16 signed16 and ClassGuid GUID are correctly labeled in actual source; no false mismatch inferred from partition boundary."
+    },
+    {
+      "id": "core-001:unit:1139e69a203ad565",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.DeviceProperties.cs",
+      "range_sha256": "667bdacbbe0690d74324c9179baf001b492d3773672df85b5431263e079b0368",
+      "current_file_sha256": "bd7b8c612cc2dd47fbc3786338ebc013f694b22a7b0b0deaa14dcdf6e206869e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Adjacent complete declarations read: leading extracted inline comment belongs to preceding declaration. BYTE unsigned8, INT16 signed16 and ClassGuid GUID are correctly labeled in actual source; no false mismatch inferred from partition boundary."
+    },
+    {
+      "id": "core-001:unit:d35c8e405be647ae",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "4a6824e735430f8ac49f808345b5acf99e35b269e81bb2127aca265ab2757666",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:7905855969fecdb7",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "f246f5f4e68846664990490db260f7092edb8f1d993cdb7b61666bfd43dd0346",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:c49d22b32d967530",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "a1cb99959cdc6f4922e97f937e79afe2283953ec08f1b57116b96ccbb2be6cd3",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:4289a4ab4c854929",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "b632e0321b20106a882dfd70ae4511ee9797daf8536f6eff861404c81cad0ff1",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:82d3022818e7fe85",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "0aedb1dc45f17de956ce16fc15f109a9a9b44989bec6d719d69290990ed58841",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:493cea048ce99ba9",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "86179e51f1b2ee1859fe3ba46dc9be56364268565691ff1158f2ec5877853407",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:f8f2e0d56c27796a",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "26f338b858f48e676d99ef239e942c815dcbc4b1c992d0db4c7a39fe6f55f509",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:9116749dadfa0cef",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "598582f63775e0d8384332ce351212b4fdf23e36522d93a7c1533b79325b49ea",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:980b50873c8be7fa",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "7aa3bf9b51626bf80f9e8d788aafe6106217a48784620ab4a07396417506350e",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:681dd8dc4e8e2100",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmDeviceProperty.cs",
+      "range_sha256": "50006dbea2f1572b9ab653c459823afbe9af2eb848393dce70d7a0bd9e19fdf7",
+      "current_file_sha256": "c9c5fe3bbd451de4849a056102da80caa10063db62a433dde04a250b3fc841fa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:fdbf650298d171d7",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "3ecb2b01daf91d4d64b20b25369e5a1f056e5f8f5060603655b1009311a9ab62",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:46ba672a5df97762",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "b0e445c9fdcde2a10df397d8f6904d149916d06edefd394b3b1ed8175d20012d",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:bfc6d4ed213120ce",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "880e630a468ab8f1038e72fda1a79011f91a32dafada9fdf299dba4a49515b33",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:1aa330d64d67e641",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "9613176630b47c7b141f82246da0cdafaa8ed5e447fa5763773a0f60f5de310f",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:180329a9026ee41f",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "73d36ef9bf3b64a0e41a7f6339f4139fc17683a024b33608c65cc48264039faa",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:80fae54950b754d5",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "165009c4d08540e96a2a7716a206b0bcd7fd0ac86d63ca9d358fbc8c92d65fee",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:4a70b27981c65a50",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "609a5836f5e117d6488089f122dea9e00b1692d8abf96d39459c82b46f0823a3",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:239c09cb444ed505",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "dedcd4c660dd322f58d0d0af55c1354028c6e3f6a6a9c2302854dac62a6c06ef",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:84bda4260bec1438",
+      "path": "src/Core/src/Transports/Hid/HidDeviceChangeKind.cs",
+      "range_sha256": "0f2141a40212906872f32d3237758113c95959a2c55468a9716072ec34f6dd9c",
+      "current_file_sha256": "182f29d10eb30d432bb5f1cb8fa6c61093a1dc3eae65dc184eb93abfe472b0d0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:bcd617d8643400a4",
+      "path": "src/Core/src/Transports/Hid/HidDeviceChangeKind.cs",
+      "range_sha256": "1811930cd5e3498c52c30643179301da35e337b11ce8917d5783f9be187098a2",
+      "current_file_sha256": "182f29d10eb30d432bb5f1cb8fa6c61093a1dc3eae65dc184eb93abfe472b0d0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:3c80420b1cc74cf3",
+      "path": "src/Core/src/Transports/Hid/HidInterfaceType.cs",
+      "range_sha256": "dc9522da15e2b789de08fb5f0ac048aec4a034804411b8ba4c0ae0f47546c210",
+      "current_file_sha256": "d9f86c6ab4c4d64b702f1fc4c7c719bed3c114cdbd7e59f5497582de737da353",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:aaea5963c3250eb8",
+      "path": "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+      "range_sha256": "bf18595a3802d648caffc4814b0528a61bdeebb518afb476734f1d2e562a8e7a",
+      "current_file_sha256": "c5d18e19be6baa9823c7cd6bcdeea1375d02f9b1d062a99e9cf8796401326964",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:f41cccf6549a6c22",
+      "path": "Directory.Packages.props",
+      "range_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "current_file_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:c24dad64c24dc498",
+      "path": "scripts/toolchain/Context.cs",
+      "range_sha256": "60534c6659801356f30f1ccee683fd9df2756ce05f443ac079dfcbe7b6e8f3d9",
+      "current_file_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:b260d67910547400",
+      "path": "scripts/toolchain/Conventions.cs",
+      "range_sha256": "5e33b1d698dc60ee612027729562f8bda3597c62f85dd92375e06a9df7317d65",
+      "current_file_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:150f9ba47db6abe7",
+      "path": "scripts/toolchain/Conventions.cs",
+      "range_sha256": "14d3a9c2aba48bf525bab1a3f15f8e8001d733b1acfe1f4a0373689de9feb7ee",
+      "current_file_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:bb8e7043825fc0c6",
+      "path": "scripts/toolchain/Conventions.cs",
+      "range_sha256": "3eafc0af5bdef811c166b32fb9eadd0b2e239cc616669e40c30d5d8e4185dd78",
+      "current_file_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:c16852000f9d8ea6",
+      "path": "scripts/toolchain/CoverageTargets.cs",
+      "range_sha256": "f22d589b1672b920bde9ed5671aecbdd0ebd42681e6c1af9c8d44226260768ee",
+      "current_file_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:eceda43174a27efc",
+      "path": "scripts/toolchain/Output.cs",
+      "range_sha256": "6dc9896abe3c8bbc4c694f90a29cb938d72e07210cea9675560b60991b454353",
+      "current_file_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:9ea1794bce816ec8",
+      "path": "scripts/toolchain/Output.cs",
+      "range_sha256": "a2841ff16ebd3bcfba919cb04c4135a9b06fdb50246a8ff8366f7ddf272390b0",
+      "current_file_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "original_unit_present_in_current": true,
+      "verdict": "KNOWN-DEFERRED-PROTECTED-OUTPUT",
+      "note": "Runtime help strings are preserved, not documentation-editable. Existing no-tests target/result-policy qualification applies; actual checked target behavior is authoritative and this protected-output unit gets no final clean credit."
+    },
+    {
+      "id": "core-001:unit:03846cc18a211676",
+      "path": "scripts/toolchain/TargetRegistry.cs",
+      "range_sha256": "ece39cae65b472901267b927f4748617600bcdda234ebb5484b48a0191260133",
+      "current_file_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:4e2fa00807d432b0",
+      "path": "scripts/toolchain/TargetRegistry.cs",
+      "range_sha256": "cf712b2b7237dc53c6a7e8be42464dcfd7e194eaf009793ba6c3818b985af5f4",
+      "current_file_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:062735c80dd15210",
+      "path": "scripts/toolchain/Usage.cs",
+      "range_sha256": "6637f19d230b5fa88a622022b61f9ed9acc5e5074277eb118ee73861010671d7",
+      "current_file_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:e75f6865eb06248a",
+      "path": "src/Core/src/Transports/Hid/HidInterfaceClassifier.cs",
+      "range_sha256": "f1fcdf768d4b281d9913cc0d1117e58b348071d4951833468d5391a6de348251",
+      "current_file_sha256": "7747646b872cbfeebb6248efcf6e59877bb6b5d77932c34541374002c8eeb5e2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:31498b7a3f6f5d32",
+      "path": "src/Core/src/Transports/Hid/HidReportDescriptorReader.cs",
+      "range_sha256": "6790f4686f12d4cc0a9d3a431fa3713364c7c618d378d8bd3aac91f21ec0d444",
+      "current_file_sha256": "c3ae8800dc34fd6118768ef608fbc40e84a06ece45ff9b4aa3f6de09c50eb264",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:626db51eb3663093",
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "range_sha256": "81682e9f788777be74d72d4f9904f925b0a96f051551b15968a7152739e851a2",
+      "current_file_sha256": "e36965aadaee30ef241c45b7da5a2141b117a2e41495d1b391fdb0c0ede4507d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:476e60c2f787e69d",
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "range_sha256": "9ec74037f56d58a4caad1ff887f6f3b0566640d160cf2f5c1d4068c8119fc611",
+      "current_file_sha256": "510af458af29afaa8d1f2cadfc1fea54380836ac96d639cdd0d9cbe5251d4e0d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:2ae3f73734ec22cd",
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "range_sha256": "61687684a4e6850a810d00b46d5c6ca82a29a517d6a72d52742019f56e70060c",
+      "current_file_sha256": "510af458af29afaa8d1f2cadfc1fea54380836ac96d639cdd0d9cbe5251d4e0d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:8764b168af334bfe",
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidInterface.cs",
+      "range_sha256": "c0c96f8f50a3b1a85cfdadcad9153c5ef5677b9dcd5c60275b5c1244a5561a05",
+      "current_file_sha256": "a8ef95e05b2dfb58b30df839f73234130a5b082cf0fe822404367d99238ce1e6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:001c58b1d1862d76",
+      "path": "CLAUDE.md",
+      "range_sha256": "1416aeac6ae4fba9eb51454d0b7a5e2d3a552dee8d8e00cae10133b92dca10c6",
+      "current_file_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B4-001: generic collections need not box struct elements; no-GC/deep-immutability and machine-word claims need qualification. Bounded guide correction reviewed separately."
+    },
+    {
+      "id": "core-001:unit:a9e434874ba55d57",
+      "path": "docs/v1-to-v2-comparison.md",
+      "range_sha256": "7247e4fe58b861d736ec834417ec98b43a9a2de10d2ff6c412beed466fc7ddbc",
+      "current_file_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B4-002: internalization wording must distinguish retired extension points/internal protocol composition from actual public raw/utility surfaces."
+    },
+    {
+      "id": "core-001:unit:c800fb08d134d876",
+      "path": "docs/v1-to-v2-comparison.md",
+      "range_sha256": "254561f08004bca7d952d91aeb39c4a79fd799f579aaf8fcb2d9174f6e7258b7",
+      "current_file_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:a146f9d1cba78f0d",
+      "path": "src/Core/README.md",
+      "range_sha256": "9f66b6920eb1e265fb4c76e752977dc19c0dde5d6e3018c5f2004991697ea624",
+      "current_file_sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:fd66aba03a4df30b",
+      "path": "src/Core/src/Native/Desktop/SCard/SCard.Interop.cs",
+      "range_sha256": "1e3fbadf11932bf9ab21526ec5cfd2839216061f3ca922afdb58b4569a0da654",
+      "current_file_sha256": "09370f2c2e610c860387a08fdc49c91d087a63ffb46319380b5eb9b9b2f160f7",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:1b2598d5c8018603",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardCardHandle.cs",
+      "range_sha256": "e0323c9ec4b1abb13ff8f5fd6e38c3a2e1bf42965f65118bd4b053d5904c2e18",
+      "current_file_sha256": "78f8e4e5a3e2e85021e45803b42dff018964f173770d1454d193d367e3792b75",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:9714306e3122ebf3",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardCardHandle.cs",
+      "range_sha256": "ccb968e8c35da0947defa7c61e66a2198dd16a6216ac7d89555694eb0535febc",
+      "current_file_sha256": "78f8e4e5a3e2e85021e45803b42dff018964f173770d1454d193d367e3792b75",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:4f6e767f4c54a490",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardContext.cs",
+      "range_sha256": "ecb5a72946c92fb606248e645365fb019fb11d80af11b9b50f13c0b40de0d2d0",
+      "current_file_sha256": "e5014a9eb24db2394804c7b4eda92527a1b25f3b35834e2192f68c10c5068331",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:43f70d8ce8b06967",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "range_sha256": "e18413b2013644dac7ebf102bb3592388fc212dac980fed41030031fb5dbf0b1",
+      "current_file_sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected numeric constants and message meanings checked against retained official-winerror.h exact MessageId blocks. Not evidence of observed device state or OS parity beyond source meaning."
+    },
+    {
+      "id": "core-001:unit:c9ca0b9368626f3c",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "range_sha256": "e8071d132b10d293260ca78eaddc56c09f27cb68f7a912d85aed87628b95e7ca",
+      "current_file_sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected numeric constants and message meanings checked against retained official-winerror.h exact MessageId blocks. Not evidence of observed device state or OS parity beyond source meaning."
+    },
+    {
+      "id": "core-001:unit:33e8ed5c0350a62d",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "range_sha256": "91b769713364a428c7202d7f1923919ebf387d6569f762efc2ee2a8a99f74938",
+      "current_file_sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected numeric constants and message meanings checked against retained official-winerror.h exact MessageId blocks. Not evidence of observed device state or OS parity beyond source meaning."
+    },
+    {
+      "id": "core-001:unit:aa0de53f1f164811",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "range_sha256": "0b52a70ee907c407c6734e908daf0edb0e3d88d71800741e5b0564edaa6b4ad8",
+      "current_file_sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected numeric constants and message meanings checked against retained official-winerror.h exact MessageId blocks. Not evidence of observed device state or OS parity beyond source meaning."
+    },
+    {
+      "id": "core-001:unit:e338723f893fc4dc",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "range_sha256": "2896d3471d4a56701655ca8447f1552270ec70b852d75e36c19c8e514279e4ec",
+      "current_file_sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected numeric constants and message meanings checked against retained official-winerror.h exact MessageId blocks. Not evidence of observed device state or OS parity beyond source meaning."
+    },
+    {
+      "id": "core-001:unit:779f4d2fba09f19d",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "range_sha256": "71869c06c6a7fd56e9fc1613094ac4b132374dde2cbe8914d00ff18018b48b2f",
+      "current_file_sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected numeric constants and message meanings checked against retained official-winerror.h exact MessageId blocks. Not evidence of observed device state or OS parity beyond source meaning."
+    },
+    {
+      "id": "core-001:unit:bcf29106aefd5221",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "range_sha256": "f6522f3f6d66cd864eef8b19df8ae3d16a6b0eb9f6cb5da7a71832047b1c7801",
+      "current_file_sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected numeric constants and message meanings checked against retained official-winerror.h exact MessageId blocks. Not evidence of observed device state or OS parity beyond source meaning."
+    },
+    {
+      "id": "core-001:unit:cc2d794921aed56e",
+      "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStateExtensions.cs",
+      "range_sha256": "ee8f298ee4ada58f6d9518efcab5ebbc9d90d54961686a2352b658ce574cef4f",
+      "current_file_sha256": "7459cf196731d11e5331011c414ea5d548afb91d542732e4dc4c3f051e9837f1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:ab9aa77d46bb36ce",
+      "path": "src/Core/src/Native/SafeLibraryHandle.cs",
+      "range_sha256": "0ecf2b8a6ce0f5e83598f2d492f334d5ab1785d3758cbf121347bba93bf70105",
+      "current_file_sha256": "8aa7e52a227b70ba37628837c94f5d16110e56f893d4daa0c7941f270ea272ba",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:d3c6bc7e580d7979",
+      "path": "src/Core/src/Native/SafeLibraryHandle.cs",
+      "range_sha256": "f8ac52ff5b47a0bc21e0bc6c76f7aee004cbe0f93cadf48f79273f370bb48e48",
+      "current_file_sha256": "8aa7e52a227b70ba37628837c94f5d16110e56f893d4daa0c7941f270ea272ba",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:6437aa1c1acf75e5",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.DeviceProperties.cs",
+      "range_sha256": "c37c3be9d66dcd908a68398f16aa00f4d5ff1072887db739a143b0d258223de1",
+      "current_file_sha256": "bd7b8c612cc2dd47fbc3786338ebc013f694b22a7b0b0deaa14dcdf6e206869e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Adjacent complete declarations read: leading extracted inline comment belongs to preceding declaration. BYTE unsigned8, INT16 signed16 and ClassGuid GUID are correctly labeled in actual source; no false mismatch inferred from partition boundary."
+    },
+    {
+      "id": "core-001:unit:7040d06e9ab75822",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "25178aa4c9b7bb66095d944aa291d5a60c5c7e30fb92e78c860a30558bf9f36e",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:3bc18bc281447f54",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "fab879ca7c06a694dd55757087ec0a4abb98ef2fb22d375c87d354cdaa8ad69f",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:61cbe3c150122640",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "865ffcb1df3dce0064a89a54b9aec784dc82f009ac44d571706c994e9b1c7852",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:7044ceb286f08690",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "ae7bb78f9c8874e7b45ed80caac1abc3fc276ee64314fe80d43108afc64efebe",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:13a340e298116ce6",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "range_sha256": "238b3550192f91516ffb826c060e56b2e60085f2f9d6d958a5197dc6a87d7fb1",
+      "current_file_sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:4645c4f382dcc83c",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "ddefadcc6a2be35f7ea3b6393e52aa3fdd1abe3d66d10e07b7991078fe64777c",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:a976a2de7d4e2112",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "606b2c9b9c0c424d7e3f025b3121b93a451f7385abf021a9894e6912aa801843",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:0508aa95b2692f54",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "daf717a488bcea09f1997f6dbc77c57b41966b3ccfe94d6d89e55f2194d7ecc8",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:ee41995193a31bce",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "b846c9b65823b7cc335e90dc329377028e225a5ee4817ee7a5d93df0b86abee4",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:79ce1f718c08e8a6",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "7beb1a2dcff8e1d056313b8101f99aceb639a9d52b866a24ffdbd65b2fd26bd1",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:34b950df7557a08a",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "033d912a2a85914406a5f09edc634fa2d8a69467d149aa56a7748ca9a77de24d",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:3096532c5be176ee",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "19eab08f5175813b786607d1b336e3a6dca911478649b1dfbc218fbf745c4a38",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:e54524d6a143f40d",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "13d80c0bff0731fbf09c2b03333b25e4e4bf16aea5c481e82e555e6e2f83d702",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:d326d43993bfb623",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "66ade3a6f20770d38c607484c23b1b34f217c68f03c2d5d70f6299409d671e8d",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:2560815de4900918",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "be8af8b309c3cfe29d0cb74256eaa288734fec76da62e6e605d7d2ee4ceb190d",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:56b38190860b305d",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "range_sha256": "656b87061d812e65bbc9a100b76624f462419004c14ec9ba4e7df22c75b6d004",
+      "current_file_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected GUID fields agree with retained official-devguid.h definitions checked individually. This establishes header-source agreement, not current device class/runtime or producer qualification."
+    },
+    {
+      "id": "core-001:unit:73668e7a40023989",
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmDevice.cs",
+      "range_sha256": "8ff7e934cb925083f86e8f2bd82fbfb8faf2f7a1efb8b9c88152c82141f50763",
+      "current_file_sha256": "4382ccc72ed8db4bcd2987243f1dee0e6b8a2b27e9cfe01b73935d5a7c25593b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:a994aae01d0bcb2b",
+      "path": "src/Core/src/Native/Windows/Interop.Libraries.cs",
+      "range_sha256": "36434caff55709c5d365b48c37c03e81774a1a734e57f0159e58dbe005334a3c",
+      "current_file_sha256": "700f5dcca7939442c98b7197b7a4118ea4bba88f09fd49d4f622c29e569eaaf5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:545ed185c93bd746",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "0dff76b81b343e9da6af45e07dc7660af78fb68cadbb3d7fccf9c163b189d7bf",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:9ed0b72d7d260d4f",
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "range_sha256": "4bc3487ae85854b2b35a95541327cf093415236ef3bd8cee2d2179dd77c71c66",
+      "current_file_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:de225fee64cd6c24",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+      "range_sha256": "0d3d17aee4872d88dd0589f5fac8abfb332d3f290dd5ed8944138dec778ebf5f",
+      "current_file_sha256": "bb7f9ca65d4e78bcc1a0bf9464ace85ab2ddfa4eecc71bf6269c8c6268f597c0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:616c3c83bbf106ae",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs",
+      "range_sha256": "c4db34f3a9cc0b0ec0c2f938c174b96b3aa4bd7f27c3a125d68eb095cf2d3af1",
+      "current_file_sha256": "47e92b43da068107fb7ca2415a6c88b8b61b2a04fd45d920e7fb79505d1f9c06",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:71c994106bebfb92",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "range_sha256": "0d5b43ec698c375aa4a7ce507add1e6d4371d3f24c45673d27cfec765bea55bb",
+      "current_file_sha256": "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:d397e0fce7ff2058",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "range_sha256": "04ed17331e8cc972d8b8671b661314d41d919f8d0943d44db05aaae7c30df1ed",
+      "current_file_sha256": "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:28491c24d4088184",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "range_sha256": "fa7b7ab9526d6f4ea69d9eeaada863b8a3c803bfc51fa4579316685b8fb74d0e",
+      "current_file_sha256": "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:626bda583b1870ab",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs",
+      "range_sha256": "741c375c44dbb21ab11aa0b659dd10a0111f39163ed2c0072999155fc34d3e3d",
+      "current_file_sha256": "7b2849955ecfd57c61ad61c438994615b680445b6abee350a861ef7955a148c5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:307f00bc683ddfb8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+      "range_sha256": "f23c33a533746a61b64f3bc5ce96348c379c1afad02c071e3393740cf63b1995",
+      "current_file_sha256": "e46904fcfd3b69e78358de905917bac4fc5796e89aee5ef277b47ccc4fe242cb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:10b1c56e936a716a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+      "range_sha256": "c6c1fa55c28e93727285f487bf8ba835a5269c3e5040f6362cddc43b3f6694fb",
+      "current_file_sha256": "e46904fcfd3b69e78358de905917bac4fc5796e89aee5ef277b47ccc4fe242cb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:109e638492d171d0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryManifest.cs",
+      "range_sha256": "aa5be91d13eb48d25f5bf1f6b1f6ea1047c65e1c077511f5ab327fa23aa80674",
+      "current_file_sha256": "49ac596611527a2d57b83ee3fad39fb44c77381c451faa1ccf90ed6754c7a1f7",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:ad8ea188f8abea31",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs",
+      "range_sha256": "5575c7b5d39953dbdbdeb73f92e31f57bb98af8c4323de7ef4c7df26659a6ee6",
+      "current_file_sha256": "e9f5a1ef0e80aff32cba6d3d75d5625d95937d7ae14508c64a7126de5091d33b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:8b6b35d0d7b58375",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "d452b2a9a3aa4e1acdf2bbee307971681c8a0442f093093aea41dec0e95f2ac8",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:159b9708889ef3d4",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "fbd041c85e971b11098564a267b32ad0ece2b82738a23d5da3fe24779bc135fc",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:af095e43ddd71540",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "9b488097d9a5dd336806975cd173d6c58759ced0c0abbf9413e89e2e5ad9a659",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:a6156549268d7731",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "997ca66e37e73386023c0e7cbfb2fcdc31def92ecb00dc1434f15b280218e21b",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:c445c590b4c5c140",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "cf4c701d15fac34b57ccfd4b8574c3cc3675997b035ed90ba54bb8b212842962",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:c9a2776ed3a43232",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "1424d664c61b32249b9099817bf5ed6234e6d77a0e72860964d6d4b706251722",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:11388c9856d1a295",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "77749c9f2c28d75753ac661f922f2af83d8f84d7bdf0a112ff8b5b5317f25f8a",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:707b6889c0be9c0f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "range_sha256": "2b2c3bb32b52288fb1a504534bc80add1b45a405c00e41eb7c4915d9ab3ace9b",
+      "current_file_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:ffcc8b1ef6333aee",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+      "range_sha256": "44e46ef62a5986f0fbd402100adf8bfbeec39d9b517ecce8bd5aed125cca10a1",
+      "current_file_sha256": "958a5e4783b1f5d9a0a7a2102e9f65c8fcfca71d7da971aa331e838ef190ffdb",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:8d9236eb1f3ca11c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "range_sha256": "f2f983c8e109f922b12f7bba244dae7cde633a40c531587f228ea6405028dfed",
+      "current_file_sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:3a6730a0f15ef1e3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "range_sha256": "40d70665ec1af979a7296d25ee0df78b643fe3e45112f1021e868e0018bb9710",
+      "current_file_sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:51ef719c3b27b0d5",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "range_sha256": "1f428b9ca8114bfa4e4bd77bfa1f77afbaa1a6cb3e94693126ea1a6b5892b877",
+      "current_file_sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:53f0fbdc4617a3ea",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "range_sha256": "228bb6e8bb4293d6b375ce6671d341ff22eba186ccc7299c44665cb9dfa484a9",
+      "current_file_sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:bc1447a0b92049be",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+      "range_sha256": "230c7845c6703f4fc54cb4b8cbfcf992a30f8292b7336643d6a1b6c32a33e135",
+      "current_file_sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:c3a64e08bb8351f2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+      "range_sha256": "4e309fc9e2721c2e441b94b7b0f4ad7b03af196a7cc634760eb913c2a3d4ad12",
+      "current_file_sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:1c31fe1fabe2193c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+      "range_sha256": "61706caebb7a161bf3a47e69d1469aa5a37feb82ce52d94731fbc2bcf1536da3",
+      "current_file_sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:029aa538df8f8024",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+      "range_sha256": "704b5fdcdad2b82d88eb8ac11dcad5df003d1fe0ebe4ecdc13d8297d3f2a237e",
+      "current_file_sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:091e43e130b7ade2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/RuntimeResilience/RuntimeResilienceStaticScanTests.cs",
+      "range_sha256": "12379f441781dd67917ec3746c127e792980dfd9b4b64c5c4f54c251c8313d6f",
+      "current_file_sha256": "0c22f9586d74e7e9d46c8feb6f6da0eeef882563f7f9e8d458881dbe4f766752",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:a40eee27cf7e20f4",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+      "range_sha256": "ca4eaf34debe36c5846ac37c46f1a3e69546ad5bf381a756a6a8bf5f7cf7036a",
+      "current_file_sha256": "dd668b4da846830cb54d956177bfaad3f08c347c77e0e3fcc8f6aaece1c41be0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:ecaaac968d427796",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+      "range_sha256": "e71f15114664f7cd3a419a214830a0a983a764b14c6bbb6f6e66009ce339ef8d",
+      "current_file_sha256": "dd668b4da846830cb54d956177bfaad3f08c347c77e0e3fcc8f6aaece1c41be0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:79e58d98b2c6b23c",
+      "path": "scripts/toolchain/Conventions.cs",
+      "range_sha256": "4da7494ae8d119bd4e4510e849f425f4de543f85f37242aa270d93d2be61e051",
+      "current_file_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    },
+    {
+      "id": "core-001:unit:b7006f3e6dc237e1",
+      "path": "scripts/toolchain/DocsTargets.cs",
+      "range_sha256": "65dcd700d65808d3ecb26e5186ae34a77d2e95b872d0ae3add62201008952a27",
+      "current_file_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, source condition or controlled oracle supported. No Windows runtime, deployed ABI, hardware or universal behavior acceptance inferred."
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+"""Finite accepted external contexts; historical invalid APIs remain separate and uncompiled."""
+import importlib.util
+import json
+from pathlib import Path
+import hashlib
+import sys
+
+HERE=Path(__file__).resolve().parent
+sys.path.insert(0,str(HERE))
+from compiler_imports import correct_prefix
+ROOT=HERE.parents[9]
+spec=importlib.util.spec_from_file_location('literal_full_contexts',HERE/'contexts.py')
+base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)
+
+
+def main():
+    rows=json.loads((HERE/'external-current-inventory.json').read_bytes())['entries']
+    consumer_parameters={78:'',81:'CancellationToken cancellationToken',83:'CancellationToken cancellationToken',
+        85:'IYubiKey device, CancellationToken cancellationToken',87:'IYubiKey device, CancellationToken cancellationToken',
+        89:'IYubiKey device, CancellationToken cancellationToken',90:'IYubiKey device, CancellationToken cancellationToken',
+        92:'IYubiKey device, CancellationToken cancellationToken',93:'Yubico.YubiKit.Oath.CredentialData credentialData',
+        95:'IYubiKey device, byte[] hmacKey, byte[] challenge, CancellationToken cancellationToken'}
+    contexts={};result=[];aliases={}
+    for row in rows:
+        if row['compilation_status']!='current-context-required':continue
+        number=int(row['id'].split('-')[1]);body=row['decoded_body']
+        imports,content=base.split_imports(body)
+        prefix=base.COMMON+'using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\n'+imports
+        if number in (89,90):prefix+='using Yubico.YubiKit.Ctap2;\n'
+        suffix='\n}\n';group='consumer'
+        if row['path']=='docs/migration/v1-to-v2.md':
+            prefix+='namespace Audit20261111.DocExamples.External'+str(number)+';\ninternal static class Body\n{\n'
+            if number in consumer_parameters:
+                is_async='await ' in content
+                prefix+='internal static '+('async Task' if is_async else 'void')+' CompileOnly('+consumer_parameters[number]+')\n{\n'
+                suffix='\n}\n}\n'
+            else:
+                assert number in (76,97,99),number
+            path=HERE/'host/src'/(row['id']+'.cs')
+        else:
+            group='Oath.IntegrationTests' if number in (204,234) else 'SecurityDomain.IntegrationTests' if number==231 else 'Management.IntegrationTests'
+            prefix+=('using Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\n'
+                     'using Yubico.YubiKit.Management;\n')
+            if group=='Oath.IntegrationTests':prefix+='using Yubico.YubiKit.Oath;\n'
+            prefix+='namespace Audit20261111.DocExamples.External'+str(number)+';\n'
+            if number in (204,234):
+                prefix+='public static class DocumentationExtensions\n{\n'
+            elif number in (206,227,232):
+                suffix='\n' # Complete original filter/test types at namespace scope.
+            else:
+                prefix+='public sealed class DocumentationBody\n{\n'
+                if number in (210,235):
+                    prefix+='internal '+('async Task' if number==235 else 'void')+' CompileOnly('+('FilterCriteria criteria, int serialNumber' if number==210 else '')+')\n{\n'
+                    suffix='\n}\n}\n'
+            path=HERE/'injections'/group/(row['id']+'.cs')
+        prefix=correct_prefix(prefix,imports)
+        key=(group,row['decoded_sha256'],'owned-connection-session-and-caller-scp-parameters' if number in (204,234) else row['path'])
+        alias=aliases.get(key)
+        if alias is None:
+            aliases[key]=row['id'];path.parent.mkdir(parents=True,exist_ok=True)
+            with path.open('xb') as output:output.write((prefix+content+suffix).encode())
+        item=dict(id=row['id'],context=group,generated_path=path.relative_to(HERE).as_posix(),compilation_alias_of=alias,
+                  generated_sha256=hashlib.sha256((prefix+content+suffix).encode()).hexdigest(),
+                  prefix=prefix,body=content,suffix=suffix,original_import_prefix=imports,
+                  source_document=row['document'],source_body_sha256=row['decoded_sha256'],review=row['review'],
+                  compilation_status='prepared-consumer-body' if group=='consumer' else 'prepared-existing-project-injection',execution_status='not-run',
+                  ownership='Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope.')
+        result.append(item)
+        if group!='consumer':
+            module=group.split('.')[0];project=f'src/{module}/tests/Yubico.YubiKit.{group}/Yubico.YubiKit.{group}.csproj'
+            assert (ROOT/project).is_file();contexts[group]=project
+    assert len(result)==28
+    with (HERE/'external-context-dispositions.json').open('x') as output:
+        json.dump(dict(entries=result,existing_projects=contexts,unique_compilations=len(aliases),
+                       no_historical_invalid_api_revival=True,no_execution=True),output,indent=2);output.write('\n')
+    print('External current real contexts:',len(result),'unique',len(aliases),'; consumer',sum(row['context']=='consumer' for row in result))
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,93 @@
+{
+  "result": "RECORDS-ONLY ADDENDUM STRUCTURAL CHECKS VERIFIED; NO SAMPLER PASS",
+  "actual_unique_reads": 1129,
+  "predecessor_candidate": 1067,
+  "supported_after_retraction": 1066,
+  "new_target": 1071,
+  "WA_narrative_population": 33,
+  "derived_original_quota": 4,
+  "new_unread": 5,
+  "prior_five_transfers_verified": true,
+  "current_manifest_paths": 363,
+  "final_accepted_clean_count": null,
+  "sampler_PASS": null,
+  "checks": [
+    "All predecessor final files remain byte-exact. Earlier supported verdict preserved verbatim; exact coordinator compiler retraction overlays zero credit, no read-count or runtime-bug increment.",
+    "Five transfer receipts/nine paths and current363 hashes exactly match predecessor AFTER projection. All1,129 actual read maps refreshed to matching primary bytes, with only the mandatory credit retraction.",
+    "Original narrative population33 gives quota4. Role supported3/target8 requires exactly5 unread units; the other93 role records stay unchanged, conservative population9352, global supported1066/target1071, no borrowing or shrink.",
+    "Five new units are the exact next deterministic eligible prefix, with original hashes/ranges and exact current whole-unit matches; excerpts complete, all unread/unassigned/zero credit.",
+    "Prior transfer refresh does not accept pending WA body: genuine-context compilation, body review, exact later hash/span refresh and final sampler acceptance remain explicit gates."
+  ],
+  "sealed_outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/addendum.md",
+      "sha256": "bb7979b440ecc1c0379c39f10236462dfa9c856cd231630479fb302352135f55",
+      "bytes": 3487
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/five-transfer-refresh.json",
+      "sha256": "22abac660b027f19a30c8f4e03540543678d779638870b54cf6cd3961edd17cf",
+      "bytes": 85032
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/new-proposals.json",
+      "sha256": "06aab5a1932093f623eac473d4b0bf2f1c62ae770970a6d89021b0cd410acba9",
+      "bytes": 7004
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/original-units.md",
+      "sha256": "c25e7ea4539ae00b72d3a5518a78f9dc9485f3fc9e2adc41ee66e520cb4329cf",
+      "bytes": 9451
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/predecessor-file-seal.json",
+      "sha256": "ba9e202fb309ffd3d1aba04781ec26703b49c8ced6b4d4401d00146d00855ec3",
+      "bytes": 4421
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/preparation.stdout.json",
+      "sha256": "55527a45895ea738194674d7d33f6bec37d7ef8f72e89637f7388c2f5c9a0fcf",
+      "bytes": 1299
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/prepare.py",
+      "sha256": "33236056ee5930d2096879e70468488f466be19dd300aca35571185f2e8187fc",
+      "bytes": 17871
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/refreshed-current-read-mapping.json",
+      "sha256": "49f701b27c5248bfc899e6be2c168477b82746a7d51242d567d5ce6ef5a12b67",
+      "bytes": 1022476
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/replacement-pool-order.json",
+      "sha256": "76140a76f23c6108f4190365c460f962e8acea756bd4fe5fe5c2381327bf59d1",
+      "bytes": 10906
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/retraction-overlay.json",
+      "sha256": "b622c82802ff3f8384a6eebdbb269cc5657d2620ee2ba7cae233e866c6f7c786",
+      "bytes": 5673
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/role-quota-status.json",
+      "sha256": "814686586059464518c2b9e6c87efc030fb2a9da2b826e75248527516b156f7e",
+      "bytes": 96636
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/summary.json",
+      "sha256": "55527a45895ea738194674d7d33f6bec37d7ef8f72e89637f7388c2f5c9a0fcf",
+      "bytes": 1299
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/verification.json",
+      "sha256": "e24dd5d89ec64d470c2da0adce6382dd87db4cb4156dec554eedeb272de2a6ca",
+      "bytes": 122691
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-addendum/verify.py",
+      "sha256": "c344498e7917d5fd8599a7410d5f7cf27c4513b2748c4fdd6a411b86163d2225",
+      "bytes": 9608
+    }
+  ]
+}

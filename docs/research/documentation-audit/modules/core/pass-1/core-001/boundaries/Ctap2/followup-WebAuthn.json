@@ -1,0 +1,152 @@
+{
+  "task": "Complete CTAP2/Core named WebAuthn source follow-up; stop at pinned boundary reconciliation",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_followup_status": "SOURCE-RECONCILED-WITH-QUALIFICATIONS",
+  "final_pinned_boundary_source_status": "COMPLETE-WITH-QUALIFICATIONS",
+  "report": "followup-WebAuthn.md",
+  "report_sha256": "4b7d307457db6337307cce193303b4af2a0735c72b096be68823e44c55921a47",
+  "completion_addendum": "boundary-completion.md",
+  "completion_addendum_sha256": "96558caf0958eb2034cf5be17540a1b09ce687f663af26cd8dae1a45bf2fd777",
+  "accepted_core_ids_allocated": 0,
+  "dispositions": [
+    {
+      "question": "Ceremony versus per-exchange lifetime",
+      "source_status": "RECONCILED",
+      "ids": ["CORE-CTAP-X002", "CORE-WA-X002", "CORE-B5-C006"],
+      "outcome": "No WebAuthn ceremony admission/disposal join. Backend disposes shared PIN protocol before session drain. Core protects one exchange, not token/probe/GetNext/blob/response-output workflows or detached callbacks.",
+      "documentation": "Add full awaited/serialized ceremony and outer disposal/prompt scopes to WebAuthnClient lifetime XML and README Constraints; coordinate CTAP guidance.",
+      "remaining_owner": "Fresh editors/reviewers and maintainer-selected workflow/disposal design; implementation and qualification OPEN"
+    },
+    {
+      "question": "Membership and transport guidance",
+      "source_status": "RECONCILED",
+      "ids": ["CORE-CTAP-X001", "CORE-WA-X001"],
+      "outcome": "WebAuthn forwards options to CTAP's single-route factory. Core claims known InterfaceIds; process-local exclusion requires overlap. No failover or stronger physical grouping is added.",
+      "documentation": "Qualify both module README all-interface headlines, CTAP CLAUDE and shared physical/discovery guidance; preserve disjoint/direct/cross-process coordination limits.",
+      "remaining_owner": "CTAP/WebAuthn/SHARED editors and independent reviewers; no new registry defect"
+    },
+    {
+      "question": "Descriptor recovery",
+      "source_status": "RECONCILED-SOURCE-CONFIRMED-GAP",
+      "keys": ["webauthn-001:WA-IMP-010"],
+      "ids": ["CORE-WA-X007", "CORE-CTAP-X011"],
+      "outcome": "Filter retains known singleton selection and final request narrows to it; matcher and final response builder independently read optional final descriptor and publish Empty on omission. Actual singleton CTAP2.0 exception includes narrowing an original multi-entry WebAuthn list.",
+      "reopen": ["src/WebAuthn/src/Client/CredentialFilter.cs", "src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs", "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs", "src/WebAuthn/src/Client/Authentication/MatchedCredential.cs", "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs", "per-credential PRF/preview consumers and selected omission assertions"],
+      "remaining_owner": "WebAuthn implementation owner/maintainer selects association and malformed/version error policy; no first-original-entry guessing or CTAP parser repair authorized"
+    },
+    {
+      "question": "Native selected-output disclosure actor",
+      "source_status": "RECONCILED-ACTOR-TRACE",
+      "keys": ["ctap2-001:CTAP-DEC-002"],
+      "ids": ["CORE-WA-X008"],
+      "outcome": "Modeled User retained through CTAP parser, matcher, match and AuthenticationResponse; SelectAsync retrieves same already-built response. RP-format/upload task belongs to application; no SDK response serializer in the documented route.",
+      "policy_status": "NEEDS-MAINTAINER-COORDINATOR-DECISION",
+      "remaining_owner": "Name native picker/raw versus intended platform-to-WebAuthn/browser/RP disclosure contract before filtering. Absence of serializer is not automatic conformance; no field stripping authorized.",
+      "reopen": ["src/Ctap2/src/Credentials/GetAssertionResponse.cs", "src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs", "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs", "src/WebAuthn/src/Client/Authentication/MatchedCredential.cs", "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs", "both module guides and any chosen serializer"]
+    },
+    {
+      "question": "Original User/descriptor documentation resolution",
+      "source_status": "RECONCILED-RESOLUTION-PRESERVED",
+      "keys": ["webauthn-001:WA-XREF-001", "ctap2-001:CTAP-XREF-001"],
+      "outcome": "Corrected opaque handle/display-field/edition-specific descriptor prose remains documentation-resolved. WA-IMP-010 recovery and CTAP-DEC-002 actor policy remain distinct, not reopened duplicates."
+    },
+    {
+      "question": "Response, secret and notification ownership",
+      "source_status": "RECONCILED-LAYERED-OWNERSHIP",
+      "ids": ["CORE-CTAP-X004", "CORE-CTAP-X014", "CORE-CTAP-X016", "CORE-CTAP-X019", "CORE-CTAP-X020", "CORE-WA-X004", "CORE-WA-X006"],
+      "keys": ["ctap2-001:CTAP-IMP-004", "ctap2-001:CTAP-IMP-027", "ctap2-001:CTAP-IMP-035", "webauthn-001:WA-IMP-006", "webauthn-001:WA-IMP-013"],
+      "outcome": "CTAP terminal notification precedes typed decode and WebAuthn output construction; silent probes/ClientPin/GetNext stay silent. Retained prompts are application-owned. Adopted token/auth-tag/shared-secret scopes differ from report/APDU/CTAP/attestation/authData/PRF/blob copies. PRF aggregate clearing does not clear independent range/result arrays; X020 diagnostic failure remains separate.",
+      "remaining_owner": "Selected owner/view/transfer and exceptional-cleanup design with exact retained-array review; no end-to-end erasure or whole-ceremony outcome claim",
+      "reopen": ["Core notification/intent and response ownership XML", "CTAP backends/session/response/builder/storage XML", "WebAuthn client/result/attestation/codec/processor XML", "both guides and actual owner-specific assertions"]
+    },
+    {
+      "question": "Other named routed WA aliases",
+      "source_status": "RECONCILED-REFERRALS-RETAINED",
+      "keys": ["webauthn-001:WA-IMP-007", "webauthn-001:WA-IMP-017", "webauthn-001:WA-IMP-019", "ctap2-001:CTAP-IMP-030", "audit-v2-20261022-20261031:#4"],
+      "ids": ["CORE-CTAP-X023", "CORE-CTAP-X010", "CORE-CTAP-X007", "CORE-CTAP-X008", "CORE-WA-X010", "CORE-WA-X011"],
+      "outcome": "Handoff consumed: default Aaguid differs from CTAP endian conversion; optional direct-blob/unsigned-key8 support differs from transport; empty generated-handle round-trip policy differs from accessor propagation/draft profile/Core mathematics. Applet implementation/decision gaps remain open, not missing Core source returns."
+    }
+  ],
+  "remaining_gates": {
+    "independent_content_citation_cross_layer_review": "PENDING; investigator reconciliation supplies no independent acceptance",
+    "documentation_editing_sampling_consumer_validation": "PENDING; no campaign-wide Pass1 completion claimed",
+    "implementation_and_actor_policy": "OPEN under original local/group/source-run IDs; no Pass2 authorization",
+    "platform_provider_device_qualification": "OPEN with B4/B6/C source/producer/ABI/ISO/final-GP/vendor limitations retained",
+    "new_windows_concurrency_delta": "UNREADY-UNREVIEWED; wait for explicit ready handoff and separately pinned delta; no unfinished checkout inspected",
+    "piv_physical_deferral": "PRESERVED",
+    "further_work_in_this_packet": "STOP; no additional research/tooling/planning or execution initiated"
+  },
+  "prior_B4_B6_source_status": "RECONCILED-WITH-QUALIFICATIONS; existing addendum unchanged",
+  "preservation": {
+    "algorithm": "SHA256 of UTF8 canonical JSON (sort_keys=True, separators=(',',':')) array of {path,sha256}, sorted by repository-relative path; recursively include original packet files and root boundary report. Exclude exactly the three new CTAP files from this task.",
+    "ctap_prior_records": 19,
+    "ctap_bundle_sha256": "36b76b976dbbc8286b3c572ffd5919da1aba6d086e1058accb7c08b54bf8d8de",
+    "webauthn_original_records": 29,
+    "webauthn_bundle_sha256": "8572dc0979bd16303b37535ecdb6bea923b161e792e09154481a1aa740e06176",
+    "ctap_unit_ledger": {"count":590,"sha256":"49a22ea23bd2c6090e67b51e74989d02f330f96f90956126317203e8db6872d5"},
+    "ctap_inherited_ledger": {"count":26,"sha256":"1cdb2d23eee6ca5c7a659251c18d5f6b9a7aac2d6fb8137cbdecdfbb6201bfe4"},
+    "webauthn_unit_ledger": {"count":265,"sha256":"e6b94e16c251fcc08f27b226444584db17115c29b66f63b7f91328a1134c1063"},
+    "webauthn_inherited_ledger": {"count":31,"sha256":"3af8b94c5517e08f873f6b1ab91cb51e18c676ba6c7b026f23487c2215fd5c2f"},
+    "original_dispositions_and_candidate_ids_changed": false
+  },
+  "input_paths_relative_to": "docs/research/documentation-audit/modules/core/pass-1/core-001",
+  "input_hashes": {
+    "boundary-WebAuthn.md": "ffaeff5adc6e15dc317ad7031f52180b98c5fff4a262426b1f91c569d71f953c",
+    "boundaries/WebAuthn/ctap2-handoff.md": "8f825e47f6436796a27d74840a8ae5c739b9ccbd23b49a0b1f15db8073a437c4",
+    "boundaries/WebAuthn/candidates.md": "e85cda5f0224c7a693c93ab0e1c7aaa8b072008bff68b08fe58bd3665881369f",
+    "boundaries/WebAuthn/sources.md": "a5ecfaf16fab13a2127793e545680700dbafe3ba9288293c2665c5098e485ea7",
+    "boundaries/WebAuthn/verification.json": "f123f5c03e042b93c2bd54a9286a00ef6cc0145a33f18a1f968d91897e970574",
+    "boundaries/Ctap2/followup-B4-B6.json": "4551f252d1771f37aca561b754bd91383e01e9ae659dcddf21ccef784822edc1"
+  },
+  "reused_passage_record": {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/g/boundary-originals.md",
+    "sha256": "1f775eead1bc5e28c1bc386f4b8932f64015679cdcfffd77c9cddce52b60d3bc",
+    "read_lines": [16,35],
+    "authority": "Exact CTAP Proposed Standard editions: 2.0 2019-01-30 section5.2 optional descriptor for actual singleton; 2.1 2021-06-15 and errata2022-06-21, 2.3 2026-02-26 section6.2.2 required descriptor and distinct authenticator identifying-field MUST NOT without UV versus multiple-account platform picker ONLY-id return. Original capture dates/actor scope retained; no automatic native DTO disclosure policy.",
+    "further_original_source_index": "boundaries/WebAuthn/sources.md; existing CTAP/Core family originals reused, no new remote research"
+  },
+  "source_rows_schema": ["repository_relative_path", "raw_file_sha256", "inclusive_read_line_ranges"],
+  "source_rows": [
+    ["src/WebAuthn/src/IYubiKeyExtensions.cs","57bdcde9265ea2951982480b4373c058388f0e1263abd35c1917e670ee27d759",[[60,82]]],
+    ["src/WebAuthn/src/Client/WebAuthnClient.cs","ce590e3e646f32b56f42377840139ba651270d66ad402bc9a0eb86b36facae5f",[[21,120]]],
+    ["src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs","6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51",[[26,237]]],
+    ["src/WebAuthn/src/Client/WebAuthnBackend.cs","ad7e6403a5938844ccdfc05680230252c47f8cb53170b04d2541d0f09664365b",[[23,294]]],
+    ["src/WebAuthn/src/Client/CredentialFilter.cs","67793da940d0c7213f03007301a501b29200bcde39093f5e0409c459bec7191d",[[75,151]]],
+    ["src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs","bc4efb9c5baabe280698100dcf93e640dc088c1f191887229f823319eb0d28b5",[[20,89]]],
+    ["src/WebAuthn/src/Client/Authentication/MatchedCredential.cs","d04cb09b436eda097f5e7f642ca265d9252e50b1705aeb9f2a426838bf836673",[[19,96]]],
+    ["src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs","4bc9c446bd42044d462240499856fd5e5bc3425c21a89f57c15dc46adbf6e5ad",[[19,80]]],
+    ["src/WebAuthn/src/Client/PinUvAuthTokenSession.cs","6005f2fb3d915f3d7fa6a324f9828e188ff8833fd22dfe2817b8a9ae35429c94",[[15,100]]],
+    ["src/WebAuthn/src/Client/PinUvSharedSecret.cs","8fa0ee43a87c42f7a31a49c241586d9e7d32ee6e893eac383f3c370833a5fb5b",[[19,56]]],
+    ["src/WebAuthn/src/Extensions/Codec/PrfCodec.cs","19c79865f60ff7e49f057bc94c5a2e92f1a884ce1f15f37e6666aa779c8fa872",[[50,91]]],
+    ["src/WebAuthn/README.md","cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",[[133,148],[450,469]]],
+    ["src/Ctap2/src/Credentials/GetAssertionResponse.cs","44bceddfd5691092dc76ac757ab486a4509f73f83051a44628a64f9d92bbc0ab",[[49,243]]],
+    ["src/Ctap2/src/Backend/HidBackend.cs","14941f940c60035457b0d3edf6b6f87b2422aba25ad62f28fe900ec4e6ef6c55",[[59,118]]],
+    ["src/Ctap2/src/Backend/SmartCardBackend.cs","d684c8aaedfc9c407f6e0830ee088af490b7ea06ab5c3cf597b54bdf88a602fa",[[81,149]]],
+    ["src/Ctap2/src/Ctap2Session.cs","870046812fe2802a82ef3c84ab1af7bd118e283a0e2f3ce21934e8c5c8087729",[[265,385]]],
+    ["src/Ctap2/src/IYubiKeyExtensions.cs","4a456736bcb7c35d25cbbee5508dde57a4dfed04a9f039f56740a9ad6c411673",[[140,207]]],
+    ["src/Core/src/Utilities/ExchangeGuard.cs","3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",[[43,127]]],
+    ["src/Core/src/Sessions/ApplicationSession.cs","9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",[[35,52]]],
+    ["src/Core/src/Credentials/UserPresenceNotification.cs","4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",[[80,169]]],
+    ["src/Core/src/Devices/DeviceConnectionRegistry.cs","bd90a8023444a8a5ad3d31b7986a74cb2b2b3b6736ffc611fa3310913f5ccb96",[[20,119]]],
+    ["src/Core/src/Devices/YubiKeyDevice.cs","53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",[[131,215]]]
+  ],
+  "verification": {
+    "kind": "Bounded read-only Python/Git source/hash/identity/link checks, not new SDK tooling",
+    "source_files_checked_against_pin_with_explicit_bom_crlf_normalization": 22,
+    "input_hashes_checked": 6,
+    "original_ctap_records_preserved": 19,
+    "original_webauthn_records_preserved": 29,
+    "independent_content_review": false,
+    "runtime_qualification": false
+  },
+  "execution": {
+    "product_edits": 0,
+    "sdk_tests_builds_formatter": 0,
+    "native_device_crypto_provider_runs": 0,
+    "central_ledger_git_mutations": 0,
+    "subagents": 0,
+    "new_tooling_or_planning_projects": 0,
+    "owned_writes": ["boundaries/Ctap2/followup-WebAuthn.md", "boundaries/Ctap2/followup-WebAuthn.json", "boundaries/Ctap2/boundary-completion.md"]
+  }
+}

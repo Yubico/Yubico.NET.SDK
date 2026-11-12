@@ -1,0 +1,249 @@
+{
+  "finding": "PF-01",
+  "response_state": "MISSING-OVERLAY-LINK-ADDRESSED; content-PASS-queued-untransferred",
+  "sample_finding": "SAMPLE-B2-003",
+  "unit": {
+    "id": "core-001:unit:82f001f6db22d507",
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+    "range_sha256": "179df7e3823075e5935f005be8da257c76fa909edac2e5ee1f58ef8eae2856ab",
+    "start_character": 3394,
+    "end_character_exclusive": 3712,
+    "first_line": 79,
+    "last_line": 86,
+    "category": "member-contract-and-implementation",
+    "label": "Yubico.YubiKit.Core.Transports.Hid.Linux.ILinuxHidEventSource :: LinuxHidUdevEvent? ReceiveEvent();",
+    "assigned_family": "B",
+    "stage": "B2-linux-lifetimes",
+    "status": "UNREAD",
+    "review_status": "UNASSIGNED",
+    "sample_status": "INELIGIBLE-UNTIL-READ",
+    "scope_rationale": "Complete source/XML/comment/assertion context; declaration ranges include code-only implicit contracts.",
+    "features": {
+      "xml": true,
+      "comments": true,
+      "todo": false,
+      "specification": false,
+      "code_only": false,
+      "tests": false
+    }
+  },
+  "candidate_links": [
+    {
+      "id": "CORE-B2-C002",
+      "relation": "Existing Linux mechanism/comment context only; no new engineering group or unchanged-clean credit."
+    }
+  ],
+  "target": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+  "patch": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/source.patch",
+  "patch_bytes": 1052,
+  "patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+  "review_path": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/review.md",
+  "review_sha256": "549c7a225f9ba20d0ce50057b8801335defaa729dfaa306e3ea8cf4a36e9551e",
+  "review_text": "# Independent focused review — SAMPLE-B2-003\n\n## Decision\n\n**PASS — the exact ReceiveEvent XML-only additive patch.** No mandatory correction remains.\n\nAccepted `source.patch` SHA-256:\n`9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86` (1,052 bytes).\n\nTarget: `src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs`.\nBefore/current-primary SHA-256: `676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29`.\nAccepted after SHA-256: `27276323b17745eaddd0b16d1030d01304ae6122d49d516795a945620d040445`.\nThe before identity includes accepted Linux sampling patch `a994f308…`, not the older revision-2\nLinux source. This focused acceptance does not replace any preceding patch or broaden the audit.\n\n## Source and meaning\n\nRead the complete corrected ReceiveEvent XML/current method, its surrounding poll/signal context,\nthe listener's null-result/rescan branch, report/source-evidence records and retained native passage.\n\n- Current XML (`82–91`) correctly describes a missing/invalid monitor or native no-device result,\n  without assigning a frequency to possible causes. `ReceiveEvent:248–266` returns null for the\n  missing/invalid monitor or invalid native device. It does not inspect errno or collect cause\n  frequencies; successful event fields retain their existing copied-result behavior.\n- Retained systemd **v257** `libudev-monitor.c:192–249` supports both no-available-event and error\n  possibilities. After filtered messages, the helper's zero-time wait can return no further readiness\n  and produce `-EAGAIN` (`198–216`). The public wrapper maps negative results to NULL with errno\n  (`239–249`); its API comment also documents NULL on error (`220–237`). The retained register/manifest\n  binds this original to the v257 URL and SHA-256\n  `3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589`.\n  These are API/implementation outcome paths, not a deployed error-frequency measurement.\n- `LinuxHidDeviceListener.ProcessUdevEvent:220–233` emits the existing unknown-change rescan hint\n  on null. Potential notification loss, including removal, is a conservative recovery rationale;\n  a null result does not itself prove a lost notification. The corrected XML preserves that distinction\n  and claims no observed event storm, ENOBUFS or dropped removal. No ranking such as “most likely” is\n  supported by these sources, and the replacement appropriately removes it.\n- Existing attempted-shutdown-wake/no-acknowledgment XML remains exact (`93–101`), as do loop-policy\n  fake-test limits and native signaling/wait implementation. This edit changes no rescan, cancellation,\n  drain, release or error-classification behavior.\n\nOriginal selected identity `core-001:unit:82f001f6db22d507` (original 79–86), including its source/range\nhash and offsets, matches B2's ledger. Its former status is preserved provenance, not renewed clean\nsampling credit. SAMPLE-B2-003 remains a documentation sampling correction, not a newly allocated\nunique engineering finding.\n\n## Independent static preservation\n\nFresh read-only Python/text/hash comparisons found zero discrepancies:\n\n- Saved before text matches current primary bytes exactly and the accepted Linux sampling after hash.\n  No primary file was written; the primary remains reserved for its owner through the compile cycle.\n- The independently regenerated before/current unified diff exactly matches the accepted patch.\n  Removing only the ReceiveEvent documentation unit leaves identical full before/after text, including\n  the no-wake-ack qualification. The declaration, all member/ordinary comments outside that XML block,\n  executable code, imports, directives, defaults, attributes, assertions, strings and APIs are unchanged.\n  BOM/final-newline state is preserved; no example is added or changed.\n- The other **212 eligible source files** match accepted revision-2 identities with the already\n  accepted Linux sampling and macOS seam corrections overlaid. All **47 protected prior records**\n  and the four preceding patch identities remain exact, including prior decisions, holds and examples.\n- The source-evidence hashes and all six editor records listed by the return manifest match.\n\nThis PASS is content/source acceptance plus bounded static preservation, not compiler, tokenizer,\nAPI-binding, native/deployment or device qualification. The editor's recorded XML/Git checks are not\nrepresented as newly executed reviewer checks. No SDK build/tests, native/device/SDK-crypto operation,\nformatter, Git command/mutation, subagent, new tooling or broader audit occurred. Only this review and\n`review-identities.json` were written; product/editor records and primary source were untouched.\n\nExisting held implementation and runtime/native/physical/producer qualifications remain unchanged.\nThe sampler/coordinator owns exclusion, quota, category expansion and sampling credit; none is assigned\nby this review. Complete existing coordinator validation, Core Pass 1 publication and the deferred\nfinding handoff, then stop; no new implementation or campaign is authorized.\n",
+  "review_identities": {
+    "review_kind": "focused-independent-ReceiveEvent-documentation-review",
+    "sample_finding": "SAMPLE-B2-003",
+    "decision": "PASS",
+    "acceptance_scope": "Exact ReceiveEvent XML-only additive patch; no broader audit, runtime change or new unique engineering finding.",
+    "accepted_patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+    "accepted_patch_bytes": 1052,
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "before_current_primary_raw_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+    "accepted_after_raw_sha256": "27276323b17745eaddd0b16d1030d01304ae6122d49d516795a945620d040445",
+    "before_basis": "Current primary including accepted Linux sampling patch a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049, not older revision2 Linux bytes.",
+    "accepted_current_xml_lines": [
+      [
+        82,
+        91
+      ]
+    ],
+    "original_selected_unit": "core-001:unit:82f001f6db22d507",
+    "reviewed_evidence": [
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "current_read_lines": [
+          [
+            57,
+            111
+          ],
+          [
+            197,
+            306
+          ]
+        ],
+        "conclusion": "Missing/invalid monitor and invalid native device return null; errno/cause frequencies are not inspected. Complete receive flow and existing no-wake-ack qualification preserved."
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+        "sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+        "current_read_lines": [
+          [
+            220,
+            264
+          ]
+        ],
+        "conclusion": "Null result emits existing unknown-change rescan hint; potential notification loss/removal is conservative recovery rationale, not demonstrated loss or cause-frequency evidence."
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/libudev-monitor.c",
+        "sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+        "revision": "systemd v257, retained original register/manifest URL",
+        "read_lines": [
+          [
+            175,
+            249
+          ]
+        ],
+        "conclusion": "Filtered-message helper can exhaust readiness and return -EAGAIN; negative wrapper results produce NULL with errno. API comment documents NULL on error. Supports possibilities, not likelihood ranking or deployed-binary behavior."
+      }
+    ],
+    "accepted_input_records_relative_to_sampling_udev_receive": {
+      "report.md": "2817f5dc862dbab86e951fe2f42001ac196067c48398572ed9b55bcd6876c6df",
+      "inputs.json": "7678bd8c995afa1891621738b528a287c980d4d34bb8494f94afe7e8d1b0a012",
+      "file-disposition.json": "34b43e1e254971b622b05b7f931dc6d80fc6a02daf16c01452c2f9e777e7a227",
+      "source-evidence.json": "8c7622d975b46ded2d5ff28874169ec73582fdffc88bedc21e01d4aa4e2b0606",
+      "return-identities.json": "7e5947026d04e1ff9aacc45d9dc9cf0e6421c1ed3d2ae47c987b341f01982348",
+      "static-preservation.json": "9405febf09f454983e2433577cc7619ac64128d7df09ede250cd2bdc9c173043"
+    },
+    "independent_static_checks": {
+      "result": "PASS",
+      "discrepancies": [],
+      "before_text_matches_current_primary_bytes": true,
+      "before_hash_matches_accepted_Linux_sampling_after_identity": true,
+      "after_hash_matches": true,
+      "focused_patch_equals_independently_regenerated_delta": true,
+      "only_ReceiveEvent_xml_changed": true,
+      "all_other_same_file_text_and_no_wake_ack_qualification_exact": true,
+      "bom_and_final_newline_preserved": true,
+      "other_eligible_source_files_unchanged_against_revision2_plus_accepted_sampling": 212,
+      "protected_prior_records_exact": 47,
+      "prior_patch_identities_exact": 4,
+      "listed_editor_record_hashes_match": 6,
+      "original_unit_identity_range_hash_matches_B2_ledger": true,
+      "source_evidence_hashes_match": true,
+      "examples_unchanged": true,
+      "limitation": "Static text/hash comparisons, not compiler/tokenizer/API-binding/runtime verification. Editor XML/Git checks not rerun by reviewer."
+    },
+    "remaining_mandatory_corrections": [],
+    "qualifications": "Potential loss is recovery rationale, not proven lost notification, observed ENOBUFS/event storm or frequency distribution. All native/deployment/physical/producer gaps and held decisions remain unchanged.",
+    "sampling_ownership": "Sampler/coordinator retains exclusion, quota, category expansion and credit accounting; no sampling or coverage credit allocated here.",
+    "primary_reservation": "Primary read only for exact before-byte comparison; no primary writes. Reservation through owner's full compile cycle remains intact.",
+    "execution": "Read-only managed/native-source/record inspection and Python text/hash comparisons only. No product/editor-record writes, SDK build/tests/native/device/SDK-crypto/formatter/Git commands or mutations/subagents/new tooling/broader audit.",
+    "owned_writes": [
+      "editing/transports/sampling-udev-receive/review.md",
+      "editing/transports/sampling-udev-receive/review-identities.json"
+    ],
+    "stopping_point": "Existing coordinator validation, Core Pass1 publication and deferred finding handoff, then stop."
+  },
+  "source_evidence_record": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/source-evidence.json",
+  "source_evidence": {
+    "sample_finding": "SAMPLE-B2-003",
+    "conclusion": "CORRECTION SUPPORTED: retained sources establish possible no-event/error results, not the most-likely-during-event-storms frequency claim.",
+    "original_selected_unit": "core-001:unit:82f001f6db22d507",
+    "current_primary_before_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+    "evidence": [
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/libudev-monitor.c",
+        "sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+        "revision": "systemd v257, as identified by the retained B2 original-source register/manifest",
+        "read_lines": [
+          [
+            192,
+            218
+          ],
+          [
+            220,
+            249
+          ]
+        ],
+        "contract_and_implementation": "API comment returns a new device or NULL on error. The helper loops after filtered-out events; a zero-time readiness wait with no further message yields -EAGAIN. The public wrapper maps a negative result to NULL with errno. These paths support no available event or error; they provide no observed error-frequency distribution.",
+        "applicability_limit": "Exact retained source revision, not a fresh native run or deployed-binary correspondence claim."
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "before_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+        "before_read_lines": [
+          [
+            82,
+            87
+          ],
+          [
+            243,
+            262
+          ]
+        ],
+        "contract_and_implementation": "The managed source returns null for a missing/invalid monitor or an invalid device returned by udev_monitor_receive_device. It does not inspect errno to identify cause or count error frequencies; successful event fields are copied as before."
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+        "sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+        "read_lines": [
+          [
+            220,
+            233
+          ]
+        ],
+        "contract_and_implementation": "A null ReceiveEvent result logs the existing warning and emits HidDeviceRescanHint.Unknown, requesting a recovery rescan rather than treating event delivery as complete. This is conservative recovery policy, not proof that a notification was lost."
+      }
+    ],
+    "new_lookup_or_native_execution": false,
+    "qualification": "Potential loss of notifications, including removals, remains a recovery rationale. No ranking of causes, event-storm reproduction, observed ENOBUFS or native/device result is claimed."
+  },
+  "accepted_before_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+  "accepted_after_sha256": "27276323b17745eaddd0b16d1030d01304ae6122d49d516795a945620d040445",
+  "current_primary_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+  "current_worktree_after_sha256": "27276323b17745eaddd0b16d1030d01304ae6122d49d516795a945620d040445",
+  "before_basis": "Current primary including accepted Linux sampling patch a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049, not older revision2 Linux bytes.",
+  "reviewed_input_hash_checks": {
+    "report.md": {
+      "reviewed_sha256": "2817f5dc862dbab86e951fe2f42001ac196067c48398572ed9b55bcd6876c6df",
+      "actual_sha256": "2817f5dc862dbab86e951fe2f42001ac196067c48398572ed9b55bcd6876c6df"
+    },
+    "inputs.json": {
+      "reviewed_sha256": "7678bd8c995afa1891621738b528a287c980d4d34bb8494f94afe7e8d1b0a012",
+      "actual_sha256": "7678bd8c995afa1891621738b528a287c980d4d34bb8494f94afe7e8d1b0a012"
+    },
+    "file-disposition.json": {
+      "reviewed_sha256": "34b43e1e254971b622b05b7f931dc6d80fc6a02daf16c01452c2f9e777e7a227",
+      "actual_sha256": "34b43e1e254971b622b05b7f931dc6d80fc6a02daf16c01452c2f9e777e7a227"
+    },
+    "source-evidence.json": {
+      "reviewed_sha256": "8c7622d975b46ded2d5ff28874169ec73582fdffc88bedc21e01d4aa4e2b0606",
+      "actual_sha256": "8c7622d975b46ded2d5ff28874169ec73582fdffc88bedc21e01d4aa4e2b0606"
+    },
+    "return-identities.json": {
+      "reviewed_sha256": "7e5947026d04e1ff9aacc45d9dc9cf0e6421c1ed3d2ae47c987b341f01982348",
+      "actual_sha256": "7e5947026d04e1ff9aacc45d9dc9cf0e6421c1ed3d2ae47c987b341f01982348"
+    },
+    "static-preservation.json": {
+      "reviewed_sha256": "9405febf09f454983e2433577cc7619ac64128d7df09ede250cd2bdc9c173043",
+      "actual_sha256": "9405febf09f454983e2433577cc7619ac64128d7df09ede250cd2bdc9c173043"
+    }
+  },
+  "source_identity_checks": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/libudev-monitor.c",
+      "expected_sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+      "current_sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+      "scope": "Byte identity only; completed reviewer supplied passage/implementation interpretation."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "expected_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+      "current_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+      "scope": "Byte identity only; completed reviewer supplied passage/implementation interpretation."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "expected_sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+      "current_sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+      "scope": "Byte identity only; completed reviewer supplied passage/implementation interpretation."
+    }
+  ],
+  "final_clean_credit": 0,
+  "actual_read_credit_added": 0,
+  "implementation_or_native_outcome_added": false,
+  "claim": "Remove unsupported receive-null cause-frequency ranking; preserve no-event/error possibilities and conservative rescan rationale. No rescan/wake/cancel/drain/release behavior changed.",
+  "remaining": "Reservation, separate later transfer receipt and predecessor map, source/document/profile impact reconciliation, final preservation and sampling quota decisions remain coordinator-owned."
+}

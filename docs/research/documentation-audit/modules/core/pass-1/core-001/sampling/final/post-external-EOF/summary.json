@@ -1,0 +1,34 @@
+{
+  "state": "FINAL TWO-FILE EOF SUCCESSOR CANDIDATE; READY FOR ASTRA/FRESH INDEPENDENT REVIEW",
+  "predecessor_seal_sha256": "b93a2584b10dc6ee35c264417b452cc3c80d93d5b4183451bdc121cc67ab61fb",
+  "actual_unique_reads": 1134,
+  "actual_current_supported_candidate_count": 1071,
+  "required_target": 1071,
+  "shortfall": 0,
+  "conservative_population": 9352,
+  "roles": 94,
+  "owners": 17,
+  "current_manifest_paths": 363,
+  "current_manifest_sha256": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b",
+  "changed_product_paths": [
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs"
+  ],
+  "affected_population_range_records": 41,
+  "affected_actual_read_maps": 6,
+  "literal_original_unit_range_differences": 0,
+  "new_content_reads": 0,
+  "new_credit_awards": 0,
+  "eligibility_losses": 0,
+  "formerly_recorded_EOF_overlap_now_absent_ids": [
+    "core-001:unit:fc1fb9627bba154a"
+  ],
+  "formerly_held_credit_policy": "Prior counted allocations remain unchanged; any restored eligibility/surplus award requires explicit Astra adjudication. No current EOF-only difference is labelled substantive.",
+  "identity_refresh": "COMPLETE: two actual files plus exact current map; other identities inherited unchanged from predecessor seal and identical map entries",
+  "Astra_adjudication": "PENDING REVIEW",
+  "fresh_independent_adjudication": "PENDING REVIEW",
+  "accepted_clean_count": null,
+  "accepted_denominator": null,
+  "sampler_PASS": null,
+  "compiler_or_full_formatter_completion_claim": false
+}

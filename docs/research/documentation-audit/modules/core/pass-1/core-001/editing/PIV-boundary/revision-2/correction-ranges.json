@@ -1,0 +1,193 @@
+[
+  {
+    "path": "src/Piv/README.md",
+    "before_sha256": "d62600bc7ffa804d9ea11b91d2ab7b9e762482eedd7ac5df2e9e9b7ddf653e9f",
+    "after_sha256": "4d5af3e8939230a5c2247821f97742a33182d1a53d6d25ce1adfab4f7e00a05f",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004",
+      "CORE-PIV-X006"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 28,
+        "before_count": 0,
+        "after_start": 28,
+        "after_count": 6
+      },
+      {
+        "before_start": 64,
+        "before_count": 0,
+        "after_start": 70,
+        "after_count": 20
+      },
+      {
+        "before_start": 97,
+        "before_count": 0,
+        "after_start": 123,
+        "after_count": 7
+      },
+      {
+        "before_start": 150,
+        "before_count": 0,
+        "after_start": 183,
+        "after_count": 2
+      },
+      {
+        "before_start": 151,
+        "before_count": 2,
+        "after_start": 186,
+        "after_count": 0
+      },
+      {
+        "before_start": 155,
+        "before_count": 0,
+        "after_start": 188,
+        "after_count": 1
+      },
+      {
+        "before_start": 188,
+        "before_count": 0,
+        "after_start": 222,
+        "after_count": 2
+      },
+      {
+        "before_start": 189,
+        "before_count": 2,
+        "after_start": 225,
+        "after_count": 0
+      },
+      {
+        "before_start": 193,
+        "before_count": 0,
+        "after_start": 227,
+        "after_count": 1
+      },
+      {
+        "before_start": 211,
+        "before_count": 0,
+        "after_start": 246,
+        "after_count": 5
+      },
+      {
+        "before_start": 313,
+        "before_count": 0,
+        "after_start": 353,
+        "after_count": 4
+      },
+      {
+        "before_start": 343,
+        "before_count": 0,
+        "after_start": 387,
+        "after_count": 7
+      },
+      {
+        "before_start": 398,
+        "before_count": 0,
+        "after_start": 449,
+        "after_count": 4
+      },
+      {
+        "before_start": 424,
+        "before_count": 0,
+        "after_start": 479,
+        "after_count": 8
+      }
+    ],
+    "predecessor_sha256": "c3ef3a2cbc1fabde7177e3c7255558a7b2bb38098c94c96ee08ea9be8bf046c6",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 183,
+        "before_count": 0,
+        "after_start": 183,
+        "after_count": 2
+      },
+      {
+        "before_start": 184,
+        "before_count": 2,
+        "after_start": 186,
+        "after_count": 0
+      },
+      {
+        "before_start": 188,
+        "before_count": 0,
+        "after_start": 188,
+        "after_count": 1
+      },
+      {
+        "before_start": 221,
+        "before_count": 0,
+        "after_start": 222,
+        "after_count": 2
+      },
+      {
+        "before_start": 222,
+        "before_count": 2,
+        "after_start": 225,
+        "after_count": 0
+      },
+      {
+        "before_start": 226,
+        "before_count": 0,
+        "after_start": 227,
+        "after_count": 1
+      },
+      {
+        "before_start": 244,
+        "before_count": 0,
+        "after_start": 246,
+        "after_count": 5
+      }
+    ]
+  },
+  {
+    "path": "src/Piv/examples/PivTool/README.md",
+    "before_sha256": "f99a39262fbb13470081c013ce5bc8bdb9a7470ae7e5f22d7c855571e451f71a",
+    "after_sha256": "c5fc7c6d5bc7c09d96157477afd22a8e9e238427d7ac348342dddd100b28f580",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X006"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 5,
+        "before_count": 1,
+        "after_start": 5,
+        "after_count": 1
+      },
+      {
+        "before_start": 131,
+        "before_count": 0,
+        "after_start": 131,
+        "after_count": 5
+      },
+      {
+        "before_start": 144,
+        "before_count": 1,
+        "after_start": 149,
+        "after_count": 3
+      }
+    ],
+    "predecessor_sha256": "899ad7a7119ab202fcd98955f81b051d626b505943259df6b354568b4db01320",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 5,
+        "before_count": 1,
+        "after_start": 5,
+        "after_count": 1
+      },
+      {
+        "before_start": 149,
+        "before_count": 1,
+        "after_start": 149,
+        "after_count": 3
+      }
+    ]
+  }
+]

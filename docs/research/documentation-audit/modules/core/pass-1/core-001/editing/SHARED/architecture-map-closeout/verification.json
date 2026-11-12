@@ -1,0 +1,34 @@
+{
+  "finding": "PF02 exact diagram-box metadata and bounded teaching claims",
+  "only_new_product_delta": [
+    "docs/architecture/sdk-architecture-diagrams.md",
+    "docs/architecture/sdk-architecture-map.yml"
+  ],
+  "other_25_previous_product_paths_unchanged": true,
+  "prior_records_preserved": 80,
+  "map_original_bytes_preserved_after_removing_five_added_lines": true,
+  "builder_parser_anchors_preserved": true,
+  "complete_fenced_bodies_unchanged": 8,
+  "mermaid_bodies_unchanged": 7,
+  "image_and_manifest_files_unchanged": 15,
+  "unclosed_fences": 0,
+  "new_missing_local_file_targets": [],
+  "scope": "Local file targets; anchors/external URLs not mechanically checked.",
+  "static_checks": {
+    "map-checker": {
+      "exit": 0,
+      "output": "architecture map OK: 6 diagram entries, all evidence + project edges resolve; coverage matches 6 diagram heading level(s).\n"
+    },
+    "diff-whitespace": {
+      "exit": 0,
+      "output": ""
+    },
+    "focused-patch": {
+      "exit": 0,
+      "output": ""
+    }
+  },
+  "index_unchanged": true,
+  "build_test_formatter_compiler_npm_render_native_crypto_device": "NOT RUN",
+  "focused_independent_review": "pending"
+}

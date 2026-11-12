@@ -1,0 +1,78 @@
+{
+  "package_key": "Microsoft.NET.Test.Sdk/18.0.1",
+  "package_path": "microsoft.net.test.sdk/18.0.1",
+  "package_root": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1",
+  "package_folders": {
+    "/home/rupicola/.nuget/packages/": {}
+  },
+  "package_content_hash": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+  "archive_sha512": "cfpn4IW0Q+emID8eUocS7xfmwwYgD/JX5S+zCZA2l7gcYzxZ1vvfcdZHcKkuzCH4gMbBYqcZqtBn9uZa0WJRUg==",
+  "files": {
+    "source": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+      "bytes": 218,
+      "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a"
+    },
+    "producer": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.targets",
+      "bytes": 3211,
+      "sha256": "93e2c4a4e08fa8db6af3b5907205741ad5184e642181bfdbe949c5109e19aa2f"
+    },
+    "props": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.props",
+      "bytes": 848,
+      "sha256": "a52a33ff2b93571aaba9311d42b62b6cbb14eb4f71ab580a40eb7e7ffe1f13ba"
+    },
+    "nuspec": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.nuspec",
+      "bytes": 1376,
+      "sha256": "2dd29606329ec4f855d243329f56fad96b71cd315897a1f721eeb57f38f85290"
+    },
+    "archive": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.18.0.1.nupkg",
+      "bytes": 39745,
+      "sha256": "d1cdffae9f5d8b4c3b1395267d187a3ebae6dc07b28bc34e8f96e6da2ea3021d"
+    },
+    "archive_sha512": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+      "bytes": 88,
+      "sha256": "f665987c75f76a2c228ee04fe9d80fddb9fb32f507fbfea9ddd87bdc5bc96b2b"
+    },
+    "metadata": {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/.nupkg.metadata",
+      "bytes": 178,
+      "sha256": "76ba008b650088ff2b68c7a6a9516858a364022bedf75efd8b10d0e14c250a27"
+    }
+  },
+  "archive_members": {
+    "source": "build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+    "producer": "build/net8.0/Microsoft.NET.Test.Sdk.targets",
+    "props": "build/net8.0/Microsoft.NET.Test.Sdk.props",
+    "nuspec": "Microsoft.NET.Test.Sdk.nuspec"
+  },
+  "contexts": {
+    "Ctap2.IntegrationTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+    "WebAuthn.IntegrationTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj",
+    "Management.IntegrationTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+    "Core.IntegrationTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+    "SecurityDomain.IntegrationTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+    "Piv.IntegrationTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj",
+    "Oath.IntegrationTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj"
+  },
+  "excluded_contexts": {
+    "consumer": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj",
+    "Ctap2.UnitTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+    "Core.UnitTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+    "Management.UnitTests": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj"
+  },
+  "producer": {
+    "target": "GenerateProgramFile",
+    "initial_target": true,
+    "condition": "'$(GenerateProgramFile)' == 'true'",
+    "source_property": "GeneratedProgramFile",
+    "language": "C#",
+    "compile_include": "$(GeneratedProgramFile)",
+    "semantics": "Exact package source added by pinned package InitialTargets producer; not a new disk-generated obj file."
+  },
+  "scope": "Only this package/version/source/producer for these seven exact projects. No arbitrary package or generated-source allowance; actual source required in observed Compile and Csc membership."
+}

@@ -1,0 +1,61 @@
+{
+  "schema":"core-001-SHARED-compiler-logging-access-independent-review-1",
+  "verdict":"PASS",
+  "scope":"Exactly one root logging bullet for SAMPLE-WA002/FULL032; WebAuthn body/example fix and compiler acceptance separately FIDO-owned",
+  "worktree":"/home/rupicola/Code/y/yubikit-core-docs-edit-guides",
+  "base":"da66f5d01ba594993974ddd26723e8c300c0a454",
+  "accepted_patch_sha256":"b43c9a1da1416b45971f25e81b25bc46705158066e474d214e506f7909b452bd",
+  "accepted_path":"CLAUDE.md",
+  "before_sha256":"6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+  "accepted_after_sha256":"48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264",
+  "input_sha256":{
+    "report.md":"c95efa2dfbeb81ce682a8e412c70bef2ed92e8a2ed3304487a331605e3206e8c",
+    "before.md":"6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+    "after.md":"48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264",
+    "product-before-identities.json":"3ac6d2d828b0d14695309bd69f111f999016789dadf27884df768fcd5a896304",
+    "preserved-record-identities.json":"7686d000b3db2de37ebb8a6d7fba809cbb87f79f29c96a7bc289695fd5d317cb",
+    "source-evidence.json":"817bca83da00240558c6284ab2e9a372482a9021967c0b0a94dbced32283c339",
+    "product.patch":"b43c9a1da1416b45971f25e81b25bc46705158066e474d214e506f7909b452bd",
+    "example-bodies.json":"1317fc43a090caa177031a773221755352fd40c2ed284bb732a7a4230c54e8a0",
+    "changed-path-sha256.json":"7ff7f8478e2faa67a651d9165e05f60e4450d75ee02378e23d3c318f13602714",
+    "verification.json":"09ed470ab80dd6142819358517248cb389d098e9df9a1b62fba29a50961c9f2f",
+    "output-identities.json":"00f899995b8ab63f25547078078772a96f5a318bfb6d3eb932985363c3511f6d"
+  },
+  "actual_source_sha256":{
+    "src/Core/src/YubiKitLogging.cs":"bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "src/Core/src/Yubico.YubiKit.Core.csproj":"fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+    "Directory.Build.targets":"bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+  },
+  "independent_library_checks":{
+    "context7_library":"/dotnet/docs",
+    "scope":"Generic ILoggerFactory extension and namespace-specific Microsoft.Extensions.Logging overview checked; MTP architecture-services orientation is not sole namespace authority",
+    "overview_url":"https://github.com/dotnet/docs/blob/main/docs/core/extensions/logging/overview.md",
+    "api_reference_url":"https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loggerfactoryextensions.createlogger?view=net-10.0-pp",
+    "api_uid":"Microsoft.Extensions.Logging.LoggerFactoryExtensions.CreateLogger*",
+    "api_reference_source_commit":"794dcdbc8d221540061d20f6cfa3fe12ddf0d59a",
+    "checked_signature":"public static Microsoft.Extensions.Logging.ILogger<T> CreateLogger<T>(this Microsoft.Extensions.Logging.ILoggerFactory factory);",
+    "limit":"Current namespace-qualified API reference includes net-10.0-pp applicability but renders a newer default/package heading; no package upgrade, installed-provider identity or execution inferred"
+  },
+  "checks":{
+    "primary_current_before_identity_exact":true,
+    "actual_after_equals_capture":true,
+    "reconstructed_diff_equals_patch":true,
+    "removed_bullets":1,
+    "replacement_bullets":1,
+    "other_root_lines_changed":0,
+    "complete_root_fences_unchanged_and_receipts_verified":17,
+    "other_current_product_paths_unchanged":26,
+    "prior_artifacts_preserved":100,
+    "actual_source_evidence_files_verified":3,
+    "api_or_ivt_changes":false,
+    "git_diff_check_exit":0,
+    "focused_reverse_check_exit":0,
+    "index_unchanged":true,
+    "head_unchanged":true
+  },
+  "preserved_preferences":["static logger","configure before first use","providers alive through captured logger use","no injected ILogger"],
+  "not_granted":["WebAuthn actual body fix acceptance","Compiler/example execution credit","API/friendship addition","Provider/native lifetime or redaction guarantees beyond the stated caller responsibility"],
+  "unrun":["SDK build/tests/compiler/formatter","provider/native/device/cryptographic operations"],
+  "remaining_gates":["Separate FIDO caller/body/compiler review","Final reconciliation/validation","Core Pass-1 publication and precise deferred handoff, then stop"],
+  "reviewer_writes_only":["editing/SHARED/compiler-logging-access/review.md","editing/SHARED/compiler-logging-access/review-identities.json"]
+}

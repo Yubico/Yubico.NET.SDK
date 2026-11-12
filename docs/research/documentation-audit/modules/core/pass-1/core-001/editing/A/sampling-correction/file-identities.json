@@ -1,0 +1,125 @@
+[
+  {
+    "sample": "SAMPLE-A001",
+    "path": "src/Core/src/Devices/HotplugSignals.cs",
+    "baseline_kind": "EXACT-CURRENT-PRIMARY-FILE-BEFORE-CORRECTION",
+    "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "before_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+    "primary_before_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+    "primary_still_matches_before": true,
+    "current_sha256": "70925f5b5f694990a5c0dd03b963259922e15604c1884741e50e11dab59db093",
+    "before_final_newline": false,
+    "current_final_newline": true,
+    "exact_noncomment_lines_identical": true,
+    "current_affected_xml_blocks": [
+      {
+        "first_line": 35,
+        "last_line": 39,
+        "well_formed": true,
+        "text": "<summary>Attempts to create and start transport listeners in order.</summary>\n<remarks>\nListener failures are logged and partial listeners receive best-effort cleanup before the next\nlistener is attempted. A logging exception can escape and interrupt cleanup or remaining startup.\n</remarks>"
+      },
+      {
+        "first_line": 86,
+        "last_line": 96,
+        "well_formed": true,
+        "text": "<summary>\nAttempts to detach callbacks for all retained listeners, then stop all listeners, then dispose them.\nAttempts signal-channel completion after those three passes return.\n</summary>\n<remarks>\nThe pass order prioritizes detaching signal producers before stopping and disposing them. Cleanup\nexceptions are logged; failed operations can leave callback, listener, or native state active.\nA logging exception can interrupt later passes and prevent channel completion. The disposed flag\nis already set, so later calls return without retrying cleanup. Channel completion alone supplies\nno proof that listener or native resources were released.\n</remarks>"
+      }
+    ],
+    "current_all_xml_blocks": [
+      {
+        "first_line": 21,
+        "last_line": 21,
+        "well_formed": true
+      },
+      {
+        "first_line": 35,
+        "last_line": 39,
+        "well_formed": true
+      },
+      {
+        "first_line": 86,
+        "last_line": 96,
+        "well_formed": true
+      },
+      {
+        "first_line": 127,
+        "last_line": 127,
+        "well_formed": true
+      }
+    ],
+    "examples_in_file": 0,
+    "review_status": "FOCUSED-REVIEW-PENDING"
+  },
+  {
+    "sample": "SAMPLE-A002",
+    "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "baseline_kind": "EXACT-CURRENT-PRIMARY-FILE-BEFORE-CORRECTION",
+    "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "before_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+    "primary_before_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+    "primary_still_matches_before": true,
+    "current_sha256": "00b5b7d5f223bb281444bb29ec937cc03c84ffff339fe5a477ed778e9dbf4e67",
+    "before_final_newline": false,
+    "current_final_newline": true,
+    "exact_noncomment_lines_identical": true,
+    "current_affected_xml_blocks": [
+      {
+        "first_line": 17,
+        "last_line": 22,
+        "well_formed": true,
+        "text": "<summary>\n    Why a best-effort discovery device-info read was skipped. Carried on\n    <see cref=\"DiscoveryReadSkippedException\" /> so logs and diagnostics can distinguish unsupported\n    discovery access, another discovery lease or an active or waiting connection, worker-admission\n    saturation, and transport supersession.\n</summary>"
+      },
+      {
+        "first_line": 28,
+        "last_line": 31,
+        "well_formed": true,
+        "text": "<summary>\n    Another discovery lease, an active connection, or a waiting connection prevents discovery\n    admission for this interface in this process.\n</summary>"
+      },
+      {
+        "first_line": 48,
+        "last_line": 55,
+        "well_formed": true,
+        "text": "<summary>\n    Thrown when a best-effort discovery device-info read is intentionally skipped because the target does\n    not support the internal discovery-only connection path, another discovery lease or an active or\n    waiting connection prevents exclusive access, bounded worker admission is saturated, or transport activity\n    superseded the read before it opened the interface (see <see cref=\"DiscoveryDeviceInfoReader.ReadBoundedAsync\" />). The read does\n    not open a normal session connection or transmit. Callers degrade like any other failed best-effort\n    read: identity unknown / try next transport.\n</summary>"
+      }
+    ],
+    "current_all_xml_blocks": [
+      {
+        "first_line": 17,
+        "last_line": 22,
+        "well_formed": true
+      },
+      {
+        "first_line": 25,
+        "last_line": 25,
+        "well_formed": true
+      },
+      {
+        "first_line": 28,
+        "last_line": 31,
+        "well_formed": true
+      },
+      {
+        "first_line": 34,
+        "last_line": 37,
+        "well_formed": true
+      },
+      {
+        "first_line": 40,
+        "last_line": 44,
+        "well_formed": true
+      },
+      {
+        "first_line": 48,
+        "last_line": 55,
+        "well_formed": true
+      },
+      {
+        "first_line": 61,
+        "last_line": 61,
+        "well_formed": true
+      }
+    ],
+    "examples_in_file": 0,
+    "review_status": "FOCUSED-REVIEW-PENDING"
+  }
+]

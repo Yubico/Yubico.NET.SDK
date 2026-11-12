@@ -1,0 +1,47 @@
+<Project>
+  <!-- The named environment override preserves the complete current root policy. -->
+  <Import Project="$(MSBuildThisFileDirectory)../../../../../../../../../Directory.Build.targets" />
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocCheck'">
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+    <SkipCompilerExecution>false</SkipCompilerExecution>
+    <UseSharedCompilation>false</UseSharedCompilation>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(CoreDocCheckGeneratedDirectory)</CompilerGeneratedFilesOutputPath>
+    <CoreDocCheckBinder>$(MSBuildThisFileDirectory)bind.py</CoreDocCheckBinder>
+  </PropertyGroup>
+  <Target Name="CoreDocCheckProperties" DependsOnTargets="GenerateSourceLinkFile;_SetEmbeddedFilesFromSourceControlManagerUntrackedFiles"
+          Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocCheck'">
+    <ItemGroup>
+      <_CoreDocCheckOther Include="$(SourceLink);$(ResolvedCodeAnalysisRuleSet);$(Win32Manifest);$(Win32Resource);$(ApplicationIcon);$(AppConfigForCompiler);$(KeyOriginatorFile);@(EmbeddedFiles);@(_CoreCompileResourceInputs);@(LinkResource)" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/properties.txt" Overwrite="true" Lines="MSBuildProjectFullPath=$(MSBuildProjectFullPath);NETCoreSdkVersion=$(NETCoreSdkVersion);Configuration=$(Configuration);TargetFramework=$(TargetFramework);Version=$(Version);AssemblyVersion=$(AssemblyVersion);TargetPath=$(TargetPath);ProjectAssetsFile=$(ProjectAssetsFile);TreatWarningsAsErrors=$(TreatWarningsAsErrors);RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild);AnalysisMode=$(AnalysisMode);AnalysisLevel=$(AnalysisLevel);LangVersion=$(LangVersion);Nullable=$(Nullable);NoWarn=$(NoWarn);WarningsAsErrors=$(WarningsAsErrors);WarningsNotAsErrors=$(WarningsNotAsErrors);SkipCompilerExecution=$(SkipCompilerExecution);ProvideCommandLineArgs=$(ProvideCommandLineArgs);UseSharedCompilation=$(UseSharedCompilation);CscEnvironment=$(CscEnvironment);CscToolPath=$(CscToolPath);CscToolExe=$(CscToolExe);CompilerGeneratedFilesOutputPath=$(CompilerGeneratedFilesOutputPath);SourceLink=$(SourceLink);SourceLinkGenerator=$(_MicrosoftSourceLinkCommonAssemblyFile);SourceLinkProvider=$(_SourceLinkGitHubAssemblyFile);SourceControlTask=$(MicrosoftBuildTasksGitAssemblyFile)" />
+  </Target>
+  <Target Name="CoreDocCheckBefore" BeforeTargets="CoreCompile" DependsOnTargets="CoreDocCheckProperties"
+          Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocCheck'">
+    <Touch Files="$(CoreDocCheckCaptureDirectory)/additional.txt;$(CoreDocCheckCaptureDirectory)/projectrefs.txt;$(CoreDocCheckCaptureDirectory)/other.txt" AlwaysCreate="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/sources.txt" Lines="@(Compile->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/references.txt" Lines="@(ReferencePathWithRefAssemblies->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/analyzers.txt" Lines="@(Analyzer->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/configs.txt" Lines="@(EditorConfigFiles->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/additional.txt" Lines="@(AdditionalFiles->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/projectrefs.txt" Lines="@(ProjectReference->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/other.txt" Lines="@(_CoreDocCheckOther->'%(FullPath)')" Overwrite="true" />
+    <Exec Command="python3 -B &quot;$(CoreDocCheckBinder)&quot; capture --directory &quot;$(CoreDocCheckCaptureDirectory)&quot; before" />
+  </Target>
+  <!-- Completed CoreCompile publishes Csc task outputs to this late hook's lookup. -->
+  <Target Name="CoreDocCheckActualCsc" AfterTargets="CoreCompile" Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocCheck'">
+    <Touch Files="$(CoreDocCheckCaptureDirectory)/additional-actual.txt;$(CoreDocCheckCaptureDirectory)/projectrefs-actual.txt;$(CoreDocCheckCaptureDirectory)/other-actual.txt" AlwaysCreate="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/csc-arguments.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/sources-actual.txt" Lines="@(Compile->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/references-actual.txt" Lines="@(ReferencePathWithRefAssemblies->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/analyzers-actual.txt" Lines="@(Analyzer->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/configs-actual.txt" Lines="@(EditorConfigFiles->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/additional-actual.txt" Lines="@(AdditionalFiles->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/projectrefs-actual.txt" Lines="@(ProjectReference->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(CoreDocCheckCaptureDirectory)/other-actual.txt" Lines="@(_CoreDocCheckOther->'%(FullPath)')" Overwrite="true" />
+    <Exec Command="python3 -B &quot;$(CoreDocCheckBinder)&quot; capture --directory &quot;$(CoreDocCheckCaptureDirectory)&quot; compile" />
+  </Target>
+  <Target Name="CoreDocCheckFinish" AfterTargets="Build" Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocCheck'">
+    <Exec Command="python3 -B &quot;$(CoreDocCheckBinder)&quot; capture --directory &quot;$(CoreDocCheckCaptureDirectory)&quot; finish" />
+  </Target>
+</Project>

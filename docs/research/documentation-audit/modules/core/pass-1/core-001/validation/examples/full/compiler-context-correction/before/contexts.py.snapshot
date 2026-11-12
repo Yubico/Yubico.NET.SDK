@@ -1,0 +1,339 @@
+"""Explicit real A/C-successor contexts; leaves unresolved bodies visible rather than inventing APIs."""
+import json
+from pathlib import Path
+import re
+import sys
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0,str(HERE))
+from compiler_imports import compose
+COMMON = '''using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+'''
+MOD = {
+ 'PGP': 'using Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.OpenPgp;\n',
+ 'PIV': 'using Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Piv;\nusing Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;\n',
+ 'PROTO': 'using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\n',
+ 'TRANS': '',
+ 'FIDO': '''using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cbor;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.CredentialManagement;
+using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.Ctap2.Pin;
+'''
+}
+PIV_PARAMS = {
+370:'IYubiKey device, CancellationToken cancellationToken',371:'IYubiKey device, CancellationToken cancellationToken',
+379:'IYubiKey device',380:'IPivSession session',381:'IYubiKey device',382:'IYubiKey device',
+385:'IYubiKey device',387:'IYubiKey device, CancellationToken ct',388:'IPivSession session, CancellationToken ct',
+389:'IYubiKey device, CancellationToken ct',390:'IYubiKey device, ReadOnlyMemory<byte> managementKey, CancellationToken ct',
+391:'IYubiKey device, CancellationToken ct',392:'IYubiKey device, ReadOnlyMemory<byte> managementKey, CancellationToken ct',
+393:'IYubiKey device, ReadOnlyMemory<byte> managementKey, ReadOnlyMemory<byte> pin, CancellationToken ct',
+394:'IYubiKey device, ReadOnlyMemory<byte> pin, CancellationToken ct',
+395:'IYubiKey device, IUserPresencePrompt userPresencePrompt, ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> encryptedBytes, CancellationToken ct',
+396:'IYubiKey device, CancellationToken ct',397:'IYubiKey device, ReadOnlyMemory<byte> managementKey, CancellationToken ct',
+398:'IYubiKey device, CancellationToken ct',399:'IPivSession session, CancellationToken ct',400:'IPivSession session, CancellationToken ct',
+401:'IPivSession session, CancellationToken ct',402:'IPivSession session, ReadOnlyMemory<byte> currentKey, ReadOnlyMemory<byte> newKey, CancellationToken ct',
+403:'IYubiKey device, bool userConfirmedReset, CancellationToken ct',
+404:'IYubiKey device, IUserPresencePrompt userPresencePrompt, ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> dataBytes, CancellationToken ct',
+405:'IYubiKey device, CancellationToken ct',406:'IYubiKey device, ReadOnlyMemory<byte> originalData, ReadOnlyMemory<byte> signatureBytes, CancellationToken ct',
+409:'IPivSession session',410:'IPivSession session',
+411:'IYubiKey key, ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> digest, CancellationToken ct'
+}
+FIDO_PARAMS = {
+2:'IYubiKey yubiKey',3:'ICtap2Session session',
+4:'ICtap2Session session, byte[] pin, string rpId, byte[] clientDataHash, MakeCredentialOptions options, PublicKeyCredentialRpEntity rp, PublicKeyCredentialUserEntity user, CancellationToken cancellationToken',
+5:'ReadOnlyMemory<byte> blobData, IPinUvAuthProtocol protocol, byte[] sharedSecret, IReadOnlyDictionary<int, object?> keyAgreement, byte[] salt1, byte[] salt2',
+6:'Ctap2Session session, IPinUvAuthProtocol protocol, ReadOnlyMemory<byte> pinToken, ReadOnlyMemory<byte> rpIdHash, PublicKeyCredentialDescriptor credentialId',
+7:'ICtap2Session session, IPinUvAuthProtocol protocol',8:'byte[] pinBytes',9:'',15:'FirmwareVersion firmwareVersion',
+18:'ICtap2Session session',19:'ICtap2Session session, ReadOnlyMemory<byte> credentialId',
+20:'ICtap2Session session, byte[] authenticationHash',21:'CredentialManagement credentialManagement, ReadOnlyMemory<byte> rpIdHash',
+22:'ICtap2Session session, PublicKeyCredentialRpEntity rp, PublicKeyCredentialUserEntity user',24:'IYubiKey device',29:'',
+33:'ICtap2Session ctap2Session, WebAuthnOrigin origin, ICredentialPrompt myCredentialPrompt, byte[] userId, byte[] registrationChallenge, byte[] authenticationChallenge, RegistrationExtensionInputs registrationExtensions, AuthenticationExtensionInputs authenticationExtensions',
+34:'IYubiKey yubiKey, WebAuthnOrigin origin, ApplicationRpValidationService rpValidationService, ICredentialPrompt myCredentialPrompt, ScpKeyParameters scpKeyParameters',
+36:'GeneratedSigningKey generatedKey, ReadOnlyMemory<byte> toBeSigned, ReadOnlyMemory<byte> algorithmSpecificAdditionalArgs, ReadOnlyMemory<byte> credentialId',
+42:'WebAuthnClientOptions clientOptions, Func<CredentialPromptContext, CancellationToken, Task<byte[]>> ReadPinAsync',
+44:'IYubiKey device, WebAuthnOrigin origin, WebAuthnClientOptions clientOptions',45:'',46:'ApplicationRpValidationService rpValidationService',
+47:'ICtap2Session ctap2Session, WebAuthnOrigin origin'
+}
+SHARED_PARAMS = {
+67:'ReadOnlySpan<byte> inputData, ReadOnlySpan<byte> key, ReadOnlySpan<byte> data, Span<byte> plaintext, ReadOnlySpan<byte> iv, Span<byte> ciphertext',
+68:'ReadOnlySpan<byte> data',69:'ReadOnlySpan<byte> expected, ReadOnlySpan<byte> actual',70:'byte[] key',
+72:'object? obj',74:'IReadOnlyList<string> list1, IReadOnlyList<string> list2',79:'ReadOnlySpan<byte> apdu',
+81:'IEnumerable<string> items',82:'string? nullableString',
+107:'int actualLength, int pinLength, Action<Span<byte>> ProcessData',109:'ReadOnlySpan<byte> someSpan, Action<ReadOnlySpan<byte>> ProcessData',
+110:'byte[] data',111:'Action<byte[]> ProcessData',113:'byte[] apduData',
+66:'',92:'Microsoft.Extensions.Logging.ILoggerFactory loggerFactory',93:'',94:'',95:'',96:'string[] args',98:'string[] args',
+99:'',101:'Microsoft.Extensions.Logging.ILoggingBuilder builder',103:'Microsoft.Extensions.Logging.ILogger _logger, int slotNumber, byte[] privateKey',136:'',202:'',
+148:'IYubiKey yubiKey, ReadOnlyMemory<byte> pin',149:'IYubiKey device, ReadOnlyMemory<byte> pin',151:'',
+152:'Action<DeviceChange> Apply, CancellationToken cancellationToken',153:'IYubiKey device',154:'IYubiKey device',155:'IYubiKey device',156:'IYubiKey device',157:'IYubiKey device, ReadOnlyMemory<byte> pin',
+158:'IYubiKey yubiKey, CancellationToken cancellationToken',
+159:'IYubiKey yubiKey, FirmwareVersion firmwareVersion, ReadOnlyMemory<byte> applicationId, byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> commandData, CancellationToken cancellationToken',
+160:'IYubiKey yubiKey, FirmwareVersion firmwareVersion, ReadOnlyMemory<byte> applicationId, ApduCommand command, CancellationToken cancellationToken',
+161:'IYubiKey yubiKey, byte ctapHidCommand, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken',
+162:'IYubiKey yubiKey, byte commandOrSlot, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken',163:'ReadOnlyMemory<byte> response, int expectedLength',
+165:'ISmartCardConnection connection, ReadOnlyMemory<byte> applicationId, CancellationToken cancellationToken',
+181:'',182:'',183:'int serial, CancellationToken cancellationToken',184:'',185:'',186:'',189:'CancellationToken cancellationToken',
+193:'ReadOnlyMemory<byte> responseData, ReadOnlyMemory<byte> certificateData',194:'ReadOnlyMemory<byte> modulusBytes, ReadOnlyMemory<byte> exponentBytes',
+195:'byte[] privateKeyBytes, Action<ReadOnlySpan<byte>> UseSensitiveEncoding',
+196:'IYubiKey yubiKey, CancellationToken cancellationToken',198:'UserPresenceContext context',
+199:'Yubico.YubiKit.WebAuthn.Client.WebAuthnClient client, Yubico.YubiKit.WebAuthn.Client.Authentication.PublicKeyCredentialRequestOptions requestOptions, CancellationToken cancellationToken',
+218:'',219:'CancellationToken cancellationToken',220:'IYubiKey device',221:'int expectedSerialNumber, CancellationToken cancellationToken',222:'',
+223:'IPcscDevice reader, CancellationToken cancellationToken',224:'IYubiKey device',225:'',226:'',
+227:'IYubiKey device, FirmwareVersion firmwareVersion, ReadOnlyMemory<byte> requestData',
+228:'IYubiKey device, ReadOnlyMemory<byte> commandBytes, CancellationToken cancellationToken',229:'IYubiKey device',
+232:'IYubiKey device, CancellationToken cancellationToken',235:'IYubiKey device, byte[] encKey, byte[] macKey, byte[] dekKey',236:''
+ ,209:'IPcscDevice reader, IYubiKey yubiKey, CancellationToken cancellationToken',
+213:'SmartCardConnectionFactory connectionFactory, IPcscDevice reader, FirmwareVersion firmwareVersion, CancellationToken ct',
+214:'RawSmartCardSession raw, ReadOnlyMemory<byte> applicationId, byte InsVerify, byte[] pinnedPin, CancellationToken ct',
+215:'RawSmartCardSession raw, ApduCommand command, CancellationToken ct'
+}
+APP_PARAMS = {
+246:'IYubiKey yubiKey, CancellationToken cancellationToken',247:'IYubiKey yubiKey, CancellationToken cancellationToken',
+248:'IYubiKey yubiKey, CancellationToken cancellationToken',249:'IYubiKey yubiKey, CancellationToken cancellationToken',
+250:'IYubiKey yubiKey, CancellationToken cancellationToken',251:'IYubiKey yubiKey, CancellationToken cancellationToken',
+263:'',264:'',265:'IManagementSession mgmt',268:'',269:'CancellationToken cancellationToken',
+273:'IYubiKey device',274:'IYubiKey device',275:'IYubiKey device',276:'IYubiKey device, byte[] currentLockCode',277:'IYubiKey device',
+279:'',280:'IManagementSession session, CancellationToken ct',
+281:'IManagementSession session, Func<byte[]?> GetCurrentCode, Func<byte[]?> GetNewCode, CancellationToken ct',
+282:'IYubiKey device, CancellationToken ct',283:'IManagementSession session, CancellationToken ct',
+286:'IManagementSession session',287:'IYubiKey device, CancellationToken cancellationToken',
+293:'ISecurityDomainSession session, Microsoft.Extensions.Logging.ILogger logger, CancellationToken cancellationToken',
+297:'IYubiKey device',298:'ISecurityDomainSession session',299:'ISecurityDomainSession session',301:'IYubiKey device',
+311:'IYubiKey device',312:'IYubiKey device',313:'IYubiKey device',314:'IYubiKey device',315:'IYubiKey device',317:'IYubiKey device',
+318:'IYubiKey device, CancellationToken ct',320:'IEnumerable<Credential> credentials',
+323:'ISmartCardConnection connection, byte[] key',324:'IYubiOtpSession session, byte[] challenge',
+325:'IYubiOtpSession session',329:'IYubiKey device',330:'IYubiKey device',331:'IYubiKey device',332:'IYubiKey device',
+333:'IYubiKey device',334:'IYubiKey device',336:'IYubiKey device',346:'IYubiKey device'
+}
+
+
+def split_imports(body):
+    lines = body.splitlines(keepends=True)
+    imports, end = [], 0
+    while end < len(lines):
+        value = lines[end].strip()
+        if re.fullmatch(r'using (?:static )?[A-Za-z0-9_.]+;', value):
+            imports.append(lines[end])
+        elif value:
+            break
+        end += 1
+    return ''.join(imports), ''.join(lines[end:])
+
+
+def select(row, all_rows):
+    number = int(row['id'].split('-')[1])
+    body = row['decoded_body']
+    if number == 191:
+        return dict(status='historical-excluded', reason='This fence is the explicitly labelled historical Before DI-manager example; the separate current After body FULL-192 is prepared.')
+    if row['language'].lower() not in ('csharp', 'cs', 'c#'):
+        return dict(status='non-csharp-excluded', reason='Exact original language/diagram/command/config/output shape; no C# compilation claim.')
+    if any(value in row['editor_classification'].upper() for value in ('NOT C#', 'NOT CSHARP', 'NOT EXECUTABLE C#', 'NOT-CSHARP', 'WIRE-LAYOUT')):
+        return dict(status='non-csharp-layout-excluded', reason='The XML code region carries protocol layout/pseudocode, not C# source.')
+    packet = row['packet']
+    mode, parameters, imports, dependencies = None, '', COMMON + MOD.get(packet, ''), []
+    if packet == 'PGP' and number == 351:
+        mode = 'async-statements'
+    elif packet == 'PGP' and 352 <= number <= 363:
+        mode = 'members'
+    elif packet == 'PIV' and number in PIV_PARAMS:
+        mode, parameters = 'async-statements', PIV_PARAMS[number]
+        if number == 385:
+            dependencies = ['FULL-384']
+    elif packet == 'PIV' and number in (373,383,384):
+        mode = 'members'
+    elif packet == 'PIV' and number == 378:
+        mode = 'async-statements'
+    elif packet == 'PROTO':
+        mode = 'members'
+    elif packet == 'TRANS':
+        mode = 'async-statements' if number == 414 else 'members'
+    elif packet == 'FIDO' and number in FIDO_PARAMS:
+        mode, parameters = ('sync-statements' if number in (5,8,9,15,29,36,42,45,46) else 'async-statements'), FIDO_PARAMS[number]
+        if number == 24:
+            dependencies = ['FULL-023']
+        if number in (42,44):
+            dependencies = ['FULL-041' if number == 42 else 'FULL-043']
+        if number == 47:
+            split = body.index('// After')
+            row['subbody_dispositions'] = [dict(start=0, end=split, status='historical-before-excluded'),
+                                            dict(start=split, end=len(body), status='current-after-prepared')]
+            body, mode = body[split:], 'return-client'
+    elif packet == 'FIDO' and number in (17,40):
+        mode = 'async-statements'
+    elif packet == 'FIDO' and number in (14,23,35,41,43):
+        mode = 'members'
+    elif packet == 'APP' and number in APP_PARAMS:
+        mode, parameters = 'async-statements', APP_PARAMS[number]
+        if number in (263,264,268,279,320,325):
+            mode = 'sync-statements'
+        if number in (317,336,346):
+            dependencies = [{317:'FULL-316',336:'FULL-335',346:'FULL-345'}[number]]
+    elif packet == 'APP' and number in (272,296,310,328,341):
+        mode = 'async-statements'
+    elif packet == 'APP' and number in (300,316,335,342,343,344,345):
+        mode = 'members'
+    elif packet == 'APP' and number == 245:
+        mode = 'top-level-type'
+    elif packet == 'APP' and number == 292:
+        mode = 'members'
+    elif packet == 'SHARED' and number in (100,112,164,197):
+        mode = 'members'
+        imports += 'using Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Piv;\n'
+    elif packet == 'SHARED' and number in SHARED_PARAMS:
+        mode, parameters = ('async-statements' if 'await ' in body else 'sync-statements'), SHARED_PARAMS[number]
+        imports += ('using Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\n'
+                    'using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Transports.Hid;\n'
+                    'using Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Piv;\nusing Yubico.YubiKit.Oath;\n')
+        if number in (92,94,95,96,98,99,101,103,202):
+            imports += ('using Microsoft.Extensions.Logging;\nusing Microsoft.Extensions.Hosting;\n'
+                        'using Microsoft.Extensions.DependencyInjection;\nusing Microsoft.AspNetCore.Builder;\n')
+        if number == 103:
+            split = body.index('// ✅ YES')
+            row['subbody_dispositions'] = [dict(start=0, end=split, status='explicit-secret-logging-antipattern-excluded'),
+                                            dict(start=split, end=len(body), status='current-metadata-logging-prepared')]
+            body = body[split:]
+        if number == 165:
+            split = body.index('// After')
+            row['subbody_dispositions'] = [dict(start=0, end=split, status='historical-before-excluded'),
+                                            dict(start=split, end=len(body), status='current-after-prepared')]
+            body = body[split:]
+        if number in (68,81,82,109,110,111,113):
+            split = body.index('// ✅')
+            row['subbody_dispositions'] = [dict(start=0, end=split, status='explicit-antipattern-excluded'),
+                                            dict(start=split, end=len(body), status='current-recommended-body-prepared')]
+            body = body[split:]
+        if number in (69,72,74):
+            split = body.index('// ❌')
+            row['subbody_dispositions'] = [dict(start=0, end=split, status='current-recommended-body-prepared'),
+                                            dict(start=split, end=len(body), status='explicit-antipattern-excluded')]
+            body = body[:split]
+    elif packet == 'SHARED' and number in (188,192):
+        mode = 'members'
+    elif packet == 'SHARED' and number == 200:
+        mode = 'members-instance'
+    elif packet == 'SHARED' and number in (49,53,76,86):
+        mode = 'members'
+        if number == 53:
+            dependencies = ['FULL-049']
+    elif packet == 'SHARED' and number == 89:
+        mode = 'members-instance'
+    elif packet == 'SHARED' and number == 77:
+        mode = 'complete-file'
+    elif packet == 'SHARED' and number == 187:
+        mode, parameters = 'hosted-demo', 'string[] args'
+    if mode is None:
+        classification = row['editor_classification'].lower()
+        if 'historical' in classification and 'current' not in classification and 'after' not in classification:
+            return dict(status='historical-excluded', reason='Historical source shape explicitly identified by the accepted inventory; current After regions are handled separately.')
+        if 'test' in classification or '[Fact]' in body or '[SkippableTheory]' in body:
+            return dict(status='existing-test-context-pending', reason='Requires the real named test project/fixture imports and existing IVT, with compile-only injection and no test execution; no impersonation or mock SDK surface.')
+        return dict(status='typed-context-pending', reason='Active C# body requires an explicit genuine surrounding context; remains visible and receives no compilation credit.')
+    if packet == 'APP':
+        module = row['path'].split('/')[1]
+        imports += ('using Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Core.Cryptography;\n'
+                    'using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.' + module + ';\n')
+        if module == 'YubiOtp':
+            imports += 'using Yubico.YubiKit.Core.Transports.Hid.Keyboard;\n'
+        if module == 'Management' and '/examples/' in row['path']:
+            imports += 'using Yubico.YubiKit.Management.Examples.ManagementTool.Features;\nusing Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;\n'
+    if row['path'].startswith('src/WebAuthn/'):
+        imports += '''using Yubico.YubiKit.WebAuthn;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+'''
+    original_imports, compiled = split_imports(body)
+    secondary = ''
+    if mode == 'hosted-demo':
+        split = compiled.index('sealed class MonitorLifetime')
+        secondary, compiled = compiled[split:], compiled[:split]
+    # Distinct document contexts prevent accidental global-text deduplication across ownership contracts.
+    pre = compose(imports,original_imports)
+    if mode != 'complete-file':
+        pre += '\nnamespace Audit20261111.DocExamples.Full'
+        pre += ('.Context' + str(number) + ';\n') if mode == 'top-level-type' else ';\ninternal ' + ('sealed' if mode == 'members-instance' else 'static') + ' class Body' + str(number) + (' : IUserPresencePrompt' if number == 200 else '') + '\n{\n'
+    for dependency in dependencies:
+        pre += all_rows[dependency]['decoded_body'] + '\n'
+    if packet == 'FIDO' and number in (34,46):
+        pre += ('internal sealed class ApplicationRpValidationService(Func<WebAuthnOrigin, string, bool> validate)\n'
+                '{ public bool IsRpValidForOrigin(WebAuthnOrigin origin, string rpId) => validate(origin, rpId); }\n')
+    post = '\n' if mode in ('top-level-type', 'complete-file') else '\n}\n'
+    if mode not in ('members', 'members-instance', 'top-level-type', 'complete-file'):
+        return_type = 'async Task' if mode in ('async-statements', 'hosted-demo') else 'WebAuthnClient' if mode == 'return-client' else 'void'
+        signature = 'internal static ' + return_type + ' CompileOnly(' + parameters + ')\n{\n'
+        pre += signature
+        if mode == 'return-client':
+            pre += 'return '
+        post = '\n}\n' + secondary + '\n}\n'
+    return dict(status='prepared-consumer-body', mode=mode, typed_parameters=parameters,
+                subbody_dispositions=row.get('subbody_dispositions'),
+                secondary_body=secondary,
+                original_import_prefix=original_imports, dependency_body_ids=dependencies,
+                prefix=pre, body=compiled, suffix=post,
+                context_key=row['path'] + ':' + mode + ':' + parameters,
+                reason='Exact body in a real referenced SDK/application-helper context; compile-only, original ownership/resource scopes intact.')
+
+
+def main():
+    inventory = json.loads((HERE / 'current-inventory.json').read_bytes())
+    all_rows = {row['id']: row for row in inventory['entries']}
+    result, groups = [], {}
+    (HERE / 'host/src').mkdir(parents=True, exist_ok=True)
+    for row in inventory['entries']:
+        context = select(row, all_rows)
+        record = dict(id=row['id'], status=context['status'], reason=context['reason'],
+                      source_alias=dict(path=row['path'], ordinal=row['ordinal'], first_line=row['first_line'],
+                                        raw_sha256=row['raw_sha256'], authority=row['authority'], review=row['review']))
+        if context['status'] == 'prepared-consumer-body':
+            key = (row['decoded_sha256'], context['context_key'], tuple(context['dependency_body_ids']))
+            if key in groups:
+                record['compilation_alias_of'] = groups[key]
+            else:
+                groups[key] = row['id']
+                raw = (context['prefix'] + context['body'] + context['suffix']).encode()
+                path = HERE / 'host/src' / (row['id'] + '.cs')
+                if path.exists():
+                    assert path.read_bytes() == raw, 'Preserve an earlier prepared body/context instead of silently rewriting it'
+                else:
+                    with path.open('xb') as output:
+                        output.write(raw)
+                record.update(context=context, generated_path=path.relative_to(HERE).as_posix(),
+                              generated_sha256=__import__('hashlib').sha256(raw).hexdigest(),
+                              compiled_body_byte_start=len(context['prefix'].encode()),
+                              compiled_body_byte_end=len((context['prefix'] + context['body']).encode()))
+        result.append(record)
+    with (HERE / 'context-dispositions-ready.json').open('x') as output:
+        json.dump(dict(entries=result, compiled_unique_bodies=len(groups),
+                       final_descriptor='Unsealed: pending external transfer/final accepted toolchain comments and remaining exact context preparation.'), output, indent=2)
+        output.write('\n')
+    from collections import Counter
+    print(dict(Counter(row['status'] for row in result)))
+
+
+if __name__ == '__main__':
+    main()

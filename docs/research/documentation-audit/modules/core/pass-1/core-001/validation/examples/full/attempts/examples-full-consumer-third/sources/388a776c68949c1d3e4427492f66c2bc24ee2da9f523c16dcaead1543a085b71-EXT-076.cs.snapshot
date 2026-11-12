@@ -1,0 +1,36 @@
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+namespace Audit20261111.DocExamples.External76;
+internal static class Body
+{
+static async Task WithRawScpAsync(
+    IYubiKey device,
+    ScpKeyParameters scpParameters,
+    FirmwareVersion firmwareVersion,
+    Func<RawSmartCardSession, CancellationToken, Task> action,
+    CancellationToken cancellationToken)
+{
+    await using RawSmartCardSession raw = await device.CreateRawSmartCardSessionAsync(
+        scpParameters,
+        firmwareVersion,
+        cancellationToken: cancellationToken);
+    await action(raw, cancellationToken);
+}
+}

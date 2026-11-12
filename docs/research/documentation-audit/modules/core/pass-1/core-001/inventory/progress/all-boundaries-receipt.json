@@ -1,0 +1,79 @@
+{
+  "result": "PASS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_record_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "completed_families": 8,
+  "completed_static_boundaries": 9,
+  "distinct_assigned_IDs": 14044,
+  "Core": 9020,
+  "external": 5024,
+  "primary": 12341,
+  "shared": 1703,
+  "remaining_source_IDs": 0,
+  "missing_extra_overlapping_IDs": 0,
+  "family_only_IDs": 11101,
+  "boundary_only_IDs": 2943,
+  "original_inventory_files_unchanged": 38,
+  "original_coverage_packets_owners_and_investigator_ledgers": "UNCHANGED",
+  "qualified_API_support_unit": "core-001:unit:8a14c1c56398fcde",
+  "current_documentation_accepted_paths": 91,
+  "coordinator_checks_retained": {
+    "tokens_CSharp_paths": 1320,
+    "API_snapshots": 20,
+    "rerun_by_aggregator": false
+  },
+  "source_representation_counts": {
+    "exact pinned bytes": 1459,
+    "unchanged original checkout bytes with exact inventory hash and normalized pinned equality": 52
+  },
+  "original_source_paths_verified": 1511,
+  "current_edited_original_range_paths_count": 91,
+  "OTP_path_accounting": {
+    "selected_paths": 61,
+    "disposition_paths": 62,
+    "declared_file_count": 62,
+    "disposition_only_paths": [
+      "src/YubiOtp/src/PublicAPI.Shipped.txt"
+    ],
+    "assigned_units": 324,
+    "extra_assigned_unit_credit": 0,
+    "explanation": "Directive-only shipped API snapshot receives a file disposition, not an invented semantic unit. Literal original arrays and all 324 IDs preserved."
+  },
+  "history_receipt": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/eight-family-two-boundary/receipt.json",
+  "history_receipt_sha256": "fd096d2e34f48064b453b89d8fe37a8e01b6894f6e78cc2724f45f265390ecb8",
+  "report_lines": 32,
+  "completion_scope": "All original selected source IDs have final investigator dispositions; no final clean sampling/API binding/runtime or campaign-publication claim. Current accepted A/C docs and bounded preservation gates recorded separately.",
+  "remaining_dimensions": "Broader editing, independent review/sampling, final compiler/examples/runtime qualification and publication remain pending; stop after Core Pass1 publication, no Pass2 authorization.",
+  "preserved_preparation_failures": [
+    {
+      "attempt": 1,
+      "error": "Original inventory representation unavailable for src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "cause": "Mixed newline original checkout representation differs from all-LF/all-CRLF forms",
+      "correction": "Allow exact unchanged original checkout bytes only when their inventory hash and normalized pinned Git content both match. Edited paths still use reconstructed baseline coordinates."
+    },
+    {
+      "attempt": 2,
+      "error": "WebAuthn read-field assertion rejected its one declaration support exclusion",
+      "correction": "Explicitly recognize only core-001:unit:4f63111f73121848 as declaration-inventory-reconciled-exclusion; zero clean/all-signature credit."
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/coverage-progress.json",
+      "sha256": "45b4799d9eb5773f6ca8a4475ccf6187f9ab0b4ef0975e367b45e1a59d2f09ce"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/coverage-progress.md",
+      "sha256": "aaf5769f62af145973e9578b5a69138bbe8881c3977ba675e55588beeeaa4f94"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/aggregate-all-families.py",
+      "sha256": "bc132b7a89030400e575b0c87c493302773acaa53d1fcaeb0a0f6f2730529b53"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/all-boundaries.stdout.json",
+      "sha256": "45bcb6e13740436d76e18bb36a6546f988309442412e81918178b9d98924cbe1"
+    }
+  ],
+  "all_original_assigned_range_hashes_recomputed_against_immutable_bytes": 14044
+}

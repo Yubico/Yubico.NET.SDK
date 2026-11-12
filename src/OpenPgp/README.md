@@ -29,8 +29,10 @@ Core is installed transitively. The current SDK checks these version thresholds 
 Match these checks with the card's advertised capabilities, supported algorithms, slot and policy support.
 They describe this SDK's checks rather than a blanket availability guarantee. In particular, cached/ATT touch
 policies need additional device support, and retry/challenge commands leave some capability checks to the card.
-The 1.0.0 version-query fallback is a compatibility fallback, not a qualified minimum device version. NEO applet
-versions have a different history from physical firmware; NEO import, generation and deletion paths still need
+The version query falls back to 1.0.0 for every non-OK response, successful response shorter than three bytes,
+or caught APDU exception; transport and other exceptions propagate. This is a compatibility value, not a qualified
+minimum device version. NEO applet versions have a different history from physical firmware; NEO import,
+generation and deletion paths still need
 separate qualification. Development-device applet versions and device metadata can differ: retain both when
 diagnosing a feature check, and use an override only with a known device profile.
 
@@ -72,9 +74,29 @@ foreach (var entry in await session.ListKeyInformationAsync())
 
 The device extension owns the connection it opens. `OpenPgpSession.CreateAsync(connection, ...)` uses an existing
 SmartCard connection; keep that connection alive through session disposal and dispose it afterward. Await operations
-sequentially on a session. `GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF, while KDF has a
-separate lazy cache. Typed initialization requires recognized mandatory algorithm attributes; use `GetDataAsync`
-for raw response inspection when a model omits a field.
+sequentially on a session, and await each complete public task before disposal. Core excludes overlapping logical
+exchanges, including chaining and SCP processing, but a public method can span several exchanges plus parsing,
+cache changes and callbacks. For example, certificate occurrence selection and its read/write are separate exchanges.
+Keep borrowed keys, input buffers and prompt services alive through the complete task, not just its last transmit.
+
+Creation binds the session before device I/O, selects the applet and reads its version, then configures framing and
+optional SCP before parsing application data. A failed factory disposes/detaches the session; a direct factory leaves
+your connection open, while the device extension cleans up its hidden connection. `FirmwareVersionOverride` chooses
+the effective framing/feature version without skipping the version probe. Device metadata, the detected applet version,
+the effective session version and the AID's Card specification version are separate diagnostic values.
+
+For SCP, supply `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile. Keep those parameters and
+their contained resources alive through actual factory completion. SCP03 parameter disposal clears its retained
+`StaticKeys`, not your original source arrays. SCP11 parameters retain the supplied key/certificate objects: disposal
+disposes the retained OCE private key and certificates, but not the SD public key. Avoid independently disposing shared
+aliases while creation uses them. These ownership rules do not establish device/profile support or trust. Generic Core
+SCP version checks alone do not identify the earliest supported OpenPGP firmware. `IsAuthenticated` records SCP setup;
+the card separately enforces User/Admin PIN authorization. See the [Core guide](../Core/README.md) for SCP configuration.
+
+`GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF, while KDF has a separate lazy cache. Typed
+initialization requires recognized mandatory algorithm attributes. After successful initialization, use `GetDataAsync`
+for raw response inspection when a model omits a field. If typed initialization itself fails, dispose that attempt and
+use a separate [raw SmartCard session](../../docs/architecture/raw-access-tiers.md) for diagnosis.
 
 `KeyInformation`, `KeyFingerprints`, and `GenerationTimes` are read-only dictionaries. Their slots reflect the
 card's reported data. Use key status to inspect presence: an unset fingerprint can still occupy a 20-byte zero-filled
@@ -85,6 +107,8 @@ field. `GetSupportedAlgorithmsAsync` returns an ordered list with repeated slots
 Pass PINs as UTF-8 bytes from your credential reader. The public factory defaults are User `123456` and Admin
 `12345678`; change both before real use. Apply the card's byte-length/profile rules as well as reader limits.
 Avoid creating immutable strings for production secrets, and clear owned credential buffers in `finally`.
+`OpenPgpCredentialOptions` configures reader lengths in UTF-16 code units before UTF-8 encoding; those counts are
+distinct from card byte limits. The byte-taking PIN methods add no general credential-format/length validation.
 
 The same User PIN (PW1) authorizes two separate card states: `extended: false` selects signature mode (VERIFY P2=81),
 and `extended: true` selects decryption/authentication mode (P2=82). Both share the User retry counter. The Reset Code
@@ -218,6 +242,16 @@ drops the previous reference without disposing it. Keep an enclosing cleanup sco
 session teardown, and clear separately owned initial hashes and serialized KDF bytes after use. Raw F9 writes require
 a fresh session to reload KDF; refreshing application data leaves the KDF cache unchanged. These lifetime constraints
 describe the current implementation rather than a general cloning/ownership policy.
+
+Synchronous session disposal clears the current KDF before draining the protocol. Asynchronous disposal awaits Core
+teardown first and then clears that KDF, including when teardown fails. Await the complete PIN/KDF workflow before
+either path: protocol drain alone does not cover host derivation or the intervals between exchanges.
+
+The example clears its caller-owned hashes/salts and keeps both KDF objects in enclosing disposal scopes. Internal
+F9 serialization and parsing still leave separate copies without explicit clearing scopes: an intermediate complete
+encoding, the `SetKdfAsync` payload, decoded fields and the read response. Clearing the KDF object or a caller-owned
+encoding does not clear those copies. Initial PIN hashes are authentication material; these cleanup gaps remain
+implementation work.
 
 ## Inspect key representation metadata
 
@@ -393,6 +427,8 @@ Use that technique only for SDK outputs whose storage you own, rather than arbit
 Clearing a `ToArray()` copy would leave the original secret intact. The SDK clears its raw decipher response after
 copying the successful result. RSA/EdDSA signatures instead transfer response storage to the caller; ECDSA returns
 new DER storage and clears the raw response. Keep caller-owned result cleanup in both cases.
+These are local response-owner scopes. Transport return arrays, earlier chained-response fragments and SCP
+plaintext/protected intermediates have separate owners; clearing the final output does not establish their erasure.
 
 ## Store certificates and attest a generated key
 
@@ -470,10 +506,16 @@ first, reads directly if absent, and falls back to `PolicyMayRequire` on a faile
 Firmware without UIF support stays silent. See [user interaction](../../docs/usage/user-interaction.md).
 
 Terminal notifications are `Completed`, `Cancelled` or `Failed`. Device APDU errors resolve as `Failed`; the SDK
-currently leaves OpenPGP statuses, including 6600, outside its `TimedOut` classification. Cancellation can leave
-an admitted SmartCard exchange or persistent command in progress. Await
-completion/drain and inspect state through a fresh session before retrying a mutation; a cancelled token is no
-rollback guarantee.
+currently leaves OpenPGP statuses, including 6600, outside its `TimedOut` classification. Keep the application-owned
+prompt alive until full operation and callback completion, and avoid reentering or disposing the session from a
+callback. Sign/authenticate resolve completion before transferring the signature; decrypt resolves before copying
+the caller's result and clears the raw response even if resolution fails. Attestation creates its certificate before
+the outer completion callback; a callback failure can currently abandon that disposable certificate.
+
+Cancellation is checked before each logical exchange is admitted. After admission, constituent SmartCard work uses
+`CancellationToken.None`; a later exchange in the same public method can still reject the canceled token. Ending an
+outer wait does not stop that work or make borrowed inputs safe to clear. Await the actual public task and teardown,
+then inspect state through a fresh session before retrying a mutation. A canceled token supplies no rollback guarantee.
 
 ## Reset an application deliberately
 
@@ -484,8 +526,15 @@ public ATT certificate preserves that certificate, not a recoverable factory pri
 `ResetAsync` attempts PIN blocking, TERMINATE, ACTIVATE and state refresh, using the SDK's 1.0.6 check. Its current
 implementation ignores TERMINATE/ACTIVATE statuses and checks no complete erasure postcondition. A normal return
 alone proves too little: independently inspect key status, certificates, PIN acceptance/retries, KDF and UIF afterward.
-Cancellation/failure can leave blocked PINs or partial state. This method performs the attempted reset and returns
-fresh application metadata for part of that inspection; your application supplies authorization and full verification.
+Cancellation/failure can leave blocked PINs or partial state. `ResetAsync` refreshes the session's application-data
+cache without returning metadata. The `ResetAndInspectAsync` example below makes a separate application-data read
+and returns that result for part of the inspection; your application supplies authorization and full verification.
+
+Reset preserves the session's effective version, including any override. On an SCP-created session, reset commands
+use the existing secure graph; reselection sends a plain SELECT without discarding that graph or establishing new
+keys, and subsequent commands use its retained secure state. OpenPGP retains no creation parameters for a reset
+handshake. The inherited authentication flag therefore supplies no SCP-restoration evidence. Dispose/reopen after
+uncertain reset or recovery, and independently inspect persistent state before retrying.
 
 ```csharp
 static async Task<ApplicationRelatedData> ResetAndInspectAsync(

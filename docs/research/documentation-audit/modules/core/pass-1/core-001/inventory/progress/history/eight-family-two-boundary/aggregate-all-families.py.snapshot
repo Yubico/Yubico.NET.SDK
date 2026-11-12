@@ -1,0 +1,291 @@
+#!/usr/bin/env python3
+"""Mechanical joins for eight final families and two released static boundaries."""
+import collections
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+RUN = Path('docs/research/documentation-audit/modules/core/pass-1/core-001')
+INV = RUN / 'inventory'
+HISTORY = INV / 'progress/history/five-family'
+PIN = 'fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef'
+inputs, sources, current_raw, metadata_context = {}, {}, {}, {}
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def read(path):
+    data = path.read_bytes()
+    inputs[str(path)] = sha(data)
+    return data
+
+
+def load(path):
+    return json.loads(read(path))
+
+
+def source(path):
+    if path not in sources:
+        raw = Path(path).read_bytes()
+        assert sha(raw) == files[path]['sha256'], path
+        if files[path]['git_blob'] is None:
+            assert path == 'docs/research/documentation-audit/core.md'
+            pinned = subprocess.check_output(['git', 'show', '01a114d4:' + path])
+            metadata_context[path] = 'Post-source-pin active campaign handoff; inventory raw hash and published 01a114d4 bytes checked, no fe342 source-presence claim.'
+        else:
+            pinned = subprocess.check_output(['git', 'show', PIN + ':' + path])
+        normalize = lambda b: b.decode('utf-8-sig', errors='strict').replace('\r\n', '\n')
+        assert raw == pinned or normalize(raw) == normalize(pinned), path
+        sources[path] = raw.decode('utf-8-sig', errors='replace')
+        current_raw[path] = sha(raw)
+    return sources[path]
+
+
+def check_row(row, key):
+    unit = units[key]
+    for field in ['path', 'start_character', 'end_character_exclusive', 'first_line', 'last_line', 'source_sha256', 'range_sha256']:
+        assert row[field] == unit[field], (key, field)
+    assert unit['status'] == 'UNREAD'
+    text = source(unit['path'])
+    assert sha(text[unit['start_character']:unit['end_character_exclusive']].encode()) == unit['range_sha256'], key
+
+
+def count(ids, states):
+    result = dict(total=len(ids), scope={}, scope_by_assignment={}, primary_shared={}, dispositions={}, category={})
+    for key in sorted(ids):
+        u, state = units[key], states[key]
+        scope = 'Core' if u['path'].startswith('src/Core/') else 'external'
+        assignment = 'shared' if key in shared else 'primary'
+        result['scope'][scope] = result['scope'].get(scope, 0) + 1
+        result['scope_by_assignment'].setdefault(assignment, collections.Counter())[scope] += 1
+        result['primary_shared'].setdefault(assignment, collections.Counter())[state] += 1
+        result['dispositions'][state] = result['dispositions'].get(state, 0) + 1
+        result['category'].setdefault(u['category'], collections.Counter())[state] += 1
+    return result
+
+
+read(Path(__file__))
+receipt = load(HISTORY / 'receipt.json')
+for entry in receipt['files']: assert sha(read(Path(entry['snapshot_path']))) == entry['sha256']
+prior = load(HISTORY / 'coverage-progress.json')
+assert prior['source_baseline'] == PIN and prior['total_completed_return']['total'] == 7135 and prior['remaining']['total'] == 6909
+for path, digest in prior['input_sha256'].items():
+    target = HISTORY / 'aggregate.py.snapshot' if path == str(INV / 'progress/aggregate.py') or path == str((INV / 'progress/aggregate.py').resolve()) else Path(path)
+    assert sha(read(target)) == digest, ('Prior input changed', path)
+units = {u['id']: u for u in load(INV / 'semantic-units.json')}
+files = {f['path']: f for f in load(INV / 'files.json')}
+shared = {s['unit_id']: s for s in load(INV / 'shared-sections.json')}
+packets = {p.stem: load(p) for p in sorted((INV / 'packets').glob('*.json'))}
+original_paths = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', '01a114d4', '--', str(INV)], text=True).splitlines()
+for path in original_paths + [str(RUN / 'coverage.json')]:
+    assert Path(path).read_bytes() == subprocess.check_output(['git', 'show', '01a114d4:' + path]), path
+
+states, raw_states, assignments = {}, {}, {}
+families = dict(prior['completed_families'])
+prior_packet_names = {'A': 'A', 'B1': 'B1-portable-lifetimes', 'B2': 'B2-linux-lifetimes', 'B3': 'B3-macos-lifetimes', 'C': 'C'}
+for family, packet_name in prior_packet_names.items():
+    p = packets[packet_name]
+    expected = set(p['unit_ids'] + p['shared_read_unit_ids'])
+    ledger = load(Path(families[family]['ledger']))
+    rows = ledger['units'].items() if family == 'A' else ((x['unit_id'] if family == 'B1' else x['id'], x) for x in ledger)
+    own = {}
+    for key, row in rows:
+        if family == 'A': status = row['status']; table = {'READ-CLEAN': 'read-clean', 'CANDIDATE': 'read-candidate'}
+        elif family == 'B1': status = row['disposition']; table = {'READ-CLEAN': 'read-clean', 'READ-CANDIDATE': 'read-candidate', 'READ-EXCLUSION': 'read-exclusion'}
+        else:
+            status = row['status']
+            table = {'READ-CLEAN': 'read-clean', 'READ-CANDIDATE': 'read-candidate', 'READ-EXCLUSION': 'read-exclusion',
+                     'READ-CANDIDATE-CONTEXT': 'read-candidate-context', 'READ-HISTORICAL-EXCLUSION': 'read-historical-exclusion', 'READ-HISTORICAL-CONTEXT': 'read-historical-context'}
+        assert key not in own and key not in states
+        own[key] = table[status]; raw_states[key] = status; assignments[key] = family
+    assert set(own) == expected and count(expected, own) == families[family]['counts']
+    states.update(own)
+assert len(states) == 7135
+
+new_configs = {
+    'B4': ('B4-windows-support', 'coverage-summary.json', 'source_pin', 'combined_status_counts', 'local_candidate_count'),
+    'B5': ('B5-session-framing', 'coverage-summary.json', 'source_baseline', 'counts', 'local_candidates'),
+    'B6': ('B6-wire-scp', 'final-summary.json', 'source_pin', 'unit_dispositions', 'local_concern_groups')}
+depth_limits, exclusions = [], list(prior['exclusions'])
+for family, (packet_name, summary_name, baseline_key, status_key, groups_key) in new_configs.items():
+    d = RUN / 'investigation' / family
+    report = RUN / ('investigation-' + family + '.md')
+    assert PIN.encode() in read(report)
+    summary, rows = load(d / summary_name), load(d / 'unit-dispositions.json')
+    assert summary[baseline_key] == PIN
+    p = packets[packet_name]; primary, shared_ids = set(p['unit_ids']), set(p['shared_read_unit_ids'])
+    assert len(rows) == len(primary | shared_ids) and len({x['id'] for x in rows}) == len(rows)
+    assert {x['id'] for x in rows} == primary | shared_ids and not (primary | shared_ids) & states.keys()
+    own = {}
+    for row in rows:
+        key = row['id']; check_row(row, key)
+        expected_assignment = 'primary' if key in primary else 'shared'
+        if family == 'B4':
+            assert row['ownership'] == ('primary' if key in primary else 'assigned-shared')
+            assert row['assigned_scope_disposition_complete'] is True and row['pending_context'] is None
+            assert row['actual_range_sha256'] == units[key]['range_sha256']
+            raw_status = row['status']
+            normalized = {'READ-CLEAN': 'read-clean', 'READ-CANDIDATE': 'read-candidate', 'READ-SOURCE-QUALIFIED': 'read-source-qualified',
+                          'READ-RELATED-CONTEXT': 'read-related-context', 'READ-HISTORICAL-QUALIFIED': 'read-historical-qualified'}[raw_status]
+            if row['complete_context_read'] is False:
+                assert key == 'core-001:unit:8a14c1c56398fcde' and raw_status == 'READ-RELATED-CONTEXT'
+                depth_limits.append(dict(id=key, path=row['path'], family='B4', original_status=raw_status,
+                    full_context_read=False, scope=row['scope'], qualification=row['qualification'], clean_credit=0,
+                    limitation='Whole Unshipped snapshot support/type reconciliation; no independent all-member semantic binding or compiler verification.'))
+        elif family == 'B5':
+            assert row['assignment'] == expected_assignment and row['read_status'] == 'FULL-ASSIGNED-UNIT-READ-WITH-CONTEXT'
+            raw_status = row['status']
+            normalized = {'READ-CLEAN': 'read-clean', 'READ-CANDIDATE': 'read-candidate', 'READ-EXCLUSION': 'read-exclusion'}[raw_status]
+        else:
+            assert row['assignment'] == expected_assignment and row['semantic_review'] == 'COMPLETE-FOR-ASSIGNED-SCOPE'
+            raw_status = row['disposition']
+            normalized = {'READ-CLEAN': 'read-clean', 'READ-CANDIDATE': 'read-candidate', 'READ-CONTEXT': 'read-context', 'READ-HISTORICAL-CONTEXT': 'read-historical-context'}[raw_status]
+        if key in shared_ids: assert shared[key]['investigation_stage'] == packet_name
+        else: assert units[key]['stage'] == packet_name
+        own[key], raw_states[key], assignments[key] = normalized, raw_status, family
+        if normalized == 'read-exclusion':
+            exclusions.append(dict(id=key, path=row['path'], primary_owner=family, state=normalized, reason=row['semantic_context'], increment=0))
+    assert dict(collections.Counter(raw_states[x] for x in own)) == summary[status_key]
+    primary_key, shared_key = {'B4': ('primary_status_counts', 'shared_status_counts'), 'B5': ('primary_counts', 'shared_counts'), 'B6': ('primary_dispositions', 'shared_dispositions')}[family]
+    assert dict(collections.Counter(raw_states[x] for x in primary)) == summary[primary_key]
+    assert dict(collections.Counter(raw_states[x] for x in shared_ids)) == summary[shared_key]
+    if family == 'B4': assert summary['complete_primary_file_reads'] == 105 and summary['scoped_related_context_snapshot_files'] == 1
+    families[family] = dict(packet=str(INV / 'packets' / (packet_name + '.json')), report=str(report), ledger=str(d / 'unit-dispositions.json'),
+        summary=str(d / summary_name), primary=len(primary), shared=len(shared_ids), local_candidate_groups=summary[groups_key],
+        counts=count(set(own), own), original_status_counts=summary[status_key], independent_review='PENDING', editing='PENDING', SDK_runtime_verification='PENDING')
+    states.update(own)
+
+assert len(depth_limits) == 1
+family_ids = set(states)
+assert len(family_ids) == 11101
+boundaries = {}
+for module, status_field, table in [
+    ('Management', 'status', {'READ-CLEAN': 'read-clean', 'READ-CANDIDATE-CONTEXT': 'read-candidate-context'}),
+    ('Ctap2', 'disposition', {'READ-CLEAN': 'read-clean', 'READ-CANDIDATE': 'read-candidate', 'READ-CANDIDATE-CONTEXT': 'read-candidate-context', 'READ-EXCLUSION': 'read-exclusion'})]:
+    d = RUN / 'boundaries' / module; report = RUN / ('boundary-' + module + '.md')
+    assert PIN.encode() in read(report)
+    verification, rows, file_rows = load(d / 'verification.json'), load(d / 'unit-dispositions.json'), load(d / 'file-dispositions.json')
+    assert verification['source_pin' if module == 'Management' else 'source_baseline'] == PIN
+    packet_name = 'BOUNDARY-' + module; p = packets[packet_name]
+    expected = set(p['unit_ids']); assert not p['shared_read_unit_ids']
+    assert len(rows) == len({x['id'] for x in rows}) == len(expected) and {x['id'] for x in rows} == expected
+    assert not expected & states.keys()
+    assert len(file_rows) == len({x['path'] for x in file_rows}) == len(p['disposition_paths'])
+    assert {x['path'] for x in file_rows} == set(p['disposition_paths'])
+    for f in file_rows:
+        assert f['source_sha256'] == files[f['path']]['sha256']; source(f['path'])
+    own = {}
+    for row in rows:
+        key = row['id']; check_row(row, key); assert units[key]['assigned_family'] == packet_name
+        if module == 'Ctap2': assert row['source_baseline'] == PIN and row['read'] == 'complete-assigned-unit-with-boundary-context'
+        own[key] = table[row[status_field]]; raw_states[key] = row[status_field]; assignments[key] = packet_name
+        if own[key] == 'read-exclusion': exclusions.append(dict(id=key, primary_owner=packet_name, path=row['path'], state='read-exclusion/API-support', reason=row['exclusion_reason'], increment=0))
+    summary_key = 'unit_status_counts' if module == 'Management' else 'disposition_counts'
+    assert dict(collections.Counter(raw_states[x] for x in own)) == verification[summary_key]
+    boundaries[module] = dict(report=str(report), ledger=str(d / 'unit-dispositions.json'), file_dispositions=str(d / 'file-dispositions.json'),
+        selected_paths=len(p['paths']), candidate_file_population=len(file_rows), primary=len(expected), shared=0, counts=count(expected, own),
+        original_status_counts=verification[summary_key], independent_review='PENDING', editing='PENDING', SDK_runtime_verification='PENDING')
+    states.update(own)
+
+# Additive source follow-ups carry zero extra unit credit; bind their actual unchanged inputs.
+def hash_map(mapping):
+    for relative, digest in mapping.items(): assert sha(read(RUN / relative)) == digest, relative
+
+mgmt6 = load(RUN / 'boundaries/Management/followup-B6.json')
+mgmt4 = load(RUN / 'boundaries/Management/followup-B4.json')
+ctap = load(RUN / 'boundaries/Ctap2/followup-B4-B6.json')
+for record in [mgmt6, mgmt4, ctap]: assert record['source_pin'] == PIN
+for record in [mgmt6, mgmt4]:
+    for path, digest in record['current_source_sha256'].items():
+        source(path)
+        assert current_raw[path] == digest, path
+for path, digest, ranges in ctap['source_rows']:
+    source(path)
+    assert current_raw[path] == digest and all(first <= last for first, last in ranges), path
+for record, keys in [(mgmt6, ['preserved_original_sha256', 'completed_B6_inputs_sha256']),
+                     (mgmt4, ['preserved_prior_sha256', 'B4_inputs_sha256']),
+                     (ctap, ['input_hashes', 'retained_original_hashes'])]:
+    for key in keys: hash_map(record[key])
+read(RUN / 'boundaries/Management/boundary-completion.md')
+read(RUN / 'boundaries/Management/followup-B4.md'); read(RUN / 'boundaries/Management/followup-B6.md')
+read(RUN / 'boundaries/Ctap2/followup-B4-B6.md')
+assert mgmt4['source_investigation'] == 'COMPLETE-FOR-ORIGINAL-MANAGEMENT-PACKET-AND-MANDATORY-B4-B6-FOLLOWUPS'
+assert ctap['overall_status'] == 'NAMED-PINNED-SOURCE-FOLLOWUPS-RECONCILED-WITH-QUALIFICATIONS'
+assert all(x['source_status'] == 'RECONCILED' for x in ctap['followups'])
+assert ctap['mandatory_open'][0]['owner'] == 'BOUNDARY-WebAuthn and maintainer/coordinator' and ctap['mandatory_open'][0]['status'] == 'OPEN-RETURN-NOT-RECEIVED'
+boundaries['Management']['source_boundary_closure'] = 'COMPLETE-PINNED-SOURCE; mandatory B4/B6 follow-ups source-reconciled, qualifications retained'
+boundaries['Ctap2']['source_boundary_closure'] = 'STATIC-READ-COMPLETE; B4/B6 source-reconciled; mandatory WebAuthn return OPEN'
+for module in boundaries: boundaries[module]['followup_extra_unit_credit'] = 0
+
+read(RUN / 'investigation/B4/continuation-and-verification.md')
+read(RUN / 'investigation/B4/candidates.md')
+assert b'core-001:unit:9fe6da15d252bcd2' in (RUN / 'investigation/B4/continuation-and-verification.md').read_bytes()
+platform = next(x for x in exclusions if x['id'] == 'core-001:unit:9fe6da15d252bcd2')
+platform.update(state='read-exclusion/secondary-source-supplied', Windows='B4 source disposition supplied; access/elevation candidate and native/late-user-delta qualification OPEN',
+    source_handoff='B3 macOS and B4 Windows supplied; parent remains original exclusion, zero duplicate credit')
+
+universe = {k for k, u in units.items() if u['status'] == 'UNREAD'}
+remaining = universe - states.keys(); remaining_packets = {}
+for name in sorted(p for p in packets if p.startswith('BOUNDARY-') and p not in ['BOUNDARY-Management', 'BOUNDARY-Ctap2']):
+    p = packets[name]; ids = set(p['unit_ids'] + p['shared_read_unit_ids'])
+    assert ids <= remaining
+    remaining_packets[name] = dict(state='IN-PROGRESS' if name in ['BOUNDARY-SecurityDomain', 'BOUNDARY-Oath', 'BOUNDARY-WebAuthn'] else 'NOT-STARTED',
+        primary=len(p['unit_ids']), shared=len(p['shared_read_unit_ids']), counts=count(ids, dict.fromkeys(ids, 'pending-completed-return')))
+pending = [key for name in remaining_packets for key in packets[name]['unit_ids'] + packets[name]['shared_read_unit_ids']]
+assert len(pending) == len(set(pending)) and set(pending) == remaining
+totals = count(set(states), states); family_counts = count(family_ids, states); pending_counts = count(remaining, dict.fromkeys(remaining, 'pending-completed-return'))
+assert totals['total'] == 12022 and pending_counts['total'] == 2022 and totals['scope']['Core'] == 9020 and pending_counts['scope'].get('Core', 0) == 0
+
+for path, digest in inputs.items(): assert sha(Path(path).read_bytes()) == digest, ('Input changed during capture', path)
+for path, digest in current_raw.items(): assert sha(Path(path).read_bytes()) == digest, ('Source changed during capture', path)
+result = dict(schema='core-001-coverage-progress-v3', source_baseline=PIN,
+    observed_record_head=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+    measure_definitions=dict(total_completed_return='Distinct IDs with final investigator scoped read dispositions, including context/qualified/excluded records; not all fully read prose, semantic API binding or runtime verification',
+        remaining='IDs awaiting a released completed return; active/mutable boundaries receive zero partial credit'),
+    completed_families=families, completed_boundaries=boundaries, family_only_totals=family_counts,
+    total_completed_return=totals, remaining=pending_counts, remaining_packets=remaining_packets,
+    original_partition=prior['original_partition'], source_depth_limitations=depth_limits, exclusions=exclusions,
+    original_schema_fields=dict(A='unit-results.units[id].status; read bool; ownership', B1='unit_id; disposition; read_status; ownership',
+        B2='id; status; assignment_kind', B3='id; status; ownership', C='id; status; assignment; read_complete',
+        B4='id; status; ownership; complete_context_read and assigned_scope_disposition_complete kept distinct',
+        B5='id; status; assignment; read_status', B6='id; disposition; assignment; semantic_review',
+        Management='id; status; original boundary verification and additive source follow-ups', Ctap2='id; disposition; read; source_baseline; mandatory_open follow-up states'),
+    original_field_preservation='No original ledger rewritten. Hash-bound ledger references retain every original field; normalization uses explicit per-schema exact-value maps, not status text matching.',
+    prior_five_family_snapshot=dict(receipt=str(HISTORY / 'receipt.json'), sha256=inputs[str(HISTORY / 'receipt.json')], completed_units=7135, remaining_units=6909),
+    qualification=dict(independent_review='PENDING', editing='PENDING', SDK_runtime_verification='PENDING', accepted_bug_count=None,
+        family_local_groups_nonadditive=sum(x['local_candidate_groups'] for x in families.values()), boundary_local_groups_nonadditive=dict(Management=3, Ctap2=23),
+        final_clean_sampling_denominator=None, clean='Type/native/context/historical/rendering strata explicit; source clean is not independent acceptance',
+        API='1,442-entry orientation/projection is not compiler binding or all-member semantic verification. B4 whole Unshipped snapshot is qualified related context, zero clean credit.',
+        active_investigators=['BOUNDARY-SecurityDomain', 'BOUNDARY-Oath', 'BOUNDARY-WebAuthn'], active_partial_records_read_or_credited=0,
+        Windows='Pinned B4 secondary source supplied; new user Windows concurrency delta and native qualification remain OPEN', PIV='Physical/touch/hotplug deferral retained'),
+    structural_verification=dict(result='PASS', completed_IDs_consumed_exactly_once=len(states), missing_or_extra_assigned_IDs=0, overlaps=0,
+        original_inventory_files_unchanged=len(original_paths), original_coverage_unchanged=True, current_source_paths_checked=len(sources),
+        prior_five_family_qualification='Exact ledger/packet/inventory input hashes preserved and ID unions rejoined; old source qualification reused',
+        new_sources='Raw source/range hashes equal original inventory; pin equality checks raw bytes or explicit UTF8 BOM/CRLF normalization; no source body audit',
+        boundary_candidate_file_populations=dict(Management=55, Ctap2=181), secondary_followup_unit_increment=0,
+        post_source_pin_metadata_context=metadata_context), input_sha256=inputs)
+(RUN / 'coverage-progress.json').write_text(json.dumps(result, indent=2) + '\n')
+
+lines = ['# Core structural coverage progress', '', f'Source: `{PIN}`. Read dispositions only; independent review, editing and SDK/runtime qualification remain **PENDING**.', '',
+    '## Completed scoped read dispositions', '| Packet | Primary | Shared | Clean | Candidate | Qualified/context/history | Excluded |', '| --- | ---: | ---: | ---: | ---: | ---: | ---: |']
+for name in ['A', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C', 'Management', 'Ctap2']:
+    entry = families[name] if name in families else boundaries[name]
+    c = entry['counts']['dispositions']; clean = c.get('read-clean', 0); candidate = c.get('read-candidate', 0)
+    excluded = c.get('read-exclusion', 0) + c.get('read-historical-exclusion', 0)
+    context = entry['counts']['total'] - clean - candidate - excluded
+    link = '../investigation-' + name + '.md' if name in families else '../boundary-' + name + '.md'
+    lines.append(f"| [{name}]({link}) | {entry['primary']} | {entry['shared']} | {clean} | {candidate} | {context} | {excluded} |")
+lines += ['', f"**Completed: {totals['total']:,} distinct IDs; Core 9,020 / 9,020, external {totals['scope']['external']:,} / 5,024.** Eight families: 11,101; Management/CTAP2: 921 disjoint additional IDs.",
+    'B4: 105 full primary-file reads plus one qualified whole Unshipped API snapshot support/type reconciliation; that unit is related context, **zero clean/all-member binding credit**.',
+    '## Remaining units and source-boundary closure', '**2,022 external units remain**; Core has zero undispositioned reading IDs, with the API-depth qualification above. SD/OATH/WebAuthn active; YubiOTP/HSM Auth/OpenPGP/PIV not started. No partial credit.',
+    'Management: static source boundary and B4/B6 follow-ups reconciled. CTAP2: 590 static read IDs and B4/B6 reconciled; mandatory **WebAuthn return OPEN**, not an unexecuted CTAP packet.',
+    'B1 platform exclusion: B3 macOS/B4 Windows secondary source supplied, zero duplicate credit; late Windows delta/native qualification OPEN. B2 inactive scan and all other historical exclusions remain preserved.',
+    'Clean/qualified/context/history/rendering/type/native records stay distinct in JSON; no final clean sampling denominator. Candidate groups are provisional/nonadditive. Candidate-associated unchanged paths require later editor/reviewer disposition.',
+    'Original 4,544 administrative / 7,140 outside-scope records, coverage.json, packet IDs/owners, source and investigator records remain unchanged; PIV physical deferrals remain.',
+    '[Five-family history/hash receipt](progress/history/five-family/receipt.json): 7,135 completed / 6,909 remaining. [Current exact counts/categories/ledger hashes](../coverage-progress.json).',
+    'Mechanical counts/hash joins only. No source/spec investigation, SDK build/test/native/device/formatter run, index/ref write, commit or subagent.']
+(INV / 'coverage-progress.md').write_text('\n'.join(lines) + '\n')
+print(json.dumps(dict(result='PASS', completed=totals, remaining=pending_counts, current_source_paths_checked=len(sources)), indent=2))

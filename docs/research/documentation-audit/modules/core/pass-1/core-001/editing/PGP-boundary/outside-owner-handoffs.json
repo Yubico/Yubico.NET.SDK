@@ -1,0 +1,305 @@
+[
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced"
+  },
+  {
+    "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f"
+  },
+  {
+    "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9"
+  },
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Core C source editor; C001-C006/C017 as applicable",
+    "candidates": [
+      "CORE-PGP-X002"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b"
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Core C source editor; C001-C006/C017 as applicable",
+    "candidates": [
+      "CORE-PGP-X002"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Core C source editor; C001-C006/C017 as applicable",
+    "candidates": [
+      "CORE-PGP-X004"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1"
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Core A metadata source owner, coordinated with B5 effective-version owner",
+    "candidates": [
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7"
+  },
+  {
+    "path": "src/Core/src/Devices/FirmwareVersion.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Core A metadata source owner, coordinated with B5 effective-version owner",
+    "candidates": [
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B5/B6 session/protocol editor: /home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68"
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "B1/B4 transport editor: /home/rupicola/Code/y/yubikit-core-docs-edit-transports",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f"
+  },
+  {
+    "path": "src/Core/src/Utilities/Tlv.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Core C source editor; C001-C006/C017 as applicable",
+    "candidates": [
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42"
+  },
+  {
+    "path": "src/Core/src/Utilities/TlvHelper.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Core C source editor; C001-C006/C017 as applicable",
+    "candidates": [
+      "CORE-PGP-X003"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44"
+  },
+  {
+    "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Coordinator: Tests.Shared source owner; B6/B1 recorder-example referral",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4"
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "SHARED narrative editor: /home/rupicola/Code/y/yubikit-core-docs-edit-guides",
+    "candidates": [
+      "CORE-PGP-X004"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831"
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "Coordinator: assign migration guide owner; outside current SHARED path grant",
+    "candidates": [
+      "CORE-PGP-X002",
+      "CORE-PGP-X005"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280"
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "owner": "SHARED narrative editor: /home/rupicola/Code/y/yubikit-core-docs-edit-guides",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "reopening_trigger": "Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "applicability": "Narrow actual caller/helper/owner dependency; primary ownership and denominator remain with Core family/SHARED. Product unchanged. Recheck the corresponding OpenPGP caller after shared ownership/admission/version/encoding/prompt contract changes.",
+    "unchanged_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5"
+  }
+]

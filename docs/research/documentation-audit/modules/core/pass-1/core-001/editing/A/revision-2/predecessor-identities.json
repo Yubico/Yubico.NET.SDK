@@ -1,0 +1,57 @@
+{
+  "review_subject_patch_sha256": "28cfedee32cba340d041a90edadd79afff3d65ced04317a8863d43854890a517",
+  "immutable_files": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-A.md",
+      "sha256": "32854eda75d59d643bd7e951a148e6a15d09b285d8d6be14c81caeca8acc8f6a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/changed-path-sha256.json",
+      "sha256": "ee78a04250d30f520a39790dfed3b2e546340d3247aad1e05d879cc475900c13"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/example-bodies.json",
+      "sha256": "4088b11eb2dc2c872c99ea7f06a4421e1edd981bfe855b2aa04ecc20010b290f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/input-identities.json",
+      "sha256": "fa28ed373cb445a251e9fa55f692ab14fe688c8707dc2dee8860e9826d0c320d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/output-identities.json",
+      "sha256": "f895a0be53057fe2cab6608e0411c59663ca788a5e1088596ef06a5891dbb67a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/path-dispositions.json",
+      "sha256": "2b10d73d25dfbf30ee325919c19ae9f1af59df115f6c2be7362fba0c1030b2c8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/product.patch",
+      "sha256": "28cfedee32cba340d041a90edadd79afff3d65ced04317a8863d43854890a517"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/review-identities.json",
+      "sha256": "8acfb7df9d4ec066989385ef613b17045349d09973cfbd62ff5f796e007609a4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/review.md",
+      "sha256": "d15893a37fdd3a01ad1fa0e8c30adffc818cb220917a46390177470c4662ccb1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/verification.json",
+      "sha256": "5f91b5c04df09867e4050aafb558bda9c2dc4aaa01bd9108b5fc97c767f163af"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/verify_static.py",
+      "sha256": "6bce025ed7d0b7ad0f5ada24455fad33c0c885d685f050c4f23f19401b09f09e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/xml-checks.json",
+      "sha256": "940b661cda4da28152983be5f11fb97ee293bc716eac2ee0c3d0654e545bac3d"
+    }
+  ]
+}

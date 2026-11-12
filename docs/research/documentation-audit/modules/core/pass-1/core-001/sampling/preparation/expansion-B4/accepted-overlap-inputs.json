@@ -1,0 +1,608 @@
+{
+  "manifest": "editing/integration/current-products.json",
+  "manifest_sha256": "d33ac76a90640420d868b77dcbfa285e9e1c84ac1c8ab10b644e314fcbb0d23f",
+  "accepted_paths": 361,
+  "accepted_target_role_paths": [
+    "CLAUDE.md",
+    "README.md",
+    "docs/v1-to-v2-comparison.md",
+    "src/Core/CLAUDE.md",
+    "src/Core/README.md",
+    "src/Core/src/Exceptions.cs"
+  ],
+  "command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--no-renames",
+    "--unified=3",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+    "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "--",
+    "CLAUDE.md",
+    "README.md",
+    "docs/v1-to-v2-comparison.md",
+    "src/Core/CLAUDE.md",
+    "src/Core/README.md",
+    "src/Core/src/Exceptions.cs"
+  ],
+  "current_patch_sha256": "4ce72ea21c7935a9d906c5ad5549fd5ca006e2429a84a7e99bb878021d196706",
+  "focused_review_record": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-type-guidance/review-identities.json",
+  "focused_patch_sha256": "3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623",
+  "focused_paths": [
+    "CLAUDE.md",
+    "docs/v1-to-v2-comparison.md"
+  ],
+  "focused_effective_diff_sha256": "190959ae04e315a97c7dc8e39b581e59fa5c8acd916935f1331414882f19d1e9",
+  "scope": "Accepted current target-role edits plus reviewed-pending two-document successor; exact original spans, not whole files.",
+  "original_changed_spans": {
+    "CLAUDE.md": [
+      {
+        "start_character": 4208,
+        "end_character_exclusive": 4437,
+        "old_first_line": 64,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13277,
+        "end_character_exclusive": 13492,
+        "old_first_line": 166,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14311,
+        "end_character_exclusive": 14349,
+        "old_first_line": 178,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14507,
+        "end_character_exclusive": 14611,
+        "old_first_line": 184,
+        "old_line_count": 4,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 15506,
+        "end_character_exclusive": 15554,
+        "old_first_line": 229,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 19965,
+        "end_character_exclusive": 20067,
+        "old_first_line": 405,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 20810,
+        "end_character_exclusive": 20856,
+        "old_first_line": 429,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 20939,
+        "end_character_exclusive": 21077,
+        "old_first_line": 432,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 23777,
+        "end_character_exclusive": 24062,
+        "old_first_line": 502,
+        "old_line_count": 10,
+        "added_lines": 21,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "README.md": [
+      {
+        "start_character": 2169,
+        "end_character_exclusive": 2418,
+        "old_first_line": 50,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3069,
+        "end_character_exclusive": 3069,
+        "old_first_line": 60,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      }
+    ],
+    "docs/v1-to-v2-comparison.md": [
+      {
+        "start_character": 1289,
+        "end_character_exclusive": 1394,
+        "old_first_line": 29,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3597,
+        "end_character_exclusive": 3673,
+        "old_first_line": 57,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3978,
+        "end_character_exclusive": 4090,
+        "old_first_line": 62,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4388,
+        "end_character_exclusive": 4487,
+        "old_first_line": 71,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10337,
+        "end_character_exclusive": 10337,
+        "old_first_line": 171,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 10557,
+        "end_character_exclusive": 10627,
+        "old_first_line": 174,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/CLAUDE.md": [
+      {
+        "start_character": 2867,
+        "end_character_exclusive": 2930,
+        "old_first_line": 61,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3013,
+        "end_character_exclusive": 3013,
+        "old_first_line": 66,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3202,
+        "end_character_exclusive": 3202,
+        "old_first_line": 70,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6635,
+        "end_character_exclusive": 6744,
+        "old_first_line": 110,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22670,
+        "end_character_exclusive": 22727,
+        "old_first_line": 312,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22892,
+        "end_character_exclusive": 22929,
+        "old_first_line": 321,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 23904,
+        "end_character_exclusive": 24002,
+        "old_first_line": 349,
+        "old_line_count": 3,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 24003,
+        "end_character_exclusive": 24285,
+        "old_first_line": 353,
+        "old_line_count": 6,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 27133,
+        "end_character_exclusive": 27521,
+        "old_first_line": 410,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 28428,
+        "end_character_exclusive": 28428,
+        "old_first_line": 443,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 32303,
+        "end_character_exclusive": 33017,
+        "old_first_line": 488,
+        "old_line_count": 8,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34367,
+        "end_character_exclusive": 34454,
+        "old_first_line": 518,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34455,
+        "end_character_exclusive": 34598,
+        "old_first_line": 520,
+        "old_line_count": 3,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34603,
+        "end_character_exclusive": 34603,
+        "old_first_line": 525,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 35604,
+        "end_character_exclusive": 36157,
+        "old_first_line": 536,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 36700,
+        "end_character_exclusive": 36700,
+        "old_first_line": 544,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 37757,
+        "end_character_exclusive": 37757,
+        "old_first_line": 555,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 51181,
+        "end_character_exclusive": 51245,
+        "old_first_line": 723,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52018,
+        "end_character_exclusive": 52070,
+        "old_first_line": 751,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52099,
+        "end_character_exclusive": 52231,
+        "old_first_line": 754,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52261,
+        "end_character_exclusive": 52310,
+        "old_first_line": 758,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52429,
+        "end_character_exclusive": 52473,
+        "old_first_line": 764,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 53656,
+        "end_character_exclusive": 53789,
+        "old_first_line": 789,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54090,
+        "end_character_exclusive": 54160,
+        "old_first_line": 805,
+        "old_line_count": 3,
+        "added_lines": 0,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54218,
+        "end_character_exclusive": 54218,
+        "old_first_line": 810,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 54506,
+        "end_character_exclusive": 54596,
+        "old_first_line": 826,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54676,
+        "end_character_exclusive": 54930,
+        "old_first_line": 828,
+        "old_line_count": 3,
+        "added_lines": 11,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54971,
+        "end_character_exclusive": 55043,
+        "old_first_line": 838,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55045,
+        "end_character_exclusive": 55101,
+        "old_first_line": 840,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55165,
+        "end_character_exclusive": 55221,
+        "old_first_line": 844,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55300,
+        "end_character_exclusive": 55549,
+        "old_first_line": 852,
+        "old_line_count": 12,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55550,
+        "end_character_exclusive": 55753,
+        "old_first_line": 865,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 56462,
+        "end_character_exclusive": 56660,
+        "old_first_line": 882,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 57003,
+        "end_character_exclusive": 58948,
+        "old_first_line": 884,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 61763,
+        "end_character_exclusive": 61867,
+        "old_first_line": 895,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/README.md": [
+      {
+        "start_character": 563,
+        "end_character_exclusive": 606,
+        "old_first_line": 12,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1337,
+        "end_character_exclusive": 1438,
+        "old_first_line": 24,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1630,
+        "end_character_exclusive": 1630,
+        "old_first_line": 28,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2971,
+        "end_character_exclusive": 3306,
+        "old_first_line": 66,
+        "old_line_count": 3,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9478,
+        "end_character_exclusive": 9478,
+        "old_first_line": 156,
+        "old_line_count": 0,
+        "added_lines": 8,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12608,
+        "end_character_exclusive": 13020,
+        "old_first_line": 209,
+        "old_line_count": 4,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 17798,
+        "end_character_exclusive": 17871,
+        "old_first_line": 299,
+        "old_line_count": 1,
+        "added_lines": 9,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 21214,
+        "end_character_exclusive": 21214,
+        "old_first_line": 359,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 30721,
+        "end_character_exclusive": 30846,
+        "old_first_line": 497,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 30847,
+        "end_character_exclusive": 30936,
+        "old_first_line": 500,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 31093,
+        "end_character_exclusive": 31093,
+        "old_first_line": 506,
+        "old_line_count": 0,
+        "added_lines": 13,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 38097,
+        "end_character_exclusive": 38194,
+        "old_first_line": 604,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 40832,
+        "end_character_exclusive": 41133,
+        "old_first_line": 634,
+        "old_line_count": 4,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 41426,
+        "end_character_exclusive": 41523,
+        "old_first_line": 641,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Exceptions.cs": [
+      {
+        "start_character": 622,
+        "end_character_exclusive": 622,
+        "old_first_line": 17,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 695,
+        "end_character_exclusive": 754,
+        "old_first_line": 19,
+        "old_line_count": 1,
+        "added_lines": 0,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 873,
+        "end_character_exclusive": 1018,
+        "old_first_line": 26,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ]
+  },
+  "parser_reuse_sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d"
+}

@@ -1,0 +1,15 @@
+{
+  "original_983_selection": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/selection.json",
+  "retired_provisional_SW_ids": [
+    "core-001:unit:3ad8b9f956a4e672",
+    "core-001:unit:a3d37dc1aed22b2f",
+    "core-001:unit:aa9d6d49701b178d",
+    "core-001:unit:f39183b2d438d21d"
+  ],
+  "canonical_family_successor": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/family-replacements/revision-2/replacement-selection.json",
+  "conditional_B2": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/conditional-history-replacements.json",
+  "repeated_B3_activation": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B3/activated-history-replacements.json",
+  "repeated_activation_read_increment": 0,
+  "proposal_presence_never_grants_read_or_content_credit": true,
+  "order_rule": "Within each immutable proposal record retain exact array index and original deterministic rank; conditional-to-activation and predecessor-to-successor relations remain explicit. Actual verdict union controls credit, never repeated proposal occurrences."
+}

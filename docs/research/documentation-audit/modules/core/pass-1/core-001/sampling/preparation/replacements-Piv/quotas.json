@@ -1,0 +1,40 @@
+[
+  {
+    "owner": "Piv",
+    "stratum": "implementation-state-and-internal-contracts",
+    "broad_original_population": 78,
+    "original_quota": 8,
+    "conservative_minimum": 8,
+    "withheld_sample_ids": [
+      "core-001:unit:a579b6a5cf4242e4",
+      "core-001:unit:8fc815177a95b970"
+    ],
+    "known_edited_original_selected_ids": [],
+    "valid_original_selected": 6,
+    "required_replacements": 2,
+    "replacement_ids": [
+      "core-001:unit:be11505c581308a5",
+      "core-001:unit:a4315aa9922ecd83"
+    ],
+    "policy": "Retain original broad role denominator/quota conservatively until stable final diff; specific sample credits withheld, no material-miss expansion."
+  },
+  {
+    "owner": "Piv",
+    "stratum": "narrative-examples-and-maps",
+    "broad_original_population": 21,
+    "original_quota": 3,
+    "conservative_minimum": 3,
+    "withheld_sample_ids": [
+      "core-001:unit:89c5d1ecb6fd0e8d"
+    ],
+    "known_edited_original_selected_ids": [
+      "core-001:unit:89c5d1ecb6fd0e8d"
+    ],
+    "valid_original_selected": 2,
+    "required_replacements": 1,
+    "replacement_ids": [
+      "core-001:unit:eb2ea938be1dc7f7"
+    ],
+    "policy": "Retain original broad role denominator/quota conservatively until stable final diff; specific sample credits withheld, no material-miss expansion."
+  }
+]

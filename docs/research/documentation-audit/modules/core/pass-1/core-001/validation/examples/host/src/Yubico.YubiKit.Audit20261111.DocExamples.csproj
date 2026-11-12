@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../../../../../../../../../../src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../../../../../../../../../../src/Piv/src/Yubico.YubiKit.Piv.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../../../../../../../../../../src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" />
+  </ItemGroup>
+</Project>

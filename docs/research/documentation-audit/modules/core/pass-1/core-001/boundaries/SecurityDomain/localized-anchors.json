@@ -1,0 +1,310 @@
+[
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/README.md",
+    "first_line": 126,
+    "last_line": 152,
+    "reason": "SCP11 task lacks immediate required effective-version creation example"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/README.md",
+    "first_line": 202,
+    "last_line": 207,
+    "reason": "Retain accurate assumed/explicit version conditions; add setup gate consequence"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 125,
+    "last_line": 205,
+    "reason": "Actual override/default -> Core gate; local config and version not retained"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 765,
+    "last_line": 799,
+    "reason": "Both reset callbacks omit config/version, retain exact SCP parameters"
+  },
+  {
+    "candidate": "CORE-SD-X001",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "first_line": 130,
+    "last_line": 147,
+    "reason": "Local setup/version provenance and selected catch must stay together"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/README.md",
+    "first_line": 215,
+    "last_line": 225,
+    "reason": "Contained private-key/certificate identity needs actionable ownership wording"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "first_line": 123,
+    "last_line": 128,
+    "reason": "Replace unverified deep ownership caveat with source-qualified containment details"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 83,
+    "last_line": 101,
+    "reason": "Exact retained caller parameter object and borrowed connection"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 608,
+    "last_line": 617,
+    "reason": "Caller-owned private D alias, distinct encrypted copy"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 646,
+    "last_line": 652,
+    "reason": "Curve byte stackalloc uninitialized; source-quality qualification only"
+  },
+  {
+    "candidate": "CORE-SD-X002",
+    "path": "src/SecurityDomain/src/SecurityDomainKeyMaterial.cs",
+    "first_line": 32,
+    "last_line": 108,
+    "reason": "Pooled plaintext finally versus separate KCV/ciphertext/provider temporaries"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 816,
+    "last_line": 823,
+    "reason": "Facade strips response owner and exposes Data alias"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "first_line": 35,
+    "last_line": 52,
+    "reason": "Input borrow and result owner/clear policy absent; supplemental XML read"
+  },
+  {
+    "candidate": "CORE-SD-X003",
+    "path": "src/SecurityDomain/README.md",
+    "first_line": 215,
+    "last_line": 225,
+    "reason": "Public source/result cleanup responsibility needs hidden-owner qualification"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 765,
+    "last_line": 936,
+    "reason": "Raw attempts bypass guard; flags clear only after attempts/disposal, failure cleanup local"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "first_line": 312,
+    "last_line": 332,
+    "reason": "Add failed-reset disposal/reopen condition near existing destructive limits"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/README.md",
+    "first_line": 172,
+    "last_line": 190,
+    "reason": "Cancellation/failed-reset lifecycle and diagnostic completion boundaries"
+  },
+  {
+    "candidate": "CORE-SD-X004",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "first_line": 74,
+    "last_line": 99,
+    "reason": "Keep attempt count and fresh-session workaround, add stale graph/failure action"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecureChannelException.cs",
+    "first_line": 70,
+    "last_line": 74,
+    "reason": "Message embeds opaque immediate failure text; supplemental helper read"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "first_line": 142,
+    "last_line": 148,
+    "reason": "Keep selected wrapper; useful nested status/local gate diagnosis"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "first_line": 175,
+    "last_line": 179,
+    "reason": "Global logging and opaque exception provenance, no blanket privacy assurance"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 232,
+    "last_line": 244,
+    "reason": "GET DATA warning forwards exception object"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 485,
+    "last_line": 489,
+    "reason": "SCP03 import error forwards exception object"
+  },
+  {
+    "candidate": "CORE-SD-X005",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 666,
+    "last_line": 670,
+    "reason": "EC import error forwards exception object"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/README.md",
+    "first_line": 30,
+    "last_line": 37,
+    "reason": "Add a/c first post-setup correct-MAC phase beside existing b/authority qualification"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/README.md",
+    "first_line": 137,
+    "last_line": 163,
+    "reason": "Retain draft permission/counter condition and trust role distinction"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "first_line": 25,
+    "last_line": 31,
+    "reason": "Setup flag versus device auth phase; draft final/profile scope"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "first_line": 35,
+    "last_line": 52,
+    "reason": "Zero Le and configured format limits; no absent-Le promise"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "first_line": 281,
+    "last_line": 290,
+    "reason": "One logical STORE DATA may physically chain through Core"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "first_line": 208,
+    "last_line": 228,
+    "reason": "Common empty requestData/Le0 follows Core encryption/format policy"
+  },
+  {
+    "candidate": "CORE-SD-X007",
+    "path": "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+    "first_line": 32,
+    "last_line": 36,
+    "reason": "Forwarding dependency only, not a new local mechanism"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+    "first_line": 167,
+    "last_line": 192,
+    "reason": "Unscoped borrowed fake and exact failed-reinit oracle, not device reset proof"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+    "first_line": 68,
+    "last_line": 75,
+    "reason": "Fixture owns derived arrays separately from StaticKeys"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+    "first_line": 104,
+    "last_line": 109,
+    "reason": "Dispose only static keys, not fixture derived buffers"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+    "first_line": 24,
+    "last_line": 50,
+    "reason": "DisposeCount/no synchronous Dispose is narrower than complete disposal observer"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+    "first_line": 217,
+    "last_line": 435,
+    "reason": "Nonnull/config inputs or transmit assertion do not verify all propagated settings/disposal"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+    "first_line": 1,
+    "last_line": 103,
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+    "first_line": 1,
+    "last_line": 216,
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+    "first_line": 1,
+    "last_line": 196,
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+    "first_line": 1,
+    "last_line": 366,
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+    "first_line": 1,
+    "last_line": 183,
+    "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+    "first_line": 1,
+    "last_line": 86,
+    "reason": "Supplemental complete fixture read; exact caller trust/cleanup owner SD-IMP-007/008"
+  },
+  {
+    "candidate": "CORE-SD-X008",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/Scp11TestData.cs",
+    "first_line": 1,
+    "last_line": 94,
+    "reason": "Supplemental complete fixture read; exact caller trust/cleanup owner SD-IMP-007/008"
+  },
+  {
+    "candidate": "CORE-SD-X006",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+    "first_line": 61,
+    "last_line": 70,
+    "reason": "Protected public listing after flag is not an administrative-authority oracle"
+  }
+]

@@ -116,10 +116,16 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// <exception cref="CryptographicException">
         /// Thrown if the private key is invalid.
         /// </exception>
+        /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
+        /// <remarks>
+        /// Accepts the typed decoder's attribute-free, version-0 PKCS#8 subset. AlgorithmIdentifier
+        /// consumption is checked separately from outer and nested trailing-data admission. Scalar-width
+        /// checking does not prove range; consistency checking runs when both public coordinates are present.
+        /// </remarks>
         public static ECPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
             => CreateFromPkcs8(encodedKey, parametersDecoded: null);
 
-        // Test observation hook. The callback must not retain or mutate the decoded private value.
+        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
         internal static ECPrivateKey CreateFromPkcs8(
             ReadOnlyMemory<byte> encodedKey,
             Action<ECParameters>? parametersDecoded)
@@ -152,7 +158,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </exception>
         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
 
-        // Test observation hook. The callback must not retain or mutate the copied private value.
+        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
         internal static ECPrivateKey CreateFromParameters(
             ECParameters parameters,
             Action<ECParameters>? parametersCopied) =>
@@ -175,7 +181,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         public static ECPrivateKey CreateFromEcdh(ECDiffieHellman ecdh)
             => CreateFromEcdh(ecdh, parametersExported: null);
 
-        // Test observation hook. The callback must not retain or mutate the exported private value.
+        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
         internal static ECPrivateKey CreateFromEcdh(
             ECDiffieHellman ecdh,
             Action<ECParameters>? parametersExported)
@@ -204,10 +210,11 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// are cleared.
         /// </para>
         /// <para>
-        /// On macOS the runtime's own derivation keeps a copy of the scalar that it does not clear. This
-        /// is a runtime behaviour, not one the SDK can reach. Supplying the public point yourself through
-        /// <see cref="CreateFromParameters(ECParameters)"/> does not avoid it, because the SDK checks that the point
-        /// belongs to the scalar by signing with the same runtime path.
+        /// The inspected .NET v10.0.0 macOS D-only import route derives the public point and creates a
+        /// runtime-owned managed scalar copy whose cleanup is not exposed to this SDK. Supplying both
+        /// public coordinates through <see cref="CreateFromParameters(ECParameters)"/> skips that extraction
+        /// route in the inspected revision. Provider-owned copies and native erasure still require separate
+        /// qualification for the runtime actually used; clearing SDK arrays alone establishes neither.
         /// </para>
         /// </remarks>
         /// <param name="privateValue">
@@ -224,7 +231,7 @@ namespace Yubico.YubiKit.Core.Cryptography
             KeyType keyType)
             => CreateFromValue(privateValue, keyType, parametersCreated: null);
 
-        // Test observation hook. The callback must not retain or mutate the temporary private values.
+        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
         internal static ECPrivateKey CreateFromValue(
             ReadOnlyMemory<byte> privateValue,
             KeyType keyType,

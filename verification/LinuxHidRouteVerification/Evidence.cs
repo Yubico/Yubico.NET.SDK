@@ -12,6 +12,8 @@ internal sealed record IdleObservation(string Scope, double WallMs, double CpuMs
 
 internal sealed class Evidence(string mode)
 {
+    // Baseline names the original comparison checkpoint, not the current executable's source.
+    // SourceHash is launcher-supplied (or UNRECORDED); these fields alone attest no build identity.
     public string Mode { get; } = mode;
     public string Baseline { get; } = "3de42bb54c5e8c986364f0f04398d4e85a66a596";
     public string SourceHash { get; } = Environment.GetEnvironmentVariable("LINUX_VERIFY_SOURCEHASH") ?? "UNRECORDED";
@@ -35,6 +37,8 @@ internal sealed class Evidence(string mode)
 
     internal async Task<T> MeasureAsync<T>(string name, Func<Task<T>> invoke)
     {
+        // Distinguish invocation return from awaited completion. Allocation deltas are process-wide,
+        // not native-only or isolated to this operation, and failed operations add no measurement row.
         long allocated = GC.GetTotalAllocatedBytes();
         long start = Stopwatch.GetTimestamp();
         Task<T> operation = invoke();

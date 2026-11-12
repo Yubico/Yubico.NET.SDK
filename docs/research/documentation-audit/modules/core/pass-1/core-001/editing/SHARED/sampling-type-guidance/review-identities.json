@@ -1,0 +1,62 @@
+{
+  "schema": "core-001-SHARED-sampling-type-guidance-independent-review-1",
+  "verdict": "PASS",
+  "scope": "Exact two-document SAMPLE-B4-001/002 type-selection rationale and migration-introduction correction only",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides",
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "accepted_focused_patch_sha256": "3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623",
+  "accepted_paths": [
+    {"path":"CLAUDE.md","finding":"SAMPLE-B4-001","original_unit_id":"core-001:unit:001c58b1d1862d76","before_sha256":"461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109","after_sha256":"6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383","edited_overlap_clean_credit":0},
+    {"path":"docs/v1-to-v2-comparison.md","finding":"SAMPLE-B4-002","original_unit_id":"core-001:unit:a9e434874ba55d57","before_sha256":"37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1","after_sha256":"4797f0c57ce247952d35bf2e03a63a826f3b63f21b995d4da877484249dafb13","edited_overlap_clean_credit":0}
+  ],
+  "preserved_predecessor_chain": {
+    "full_26_path_acceptance_relative_to_run":"editing/SHARED/revision-2/review-identities.json",
+    "full_26_path_acceptance_sha256":"10ceb52f8cb0575e7751689c4885d8ab4a150ca922307beaf2fa77cd3dedcb84",
+    "full_26_path_patch_sha256":"8e743d0336f0d0338d6a726f63ececcd37a3877cb7da6741626e169d8b99c56c",
+    "lifecycle_acceptance_relative_to_run":"editing/SHARED/sampling-correction/review-identities.json",
+    "lifecycle_acceptance_sha256":"8904cd044f15c9bc99a1d6fd060b1c90093de6ce99c2088c172f6fcfa60ee2f7",
+    "lifecycle_patch_sha256":"37074361c54bb2232ff8406ae37af482a73c51b029a3dfd8328e467f697e274e",
+    "meaning":"Predecessor acceptance artifacts remain exact; this focused patch replaces only the two named path hashes and does not relabel old full-patch identities."
+  },
+  "focused_inputs_sha256": {
+    "report.md":"44e95412648cd2e3fe7e3b699cadc6931172a448c7221094e488325c1c8306b4",
+    "before-identities.json":"cfe0e59f64874ec7064756f0c1421c748d0c19baa2e83a96ccd89bbd652ec4d2",
+    "preserved-record-identities.json":"b167f3ca457d832aa74671c8d54c32e45ccac0f51cb6392cbc5ba5378696e201",
+    "source-evidence.json":"d0bd3d705c1c192d604704e42ee732cd6687a521ade82c9597dcdce03039e86a",
+    "product.patch":"3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623",
+    "changed-path-sha256.json":"10cc64c8284e32ba0c5e122f9d16021f9aeb9915e65d9eb203dccb5e997b6c3d",
+    "example-bodies.json":"b765f6e31fcb1f8dd58e4ec55e545f00a95679e070aa105a3814de97a0d85b07",
+    "verification.json":"dbb7eda306de97da3b48cf9d02ee7a36b67b7c99f1a9c4ec9ee7e0819674dbfd",
+    "output-identities.json":"9c0dc4af67f9b5ba390de87d31660059669a4bfcc342c269cdd42a6d6c8d35d2",
+    "before/CLAUDE.md":"461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+    "before/v1-to-v2-comparison.md":"37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+    "after/CLAUDE.md":"6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+    "after/v1-to-v2-comparison.md":"4797f0c57ce247952d35bf2e03a63a826f3b63f21b995d4da877484249dafb13",
+    "sources/struct.md":"b2281eb170604925a0ce0b4a85a393b47c4b6d467e602b6866940e1a49e865ca",
+    "sources/when-to-use-generic-collections.md":"05b8868b89ee482fb6021e9226d293d1318c6508a058e33dd69245fd236a5a06",
+    "sources/generics.md":"61ee70893b9e5f6c657ad8513a460b1d6754101c5eb205fb42024cee1998b85e"
+  },
+  "source_review_limit":"Named Microsoft references reported by editor's Context7 /dotnet/docs orientation were read as retained moving-main documentation snapshots. Actual Core declarations/enclosing accessibility checked. No pinned-runtime or benchmark inference; generic value-type element storage is not a global no-GC promise.",
+  "independent_static_verification": {
+    "mismatches":0,
+    "product_paths_changed_from_accepted_predecessor":["CLAUDE.md","docs/v1-to-v2-comparison.md"],
+    "other_accepted_product_paths_unchanged":24,
+    "prior_artifacts_preserved":45,
+    "source_evidence_entries_verified":14,
+    "retained_microsoft_reference_captures_verified":3,
+    "actual_core_source_files_and_declaration_receipts_verified":11,
+    "complete_fenced_bodies_unchanged_and_coordinates_verified":17,
+    "specific_migration_table_and_Base32_pointer_byte_identical":true,
+    "actual_after_equals_after_captures":true,
+    "reconstructed_two_document_diff_equals_focused_patch":true,
+    "git_diff_check_exit":0,
+    "focused_reverse_check_exit":0,
+    "unclosed_fences":0,
+    "head_unchanged":true,
+    "index_unchanged":true
+  },
+  "not_granted":["Clean sampling credit for either edited overlap","New example compilation credit","Universal stack allocation/deep immutability/no-GC or no-boxing claim","Project type-selection preference change","Public API/runtime change","Broad guide or module re-audit"],
+  "unrun":["build/tests/compiler/formatter","native/device/cryptographic operations","allocation experiments/benchmarks"],
+  "coordinator_gates":["Category expansion and sampling reconciliation","Final boundary reconciliation and validation","Core Pass-1 publication and precise deferred-owner handoff, then stop"],
+  "reviewer_writes_only":["editing/SHARED/sampling-type-guidance/review.md","editing/SHARED/sampling-type-guidance/review-identities.json"]
+}

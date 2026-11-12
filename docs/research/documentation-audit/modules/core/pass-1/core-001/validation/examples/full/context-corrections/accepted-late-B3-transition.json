@@ -1,0 +1,34 @@
+{
+  "scope": "Only the late independently accepted B3 overview comment and current-products metadata transition; no example body or checker participant changed.",
+  "source_path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+  "old": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "bytes": 8611,
+    "sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a"
+  },
+  "current": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "bytes": 8679,
+    "sha256": "18d3f8ef6d7d2b72d0bb668ed6301eee634a2659c20ed89e2d8b75e1a69dadd3"
+  },
+  "receipt": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B3.json",
+    "sha256": "e89396e367c6c3efd64e02be0251b19491bbbc1cace99f230a6f972dc449d584"
+  },
+  "original_snapshot_source": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/inputs.json",
+    "sha256": "e3864651fb063bf3e076b5cef26a82c00b7ac0716c015bd24f91169768048206"
+  },
+  "exact_noncomment_lines_equal": true,
+  "old_product_map": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+    "bytes": 79207,
+    "sha256": "24410c0e80bb021d5e06091b26f94b54e80d6c419a4f88f0c8f87abed810176f"
+  },
+  "current_product_map": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+    "bytes": 79334,
+    "sha256": "0239c09d598a7c036b1bec145304aa675ec2b720de5dbb3035bbf6687b811295"
+  },
+  "old_product_map_recovered_exactly": true
+}

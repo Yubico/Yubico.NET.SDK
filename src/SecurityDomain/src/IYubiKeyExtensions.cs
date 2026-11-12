@@ -39,6 +39,8 @@ public static class IYubiKeyExtensions
         ///     Supply FirmwareVersionOverride when the exact firmware is known: Security Domain cannot
         ///     detect it and otherwise configures with 5.3.0. Reset currently omits the original protocol
         ///     configuration/version; create a fresh session with those options when needed after reset.
+        ///     SCP11 setup requires a known supported override (normally 5.7.2+); the default 5.3.0
+        ///     fails Core's local gate before authentication. An override is policy, not hardware detection.
         /// </remarks>
         /// <exception cref="SecureChannelException">
         ///     SCP parameters were supplied and secure-channel configuration threw ApduException,

@@ -1,0 +1,105 @@
+{
+  "schema": "core-001-A-sampling-focused-independent-review-v1",
+  "decision": "PASS",
+  "scope": "Both additive documentation patches only; accepted revision-2 review and qualification preserved",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-discovery",
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_focused_patches": [
+    {"path": "editing/A/sampling-correction/product.patch", "sha256": "c00893c28c7b215f129b6b68e36a8240b2b34d5eec511da7fc4df8a082e29651", "files": 2},
+    {"path": "editing/A/sampling-feed-completion/product.patch", "sha256": "f50744c7d3c81a515ca0f43c84e5dd22e84f87c368260308d61034cc0ecc3aae", "files": 1}
+  ],
+  "accepted_files": [
+    {
+      "path": "src/Core/src/Devices/HotplugSignals.cs",
+      "before_primary_base_pin_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+      "current_sha256": "70925f5b5f694990a5c0dd03b963259922e15604c1884741e50e11dab59db093",
+      "selected_original_unit_ids": ["core-001:unit:711e47d18bab0742"],
+      "sample": "SAMPLE-A001",
+      "reviewed_XML": "35-39; 86-96",
+      "decision": "PASS: ordered best-effort startup/cleanup; logger interruption and conditional channel completion; no native-release proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+      "before_primary_base_pin_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+      "current_sha256": "00b5b7d5f223bb281444bb29ec937cc03c84ffff339fe5a477ed778e9dbf4e67",
+      "selected_original_unit_ids": ["core-001:unit:c085f1cd3632e7c2", "core-001:unit:076b4d4328825902"],
+      "adjacent_not_selected": ["core-001:unit:79340850e7d0f3c2"],
+      "sample": "SAMPLE-A002",
+      "reviewed_XML": "17-22; 28-31; 48-55",
+      "decision": "PASS: discovery lease, active connection and waiting connection refusal vocabulary; unrecovered state throws separately before predicates"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "before_primary_base_pin_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+      "current_sha256": "46ef5ee7ecd8410de85da36cf73b34f8a4d86a1f3b705872e2b80efb5f2bdb6e",
+      "additional_context_unit": "core-001:unit:3c7f0585447bd6d1",
+      "selected_original_unit_ids": [],
+      "sample_context_label": "SAMPLE-A003",
+      "reviewed_XML": "111-117",
+      "decision": "PASS: healthy completion requests, retained fault/overflow outcomes, producer precondition, later empty subscriptions and possible replay/buffer drain"
+    }
+  ],
+  "preserved_prior_acceptance": {
+    "accepted_37_file_patch_sha256": "028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228",
+    "accepted_37_file_manifest_sha256": "4ecc11cf6e641cb94be9d578aa5c98a504a14baba00be73884d97f90aa39b0e1",
+    "revision_2_review_md_sha256": "f0f59c2ae7fcbf9194699d81822c71d88143a5ea3b6e200f40de0d0175539390",
+    "revision_2_review_identities_sha256": "eb701c79f1ceb9dc4186f0e4908694cb5fafafa13589d8b03ed571a1212bfad2",
+    "source_hashes_unchanged": 37,
+    "first_sampling_frozen_predecessor_files_checked": 25,
+    "feed_addendum_frozen_predecessor_files_checked": 35,
+    "prior_patches_or_reviews_regenerated": false
+  },
+  "focused_artifact_identities_relative_to_run": {
+    "editing/A/sampling-correction/report.md": "435f579ca76e1f81ef8e01519e8e5bf40bf2e707f05aeda19785ecf9abb2c54e",
+    "editing/A/sampling-correction/annotation.json": "6e20be39b0ce6f33d9b56808169212818833cf85929ca2d69b3f5f62c346619c",
+    "editing/A/sampling-correction/file-identities.json": "539d5895cec568443e7408264eb91ba6f5c24ffee1868e02ac76051f6db03b56",
+    "editing/A/sampling-correction/output-identities.json": "841c02582dad5183cce16f0a850044ed331329a3ba85abd7b09104271fb2b417",
+    "editing/A/sampling-feed-completion/report.md": "4bd1ee22409bad944d6d5bfdb6ac7ca39ec5134ddeeaa9af92b723938e77c5dc",
+    "editing/A/sampling-feed-completion/annotation.json": "1b35173dacb40035ac75035adc14f53b4a82509f87e0b616a4e4b725d7172255",
+    "editing/A/sampling-feed-completion/file-identities.json": "0ad3edf88c9594bcd9ecb939a5f8aa5ea46a97ae1bbde92b3cfa31e14e532400",
+    "editing/A/sampling-feed-completion/output-identities.json": "2f42127a31cb5ed436060cb579e94aa70785fd675d0f5ffb093cb277a7f8e9c8"
+  },
+  "source_evidence": {
+    "HotplugSignals": "Complete before/current class; constructor, TryStart, BestEffort, three cleanup passes and channel completion order",
+    "registry": "Complete DeviceConnectionRegistry, especially IsDiscoveryAvailable 144-145/181-191, connection acquisition 193-231, TryAcquireDiscovery 281-293, ThrowIfUnrecovered 295-304",
+    "shared_read": "SharedDeviceInfoRead 98-290: precheck, worker admission and atomic acquire/open/cleanup path",
+    "feed": "Complete DeviceChangeFeed before/current; Fault, Subscribe, both Complete methods and Subscription.Deliver",
+    "runtime": {
+      "path": "investigation/A/sources/dotnet10-bounded-channel.cs.txt",
+      "revision": "dotnet/runtime v10.0.0",
+      "sha256": "4798673d97ee37741287c70b7f017b5f962b956b1a9e214b9089e0940a4ee406",
+      "passage": "Complete TryComplete 305-361, first-terminal check 319-326",
+      "authority": "Pinned managed-runtime implementation; not device normative authority or fresh execution"
+    },
+    "tests": "DeviceChangeFeedTests complete methods 118-203, read only; fault test does not execute a new pending-reader fault-then-Complete experiment"
+  },
+  "fresh_static_checks": {
+    "three_captured_before_files_equal_primary_base_pin_and_accepted_retained_hashes": true,
+    "all_corrected_current_hashes_match": true,
+    "actual_focused_diffs_equal_patch_bytes": true,
+    "patches_mutually_disjoint_and_outside_prior_37_edited_paths": true,
+    "exact_filtered_noncomment_lines_preserved": true,
+    "executable_change_found_by_hunk_and_source_read": false,
+    "focused_output_manifest_hashes_match": true,
+    "original_character_ranges_hash_checked": 19,
+    "selected_A_units": 3,
+    "additional_Complete_context_claimed_selected": false,
+    "xml_blocks_parsed": 16,
+    "git_diff_check_exit_code": 0,
+    "example_bodies_in_three_corrected_files": 0,
+    "existing_accepted_examples_unchanged": true
+  },
+  "qualification": {
+    "compiler_token_API_cref_final_validation": "Coordinator gates pending; not proved by filtered comment-line comparison",
+    "sampling_expansion_denominator_source_credit_central_ledgers": "Coordinator-owned; no allocation or modification here",
+    "related_guide": "core-001:unit:cf1e2081af8b8ac4 remains SHARED-owned; only original provenance hash checked, pending correction not reviewed or edited here",
+    "new_runtime_findings_or_engineering_behavior": 0,
+    "FPX-01_A-E01_A-E02_through_A-E06": "NOT-RUN",
+    "product_edits_builds_tests_formatter_compiler_crypto_native_device_Git_mutations_subagents": "NOT-RUN",
+    "prior_native_physical_profile_cross_process_historical_boundary_qualifications": "Unchanged",
+    "stop": "Finish existing Core Pass-1 validation and agreed handoff, then stop"
+  },
+  "reviewer_writes_only": ["editing/A/sampling-review.md", "editing/A/sampling-review-identities.json"],
+  "self_and_review_text_hashes_excluded": true
+}

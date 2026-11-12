@@ -1,0 +1,112 @@
+{
+  "review_kind": "focused-independent-successor-content-and-citation-review",
+  "decision": "PASS",
+  "acceptance_scope": "Complete successor 62-file B1-B4 documentation batch, combining prior independent full-batch review with closed M1-M3 and exact preservation of other eligible source files. Not compiler/runtime acceptance or a broad re-audit.",
+  "base_and_observed_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_full_patch_sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+  "accepted_focused_delta_sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2",
+  "predecessor_full_patch_sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+  "accepted_records_relative_to_revision_2": {
+    "report.md": "69b055e77390877dc5455f90f114dc37b821fd720a0cec293197f0e909ae22ed",
+    "current-path-hashes.json": "0d440261ba1d64ab54bc415689a3f42bb8a199703e0c53cf9c3738f52d69f2e5",
+    "file-dispositions.json": "b3a1421c894431a33dc88a0674b552f12773cb9238845652c169dfd5212ebed4",
+    "proposal-dispositions.json": "ba2b3214d65cc416eeebb72c1518c295db5d625b1fa9a2d37a42af4a7e9273ee",
+    "focused-citations.json": "1e245be21f9507bb5dc904e8002aafeb6fb4dd2922e16a29571153a81b817b97",
+    "return-identities.json": "2ddcf469145643dd0a825ac8f23aace0cbfab2b61cd0b7f257bde3d34d17d75f",
+    "review-inputs.json": "9d8b522c7beae4c02746b86534a7c1a7dc5849f2c9af95b3ecfcf302f2fdc741",
+    "prior-record-preservation.json": "18d3e961e86ae8dcc43fc2ea5f5de83ec39c1fc5d1b40def04d3bdc285395ccb",
+    "example-bodies.json": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+  },
+  "closed_corrections": [
+    {
+      "review_id": "M1",
+      "status": "RESOLVED",
+      "candidate": "CORE-B3-C003",
+      "proposal": "FPT-042",
+      "original_unit_ids": ["core-001:unit:cef6b843926775c3", "core-001:unit:549db4976f21f028"],
+      "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "current_raw_sha256": "81c0010ee6352821adca2a5c7bbf4aa0f9c753ff27ae901141b5d451e12680fc",
+      "accepted_current_lines": [[26, 108]],
+      "decisive_current_source": "MacOSHidInterface.GetList:58-109 and complete helper query flow; no per-device report open precedes enumeration property queries.",
+      "authority": "Apple IOKitUser323ead896d04424f87184d8f6ff0cce811aab106 IOHIDDevice.h:87-102, SHA25664aad6babb2e4bbbf31386f54c658fd16fbaa1aa271fb8f396126c22d6f833bd; open-before-state-changing-command contract, not universal property-open prerequisite.",
+      "qualification": "Valid caller-maintained reference, no extra per-query CFRetain mandate; held nullable-set/CFNumberType findings unchanged."
+    },
+    {
+      "review_id": "M2",
+      "status": "RESOLVED",
+      "candidate": "CORE-B4-C004",
+      "proposal": "FPT-051",
+      "original_unit_ids": ["core-001:unit:97f3c89d0819e76e", "core-001:unit:3ac34ce64d139f54"],
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "current_raw_sha256": "183a5bcd93e003b9a4f6fb17178fe2e72c1e221652fc0c4287cbecb330a18d86",
+      "accepted_current_lines": [[76, 101]],
+      "decisive_current_source": "Constructor38-49, GetCapabilities183-204, OpenHandleWithAccess206-232, OpenHandleForMetadata234-264, OpenReadWriteHandle273-275, exception filter277-278 and failure translation280-288.",
+      "authority": "Retained Win32 CreateFile desired-access/share contract SHA256b946f24eb9b62fbb37093e74741e9bc3aad5c96cf82d6ed552ef716118d248eb; HidD_GetFeature Parameters/Remarks SHA256744407c7ab7fe1d1cecfe17229e8976ec4629738891d2a9a4107f38511cb2684.",
+      "qualification": "Zero-access first attempt and read/write retry selected by UnauthorizedAccessException; neither metadata route exercises feature GET/SET; no deployed-access success claim."
+    },
+    {
+      "review_id": "M3",
+      "status": "RESOLVED",
+      "candidate": "CORE-B4-C002",
+      "proposal": "FPT-049",
+      "supporting_unchanged_candidate_and_proposal": ["CORE-B3-C005", "FPT-044"],
+      "original_unit_ids": ["core-001:unit:6f60e2b189737226", "core-001:unit:c40476271e99068b", "core-001:unit:8aa16b126b5c3c3b"],
+      "locations": [
+        {"path": "src/Core/src/Transports/Hid/HidDeviceListener.cs", "current_raw_sha256": "9b4ec4fd9bbfd5b6e459e64152a0aa0f555168493cefd42d80a318bbfd90207c", "accepted_current_lines": [[69, 85], [127, 149]]},
+        {"path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs", "current_raw_sha256": "e36965aadaee30ef241c45b7da5a2141b117a2e41495d1b391fdb0c0ede4507d", "accepted_current_lines": [[151, 178]]}
+      ],
+      "decisive_current_source": "Windows listener Stop129-149 and Dispose/finalizer280-315; macOS listener StartGeneration/Stop74-118; base Dispose(bool)135-149.",
+      "authority": "Retained Microsoft CM_Unregister_Notification Return value/Remarks SHA256eacdd31a133642644779abe5a7144213e06e25591a02fa528a4c4913bf92092e: success versus error, pending-callback wait and callback-thread deadlock restriction.",
+      "qualification": "Cleanup/unregister requests or attempts, not release proof; existing status-discard and no-worker retention findings remain unresolved."
+    }
+  ],
+  "independent_static_verification": {
+    "result": "PASS",
+    "discrepancies": [],
+    "eligible_paths": 213,
+    "edited": 62,
+    "retained": 135,
+    "held": 16,
+    "all_213_current_raw_and_lf_hashes_match": true,
+    "exact_four_changed_source_paths": true,
+    "saved_four_predecessor_text_hashes_match_prior_review": true,
+    "other_209_source_hashes_and_decision_objects_unchanged": true,
+    "all_16_held_decision_objects_unchanged": true,
+    "changed_proposal_ids": ["FPT-042", "FPT-049", "FPT-051"],
+    "other_33_proposal_objects_unchanged": true,
+    "prior_editor_review_records_preserved_byte_exact": 10,
+    "predecessor_input_hashes_crosschecked_against_prior_independent_review": true,
+    "full_successor_patch_equals_current_git_diff": true,
+    "focused_delta_equals_independently_regenerated_delta": true,
+    "nonblank_non_full_line_comment_lines_equal_to_base_all_213_paths": true,
+    "nonblank_non_full_line_comment_lines_equal_to_reviewed_four_texts": true,
+    "bom_and_final_newline_preserved": true,
+    "example_inventory_byte_exact": true,
+    "current_examples_exact_body_matches": 3,
+    "focused_original_citation_hashes_match": 4,
+    "listed_successor_record_hashes_match": 14,
+    "limitation": "Static text/hash/JSON/Git comparison; not coordinator token/API, compiler, example compilation, native or device validation."
+  },
+  "prior_independent_review_preserved": {
+    "review_md_sha256": "090e3f28b303b77839d08e852eced612bc4a785923f73d106f2cc6965bc19812",
+    "review_identities_json_sha256": "94b90c17733559a9a2b5cf77136085ac3844b7bad66091f86a223b32ec176e16"
+  },
+  "coordinator_validation": {
+    "combined_compilation": "PENDING-COORDINATOR",
+    "token_and_api_validation": "PENDING-COORDINATOR",
+    "examples": "VALID-NOT-CHECKED; NOT-EXECUTED"
+  },
+  "qualifications_carried_forward": [
+    "All prior physical, producer, deployment, historical and platform qualifications remain held.",
+    "NIST original-PDF gap remains distinct from separately retained PC/SC specification; requested UNPOWER is not observed power/PIN-state clearing.",
+    "Conditional Linux LP64 PCI route is not a Windows/macOS universal claim; published NativeShims source is not deployed producer/header proof.",
+    "IOReturn and CFNumberType discrepancies remain implementation findings, not corrected runtime values or intended guarantees.",
+    "Native-only versus physical evidence, historical macOS profiles and unresolved serial9681620 cause remain distinct.",
+    "Future Windows concurrency delta remains unready and unreviewed."
+  ],
+  "execution": "Static read-only source/citation/text/hash/JSON/Git checks only. No broad re-audit, new tooling, product/editor-record edits, SDK build/tests/formatter/native/device/SDK-crypto operation, Git mutation or subagents.",
+  "owned_writes": ["editing/transports/revision-2/review.md", "editing/transports/revision-2/review-identities.json"],
+  "remaining_mandatory_corrections": [],
+  "stopping_point": "Existing coordinator gates, publish Core Pass1, deferred finding handoff, then stop; no Pass2 implementation or additional campaign."
+}

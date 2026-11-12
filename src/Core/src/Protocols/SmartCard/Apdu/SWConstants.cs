@@ -195,6 +195,11 @@ public static class SWConstants
     /// </summary>
     /// <param name="sw">The status word to describe.</param>
     /// <returns>A descriptive message explaining the status word meaning.</returns>
+    /// <remarks>
+    ///     Descriptions are diagnostic text, not success classification. In particular, the signed-short
+    ///     fallback can label an unknown high-bit value as an unknown success code. Core IsOK checks exactly
+    ///     0x9000; preserve and inspect the raw status when interpreting an unmodeled value.
+    /// </remarks>
     public static string GetStatusMessage(short sw) => sw switch
     {
         Success => "Command completed successfully",

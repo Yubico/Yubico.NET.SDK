@@ -1,0 +1,385 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "primary_26_dispositions": {
+    "EDIT": 12,
+    "RETAIN": 13,
+    "HOLD": 1
+  },
+  "previous_37_dispositions": {
+    "RETAIN": 29,
+    "HOLD": 8
+  },
+  "revision_2_edits": [
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "verification/MacOSHidBoundaryComparison/Program.cs",
+    "verification/MacOSHidInputVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "verification/MacOSHidRouteVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "verification/NativeAotVerification/Program.cs",
+    "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+    "verification/NativeCompatibilityVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs"
+  ],
+  "full_successor_product_edits": [
+    "TOOLCHAIN.md",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "docs/migration/v1-to-v2.md",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+    "src/Cli.Shared/src/Output/PinPrompt.cs",
+    "src/Cli.Shared/src/Output/SecureCredential.cs",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    "src/Tests.Shared/CLAUDE.md",
+    "src/Tests.Shared/IYubiKeyFilter.cs",
+    "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    "src/Tests.Shared/Infrastructure/TestCategories.cs",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/README.md",
+    "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "src/Tests.Shared/YubiKeyTestState.cs",
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "verification/MacOSHidBoundaryComparison/Program.cs",
+    "verification/MacOSHidInputVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "verification/MacOSHidRouteVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "verification/NativeAotVerification/Program.cs",
+    "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+    "verification/NativeCompatibilityVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs"
+  ],
+  "full_successor_patch_sha256": "f4ed4fc218300b64b2adb8595230a035a8b785a9a036de53ea9310596429e4e3",
+  "checks": [
+    {
+      "path": ".github/workflows/build.yml",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": ".github/workflows/native-aot.yml",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "Directory.Build.props",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "Directory.Packages.props",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/BoundarySelfTest.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 1
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Yubico.YubiKit.PerformanceBenchmarks.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "docs/migration/.state.yml",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "global.json",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "nuget.config",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/architecture/architecture-images.env",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/architecture/build-architecture-context.sh",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/architecture/check-architecture-images.sh",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/architecture/check-architecture-map.sh",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/architecture/lib-architecture-blocks.sh",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/architecture/mermaid.config.json",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/architecture/render-architecture.sh",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/BenchmarkTargets.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/BuildTargets.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Context.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Conventions.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/CoverageTargets.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Discovery.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/DocsTargets.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Options.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Output.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/PackageTargets.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Process.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Results.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/RunLog.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/TargetRegistry.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "scripts/toolchain/Usage.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "src/Tests.Shared/appsettings.json",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/BlockingReportConnection.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/DescriptorReportApi.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/HardwareScenarios.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/NativeDescriptors.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/NativeScenarios.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/ObservedReadinessNative.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/Program.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/capture.py",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/evidence_gate.py",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/publish_contract.py",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/test_evidence_gates.py",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/CurrentProfile.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Directory.Build.props",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 1
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/RunnerSelfTest.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidInputVerification/MacOSHidInputVerification.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidInputVerification/Program.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/AcceptanceScenarios.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ExpertIoScenario.cs",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 1
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/Program.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "verification/NativeAotVerification/Program.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 4
+    },
+    {
+      "path": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "check": "exact text outside XML comments and parsed element/attribute/text structure equal"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/NativeCompatibilityVerification.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/Program.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/README.md",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+      "check": "exact non-full-line-comment lines including blanks equal",
+      "xml_blocks": 0
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/RuntimeConsumer.csproj",
+      "check": "base/current LF-normalized bytes equal; no revision-2 semantic change"
+    }
+  ],
+  "git_diff_check": "PASS",
+  "initial_history_and_product_preserved": true,
+  "limits": "Exact comment-only/normalized-text/XML structure checks; no SDK build/test/formatter/native/device/crypto/provider execution, Roslyn semantic binding, or independent review. Other worktrees never compared to raw product base."
+}

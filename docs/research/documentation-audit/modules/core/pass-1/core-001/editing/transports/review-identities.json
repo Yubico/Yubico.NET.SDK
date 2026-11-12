@@ -1,0 +1,112 @@
+{
+  "review_kind": "fresh-independent-content-and-citation-review",
+  "decision": "BOUNDED-MANDATORY-CORRECTIONS",
+  "mandatory_corrections": 3,
+  "base_and_observed_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "checkout": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports",
+  "accepted_identity_meaning": "Verified review inputs, not blanket content acceptance or compiler/runtime validation. A successor patch requires a focused successor review.",
+  "input_records_relative_to_run": {
+    "edit-transports.md": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3",
+    "editing/transports/source.patch": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+    "editing/transports/file-dispositions.json": "dcd67fdf4dda350456a2034220b7089dd80fabdd38c6e6155056eea813ece35f",
+    "editing/transports/proposal-dispositions.json": "c32b2c2b1063becaf4d567b616993aabb5329819755bc2ed9b3d63b97ccf2115",
+    "editing/transports/followups.json": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11",
+    "editing/transports/example-bodies.json": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1",
+    "editing/transports/source-citations.json": "596f27302575eb63b3eca6d7d7bab4658a48fd5ebfd5673fd86b6849c2b0fc09",
+    "editing/transports/static-preservation.json": "629eaf27ce006f955f0fe36f985524266f5f3b89912873d27a0d5505db9eafc4"
+  },
+  "independent_static_checks": {
+    "eligible_paths": 213,
+    "edited": 62,
+    "retained": 135,
+    "held": 16,
+    "candidate_associated_paths": 122,
+    "local_candidates": 37,
+    "proposals": 36,
+    "proposal_ids": "FPT-022 through FPT-057",
+    "current_raw_base_and_pin_hashes_match_record": true,
+    "nonblank_non_full_line_comment_lines_equal": true,
+    "bom_and_final_newline_preserved": true,
+    "all_eligible_paths_have_reasons": true,
+    "all_edits_have_candidate_and_proposal_mappings": true,
+    "followup_proposal_id_set_matches": true,
+    "current_xml_example_bodies": 3,
+    "current_xml_bodies_equal_recorded_bodies": true,
+    "citation_original_hashes_match_record": true,
+    "cached_diff_empty_when_observed": true,
+    "limitations": "Bounded text/hash/JSON/Git inspection, not a C# parser, coordinator bound-checker, compiler check, native proof or independent semantic review of every retained clean unit."
+  },
+  "corrections": [
+    {
+      "review_id": "M1",
+      "candidate": "CORE-B3-C003",
+      "proposal": "FPT-042",
+      "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "current_lines": [[29, 31], [59, 61]],
+      "original_unit_ids": ["core-001:unit:cef6b843926775c3", "core-001:unit:549db4976f21f028"],
+      "required_change": "Remove the already-open prerequisite from both device parameters; describe a valid caller-retained IOHIDDeviceRef during query.",
+      "decisive_current_source": ["src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs:65-85", "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs:72-105"],
+      "original_source_anchor": "investigation/B3/sources/IOHIDDevice.h:87-102; IOKitUser 323ead896d04424f87184d8f6ff0cce811aab106",
+      "runtime_change_requested": false
+    },
+    {
+      "review_id": "M2",
+      "candidate": "CORE-B4-C004",
+      "proposal": "FPT-051",
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "current_lines": [[86, 90]],
+      "original_unit_ids": ["core-001:unit:97f3c89d0819e76e", "core-001:unit:3ac34ce64d139f54"],
+      "required_change": "State zero-access metadata first attempt and read/write retry on UnauthorizedAccessException from open or capability retrieval; constructor success is not zero-access success proof. Retain no-feature-transfer qualification.",
+      "decisive_current_source": ["src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs:232-276"],
+      "original_source_anchor": "investigation/B4/sources/createfile.html desired access/share parameters; hidd-getfeature.html Parameters/Remarks; retained live Win32 reference, not deployed-driver evidence",
+      "runtime_change_requested": false
+    },
+    {
+      "review_id": "M3",
+      "candidate": "CORE-B4-C002",
+      "proposal": "FPT-049",
+      "supporting_candidate_and_proposal": ["CORE-B3-C005", "FPT-044"],
+      "locations": [
+        {"path": "src/Core/src/Transports/Hid/HidDeviceListener.cs", "current_lines": [[69, 71], [127, 129]]},
+        {"path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs", "current_lines": [[162, 164]]}
+      ],
+      "original_unit_ids": ["core-001:unit:6f60e2b189737226", "core-001:unit:c40476271e99068b", "core-001:unit:8aa16b126b5c3c3b"],
+      "required_change": "Qualify Stop/Dispose resource-release summaries and the remaining Windows finalizer-will-unregister sentence as requests/attempts, consistent with retained unresolved native ownership.",
+      "decisive_current_source": ["src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs:85-113", "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs:138-147", "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs:294-306"],
+      "original_source_anchor": "investigation/B4/sources/cm-unregister.html Return value/Remarks: CR_SUCCESS versus failure, pending-callback wait and callback-thread deadlock restriction",
+      "runtime_change_requested": false
+    }
+  ],
+  "example_qualification": {
+    "source_shape": "One complete top-level startup/discovery snippet and two composable methods with actual typed prerequisites, imports and session-before-connection disposal scopes; no missing fake helpers.",
+    "compiler_status": "VALID-NOT-CHECKED",
+    "runtime_status": "NOT-EXECUTED",
+    "body_identities": [
+      "93c6e18a42028e6ee02a1c19a426d916e02df9684bc1cade1d9a4790266d414e",
+      "36c0086b750a13aa9044d29ac0581e82a5d44fdec049817fa4adb9c1b367b9f9",
+      "5289baa08de2b885c902887c3e7c3f7e88fbf1fff7ba07efa2177760eb1074c5"
+    ]
+  },
+  "authority_qualifications": {
+    "nist": "Exa-attributed July 2024 final SP800-73-5 Part2 section2.4.2 text; direct PDF403; independent original-PDF review remains held.",
+    "pcsc": "Separately retained Part5 revision2.01.01 September2005 PDF SHA256 524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff; desired disposition and if-possible conditions are not physical power/PIN-state proof.",
+    "linux": "Kernel v6.12/glibc2.40/man-pages6.19/systemd v257 and Ubuntu noble amd64 original evidence retain revision and deployment limits; Linux close classification is not portable POSIX acceptance.",
+    "macos": "IOKitUser323ead896d04424f87184d8f6ff0cce811aab106, XNU xnu-12377.1.9 and CF-1153.18 support source/header facts. IOReturn and CFNumberType fixes remain implementation findings, not repaired contracts.",
+    "windows": "Retained Win32 reference and win32metadata15fc870a5e96df7c560877ff30136c0fb5a21e9b header contracts are not cross-architecture runtime evidence.",
+    "native_shims": "Published1.18.1 commitdedba95b94946907112a7953cd82df8a15c22655 source is not deployed producer/header proof. PCI discrepancy is conditional Linux LP64 pointer-forwarding route, not Windows/macOS universalization.",
+    "late_windows_delta": "Unready and unreviewed; no unfinished branch inspected.",
+    "physical_and_history": "Physical PIV deferral, native-only versus physical populations, macOS .8 historical profile and serial9681620 unresolved cause remain separate."
+  },
+  "coordinator_gates": {
+    "bound_checker": "PENDING-COORDINATOR",
+    "compilation": "PENDING-COORDINATOR",
+    "example_validation": "PENDING-COORDINATOR",
+    "stratified_clean_sampling": "NOT-CLAIMED-BY-IDENTITY-CHECK"
+  },
+  "execution": "Static reads, text extraction, JSON reconciliation and hashes only; no SDK build/test/formatter/native/device/SDK-crypto operation or subagents.",
+  "writes_owned": ["editing/transports/review.md", "editing/transports/review-identities.json"],
+  "product_editor_records_and_originals_modified": false,
+  "git_index_or_refs_modified": false,
+  "stopping_point": "Correct/review bounded documentation delta, complete existing coordinator gates, publish Core Pass1/deferred handoff, then stop; no Pass2 implementation or additional campaign."
+}

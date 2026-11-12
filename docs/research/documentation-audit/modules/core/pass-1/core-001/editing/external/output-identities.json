@@ -1,0 +1,77 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/allowlist.json",
+    "bytes": 17261,
+    "sha256": "6927882dcda84e26bc4b28bad74f89b2ad866ad55f64e970bcd3bec5bad5b9d0"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/boundary-referrals.json",
+    "bytes": 7182,
+    "sha256": "75cbb1ad8ac1221a38688412c058bf15f14c5d93e89b0c040f01b2a99dde2a63"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/candidate-decisions.json",
+    "bytes": 1277243,
+    "sha256": "54f0f93ee8b1165fc1870fa0d5b2777fa4933494234a99130da276ed9db5ab3f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/citations-and-handoff.md",
+    "bytes": 11996,
+    "sha256": "f5f9b8944410291205cffc135eed635e43adecee1a720ea13222808404e7bf9f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/example-bodies.json",
+    "bytes": 278628,
+    "sha256": "57a42ee778dff84c3d4314b52d522db48e64988f4fc963a35af2216c692b7641"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/final-checks.json",
+    "bytes": 3995,
+    "sha256": "0763f1ca4a85400adc7c8c0098393212e096a99082f4e4fc65a2f0b964515a0f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/input-identities.json",
+    "bytes": 9809,
+    "sha256": "8cc9faedf188fd9761f2625f8c89bc14fc0b86b9b97998b78fa1f6b4e6494250"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/outside-owner-followups.json",
+    "bytes": 2095401,
+    "sha256": "7bf6fb6f9a9dc85e1323cbc06af161a114e6bf71c8267d7c5d4080ac76c7ea5d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/path-decisions.json",
+    "bytes": 867716,
+    "sha256": "7845efecc5810fe71c0764068111d15401a142b16bb21edb20536496a338140c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/record.py",
+    "bytes": 23378,
+    "sha256": "6f8f671de831997c62a48402ab64b3b87f0ef35dbe35fe3a139566683fc589b8"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/source.patch",
+    "bytes": 63507,
+    "sha256": "ec6997bd2b14af3f2ad82988d60487fe4e542dbaccf38e1e96e026892ac03727"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-attempts.md",
+    "bytes": 1201,
+    "sha256": "08b5a9ff47f70162c228ba56fff95c101d6dfa6c86c2c161d15ea36d742ee925"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-preservation.json",
+    "bytes": 5737,
+    "sha256": "a8bb41c818554e68087dff50a5edbfb6155a56d62e925a8bbd02e75b1b08985e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/supplemental-dependencies.json",
+    "bytes": 110587,
+    "sha256": "97fb0499d3df941a0554ccdfec51ea87396d0bdb38ed8eb033147efc953edf83"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-external.md",
+    "bytes": 10713,
+    "sha256": "599805116675b83a08c9a43e1f5dcb33ba9fb176dfe6c19a90795af58daf92b4"
+  }
+]

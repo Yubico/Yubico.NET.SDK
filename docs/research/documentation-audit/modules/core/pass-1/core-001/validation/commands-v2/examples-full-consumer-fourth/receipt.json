@@ -1,0 +1,393 @@
+{
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "--project",
+    "Yubico.YubiKit.Audit20261111.DocExamples.Full",
+    "--clean"
+  ],
+  "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "logger": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+    "bytes": 1670,
+    "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+  },
+  "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+  "started": "2026-11-12T04:10:36.605102+00:00",
+  "environment": {
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "expected_targets": [
+    "build"
+  ],
+  "expected_projects": [],
+  "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth",
+  "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/examples-full-consumer-fourth",
+  "qualification_faults": [],
+  "exit_code": 0,
+  "status": "passed",
+  "errors": [],
+  "quiescent": true,
+  "ownership": {
+    "pgid": 3716780,
+    "sid": 3716780,
+    "leader_start_ticks": 83442644,
+    "before": {
+      "members": [
+        {
+          "pid": 3716869,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716870,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716871,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716872,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716873,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716874,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716905,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716906,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716910,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442723
+        },
+        {
+          "pid": 3716914,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442724
+        },
+        {
+          "pid": 3716915,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442724
+        },
+        {
+          "pid": 3716917,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442724
+        },
+        {
+          "pid": 3716919,
+          "state": "S",
+          "ppid": 3716729,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442724
+        },
+        {
+          "pid": 3717313,
+          "state": "S",
+          "ppid": 3716870,
+          "pgid": 3716780,
+          "sid": 3716780,
+          "start_ticks": 83442929
+        }
+      ],
+      "escaped": []
+    },
+    "signals": [
+      {
+        "signal": "SIGTERM",
+        "proven_members": [
+          {
+            "pid": 3716869,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716870,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716871,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716872,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716873,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716874,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716905,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716906,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716910,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442723
+          },
+          {
+            "pid": 3716914,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442724
+          },
+          {
+            "pid": 3716915,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442724
+          },
+          {
+            "pid": 3716917,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442724
+          },
+          {
+            "pid": 3716919,
+            "state": "S",
+            "ppid": 3716729,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442724
+          },
+          {
+            "pid": 3717313,
+            "state": "S",
+            "ppid": 3716870,
+            "pgid": 3716780,
+            "sid": 3716780,
+            "start_ticks": 83442929
+          }
+        ]
+      }
+    ],
+    "after": {
+      "members": [],
+      "escaped": []
+    },
+    "quiescent": true
+  },
+  "stream_complete": true,
+  "retention_complete": true,
+  "result_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build"
+    ],
+    "projects": 0,
+    "executed": 0,
+    "skipped": 0,
+    "failed": 0,
+    "warnings": 0
+  },
+  "retained": [
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-051036-933-build/01-clean-Audit20261111.DocExamples.Full.log",
+        "bytes": 70473,
+        "sha256": "cebc6dd2507f8c32b1c95a09876b297b078da5786cbb3c47c8cc36bdddf6a279"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth/toolchain/20261112-051036-933-build/01-clean-Audit20261111.DocExamples.Full.log",
+        "bytes": 70473,
+        "sha256": "cebc6dd2507f8c32b1c95a09876b297b078da5786cbb3c47c8cc36bdddf6a279"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-051036-933-build/02-build-Audit20261111.DocExamples.Full.log",
+        "bytes": 2432,
+        "sha256": "fa66faa944420bc91988fa5f3d08f72b1731bff7144747dee12db1544719914c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth/toolchain/20261112-051036-933-build/02-build-Audit20261111.DocExamples.Full.log",
+        "bytes": 2432,
+        "sha256": "fa66faa944420bc91988fa5f3d08f72b1731bff7144747dee12db1544719914c"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-051036-933-build/result.json",
+        "bytes": 739,
+        "sha256": "58ee02ed981aec53a5cbe6a454935fffa2a88fd14b66acef0a9f57a2034cd8fd"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth/toolchain/20261112-051036-933-build/result.json",
+        "bytes": 739,
+        "sha256": "58ee02ed981aec53a5cbe6a454935fffa2a88fd14b66acef0a9f57a2034cd8fd"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-051036-933-build/result.txt",
+        "bytes": 462,
+        "sha256": "6d8197b32b5066f201282b19442b9b803a8bc6b8bf3e254bc168152e67c6f94a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth/toolchain/20261112-051036-933-build/result.txt",
+        "bytes": 462,
+        "sha256": "6d8197b32b5066f201282b19442b9b803a8bc6b8bf3e254bc168152e67c6f94a"
+      }
+    },
+    {
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-051036-933-build/run.log",
+        "bytes": 2219,
+        "sha256": "b26379ea2471e2f57760fd8200069475b7d1ca93fd26e9a0ed6a0be50bf1818b"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth/toolchain/20261112-051036-933-build/run.log",
+        "bytes": 2219,
+        "sha256": "b26379ea2471e2f57760fd8200069475b7d1ca93fd26e9a0ed6a0be50bf1818b"
+      }
+    }
+  ],
+  "streams": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth/stdout.log",
+      "bytes": 1873,
+      "sha256": "a30c5b0b711e8263489027d351826509a810e9b5f96c69acb1d99f88f2cc8755"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-fourth/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished": "2026-11-12T04:10:49.083394+00:00",
+  "reuse": {
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+    "files": [
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+        "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+        "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+        "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+        "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+      }
+    ]
+  }
+}

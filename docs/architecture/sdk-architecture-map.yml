@@ -107,6 +107,9 @@ diagrams:
       IOtpHidConnection: src/Core/src/Transports/Hid/IOtpHidConnection.cs
       CtapRequestBuilder: src/Ctap2/src/Cbor/CtapRequestBuilder.cs
       CtapResponseParser: src/Ctap2/src/Cbor/CtapResponseParser.cs
+      Ctap2SessionRequestEncoding: src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs
+      MakeCredentialResponse: src/Ctap2/src/Credentials/MakeCredentialResponse.cs
+      GetAssertionResponse: src/Ctap2/src/Credentials/GetAssertionResponse.cs
       ICtap2Backend: src/Ctap2/src/Backend/ICtap2Backend.cs
       HidBackend: src/Ctap2/src/Backend/HidBackend.cs
       SmartCardBackend: src/Ctap2/src/Backend/SmartCardBackend.cs
@@ -141,6 +144,8 @@ diagrams:
       Ctap2Session: src/Ctap2/src/Ctap2Session.cs
       CtapRequestBuilder: src/Ctap2/src/Cbor/CtapRequestBuilder.cs
       CtapResponseParser: src/Ctap2/src/Cbor/CtapResponseParser.cs
+      Ctap2SessionRequestEncoding: src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs
+      MakeCredentialResponse: src/Ctap2/src/Credentials/MakeCredentialResponse.cs
       ICtap2Backend: src/Ctap2/src/Backend/ICtap2Backend.cs
       HidBackend: src/Ctap2/src/Backend/HidBackend.cs
       SmartCardBackend: src/Ctap2/src/Backend/SmartCardBackend.cs

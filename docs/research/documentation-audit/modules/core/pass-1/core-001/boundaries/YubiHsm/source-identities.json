@@ -1,0 +1,114 @@
+[
+  {
+    "path": "docs/research/documentation-audit/yubihsm.md",
+    "sha256": "327bd9b7c790bf623796216dd8ea16929bcc9663a965aca67a3105da302cfa7f",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+    "sha256": "634cec0e60644d5d287da17a31a6298000fdfdd5ebf99a50888801b3e3e758fc",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/cryptogram-investigation.md",
+    "sha256": "b592493e2bfc2613093b394ea691ede532601fde65ab022eec389b93635b5adb",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/sources.md",
+    "sha256": "85622737a1d1491ec2be6ec4af59de3533847e96a06f188698c3beebd5e1cf24",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/evidence/cryptogram-sources.md",
+    "sha256": "711ac53f3f5c88a0126af5a0547621ca91d589c6380ee0fc10c78eb76d5a1beb",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/hardware/results.md",
+    "sha256": "8331a7ef2e1a89e079667669a400880dad70615c8bb6c006f7ae912ba88b32d1",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+    "sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/context.md",
+    "sha256": "68694ce44329e1d16d56f048cfe4f1c1ad6c7d12152f92f703e1c8b3671d9ba7",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf",
+    "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+    "sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-source-register.md",
+    "sha256": "6f3edcfba098920dd43e3e2a6db59c03108e39bfbb4ab81373e87d2c74731727",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/ownership-and-handoffs.md",
+    "sha256": "a73c1b3bc43b98b50494f04807964fe9af1a71a1cd1e22d9dd13ff6be8c9d3c7",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+    "sha256": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+    "sha256": "2dcfa9c987390940ad44e90298d91ebcccd4ad009ccea473a2995c9f67e8bc4d",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+    "sha256": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+    "sha256": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B4.md",
+    "sha256": "a6743e926ffdedd3157c80097736048f7ab287b7f5c60a904b804d4f23bf098b",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+    "sha256": "5c9b80dcf2351d22bf179584c9fd8a105f897a33efeebfff34e1cfd72e7ab186",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B6.md",
+    "sha256": "146bd5a53f6f1ca3971c8ea8151b6aaee980295e730f5ebfb5c723e55817fdc9",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+    "sha256": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "role": "REUSED-READ-ONLY-EVIDENCE-NOT-NEW-EXECUTION"
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikey-manager/yubikit/hsmauth.py",
+    "sha256": "e3573d5580928b84818939b6eb1ae0083c7d01793589746eace80db32fe2cab3",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "role": "COMPLETE-SOURCE-AND-ASSERTIONS-READ-COMPARATOR-NOT-EXECUTED"
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikey-manager/tests/test_hsmauth.py",
+    "sha256": "22b23cfef3c6130d2434d87d2e1396c3df0949aa8f1b32c26f3dc77751167d9d",
+    "revision": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "role": "COMPLETE-SOURCE-AND-ASSERTIONS-READ-COMPARATOR-NOT-EXECUTED"
+  }
+]

@@ -1,0 +1,82 @@
+{
+  "review_outcome": "mandatory-corrections",
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries",
+  "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "run": "docs/research/documentation-audit/modules/core/pass-1/core-001",
+  "meaning": "Exact reviewed input identities. content-reviewed is bounded documentation acceptance only, not compilation, runtime, engineering or whole-campaign acceptance. R1/R2 paths require correction and fresh hashes.",
+  "product_files": [
+    {"path":"src/Ctap2/CLAUDE.md","sha256":"00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17","status":"content-reviewed"},
+    {"path":"src/Ctap2/README.md","sha256":"24db84d846cc06b4c4a1b18694c210d368d169e37bb6b8c1afb4a9f316bd433e","status":"R1-required"},
+    {"path":"src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs","sha256":"6e59a89acffe19912d0a8432fd313deba0ac0fcb18f43eb3189f767c07f8f29b","status":"content-reviewed"},
+    {"path":"src/Ctap2/src/Backend/HidBackend.cs","sha256":"149367792f1fe0fb5b9c1389cd77dcc5dfc709daeee14e9c581df0bee7444f50","status":"content-reviewed"},
+    {"path":"src/Ctap2/src/Backend/SmartCardBackend.cs","sha256":"447797997e8f407d97bc30bec29c428d80c4c5f20370c23bcdc53a02b622a7df","status":"content-reviewed"},
+    {"path":"src/Ctap2/src/Ctap2Session.cs","sha256":"d2bf4fe2344bb17b49892fc97dbd824c1381f570ec882ba6a4f1ef16e4f14ff9","status":"content-reviewed"},
+    {"path":"src/Ctap2/src/ICtap2Session.cs","sha256":"30640a8723290b03020cf3448fe3e54d331510975854b79258974282d0c99dc3","status":"content-reviewed"},
+    {"path":"src/Ctap2/tests/CLAUDE.md","sha256":"2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8","status":"content-reviewed"},
+    {"path":"src/WebAuthn/CLAUDE.md","sha256":"8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a","status":"content-reviewed"},
+    {"path":"src/WebAuthn/README.md","sha256":"fbfe9912165f654cedc40e72ab5a868d7b5c6b171de63d5a7fb9bb29e4dc7a5a","status":"content-reviewed"},
+    {"path":"src/WebAuthn/src/Client/WebAuthnClient.cs","sha256":"50e087309ced66d0fba57b6e9fb924e5995d0155c2f71082104672c45f4750ca","status":"content-reviewed"},
+    {"path":"src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs","sha256":"6e7831adf4b8e067d1f08687f0d0ca00ba848d05bbd11232935a710bca822e3f","status":"content-reviewed"},
+    {"path":"src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs","sha256":"7d866ccce2cd3db28dd022cf132f7eb53b9e378167b6909f734c3ade9c5c2c8b","status":"R2-required"},
+    {"path":"src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs","sha256":"11d3038d26597aac1a85b5ee9bec85cd8d34b1f7d64e9131626e92a24441c187","status":"content-reviewed"}
+  ],
+  "critical_retained_inputs": [
+    {"path":"src/Ctap2/src/Pin/PinUvAuthHelpers.cs","sha256":"47d199377344b2505fa593fbe3ad4f31fb0eeb937b5f63d572ae5f702a617643","role":"R1 implementation anchor, no repair authorized"},
+    {"path":"src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs","sha256":"c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc","role":"R2 retained documentation correction required"}
+  ],
+  "editor_records": {
+    "product.patch":"904ab905bc35609168302a65edd118cc1395bafe016b5d1bca15a3d191e3e78f",
+    "path-decisions.json":"132f77440148d27dde89cc515ed4f6befad5697583d1ed7bbe5e5f84c323772e",
+    "candidate-decisions.json":"acd089d5a5306892bc00414cb82495905b03564d5a9b3d7ed14e54f3ab4e3a84",
+    "examples.json":"f45ec00c6bb423644b75ea5dffb2a13ab0941f4fff9c5675b43b84cd2373d5ab",
+    "citations-and-handoff.md":"eb262fac144ab0408d29e355561f26515e23b364c343b342a5d440e0ac1267c6",
+    "verification.json":"78ad734be0aaccb93332acd3e327e1c05e3b5c639b4383c11642d228d44802e8",
+    "input-identities.json":"ddf335d17068299b9c9cede01645d0129dfc3595f0e0ea8dd7a43b6096f2ab32",
+    "link-check.json":"0d2535711051bfd68fcba48ff747a8caba842aff1cf19c9cbd646251da30f8cf",
+    "record.py":"a4b457c5b421d57c1e1a82e9ad2f6bb99cec12e31b5f8b13aa7e59817295b993"
+  },
+  "primary_run_inputs": {
+    "triage/editing-release.md":"6ea0a2f4eeff0fa9dae1cf9d67e77ca22f0b27bef3bccd649c7f2dd970ae009e",
+    "boundaries/Ctap2/candidates.md":"d719f307b97710eef252790cc4efe289a2935b670188903a05609b5766f4f759",
+    "boundaries/WebAuthn/candidates.md":"e85cda5f0224c7a693c93ab0e1c7aaa8b072008bff68b08fe58bd3665881369f",
+    "boundaries/Ctap2/followup-B4-B6.md":"5bb19dd111642976aae6f446ccd0625bf01720fe7bc45169ad3b8deae9e8c4fd",
+    "boundaries/Ctap2/followup-WebAuthn.md":"4b7d307457db6337307cce193303b4af2a0735c72b096be68823e44c55921a47",
+    "boundaries/Ctap2/boundary-completion.md":"96558caf0958eb2034cf5be17540a1b09ce687f663af26cd8dae1a45bf2fd777",
+    "boundaries/WebAuthn/ctap2-handoff.md":"8f825e47f6436796a27d74840a8ae5c739b9ccbd23b49a0b1f15db8073a437c4",
+    "boundaries/Ctap2/sources.md":"305da241be6897c52720778529a7e83b37023c5197473e4203fa95d51be6d216",
+    "boundaries/WebAuthn/sources.md":"a5ecfaf16fab13a2127793e545680700dbafe3ba9288293c2665c5098e485ea7",
+    "investigation/B5/sources/ctap20.txt":"92a9b6c676ac7b563f69048dbc65eb2bde354286b341cd0f58680d739d1351ff",
+    "investigation/B5/sources/ctap21.txt":"97960d3aff3b1d266cdcb6e8e1ee2802df5629b0c420bc6e0192d6b1841ed71f",
+    "investigation/B5/sources/ctap23.txt":"e36c7e9111613ed7d821e47ddfcf86ec1d782c4f5666e00549a2724087799faf",
+    "investigation/B6/sources/scp03-1.1.2.txt":"921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.txt":"59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543",
+    "boundaries/WebAuthn/sources/webauthn3.html":"157030c980d44a3ce4b1ec5bcfaa16790c7dfefac20709af6ed2b11c7120970b"
+  },
+  "independent_static_checks": {
+    "path_identities_checked":310,
+    "path_identity_mismatches":0,
+    "candidate_groups":35,
+    "candidate_associated_paths":183,
+    "candidate_associated_retained_paths":169,
+    "actual_product_patch_equals_receipt":true,
+    "changed_csharp_files":9,
+    "manual_diff_and_comment_erasure_preservation":true,
+    "fence_bodies_byte_identical_to_base":47,
+    "changed_csharp_xml_fragment_syntax_errors":0,
+    "primary_editor_input_hash_matches":26,
+    "primary_editor_input_hash_drifts":1,
+    "drift":"Live editing-release.md; current hash bound above, historical receipt preserved. No assertion of comparison to unavailable historical bytes."
+  },
+  "context7": {
+    "library_id":"/dotnet/docs",
+    "topic":"C# string.Length and char count UTF-16 code units, not Unicode scalar values or UTF-8 bytes",
+    "returned_sources":["docs/csharp/fundamentals/strings/index.md","docs/standard/base-types/character-encoding-introduction.md"],
+    "scope":"Current terminology orientation only; not an SDK policy or execution oracle"
+  },
+  "unrun_gates":["compiler/analyzers","XML cref/paramref binding","consumer and example compilation","SDK tests","formatter","crypto experiments","native/device execution","Windows qualification","physical/profile/SCP interoperability","coordinator validation and publication"],
+  "preserved_decisions":{"WA-XREF-001":"documentation-resolved","CTAP-XREF-001":"documentation-resolved","WA-IMP-010":"source-confirmed implementation gap","CTAP-DEC-002":"maintainer/coordinator native-output actor and serializer decision; no stripping authorized","future_windows_concurrency":"UNREADY / UNREVIEWED","piv_physical":"deferred"},
+  "writes_owned":["editing/FIDO-boundaries/review.md","editing/FIDO-boundaries/review-identities.json"],
+  "stop":"After narrow corrections and existing gates, coordinator finishes/publishes Core Pass 1, delivers deferred handoff, then stops; no new Pass-2/framework work."
+}

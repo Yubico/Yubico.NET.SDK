@@ -1,0 +1,1831 @@
+[
+  {
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "eligible": 185,
+    "minimum_10_percent": 19,
+    "proposed_selected": 19,
+    "selected_ids": [
+      "core-001:unit:019eae4efe42d6e5",
+      "core-001:unit:2671911eb64af1aa",
+      "core-001:unit:076b4d4328825902",
+      "core-001:unit:3f972c5207254bdd",
+      "core-001:unit:711e47d18bab0742",
+      "core-001:unit:2d7384815a34e691",
+      "core-001:unit:36956745104ff731",
+      "core-001:unit:3d71e6d3bd862995",
+      "core-001:unit:1fc213103a564722",
+      "core-001:unit:c20e4d6e55c8a0bb",
+      "core-001:unit:6e353becfd918253",
+      "core-001:unit:20c9c91498bfd689",
+      "core-001:unit:35700b4303b7b14b",
+      "core-001:unit:816c2fdd798610af",
+      "core-001:unit:4a3cd5465f24843d",
+      "core-001:unit:fde9854638dd24be",
+      "core-001:unit:d75a3dbb4ec57c42",
+      "core-001:unit:d231181d1329769b",
+      "core-001:unit:0f2b4a412a201ec2"
+    ]
+  },
+  {
+    "owner": "A",
+    "stratum": "enum-values",
+    "eligible": 32,
+    "minimum_10_percent": 4,
+    "proposed_selected": 4,
+    "selected_ids": [
+      "core-001:unit:749973e915170867",
+      "core-001:unit:c085f1cd3632e7c2",
+      "core-001:unit:468e384d30b9c33b",
+      "core-001:unit:a124a683e6029d5b"
+    ]
+  },
+  {
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 106,
+    "minimum_10_percent": 11,
+    "proposed_selected": 11,
+    "selected_ids": [
+      "core-001:unit:05c27da3274a61c3",
+      "core-001:unit:34cf0693a537f0df",
+      "core-001:unit:2d775717e74d6f32",
+      "core-001:unit:d73e12e719d3fff0",
+      "core-001:unit:3fb51ea489737870",
+      "core-001:unit:10653b759a2209f8",
+      "core-001:unit:1780289b48616248",
+      "core-001:unit:010596d531cf6d98",
+      "core-001:unit:d46b1ef7a44e6284",
+      "core-001:unit:7573e895ff24c450",
+      "core-001:unit:2b3cc1caf0dfec3f"
+    ]
+  },
+  {
+    "owner": "A",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "eligible": 294,
+    "minimum_10_percent": 30,
+    "proposed_selected": 30,
+    "selected_ids": [
+      "core-001:unit:25aa4af785e881de",
+      "core-001:unit:353f089f75aa1ae7",
+      "core-001:unit:ce4ac427cb0cef28",
+      "core-001:unit:01a6cfa0b7c38940",
+      "core-001:unit:60dd6f6febeebdd8",
+      "core-001:unit:1aa9379b97a656a3",
+      "core-001:unit:a8576919fc5ca1ac",
+      "core-001:unit:8347f3486ba80697",
+      "core-001:unit:e6ca5d7aa8b2f21d",
+      "core-001:unit:942a063a6ba4b64c",
+      "core-001:unit:a6706ccc51c5b8b2",
+      "core-001:unit:af296d4153432a33",
+      "core-001:unit:3582bbf6b676e34c",
+      "core-001:unit:9c98c412616de662",
+      "core-001:unit:55cd5be1cd4ebf76",
+      "core-001:unit:0345a4013ca4230b",
+      "core-001:unit:fffbb1e91e795937",
+      "core-001:unit:896dd543e29befc7",
+      "core-001:unit:06b9b030214228fd",
+      "core-001:unit:704bec4f7f9cbcc7",
+      "core-001:unit:461949ca0e95ac25",
+      "core-001:unit:52bcea037a7afb20",
+      "core-001:unit:bf32732f3b6ebcda",
+      "core-001:unit:e321afb584ee7490",
+      "core-001:unit:441ecd53f2034d3a",
+      "core-001:unit:c1935efa8b55d4fd",
+      "core-001:unit:dc379bca80113a80",
+      "core-001:unit:3fed58fa1f83f08d",
+      "core-001:unit:1577e5d955f076e7",
+      "core-001:unit:bc1ab2f42466f2f4"
+    ]
+  },
+  {
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 79,
+    "minimum_10_percent": 8,
+    "proposed_selected": 8,
+    "selected_ids": [
+      "core-001:unit:689d848fe4e3b5fb",
+      "core-001:unit:c7ac3ec8651f40bf",
+      "core-001:unit:22ce88df9daddd31",
+      "core-001:unit:cf1e2081af8b8ac4",
+      "core-001:unit:b97af2e9d8692339",
+      "core-001:unit:b77ef6f0677fffbf",
+      "core-001:unit:a84e2cc173ca0753",
+      "core-001:unit:cb2232cff0d50f0d"
+    ]
+  },
+  {
+    "owner": "A",
+    "stratum": "tests-and-helpers",
+    "eligible": 1012,
+    "minimum_10_percent": 102,
+    "proposed_selected": 102,
+    "selected_ids": [
+      "core-001:unit:1c7b9d760a3c992a",
+      "core-001:unit:c6bd7a57ecbcdb99",
+      "core-001:unit:c7318fc32f6e0ab7",
+      "core-001:unit:b64161990dfd9695",
+      "core-001:unit:83af4510d6870b80",
+      "core-001:unit:d2b1387699593935",
+      "core-001:unit:7a65a03366eb682e",
+      "core-001:unit:4c687969a62af799",
+      "core-001:unit:ccd03d010c5e42ee",
+      "core-001:unit:6f9b6d5f4aa9c49c",
+      "core-001:unit:6f4d2bce814292ac",
+      "core-001:unit:ee61d4edd0255704",
+      "core-001:unit:5fd5a4456bc2f98a",
+      "core-001:unit:7ea29e97c9a024e8",
+      "core-001:unit:129c402fc85f1cea",
+      "core-001:unit:1d6488ddfeddc05b",
+      "core-001:unit:5248e323347ed4ed",
+      "core-001:unit:7272d5c9e7cc2028",
+      "core-001:unit:84f185f37bd981c0",
+      "core-001:unit:21e721dfeef0acc0",
+      "core-001:unit:4aa7e90a418de9a1",
+      "core-001:unit:c84fdf084fc2b106",
+      "core-001:unit:3f42a5d73901f082",
+      "core-001:unit:42d5bf06a4834d36",
+      "core-001:unit:67e1a8bec12453ab",
+      "core-001:unit:2a9641be276feaca",
+      "core-001:unit:bcdef9ae7ec43a7f",
+      "core-001:unit:75bc794c75bd22a2",
+      "core-001:unit:51c280523f6234e6",
+      "core-001:unit:713cc9ce2a5207bd",
+      "core-001:unit:9146747552870875",
+      "core-001:unit:df7b185fc050c276",
+      "core-001:unit:6cae9db755d5bd3e",
+      "core-001:unit:a9ee526a01572633",
+      "core-001:unit:1d6c3d9681522a9b",
+      "core-001:unit:8ad47adcb57fb1ec",
+      "core-001:unit:42db4fde4cc406d0",
+      "core-001:unit:4b3bc2890cc78b9d",
+      "core-001:unit:bf27ed1d1811391d",
+      "core-001:unit:3fa9b3935e42253a",
+      "core-001:unit:e1750f48a7e48d56",
+      "core-001:unit:f765dbcbbf891d58",
+      "core-001:unit:c5f1b3b40ff4c027",
+      "core-001:unit:5b10960d28bc25d8",
+      "core-001:unit:e8433d7f15d34b70",
+      "core-001:unit:f125825211ee249e",
+      "core-001:unit:163cb964de48b8aa",
+      "core-001:unit:b870979a9f4e3530",
+      "core-001:unit:2a405e0a6f71ced1",
+      "core-001:unit:5c75f53b740f7a56",
+      "core-001:unit:3a2582bf8fc7edd1",
+      "core-001:unit:ad828279bcc1a175",
+      "core-001:unit:e59a7fc4150cd7c1",
+      "core-001:unit:fc02fc15609161b7",
+      "core-001:unit:b8b678a2e86cffac",
+      "core-001:unit:ae6fac7719619268",
+      "core-001:unit:d371f276b0b17d55",
+      "core-001:unit:5579c68c6c6763a3",
+      "core-001:unit:1b00e9525e807878",
+      "core-001:unit:6d9764a032730fca",
+      "core-001:unit:c0b686c061e5e6d6",
+      "core-001:unit:9d433e7baf55acb8",
+      "core-001:unit:36bcfc8b36e95ae8",
+      "core-001:unit:48b6250a4ff72a5f",
+      "core-001:unit:01a4b75c868acca2",
+      "core-001:unit:2708dc6180c9ad82",
+      "core-001:unit:457eb72bbf026185",
+      "core-001:unit:4417d95fc05659c6",
+      "core-001:unit:30569540689bd08c",
+      "core-001:unit:ee0a17e4473a845f",
+      "core-001:unit:9cab1848ff8ab7d2",
+      "core-001:unit:0815dd8ff2a94421",
+      "core-001:unit:88137649bb50251c",
+      "core-001:unit:ffe76af0995b6cc7",
+      "core-001:unit:4703c2c99161ed3a",
+      "core-001:unit:0b530ce89cb7095a",
+      "core-001:unit:89f76aaff9cdd2e9",
+      "core-001:unit:0f08c4ac8fa60582",
+      "core-001:unit:264b9a61da0148c8",
+      "core-001:unit:241694d8cc9f58ee",
+      "core-001:unit:d703dbd287854fe6",
+      "core-001:unit:8bad4a42b615d77e",
+      "core-001:unit:e99851af4e5d53d8",
+      "core-001:unit:ada359febf4d2cad",
+      "core-001:unit:680d48b9974bd459",
+      "core-001:unit:f799935177b672e5",
+      "core-001:unit:06d91e3f9f9dbfde",
+      "core-001:unit:fd5536c255cb40d9",
+      "core-001:unit:a44c5039d794914f",
+      "core-001:unit:0985fedf9fa9be5c",
+      "core-001:unit:61fde3f07bcf9769",
+      "core-001:unit:178443944681bf16",
+      "core-001:unit:a04e1e78211fc8ee",
+      "core-001:unit:7e041972161b3438",
+      "core-001:unit:86dd7e0403e14eec",
+      "core-001:unit:11f57474a407f72d",
+      "core-001:unit:6d7b5fd78fd2e972",
+      "core-001:unit:5819f85c176432a0",
+      "core-001:unit:ee2c12cc9ea7f04e",
+      "core-001:unit:450d843b33a6a063",
+      "core-001:unit:70a48e4813608786",
+      "core-001:unit:d8900ebff4499887"
+    ]
+  },
+  {
+    "owner": "A",
+    "stratum": "type-declarations",
+    "eligible": 14,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:58782f112f94c8a1",
+      "core-001:unit:a60076fefa595227"
+    ]
+  },
+  {
+    "owner": "B1",
+    "stratum": "XML-contracts",
+    "eligible": 56,
+    "minimum_10_percent": 6,
+    "proposed_selected": 6,
+    "selected_ids": [
+      "core-001:unit:63aa8710ae155517",
+      "core-001:unit:a7c4a6b478cc9c7a",
+      "core-001:unit:1f43bb31b9a99e4c",
+      "core-001:unit:5f8bc8be883eb29d",
+      "core-001:unit:a7472e3bb01063ea",
+      "core-001:unit:6fafc3d16be878bf"
+    ]
+  },
+  {
+    "owner": "B1",
+    "stratum": "enum-values",
+    "eligible": 12,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:73f56f81969d98ff",
+      "core-001:unit:23c94a53a4cf4727"
+    ]
+  },
+  {
+    "owner": "B1",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 71,
+    "minimum_10_percent": 8,
+    "proposed_selected": 8,
+    "selected_ids": [
+      "core-001:unit:329317501a183f73",
+      "core-001:unit:7c7ab9076a83cc1e",
+      "core-001:unit:33ef7a843647f935",
+      "core-001:unit:b894464f9dd75094",
+      "core-001:unit:b7cd32c941a627dc",
+      "core-001:unit:25c478c7304f56dc",
+      "core-001:unit:4b49917685ba7b55",
+      "core-001:unit:914c925013cf6445"
+    ]
+  },
+  {
+    "owner": "B1",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "eligible": 238,
+    "minimum_10_percent": 24,
+    "proposed_selected": 24,
+    "selected_ids": [
+      "core-001:unit:2426f3a0239dcbe2",
+      "core-001:unit:6f9709c1f760afd3",
+      "core-001:unit:6c7f0156ee70e8b9",
+      "core-001:unit:a1e401ec2b99f21c",
+      "core-001:unit:9715fd23161cbcd7",
+      "core-001:unit:41b892356800d072",
+      "core-001:unit:d261ddd7d88711cf",
+      "core-001:unit:5e7f801af3e0b797",
+      "core-001:unit:0ffbd3041f68ccc4",
+      "core-001:unit:fd20a8a6daf993ee",
+      "core-001:unit:751938c8fd251302",
+      "core-001:unit:b1a1e66c96c6de98",
+      "core-001:unit:b0da9a6ee7f248bd",
+      "core-001:unit:e7b21994e1483471",
+      "core-001:unit:1cbc332bcc33a27a",
+      "core-001:unit:7391db03d44cc0a6",
+      "core-001:unit:9ea9c554224581f3",
+      "core-001:unit:806535e6212119aa",
+      "core-001:unit:49276f849fb765c9",
+      "core-001:unit:e537dcedcf111d4c",
+      "core-001:unit:134f7ca39a4d364a",
+      "core-001:unit:5cc1208a32fa99dc",
+      "core-001:unit:a2543b389fd3b603",
+      "core-001:unit:3f826327a54d8ea5"
+    ]
+  },
+  {
+    "owner": "B1",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 9,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:f1d4372202bdaa9b"
+    ]
+  },
+  {
+    "owner": "B1",
+    "stratum": "tests-and-helpers",
+    "eligible": 688,
+    "minimum_10_percent": 69,
+    "proposed_selected": 69,
+    "selected_ids": [
+      "core-001:unit:92b0180ca2af1ca2",
+      "core-001:unit:42875de817e3bdfe",
+      "core-001:unit:4a349d2a9cab87d4",
+      "core-001:unit:b564a05176790f32",
+      "core-001:unit:ef3112014b3d86ba",
+      "core-001:unit:204fc3ecd9a8035a",
+      "core-001:unit:d6201231a3c57f13",
+      "core-001:unit:0b910444e6b2dc1e",
+      "core-001:unit:71132d68612d1386",
+      "core-001:unit:1244570db6d5abc2",
+      "core-001:unit:4452d5e281d19d93",
+      "core-001:unit:dba344cadebd82b6",
+      "core-001:unit:5c944f58856816a1",
+      "core-001:unit:57c9e23533f4dbbb",
+      "core-001:unit:4429ee9c5a22cc88",
+      "core-001:unit:d1c8c7f987c29804",
+      "core-001:unit:f0d6a034c70c13ef",
+      "core-001:unit:1db77308e3dc0e0d",
+      "core-001:unit:5ecd56767b03d939",
+      "core-001:unit:ef4f5814f550c0a6",
+      "core-001:unit:089e31d2fb088253",
+      "core-001:unit:04e891ab6ca26522",
+      "core-001:unit:22c1af2afd58644c",
+      "core-001:unit:78cd1ec16aa90462",
+      "core-001:unit:35eed0b90edf0eaa",
+      "core-001:unit:5ee9c6e686ace85f",
+      "core-001:unit:5e913abec1e8ec34",
+      "core-001:unit:00195f036e18e87c",
+      "core-001:unit:d736f3451d2568f0",
+      "core-001:unit:09ba4c6c878a24ab",
+      "core-001:unit:792520a43ae7f3ca",
+      "core-001:unit:23d950d8aed651a1",
+      "core-001:unit:e8b5cb0b222fb273",
+      "core-001:unit:76de1c869bb5ef35",
+      "core-001:unit:bc020d9522237ab3",
+      "core-001:unit:76bce9eaa7b001ed",
+      "core-001:unit:fc00ebeb2dd79f1a",
+      "core-001:unit:485fb49e647199dd",
+      "core-001:unit:abbf813ff2da914c",
+      "core-001:unit:f5217fdf9ac66dfb",
+      "core-001:unit:e0467b8767274957",
+      "core-001:unit:03322f8f66599a98",
+      "core-001:unit:e57765e071b17e08",
+      "core-001:unit:cf2d3ad0f7214673",
+      "core-001:unit:41b66b77535ba368",
+      "core-001:unit:b874814041bef7a7",
+      "core-001:unit:131eb4b992393eff",
+      "core-001:unit:8a5dcadb26779e91",
+      "core-001:unit:31218f4596c4a81f",
+      "core-001:unit:2d70f4ce6efb7f43",
+      "core-001:unit:05c98e846d3a45d0",
+      "core-001:unit:decf8ef6a2d8b21b",
+      "core-001:unit:76e45a85145ee160",
+      "core-001:unit:c36dc6665f2f26a9",
+      "core-001:unit:99e7372a3a618d9f",
+      "core-001:unit:61a56a695ce12781",
+      "core-001:unit:6e08c22f74dfe1a3",
+      "core-001:unit:77e334d16d6b14fa",
+      "core-001:unit:b39ebdf0080ad057",
+      "core-001:unit:4e9e2576c70c8c9b",
+      "core-001:unit:4533d20585009bbe",
+      "core-001:unit:f5493372352f7285",
+      "core-001:unit:40e3599ab290e2f8",
+      "core-001:unit:ff45ccfa322ed808",
+      "core-001:unit:c462c54dfc3b511c",
+      "core-001:unit:21b621ff07b21b15",
+      "core-001:unit:97212de7ff1e3488",
+      "core-001:unit:e029926a1e9c6337",
+      "core-001:unit:253ea51a06b003ae"
+    ]
+  },
+  {
+    "owner": "B1",
+    "stratum": "type-declarations",
+    "eligible": 2,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:66cc866c1db102c5"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "eligible": 167,
+    "minimum_10_percent": 17,
+    "proposed_selected": 17,
+    "selected_ids": [
+      "core-001:unit:2ab3cc1db2ed4269",
+      "core-001:unit:7a90c15f7fb4a767",
+      "core-001:unit:619f21dd8869ecc6",
+      "core-001:unit:e49c9459b92a84fe",
+      "core-001:unit:c165b37fa4483b00",
+      "core-001:unit:7075351c8f5cf706",
+      "core-001:unit:93ecc26f4e0dd820",
+      "core-001:unit:ffa89fbb1f0e0006",
+      "core-001:unit:ad5d17565598504e",
+      "core-001:unit:1683ba031d3bcddb",
+      "core-001:unit:5c0f333d06ef9126",
+      "core-001:unit:bbc2caa0424d0694",
+      "core-001:unit:03d13df41d843868",
+      "core-001:unit:b4a0cd296ec54259",
+      "core-001:unit:d882128459cef5b6",
+      "core-001:unit:80c8b4e5e4742b49",
+      "core-001:unit:07d157697b0b7bf6"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "enum-values",
+    "eligible": 16,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:2e88f97d2c6a2093",
+      "core-001:unit:01b6c348853851b0"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 116,
+    "minimum_10_percent": 12,
+    "proposed_selected": 12,
+    "selected_ids": [
+      "core-001:unit:0d9113578140c285",
+      "core-001:unit:ede5800cd9c43e80",
+      "core-001:unit:452d5a7d1e85fa15",
+      "core-001:unit:f687d465a7684888",
+      "core-001:unit:1bfd7941724527c9",
+      "core-001:unit:369bda1d0cd58318",
+      "core-001:unit:c90c88a41999d609",
+      "core-001:unit:00d808339ba79b32",
+      "core-001:unit:f9d1a1faca427e57",
+      "core-001:unit:219683fbfc255c91",
+      "core-001:unit:91b29ba69cecef54",
+      "core-001:unit:299ddffe24179413"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "eligible": 194,
+    "minimum_10_percent": 20,
+    "proposed_selected": 20,
+    "selected_ids": [
+      "core-001:unit:75027cec36d20d7e",
+      "core-001:unit:5a9e64bc80430a1f",
+      "core-001:unit:9922abc84a69e7ef",
+      "core-001:unit:43d291b5ded400cc",
+      "core-001:unit:a5d65fe0ab80f2ee",
+      "core-001:unit:d8e54703866180d9",
+      "core-001:unit:11c91ef6840e9deb",
+      "core-001:unit:6bcbf73be9feb50f",
+      "core-001:unit:4a4f4fb2ee3e00b0",
+      "core-001:unit:8eb6258e1c70c357",
+      "core-001:unit:df36d6f917e324ff",
+      "core-001:unit:9d959fcda5cb4947",
+      "core-001:unit:9599c37631e3b2ce",
+      "core-001:unit:ca89fa5459284c88",
+      "core-001:unit:7b5c151d9a3ebbdc",
+      "core-001:unit:2ec84f79a016d9ee",
+      "core-001:unit:f31714ee80fcdd9c",
+      "core-001:unit:82e49d4a6292a59a",
+      "core-001:unit:feddcabc6205e907",
+      "core-001:unit:0c159721aed9ae3b"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 58,
+    "minimum_10_percent": 6,
+    "proposed_selected": 6,
+    "selected_ids": [
+      "core-001:unit:cfea2933573b757f",
+      "core-001:unit:094e7f926bf428c5",
+      "core-001:unit:b37c3e449550734a",
+      "core-001:unit:ebf81d7eeea93827",
+      "core-001:unit:95ad4b56865f1456",
+      "core-001:unit:6612f3e188e74e2b"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "native-interop-contracts",
+    "eligible": 136,
+    "minimum_10_percent": 14,
+    "proposed_selected": 14,
+    "selected_ids": [
+      "core-001:unit:d7636cd1bd712128",
+      "core-001:unit:db8b04f37f7bd313",
+      "core-001:unit:bc8b0f8d9f94511f",
+      "core-001:unit:d6382b511d208a17",
+      "core-001:unit:30aeca91d375799b",
+      "core-001:unit:0118113189c88a86",
+      "core-001:unit:19339d4b89793206",
+      "core-001:unit:09d455b96b0731b1",
+      "core-001:unit:c7edeed9fe6d2e6c",
+      "core-001:unit:dd174674513eff1e",
+      "core-001:unit:3404421c88096564",
+      "core-001:unit:988ca0b5bd1e1aa4",
+      "core-001:unit:73088629e7e5a9ce",
+      "core-001:unit:27680597d9ca147d"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "tests-and-helpers",
+    "eligible": 468,
+    "minimum_10_percent": 47,
+    "proposed_selected": 47,
+    "selected_ids": [
+      "core-001:unit:ac82c5fd3a2083b2",
+      "core-001:unit:38107865bd5f9cc4",
+      "core-001:unit:3c9a7c8b541cca31",
+      "core-001:unit:75da4c68bcfef47d",
+      "core-001:unit:c300adac76f89b3f",
+      "core-001:unit:95b76832a71d899e",
+      "core-001:unit:582b0239814eeab7",
+      "core-001:unit:8f26a9a7db7a0a71",
+      "core-001:unit:395e018fc7e2d73a",
+      "core-001:unit:d9a881e7b8d313d1",
+      "core-001:unit:7c0317e63f6ccad4",
+      "core-001:unit:089ef2e148592b06",
+      "core-001:unit:7914e385fc0fae13",
+      "core-001:unit:8383c5433a62e079",
+      "core-001:unit:47669f96fd907b74",
+      "core-001:unit:6faa75eb756e9f3e",
+      "core-001:unit:3c8c5a92530e6a78",
+      "core-001:unit:1466040321727ca1",
+      "core-001:unit:29a9ae241fca9754",
+      "core-001:unit:6c9be3cfd34e0b43",
+      "core-001:unit:050924edfdbb9b99",
+      "core-001:unit:5b3552bacdbc0934",
+      "core-001:unit:db2e439fd0b74649",
+      "core-001:unit:3c2c6c9d37bbe9a3",
+      "core-001:unit:7a82b232c6cd76a2",
+      "core-001:unit:21b391fa4dca9bab",
+      "core-001:unit:2264327db253f484",
+      "core-001:unit:ac7381252ca00098",
+      "core-001:unit:746c6ecb75508240",
+      "core-001:unit:ffaec5087ccd9b2e",
+      "core-001:unit:3905ec0b40f3903a",
+      "core-001:unit:16841907c5b3f5d2",
+      "core-001:unit:b026a1d3f3cba7dd",
+      "core-001:unit:2bce912e1f9afd3c",
+      "core-001:unit:fcfe703561725672",
+      "core-001:unit:f1a0056cc1ac63d2",
+      "core-001:unit:5f228badc05c83c6",
+      "core-001:unit:a9463dcf672055d2",
+      "core-001:unit:44d48f1f907a4c54",
+      "core-001:unit:8bf36df32b3a4156",
+      "core-001:unit:b9f1af2ad8097ba1",
+      "core-001:unit:9e44429263919c04",
+      "core-001:unit:b47685856a8443f5",
+      "core-001:unit:6681a2a4ace73933",
+      "core-001:unit:a2cb8ebfb76024bf",
+      "core-001:unit:058831bc607e39bf",
+      "core-001:unit:32b260c58ffe3225"
+    ]
+  },
+  {
+    "owner": "B2",
+    "stratum": "type-declarations",
+    "eligible": 13,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:9d688231691df7a1",
+      "core-001:unit:fc1fb9627bba154a"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "XML-contracts",
+    "eligible": 14,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:663f44912ef5c3b2",
+      "core-001:unit:f8412d69f0903d78"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "enum-values",
+    "eligible": 67,
+    "minimum_10_percent": 7,
+    "proposed_selected": 7,
+    "selected_ids": [
+      "core-001:unit:c697deea597fd88d",
+      "core-001:unit:38f5dfa3e4d48985",
+      "core-001:unit:68257c2609ad2cf4",
+      "core-001:unit:9303921f0cddea50",
+      "core-001:unit:b2c3553b04c1bb00",
+      "core-001:unit:8cc4e387d857f6a0",
+      "core-001:unit:598fb7688002ea28"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 203,
+    "minimum_10_percent": 21,
+    "proposed_selected": 21,
+    "selected_ids": [
+      "core-001:unit:5c2a9d17d0a6d264",
+      "core-001:unit:77aebb8c72bc4f8b",
+      "core-001:unit:6c685970d91a4bff",
+      "core-001:unit:bdb6c944a5756859",
+      "core-001:unit:c272a9fb00347790",
+      "core-001:unit:8a664f6d0d04c1b2",
+      "core-001:unit:872e42063988d971",
+      "core-001:unit:a8935af0aa96ef61",
+      "core-001:unit:5b36bb754879dcba",
+      "core-001:unit:5a01a3b881ea5b76",
+      "core-001:unit:81efac9d6d487eb2",
+      "core-001:unit:6a56c4d4ce9e07f2",
+      "core-001:unit:be7c5a145c84bea2",
+      "core-001:unit:bb7b5bb06936d638",
+      "core-001:unit:c8d2fe15b70e0f86",
+      "core-001:unit:beef240f1f71761d",
+      "core-001:unit:fd8af1cc08c0c3c6",
+      "core-001:unit:290fea93ad2bc0b6",
+      "core-001:unit:9a36a7aeb6f4830e",
+      "core-001:unit:b9573e58de539bae",
+      "core-001:unit:befc7b7f5b2de383"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "eligible": 282,
+    "minimum_10_percent": 29,
+    "proposed_selected": 29,
+    "selected_ids": [
+      "core-001:unit:c2658cfe37339eeb",
+      "core-001:unit:47f51cfacf863097",
+      "core-001:unit:0b8eeb5f60672804",
+      "core-001:unit:1bdbae7c14c6022e",
+      "core-001:unit:858a29174246303a",
+      "core-001:unit:c1c79d3db2b973cf",
+      "core-001:unit:dd724f79368a79ca",
+      "core-001:unit:d31af590d030d9cd",
+      "core-001:unit:a46ae51a7fd8c746",
+      "core-001:unit:2766051dada6b6ce",
+      "core-001:unit:11fb36bc205db285",
+      "core-001:unit:d3adfb07c2ac4b74",
+      "core-001:unit:5c067a5cdaa61349",
+      "core-001:unit:fde61d2d34e07c11",
+      "core-001:unit:6861fce129a5a2ee",
+      "core-001:unit:4d22a8bffe9fe670",
+      "core-001:unit:0d4fc0b1ead2d657",
+      "core-001:unit:2fec353019aca6e1",
+      "core-001:unit:56f503f8264cee44",
+      "core-001:unit:b0c302f97bbe0fad",
+      "core-001:unit:8501aefe4f069add",
+      "core-001:unit:214769af2d1fac51",
+      "core-001:unit:a9a38fdd04e31b55",
+      "core-001:unit:2dd5d34bf274ae46",
+      "core-001:unit:927379e43c7baa9f",
+      "core-001:unit:b6ebc2963508d4b8",
+      "core-001:unit:e638b0aaec64484d",
+      "core-001:unit:dc5d2dbbbf97c4a3",
+      "core-001:unit:51d6d7f344f7adb1"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 1,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:51fddcc95d7f7156"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "native-interop-contracts",
+    "eligible": 88,
+    "minimum_10_percent": 9,
+    "proposed_selected": 9,
+    "selected_ids": [
+      "core-001:unit:afc3343865d97e1d",
+      "core-001:unit:bcd58ec6f480d9d7",
+      "core-001:unit:8f93cc403a2ac53e",
+      "core-001:unit:fa67b2ef0b63e729",
+      "core-001:unit:4f3c03787d8628e8",
+      "core-001:unit:58c17de2a80aaa55",
+      "core-001:unit:37c554d3522ecd2e",
+      "core-001:unit:8e8e6149ecfdedba",
+      "core-001:unit:8f380e0a9029c637"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "tests-and-helpers",
+    "eligible": 381,
+    "minimum_10_percent": 39,
+    "proposed_selected": 39,
+    "selected_ids": [
+      "core-001:unit:edf39a10a89938ca",
+      "core-001:unit:b2ecfc8df07e5b7a",
+      "core-001:unit:e60607159debe2ce",
+      "core-001:unit:09bed7b2bd549db9",
+      "core-001:unit:68016c9957dcce0f",
+      "core-001:unit:5eec5b0c7e037930",
+      "core-001:unit:fc111c86c44a0782",
+      "core-001:unit:c8dd39b1de1bd87a",
+      "core-001:unit:e20e6746acbe1eb6",
+      "core-001:unit:b911881e7931c49d",
+      "core-001:unit:7b14a961bb8e9a15",
+      "core-001:unit:9bcd2e564aa0699e",
+      "core-001:unit:5d65f12b3be49266",
+      "core-001:unit:b3004d28acdb5408",
+      "core-001:unit:d79a6f5b7ba68aba",
+      "core-001:unit:2f91cfd2d58f9bfe",
+      "core-001:unit:8a16cadbb9ef1cc6",
+      "core-001:unit:c021d4413b6368fc",
+      "core-001:unit:0997450c56dcfb2d",
+      "core-001:unit:e1f124257be7dd22",
+      "core-001:unit:0a86e492926a3a86",
+      "core-001:unit:b7af6d77a34a17d0",
+      "core-001:unit:9213753eaf596d93",
+      "core-001:unit:c266fb276b6dd6b3",
+      "core-001:unit:3b28c151ff467096",
+      "core-001:unit:475d2d7317d0d9f8",
+      "core-001:unit:d429ff5fa192d1d5",
+      "core-001:unit:96e61791ebd8cf9c",
+      "core-001:unit:d1153e63b1b0f30f",
+      "core-001:unit:6fd77f3b1c5816c9",
+      "core-001:unit:18d9dfbaae9f910d",
+      "core-001:unit:8c66398d0c0e3a14",
+      "core-001:unit:6c8b14a3d805da68",
+      "core-001:unit:53dfaebec8fd2987",
+      "core-001:unit:a9fe1f2c18c24f0e",
+      "core-001:unit:bac4e0d807932738",
+      "core-001:unit:face888566b0b08e",
+      "core-001:unit:b6e6f0bfde4e8c82",
+      "core-001:unit:e06e64880354c5ab"
+    ]
+  },
+  {
+    "owner": "B3",
+    "stratum": "type-declarations",
+    "eligible": 20,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:37739f3b2014b5d7",
+      "core-001:unit:f42685023c336760"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "XML-contracts",
+    "eligible": 59,
+    "minimum_10_percent": 6,
+    "proposed_selected": 6,
+    "selected_ids": [
+      "core-001:unit:5edf620e4c9511c1",
+      "core-001:unit:786cf2b8db7cd790",
+      "core-001:unit:ca143a5e93e24ab0",
+      "core-001:unit:a974e10a3feb092e",
+      "core-001:unit:0f12bb2529841ebb",
+      "core-001:unit:7dca7d8127ba99c9"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "enum-values",
+    "eligible": 265,
+    "minimum_10_percent": 27,
+    "proposed_selected": 27,
+    "selected_ids": [
+      "core-001:unit:46ba672a5df97762",
+      "core-001:unit:aaea5963c3250eb8",
+      "core-001:unit:22ae808505eb5d7a",
+      "core-001:unit:9116749dadfa0cef",
+      "core-001:unit:980b50873c8be7fa",
+      "core-001:unit:82d3022818e7fe85",
+      "core-001:unit:180329a9026ee41f",
+      "core-001:unit:3c80420b1cc74cf3",
+      "core-001:unit:fdbf650298d171d7",
+      "core-001:unit:493cea048ce99ba9",
+      "core-001:unit:80fae54950b754d5",
+      "core-001:unit:bfc6d4ed213120ce",
+      "core-001:unit:239c09cb444ed505",
+      "core-001:unit:f8f2e0d56c27796a",
+      "core-001:unit:bcd617d8643400a4",
+      "core-001:unit:545dad17b3c12727",
+      "core-001:unit:c49d22b32d967530",
+      "core-001:unit:681dd8dc4e8e2100",
+      "core-001:unit:46d8f841e1e6da66",
+      "core-001:unit:1aa330d64d67e641",
+      "core-001:unit:84bda4260bec1438",
+      "core-001:unit:d35c8e405be647ae",
+      "core-001:unit:7905855969fecdb7",
+      "core-001:unit:1139e69a203ad565",
+      "core-001:unit:4289a4ab4c854929",
+      "core-001:unit:a0e16397556b7bfe",
+      "core-001:unit:4a70b27981c65a50"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 106,
+    "minimum_10_percent": 11,
+    "proposed_selected": 11,
+    "selected_ids": [
+      "core-001:unit:150f9ba47db6abe7",
+      "core-001:unit:f41cccf6549a6c22",
+      "core-001:unit:9ea1794bce816ec8",
+      "core-001:unit:03846cc18a211676",
+      "core-001:unit:eceda43174a27efc",
+      "core-001:unit:b260d67910547400",
+      "core-001:unit:c16852000f9d8ea6",
+      "core-001:unit:4e2fa00807d432b0",
+      "core-001:unit:c24dad64c24dc498",
+      "core-001:unit:bb8e7043825fc0c6",
+      "core-001:unit:062735c80dd15210"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "eligible": 55,
+    "minimum_10_percent": 6,
+    "proposed_selected": 6,
+    "selected_ids": [
+      "core-001:unit:8764b168af334bfe",
+      "core-001:unit:e75f6865eb06248a",
+      "core-001:unit:476e60c2f787e69d",
+      "core-001:unit:626db51eb3663093",
+      "core-001:unit:2ae3f73734ec22cd",
+      "core-001:unit:31498b7a3f6f5d32"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 38,
+    "minimum_10_percent": 4,
+    "proposed_selected": 4,
+    "selected_ids": [
+      "core-001:unit:001c58b1d1862d76",
+      "core-001:unit:a146f9d1cba78f0d",
+      "core-001:unit:a9e434874ba55d57",
+      "core-001:unit:c800fb08d134d876"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "native-interop-contracts",
+    "eligible": 346,
+    "minimum_10_percent": 35,
+    "proposed_selected": 35,
+    "selected_ids": [
+      "core-001:unit:2560815de4900918",
+      "core-001:unit:d3c6bc7e580d7979",
+      "core-001:unit:a976a2de7d4e2112",
+      "core-001:unit:a994aae01d0bcb2b",
+      "core-001:unit:e54524d6a143f40d",
+      "core-001:unit:ab9aa77d46bb36ce",
+      "core-001:unit:545ed185c93bd746",
+      "core-001:unit:9ed0b72d7d260d4f",
+      "core-001:unit:33e8ed5c0350a62d",
+      "core-001:unit:1b2598d5c8018603",
+      "core-001:unit:34b950df7557a08a",
+      "core-001:unit:56b38190860b305d",
+      "core-001:unit:61cbe3c150122640",
+      "core-001:unit:79ce1f718c08e8a6",
+      "core-001:unit:c9ca0b9368626f3c",
+      "core-001:unit:779f4d2fba09f19d",
+      "core-001:unit:cc2d794921aed56e",
+      "core-001:unit:6437aa1c1acf75e5",
+      "core-001:unit:13a340e298116ce6",
+      "core-001:unit:7044ceb286f08690",
+      "core-001:unit:3bc18bc281447f54",
+      "core-001:unit:9714306e3122ebf3",
+      "core-001:unit:73668e7a40023989",
+      "core-001:unit:3096532c5be176ee",
+      "core-001:unit:4645c4f382dcc83c",
+      "core-001:unit:fd66aba03a4df30b",
+      "core-001:unit:0508aa95b2692f54",
+      "core-001:unit:ee41995193a31bce",
+      "core-001:unit:43f70d8ce8b06967",
+      "core-001:unit:d326d43993bfb623",
+      "core-001:unit:e338723f893fc4dc",
+      "core-001:unit:bcf29106aefd5221",
+      "core-001:unit:aa0de53f1f164811",
+      "core-001:unit:7040d06e9ab75822",
+      "core-001:unit:4f6e767f4c54a490"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "tests-and-helpers",
+    "eligible": 294,
+    "minimum_10_percent": 30,
+    "proposed_selected": 30,
+    "selected_ids": [
+      "core-001:unit:626bda583b1870ab",
+      "core-001:unit:c3a64e08bb8351f2",
+      "core-001:unit:bc1447a0b92049be",
+      "core-001:unit:af095e43ddd71540",
+      "core-001:unit:c445c590b4c5c140",
+      "core-001:unit:091e43e130b7ade2",
+      "core-001:unit:c9a2776ed3a43232",
+      "core-001:unit:a6156549268d7731",
+      "core-001:unit:10b1c56e936a716a",
+      "core-001:unit:51ef719c3b27b0d5",
+      "core-001:unit:ad8ea188f8abea31",
+      "core-001:unit:d397e0fce7ff2058",
+      "core-001:unit:de225fee64cd6c24",
+      "core-001:unit:ecaaac968d427796",
+      "core-001:unit:029aa538df8f8024",
+      "core-001:unit:616c3c83bbf106ae",
+      "core-001:unit:159b9708889ef3d4",
+      "core-001:unit:8d9236eb1f3ca11c",
+      "core-001:unit:707b6889c0be9c0f",
+      "core-001:unit:1c31fe1fabe2193c",
+      "core-001:unit:53f0fbdc4617a3ea",
+      "core-001:unit:109e638492d171d0",
+      "core-001:unit:8b6b35d0d7b58375",
+      "core-001:unit:71c994106bebfb92",
+      "core-001:unit:11388c9856d1a295",
+      "core-001:unit:ffcc8b1ef6333aee",
+      "core-001:unit:a40eee27cf7e20f4",
+      "core-001:unit:307f00bc683ddfb8",
+      "core-001:unit:28491c24d4088184",
+      "core-001:unit:3a6730a0f15ef1e3"
+    ]
+  },
+  {
+    "owner": "B4",
+    "stratum": "type-declarations",
+    "eligible": 11,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:79e58d98b2c6b23c",
+      "core-001:unit:b7006f3e6dc237e1"
+    ]
+  },
+  {
+    "owner": "B5",
+    "stratum": "XML-contracts",
+    "eligible": 64,
+    "minimum_10_percent": 7,
+    "proposed_selected": 7,
+    "selected_ids": [
+      "core-001:unit:95d7c83254104597",
+      "core-001:unit:be9a9bc376b46500",
+      "core-001:unit:e0af29983be3ad4c",
+      "core-001:unit:31fae25215752be4",
+      "core-001:unit:971739df4dbce461",
+      "core-001:unit:1430eb9373891ea4",
+      "core-001:unit:e0f280ed806713e7"
+    ]
+  },
+  {
+    "owner": "B5",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 2,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:3dc28415274d2715"
+    ]
+  },
+  {
+    "owner": "B5",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "eligible": 111,
+    "minimum_10_percent": 12,
+    "proposed_selected": 12,
+    "selected_ids": [
+      "core-001:unit:accb5a8244e081d6",
+      "core-001:unit:7a5b8a3b94cca491",
+      "core-001:unit:f54885613567a25d",
+      "core-001:unit:e04bd130212e9058",
+      "core-001:unit:14fe4ebef38d1ed0",
+      "core-001:unit:80a2e5151f5d45e8",
+      "core-001:unit:22756bb8361b62c6",
+      "core-001:unit:e7371b49389c4918",
+      "core-001:unit:ffe87a0dc122f066",
+      "core-001:unit:5dc687764c3b8497",
+      "core-001:unit:282f8f4de8569fc5",
+      "core-001:unit:1ffab427759120b0"
+    ]
+  },
+  {
+    "owner": "B5",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 7,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:7e1d5b20f31edc04"
+    ]
+  },
+  {
+    "owner": "B5",
+    "stratum": "tests-and-helpers",
+    "eligible": 503,
+    "minimum_10_percent": 51,
+    "proposed_selected": 51,
+    "selected_ids": [
+      "core-001:unit:7b6fa526bc4a6aa0",
+      "core-001:unit:7321fe1e15184a10",
+      "core-001:unit:a6409df9890388c9",
+      "core-001:unit:b3b9e834ec15a544",
+      "core-001:unit:5fc487677b35ab28",
+      "core-001:unit:cf7a795602b142eb",
+      "core-001:unit:3b564994b3457b22",
+      "core-001:unit:5bcf834655fef594",
+      "core-001:unit:37c38232c3e94180",
+      "core-001:unit:738bb07041058b8c",
+      "core-001:unit:a0767c592da2a882",
+      "core-001:unit:343220c27faae036",
+      "core-001:unit:fefa3dfcb51c8048",
+      "core-001:unit:a943d9ad06221eb1",
+      "core-001:unit:373adeddffa5ed68",
+      "core-001:unit:e3bb2586dc5120b7",
+      "core-001:unit:a0d008f7add4778f",
+      "core-001:unit:c4787e6e83d209e3",
+      "core-001:unit:ab707f00fedfc8e6",
+      "core-001:unit:8c552de5da184e67",
+      "core-001:unit:139af565330d0bd8",
+      "core-001:unit:b72162c065486e80",
+      "core-001:unit:5369991596726ada",
+      "core-001:unit:c4c984606fade307",
+      "core-001:unit:a38082b8b32d418b",
+      "core-001:unit:28d11837d607f4aa",
+      "core-001:unit:c28fdc0c1ced3cdd",
+      "core-001:unit:2dd4265675872883",
+      "core-001:unit:12fed26282d091eb",
+      "core-001:unit:a30850a5a85e6f4a",
+      "core-001:unit:d08a207938a4d4fd",
+      "core-001:unit:3631aef26af6b769",
+      "core-001:unit:f58ce9eb55ed24f4",
+      "core-001:unit:d4ffb9d87b207fdb",
+      "core-001:unit:f72a718d07e9a370",
+      "core-001:unit:84a633fd9be55a84",
+      "core-001:unit:ddd57563894b9645",
+      "core-001:unit:57678adc5582df43",
+      "core-001:unit:1c9c6d64e4945a01",
+      "core-001:unit:dc0f21427d29a65c",
+      "core-001:unit:40c60fb8b4d02780",
+      "core-001:unit:ddf5b4cb930d2fa5",
+      "core-001:unit:a8c19d826d96991d",
+      "core-001:unit:c99301c915f20513",
+      "core-001:unit:95c29f78c32cee7d",
+      "core-001:unit:7449f0b2fc818733",
+      "core-001:unit:c7319c1c1182a4be",
+      "core-001:unit:ae29023d98d446cd",
+      "core-001:unit:bef6ce6dc7566d2b",
+      "core-001:unit:a10092607196bea8",
+      "core-001:unit:13551f225e5bb1f2"
+    ]
+  },
+  {
+    "owner": "B5",
+    "stratum": "type-declarations",
+    "eligible": 3,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:4018a6fd33733c9c"
+    ]
+  },
+  {
+    "owner": "B6",
+    "stratum": "XML-contracts",
+    "eligible": 104,
+    "minimum_10_percent": 11,
+    "proposed_selected": 11,
+    "selected_ids": [
+      "core-001:unit:6be1d61c780616e4",
+      "core-001:unit:5f18c0d67c2c7815",
+      "core-001:unit:8e9040753e759723",
+      "core-001:unit:e7354a1214c8ba41",
+      "core-001:unit:f5efa5515faba0fb",
+      "core-001:unit:0854b6428dc7d333",
+      "core-001:unit:53f3eee8233f9a20",
+      "core-001:unit:b0c0d59299e1e832",
+      "core-001:unit:bce440683985de79",
+      "core-001:unit:c143535480645641",
+      "core-001:unit:fbe13be6dd441542"
+    ]
+  },
+  {
+    "owner": "B6",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 1,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:ad3312a036a8ce65"
+    ]
+  },
+  {
+    "owner": "B6",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "eligible": 29,
+    "minimum_10_percent": 3,
+    "proposed_selected": 3,
+    "selected_ids": [
+      "core-001:unit:2f4fe04ec06bb866",
+      "core-001:unit:5a4dba6c6d25b59e",
+      "core-001:unit:a3af7098af466632"
+    ]
+  },
+  {
+    "owner": "B6",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 2,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:8cec358279fb0d77"
+    ]
+  },
+  {
+    "owner": "B6",
+    "stratum": "tests-and-helpers",
+    "eligible": 128,
+    "minimum_10_percent": 13,
+    "proposed_selected": 13,
+    "selected_ids": [
+      "core-001:unit:cf5d082b3f88b961",
+      "core-001:unit:f4124ed4d8b4de61",
+      "core-001:unit:75249ea1e1bc3dbf",
+      "core-001:unit:7c1c4536dda19f1e",
+      "core-001:unit:98724675b7858e85",
+      "core-001:unit:6eac55005bea451f",
+      "core-001:unit:7fbae0b508ba9783",
+      "core-001:unit:c6a6486477e62329",
+      "core-001:unit:dd0502438d1dc1d3",
+      "core-001:unit:66715b7a11aa4c97",
+      "core-001:unit:7a1d315eb50d497b",
+      "core-001:unit:2f77bfbd3d50a45b",
+      "core-001:unit:59c33b8c7c8f294c"
+    ]
+  },
+  {
+    "owner": "C",
+    "stratum": "XML-contracts",
+    "eligible": 232,
+    "minimum_10_percent": 24,
+    "proposed_selected": 24,
+    "selected_ids": [
+      "core-001:unit:60b8bbc5afbaceb8",
+      "core-001:unit:2a1d93e88d87f1d5",
+      "core-001:unit:c8eec8d48a4c1a53",
+      "core-001:unit:c07b65f7049672fd",
+      "core-001:unit:abc4e9861f35daf8",
+      "core-001:unit:a4915672d200fafe",
+      "core-001:unit:0b78e34a16aba2d2",
+      "core-001:unit:64d441b7b1bb1484",
+      "core-001:unit:05d91bd48cc4ba9f",
+      "core-001:unit:cb619071acc9bba8",
+      "core-001:unit:dceaa831d1742f95",
+      "core-001:unit:4848f6c1538b430a",
+      "core-001:unit:f5ca60315dba1804",
+      "core-001:unit:2f3a453051016bf1",
+      "core-001:unit:7deaa6b3f76664e4",
+      "core-001:unit:361e6cdfab43c71d",
+      "core-001:unit:8136013eac673552",
+      "core-001:unit:720f2bf625934af1",
+      "core-001:unit:f160af6cad1f3e94",
+      "core-001:unit:719384e829908b14",
+      "core-001:unit:5a12583307568a0a",
+      "core-001:unit:76337fd3c2c48418",
+      "core-001:unit:aa2f54c40c8e100c",
+      "core-001:unit:d9b9e31e257e7796"
+    ]
+  },
+  {
+    "owner": "C",
+    "stratum": "enum-values",
+    "eligible": 29,
+    "minimum_10_percent": 3,
+    "proposed_selected": 3,
+    "selected_ids": [
+      "core-001:unit:7f76d577f673f224",
+      "core-001:unit:d8cc0aa0dc9300b5",
+      "core-001:unit:5d739810055c9f09"
+    ]
+  },
+  {
+    "owner": "C",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 74,
+    "minimum_10_percent": 8,
+    "proposed_selected": 8,
+    "selected_ids": [
+      "core-001:unit:56d58ec2173bbf1a",
+      "core-001:unit:9bb620ed76fdd0f3",
+      "core-001:unit:30292c6fb683371c",
+      "core-001:unit:ff3f23e7387cb746",
+      "core-001:unit:5439bcf06648bd8c",
+      "core-001:unit:b8a65ee27fc78501",
+      "core-001:unit:79dffe8684b8c5b7",
+      "core-001:unit:3361e11010d6e697"
+    ]
+  },
+  {
+    "owner": "C",
+    "stratum": "tests-and-helpers",
+    "eligible": 211,
+    "minimum_10_percent": 22,
+    "proposed_selected": 22,
+    "selected_ids": [
+      "core-001:unit:7cc410f5a51db597",
+      "core-001:unit:921ec54140918360",
+      "core-001:unit:460986605acc85a7",
+      "core-001:unit:deb12c6dc5e5dad5",
+      "core-001:unit:62c982eb667d5210",
+      "core-001:unit:c96b32548ca7a275",
+      "core-001:unit:b334fdf119dbbfd3",
+      "core-001:unit:f147b8be51f14f4c",
+      "core-001:unit:032798b4fc91ebdd",
+      "core-001:unit:34cd91fd41729511",
+      "core-001:unit:04dffa6613a85a0c",
+      "core-001:unit:f1e20cac55e48d42",
+      "core-001:unit:34fe797e985d886a",
+      "core-001:unit:9f62ea84d8758ba3",
+      "core-001:unit:7b9d951edf0e42b3",
+      "core-001:unit:fefb527db102790a",
+      "core-001:unit:2c9ec2cab002ab5d",
+      "core-001:unit:bc0fa8e079704b98",
+      "core-001:unit:df139e68d3c46022",
+      "core-001:unit:8196d33310623fdc",
+      "core-001:unit:3752027db9a798b9",
+      "core-001:unit:d2454b088aa8beac"
+    ]
+  },
+  {
+    "owner": "C",
+    "stratum": "type-declarations",
+    "eligible": 49,
+    "minimum_10_percent": 5,
+    "proposed_selected": 5,
+    "selected_ids": [
+      "core-001:unit:2af033748d9a7e55",
+      "core-001:unit:459ee132eb757e46",
+      "core-001:unit:5632a5298da7f3dd",
+      "core-001:unit:b01defda889ad3bd",
+      "core-001:unit:ccd14dceb9360243"
+    ]
+  },
+  {
+    "owner": "Ctap2",
+    "stratum": "XML-contracts",
+    "eligible": 14,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:0ead92999bf55101",
+      "core-001:unit:4ca6e87f6dd1d2dc"
+    ]
+  },
+  {
+    "owner": "Ctap2",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 7,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:1bcc18573d7b9903"
+    ]
+  },
+  {
+    "owner": "Ctap2",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 15,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:b477d6cc126ee4d5",
+      "core-001:unit:1792a8f1c5bb3ba1"
+    ]
+  },
+  {
+    "owner": "Ctap2",
+    "stratum": "tests-and-helpers",
+    "eligible": 39,
+    "minimum_10_percent": 4,
+    "proposed_selected": 4,
+    "selected_ids": [
+      "core-001:unit:f6d8011c4e3c3669",
+      "core-001:unit:0eb15437dd1797ab",
+      "core-001:unit:e0cd0f858f4da187",
+      "core-001:unit:c4935360f5100eac"
+    ]
+  },
+  {
+    "owner": "Management",
+    "stratum": "XML-contracts",
+    "eligible": 14,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:a2cf98dcc1805fbf",
+      "core-001:unit:a815cc370e465f4c"
+    ]
+  },
+  {
+    "owner": "Management",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 28,
+    "minimum_10_percent": 3,
+    "proposed_selected": 3,
+    "selected_ids": [
+      "core-001:unit:417fbf395249474a",
+      "core-001:unit:6cb194bebfaebec7",
+      "core-001:unit:6dea5c78a8314291"
+    ]
+  },
+  {
+    "owner": "Management",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 12,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:31d79bce8daf96b9",
+      "core-001:unit:555e3712647dbc07"
+    ]
+  },
+  {
+    "owner": "Management",
+    "stratum": "tests-and-helpers",
+    "eligible": 146,
+    "minimum_10_percent": 15,
+    "proposed_selected": 15,
+    "selected_ids": [
+      "core-001:unit:30cfbefbd21e34c1",
+      "core-001:unit:920aed6dbc2c5cd8",
+      "core-001:unit:61eb51979d55e830",
+      "core-001:unit:94cf1d1225852eb6",
+      "core-001:unit:0ef7b0ff9c5e908c",
+      "core-001:unit:c2126db982bbfcb5",
+      "core-001:unit:409d46be3df37198",
+      "core-001:unit:ab1ac215210a05f3",
+      "core-001:unit:20ce16d2fb7eff11",
+      "core-001:unit:0a4bf24a663dd6e8",
+      "core-001:unit:c486d9f36101dbbf",
+      "core-001:unit:c5c41a16f0ac5681",
+      "core-001:unit:a469b3cef18fecb5",
+      "core-001:unit:02ae797f211c1fb1",
+      "core-001:unit:1dd329786aeabb6c"
+    ]
+  },
+  {
+    "owner": "Management",
+    "stratum": "type-declarations",
+    "eligible": 3,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:1adf219a85f82c90"
+    ]
+  },
+  {
+    "owner": "Oath",
+    "stratum": "XML-contracts",
+    "eligible": 24,
+    "minimum_10_percent": 3,
+    "proposed_selected": 3,
+    "selected_ids": [
+      "core-001:unit:ab98f777e0e5a2e5",
+      "core-001:unit:1bf9d5c2d8ded722",
+      "core-001:unit:1da1115a6a2d8624"
+    ]
+  },
+  {
+    "owner": "Oath",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 13,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:d8dd51ea527f6add",
+      "core-001:unit:054ed96fe3237098"
+    ]
+  },
+  {
+    "owner": "Oath",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 19,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:1b7bc942bb2b181f",
+      "core-001:unit:bd9fbdc6508adac7"
+    ]
+  },
+  {
+    "owner": "Oath",
+    "stratum": "tests-and-helpers",
+    "eligible": 98,
+    "minimum_10_percent": 10,
+    "proposed_selected": 10,
+    "selected_ids": [
+      "core-001:unit:a9579efc62584f84",
+      "core-001:unit:55b07354d429a6be",
+      "core-001:unit:adb4dcb90b9853b3",
+      "core-001:unit:9ab2dca35fa7c063",
+      "core-001:unit:d7db7354164023a4",
+      "core-001:unit:61c7599de7ec9de1",
+      "core-001:unit:d4ac23565d565892",
+      "core-001:unit:74a5f93a6223fb56",
+      "core-001:unit:b4961ad59e422291",
+      "core-001:unit:039b97880290cbc2"
+    ]
+  },
+  {
+    "owner": "Oath",
+    "stratum": "type-declarations",
+    "eligible": 2,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:868041ae1b1ae700"
+    ]
+  },
+  {
+    "owner": "OpenPgp",
+    "stratum": "XML-contracts",
+    "eligible": 40,
+    "minimum_10_percent": 4,
+    "proposed_selected": 4,
+    "selected_ids": [
+      "core-001:unit:d5e9bd9e80ac58c8",
+      "core-001:unit:873ce41195e42542",
+      "core-001:unit:869f7f727a2bacd9",
+      "core-001:unit:758748a063d82837"
+    ]
+  },
+  {
+    "owner": "OpenPgp",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 32,
+    "minimum_10_percent": 4,
+    "proposed_selected": 4,
+    "selected_ids": [
+      "core-001:unit:8b2a95f01db9bf2c",
+      "core-001:unit:4dbf70904bbff16f",
+      "core-001:unit:bcb85f9e4e5ea743",
+      "core-001:unit:c7086050193e168d"
+    ]
+  },
+  {
+    "owner": "OpenPgp",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 15,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:710814862611f595",
+      "core-001:unit:33e76ca38aabdeb3"
+    ]
+  },
+  {
+    "owner": "OpenPgp",
+    "stratum": "tests-and-helpers",
+    "eligible": 106,
+    "minimum_10_percent": 11,
+    "proposed_selected": 11,
+    "selected_ids": [
+      "core-001:unit:f654c14528cd489f",
+      "core-001:unit:6295ba49ce88cf2b",
+      "core-001:unit:24e90797dbd9ae65",
+      "core-001:unit:8a438c950ba16617",
+      "core-001:unit:aceb51379b5ee76b",
+      "core-001:unit:14baa3192f491ff3",
+      "core-001:unit:683eb679b38bf0b7",
+      "core-001:unit:15b19a2931c6434a",
+      "core-001:unit:c8d2b18f767cdae2",
+      "core-001:unit:9a2795debe7eb7e0",
+      "core-001:unit:62fb7fa48b9550d8"
+    ]
+  },
+  {
+    "owner": "OpenPgp",
+    "stratum": "type-declarations",
+    "eligible": 5,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:7ad9dd6d6d1845d6"
+    ]
+  },
+  {
+    "owner": "Piv",
+    "stratum": "XML-contracts",
+    "eligible": 72,
+    "minimum_10_percent": 8,
+    "proposed_selected": 8,
+    "selected_ids": [
+      "core-001:unit:009632cb50b26e3d",
+      "core-001:unit:6576de010de5767d",
+      "core-001:unit:6eec962fc55a985c",
+      "core-001:unit:81297035b8793da4",
+      "core-001:unit:1990c8b8a253ce31",
+      "core-001:unit:3eb8053339c6e5be",
+      "core-001:unit:7ef8a2e75575c5d2",
+      "core-001:unit:93c8f7b10e5bd567"
+    ]
+  },
+  {
+    "owner": "Piv",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 78,
+    "minimum_10_percent": 8,
+    "proposed_selected": 8,
+    "selected_ids": [
+      "core-001:unit:b3919addb32e317d",
+      "core-001:unit:a579b6a5cf4242e4",
+      "core-001:unit:0aa0e8aee63a59f5",
+      "core-001:unit:8fc815177a95b970",
+      "core-001:unit:df0399d60d88c3f0",
+      "core-001:unit:8f112e59fc6debcb",
+      "core-001:unit:d741c3bac5834946",
+      "core-001:unit:e0d8e2e0ada81ba1"
+    ]
+  },
+  {
+    "owner": "Piv",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 21,
+    "minimum_10_percent": 3,
+    "proposed_selected": 3,
+    "selected_ids": [
+      "core-001:unit:89c5d1ecb6fd0e8d",
+      "core-001:unit:70fb463e165b9ad9",
+      "core-001:unit:65b137a50ae4091c"
+    ]
+  },
+  {
+    "owner": "Piv",
+    "stratum": "tests-and-helpers",
+    "eligible": 201,
+    "minimum_10_percent": 21,
+    "proposed_selected": 21,
+    "selected_ids": [
+      "core-001:unit:0cf32693862d0e51",
+      "core-001:unit:ee5b81e0432fe552",
+      "core-001:unit:a7d45b5ed78ea182",
+      "core-001:unit:1b220d760b58a657",
+      "core-001:unit:ce8af4db9c07f5ad",
+      "core-001:unit:af3aaba139d19db7",
+      "core-001:unit:f6b6a42a64636d03",
+      "core-001:unit:92d416947d877101",
+      "core-001:unit:48aebb8b6acbc6ac",
+      "core-001:unit:6d100fecb62d4abb",
+      "core-001:unit:13db8df479930852",
+      "core-001:unit:eb98b78558a307d8",
+      "core-001:unit:e4f10ec180cc9e83",
+      "core-001:unit:79aade9dc99cb132",
+      "core-001:unit:e0620adee4adaf59",
+      "core-001:unit:fce5dda5582cebf9",
+      "core-001:unit:d36b5c72a45f3b4c",
+      "core-001:unit:31264273bb8cc2f5",
+      "core-001:unit:febe7cd8e74ac70c",
+      "core-001:unit:f066105117ef736a",
+      "core-001:unit:d428dd99f2122ebc"
+    ]
+  },
+  {
+    "owner": "SecurityDomain",
+    "stratum": "XML-contracts",
+    "eligible": 28,
+    "minimum_10_percent": 3,
+    "proposed_selected": 3,
+    "selected_ids": [
+      "core-001:unit:75d424217a4e94ef",
+      "core-001:unit:394639d39386bc76",
+      "core-001:unit:d7528501229916fe"
+    ]
+  },
+  {
+    "owner": "SecurityDomain",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 5,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:03e44d501350ff8b"
+    ]
+  },
+  {
+    "owner": "SecurityDomain",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 19,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:ed3e115f81fd126c",
+      "core-001:unit:e1121aa69ba90312"
+    ]
+  },
+  {
+    "owner": "SecurityDomain",
+    "stratum": "tests-and-helpers",
+    "eligible": 54,
+    "minimum_10_percent": 6,
+    "proposed_selected": 6,
+    "selected_ids": [
+      "core-001:unit:c7e80dbb3894556d",
+      "core-001:unit:350a0f3bb0448eae",
+      "core-001:unit:dcd6c17901ddf340",
+      "core-001:unit:1c4edc65a24bed3a",
+      "core-001:unit:8ed4d3276ff806e4",
+      "core-001:unit:6ef39b1f61d0b65d"
+    ]
+  },
+  {
+    "owner": "WebAuthn",
+    "stratum": "XML-contracts",
+    "eligible": 24,
+    "minimum_10_percent": 3,
+    "proposed_selected": 3,
+    "selected_ids": [
+      "core-001:unit:06d5faa281acff8e",
+      "core-001:unit:7d926f1edba94468",
+      "core-001:unit:b4125585d8579c68"
+    ]
+  },
+  {
+    "owner": "WebAuthn",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 1,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:ec91cffcba17a31e"
+    ]
+  },
+  {
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 33,
+    "minimum_10_percent": 4,
+    "proposed_selected": 4,
+    "selected_ids": [
+      "core-001:unit:c8377e0a58dac11c",
+      "core-001:unit:546f13cbc632a4a1",
+      "core-001:unit:bf53e9ad2aa19caf",
+      "core-001:unit:4886f819fa316d28"
+    ]
+  },
+  {
+    "owner": "WebAuthn",
+    "stratum": "tests-and-helpers",
+    "eligible": 104,
+    "minimum_10_percent": 11,
+    "proposed_selected": 11,
+    "selected_ids": [
+      "core-001:unit:8705722ec03b98c1",
+      "core-001:unit:35e46ef0a6a3636d",
+      "core-001:unit:651df80c5416339e",
+      "core-001:unit:2f2513b5ffd4c56b",
+      "core-001:unit:7fe08c46f10afee5",
+      "core-001:unit:c6719030f9881ef4",
+      "core-001:unit:e29522f04d40349a",
+      "core-001:unit:a78b316e99da06d2",
+      "core-001:unit:dd7a8c8d3beb3ad5",
+      "core-001:unit:4e15fa5e2d4d3425",
+      "core-001:unit:1b932c40537768a9"
+    ]
+  },
+  {
+    "owner": "YubiHsm",
+    "stratum": "XML-contracts",
+    "eligible": 7,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:7d73ad99b0542ab5"
+    ]
+  },
+  {
+    "owner": "YubiHsm",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 18,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:857ca96c5023da44",
+      "core-001:unit:be6deb0bde5274d7"
+    ]
+  },
+  {
+    "owner": "YubiHsm",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 12,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:e2c611eac31ccf1c",
+      "core-001:unit:969ca35d72262c60"
+    ]
+  },
+  {
+    "owner": "YubiHsm",
+    "stratum": "tests-and-helpers",
+    "eligible": 42,
+    "minimum_10_percent": 5,
+    "proposed_selected": 5,
+    "selected_ids": [
+      "core-001:unit:56b56f5f5ddac7fd",
+      "core-001:unit:d5c991345bf8977b",
+      "core-001:unit:673587f212268a6c",
+      "core-001:unit:75649a8bd0ae3bb6",
+      "core-001:unit:56ac675d5c5a5b82"
+    ]
+  },
+  {
+    "owner": "YubiOtp",
+    "stratum": "XML-contracts",
+    "eligible": 44,
+    "minimum_10_percent": 5,
+    "proposed_selected": 5,
+    "selected_ids": [
+      "core-001:unit:53f86b1ba80074a2",
+      "core-001:unit:4a803dcc4d6bd607",
+      "core-001:unit:eb4d4df0bb3c6233",
+      "core-001:unit:dddf82740266d31e",
+      "core-001:unit:dccbd1f9dd9d13eb"
+    ]
+  },
+  {
+    "owner": "YubiOtp",
+    "stratum": "implementation-state-and-internal-contracts",
+    "eligible": 39,
+    "minimum_10_percent": 4,
+    "proposed_selected": 4,
+    "selected_ids": [
+      "core-001:unit:a97df01d328e9157",
+      "core-001:unit:1d9a1e2ddc9a4a96",
+      "core-001:unit:5fa8e291ce0e50fa",
+      "core-001:unit:544cb91fcb796dfc"
+    ]
+  },
+  {
+    "owner": "YubiOtp",
+    "stratum": "narrative-examples-and-maps",
+    "eligible": 16,
+    "minimum_10_percent": 2,
+    "proposed_selected": 2,
+    "selected_ids": [
+      "core-001:unit:f02eac5f2126a9c4",
+      "core-001:unit:6a99ceaa75ce028b"
+    ]
+  },
+  {
+    "owner": "YubiOtp",
+    "stratum": "tests-and-helpers",
+    "eligible": 154,
+    "minimum_10_percent": 16,
+    "proposed_selected": 16,
+    "selected_ids": [
+      "core-001:unit:5c54ff22c326b0b3",
+      "core-001:unit:d64fbe6746b8ec24",
+      "core-001:unit:805d70e10d397c4c",
+      "core-001:unit:a8517209eac277b9",
+      "core-001:unit:c3dfa3ac3526a31a",
+      "core-001:unit:a323bdc19346c4b1",
+      "core-001:unit:1bebb9d5f7f0877b",
+      "core-001:unit:bd29ead0f592421f",
+      "core-001:unit:e79d924e62408464",
+      "core-001:unit:b429d29004cc107f",
+      "core-001:unit:864bf94e1240f012",
+      "core-001:unit:3843b52721516f81",
+      "core-001:unit:0356e60bb431d88f",
+      "core-001:unit:c34204e2d27aaf15",
+      "core-001:unit:45ba1288acf4038a",
+      "core-001:unit:84ede3c0f0fbbe78"
+    ]
+  },
+  {
+    "owner": "YubiOtp",
+    "stratum": "type-declarations",
+    "eligible": 3,
+    "minimum_10_percent": 1,
+    "proposed_selected": 1,
+    "selected_ids": [
+      "core-001:unit:159b455a45df887f"
+    ]
+  }
+]

@@ -1,0 +1,3047 @@
+{
+  "status": "FINAL_EXPLICIT_ACCEPTED_BODY_AND_METADATA_TRANSITIONS_READY_FOR_FOCUSED_REVIEW",
+  "changed_body": "FULL-032",
+  "source_path": "injections/WebAuthn.IntegrationTests/FULL-032.cs",
+  "old_source_sha256": "6d7d82a0b0fbba0909878e27f61f4defe0ce2d8b4cf918526f45a82b69938cc8",
+  "new_source_sha256": "e46202ca6357ae675993aa527e03e720581610c83174e074f7bafbe4eb5d68f8",
+  "old_raw_body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+  "new_raw_body_sha256": "692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860",
+  "old_decoded_body_sha256": "7c2396900aa0b184930cb26cb1854b0d2efc3001cae2f004a72a17d789245ff5",
+  "new_decoded_body_sha256": "602c0dd5a474c04e5e583d2ace7678e64776a5e7368d42d611f874a67a9d65c5",
+  "context_unchanged": true,
+  "imports_and_processor_access_unchanged": true,
+  "source_diff": "--- before/FULL-032.cs\n+++ accepted/FULL-032.cs\n@@ -26,7 +26,7 @@\n namespace Audit20261111.DocExamples.Test32;\n public sealed class DocumentationBody32\n {\n-private static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();\n+private static readonly ILogger Logger = YubiKitLogging.LoggerFactory.CreateLogger<PreviewSignProcessor>();\n internal void CompileOnly(CoseAlgorithm selectedAlgorithm)\n {\n Logger.LogDebug(\"Selected algorithm: {Algorithm}\", selectedAlgorithm);\n",
+  "metadata_field_deltas": [
+    {
+      "id": "FULL-031",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-032",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-032",
+      "field": "first_line",
+      "before": 78,
+      "after": 88
+    },
+    {
+      "id": "FULL-032",
+      "field": "last_line",
+      "before": 82,
+      "after": 92
+    },
+    {
+      "id": "FULL-032",
+      "field": "raw_start_byte",
+      "before": 4454,
+      "after": 5392
+    },
+    {
+      "id": "FULL-032",
+      "field": "raw_end_byte",
+      "before": 4620,
+      "after": 5572
+    },
+    {
+      "id": "FULL-032",
+      "field": "raw_body",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": "FULL-032",
+      "field": "raw_sha256",
+      "before": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+      "after": "692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860"
+    },
+    {
+      "id": "FULL-032",
+      "field": "decoded_body",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": "FULL-032",
+      "field": "decoded_sha256",
+      "before": "7c2396900aa0b184930cb26cb1854b0d2efc3001cae2f004a72a17d789245ff5",
+      "after": "602c0dd5a474c04e5e583d2ace7678e64776a5e7368d42d611f874a67a9d65c5"
+    },
+    {
+      "id": "FULL-032",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-033",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-033",
+      "field": "first_line",
+      "before": 97,
+      "after": 107
+    },
+    {
+      "id": "FULL-033",
+      "field": "last_line",
+      "before": 138,
+      "after": 148
+    },
+    {
+      "id": "FULL-033",
+      "field": "raw_start_byte",
+      "before": 5363,
+      "after": 6315
+    },
+    {
+      "id": "FULL-033",
+      "field": "raw_end_byte",
+      "before": 6969,
+      "after": 7921
+    },
+    {
+      "id": "FULL-034",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-034",
+      "field": "first_line",
+      "before": 143,
+      "after": 153
+    },
+    {
+      "id": "FULL-034",
+      "field": "last_line",
+      "before": 156,
+      "after": 166
+    },
+    {
+      "id": "FULL-034",
+      "field": "raw_start_byte",
+      "before": 7115,
+      "after": 8067
+    },
+    {
+      "id": "FULL-034",
+      "field": "raw_end_byte",
+      "before": 7526,
+      "after": 8478
+    },
+    {
+      "id": "FULL-035",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-035",
+      "field": "first_line",
+      "before": 211,
+      "after": 221
+    },
+    {
+      "id": "FULL-035",
+      "field": "last_line",
+      "before": 218,
+      "after": 228
+    },
+    {
+      "id": "FULL-035",
+      "field": "raw_start_byte",
+      "before": 11897,
+      "after": 12849
+    },
+    {
+      "id": "FULL-035",
+      "field": "raw_end_byte",
+      "before": 12078,
+      "after": 13030
+    },
+    {
+      "id": "FULL-036",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-036",
+      "field": "first_line",
+      "before": 365,
+      "after": 375
+    },
+    {
+      "id": "FULL-036",
+      "field": "last_line",
+      "before": 382,
+      "after": 392
+    },
+    {
+      "id": "FULL-036",
+      "field": "raw_start_byte",
+      "before": 22899,
+      "after": 23851
+    },
+    {
+      "id": "FULL-036",
+      "field": "raw_end_byte",
+      "before": 23628,
+      "after": 24580
+    },
+    {
+      "id": "FULL-037",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-037",
+      "field": "first_line",
+      "before": 502,
+      "after": 512
+    },
+    {
+      "id": "FULL-037",
+      "field": "last_line",
+      "before": 526,
+      "after": 536
+    },
+    {
+      "id": "FULL-037",
+      "field": "raw_start_byte",
+      "before": 32986,
+      "after": 33938
+    },
+    {
+      "id": "FULL-037",
+      "field": "raw_end_byte",
+      "before": 33932,
+      "after": 34884
+    },
+    {
+      "id": "FULL-037",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-038",
+      "field": "document",
+      "before": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "after": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 37568,
+        "sha256": "ae35d3238b647fef94c050537f7fb8a2f17e816a4a49eccdd78a5089068a838b"
+      }
+    },
+    {
+      "id": "FULL-038",
+      "field": "first_line",
+      "before": 529,
+      "after": 539
+    },
+    {
+      "id": "FULL-038",
+      "field": "last_line",
+      "before": 541,
+      "after": 551
+    },
+    {
+      "id": "FULL-038",
+      "field": "raw_start_byte",
+      "before": 33964,
+      "after": 34916
+    },
+    {
+      "id": "FULL-038",
+      "field": "raw_end_byte",
+      "before": 34452,
+      "after": 35404
+    },
+    {
+      "id": "FULL-048",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-048",
+      "field": "raw_start_byte",
+      "before": 10428,
+      "after": 10699
+    },
+    {
+      "id": "FULL-048",
+      "field": "raw_end_byte",
+      "before": 10629,
+      "after": 10900
+    },
+    {
+      "id": "FULL-049",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-049",
+      "field": "raw_start_byte",
+      "before": 15493,
+      "after": 15764
+    },
+    {
+      "id": "FULL-049",
+      "field": "raw_end_byte",
+      "before": 16305,
+      "after": 16576
+    },
+    {
+      "id": "FULL-050",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-050",
+      "field": "raw_start_byte",
+      "before": 16766,
+      "after": 17037
+    },
+    {
+      "id": "FULL-050",
+      "field": "raw_end_byte",
+      "before": 17117,
+      "after": 17388
+    },
+    {
+      "id": "FULL-051",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-051",
+      "field": "raw_start_byte",
+      "before": 17295,
+      "after": 17566
+    },
+    {
+      "id": "FULL-051",
+      "field": "raw_end_byte",
+      "before": 17821,
+      "after": 18092
+    },
+    {
+      "id": "FULL-052",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-052",
+      "field": "raw_start_byte",
+      "before": 18091,
+      "after": 18362
+    },
+    {
+      "id": "FULL-052",
+      "field": "raw_end_byte",
+      "before": 18844,
+      "after": 19115
+    },
+    {
+      "id": "FULL-053",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-053",
+      "field": "raw_start_byte",
+      "before": 18931,
+      "after": 19202
+    },
+    {
+      "id": "FULL-053",
+      "field": "raw_end_byte",
+      "before": 20010,
+      "after": 20281
+    },
+    {
+      "id": "FULL-054",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-054",
+      "field": "raw_start_byte",
+      "before": 20080,
+      "after": 20351
+    },
+    {
+      "id": "FULL-054",
+      "field": "raw_end_byte",
+      "before": 20863,
+      "after": 21134
+    },
+    {
+      "id": "FULL-055",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-055",
+      "field": "raw_start_byte",
+      "before": 20950,
+      "after": 21221
+    },
+    {
+      "id": "FULL-055",
+      "field": "raw_end_byte",
+      "before": 21211,
+      "after": 21482
+    },
+    {
+      "id": "FULL-056",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-056",
+      "field": "raw_start_byte",
+      "before": 21268,
+      "after": 21539
+    },
+    {
+      "id": "FULL-056",
+      "field": "raw_end_byte",
+      "before": 21359,
+      "after": 21630
+    },
+    {
+      "id": "FULL-057",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-057",
+      "field": "raw_start_byte",
+      "before": 21413,
+      "after": 21684
+    },
+    {
+      "id": "FULL-057",
+      "field": "raw_end_byte",
+      "before": 21704,
+      "after": 21975
+    },
+    {
+      "id": "FULL-058",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-058",
+      "field": "raw_start_byte",
+      "before": 23830,
+      "after": 24101
+    },
+    {
+      "id": "FULL-058",
+      "field": "raw_end_byte",
+      "before": 24272,
+      "after": 24543
+    },
+    {
+      "id": "FULL-059",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-059",
+      "field": "raw_start_byte",
+      "before": 24548,
+      "after": 24819
+    },
+    {
+      "id": "FULL-059",
+      "field": "raw_end_byte",
+      "before": 24759,
+      "after": 25030
+    },
+    {
+      "id": "FULL-060",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-060",
+      "field": "raw_start_byte",
+      "before": 25309,
+      "after": 25580
+    },
+    {
+      "id": "FULL-060",
+      "field": "raw_end_byte",
+      "before": 25928,
+      "after": 26199
+    },
+    {
+      "id": "FULL-060",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-061",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-061",
+      "field": "raw_start_byte",
+      "before": 26012,
+      "after": 26283
+    },
+    {
+      "id": "FULL-061",
+      "field": "raw_end_byte",
+      "before": 26696,
+      "after": 26967
+    },
+    {
+      "id": "FULL-061",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 33846,
+        "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-062",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-062",
+      "field": "raw_start_byte",
+      "before": 27388,
+      "after": 27659
+    },
+    {
+      "id": "FULL-062",
+      "field": "raw_end_byte",
+      "before": 28104,
+      "after": 28375
+    },
+    {
+      "id": "FULL-063",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-063",
+      "field": "raw_start_byte",
+      "before": 31562,
+      "after": 31833
+    },
+    {
+      "id": "FULL-063",
+      "field": "raw_end_byte",
+      "before": 31726,
+      "after": 31997
+    },
+    {
+      "id": "FULL-064",
+      "field": "document",
+      "before": {
+        "path": "CLAUDE.md",
+        "bytes": 34741,
+        "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+      },
+      "after": {
+        "path": "CLAUDE.md",
+        "bytes": 35012,
+        "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+      }
+    },
+    {
+      "id": "FULL-064",
+      "field": "raw_start_byte",
+      "before": 32584,
+      "after": 32855
+    },
+    {
+      "id": "FULL-064",
+      "field": "raw_end_byte",
+      "before": 32670,
+      "after": 32941
+    },
+    {
+      "id": "FULL-123",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-123",
+      "field": "raw_start_byte",
+      "before": 927,
+      "after": 941
+    },
+    {
+      "id": "FULL-123",
+      "field": "raw_end_byte",
+      "before": 1391,
+      "after": 1405
+    },
+    {
+      "id": "FULL-124",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-124",
+      "field": "raw_start_byte",
+      "before": 2825,
+      "after": 2839
+    },
+    {
+      "id": "FULL-124",
+      "field": "raw_end_byte",
+      "before": 3105,
+      "after": 3119
+    },
+    {
+      "id": "FULL-125",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-125",
+      "field": "raw_start_byte",
+      "before": 3223,
+      "after": 3237
+    },
+    {
+      "id": "FULL-125",
+      "field": "raw_end_byte",
+      "before": 3279,
+      "after": 3293
+    },
+    {
+      "id": "FULL-126",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-126",
+      "field": "raw_start_byte",
+      "before": 3806,
+      "after": 3820
+    },
+    {
+      "id": "FULL-126",
+      "field": "raw_end_byte",
+      "before": 4166,
+      "after": 4180
+    },
+    {
+      "id": "FULL-127",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-127",
+      "field": "raw_start_byte",
+      "before": 4266,
+      "after": 4280
+    },
+    {
+      "id": "FULL-127",
+      "field": "raw_end_byte",
+      "before": 4342,
+      "after": 4356
+    },
+    {
+      "id": "FULL-128",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-128",
+      "field": "raw_start_byte",
+      "before": 4540,
+      "after": 4554
+    },
+    {
+      "id": "FULL-128",
+      "field": "raw_end_byte",
+      "before": 4686,
+      "after": 4700
+    },
+    {
+      "id": "FULL-129",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-129",
+      "field": "first_line",
+      "before": 166,
+      "after": 171
+    },
+    {
+      "id": "FULL-129",
+      "field": "last_line",
+      "before": 171,
+      "after": 176
+    },
+    {
+      "id": "FULL-129",
+      "field": "raw_start_byte",
+      "before": 6578,
+      "after": 7230
+    },
+    {
+      "id": "FULL-129",
+      "field": "raw_end_byte",
+      "before": 6827,
+      "after": 7479
+    },
+    {
+      "id": "FULL-130",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-130",
+      "field": "first_line",
+      "before": 224,
+      "after": 229
+    },
+    {
+      "id": "FULL-130",
+      "field": "last_line",
+      "before": 228,
+      "after": 233
+    },
+    {
+      "id": "FULL-130",
+      "field": "raw_start_byte",
+      "before": 10029,
+      "after": 10681
+    },
+    {
+      "id": "FULL-130",
+      "field": "raw_end_byte",
+      "before": 10267,
+      "after": 10919
+    },
+    {
+      "id": "FULL-131",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-131",
+      "field": "first_line",
+      "before": 232,
+      "after": 237
+    },
+    {
+      "id": "FULL-131",
+      "field": "last_line",
+      "before": 235,
+      "after": 240
+    },
+    {
+      "id": "FULL-131",
+      "field": "raw_start_byte",
+      "before": 10361,
+      "after": 11013
+    },
+    {
+      "id": "FULL-131",
+      "field": "raw_end_byte",
+      "before": 10562,
+      "after": 11214
+    },
+    {
+      "id": "FULL-132",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-132",
+      "field": "first_line",
+      "before": 245,
+      "after": 250
+    },
+    {
+      "id": "FULL-132",
+      "field": "last_line",
+      "before": 264,
+      "after": 269
+    },
+    {
+      "id": "FULL-132",
+      "field": "raw_start_byte",
+      "before": 11035,
+      "after": 11687
+    },
+    {
+      "id": "FULL-132",
+      "field": "raw_end_byte",
+      "before": 11635,
+      "after": 12287
+    },
+    {
+      "id": "FULL-133",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-133",
+      "field": "first_line",
+      "before": 297,
+      "after": 302
+    },
+    {
+      "id": "FULL-133",
+      "field": "last_line",
+      "before": 327,
+      "after": 332
+    },
+    {
+      "id": "FULL-133",
+      "field": "raw_start_byte",
+      "before": 13419,
+      "after": 14071
+    },
+    {
+      "id": "FULL-133",
+      "field": "raw_end_byte",
+      "before": 14515,
+      "after": 15167
+    },
+    {
+      "id": "FULL-133",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-134",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-134",
+      "field": "first_line",
+      "before": 342,
+      "after": 347
+    },
+    {
+      "id": "FULL-134",
+      "field": "last_line",
+      "before": 353,
+      "after": 358
+    },
+    {
+      "id": "FULL-134",
+      "field": "raw_start_byte",
+      "before": 15448,
+      "after": 16100
+    },
+    {
+      "id": "FULL-134",
+      "field": "raw_end_byte",
+      "before": 15776,
+      "after": 16428
+    },
+    {
+      "id": "FULL-134",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-135",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-135",
+      "field": "first_line",
+      "before": 361,
+      "after": 366
+    },
+    {
+      "id": "FULL-135",
+      "field": "last_line",
+      "before": 379,
+      "after": 384
+    },
+    {
+      "id": "FULL-135",
+      "field": "raw_start_byte",
+      "before": 16223,
+      "after": 16875
+    },
+    {
+      "id": "FULL-135",
+      "field": "raw_end_byte",
+      "before": 16919,
+      "after": 17571
+    },
+    {
+      "id": "FULL-135",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-136",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-136",
+      "field": "first_line",
+      "before": 394,
+      "after": 399
+    },
+    {
+      "id": "FULL-136",
+      "field": "last_line",
+      "before": 398,
+      "after": 403
+    },
+    {
+      "id": "FULL-136",
+      "field": "raw_start_byte",
+      "before": 17868,
+      "after": 18520
+    },
+    {
+      "id": "FULL-136",
+      "field": "raw_end_byte",
+      "before": 18050,
+      "after": 18702
+    },
+    {
+      "id": "FULL-137",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-137",
+      "field": "first_line",
+      "before": 401,
+      "after": 406
+    },
+    {
+      "id": "FULL-137",
+      "field": "last_line",
+      "before": 413,
+      "after": 418
+    },
+    {
+      "id": "FULL-137",
+      "field": "raw_start_byte",
+      "before": 18111,
+      "after": 18763
+    },
+    {
+      "id": "FULL-137",
+      "field": "raw_end_byte",
+      "before": 18547,
+      "after": 19199
+    },
+    {
+      "id": "FULL-137",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-138",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-138",
+      "field": "first_line",
+      "before": 433,
+      "after": 438
+    },
+    {
+      "id": "FULL-138",
+      "field": "last_line",
+      "before": 454,
+      "after": 459
+    },
+    {
+      "id": "FULL-138",
+      "field": "raw_start_byte",
+      "before": 19367,
+      "after": 20019
+    },
+    {
+      "id": "FULL-138",
+      "field": "raw_end_byte",
+      "before": 20093,
+      "after": 20745
+    },
+    {
+      "id": "FULL-138",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-139",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-139",
+      "field": "first_line",
+      "before": 458,
+      "after": 463
+    },
+    {
+      "id": "FULL-139",
+      "field": "last_line",
+      "before": 470,
+      "after": 475
+    },
+    {
+      "id": "FULL-139",
+      "field": "raw_start_byte",
+      "before": 20139,
+      "after": 20791
+    },
+    {
+      "id": "FULL-139",
+      "field": "raw_end_byte",
+      "before": 20631,
+      "after": 21283
+    },
+    {
+      "id": "FULL-140",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-140",
+      "field": "first_line",
+      "before": 505,
+      "after": 510
+    },
+    {
+      "id": "FULL-140",
+      "field": "last_line",
+      "before": 507,
+      "after": 512
+    },
+    {
+      "id": "FULL-140",
+      "field": "raw_start_byte",
+      "before": 21900,
+      "after": 22552
+    },
+    {
+      "id": "FULL-140",
+      "field": "raw_end_byte",
+      "before": 21970,
+      "after": 22622
+    },
+    {
+      "id": "FULL-141",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-141",
+      "field": "first_line",
+      "before": 526,
+      "after": 531
+    },
+    {
+      "id": "FULL-141",
+      "field": "last_line",
+      "before": 538,
+      "after": 543
+    },
+    {
+      "id": "FULL-141",
+      "field": "raw_start_byte",
+      "before": 24708,
+      "after": 25360
+    },
+    {
+      "id": "FULL-141",
+      "field": "raw_end_byte",
+      "before": 25133,
+      "after": 25785
+    },
+    {
+      "id": "FULL-142",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-142",
+      "field": "first_line",
+      "before": 553,
+      "after": 558
+    },
+    {
+      "id": "FULL-142",
+      "field": "last_line",
+      "before": 567,
+      "after": 572
+    },
+    {
+      "id": "FULL-142",
+      "field": "raw_start_byte",
+      "before": 25860,
+      "after": 26512
+    },
+    {
+      "id": "FULL-142",
+      "field": "raw_end_byte",
+      "before": 26324,
+      "after": 26976
+    },
+    {
+      "id": "FULL-142",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "FULL-143",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-143",
+      "field": "first_line",
+      "before": 571,
+      "after": 576
+    },
+    {
+      "id": "FULL-143",
+      "field": "last_line",
+      "before": 579,
+      "after": 584
+    },
+    {
+      "id": "FULL-143",
+      "field": "raw_start_byte",
+      "before": 26371,
+      "after": 27023
+    },
+    {
+      "id": "FULL-143",
+      "field": "raw_end_byte",
+      "before": 26496,
+      "after": 27148
+    },
+    {
+      "id": "FULL-144",
+      "field": "document",
+      "before": {
+        "path": "docs/TESTING.md",
+        "bytes": 27563,
+        "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+      },
+      "after": {
+        "path": "docs/TESTING.md",
+        "bytes": 28215,
+        "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+      }
+    },
+    {
+      "id": "FULL-144",
+      "field": "first_line",
+      "before": 589,
+      "after": 594
+    },
+    {
+      "id": "FULL-144",
+      "field": "last_line",
+      "before": 605,
+      "after": 610
+    },
+    {
+      "id": "FULL-144",
+      "field": "raw_start_byte",
+      "before": 26893,
+      "after": 27545
+    },
+    {
+      "id": "FULL-144",
+      "field": "raw_end_byte",
+      "before": 27318,
+      "after": 27970
+    },
+    {
+      "id": "FULL-166",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-167",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-168",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-169",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-170",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-170",
+      "field": "first_line",
+      "before": 246,
+      "after": 251
+    },
+    {
+      "id": "FULL-170",
+      "field": "last_line",
+      "before": 274,
+      "after": 279
+    },
+    {
+      "id": "FULL-170",
+      "field": "raw_start_byte",
+      "before": 10656,
+      "after": 11140
+    },
+    {
+      "id": "FULL-170",
+      "field": "raw_end_byte",
+      "before": 11769,
+      "after": 12253
+    },
+    {
+      "id": "FULL-171",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-171",
+      "field": "first_line",
+      "before": 294,
+      "after": 299
+    },
+    {
+      "id": "FULL-171",
+      "field": "last_line",
+      "before": 331,
+      "after": 336
+    },
+    {
+      "id": "FULL-171",
+      "field": "raw_start_byte",
+      "before": 12892,
+      "after": 13376
+    },
+    {
+      "id": "FULL-171",
+      "field": "raw_end_byte",
+      "before": 14654,
+      "after": 15138
+    },
+    {
+      "id": "FULL-172",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-172",
+      "field": "first_line",
+      "before": 344,
+      "after": 354
+    },
+    {
+      "id": "FULL-172",
+      "field": "last_line",
+      "before": 388,
+      "after": 398
+    },
+    {
+      "id": "FULL-172",
+      "field": "raw_start_byte",
+      "before": 15350,
+      "after": 16358
+    },
+    {
+      "id": "FULL-172",
+      "field": "raw_end_byte",
+      "before": 17053,
+      "after": 18061
+    },
+    {
+      "id": "FULL-173",
+      "field": "document",
+      "before": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 21003,
+        "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c"
+      },
+      "after": {
+        "path": "docs/architecture/sdk-architecture-diagrams.md",
+        "bytes": 22011,
+        "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+      }
+    },
+    {
+      "id": "FULL-173",
+      "field": "first_line",
+      "before": 442,
+      "after": 452
+    },
+    {
+      "id": "FULL-173",
+      "field": "last_line",
+      "before": 445,
+      "after": 455
+    },
+    {
+      "id": "FULL-173",
+      "field": "raw_start_byte",
+      "before": 20297,
+      "after": 21305
+    },
+    {
+      "id": "FULL-173",
+      "field": "raw_end_byte",
+      "before": 20406,
+      "after": 21414
+    },
+    {
+      "id": "FULL-181",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-182",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-183",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-184",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-185",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-186",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-187",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-187",
+      "field": "first_line",
+      "before": 307,
+      "after": 309
+    },
+    {
+      "id": "FULL-187",
+      "field": "last_line",
+      "before": 325,
+      "after": 327
+    },
+    {
+      "id": "FULL-187",
+      "field": "raw_start_byte",
+      "before": 18049,
+      "after": 18235
+    },
+    {
+      "id": "FULL-187",
+      "field": "raw_end_byte",
+      "before": 18834,
+      "after": 19020
+    },
+    {
+      "id": "FULL-188",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-188",
+      "field": "first_line",
+      "before": 370,
+      "after": 380
+    },
+    {
+      "id": "FULL-188",
+      "field": "last_line",
+      "before": 378,
+      "after": 388
+    },
+    {
+      "id": "FULL-188",
+      "field": "raw_start_byte",
+      "before": 22273,
+      "after": 23199
+    },
+    {
+      "id": "FULL-188",
+      "field": "raw_end_byte",
+      "before": 22597,
+      "after": 23523
+    },
+    {
+      "id": "FULL-189",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-189",
+      "field": "first_line",
+      "before": 385,
+      "after": 395
+    },
+    {
+      "id": "FULL-189",
+      "field": "last_line",
+      "before": 399,
+      "after": 409
+    },
+    {
+      "id": "FULL-189",
+      "field": "raw_start_byte",
+      "before": 22778,
+      "after": 23704
+    },
+    {
+      "id": "FULL-189",
+      "field": "raw_end_byte",
+      "before": 23102,
+      "after": 24028
+    },
+    {
+      "id": "FULL-190",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-190",
+      "field": "first_line",
+      "before": 407,
+      "after": 417
+    },
+    {
+      "id": "FULL-190",
+      "field": "last_line",
+      "before": 409,
+      "after": 419
+    },
+    {
+      "id": "FULL-190",
+      "field": "raw_start_byte",
+      "before": 23249,
+      "after": 24175
+    },
+    {
+      "id": "FULL-190",
+      "field": "raw_end_byte",
+      "before": 23466,
+      "after": 24392
+    },
+    {
+      "id": "FULL-191",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-191",
+      "field": "first_line",
+      "before": 486,
+      "after": 496
+    },
+    {
+      "id": "FULL-191",
+      "field": "last_line",
+      "before": 497,
+      "after": 507
+    },
+    {
+      "id": "FULL-191",
+      "field": "raw_start_byte",
+      "before": 28986,
+      "after": 29912
+    },
+    {
+      "id": "FULL-191",
+      "field": "raw_end_byte",
+      "before": 29193,
+      "after": 30119
+    },
+    {
+      "id": "FULL-192",
+      "field": "document",
+      "before": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 31175,
+        "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+      },
+      "after": {
+        "path": "docs/usage/device-discovery.md",
+        "bytes": 32253,
+        "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+      }
+    },
+    {
+      "id": "FULL-192",
+      "field": "first_line",
+      "before": 500,
+      "after": 510
+    },
+    {
+      "id": "FULL-192",
+      "field": "last_line",
+      "before": 510,
+      "after": 520
+    },
+    {
+      "id": "FULL-192",
+      "field": "raw_start_byte",
+      "before": 29232,
+      "after": 30158
+    },
+    {
+      "id": "FULL-192",
+      "field": "raw_end_byte",
+      "before": 29426,
+      "after": 30352
+    },
+    {
+      "id": "FULL-217",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-218",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-219",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-219",
+      "field": "first_line",
+      "before": 127,
+      "after": 138
+    },
+    {
+      "id": "FULL-219",
+      "field": "last_line",
+      "before": 130,
+      "after": 141
+    },
+    {
+      "id": "FULL-219",
+      "field": "raw_start_byte",
+      "before": 7511,
+      "after": 8449
+    },
+    {
+      "id": "FULL-219",
+      "field": "raw_end_byte",
+      "before": 7774,
+      "after": 8712
+    },
+    {
+      "id": "FULL-220",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-220",
+      "field": "first_line",
+      "before": 149,
+      "after": 160
+    },
+    {
+      "id": "FULL-220",
+      "field": "last_line",
+      "before": 154,
+      "after": 165
+    },
+    {
+      "id": "FULL-220",
+      "field": "raw_start_byte",
+      "before": 9167,
+      "after": 10105
+    },
+    {
+      "id": "FULL-220",
+      "field": "raw_end_byte",
+      "before": 9318,
+      "after": 10256
+    },
+    {
+      "id": "FULL-221",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-221",
+      "field": "first_line",
+      "before": 184,
+      "after": 195
+    },
+    {
+      "id": "FULL-221",
+      "field": "last_line",
+      "before": 188,
+      "after": 199
+    },
+    {
+      "id": "FULL-221",
+      "field": "raw_start_byte",
+      "before": 11576,
+      "after": 12514
+    },
+    {
+      "id": "FULL-221",
+      "field": "raw_end_byte",
+      "before": 11833,
+      "after": 12771
+    },
+    {
+      "id": "FULL-222",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-222",
+      "field": "first_line",
+      "before": 204,
+      "after": 215
+    },
+    {
+      "id": "FULL-222",
+      "field": "last_line",
+      "before": 207,
+      "after": 218
+    },
+    {
+      "id": "FULL-222",
+      "field": "raw_start_byte",
+      "before": 12771,
+      "after": 13709
+    },
+    {
+      "id": "FULL-222",
+      "field": "raw_end_byte",
+      "before": 12918,
+      "after": 13856
+    },
+    {
+      "id": "FULL-223",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-223",
+      "field": "first_line",
+      "before": 212,
+      "after": 223
+    },
+    {
+      "id": "FULL-223",
+      "field": "last_line",
+      "before": 216,
+      "after": 227
+    },
+    {
+      "id": "FULL-223",
+      "field": "raw_start_byte",
+      "before": 13070,
+      "after": 14008
+    },
+    {
+      "id": "FULL-223",
+      "field": "raw_end_byte",
+      "before": 13339,
+      "after": 14277
+    },
+    {
+      "id": "FULL-224",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-224",
+      "field": "first_line",
+      "before": 238,
+      "after": 249
+    },
+    {
+      "id": "FULL-224",
+      "field": "last_line",
+      "before": 240,
+      "after": 251
+    },
+    {
+      "id": "FULL-224",
+      "field": "raw_start_byte",
+      "before": 14786,
+      "after": 15724
+    },
+    {
+      "id": "FULL-224",
+      "field": "raw_end_byte",
+      "before": 14846,
+      "after": 15784
+    },
+    {
+      "id": "FULL-225",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-225",
+      "field": "first_line",
+      "before": 259,
+      "after": 270
+    },
+    {
+      "id": "FULL-225",
+      "field": "last_line",
+      "before": 263,
+      "after": 274
+    },
+    {
+      "id": "FULL-225",
+      "field": "raw_start_byte",
+      "before": 16159,
+      "after": 17097
+    },
+    {
+      "id": "FULL-225",
+      "field": "raw_end_byte",
+      "before": 16351,
+      "after": 17289
+    },
+    {
+      "id": "FULL-226",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-226",
+      "field": "first_line",
+      "before": 271,
+      "after": 282
+    },
+    {
+      "id": "FULL-226",
+      "field": "last_line",
+      "before": 283,
+      "after": 294
+    },
+    {
+      "id": "FULL-226",
+      "field": "raw_start_byte",
+      "before": 16676,
+      "after": 17614
+    },
+    {
+      "id": "FULL-226",
+      "field": "raw_end_byte",
+      "before": 17125,
+      "after": 18063
+    },
+    {
+      "id": "FULL-227",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-227",
+      "field": "first_line",
+      "before": 307,
+      "after": 318
+    },
+    {
+      "id": "FULL-227",
+      "field": "last_line",
+      "before": 327,
+      "after": 338
+    },
+    {
+      "id": "FULL-227",
+      "field": "raw_start_byte",
+      "before": 18806,
+      "after": 19744
+    },
+    {
+      "id": "FULL-227",
+      "field": "raw_end_byte",
+      "before": 19500,
+      "after": 20438
+    },
+    {
+      "id": "FULL-228",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-228",
+      "field": "first_line",
+      "before": 352,
+      "after": 363
+    },
+    {
+      "id": "FULL-228",
+      "field": "last_line",
+      "before": 356,
+      "after": 367
+    },
+    {
+      "id": "FULL-228",
+      "field": "raw_start_byte",
+      "before": 21224,
+      "after": 22162
+    },
+    {
+      "id": "FULL-228",
+      "field": "raw_end_byte",
+      "before": 21521,
+      "after": 22459
+    },
+    {
+      "id": "FULL-229",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-229",
+      "field": "first_line",
+      "before": 362,
+      "after": 373
+    },
+    {
+      "id": "FULL-229",
+      "field": "last_line",
+      "before": 376,
+      "after": 387
+    },
+    {
+      "id": "FULL-229",
+      "field": "raw_start_byte",
+      "before": 21802,
+      "after": 22740
+    },
+    {
+      "id": "FULL-229",
+      "field": "raw_end_byte",
+      "before": 22193,
+      "after": 23131
+    },
+    {
+      "id": "FULL-230",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-230",
+      "field": "first_line",
+      "before": 433,
+      "after": 444
+    },
+    {
+      "id": "FULL-230",
+      "field": "last_line",
+      "before": 435,
+      "after": 446
+    },
+    {
+      "id": "FULL-230",
+      "field": "raw_start_byte",
+      "before": 26592,
+      "after": 27530
+    },
+    {
+      "id": "FULL-230",
+      "field": "raw_end_byte",
+      "before": 26671,
+      "after": 27609
+    },
+    {
+      "id": "FULL-231",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-231",
+      "field": "first_line",
+      "before": 472,
+      "after": 483
+    },
+    {
+      "id": "FULL-231",
+      "field": "last_line",
+      "before": 474,
+      "after": 485
+    },
+    {
+      "id": "FULL-231",
+      "field": "raw_start_byte",
+      "before": 29705,
+      "after": 30643
+    },
+    {
+      "id": "FULL-231",
+      "field": "raw_end_byte",
+      "before": 29787,
+      "after": 30725
+    },
+    {
+      "id": "FULL-232",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-232",
+      "field": "first_line",
+      "before": 490,
+      "after": 501
+    },
+    {
+      "id": "FULL-232",
+      "field": "last_line",
+      "before": 497,
+      "after": 508
+    },
+    {
+      "id": "FULL-232",
+      "field": "raw_start_byte",
+      "before": 30811,
+      "after": 31749
+    },
+    {
+      "id": "FULL-232",
+      "field": "raw_end_byte",
+      "before": 31180,
+      "after": 32118
+    },
+    {
+      "id": "FULL-233",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-233",
+      "field": "first_line",
+      "before": 501,
+      "after": 512
+    },
+    {
+      "id": "FULL-233",
+      "field": "last_line",
+      "before": 503,
+      "after": 514
+    },
+    {
+      "id": "FULL-233",
+      "field": "raw_start_byte",
+      "before": 31256,
+      "after": 32194
+    },
+    {
+      "id": "FULL-233",
+      "field": "raw_end_byte",
+      "before": 31350,
+      "after": 32288
+    },
+    {
+      "id": "FULL-234",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-234",
+      "field": "first_line",
+      "before": 514,
+      "after": 525
+    },
+    {
+      "id": "FULL-234",
+      "field": "last_line",
+      "before": 517,
+      "after": 528
+    },
+    {
+      "id": "FULL-234",
+      "field": "raw_start_byte",
+      "before": 31995,
+      "after": 32933
+    },
+    {
+      "id": "FULL-234",
+      "field": "raw_end_byte",
+      "before": 32213,
+      "after": 33151
+    },
+    {
+      "id": "FULL-235",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-235",
+      "field": "first_line",
+      "before": 528,
+      "after": 539
+    },
+    {
+      "id": "FULL-235",
+      "field": "last_line",
+      "before": 535,
+      "after": 546
+    },
+    {
+      "id": "FULL-235",
+      "field": "raw_start_byte",
+      "before": 32732,
+      "after": 33670
+    },
+    {
+      "id": "FULL-235",
+      "field": "raw_end_byte",
+      "before": 33050,
+      "after": 33988
+    },
+    {
+      "id": "FULL-236",
+      "field": "document",
+      "before": {
+        "path": "src/Core/README.md",
+        "bytes": 46873,
+        "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+      },
+      "after": {
+        "path": "src/Core/README.md",
+        "bytes": 47811,
+        "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+      }
+    },
+    {
+      "id": "FULL-236",
+      "field": "first_line",
+      "before": 575,
+      "after": 586
+    },
+    {
+      "id": "FULL-236",
+      "field": "last_line",
+      "before": 598,
+      "after": 609
+    },
+    {
+      "id": "FULL-236",
+      "field": "raw_start_byte",
+      "before": 35802,
+      "after": 36740
+    },
+    {
+      "id": "FULL-236",
+      "field": "raw_end_byte",
+      "before": 37106,
+      "after": 38044
+    },
+    {
+      "id": "FULL-287",
+      "field": "document",
+      "before": {
+        "path": "src/Management/src/IManagementSession.cs",
+        "bytes": 9756,
+        "sha256": "4c4195bfb177e2b38ea5bfeeb444235bc19eccef4aced3563bdc62ceef7b7db8"
+      },
+      "after": {
+        "path": "src/Management/src/IManagementSession.cs",
+        "bytes": 9755,
+        "sha256": "ac808ecdfff3140cd8c3ac8987676255beae14d6de2cff85e9b0bd30f4d71243"
+      }
+    },
+    {
+      "id": "FULL-348",
+      "field": "document",
+      "before": {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "bytes": 15121,
+        "sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba"
+      },
+      "after": {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "bytes": 15228,
+        "sha256": "1d48c7feea15a2ea287841d109d7ad02db24c4f817189cade61d0febf761e422"
+      }
+    },
+    {
+      "id": "FULL-366",
+      "field": "document",
+      "before": {
+        "path": "src/OpenPgp/src/Kdf.cs",
+        "bytes": 13890,
+        "sha256": "899a908e9b7a0a14979ab68225533128855aa50b6462cf24a069b7dfd9c65d15"
+      },
+      "after": {
+        "path": "src/OpenPgp/src/Kdf.cs",
+        "bytes": 13889,
+        "sha256": "91fb2cdd88db9c27e6dc60547f9b9377011384904755eb31c5c28a3a2b07915e"
+      }
+    },
+    {
+      "id": "FULL-368",
+      "field": "document",
+      "before": {
+        "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+        "bytes": 7767,
+        "sha256": "8143bdcf68b605697757b386fe31c37017bd9e54fa30012aa0a9d6042ccf0701"
+      },
+      "after": {
+        "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+        "bytes": 7766,
+        "sha256": "55c10a9b5abf319a78482b269cd27ceb84cffa5527fddc50195b206742c8691c"
+      }
+    },
+    {
+      "id": "FULL-412",
+      "field": "document",
+      "before": {
+        "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+        "bytes": 4782,
+        "sha256": "eebd95ddec5391e6de801e08cb92f14d0ef02f0caf200505e5d2141b87787a21"
+      },
+      "after": {
+        "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+        "bytes": 4781,
+        "sha256": "da0577dd3d934ecbf47a4ba7926105c765bb6e50c983522c79bcdbbcb564b330"
+      }
+    },
+    {
+      "id": "EXT-206",
+      "field": "document",
+      "before": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "bytes": 2864,
+        "sha256": "eae08ac681f5f486da9ab9116bb9ca1e5825374adc1b4197082eaf0c89e30f33"
+      },
+      "after": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "bytes": 2863,
+        "sha256": "bff5a30697195866b0cceecef21cf6fef752ac5ccb726b53ca8f7b9444db6249"
+      }
+    },
+    {
+      "id": "EXT-206",
+      "field": "compiled.source_document",
+      "before": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "bytes": 2864,
+        "sha256": "eae08ac681f5f486da9ab9116bb9ca1e5825374adc1b4197082eaf0c89e30f33"
+      },
+      "after": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "bytes": 2863,
+        "sha256": "bff5a30697195866b0cceecef21cf6fef752ac5ccb726b53ca8f7b9444db6249"
+      },
+      "preserved_as": "compiled.source_document_at_preparation",
+      "role": "Current raw source identity; original preparation identity stays explicit, not relabelled."
+    },
+    {
+      "id": "EXT-208",
+      "field": "document",
+      "before": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "bytes": 5790,
+        "sha256": "c2d596d0d3c380b07317df8fd9ffc2936dac7b2815ecc09f149c2f70171b8f9c"
+      },
+      "after": {
+        "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+        "bytes": 5789,
+        "sha256": "e974602d33cd31c80dedc87533896b47720ea0c4df8b813ce6e11ba4a63b9213"
+      }
+    },
+    {
+      "id": "EXT-212",
+      "field": "document",
+      "before": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "bytes": 4047,
+        "sha256": "2fa737b315df81137b73f495045d4689f8ad166daa7f72264ce683167bd64ee0"
+      },
+      "after": {
+        "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+        "bytes": 4046,
+        "sha256": "d5a291014dce20ec390d44326044fa33d29f07b7a33554b79f8cd27bf4ae3f04"
+      }
+    }
+  ],
+  "authority_scope": "Only FULL032 gets the explicit focused accepted body authority/review; other46 aggregate FIDO authority/review references remain unchanged. Eight guide source identities/coordinates and two WA compiled source aliases are precise metadata updates."
+}

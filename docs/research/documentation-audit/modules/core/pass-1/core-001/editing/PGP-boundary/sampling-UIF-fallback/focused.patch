@@ -1,0 +1,24 @@
+--- a/src/OpenPgp/src/OpenPgpSession.cs
++++ b/src/OpenPgp/src/OpenPgpSession.cs
+@@ -362,7 +362,8 @@
+         }
+         catch (Exception ex)
+         {
+-            // UIF is advisory metadata. A failed read must not replace the cryptographic operation.
++            // UIF is advisory metadata. If diagnostic logging succeeds, a failed read falls back to
++            // PolicyMayRequire so the cryptographic operation can proceed. Logging failures propagate.
+             _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
+             basis = UserPresenceBasis.PolicyMayRequire;
+         }
+--- a/src/OpenPgp/CLAUDE.md
++++ b/src/OpenPgp/CLAUDE.md
+@@ -214,7 +214,8 @@
+ When `SessionCreationOptions.UserPresencePrompt` is supplied, signing, decryption, authentication, and
+ attestation use the relevant cached UIF before the cryptographic APDU. `On`/`Fixed` map to `PolicyRequires`,
+ `Cached`/`CachedFixed` map to `PolicyMayRequire`, and `Off` is silent. Attestation uses the attestation-key
+-UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` without replacing the cryptographic
++UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` when diagnostic logging succeeds,
++allowing the cryptographic operation to proceed. A logging exception propagates instead and can prevent that
+ operation; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
+ that policy. A direct GET DATA is issued only when the cached application-related data omitted that key's UIF.
+ Device APDU errors resolve as `Failed`; OpenPGP statuses including 6600 currently receive no `TimedOut`

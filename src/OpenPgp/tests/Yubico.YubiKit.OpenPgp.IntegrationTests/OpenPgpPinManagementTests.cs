@@ -76,10 +76,11 @@ public class OpenPgpPinManagementTests
                 var signature = await session.SignAsync(message, System.Security.Cryptography.HashAlgorithmName.SHA256);
                 Assert.True(signature.Length > 0);
 
-                // The following signing failure probes signature state; other-operation state is untested here.
+                // This case leaves signature policy uncontrolled: Always could already consume authorization
+                // above. The later failure alone does not isolate Unverify's effect; other-operation state is untested.
                 await session.UnverifyPinAsync();
 
-                // Signing should now fail because PIN is no longer verified
+                // Assert an APDU exception, without attributing its cause or checking the exact status word.
                 await Assert.ThrowsAsync<ApduException>(
                     () => session.SignAsync(
                         "After unverify"u8.ToArray(),
@@ -123,8 +124,8 @@ public class OpenPgpPinManagementTests
             resetBeforeUse: true,
             action: async session =>
             {
-                // Attempt key generation without verifying Admin PIN
-                // The card should reject the operation with a security status error
+                // Attempt key generation without verifying Admin PIN. The assertion checks exception type,
+                // rather than a specific security status word or the phase at which generation fails.
                 await Assert.ThrowsAsync<ApduException>(
                     () => session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, KeyType.P256)));
             });

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "core-001:unit:a579b6a5cf4242e4",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "raw_verdict": {
+      "suffix": "a579b6a5cf4242e4",
+      "id": "core-001:unit:a579b6a5cf4242e4",
+      "verdict_text": "**Known deferred qualification, zero clean credit:** PIN allocation precedes awaited discovery outside try. Already owned by CORE-PIV-X006 / PIVIMP-006, not a new issue or runtime fix."
+    },
+    "final_clean_credit": 0,
+    "reason": "Known CORE-PIV-X006 / PIVIMP-006 pre-try discovery secret-cleanup qualification; not a new bug or runtime fix."
+  },
+  {
+    "id": "core-001:unit:8fc815177a95b970",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "raw_verdict": {
+      "suffix": "8fc815177a95b970",
+      "id": "core-001:unit:8fc815177a95b970",
+      "verdict_text": "**Known deferred qualification, zero clean credit:** management-key bytes likewise precede discovery outside the clearing scope; same preserved finding."
+    },
+    "final_clean_credit": 0,
+    "reason": "Known CORE-PIV-X006 / PIVIMP-006 pre-try discovery secret-cleanup qualification; not a new bug or runtime fix."
+  },
+  {
+    "id": "core-001:unit:89c5d1ecb6fd0e8d",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "raw_verdict": {
+      "suffix": "89c5d1ecb6fd0e8d",
+      "id": "core-001:unit:89c5d1ecb6fd0e8d",
+      "verdict_text": "**Edited overlap, zero clean credit:** the pinned example's post-PIN setup precedes try; accepted PIV revision2 moved that setup into the protected scope. Read history is preserved, not counted as unchanged clean content."
+    },
+    "final_clean_credit": 0,
+    "reason": "Pinned README example already changed by accepted PIV revision2 protection-scope fix; exact edited overlap is excluded."
+  }
+]

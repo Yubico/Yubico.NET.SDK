@@ -1,0 +1,31 @@
+{
+  "sample_finding": "SAMPLE-B2-003",
+  "focused_patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+  "independent_review": "PENDING",
+  "records": [
+    {
+      "path": "file-disposition.json",
+      "sha256": "34b43e1e254971b622b05b7f931dc6d80fc6a02daf16c01452c2f9e777e7a227"
+    },
+    {
+      "path": "inputs.json",
+      "sha256": "7678bd8c995afa1891621738b528a287c980d4d34bb8494f94afe7e8d1b0a012"
+    },
+    {
+      "path": "report.md",
+      "sha256": "2817f5dc862dbab86e951fe2f42001ac196067c48398572ed9b55bcd6876c6df"
+    },
+    {
+      "path": "source-evidence.json",
+      "sha256": "8c7622d975b46ded2d5ff28874169ec73582fdffc88bedc21e01d4aa4e2b0606"
+    },
+    {
+      "path": "source.patch",
+      "sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86"
+    },
+    {
+      "path": "static-preservation.json",
+      "sha256": "9405febf09f454983e2433577cc7619ac64128d7df09ede250cd2bdc9c173043"
+    }
+  ]
+}

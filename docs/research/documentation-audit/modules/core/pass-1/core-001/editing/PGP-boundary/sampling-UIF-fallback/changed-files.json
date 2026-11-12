@@ -1,0 +1,34 @@
+[
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.cs",
+    "before_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "accepted_primary_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "exact_raw_match": true,
+    "after_sha256": "a94cc912faad198fb7adc595cb0a6846d98a53b8bf33a489e0e69637451d550e",
+    "changed_ranges": [
+      {
+        "before_start": 365,
+        "before_count": 1,
+        "after_start": 365,
+        "after_count": 2
+      }
+    ],
+    "sample_issue": "SAMPLE-PGP-001"
+  },
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "before_sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "accepted_primary_sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "exact_raw_match": true,
+    "after_sha256": "1d48c7feea15a2ea287841d109d7ad02db24c4f817189cade61d0febf761e422",
+    "changed_ranges": [
+      {
+        "before_start": 217,
+        "before_count": 1,
+        "after_start": 217,
+        "after_count": 2
+      }
+    ],
+    "sample_issue": "SAMPLE-PGP-001"
+  }
+]

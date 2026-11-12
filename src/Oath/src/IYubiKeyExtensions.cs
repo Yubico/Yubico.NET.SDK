@@ -39,7 +39,9 @@ public static class IYubiKeyExtensions
         ///     The caller must dispose the session with <c>await using</c> to close that connection.
         /// </returns>
         /// <remarks>
-        ///     A physical YubiKey admits one live connection, and each connection admits one live session.
+        ///     Within this process, grouped views admit one live connection across known member IDs,
+        ///     and each connection admits one live session. Disjoint scoped views are not coordinated
+        ///     merely because they refer to the same physical key.
         ///     To use a connection you already own, call <see cref="OathSession.CreateAsync" /> instead;
         ///     that factory borrows the connection and leaves its disposal to you.
         /// </remarks>

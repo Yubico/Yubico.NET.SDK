@@ -1,0 +1,405 @@
+[
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "primary_owner": "B5",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain protocol owner, direct borrow, immediate disposal admission and initialization completion; reopen whole-workflow/callback lifetime language when lease policy changes.",
+    "pinned_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "local_unchanged_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "read_scope_from_completed_boundary": "complete actual shared session implementation"
+  },
+  {
+    "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "primary_owner": "B5/C",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X004"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain snapshot versus referenced-service/parameter ownership and effective override provenance; no deep-copy or service disposal promise.",
+    "pinned_sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f",
+    "local_unchanged_sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f",
+    "read_scope_from_completed_boundary": "complete options implementation"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "primary_owner": "C/B5",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain request/terminal state, None resolution token, primary-error policy and result-producing owner duties; reopen with PIV callback timing/output-transfer changes.",
+    "pinned_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "local_unchanged_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "read_scope_from_completed_boundary": "complete actual notification implementation"
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+    "primary_owner": "C",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X006"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain preset digit-filter policy; C owns explicit UTF-16 length units and generic reader implementation corrections.",
+    "pinned_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "local_unchanged_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "read_scope_from_completed_boundary": "complete options implementation"
+  },
+  {
+    "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+    "primary_owner": "B5",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X002"
+    ],
+    "reason_and_precise_reopening_trigger": "Per-exchange admission/drain is confirmed; reopen universal sessions-one-operation wording with actual PIV multi-command sites, without adding a runtime lock.",
+    "pinned_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "local_unchanged_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "read_scope_from_completed_boundary": "complete guard implementation"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "primary_owner": "B6",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain guard sharing, source cancellation and copied-result boundaries; recovery/formatting limits remain B6 candidates.",
+    "pinned_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "local_unchanged_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "read_scope_from_completed_boundary": "complete protocol implementation"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs",
+    "primary_owner": "B6",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X004"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain one guarded handshake and returned wrapper; B6 owns profile/phase/cleanup assertions and exact original sources.",
+    "pinned_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "local_unchanged_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "read_scope_from_completed_boundary": "complete initializer delegation"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "primary_owner": "B6",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain actual copied owner and full Clear including SW; no transport/fragment/decrypted temporary erasure follows.",
+    "pinned_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "local_unchanged_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "read_scope_from_completed_boundary": "complete response implementation"
+  },
+  {
+    "path": "src/Core/src/Utilities/Tlv.cs",
+    "primary_owner": "C",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain scoped owner disposal; C corrects Value-copy wording and generic parser admission separately. PIV copies before disposing.",
+    "pinned_sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+    "local_unchanged_sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+    "read_scope_from_completed_boundary": "complete TLV implementation"
+  },
+  {
+    "path": "src/Core/src/Utilities/TlvHelper.cs",
+    "primary_owner": "C",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain distinct list/dictionary/encoding/result ownership; PIV PRINTED uses fixed nested disposable TLVs while public metadata dictionary copies are nonsecret.",
+    "pinned_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+    "local_unchanged_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+    "read_scope_from_completed_boundary": "complete helper implementation"
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+    "primary_owner": "B1",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001"
+    ],
+    "reason_and_precise_reopening_trigger": "B1-C001 owns correction of NIST-until-reset and requested-versus-observed power claims; strict Exclusive and explicit shared opt-ins retained.",
+    "pinned_sha256": "7261185284f657f0a78ab18cb42f6aa6abf31c0ce0bd38ac0d05b436f20716db",
+    "local_unchanged_sha256": "7261185284f657f0a78ab18cb42f6aa6abf31c0ce0bd38ac0d05b436f20716db",
+    "read_scope_from_completed_boundary": "complete sharing source"
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+    "primary_owner": "B1",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain constructor snapshot and registered versus direct responsibility, cleanup contracts and original exception preservation; do not broaden to physical isolation.",
+    "pinned_sha256": "891ed9acdf57c4436707ed8ec847e8df9f796261c4b3951c0876774f982a2e48",
+    "local_unchanged_sha256": "891ed9acdf57c4436707ed8ec847e8df9f796261c4b3951c0876774f982a2e48",
+    "read_scope_from_completed_boundary": "complete factory implementation"
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+    "primary_owner": "B1",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001"
+    ],
+    "reason_and_precise_reopening_trigger": "Reopen power-off causal comment; actual TryRelease checks disconnect/context status, distinct from observed PIN/power state.",
+    "pinned_sha256": "657cf8862442fc697cfa675186ab9f7b29c5c1e1c7773885591acf8946783584",
+    "local_unchanged_sha256": "657cf8862442fc697cfa675186ab9f7b29c5c1e1c7773885591acf8946783584",
+    "read_scope_from_completed_boundary": "complete native-resource wrapper"
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+    "primary_owner": "B1",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain exact native-release proof/root/registration ordering and quarantine. No full independent second native audit credited.",
+    "pinned_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+    "local_unchanged_sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+    "read_scope_from_completed_boundary": "bounded CompleteShutdown/failure/root context400\u2013496; family full report reused"
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "primary_owner": "B1/B5",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain single concrete transport/no fallback and cleanup that preserves original initializer error; direct PIV borrowing plus OwnConnection is actual applet use.",
+    "pinned_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "local_unchanged_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "read_scope_from_completed_boundary": "resolver and creation helper175\u2013305"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+    "primary_owner": "B6",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain contained StaticKeys disposal; record cloning aliases same contained owner, rather than producing independent key lifetime.",
+    "pinned_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+    "local_unchanged_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+    "read_scope_from_completed_boundary": "complete parameter implementation"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "primary_owner": "B6",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain copied list membership but exact key/certificate object aliases and disposal; profile/trust/provisioning remain separate from host ownership.",
+    "pinned_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+    "local_unchanged_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+    "read_scope_from_completed_boundary": "complete parameter implementation"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "primary_owner": "B6",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain cloned caller sources/contained owner/derived session-key distinction; parameter/session/provider cleanup have separate scopes.",
+    "pinned_sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68",
+    "local_unchanged_sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68",
+    "read_scope_from_completed_boundary": "complete static-key implementation"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+    "primary_owner": "B1",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X005"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain share-mode/snapshot/requested UNPOWER oracle; B1 owns source/test power-isolation commentary correction; no new native/device result.",
+    "pinned_sha256": "edd11a4a91481a80248ef61ade51d778695a7e754344194848b30a0ca6e441c3",
+    "local_unchanged_sha256": "edd11a4a91481a80248ef61ade51d778695a7e754344194848b30a0ca6e441c3",
+    "read_scope_from_completed_boundary": "complete test assertions with factory/native context"
+  },
+  {
+    "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "primary_owner": "B1/Tests.Shared",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X003",
+      "CORE-PIV-X005"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain exact outgoing snapshots, queued results and sync/async disposal counter; snapshots are distinct from captured actual response owners.",
+    "pinned_sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4",
+    "local_unchanged_sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4",
+    "read_scope_from_completed_boundary": "complete actual recorder helper"
+  },
+  {
+    "path": "src/Core/README.md",
+    "primary_owner": "SHARED",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain already useful strict-sharing migration, direct factory bypass, known-member/physical limits and borrowed input lifetime; localize PIV whole-workflow bound through SHARED editor.",
+    "pinned_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "local_unchanged_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "read_scope_from_completed_boundary": "relevant discovery/ownership/PCSC/raw sections1\u2013500; source report context reused"
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "primary_owner": "SHARED",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain existing ownership/gates; route B1/B5/B6/C factual corrections to shared editor, without rewriting current instruction source.",
+    "pinned_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "local_unchanged_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "read_scope_from_completed_boundary": "complete contributor instructions"
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "primary_owner": "SHARED/C/B5",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X006"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain parsed-completion-before-unpad and borrowed prompt wording; reopen only actual PIV/callback/whole-workflow effects after changed policy.",
+    "pinned_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "local_unchanged_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "read_scope_from_completed_boundary": "complete guide, with PIV193\u2013200 and lifetime221\u2013235"
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "primary_owner": "SHARED/B5/B6",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain complete borrowed raw-to-PIV session example and admitted cancellation distinction; no whole-public-workflow lease or guaranteed recovery inferred.",
+    "pinned_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "local_unchanged_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "read_scope_from_completed_boundary": "PIV examples1\u201380 and ownership/buffers235\u2013283; native table located"
+  },
+  {
+    "path": "docs/architecture/applet-public-api.md",
+    "primary_owner": "SHARED/B5",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X004"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain hidden owned versus direct borrowed factories, snapshot/referenced object semantics and PIV Bio enum; no new API project or grammar change.",
+    "pinned_sha256": "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c",
+    "local_unchanged_sha256": "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c",
+    "read_scope_from_completed_boundary": "product grammar/operations and relevant current decisions1\u2013105"
+  },
+  {
+    "path": "docs/architecture/physical-device-model.md",
+    "primary_owner": "SHARED/A/B1",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001"
+    ],
+    "reason_and_precise_reopening_trigger": "Known-member/disjoint-view/process bounds retain A/B1 ownership. This path is an explicit unchanged dependency, not new full-file review.",
+    "pinned_sha256": "b38d5053935ca3e26cc2821c0487e7dbf43bc764eb6bc1b11cc2156b6911a482",
+    "local_unchanged_sha256": "b38d5053935ca3e26cc2821c0487e7dbf43bc764eb6bc1b11cc2156b6911a482",
+    "read_scope_from_completed_boundary": "family conclusion/reopening referral only"
+  },
+  {
+    "path": "docs/usage/tlv-processing.md",
+    "primary_owner": "SHARED/C",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X003"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain C ownership for source/result/list/TLV cleanup guidance; no full-file PIV review credit or generic policy change.",
+    "pinned_sha256": "5a2a9ac7aaa87230c4f18f4c25bf1aec51ff17ad94915bbb8b96de7bf2b6d7df",
+    "local_unchanged_sha256": "5a2a9ac7aaa87230c4f18f4c25bf1aec51ff17ad94915bbb8b96de7bf2b6d7df",
+    "read_scope_from_completed_boundary": "family conclusion/reopening referral only"
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "primary_owner": "SHARED",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004",
+      "CORE-PIV-X006"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain complete borrowed active-key/input cleanup and F9/timestamp qualifications; reopen precise current PIV fragments after mapped lifetime/gate/tool changes.",
+    "pinned_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "local_unchanged_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "read_scope_from_completed_boundary": "PIV current generate374\u2013421, PIN-only657\u2013700 and module749\u2013762; historical before blocks kept historical"
+  },
+  {
+    "path": "docs/migration/v1-to-v2-map.yml",
+    "primary_owner": "SHARED",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X004",
+      "CORE-PIV-X006"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain known YAML parse defect and exact source-run ID; no parse rerun or map mutation here.",
+    "pinned_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+    "local_unchanged_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+    "read_scope_from_completed_boundary": "inherited DOC-002 referral only"
+  },
+  {
+    "path": "src/Tests.Shared/CLAUDE.md",
+    "primary_owner": "SHARED/A",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X005"
+    ],
+    "reason_and_precise_reopening_trigger": "Retain A-C013 fixture/read-before-allowlist correction ownership; source PIV attribute alone does not establish full-device execution or current fixture state.",
+    "pinned_sha256": "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35",
+    "local_unchanged_sha256": "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35",
+    "read_scope_from_completed_boundary": "complete applicable instructions"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "primary_owner": "SHARED/A/B4",
+    "decision": "REFER-OUTSIDE-OWNER; READ-ONLY",
+    "candidate_ids": [
+      "CORE-PIV-X005"
+    ],
+    "reason_and_precise_reopening_trigger": "No tests run. Existing no-native/authorization/runner filter corrections remain primary-owner work; preserve user physical deferrals and nonzero-count gate.",
+    "pinned_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "local_unchanged_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "read_scope_from_completed_boundary": "complete applicable testing instructions"
+  }
+]

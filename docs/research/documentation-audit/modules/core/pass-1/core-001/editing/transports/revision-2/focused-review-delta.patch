@@ -1,0 +1,79 @@
+--- reviewed/src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs
++++ revision-2/src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs
+@@ -84,10 +84,12 @@
+     ///         whether open and feature transfer succeed.
+     ///     </para>
+     ///     <para>
+-    ///         The constructor's metadata probe checks open with zero access and capability retrieval
+-    ///         (CreateFile + HidD_GetPreparsedData/HidP_GetCaps), not HidD_GetFeature/HidD_SetFeature.
+-    ///         Historical hardware results have their own source,
+-    ///         host, and device scope and do not qualify every deployment of this implementation.
++    ///         The constructor's metadata probe first tries zero desired access and retrieves capabilities
++    ///         (CreateFile + HidD_GetPreparsedData/HidP_GetCaps). If opening the handle or retrieving capabilities
++    ///         throws UnauthorizedAccessException, it retries with GENERIC_READ | GENERIC_WRITE. Constructor
++    ///         success therefore does not establish zero-access success. Neither route exercises
++    ///         HidD_GetFeature/HidD_SetFeature. Historical hardware results retain their own source, host,
++    ///         and device scope and do not qualify every deployment of this implementation.
+     ///     </para>
+     ///     <para>
+     ///         The separate open methods choose access from the operation instead of trying read/write first
+--- reviewed/src/Core/src/Transports/Hid/HidDeviceListener.cs
++++ revision-2/src/Core/src/Transports/Hid/HidDeviceListener.cs
+@@ -67,7 +67,7 @@
+     public abstract void Start();
+ 
+     /// <summary>
+-    /// Stops the listener and releases monitoring resources.
++    /// Requests listener shutdown and platform monitoring-resource cleanup.
+     /// </summary>
+     /// <remarks>
+     /// <para>
+@@ -125,8 +125,12 @@
+     }
+ 
+     /// <summary>
+-    /// Disposes of the listener and releases all resources.
++    /// Updates managed disposal state as part of the platform listener's cleanup attempt.
+     /// </summary>
++    /// <remarks>
++    /// Native cleanup depends on the platform outcome. Failed unregister or retained native state can leave
++    /// resources unresolved; a returned call or diagnostic status alone does not prove native release.
++    /// </remarks>
+     /// <param name="disposing">True if called from Dispose(), false if from finalizer.</param>
+     protected virtual void Dispose(bool disposing)
+     {
+--- reviewed/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
++++ revision-2/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
+@@ -27,7 +27,8 @@
+     ///     Gets an integer-typed property value from a device.
+     /// </summary>
+     /// <param name="device">
+-    ///     The previously opened device against which the property should be queried.
++    ///     The valid IOHIDDeviceRef to query. The caller keeps this reference valid for the query;
++    ///     an opened report connection is not required.
+     /// </param>
+     /// <param name="propertyName">
+     ///     The name of the property to query for.
+@@ -57,7 +58,8 @@
+     ///     Gets a nullable integer-typed property value from a device.
+     /// </summary>
+     /// <param name="device">
+-    ///     The previously opened device against which the property should be queried.
++    ///     The valid IOHIDDeviceRef to query. The caller keeps this reference valid for the query;
++    ///     an opened report connection is not required.
+     /// </param>
+     /// <param name="propertyName">
+     ///     The name of the property to query for.
+--- reviewed/src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs
++++ revision-2/src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs
+@@ -159,8 +159,8 @@
+         var handle = GCHandle.FromIntPtr(context);
+         if (!handle.IsAllocated || handle.Target is not WindowsHidDeviceListener listener)
+         {
+-            // Weak handle target collected (listener dropped without Dispose); the finalizer
+-            // will unregister the native notification. Drop the hint until then.
++            // Weak handle target collected (listener dropped without Dispose). Drop the hint;
++            // the finalizer can attempt unregister, but this path supplies no successful-unregister proof.
+             Logger.LogDebug("HID notification received for a collected listener; ignoring");
+             return 0;
+         }

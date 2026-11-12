@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Microsoft Testing Platform (xUnit.net v3) [2026 May 27] | xUnit.net </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Microsoft Testing Platform (xUnit.net v3) | xUnit.net ">
+      
+      
+      <link rel="icon" href="../../../images/logo-128-transparent.png">
+      <link rel="stylesheet" href="../../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../../public/main.css">
+      
+      <meta name="docfx:navrel" content="../../../toc.html">
+      <meta name="docfx:tocrel" content="../../../toc.html">
+      
+      <meta name="docfx:rel" content="../../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/xunit/xunit.net/blob/main/site/docs/getting-started/v3/microsoft-testing-platform.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../../index.html">
+            <img id="logo" class="svg" src="../../../logo.svg" alt="xUnit.net">
+            xUnit.net
+          </a>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+        </div>
+
+        <article data-uid="">
+          <h1>Microsoft Testing Platform (xUnit.net v3) <span class="label label-title-version">2026 May 27</span></h1>
+          
+
+
+
+
+<p>xUnit.net v3 includes built-in support for the new <a href="https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-intro">Microsoft Testing Platform</a> (MTP).</p>
+<p>Samples below are shown using:</p>
+<ul>
+<li>.NET 9 SDK (version <code>9.0.305</code>)</li>
+<li><code>xunit.v3</code> (version <code>3.1.0</code>)</li>
+<li><code>xunit.runner.visualstudio</code> (version <code>3.1.5</code>)</li>
+</ul>
+<h2 id="what-is-microsoft-testing-platform">What is Microsoft Testing Platform?</h2>
+<p>VSTest has been the underlying driver behind <code>dotnet test</code> and Test Explorer (and <code>vstest.console</code> and Test View before them) since it first launched in Visual Studio 2010. The new Microsoft Testing Platform aims to replace those with a new engine that is modernized, streamlined, performs better, and offers much greater extensibility for test framework authors.</p>
+<p>Like xUnit.net v3—and for many of the same reasons—test projects for Microsoft Testing Platform are standalone executables. When a Microsoft Testing Platform test project is compiled, it can then be run directly (typically by invoking the already built executable, or using <code>dotnet run</code> to both build and run). This allows for a streamlined experience where the produced executable is all that's needed to run the tests.</p>
+<p>The xUnit.net integration with Microsoft Testing Platform comes at three levels:</p>
+<ol>
+<li><p>You can replace the default xUnit.net command line experience with the Microsoft Testing Platform command line experience</p>
+</li>
+<li><p>You can run tests with the new Microsoft Testing Platform integrated <code>dotnet test</code></p>
+</li>
+<li><p>You can run tests with the new Microsoft Testing Platform integrated Test Explorer</p>
+</li>
+</ol>
+<p>Unlike our support for VSTest, our support for Microsoft Testing Platform is built natively into xUnit.net v3. If you want to rely solely on Microsoft Testing Platform support, you can remove the package references to <code>xunit.runner.visualstudio</code> and <code>Microsoft.NET.Test.Sdk</code>. However, for backward compatibility reasons, we recommend you leave these in place until you can be certain that all your supported versions of your development environments are using MTP instead of VSTest. Once all runners can support Microsoft Testing Platform, then we'll be able to deprecate <code>xunit.runner.visualstudio</code>. Supporting VSTest is separate from (and does not interfere with) our support for Microsoft Testing Platform.</p>
+<h3 id="choosing-the-microsoft-testing-platform-version">Choosing the Microsoft Testing Platform version</h3>
+<p>Starting with v3 build <code>3.2.0</code>, we now support the ability to choose which major version of Microsoft Testing Platform you wish to support. This includes:</p>
+<ul>
+<li>Microsoft Testing Platform v1 support <strong>(default in <code>3.x.y</code> builds)</strong></li>
+<li>Microsoft Testing Platform v2 support <strong>(default in <code>4.0.0</code> builds and later)</strong></li>
+<li>Microsoft Testing Platform support disabled</li>
+</ul>
+<div class="NOTE">
+<h5>Note</h5>
+<p>Support for Microsoft Testing Platform v1 has been removed from package version <code>4.0.0</code> onward. The default for these packages is Microsoft Testing Platform v2.</p>
+</div>
+<p>If you are currently including the <code>xunit.v3</code> NuGet package, you may choose among these alternatives:</p>
+<ul>
+<li><code>xunit.v3</code> (includes whatever the default version is)</li>
+<li><code>xunit.v3.mtp-v1</code> (explicitly chooses MTP v1, only available for version <code>3.x.y</code>)</li>
+<li><code>xunit.v3.mtp-v2</code> (explicitly chooses MTP v2)</li>
+<li><code>xunit.v3.mtp-off</code> (explicitly disables MTP support)</li>
+</ul>
+<p>If you are currently including the <code>xunit.v3.core</code> NuGet package, you may choose among these alternatives:</p>
+<ul>
+<li><code>xunit.v3.core</code> (includes whatever the default version is)</li>
+<li><code>xunit.v3.core.mtp-v1</code> (explicitly chooses MTP v1, only available for version <code>3.x.y</code>)</li>
+<li><code>xunit.v3.core.mtp-v2</code> (explicitly chooses MTP v2)</li>
+<li><code>xunit.v3.core.mtp-off</code> (explicitly disables MTP support)</li>
+</ul>
+<h3 id="configuration-with-testconfigjson">Configuration with <code>testconfig.json</code></h3>
+<p>Starting with v3 build <code>3.0.0</code>, you can use <code>testconfig.json</code> to provide xUnit.net configuration options for your test project. Note that this configuration is only applied when running in Microsoft Testing Platform mode.</p>
+<p>For more information, see <a href="/docs/testconfig-json-mtp">Using <code>testconfig.json</code> with Microsoft Testing Platform</a>.</p>
+<h3 id="microsoft-testing-platform-telemetry">Microsoft Testing Platform Telemetry</h3>
+<p>Starting with v3 build <code>3.2.0</code>, our NuGet packages now include package references to <code>Microsoft.Testing.Extensions.Telemetry</code>. This allows the Microsoft Testing Platform team to collect usage metrics.</p>
+<p>You can disable metrics collection by setting an environment variable named <code>TESTINGPLATFORM_TELEMETRY_OPTOUT</code> to <code>1</code>.</p>
+<p>For more information, see <a href="https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-telemetry">Microsoft.Testing.Platform telemetry</a>.</p>
+<h2 id="enabling-the-command-line-experience">Enabling the command line experience</h2>
+<p>By default, xUnit.net v3 projects have a native command line experience that is similar to our console runner command line experience.</p>
+<p>If you <code>dotnet run</code> your test project, you should see something like this (examples using our test project from the <a href="/docs/getting-started/v3/cmdline">Getting Started</a> documentation):</p>
+<pre><code class="lang-shell">$ dotnet run
+xUnit.net v3 In-Process Runner v3.1.0+03a071627b (64-bit .NET 8.0.20)
+  Discovering: MyFirstUnitTests
+  Discovered:  MyFirstUnitTests
+  Starting:    MyFirstUnitTests
+    MyFirstUnitTests.UnitTest1.FailingTest [FAIL]
+      Assert.Equal() Failure: Values differ
+      Expected: 5
+      Actual:   4
+      Stack Trace:
+        UnitTest1.cs(14,0): at MyFirstUnitTests.UnitTest1.FailingTest()
+    MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) [FAIL]
+      Assert.True() Failure
+      Expected: True
+      Actual:   False
+      Stack Trace:
+        UnitTest1.cs(28,0): at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value)
+  Finished:    MyFirstUnitTests (ID = '80800e0af62d4c98efccd4ccc97bc5732c1c4655418cf54e297426d4f586eeff')
+=== TEST EXECUTION SUMMARY ===
+   MyFirstUnitTests  Total: 5, Errors: 0, Failed: 2, Skipped: 0, Not Run: 0, Time: 0.064s
+</code></pre>
+<p>If you want to replace the xUnit.net native command line experience with the Microsoft Testing Platform command line experience, add the following property to your project file (.csproj/.fsproj/.vbproj):</p>
+<pre><code class="lang-xml">&lt;PropertyGroup&gt;
+  &lt;UseMicrosoftTestingPlatformRunner&gt;true&lt;/UseMicrosoftTestingPlatformRunner&gt;
+&lt;/PropertyGroup&gt;
+</code></pre>
+<p>Now, using <code>dotnet run</code>, you should see:</p>
+<pre><code class="lang-shell">$ dotnet run
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.1.0+03a071627b (64-bit .NET 8.0.20)
+
+failed MyFirstUnitTests.UnitTest1.FailingTest (7ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   4
+    at MyFirstUnitTests.UnitTest1.FailingTest() in UnitTest1.cs:14
+failed MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value) in UnitTest1.cs:28
+
+Test run summary: Failed! - bin\Debug\net8.0\MyFirstUnitTests.dll (net8.0|x64)
+  total: 5
+  failed: 2
+  succeeded: 3
+  skipped: 0
+  duration: 121ms
+</code></pre>
+<p>Using the Microsoft Testing Platform command line experience will give you a familiar UX if you frequently use other Microsoft Testing Platform integrated test frameworks, like <a href="https://github.com/microsoft/testfx/blob/main/docs/Changelog.md#3.6.0">MSTest 3.6</a> or <a href="https://thomhurst.github.io/TUnit/">TUnit</a>.</p>
+<p>The command line switches are different between the two platforms; type <code>dotnet run -- -?</code> to see them. The table below offers a rough mapping between the xUnit.net native command line option and the equivalent Microsoft Testing Platform command line option:</p>
+<table class="table-smaller">
+<thead>
+<tr>
+<th>xUnit.net native command line vs.<br>Microsoft Testing Platform command line</th>
+<th>Activity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:&lt;seed&gt;</code><br><code>--seed &lt;seed&gt;</code></td>
+<td>Set the randomization seed</td>
+</tr>
+<tr>
+<td><code>path/to/configFile.json</code><br><code>--xunit-config-filename path/to/configFile.json</code></td>
+<td>Set the configuration file</td>
+</tr>
+<tr>
+<td><code>-assertEquivalentMaxDepth &lt;option&gt;</code><br><code>--assert-equivalent-max-depth &lt;option&gt;</code></td>
+<td>Set the maximum depth for <code>Assert.Equivalent</code> comparisons</td>
+</tr>
+<tr>
+<td><code>-class &quot;name&quot;</code><br><code>--filter-class &quot;name&quot;</code><sup>1</sup></td>
+<td>Run all tests in a given test class</td>
+</tr>
+<tr>
+<td><code>-class- &quot;name&quot;</code><br><code>--filter-not-class &quot;name&quot;</code><sup>1</sup></td>
+<td>Do not run any tests in the given test class</td>
+</tr>
+<tr>
+<td><code>-ctrf &lt;file&gt;</code><br><code>--report-ctrf --report-ctrf-filename &lt;file&gt;</code><sup>2</sup></td>
+<td>Enable generating CTRF (JSON) report</td>
+</tr>
+<tr>
+<td><code>-culture &lt;option&gt;</code><br><code>--culture &lt;option&gt;</code></td>
+<td>Set the execution culture</td>
+</tr>
+<tr>
+<td><code>-diagnostics</code><br><code>--xunit-diagnostics on</code><sup>3</sup></td>
+<td>Display diagnostic messages</td>
+</tr>
+<tr>
+<td><code>-explicit &lt;option&gt;</code><br><code>--explicit &lt;option&gt;</code></td>
+<td>Change the way explicit tests are handled</td>
+</tr>
+<tr>
+<td><code>-failSkips</code><br><code>--fail-skips on</code></td>
+<td>Treat skipped tests as failed</td>
+</tr>
+<tr>
+<td><code>-failSkips-</code><br><code>--fail-skips off</code></td>
+<td>Treat skipped tests as skipped</td>
+</tr>
+<tr>
+<td><code>-failWarns</code><br><code>--fail-warns on</code></td>
+<td>Treat passing tests with warnings as failed</td>
+</tr>
+<tr>
+<td><code>-failWarns-</code><br><code>--fail-warns off</code></td>
+<td>Treat passing tests with warnings as passed</td>
+</tr>
+<tr>
+<td><code>-internalDiagnostics</code><br><code>--xunit-internal-diagnostics on</code><sup>3</sup></td>
+<td>Display internal diagnostic messages</td>
+</tr>
+<tr>
+<td><code>-html &lt;file&gt;</code><br><code>--report-xunit-html --report-xunit-html-filename &lt;file&gt;</code><sup>2</sup></td>
+<td>Enable generating xUnit.net HTML report</td>
+</tr>
+<tr>
+<td><code>-jUnit &lt;file&gt;</code><br><code>--report-junit --report-junit-filename &lt;file&gt;</code><sup>2</sup></td>
+<td>Enable generating JUnit (XML) report</td>
+</tr>
+<tr>
+<td><code>-longRunning &lt;seconds&gt;</code><br><code>--long-running &lt;seconds&gt;</code></td>
+<td>Enable long running (hung) test detection</td>
+</tr>
+<tr>
+<td><code>-maxThreads &lt;option&gt;</code><br><code>--max-threads &lt;option&gt;</code></td>
+<td>Set maximum thread count for collection parallelization</td>
+</tr>
+<tr>
+<td><code>-method &quot;name&quot;</code><br><code>--filter-method &quot;name&quot;</code><sup>1</sup></td>
+<td>Run a given test method</td>
+</tr>
+<tr>
+<td><code>-method- &quot;name&quot;</code><br><code>--filter-not-method &quot;name&quot;</code><sup>1</sup></td>
+<td>Do not run a given test method</td>
+</tr>
+<tr>
+<td><code>-methodDisplay &lt;option&gt;</code><br><code>--method-display &lt;option&gt;</code></td>
+<td>Set default test display name</td>
+</tr>
+<tr>
+<td><code>-methodDisplayOptions &lt;option&gt;</code><br><code>--method-display-options &lt;option&gt;</code><sup>4</sup></td>
+<td>Alters the default test display name</td>
+</tr>
+<tr>
+<td><code>-namespace &quot;name&quot;</code><br><code>--filter-namespace &quot;name&quot;</code><sup>1</sup></td>
+<td>Run all tests in the given namespace</td>
+</tr>
+<tr>
+<td><code>-namespace- &quot;name&quot;</code><br><code>--filter-not-namespace &quot;name&quot;</code><sup>1</sup></td>
+<td>Do not run any tests in the given namespace</td>
+</tr>
+<tr>
+<td><code>-noAutoReporters</code><br><code>--auto-reporters off</code><sup>3</sup></td>
+<td>Do not allow reporters to be auto-enabled by environment</td>
+</tr>
+<tr>
+<td><code>-nUnit &lt;file&gt;</code><br><code>--report-nunit --report-nunit-filename &lt;file&gt;</code><sup>2</sup></td>
+<td>Enable generating NUnit (v2.5 XML) report</td>
+</tr>
+<tr>
+<td><code>-parallel &lt;option&gt;</code><br><code>--parallel &lt;option&gt;</code></td>
+<td>Change test parallelization</td>
+</tr>
+<tr>
+<td><code>-parallelAlgorithm &lt;option&gt;</code><br><code>--parallel-algorithm &lt;option&gt;</code></td>
+<td>Change the parallelization algorithm</td>
+</tr>
+<tr>
+<td><code>-preEnumerateTheories</code><br><code>--pre-enumerate-theories on</code><sup>3</sup></td>
+<td>Turns on theory pre-enumeration</td>
+</tr>
+<tr>
+<td><code>-printMaxEnumerableLength &lt;option&gt;</code><br><code>--print-max-enumerable-length &lt;option&gt;</code></td>
+<td>Set the maximum length when printing a collection</td>
+</tr>
+<tr>
+<td><code>-printMaxObjectDepth &lt;option&gt;</code><br><code>--print-max-object-depth &lt;option&gt;</code></td>
+<td>Set the maximum child depth when printing an object</td>
+</tr>
+<tr>
+<td><code>-printMaxObjectMemberCount &lt;option&gt;</code><br><code>--print-max-object-member-count &lt;option&gt;</code></td>
+<td>Set the maximum member count when printing an object</td>
+</tr>
+<tr>
+<td><code>-printMaxStringLength &lt;option&gt;</code><br><code>--print-max-string-length &lt;option&gt;</code></td>
+<td>Set the maximum length when printing a string</td>
+</tr>
+<tr>
+<td><code>-showLiveOutput</code><br><code>--show-live-output on</code><sup>3</sup></td>
+<td>Turns on live reporting of test output (from ITestOutputHelper)</td>
+</tr>
+<tr>
+<td><code>-stopOnFail</code><br><code>--stop-on-fail on</code><sup>3</sup></td>
+<td>Stop running tests after the first test failure</td>
+</tr>
+<tr>
+<td><code>-trait &quot;name=value&quot;</code><br><code>--filter-trait &quot;name=value&quot;</code><sup>1</sup></td>
+<td>Run all tests with a given trait value</td>
+</tr>
+<tr>
+<td><code>-trait- &quot;name=value&quot;</code><br><code>--filter-not-trait &quot;name=value&quot;</code><sup>1</sup></td>
+<td>Do not run any test with a given trait value</td>
+</tr>
+<tr>
+<td><code>-trx &lt;file&gt;</code><br><code>--report-xunit-trx --report-xunit-trx-filename &lt;file&gt;</code><sup>2</sup></td>
+<td>Enable generating xUnit.net TRX report</td>
+</tr>
+<tr>
+<td><code>-xml &lt;file&gt;</code><br><code>--report-xunit --report-xunit-filename &lt;file&gt;</code><sup>2</sup></td>
+<td>Enable generating xUnit.net (v2+ XML) report</td>
+</tr>
+</tbody>
+</table>
+<div class="NOTE">
+<h5>Note</h5>
+<ol>
+<li><p>Filter options in the xUnit.net command line interface must be specified one at a time, repeating the filter switch each time. With the Microsoft Testing Platform command line interface, multiple filters of the same kind can be specified with just a single switch. For example, <code>-class Foo -class Bar</code> in the xUnit.net command line interface can be expressed as <code>--filter-class Foo Bar</code> in the Microsoft Testing Platform command line interface.</p>
+</li>
+<li><p>Unlike in the xUnit.net command line experience, providing a filename with Microsoft Testing Platform for reports is optional, and will default to a name that includes the current username, computer name, and the current date &amp; time when the report was run. If you specify the report filename in Microsoft Testing Platform, it must be a filename only without path components. All reports are output to the results folder, which defaults to <code>TestResults</code> under the output folder (and can be overridden with <code>--results-directory &lt;directory&gt;</code>).</p>
+</li>
+<li><p>These options in the xUnit.net command line interface can only be specified in one direction (either on or off, depending on the switch). The Microsoft Testing Platform command line interface allows both <code>on</code> and <code>off</code> command line options, which offers more flexibility (and in the <code>-?</code> help, describes which value is the default).</p>
+</li>
+<li><p>The method display options switch on the xUnit.net command line interface must be expressed as multiple values pushed together with commas. The Microsoft Testing Platform command line interface allows the individual values to be specified without the comma separators. For example, <code>-methodDisplayOptions replacePeriodWithComma,useEscapeSequences</code> in the xUnit.net command line interface is expressed as <code>--method-display-options replacePeriodWithComma useEscapeSequences</code> in the Microsoft Testing Platform command line interface.</p>
+</li>
+</ol>
+</div>
+<p>There are several switches that are native to Microsoft Testing Platform, and they are discussed here: <a href="https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-intro#options">https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-intro#options</a>. Any xUnit.net command line option that isn't listed here, is either covered by one of the Microsoft Testing Platform switches, or is not available in Microsoft Testing Platform command line mode.</p>
+<p>We have added one new switch (<code>--xunit-info</code>) which allows you to see the output that you'd normally see from the native xUnit.net command line experience, combined with the output from Microsoft Testing Platform:</p>
+<pre><code class="lang-shell">$ dotnet run -- --xunit-info
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.1.0+03a071627b (64-bit .NET 8.0.20)
+
+xUnit.net v3 In-Process Runner v3.1.0+03a071627b (64-bit .NET 8.0.20)
+  Discovering: MyFirstUnitTests
+  Discovered:  MyFirstUnitTests
+  Starting:    MyFirstUnitTests
+    MyFirstUnitTests.UnitTest1.FailingTest [FAIL]
+      Assert.Equal() Failure: Values differ
+      Expected: 5
+      Actual:   4
+      Stack Trace:
+        UnitTest1.cs(14,0): at MyFirstUnitTests.UnitTest1.FailingTest()
+    MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) [FAIL]
+      Assert.True() Failure
+      Expected: True
+      Actual:   False
+      Stack Trace:
+        UnitTest1.cs(28,0): at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value)
+failed MyFirstUnitTests.UnitTest1.FailingTest (7ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   4
+    at MyFirstUnitTests.UnitTest1.FailingTest() in UnitTest1.cs:14
+failed MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value) in UnitTest1.cs:28
+  Finished:    MyFirstUnitTests (ID = '80800e0af62d4c98efccd4ccc97bc5732c1c4655418cf54e297426d4f586eeff')
+=== TEST EXECUTION SUMMARY ===
+   MyFirstUnitTests  Total: 5, Errors: 0, Failed: 2, Skipped: 0, Not Run: 0, Time: 0.060s
+
+Test run summary: Failed! - bin\Debug\net8.0\MyFirstUnitTests.dll (net8.0|x64)
+  total: 5
+  failed: 2
+  succeeded: 3
+  skipped: 0
+  duration: 126ms
+</code></pre>
+<h3 id="additional-microsoft-testing-platform-features">Additional Microsoft Testing Platform features</h3>
+<p>If you enable the Microsoft Testing Platform command line experience, you will also be able to take advantage of their extension system to add new features to your test project. These include reporting extensions, code coverage extensions, and more. For more information, visit <a href="https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-extensions">Microsoft.Testing.Platform extensions</a>.</p>
+<p>We have created documentation describing how to get <a href="/docs/getting-started/v3/code-coverage-with-mtp">code coverage with Microsoft Testing Platform</a>, since the standard Coverlet experience is not supported.</p>
+<h2 id="enabling-the-dotnet-test-experience">Enabling the <code>dotnet test</code> experience</h2>
+<p>By default, xUnit.net v3 projects use VSTest when run via <code>dotnet test</code>, support for which comes from the <code>xunit.runner.visualstudio</code> package reference.</p>
+<p>This is what the VSTest <code>dotnet test</code> output looks like (examples using our test project from the <a href="/docs/getting-started/v3/getting-started">Getting Started</a> documentation):</p>
+<pre><code class="lang-shell">$ dotnet test
+Restore complete (0.2s)
+  MyFirstUnitTests succeeded (0.1s) → bin\Debug\net8.0\MyFirstUnitTests.dll
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 8.0.20)
+[xUnit.net 00:00:00.09]   Discovering: MyFirstUnitTests
+[xUnit.net 00:00:00.19]   Discovered:  MyFirstUnitTests
+[xUnit.net 00:00:00.29]   Starting:    MyFirstUnitTests
+[xUnit.net 00:00:00.34]     MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) [FAIL]
+[xUnit.net 00:00:00.34]       Assert.True() Failure
+[xUnit.net 00:00:00.34]       Expected: True
+[xUnit.net 00:00:00.34]       Actual:   False
+[xUnit.net 00:00:00.34]       Stack Trace:
+[xUnit.net 00:00:00.34]         UnitTest1.cs(28,0): at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value)
+copyOfArgs, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.35]     MyFirstUnitTests.UnitTest1.FailingTest [FAIL]
+[xUnit.net 00:00:00.35]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:00:00.35]       Expected: 5
+[xUnit.net 00:00:00.35]       Actual:   4
+[xUnit.net 00:00:00.35]       Stack Trace:
+[xUnit.net 00:00:00.35]         UnitTest1.cs(14,0): at MyFirstUnitTests.UnitTest1.FailingTest()
+[xUnit.net 00:00:00.35]   Finished:    MyFirstUnitTests (ID = '80800e0af62d4c98efccd4ccc97bc5732c1c4655418cf54e297426d4f586eeff')
+  MyFirstUnitTests test failed with 2 error(s) (0.7s)
+    UnitTest1.cs(28): error TESTERROR:
+      MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) (5ms): Error Message: Assert.True() Failure
+      Expected: True
+      Actual:   False
+      Stack Trace:
+         at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value) in UnitTest1.cs:line 28
+    UnitTest1.cs(14): error TESTERROR:
+      MyFirstUnitTests.UnitTest1.FailingTest (2ms): Error Message: Assert.Equal() Failure: Values differ
+      Expected: 5
+      Actual:   4
+      Stack Trace:
+         at MyFirstUnitTests.UnitTest1.FailingTest() in UnitTest1.cs:line 14
+
+Test summary: total: 5, failed: 2, succeeded: 3, skipped: 0, duration: 0.7s
+Build failed with 2 error(s) in 1.2s
+</code></pre>
+<p>The way you enable MTP mode for <code>dotnet test</code> varies depending on what version of the .NET SDK you're using (meaning the version number that's printed when you run <code>dotnet --version</code> from your project folder).</p>
+<h3 id="using-net-sdk-version-8-or-9">Using .NET SDK version 8 or 9</h3>
+<p>To enable <code>dotnet test</code> to run your tests using MTP instead of VSTest, add the following property to your project file (.csproj/.fsproj/.vbproj):</p>
+<pre><code class="lang-xml">&lt;PropertyGroup&gt;
+  &lt;TestingPlatformDotnetTestSupport&gt;true&lt;/TestingPlatformDotnetTestSupport&gt;
+&lt;/PropertyGroup&gt;
+</code></pre>
+<p>Now when running <code>dotnet test</code>, your output should looks something like this:</p>
+<pre><code class="lang-shell">$ dotnet test
+Restore complete (0.2s)
+  MyFirstUnitTests succeeded (0.2s) → bin\Debug\net8.0\MyFirstUnitTests.dll
+  MyFirstUnitTests test failed with 1 error(s) (0.3s)
+    bin\Debug\net8.0\MyFirstUnitTests.dll : error run failed: Tests failed: 'bin\Debug\net8.0\TestResults\MyFirstUnitTests_net8.0_x64.log' [net8.0|x64]
+
+Test summary: total: 5, failed: 2, succeeded: 3, skipped: 0, duration: 0.2s
+Build failed with 1 error(s) in 0.9s
+</code></pre>
+<p>A log file is always generated from <code>dotnet test</code> runs, but is usually only shown when the test run failed. The failure log in this case looks like:</p>
+<pre><code class="lang-text">xUnit.net v3 Microsoft.Testing.Platform Runner v3.1.0+03a071627b (64-bit .NET 8.0.20)
+
+failed MyFirstUnitTests.UnitTest1.FailingTest (7ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   4
+    at MyFirstUnitTests.UnitTest1.FailingTest() in UnitTest1.cs:14
+failed MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value) in UnitTest1.cs:28
+
+Test run summary: Failed! - bin\Debug\net8.0\MyFirstUnitTests.dll (net8.0|x64)
+  total: 5
+  failed: 2
+  succeeded: 3
+  skipped: 0
+  duration: 147ms
+
+=== COMMAND LINE ===
+bin\Debug\net8.0\MyFirstUnitTests.exe --internal-msbuild-node testingplatform.pipe.b1e011b9ecd145c696246de44d7af67c
+</code></pre>
+<p>The same command line options available in the Microsoft Testing Platform command line experience (described in the table above) are also available for <code>dotnet test</code>. The command line options are passed after <code>--</code>. For example, to filter tests to a single class with the Microsoft Testing Platform <code>dotnet test</code> experience, you could run: <code>dotnet test -- --filter-class ClassName</code>. This includes command line options from any <a href="#additional-microsoft-testing-platform-features">Microsoft Testing Platform features</a> you may add.</p>
+<p>You can find additional configuration options for the Microsoft Testing Platform <code>dotnet test</code> integration here: <a href="https://learn.microsoft.com/dotnet/core/testing/unit-testing-with-dotnet-test#microsofttestingplatform-mtp-mode-of-dotnet-test">Microsoft.Testing.Platform mode of <code>dotnet test</code></a></p>
+<h3 id="using-net-sdk-version-10-or-later">Using .NET SDK version 10 or later</h3>
+<p>To enable <code>dotnet test</code> to run your tests using MTP instead of VSTest, add/edit the <code>global.json</code> file in the root of your solution with the following value:</p>
+<pre><code class="lang-json">{
+  &quot;test&quot;: {
+    &quot;runner&quot;: &quot;Microsoft.Testing.Platform&quot;
+  }
+}
+</code></pre>
+<p>Now when running <code>dotnet test</code>, your output should looks something like this:</p>
+<pre><code class="lang-shell">$ dotnet test
+Running tests from bin\Debug\net8.0\MyFirstUnitTests.dll (net8.0|x64)
+failed MyFirstUnitTests.UnitTest1.FailingTest (8ms)
+  Assert.Equal() Failure: Values differ
+Expected: 5
+Actual:   4
+  from bin\Debug\net8.0\MyFirstUnitTests.dll (net8.0|x64)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   4
+    at MyFirstUnitTests.UnitTest1.FailingTest() in UnitTest1.cs:14
+failed MyFirstUnitTests.UnitTest1.MyFirstTheory(value: 6) (0ms)
+  Assert.True() Failure
+Expected: True
+Actual:   False
+  from bin\Debug\net8.0\MyFirstUnitTests.dll (net8.0|x64)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at MyFirstUnitTests.UnitTest1.MyFirstTheory(Int32 value) in UnitTest1.cs:28
+bin\Debug\net8.0\MyFirstUnitTests.dll (net8.0|x64) failed with 2 error(s) (158ms)
+Exit code: 2
+  Standard output: xUnit.net v3 Microsoft.Testing.Platform Runner v3.1.0+03a071627b (64-bit .NET 8.0.22)
+
+Test run summary: Failed!
+  total: 5
+  failed: 2
+  succeeded: 3
+  skipped: 0
+  duration: 254ms
+Test run completed with non-success exit code: 2 (see: https://aka.ms/testingplatform/exitcodes)
+</code></pre>
+<p>The same command line options available in the Microsoft Testing Platform command line experience (described in the table above) are also available for <code>dotnet test</code>. For example, to filter tests to a single class with the Microsoft Testing Platform <code>dotnet test</code> experience, you could run: <code>dotnet test --filter-class ClassName</code>. Typing <code>dotnet test -?</code> from within your project folder will list all the available options (including built-in options, options provided by xUnit.net, and options from any <a href="#additional-microsoft-testing-platform-features">Microsoft Testing Platform features</a> you have added).</p>
+<p>You can find additional configuration options for the Microsoft Testing Platform <code>dotnet test</code> integration here: <a href="https://learn.microsoft.com/dotnet/core/testing/unit-testing-with-dotnet-test#microsofttestingplatform-mtp-mode-of-dotnet-test">Microsoft.Testing.Platform mode of <code>dotnet test</code></a></p>
+<h2 id="enabling-the-test-explorer-experience">Enabling the Test Explorer experience</h2>
+<div class="NOTE">
+<h5>Note</h5>
+<p>As of the updating of this document, the current version of Visual Studio 2022 (17.14.16) has the Microsoft Testing Platform Test Explorer experience enabled by default.</p>
+</div>
+<p>Like all Microsoft Testing Platform test framework projects, xUnit.net v3 projects are automatically enabled for the new Microsoft Testing Platform Test Explorer experience.</p>
+<p>While we don't anticipate any issues, if you think you are experiencing an issues with Test Explorer in Microsoft Testing Platform mode, you can temporarily disable it by adding the following property to your project file (.csproj/.fsproj/.vbproj) and then restarting Visual Studio:</p>
+<pre><code class="lang-xml">&lt;PropertyGroup&gt;
+  &lt;DisableTestingPlatformServerCapability&gt;true&lt;/DisableTestingPlatformServerCapability&gt;
+&lt;/PropertyGroup&gt;
+</code></pre>
+<p>If you do find such an issue, please be sure to let us and/or the Visual Studio team know about it, so we can determine where the issue resides.</p>
+<p>Just a reminder that VSTest mode requires the package references to <code>xunit.runner.visualstudio</code> and <code>Microsoft.NET.Test.Sdk</code>. We recommend you keep these package references if you are using any test runners which have not been updated for Microsoft Testing Platform (for example, the need to use older versions of Visual Studio).</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/xunit/xunit.net/blob/main/site/docs/getting-started/v3/microsoft-testing-platform.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Copyright &copy; <a href='https://dotnetfoundation.org/'>.NET Foundation</a>. Contributions welcomed at <a href='https://github.com/xunit/xunit.net'>https://github.com/xunit/xunit.net</a>. Updates posted to <a href='https://dotnet.social/@xunit' rel='me'>Mastodon</a> and <a href='https://bsky.app/profile/xunit.net'>Bluesky</a>.
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

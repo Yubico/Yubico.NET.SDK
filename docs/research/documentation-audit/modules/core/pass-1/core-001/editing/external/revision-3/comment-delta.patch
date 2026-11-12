@@ -1,0 +1,72 @@
+diff --git a/scripts/toolchain/Process.cs b/scripts/toolchain/Process.cs
+index dd2f180ba..69fd351fb 100644
+--- a/scripts/toolchain/Process.cs
++++ b/scripts/toolchain/Process.cs
+@@ -9,10 +9,15 @@
+ sealed record ProcessResult(int ExitCode, string Output, string? LogPath);
+ 
+ /// <summary>
+-/// Every process the toolchain starts goes through here, so each one is announced with "▶ RUN", its
+-/// output reaches the run log, and in the default (non --verbose) mode only the lines that matter
+-/// reach the console. The full output of a step is always in its own log file.
++/// Runs processes dispatched through this helper, announces the command and captures output.
++/// ErrorsOnly mode shows compiler/MSBuild error lines live unless verbose output is enabled;
++/// a step log, when available, receives the full output. Other launch sites, including
++/// Dotnet.Capture and RunLog.Git, do not use this helper.
+ /// </summary>
++/// <remarks>
++/// Supplied secrets are masked in the displayed command, not in captured process output or the
++/// complete toolchain argument list separately retained by RunLog.Start. This is not end-to-end redaction.
++/// </remarks>
+ static class Exec
+ {
+     // MSBuild/compiler diagnostics ("file(1,2): error CS0029: ..." and "error MSB1009: ...").
+diff --git a/scripts/toolchain/Results.cs b/scripts/toolchain/Results.cs
+index a8d9ac1d7..70382e310 100644
+--- a/scripts/toolchain/Results.cs
++++ b/scripts/toolchain/Results.cs
+@@ -95,9 +95,14 @@ public static void FailIfAny(IReadOnlyCollection<string> failures, string check)
+     }
+ 
+     /// <summary>
+-    /// Fails the target when a project failed, or when <paramref name="requireExecution"/> is set and
+-    /// no project executed a test. A run that executed nothing is not a pass.
++    /// Rejects a failed project outcome and, when <paramref name="requireExecution"/> is set,
++    /// a nonempty result list whose outcomes are all <c>NoTestsExecuted</c>.
+     /// </summary>
++    /// <remarks>
++    /// This gate checks classified outcomes, not parsed execution counts. It does not reject an empty
++    /// list or a mixed list merely because some projects executed no tests. A passed outcome with
++    /// unknown counts is not proof that tests ran; inspect each project's counts and runner output.
++    /// </remarks>
+     public static void EnsureTestsRan(IReadOnlyList<ProjectResult> results, string kind, bool requireExecution = true)
+     {
+         var failCount = results.Count(r => r.Outcome == Outcome.Failed);
+diff --git a/scripts/toolchain/TestTargets.cs b/scripts/toolchain/TestTargets.cs
+index 1cff20cb5..fe5ae9d5d 100644
+--- a/scripts/toolchain/TestTargets.cs
++++ b/scripts/toolchain/TestTargets.cs
+@@ -155,17 +155,14 @@ static ProjectResult Classify(string projectName, int exitCode, TestCounts? coun
+         return $"{vsTestCommand} --filter \"{vsTestFilter}\"";
+     }
+ 
+-    // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
+-    // Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds.
+-    // Returns (filter args string, whether any positive/inclusion filters are present).
+     // Translates a VSTest-style --filter expression to xUnit v3 Microsoft.Testing.Platform options.
++    // Returns generated arguments, whether inclusion filters exist, and their separate arguments.
+     //
+-    // Supported shapes: `A&B&C` (every term must match) and `A|B|C` (any term matches). MTP has no
+-    // grouping operator, so an expression that mixes `&` and `|` is rejected with a clear message
+-    // instead of silently matching the wrong set. Repeated options of one kind are ORed by xUnit
+-    // (`--filter-method X --filter-method Y`), which is what `|` maps onto; `&` maps onto options of
+-    // different kinds, or onto a single `--filter-method` with both wildcards when both terms are
+-    // method patterns (xUnit ANDs distinct option kinds, so two method terms cannot be ANDed).
++    // Mixed '&'/'|' expressions are rejected. For '|' alternatives, positive inclusion flags must
++    // be of one kind. Each translated term appends its own native flag, including repeated method
++    // patterns split by '&'; two such patterns are not combined into one wildcard.
++    // Emitted arguments alone do not establish the pinned runner's same-kind boolean selection.
++    // Check actual discovery and execution before treating compound filters as coverage evidence.
+     static (string Args, bool HasPositiveFilters, string[] PositiveArgs) TranslateToMtpFilter(string vstestFilter)
+     {
+         if (vstestFilter.Contains('|'))

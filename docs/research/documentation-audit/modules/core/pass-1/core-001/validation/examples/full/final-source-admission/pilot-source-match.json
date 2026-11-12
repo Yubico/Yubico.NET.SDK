@@ -1,0 +1,869 @@
+{
+  "status": "FINAL_SOURCE_STATIC_MATCH_READY_FOR_FOCUSED_REVIEW_NOT_NEW_COMPILER_RESULT",
+  "original_manifest_sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60",
+  "body_count": 41,
+  "rows": [
+    {
+      "id": "A-01",
+      "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "5104e086d41bf595d218edbb5b286ddf05b708f1ea456577d0ebd0f59b88e921",
+      "current_raw_body_sha256": "5104e086d41bf595d218edbb5b286ddf05b708f1ea456577d0ebd0f59b88e921",
+      "original_source": {
+        "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+        "bytes": 4704,
+        "sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737"
+      },
+      "current_source": {
+        "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+        "bytes": 4704,
+        "sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737"
+      },
+      "first_line": 31,
+      "last_line": 35,
+      "raw_start_byte": 1413,
+      "raw_end_byte": 1736
+    },
+    {
+      "id": "A-02",
+      "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+      "ordinal": 2,
+      "original_raw_body_sha256": "c5cc7eed5485af196c782c094bac4714174a6121296087d7ce138303551a650a",
+      "current_raw_body_sha256": "c5cc7eed5485af196c782c094bac4714174a6121296087d7ce138303551a650a",
+      "original_source": {
+        "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+        "bytes": 4704,
+        "sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737"
+      },
+      "current_source": {
+        "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+        "bytes": 4704,
+        "sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737"
+      },
+      "first_line": 66,
+      "last_line": 70,
+      "raw_start_byte": 3472,
+      "raw_end_byte": 3811
+    },
+    {
+      "id": "A-03",
+      "path": "src/Core/src/Devices/YubiKeyManager.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "5a50614c62d1acbf23b53fdf382fd6f0474bdfb38d78b1676433227d408a3903",
+      "current_raw_body_sha256": "5a50614c62d1acbf23b53fdf382fd6f0474bdfb38d78b1676433227d408a3903",
+      "original_source": {
+        "path": "src/Core/src/Devices/YubiKeyManager.cs",
+        "bytes": 9778,
+        "sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a"
+      },
+      "current_source": {
+        "path": "src/Core/src/Devices/YubiKeyManager.cs",
+        "bytes": 9777,
+        "sha256": "92e0ace95e5b4274e30df159efbe6a72e53f1045915242c86f33ea87a0347524"
+      },
+      "first_line": 16,
+      "last_line": 37,
+      "raw_start_byte": 694,
+      "raw_end_byte": 1582
+    },
+    {
+      "id": "C-01",
+      "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "d1275bcf64ef1e0cedf4c45eb8e67369795bcb8112d9926263c9cb157950bfc6",
+      "current_raw_body_sha256": "d1275bcf64ef1e0cedf4c45eb8e67369795bcb8112d9926263c9cb157950bfc6",
+      "original_source": {
+        "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+        "bytes": 5412,
+        "sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee"
+      },
+      "current_source": {
+        "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+        "bytes": 5411,
+        "sha256": "06e7ad040206837e0b7f888c34b437ba95a02634e10c6af390bed49db478d4a7"
+      },
+      "first_line": 70,
+      "last_line": 97,
+      "raw_start_byte": 3299,
+      "raw_end_byte": 4414
+    },
+    {
+      "id": "C-02",
+      "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "bda76dccb580c0dbf3c877da33306aab17740ad304ac12253bc7d7a0f58b7b0b",
+      "current_raw_body_sha256": "bda76dccb580c0dbf3c877da33306aab17740ad304ac12253bc7d7a0f58b7b0b",
+      "original_source": {
+        "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+        "bytes": 4372,
+        "sha256": "f2b6a0687cc3d628a52c65ee27d77df45e0458aa6eab2b3537bd7cb6fe3ee669"
+      },
+      "current_source": {
+        "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+        "bytes": 4371,
+        "sha256": "015e913525cdeeeaac7139bdecc3ce4cad3cb2af92ab8aa0aa7d18fe26b96920"
+      },
+      "first_line": 36,
+      "last_line": 47,
+      "raw_start_byte": 1579,
+      "raw_end_byte": 2027
+    },
+    {
+      "id": "C-03",
+      "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "b8052dca85b3d10e3c1ea9779fbf0b2812d60a4177393da694a0f6ff8f52ad53",
+      "current_raw_body_sha256": "b8052dca85b3d10e3c1ea9779fbf0b2812d60a4177393da694a0f6ff8f52ad53",
+      "original_source": {
+        "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+        "bytes": 5769,
+        "sha256": "7aaca59de916782b7762b1c6d3f4ff614a31109ff5077c78c8a9c88627310c8f"
+      },
+      "current_source": {
+        "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+        "bytes": 5768,
+        "sha256": "5e88bdf699429adf693f625caa700996c4d988807bda5530e1f97449acb766eb"
+      },
+      "first_line": 26,
+      "last_line": 31,
+      "raw_start_byte": 1180,
+      "raw_end_byte": 1393
+    },
+    {
+      "id": "C-P01",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "a2057ec70c8e22f1d806dc96cf55ca509e355d284b5458f2dc24933008b66ba9",
+      "current_raw_body_sha256": "a2057ec70c8e22f1d806dc96cf55ca509e355d284b5458f2dc24933008b66ba9",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 73,
+      "last_line": 78,
+      "raw_start_byte": 4000,
+      "raw_end_byte": 4200
+    },
+    {
+      "id": "C-P02",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 2,
+      "original_raw_body_sha256": "25428fda71176a77bd0a6fae31c6a6f82415f7cb6a9dc660d322d1e8d1c20c9a",
+      "current_raw_body_sha256": "25428fda71176a77bd0a6fae31c6a6f82415f7cb6a9dc660d322d1e8d1c20c9a",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 83,
+      "last_line": 85,
+      "raw_start_byte": 4424,
+      "raw_end_byte": 4518
+    },
+    {
+      "id": "C-P03",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 3,
+      "original_raw_body_sha256": "114f22fcbfdef2d8b26ada16d552a1cb2859b945ec958d13ca19496aaf7383bd",
+      "current_raw_body_sha256": "114f22fcbfdef2d8b26ada16d552a1cb2859b945ec958d13ca19496aaf7383bd",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 110,
+      "last_line": 115,
+      "raw_start_byte": 5977,
+      "raw_end_byte": 6167
+    },
+    {
+      "id": "C-P04",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 4,
+      "original_raw_body_sha256": "e4bb4b88d300cd496dfb5f5cdb44ba58b4689b3a1475d718aa1a1b75ddb79c18",
+      "current_raw_body_sha256": "e4bb4b88d300cd496dfb5f5cdb44ba58b4689b3a1475d718aa1a1b75ddb79c18",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 120,
+      "last_line": 122,
+      "raw_start_byte": 6405,
+      "raw_end_byte": 6503
+    },
+    {
+      "id": "C-P05",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 5,
+      "original_raw_body_sha256": "950bad273026d5d436599d5d9e463c44cd507c3921c57e796789a6fdf4fb1d33",
+      "current_raw_body_sha256": "950bad273026d5d436599d5d9e463c44cd507c3921c57e796789a6fdf4fb1d33",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 147,
+      "last_line": 152,
+      "raw_start_byte": 7939,
+      "raw_end_byte": 8135
+    },
+    {
+      "id": "C-P06",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 6,
+      "original_raw_body_sha256": "b14bcdd4edaf60d60f0f5ad2ea60375e5e7f7cd2ef193c3d577e5d535b4e623c",
+      "current_raw_body_sha256": "b14bcdd4edaf60d60f0f5ad2ea60375e5e7f7cd2ef193c3d577e5d535b4e623c",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 157,
+      "last_line": 159,
+      "raw_start_byte": 8373,
+      "raw_end_byte": 8475
+    },
+    {
+      "id": "C-P07",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 7,
+      "original_raw_body_sha256": "d72218ec804b722523c7b69dea1700503020f6d288be9ab27b1a426158fb213e",
+      "current_raw_body_sha256": "d72218ec804b722523c7b69dea1700503020f6d288be9ab27b1a426158fb213e",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 184,
+      "last_line": 189,
+      "raw_start_byte": 9917,
+      "raw_end_byte": 10113
+    },
+    {
+      "id": "C-P08",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 8,
+      "original_raw_body_sha256": "3fc7b582e7967df775d60068cb282212b4ae4a3f231d43bdced4a5b7bc18c457",
+      "current_raw_body_sha256": "3fc7b582e7967df775d60068cb282212b4ae4a3f231d43bdced4a5b7bc18c457",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 194,
+      "last_line": 196,
+      "raw_start_byte": 10351,
+      "raw_end_byte": 10453
+    },
+    {
+      "id": "C-P09",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 9,
+      "original_raw_body_sha256": "ff732326bcf84ae2997f571af27bca029d278cb7e6f0fc17cb4537987277b8e7",
+      "current_raw_body_sha256": "ff732326bcf84ae2997f571af27bca029d278cb7e6f0fc17cb4537987277b8e7",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 221,
+      "last_line": 226,
+      "raw_start_byte": 11895,
+      "raw_end_byte": 12091
+    },
+    {
+      "id": "C-P10",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 10,
+      "original_raw_body_sha256": "c0c92d3591bf56a34dac2e487662d8e7807abe775685d8f866be7a4e761599bd",
+      "current_raw_body_sha256": "c0c92d3591bf56a34dac2e487662d8e7807abe775685d8f866be7a4e761599bd",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 231,
+      "last_line": 233,
+      "raw_start_byte": 12329,
+      "raw_end_byte": 12431
+    },
+    {
+      "id": "C-P11",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 11,
+      "original_raw_body_sha256": "1e83d89aea1e1c91ae188bb730c0b6a5891db4cc0ab2c4f35d4c60e9079f22d8",
+      "current_raw_body_sha256": "1e83d89aea1e1c91ae188bb730c0b6a5891db4cc0ab2c4f35d4c60e9079f22d8",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 258,
+      "last_line": 263,
+      "raw_start_byte": 13869,
+      "raw_end_byte": 14051
+    },
+    {
+      "id": "C-P12",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "ordinal": 12,
+      "original_raw_body_sha256": "8a038c9283b835e80e6198753b4735f3de4272c37c8506ff8abf163197a4fe43",
+      "current_raw_body_sha256": "8a038c9283b835e80e6198753b4735f3de4272c37c8506ff8abf163197a4fe43",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16090,
+        "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "first_line": 268,
+      "last_line": 270,
+      "raw_start_byte": 14289,
+      "raw_end_byte": 14385
+    },
+    {
+      "id": "C-04",
+      "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "3511331abf9c6055706198b79b4193ff69ca483b43b5d528c48c8c96d6e35498",
+      "current_raw_body_sha256": "3511331abf9c6055706198b79b4193ff69ca483b43b5d528c48c8c96d6e35498",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+        "bytes": 2410,
+        "sha256": "f4d100755cc3130896c3cca87a8a8e9e191aa2478be12ed60ca564f7a36081f6"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+        "bytes": 2409,
+        "sha256": "edaa6090701b90e16fc1b927849ff86d761a7d4a1089e64d5c0f669034116c30"
+      },
+      "first_line": 34,
+      "last_line": 43,
+      "raw_start_byte": 1495,
+      "raw_end_byte": 1955
+    },
+    {
+      "id": "C-H01",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 1,
+      "original_raw_body_sha256": "eb8ff0bc4f792f1a720c7eebd7a2cf0fd496d4d5107529c71afa285d673246cf",
+      "current_raw_body_sha256": "eb8ff0bc4f792f1a720c7eebd7a2cf0fd496d4d5107529c71afa285d673246cf",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 131,
+      "last_line": 133,
+      "raw_start_byte": 5396,
+      "raw_end_byte": 5482
+    },
+    {
+      "id": "C-H02",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 2,
+      "original_raw_body_sha256": "b86828c830b8b42f0781aa745e14bea6f7e1f62b6d4e41d2c04e97d6551b2dfd",
+      "current_raw_body_sha256": "b86828c830b8b42f0781aa745e14bea6f7e1f62b6d4e41d2c04e97d6551b2dfd",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 135,
+      "last_line": 140,
+      "raw_start_byte": 5592,
+      "raw_end_byte": 5782
+    },
+    {
+      "id": "C-H03",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 3,
+      "original_raw_body_sha256": "5e59c5cc1af3c115571cebe6ae7422d0598d8746c337a6f15df86efc8db6ef3f",
+      "current_raw_body_sha256": "5e59c5cc1af3c115571cebe6ae7422d0598d8746c337a6f15df86efc8db6ef3f",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 145,
+      "last_line": 150,
+      "raw_start_byte": 6070,
+      "raw_end_byte": 6306
+    },
+    {
+      "id": "C-H04",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 4,
+      "original_raw_body_sha256": "0ab01c8d2a87759509b7b1732c49e2b6646682963c525df2c4b518393f090e24",
+      "current_raw_body_sha256": "0ab01c8d2a87759509b7b1732c49e2b6646682963c525df2c4b518393f090e24",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 165,
+      "last_line": 174,
+      "raw_start_byte": 7142,
+      "raw_end_byte": 7686
+    },
+    {
+      "id": "C-H05",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 5,
+      "original_raw_body_sha256": "4c7719b2a016edafdba6b23321a15ed2edfe809f3fe63f0d55c1ddbded3816fd",
+      "current_raw_body_sha256": "4c7719b2a016edafdba6b23321a15ed2edfe809f3fe63f0d55c1ddbded3816fd",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 510,
+      "last_line": 521,
+      "raw_start_byte": 24829,
+      "raw_end_byte": 25402
+    },
+    {
+      "id": "C-H06",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 6,
+      "original_raw_body_sha256": "d3d10df55a00e8dfd4dc2c0295359b9ebc640b2603b33ec148512bfe1003895f",
+      "current_raw_body_sha256": "d3d10df55a00e8dfd4dc2c0295359b9ebc640b2603b33ec148512bfe1003895f",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 539,
+      "last_line": 553,
+      "raw_start_byte": 26534,
+      "raw_end_byte": 27360
+    },
+    {
+      "id": "C-H07",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 7,
+      "original_raw_body_sha256": "c9863af71f82b564d2b517b08f302e2e8cf29fc37bf699e37e32c417b3271a9a",
+      "current_raw_body_sha256": "c9863af71f82b564d2b517b08f302e2e8cf29fc37bf699e37e32c417b3271a9a",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 590,
+      "last_line": 594,
+      "raw_start_byte": 29468,
+      "raw_end_byte": 29629
+    },
+    {
+      "id": "C-H08",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 8,
+      "original_raw_body_sha256": "f876ce3f730f16562df8e465628f09a3fe970cc02d192974696ab6e417071e3b",
+      "current_raw_body_sha256": "f876ce3f730f16562df8e465628f09a3fe970cc02d192974696ab6e417071e3b",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 596,
+      "last_line": 599,
+      "raw_start_byte": 29737,
+      "raw_end_byte": 29895
+    },
+    {
+      "id": "C-H09",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 9,
+      "original_raw_body_sha256": "41159d8da92c66ae7e3a3b6260f275da749c4b29c995d76fd76c4481c77919d3",
+      "current_raw_body_sha256": "41159d8da92c66ae7e3a3b6260f275da749c4b29c995d76fd76c4481c77919d3",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 601,
+      "last_line": 610,
+      "raw_start_byte": 29986,
+      "raw_end_byte": 30405
+    },
+    {
+      "id": "C-H10",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 10,
+      "original_raw_body_sha256": "af3a214ca0a9cc324d039b4bdeb6f50764b7bb03c1074986f42c624488b07477",
+      "current_raw_body_sha256": "af3a214ca0a9cc324d039b4bdeb6f50764b7bb03c1074986f42c624488b07477",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 615,
+      "last_line": 621,
+      "raw_start_byte": 30706,
+      "raw_end_byte": 30941
+    },
+    {
+      "id": "C-H11",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 11,
+      "original_raw_body_sha256": "65dc7bce6a4ad2b72024fae0bbba1ff766330fecf79307252b4e980eb2e90e20",
+      "current_raw_body_sha256": "65dc7bce6a4ad2b72024fae0bbba1ff766330fecf79307252b4e980eb2e90e20",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 784,
+      "last_line": 791,
+      "raw_start_byte": 38623,
+      "raw_end_byte": 38878
+    },
+    {
+      "id": "C-H12",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 12,
+      "original_raw_body_sha256": "399a8c37b9b3d0eca47e5fa216f473e6a037ec823cd37da665a9845ce713a1fc",
+      "current_raw_body_sha256": "399a8c37b9b3d0eca47e5fa216f473e6a037ec823cd37da665a9845ce713a1fc",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 804,
+      "last_line": 812,
+      "raw_start_byte": 39675,
+      "raw_end_byte": 40107
+    },
+    {
+      "id": "C-H13",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 13,
+      "original_raw_body_sha256": "59ab9c0963d0c420255e5f9d972a4abe195c7d8d6ea1d93283c3a15288265f61",
+      "current_raw_body_sha256": "59ab9c0963d0c420255e5f9d972a4abe195c7d8d6ea1d93283c3a15288265f61",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 822,
+      "last_line": 831,
+      "raw_start_byte": 40568,
+      "raw_end_byte": 41112
+    },
+    {
+      "id": "C-H14",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 14,
+      "original_raw_body_sha256": "42d95588b8a5fcb8304810320485ce38a6bc5ee4fd972d6bca73e80e490ea7ce",
+      "current_raw_body_sha256": "42d95588b8a5fcb8304810320485ce38a6bc5ee4fd972d6bca73e80e490ea7ce",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 837,
+      "last_line": 839,
+      "raw_start_byte": 41388,
+      "raw_end_byte": 41472
+    },
+    {
+      "id": "C-H15",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 15,
+      "original_raw_body_sha256": "2fdca51b8ac8a875f6842226818d7ed93cd2489fcb944a67841b4e69b4aa7735",
+      "current_raw_body_sha256": "2fdca51b8ac8a875f6842226818d7ed93cd2489fcb944a67841b4e69b4aa7735",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 919,
+      "last_line": 921,
+      "raw_start_byte": 45372,
+      "raw_end_byte": 45453
+    },
+    {
+      "id": "C-H16",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 16,
+      "original_raw_body_sha256": "07805106f9cbccaa35018641b2168d07111746a0ec3803cbbfbdd36ce37817b4",
+      "current_raw_body_sha256": "07805106f9cbccaa35018641b2168d07111746a0ec3803cbbfbdd36ce37817b4",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 1010,
+      "last_line": 1012,
+      "raw_start_byte": 49382,
+      "raw_end_byte": 49446
+    },
+    {
+      "id": "C-H17",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 17,
+      "original_raw_body_sha256": "8f0ac0c9f6a8c2fab2afb86ee2294a4b7ddecd582472b37840c16a6fdfa44306",
+      "current_raw_body_sha256": "8f0ac0c9f6a8c2fab2afb86ee2294a4b7ddecd582472b37840c16a6fdfa44306",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 1020,
+      "last_line": 1022,
+      "raw_start_byte": 49727,
+      "raw_end_byte": 49792
+    },
+    {
+      "id": "C-H18",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 18,
+      "original_raw_body_sha256": "132c3f65f3738d6bf8a7c5af623d73348fe2acc7777f386fe86ba0197cf0a8f4",
+      "current_raw_body_sha256": "132c3f65f3738d6bf8a7c5af623d73348fe2acc7777f386fe86ba0197cf0a8f4",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 1027,
+      "last_line": 1035,
+      "raw_start_byte": 50135,
+      "raw_end_byte": 50542
+    },
+    {
+      "id": "C-H19",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 19,
+      "original_raw_body_sha256": "63a9a9896b92a55929c17baa00e63c5d37abb3333c3674fa285513552663eb14",
+      "current_raw_body_sha256": "63a9a9896b92a55929c17baa00e63c5d37abb3333c3674fa285513552663eb14",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 1041,
+      "last_line": 1059,
+      "raw_start_byte": 50803,
+      "raw_end_byte": 51628
+    },
+    {
+      "id": "C-H20",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 20,
+      "original_raw_body_sha256": "42d95588b8a5fcb8304810320485ce38a6bc5ee4fd972d6bca73e80e490ea7ce",
+      "current_raw_body_sha256": "42d95588b8a5fcb8304810320485ce38a6bc5ee4fd972d6bca73e80e490ea7ce",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 1081,
+      "last_line": 1083,
+      "raw_start_byte": 52816,
+      "raw_end_byte": 52900
+    },
+    {
+      "id": "C-H21",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 21,
+      "original_raw_body_sha256": "c33db4e25e1f4ff14b5df7b4c2721cd73a78d1fc756ddbda245700868199e649",
+      "current_raw_body_sha256": "c33db4e25e1f4ff14b5df7b4c2721cd73a78d1fc756ddbda245700868199e649",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 1168,
+      "last_line": 1174,
+      "raw_start_byte": 56827,
+      "raw_end_byte": 57060
+    },
+    {
+      "id": "C-H22",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "ordinal": 22,
+      "original_raw_body_sha256": "2fdca51b8ac8a875f6842226818d7ed93cd2489fcb944a67841b4e69b4aa7735",
+      "current_raw_body_sha256": "2fdca51b8ac8a875f6842226818d7ed93cd2489fcb944a67841b4e69b4aa7735",
+      "original_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_source": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "first_line": 1199,
+      "last_line": 1201,
+      "raw_start_byte": 58222,
+      "raw_end_byte": 58303
+    }
+  ],
+  "qualification": "Original accepted pilot checkpoint remains exact retained evidence, not replayed or rebound. This is final-source body matching only, not later binary equivalence."
+}

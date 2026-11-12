@@ -1,0 +1,5 @@
+The first one-off record export completed the two-file patch, hash/range records,
+two-unit map, example preservation and predecessor preservation checks, then stopped
+while checking report links: static-verification.json had not yet been written.
+The successor export writes its receipt before the final link check. This was an
+export-order error, not a product/source check failure; no SDK operation ran.

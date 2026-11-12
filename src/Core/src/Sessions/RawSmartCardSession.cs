@@ -28,8 +28,10 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///     passed to <see cref="CreateAsync(ISmartCardConnection,CancellationToken)" />; an
 ///     <see cref="Abstractions.IYubiKey" /> convenience factory owns its hidden connection. Operations refuse overlap,
 ///     while direct <see cref="ISmartCardConnection.TransmitAndReceiveAsync" /> calls bypass that guard.
-///     If a command or response continuation fails, this session refuses further exchanges without replaying them.
-///     Dispose and reopen the connection before continuing; disposing a borrowed session alone does not recover it.
+///     Recovery notifications from command/response continuation or secure processing latch refusal without replay.
+///     They do not cover every uncertain failure, including a plain first-fragment transport failure. After a
+///     partial exchange leaves state uncertain, dispose and reopen the connection even if local admission remains
+///     open; disposing a borrowed session alone is not device recovery.
 /// </remarks>
 public sealed class RawSmartCardSession : ApplicationSession
 {
@@ -46,7 +48,10 @@ public sealed class RawSmartCardSession : ApplicationSession
     // Existing alpha overload family: preserve the simple and SCP-specific raw-session entry points.
 #pragma warning disable RS0026
     /// <summary>Creates a raw APDU session that borrows <paramref name="connection" />.</summary>
-    /// <remarks>No APDU is transmitted and no application is selected during creation.</remarks>
+    /// <remarks>
+    ///     Creation transmits no APDU and selects no application. FirmwareVersion starts unknown (0.0.0);
+    ///     Configure records a caller-supplied version rather than discovering it.
+    /// </remarks>
     public static Task<RawSmartCardSession> CreateAsync(
         ISmartCardConnection connection,
         CancellationToken cancellationToken = default) =>
@@ -122,6 +127,10 @@ public sealed class RawSmartCardSession : ApplicationSession
     }
 
     /// <summary>Selects exactly the supplied application identifier.</summary>
+    /// <remarks>
+    ///     On an SCP session, SELECT is sent in plaintext while the local secure processor is retained. It is
+    ///     not a reauthentication procedure. Prefer an applet factory for selection followed by SCP establishment.
+    /// </remarks>
     public Task<ReadOnlyMemory<byte>> SelectAsync(
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
@@ -137,6 +146,12 @@ public sealed class RawSmartCardSession : ApplicationSession
     ///     the returned response preserves both data and status bytes.
     /// </param>
     /// <param name="cancellationToken">Cancellation checked before the stateful exchange is admitted.</param>
+    /// <remarks>
+    ///     Keep command data unchanged until this task is terminal, then clear sensitive source storage in finally.
+    ///     The returned response owns a copy. Inspect status and parse data before calling ApduResponse.Clear in
+    ///     finally for sensitive output; Clear invalidates its status and data aliases, not transport staging or
+    ///     earlier response fragments. With throwOnError enabled, every final status other than 0x9000 throws.
+    /// </remarks>
     public Task<ApduResponse> TransmitAndReceiveAsync(
         ApduCommand command,
         bool throwOnError = true,

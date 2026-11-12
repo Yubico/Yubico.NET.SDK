@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.Core.Abstractions;
 /// <summary>
 ///     Represents a physical YubiKey and the set of connections (interfaces) it exposes.
 /// </summary>
+/// <remarks>
+///     Discovery groups observed interfaces using available evidence. Partial visibility can split a key,
+///     and complementary partial interfaces from same-PID keys can resemble one complete key. A grouped
+///     serial therefore establishes no independent serial-to-interface verification for each connection slot.
+///     An owned monitor retains a published reference while its member interfaces and connection set remain
+///     unchanged and fresh known serial evidence agrees. Observed absence or contradictory identity ends retention.
+/// </remarks>
 public interface IYubiKey
 {
     /// <summary>
@@ -41,13 +48,13 @@ public interface IYubiKey
     ///     <para>
     ///         <strong>The same physical key can present different values.</strong> Evidence depends on what
     ///         else is attached: a key alone may group by PID, while inserting a second key of the same
-    ///         product ID forces serial evidence to tell them apart. Measured on macOS hardware, one key
-    ///         reported <c>ykphysical:pid:0407</c> alone and <c>ykphysical:103</c> once a same-PID sibling
-    ///         was inserted. The device did not change; the available evidence did.
+    ///         product ID requires serial evidence to tell them apart. For example, discovery can use
+    ///         <c>ykphysical:pid:0407</c> for a complete lone key and <c>ykphysical:103</c> for the same key
+    ///         when serial 103 distinguishes it from a same-PID sibling. The evidence changed, not the key.
     ///     </para>
     ///     <para>
-    ///         <strong>A live repository and a fresh scan can legitimately disagree.</strong> When an
-    ///         evidence-only tier change occurs, the repository keeps publishing the object it already
+    ///         <strong>An owned monitor and a fresh scan can legitimately disagree.</strong> When an
+    ///         evidence-only tier change occurs, the monitor keeps publishing the object it already
     ///         handed out rather than churning subscribers, so a concurrent independent scan may report a
     ///         different identifier for the same key. Both are correct.
     ///     </para>
@@ -69,8 +76,9 @@ public interface IYubiKey
     /// <summary>
     ///     The set of concrete connections this physical device exposes (any combination of
     ///     <see cref="ConnectionType.SmartCard"/>, <see cref="ConnectionType.HidFido"/>, and
-    ///     <see cref="ConnectionType.HidOtp"/>). Never contains the <see cref="ConnectionType.Hid"/>
-    ///     group flag or <see cref="ConnectionType.All"/>.
+    ///     <see cref="ConnectionType.HidOtp"/>), including FIDO and OTP together. The separate
+    ///     <see cref="ConnectionType.Hid"/> group bit is absent, so the value also differs from
+    ///     <see cref="ConnectionType.All"/> even when every concrete interface is present.
     /// </summary>
     ConnectionType AvailableConnections { get; }
 
@@ -88,12 +96,12 @@ public interface IYubiKey
     ///         </description></item>
     ///         <item><description>
     ///             Once non-<see langword="null" />, it never reverts to <see langword="null" />. It may
-    ///             transition from <see langword="null" /> to a value after publication, without any
-    ///             device event.
+    ///             transition from <see langword="null" /> to a value after publication. A monitor's
+    ///             changed metadata publication emits <see cref="DeviceUpdated"/> for the retained object.
     ///         </description></item>
     ///         <item><description>
-    ///             A manager-retained object's known value does not change to another known value. If a
-    ///             fresh scan reports a different known serial for the same interface set, the manager
+    ///             A monitor-retained object's known value does not change to another known value. If a
+    ///             scan reports a different known serial for the same interface set, the monitor
     ///             republishes the device as a removal followed by an addition.
     ///         </description></item>
     ///         <item><description>
@@ -108,7 +116,9 @@ public interface IYubiKey
     ///     </list>
     ///     <para>
     ///         This is the only durable physical identity the SDK offers. When it is
-    ///         <see langword="null" />, physical identity is unknowable without a live session.
+    ///         <see langword="null" />, distinct references have unknown serial-based correlation. A live
+    ///         metadata read may supply a serial, but some devices report none. Successful serial-less
+    ///         discovery reads can be cached for the finder's evidence lifetime rather than retried each scan.
     ///     </para>
     /// </remarks>
     int? SerialNumber => null;
@@ -119,9 +129,10 @@ public interface IYubiKey
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         This is a last-known snapshot, not guaranteed-current device state. Existing discovery and
-    ///         repository updates may replace it without a device event; a failed metadata read does not
-    ///         clear a previously successful snapshot. A value already returned to a caller does not change.
+    ///         This is last-known metadata. A monitor replaces changed metadata on a retained object and emits
+    ///         <see cref="DeviceUpdated"/>; a failed metadata read preserves the previous successful snapshot.
+    ///         Replacing the snapshot leaves the scalar fields of a previously returned value unchanged.
+    ///         <see cref="DeviceInfo.ChallengeResponseTimeout"/> retains its source-memory ownership qualification.
     ///     </para>
     ///     <para>
     ///         Metadata may be stale after configuration changes or disconnection. A retained device object
@@ -154,7 +165,7 @@ public interface IYubiKey
     ///     inequality and must not be coerced to either result for collection equality or deduplication.
     ///     No equality comparer over this relation is offered: the serial arrives after publication, so
     ///     any serial-derived hash could mutate while the object already keys a collection. Key
-    ///     collections by reference instead — instance retention within one manager makes that a
+    ///     collections by reference instead — instance retention within one owned monitor makes that a
     ///     supported pattern.
     /// </remarks>
     /// <param name="other">The device reference to compare with this reference.</param>

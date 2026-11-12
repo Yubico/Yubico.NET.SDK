@@ -35,6 +35,10 @@ examples below use SCP03. SCP11 permissions are command-specific: the August 202
 Review draft §4.6 forbids PUT KEY, DELETE [keys], and SET STATUS over SCP11c. This draft restriction does not
 establish final-specification or YubiKey-profile behavior. The inherited `IsAuthenticated` flag alone is
 not evidence that the host has authority for a particular operation.
+It records successful Core setup, not ongoing channel health. In the same Public Review draft, §4.3
+includes the first correct-MAC APDU after establishment in a/c authentication of the OCE to the device;
+the factory return alone does not establish that device-side phase. Final SCP11 1.4 and the complete
+YubiKey profile remain separate qualification requirements.
 
 ## Installation
 
@@ -130,9 +134,32 @@ var keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);
 ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);
 ```
 
-Persist `devicePublicKey` through this trusted provisioning session. Later sessions establish SCP11b by
-passing `new Scp11KeyParameters(keyReference, devicePublicKey)` as `ScpKeyParameters`, with an owned parameter
-scope enclosing the session as in the SCP03 example. This provides a channel, not host management authority.
+Persist `devicePublicKey` through this trusted provisioning session. End that session before opening
+another. SCP11 creation also needs a known supported firmware version, normally 5.7.2 or later, in
+`FirmwareVersionOverride`: Security Domain's default 5.3.0 fails Core's SCP11 setup gate locally, even
+if the preceding generation request succeeded on a newer device. An override supplies policy; it does
+not detect firmware or prove hardware support.
+
+This complete composable method uses the directives above plus System.Collections.Generic,
+System.Threading and System.Threading.Tasks. The caller supplies the intended device, an SCP11b reference,
+its trusted public key and a known supported version. The method owns parameters and session, disposing
+the session first. It reads public metadata through the channel; it grants no host management authority.
+
+```csharp
+static async Task<IReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo>> ReadWithScp11bAsync(
+    IYubiKey device, FirmwareVersion knownFirmware, KeyReference keyReference,
+    ECPublicKey trustedDevicePublicKey, CancellationToken cancellationToken)
+{
+    using var parameters = new Scp11KeyParameters(keyReference, trustedDevicePublicKey);
+    await using var session = await device.CreateSecurityDomainSessionAsync(
+        new SessionCreationOptions
+        {
+            FirmwareVersionOverride = knownFirmware,
+            ScpKeyParameters = parameters
+        }, cancellationToken);
+    return await session.ListKeyInformationAsync(cancellationToken);
+}
+```
 
 ### Understand SCP11a/c provisioning roles
 
@@ -180,6 +207,9 @@ therefore does not prove complete restoration. Failure or cancellation can leave
 Use an unauthenticated reset session as above: retained SCP parameters may no longer work during reselection
 and reauthentication. Currently reset reinitialization also omits the original protocol configuration and
 firmware override. Dispose the reset session and create a fresh session with your required options afterward.
+SCP11 reinitialization can fail at the local version gate before a new handshake because reset falls
+back to 5.3.0. After any failed or cancelled reset, await its terminal task, dispose the session and
+reopen; retained readiness/authentication values do not prove that the old graph survived raw attempts.
 
 ## User interaction
 
@@ -188,6 +218,9 @@ supply through `SessionCreationOptions.ScpKeyParameters`, so this module does no
 `SessionCreationOptions.UserPresencePrompt`. Pass a `CancellationToken` to session calls to request cancellation.
 Cancellation is not rollback: a device may already have accepted a persistent change. Reset can take noticeably
 longer than other operations because it makes repeated authentication attempts.
+Await complete public workflows before disposal or input cleanup. Core guards individual exchanges,
+not the entire reset, multi-query retrieval or application callback. The reset attempt limit is not a
+wall-clock deadline or a native interruption guarantee.
 
 ## Constraints
 
@@ -197,8 +230,10 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 
 - SmartCard transport only. Requesting another transport through
   `SessionCreationOptions { PreferredConnectionType = ... }` throws.
-- One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
-  disposes it with `await using`; a session from `CreateSecurityDomainSessionAsync` owns the one it opened.
+- Within this process, grouped views admit one live connection across known member IDs, and each connection
+  admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
+  it with `await using`; a session from `CreateSecurityDomainSessionAsync` owns the one it opened.
+  See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
 - The Security Domain cannot detect firmware. `SessionCreationOptions.FirmwareVersionOverride` is its only
   exact version source; without it the session assumes 5.3.0 for protocol configuration. Supply the version
   from a Management session so the SCP11 gate can be evaluated.
@@ -217,7 +252,7 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 - `StaticKeys` holds the ENC, MAC, and DEK values and implements `IDisposable`. Wrap it in `using` so the key
   bytes are zeroed; `Scp03KeyParameters` and `Scp11KeyParameters` do the same for what they own.
 - Session creation borrows the key parameters you pass. You keep ownership and remain responsible for
-  disposing them after the session is gone.
+  disposing them after every session using them is gone. Security Domain retains the exact object for reset.
 - `GetCertificatesAsync` returns caller-owned certificates. Dispose each certificate when no longer needed;
   disposing the session does not dispose them. If any certificate cannot be loaded, the SDK disposes those
   already loaded and throws instead of returning a partial bundle.
@@ -226,6 +261,18 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 - The factory SCP03 key set is a public value. Treat a device that still has it as unprotected, and rotate
   before relying on the channel.
 - Never log key bytes, key check values, or challenge and response payloads. Log key references only.
+
+| Parameter content | Ownership action |
+| --- | --- |
+| `StaticKeys` | Copies the original arrays. Clear those sources separately; `Scp03KeyParameters` retains and disposes that same `StaticKeys` object. |
+| SCP11 private key and certificates | Parameters copy the collection, not the contained objects. Disposing parameters disposes the retained private-key wrapper and certificates; arrange one owner and keep them alive through every session/reset. The SD public-key object is not disposed by parameters. |
+| Record clones | Share contained owners; cloning parameters is not an independent secret/certificate lifetime. |
+
+`GetDataAsync` returns a view into a response array, not a pooled loan. That view survives session disposal,
+but the facade does not expose the response's supported clear handle. Clearing an independent copy cannot
+erase the hidden owner or earlier transport/SCP copies. Classify data by meaning: public certificates and
+references differ from KCVs or a caller-selected sensitive object. The current facade does not provide
+complete response-erasure control for arbitrary sensitive objects. Do not cast borrowed read-only memory writable.
 
 ## Related
 

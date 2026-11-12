@@ -20,14 +20,15 @@ namespace Yubico.YubiKit.OpenPgp.Credentials;
 /// Supplies credential-reader limits and prompts for OpenPGP input.
 /// </summary>
 /// <remarks>
-/// These factories configure the reader. The application also checks the card's credential format and
-/// encoded byte limits; UTF-8 byte length can differ from reader input length. Session methods receive
-/// bytes directly and leave credential collection with the application.
+/// These factories configure text-reader limits in UTF-16 code units, before UTF-8 encoding. The caller
+/// separately checks the card's credential format and encoded byte limits; neither these presets nor
+/// the byte-taking session methods perform general card-profile validation. UTF-8 byte length can differ
+/// from the reader's count.
 /// </remarks>
 public static class OpenPgpCredentialOptions
 {
     /// <summary>
-    /// Creates User PIN reader options with MinLength 6 and MaxLength 127.
+    /// Creates User PIN reader options with a length of 6–127 UTF-16 code units.
     /// </summary>
     public static CredentialReaderOptions ForOpenPgpPin() => new()
     {
@@ -38,7 +39,7 @@ public static class OpenPgpCredentialOptions
     };
 
     /// <summary>
-    /// Creates Admin PIN reader options with MinLength 8 and MaxLength 127.
+    /// Creates Admin PIN reader options with a length of 8–127 UTF-16 code units.
     /// </summary>
     public static CredentialReaderOptions ForOpenPgpAdminPin() => new()
     {
@@ -49,7 +50,7 @@ public static class OpenPgpCredentialOptions
     };
 
     /// <summary>
-    /// Creates Reset Code reader options with MinLength 8 and MaxLength 127.
+    /// Creates Reset Code reader options with a length of 8–127 UTF-16 code units.
     /// </summary>
     public static CredentialReaderOptions ForOpenPgpResetCode() => new()
     {

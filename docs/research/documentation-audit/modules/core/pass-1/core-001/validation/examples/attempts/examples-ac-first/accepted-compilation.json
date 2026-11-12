@@ -1,0 +1,125 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "command_receipt": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/receipt.json",
+    "bytes": 8410,
+    "sha256": "34142d44bf2eac0e10a981703871ad2d6720646f0edeee1d5a0ebd17cf997d0e"
+  },
+  "captures": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/source-before.json",
+      "bytes": 161810,
+      "sha256": "1e9b26875576ba8cd6c48d8acba15c80014f98553cc2b27257a02a6db5fcf4d1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/before.json",
+      "bytes": 89449,
+      "sha256": "0ea7afcabb5f24eef8b6944f1e8ff1718d6a8e99c5c69d5d60b7d6852ee44402"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/compiler.json",
+      "bytes": 91852,
+      "sha256": "54bd017df0492e2c78e05d990d9bc6985f5c8eaf0ec66758b2c44344f76839e8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/finish.json",
+      "bytes": 63248,
+      "sha256": "11289ddeb9abdb1a31be77998d107e9bf4084c8d9b1c0cfd0cee4154570c9457"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/source-after.json",
+      "bytes": 161810,
+      "sha256": "1e9b26875576ba8cd6c48d8acba15c80014f98553cc2b27257a02a6db5fcf4d1"
+    }
+  ],
+  "body_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/manifest.json",
+    "bytes": 87165,
+    "sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60"
+  },
+  "outputs": [
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.deps.json",
+      "bytes": 12528,
+      "sha256": "8ea7f2c99b2bee344f94fb9e808ca78ee52f8e4ad331b03e1046a308cfd4f4c4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.dll",
+      "bytes": 15360,
+      "sha256": "3d4d2f3fbf454d2a8a0f935041a48f464ed514250534b835ba46874aa572d2f0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.pdb",
+      "bytes": 16088,
+      "sha256": "b1132abfb4e558d8f1e634e34e36337f53edb66524a5bc4c44d12536783c569b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.xml",
+      "bytes": 157,
+      "sha256": "62e2a3682d76583aabd8ab02c51c15adaf88e75dfa5ed802003005d893349c98"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+      "bytes": 816128,
+      "sha256": "801d0b2f9215ae4bc10687791e3cd67a57c3b42fdabcabb1ff46fea19eaa020a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+      "bytes": 234532,
+      "sha256": "cfeefea824bb47479901e92558e3ebc8544bf038d44b3e70043a9a62314ea167"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+      "bytes": 782361,
+      "sha256": "97788d4f85a5e19bd3fa8197d51325942696b5c4b34a79757c2b4a829c01a0c9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+      "bytes": 206848,
+      "sha256": "3617f072f8c5ffaeacca3fdba0a8d20da0eca128b9b0e76f6b1c8ee109c3d943"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb",
+      "bytes": 73180,
+      "sha256": "d05a7c6667e506c26bc924f5befec2b4636d3bae3e89888b3ebb7cf9aca2342a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml",
+      "bytes": 418346,
+      "sha256": "bf9bc68ecac5a687f2d48fc72892aa180a2f7fd7d5635ce29b2db11fd19b82d1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Piv.dll",
+      "bytes": 159744,
+      "sha256": "5b8fc2b74753f18f1b8319816853ef122c5ef26d72d8ab18f28d282c8aed4044"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb",
+      "bytes": 44840,
+      "sha256": "07d99833e471902db27c46b1e06f48fd184a3ed845f64649531bbfda5f212ca7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Piv.xml",
+      "bytes": 145355,
+      "sha256": "e3d8d5d18e5eaf8f7f44f25c13fdf5e99e6a60653182d05b075d6f42530ed1ab"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll",
+      "bytes": 165888,
+      "sha256": "3d01584cabb09128a50f3073ab172599c43340178ad24f77891d11e9c30054dd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.pdb",
+      "bytes": 52492,
+      "sha256": "a8dd9cf68d7f233049d025ed56eb5d1422ab4c0fd4249149110210041d910ae4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.xml",
+      "bytes": 220990,
+      "sha256": "ebdbbf139b0b14891d2701fe8fdcb7bf72fd7da2b6a9a16c1710b99fea822a37"
+    }
+  ],
+  "scope": "17 accepted A/C bodies compiled in one genuine SDK-reference library context; no example execution.",
+  "execution_status": "not-run",
+  "internal_examples": "2 explicitly qualified internal illustrations, excluded from this consumer host"
+}

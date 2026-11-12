@@ -1,0 +1,1001 @@
+{
+  "authority_records": 41,
+  "accepted_unique_compilations": 17,
+  "internal_qualified_noncompiled": 2,
+  "historical_excluded": 22,
+  "original_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/manifest.json",
+    "bytes": 87165,
+    "sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60"
+  },
+  "accepted_compilation": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+    "bytes": 7053,
+    "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+  },
+  "original_retained_mapping": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/pilot-output-preservation.json",
+    "bytes": 67505,
+    "sha256": "aa37ec854f913480570ea438f98c63e66aec3f7747b489dad4dec060109132bc"
+  },
+  "retained_pilot_files_verified": 29,
+  "records": [
+    {
+      "record_id": "A-01",
+      "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+      "classification": "ILLUSTRATIVE-INTERNAL-EXPRESSIONS",
+      "original_status": "qualified-internal-not-selected",
+      "raw_body_sha256": "5104e086d41bf595d218edbb5b286ddf05b708f1ea456577d0ebd0f59b88e921",
+      "decoded_body_sha256": "9ff8535b320dc909b8670d626b05c18dc8e362ec80c1c1c5237b6a631c46811e",
+      "current_document": {
+        "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+        "bytes": 4704,
+        "sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/example-bodies.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "pilot-internal-qualified-noncompiled",
+      "qualification": "ConnectionTypeExtensions is internal; the unique consumer host has no existing IVT grant. No implementation copying, assembly-name impersonation or new access grant."
+    },
+    {
+      "record_id": "A-02",
+      "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+      "classification": "ILLUSTRATIVE-INTERNAL-EXPRESSIONS",
+      "original_status": "qualified-internal-not-selected",
+      "raw_body_sha256": "c5cc7eed5485af196c782c094bac4714174a6121296087d7ce138303551a650a",
+      "decoded_body_sha256": "a6daf07849fb4729187f4c98a5d3b471a34ed7216a69276cd8f0350ec448fb20",
+      "current_document": {
+        "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+        "bytes": 4704,
+        "sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/example-bodies.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "pilot-internal-qualified-noncompiled",
+      "qualification": "ConnectionTypeExtensions is internal; the unique consumer host has no existing IVT grant. No implementation copying, assembly-name impersonation or new access grant."
+    },
+    {
+      "record_id": "A-03",
+      "path": "src/Core/src/Devices/YubiKeyManager.cs",
+      "classification": "COMPLETE-METHOD",
+      "original_status": "prepared",
+      "raw_body_sha256": "5a50614c62d1acbf23b53fdf382fd6f0474bdfb38d78b1676433227d408a3903",
+      "decoded_body_sha256": "d1620db72041e4a0b935b9fe662bca97261788f471db337171739bd7c66870bf",
+      "current_document": {
+        "path": "src/Core/src/Devices/YubiKeyManager.cs",
+        "bytes": 9777,
+        "sha256": "92e0ace95e5b4274e30df159efbe6a72e53f1045915242c86f33ea87a0347524"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/example-bodies.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/A-03.cs",
+        "bytes": 878,
+        "sha256": "fa650274628c5009c64eebfaf3d67c92b67d931b1627cf7385903cf657025890"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/A-03.cs",
+        "bytes": 878,
+        "sha256": "fa650274628c5009c64eebfaf3d67c92b67d931b1627cf7385903cf657025890"
+      }
+    },
+    {
+      "record_id": "C-01",
+      "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "classification": "Complete example class; application-supplied async acquisition delegate; transferred byte array cleared in finally; result owner transfers on success",
+      "original_status": "prepared",
+      "raw_body_sha256": "d1275bcf64ef1e0cedf4c45eb8e67369795bcb8112d9926263c9cb157950bfc6",
+      "decoded_body_sha256": "643231b021ba7c1ef71e57cb6b8ceef92008e7bc2448a58dc319374c512c286b",
+      "current_document": {
+        "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+        "bytes": 5411,
+        "sha256": "06e7ad040206837e0b7f888c34b437ba95a02634e10c6af390bed49db478d4a7"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-01.cs",
+        "bytes": 1262,
+        "sha256": "17feb94ab6c4764aadf339a56180521fa7049fff02edb2d705a93266120c8a8b"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-01.cs",
+        "bytes": 1262,
+        "sha256": "17feb94ab6c4764aadf339a56180521fa7049fff02edb2d705a93266120c8a8b"
+      }
+    },
+    {
+      "record_id": "C-02",
+      "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "classification": "Complete method example; borrowed open IPivSession and token; owned credential using encloses awaited VerifyPinAsync; caller retains session disposal",
+      "original_status": "prepared",
+      "raw_body_sha256": "bda76dccb580c0dbf3c877da33306aab17740ad304ac12253bc7d7a0f58b7b0b",
+      "decoded_body_sha256": "86341af54954a38cced85a4ac3857d49d62caa071c635ace9df10b846b16da4e",
+      "current_document": {
+        "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+        "bytes": 4371,
+        "sha256": "015e913525cdeeeaac7139bdecc3ce4cad3cb2af92ab8aa0aa7d18fe26b96920"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-02.cs",
+        "bytes": 719,
+        "sha256": "b49d030b6849fa21a760ec4231ee4fef3dc75d0cce7699f5f6fe2a0be16ae984"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-02.cs",
+        "bytes": 719,
+        "sha256": "b49d030b6849fa21a760ec4231ee4fef3dc75d0cce7699f5f6fe2a0be16ae984"
+      }
+    },
+    {
+      "record_id": "C-03",
+      "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "classification": "Context fragment; borrowed WebAuthnClient, PublicKeyCredentialRequestOptions and token; complete owned intent using scope; client lifetime stays with caller",
+      "original_status": "prepared",
+      "raw_body_sha256": "b8052dca85b3d10e3c1ea9779fbf0b2812d60a4177393da694a0f6ff8f52ad53",
+      "decoded_body_sha256": "a336ec35023569f85fd4ac5833375b991a1dcbc1e84af308099c7831214a03c0",
+      "current_document": {
+        "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+        "bytes": 5768,
+        "sha256": "5e88bdf699429adf693f625caa700996c4d988807bda5530e1f97449acb766eb"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-03.cs",
+        "bytes": 777,
+        "sha256": "f4c8c811184f6b80038ba120a0754e77e6e42488c8cd727cab99b7bfaa57787b"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-03.cs",
+        "bytes": 777,
+        "sha256": "f4c8c811184f6b80038ba120a0754e77e6e42488c8cd727cab99b7bfaa57787b"
+      }
+    },
+    {
+      "record_id": "C-P01",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Resource-lifetime fragment with complete provider using scope",
+      "original_status": "prepared",
+      "raw_body_sha256": "a2057ec70c8e22f1d806dc96cf55ca509e355d284b5458f2dc24933008b66ba9",
+      "decoded_body_sha256": "39ffc15f4bc60d947b05d1a268deaa96a6f63429b1abd31b16947ceeacbff5bf",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P01.cs",
+        "bytes": 518,
+        "sha256": "f3eff95445587185a653c341d2893965abd37622b6ebdb4a9a6a1228561d15c1"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P01.cs",
+        "bytes": 518,
+        "sha256": "f3eff95445587185a653c341d2893965abd37622b6ebdb4a9a6a1228561d15c1"
+      }
+    },
+    {
+      "record_id": "C-P02",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Startup configuration fragment selecting a factory; returned-object ownership is documented separately",
+      "original_status": "prepared",
+      "raw_body_sha256": "25428fda71176a77bd0a6fae31c6a6f82415f7cb6a9dc660d322d1e8d1c20c9a",
+      "decoded_body_sha256": "7dd444e3d5fa00e29c8e1914305cf0fb148b447c49c5e29c504a67d9e8da3f1b",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P02.cs",
+        "bytes": 448,
+        "sha256": "8fd6fadedf3970298c5f7640d18fba8c68baf2633285b201a096ed5552d2a51a"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P02.cs",
+        "bytes": 448,
+        "sha256": "8fd6fadedf3970298c5f7640d18fba8c68baf2633285b201a096ed5552d2a51a"
+      }
+    },
+    {
+      "record_id": "C-P03",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Resource-lifetime fragment with complete provider using scope",
+      "original_status": "prepared",
+      "raw_body_sha256": "114f22fcbfdef2d8b26ada16d552a1cb2859b945ec958d13ca19496aaf7383bd",
+      "decoded_body_sha256": "019013d44fbc7464a6238f8ae0ccd640f92c0a6311b3167b1d5a2199be5a717d",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P03.cs",
+        "bytes": 508,
+        "sha256": "e78374f971f10904011bc3de4831172fe565b6994b01fced6c1d31ef72d708e5"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P03.cs",
+        "bytes": 508,
+        "sha256": "e78374f971f10904011bc3de4831172fe565b6994b01fced6c1d31ef72d708e5"
+      }
+    },
+    {
+      "record_id": "C-P04",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Startup configuration fragment selecting a factory; returned-object ownership is documented separately",
+      "original_status": "prepared",
+      "raw_body_sha256": "e4bb4b88d300cd496dfb5f5cdb44ba58b4689b3a1475d718aa1a1b75ddb79c18",
+      "decoded_body_sha256": "ac8773caef16e6a64b54ed105ac30b960b7b89da357880ec2bd9e7e99aa8c2d3",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P04.cs",
+        "bytes": 452,
+        "sha256": "a3dbc21d12c428d375d788ab191c0a8ff49310db2111c64f7f85b9787524b96d"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P04.cs",
+        "bytes": 452,
+        "sha256": "a3dbc21d12c428d375d788ab191c0a8ff49310db2111c64f7f85b9787524b96d"
+      }
+    },
+    {
+      "record_id": "C-P05",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Resource-lifetime fragment with complete provider using scope",
+      "original_status": "prepared",
+      "raw_body_sha256": "950bad273026d5d436599d5d9e463c44cd507c3921c57e796789a6fdf4fb1d33",
+      "decoded_body_sha256": "ed94bf8978b8f9ef90e3652812aba5a0507bda07d14217cb6c185431d9eaf538",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P05.cs",
+        "bytes": 514,
+        "sha256": "e7a10b4bbf730d257bd71c6b6f94ac6a9d9e0e716442a11e597e3424731f5158"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P05.cs",
+        "bytes": 514,
+        "sha256": "e7a10b4bbf730d257bd71c6b6f94ac6a9d9e0e716442a11e597e3424731f5158"
+      }
+    },
+    {
+      "record_id": "C-P06",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Startup configuration fragment selecting a factory; returned-object ownership is documented separately",
+      "original_status": "prepared",
+      "raw_body_sha256": "b14bcdd4edaf60d60f0f5ad2ea60375e5e7f7cd2ef193c3d577e5d535b4e623c",
+      "decoded_body_sha256": "5cbc06c4cc7c47baeecdbd1b3d420dfe32970c330855acf995c9ecab3cb283e0",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P06.cs",
+        "bytes": 456,
+        "sha256": "001d44517aa025b118cfc6b79460e9c19906e30fffa9d0fd6b8f4c35ca9b66f5"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P06.cs",
+        "bytes": 456,
+        "sha256": "001d44517aa025b118cfc6b79460e9c19906e30fffa9d0fd6b8f4c35ca9b66f5"
+      }
+    },
+    {
+      "record_id": "C-P07",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Resource-lifetime fragment with complete provider using scope",
+      "original_status": "prepared",
+      "raw_body_sha256": "d72218ec804b722523c7b69dea1700503020f6d288be9ab27b1a426158fb213e",
+      "decoded_body_sha256": "a295c5b2bf5742fb118d4d8c071f507dba3acc89a9bce9ca4780073d92c7b2bd",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P07.cs",
+        "bytes": 514,
+        "sha256": "3823c131dc718d695bae9eed7f37ff967a3bf3774315d279f57dbb27466332db"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P07.cs",
+        "bytes": 514,
+        "sha256": "3823c131dc718d695bae9eed7f37ff967a3bf3774315d279f57dbb27466332db"
+      }
+    },
+    {
+      "record_id": "C-P08",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Startup configuration fragment selecting a factory; returned-object ownership is documented separately",
+      "original_status": "prepared",
+      "raw_body_sha256": "3fc7b582e7967df775d60068cb282212b4ae4a3f231d43bdced4a5b7bc18c457",
+      "decoded_body_sha256": "b0bfffb475fa5c25398e1be28766acae039988d28df51b49d61c1702de3a779d",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P08.cs",
+        "bytes": 456,
+        "sha256": "bd5dace798f87a99411ca1d3606a442ffa3ab50ec986963da203b3780730b19d"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P08.cs",
+        "bytes": 456,
+        "sha256": "bd5dace798f87a99411ca1d3606a442ffa3ab50ec986963da203b3780730b19d"
+      }
+    },
+    {
+      "record_id": "C-P09",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Resource-lifetime fragment with complete provider using scope",
+      "original_status": "prepared",
+      "raw_body_sha256": "ff732326bcf84ae2997f571af27bca029d278cb7e6f0fc17cb4537987277b8e7",
+      "decoded_body_sha256": "89147daed53e64d736b3661eeac0fe1dd0d5f53f98e9fc00fede592df4a2cf41",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P09.cs",
+        "bytes": 514,
+        "sha256": "7e9000c51c5aae27339605a2a5233ed4367d86c5f7ed0efe1b02141219ca56f8"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P09.cs",
+        "bytes": 514,
+        "sha256": "7e9000c51c5aae27339605a2a5233ed4367d86c5f7ed0efe1b02141219ca56f8"
+      }
+    },
+    {
+      "record_id": "C-P10",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Startup configuration fragment selecting a factory; returned-object ownership is documented separately",
+      "original_status": "prepared",
+      "raw_body_sha256": "c0c92d3591bf56a34dac2e487662d8e7807abe775685d8f866be7a4e761599bd",
+      "decoded_body_sha256": "10278ab3fdc13ce1d5eacc9e954488e625176c124164c21216daf73c3d693e2e",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P10.cs",
+        "bytes": 456,
+        "sha256": "c9c9da393b46175bce17f72efb175c76596cd7ffd66d851fc5c2a275067b26d6"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P10.cs",
+        "bytes": 456,
+        "sha256": "c9c9da393b46175bce17f72efb175c76596cd7ffd66d851fc5c2a275067b26d6"
+      }
+    },
+    {
+      "record_id": "C-P11",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Resource-lifetime fragment with complete provider using scope",
+      "original_status": "prepared",
+      "raw_body_sha256": "1e83d89aea1e1c91ae188bb730c0b6a5891db4cc0ab2c4f35d4c60e9079f22d8",
+      "decoded_body_sha256": "e0db84ab5414ca13f53b69da2a35c87bde336acd3b3efce283e7dae5335083b9",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P11.cs",
+        "bytes": 500,
+        "sha256": "75d120486f80fdafad739d76cf0bae9a5ef2b5084e981db86372141018e976a1"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P11.cs",
+        "bytes": 500,
+        "sha256": "75d120486f80fdafad739d76cf0bae9a5ef2b5084e981db86372141018e976a1"
+      }
+    },
+    {
+      "record_id": "C-P12",
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "classification": "Startup configuration fragment selecting a factory; returned-object ownership is documented separately",
+      "original_status": "prepared",
+      "raw_body_sha256": "8a038c9283b835e80e6198753b4735f3de4272c37c8506ff8abf163197a4fe43",
+      "decoded_body_sha256": "ddb6ea2aad6e8e67d423288c301d09a71a533a2dc0156a2f786d4b8a7107eea5",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+        "bytes": 16089,
+        "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P12.cs",
+        "bytes": 450,
+        "sha256": "2f380badeb58194e052f5664ec609fb0eecca8d12af2e798bb1f65fce18c8186"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-P12.cs",
+        "bytes": 450,
+        "sha256": "2f380badeb58194e052f5664ec609fb0eecca8d12af2e798bb1f65fce18c8186"
+      }
+    },
+    {
+      "record_id": "C-04",
+      "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "classification": "Complete method example; borrowed encodedKey; concrete RSAPrivateKey owner using scope; IPrivateKey and cast result are aliases, not disposal owners",
+      "original_status": "prepared",
+      "raw_body_sha256": "3511331abf9c6055706198b79b4193ff69ca483b43b5d528c48c8c96d6e35498",
+      "decoded_body_sha256": "3c37a2db35f175caaec82dc08874c49c127f3713c26516ea9fe23bcedbac3278",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+        "bytes": 2409,
+        "sha256": "edaa6090701b90e16fc1b927849ff86d761a7d4a1089e64d5c0f669034116c30"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "accepted-pilot-canonical-compilation",
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-04.cs",
+        "bytes": 691,
+        "sha256": "f45a89c99ffcd35c63810301608f77366c7aa3bd38a72da5834e485f96706240"
+      },
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+        "bytes": 7053,
+        "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+      },
+      "actual_compiler_input": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/C-04.cs",
+        "bytes": 691,
+        "sha256": "f45a89c99ffcd35c63810301608f77366c7aa3bd38a72da5834e485f96706240"
+      }
+    },
+    {
+      "record_id": "C-H01",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "eb8ff0bc4f792f1a720c7eebd7a2cf0fd496d4d5107529c71afa285d673246cf",
+      "decoded_body_sha256": "e17ff8eece9438779d2bebd5a40d7f5d54196d2fa796dc27db361b5d0791513c",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H02",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "b86828c830b8b42f0781aa745e14bea6f7e1f62b6d4e41d2c04e97d6551b2dfd",
+      "decoded_body_sha256": "fe629643a9286efc3c9de3a1e909bf8c34f47d5c0c1a8c964577475fa8903877",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H03",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "5e59c5cc1af3c115571cebe6ae7422d0598d8746c337a6f15df86efc8db6ef3f",
+      "decoded_body_sha256": "1349d533918b060ecef28b43c7b9d5ff13497d474ff0d43c98517d9887b0f648",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H04",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "0ab01c8d2a87759509b7b1732c49e2b6646682963c525df2c4b518393f090e24",
+      "decoded_body_sha256": "9d9eb5e5f298347116a8479bee3be88c4b906cc3f077b090438b6416a25fc7ca",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H05",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "4c7719b2a016edafdba6b23321a15ed2edfe809f3fe63f0d55c1ddbded3816fd",
+      "decoded_body_sha256": "c39672107afa7f88d2b5976b10247993362c7a68c9109a1f0af6c231d478e7e5",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H06",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "d3d10df55a00e8dfd4dc2c0295359b9ebc640b2603b33ec148512bfe1003895f",
+      "decoded_body_sha256": "1d87eb33e908e5afd30b3224073230827d31a39f38c4d28c993350b205c335dc",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H07",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "c9863af71f82b564d2b517b08f302e2e8cf29fc37bf699e37e32c417b3271a9a",
+      "decoded_body_sha256": "e01da11794275933d0c43ed1c641a4c27d2406fbfb17a8226631469e73b2f9dd",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H08",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "f876ce3f730f16562df8e465628f09a3fe970cc02d192974696ab6e417071e3b",
+      "decoded_body_sha256": "0b827ec8fd9a62b0bfbd1971747df80d169a7a6066ba8d876f6d246ffdd4c955",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H09",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "41159d8da92c66ae7e3a3b6260f275da749c4b29c995d76fd76c4481c77919d3",
+      "decoded_body_sha256": "c018db56722f7f92c7c0879f4e1341db3028f910c7b67d670ddf4d86975b738b",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H10",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "af3a214ca0a9cc324d039b4bdeb6f50764b7bb03c1074986f42c624488b07477",
+      "decoded_body_sha256": "13717ed5d9a913e1691b8a9caed152c832331cac2cf7756a1113d32576e21f9a",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H11",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "65dc7bce6a4ad2b72024fae0bbba1ff766330fecf79307252b4e980eb2e90e20",
+      "decoded_body_sha256": "82f3031905b95ab355eb3bbab5fee7c133ada3d8838213bccf695843eaf85408",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H12",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "399a8c37b9b3d0eca47e5fa216f473e6a037ec823cd37da665a9845ce713a1fc",
+      "decoded_body_sha256": "b25f71c75795d2d9ec683e89a30020cf483eddc0524fe401281270f0e5b2a2c6",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H13",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "59ab9c0963d0c420255e5f9d972a4abe195c7d8d6ea1d93283c3a15288265f61",
+      "decoded_body_sha256": "947ea7fdafb6742368a51d531e68bc5d6e81fca720fb71dc45d4740965fcd972",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H14",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "42d95588b8a5fcb8304810320485ce38a6bc5ee4fd972d6bca73e80e490ea7ce",
+      "decoded_body_sha256": "2c1147394bfc3f8cb3a6f5ada3e0e9aa61a48dc872d434dbde5344ffd58f0487",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H15",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "2fdca51b8ac8a875f6842226818d7ed93cd2489fcb944a67841b4e69b4aa7735",
+      "decoded_body_sha256": "aafa3de4adfd2f6a579b6f54acfca200e64d0e65f29c5542f2921ba8d79bc216",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H16",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "07805106f9cbccaa35018641b2168d07111746a0ec3803cbbfbdd36ce37817b4",
+      "decoded_body_sha256": "c534bb26d16a9ce545a9f1334e777625ac3bd358132efe49b776d87133e29a0a",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H17",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "8f0ac0c9f6a8c2fab2afb86ee2294a4b7ddecd582472b37840c16a6fdfa44306",
+      "decoded_body_sha256": "fc31259ba9fbc81ebff3bb6051fd04e02bc455b594f98787c5de5b0e36d979b5",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H18",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "132c3f65f3738d6bf8a7c5af623d73348fe2acc7777f386fe86ba0197cf0a8f4",
+      "decoded_body_sha256": "001bebe1d25728a5f2a3a4b793af91a0be55670a091b57cf844d171fd3d15289",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H19",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "63a9a9896b92a55929c17baa00e63c5d37abb3333c3674fa285513552663eb14",
+      "decoded_body_sha256": "9bc90c82509a2f61817a43115c0a7440eadb4fd71dff62d6f95583316f06bba6",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H20",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "42d95588b8a5fcb8304810320485ce38a6bc5ee4fd972d6bca73e80e490ea7ce",
+      "decoded_body_sha256": "2c1147394bfc3f8cb3a6f5ada3e0e9aa61a48dc872d434dbde5344ffd58f0487",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H21",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "c33db4e25e1f4ff14b5df7b4c2721cd73a78d1fc756ddbda245700868199e649",
+      "decoded_body_sha256": "a65930718d0a17791de5052b2598d9b6e3e2cfe89aa220fe687a8f3bac7f1ff3",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    },
+    {
+      "record_id": "C-H22",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "classification": "Historical commented-out RsaFormat illustration; excluded from active SDK/example compilation; retained without correction or runtime claim",
+      "original_status": "historical-excluded",
+      "raw_body_sha256": "2fdca51b8ac8a875f6842226818d7ed93cd2489fcb944a67841b4e69b4aa7735",
+      "decoded_body_sha256": "aafa3de4adfd2f6a579b6f54acfca200e64d0e65f29c5542f2921ba8d79bc216",
+      "current_document": {
+        "path": "src/Core/src/Cryptography/RsaFormat.cs",
+        "bytes": 75780,
+        "sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53"
+      },
+      "current_body_matches_original": true,
+      "accepted_inventory": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/examples.json",
+      "execution_status": "not-run",
+      "closeout_disposition": "historical-excluded",
+      "qualification": null
+    }
+  ],
+  "scope": "Pilot17 counted once, not replayed; original captured outputs preserved separately from208 Full files."
+}

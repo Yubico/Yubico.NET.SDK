@@ -1,0 +1,203 @@
+[
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "before_first_line": 62,
+    "after_first_line": 73,
+    "classification": "ILLUSTRATIVE-PROTOCOL-OR-STRUCTURE-FRAGMENT",
+    "body_sha256": "0c1e2f3cce488e919ea2cffda5e659c73954b1deb3b09e4bddc0350d30451ede",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "The contributor guide preserves SmartCard-only backend borrowing, KDF aliases, historical credential identity, X25519/ATT defects, version provenance and precise assertion limits. Its initialization fallback is narrower than actual backend handling: every non-OK or short successful version response falls back. Preserve the existing qualifications while correcting only that local explanation.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/PACKAGE_README.md",
+    "before_first_line": 14,
+    "after_first_line": 14,
+    "classification": "INSTALL-OR-RUN-COMMAND",
+    "body_sha256": "2b55528da431e404f990419feaada3b33dfbbb4df93591ffec48bd74adc3087c",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "The short package page describes applet tasks, alpha/security-audit status, transitive Core and links. Its install fragment carries no connection, key, prompt or secret result lifetime and needs no boundary-specific expansion; detailed task constraints are linked.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 14,
+    "after_first_line": 14,
+    "classification": "INSTALL-OR-RUN-COMMAND",
+    "body_sha256": "2b55528da431e404f990419feaada3b33dfbbb4df93591ffec48bd74adc3087c",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 50,
+    "after_first_line": 52,
+    "classification": "COMPLETE-READ-ONLY-TOP-LEVEL-EXAMPLE",
+    "body_sha256": "5542ca500da6f1a37c534e01082300f70d3b8f51744c3fe47e6af0f20007a9c3",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 100,
+    "after_first_line": 124,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "7ee760b780601580a24306e600e47871a9c24d3b92d318a38ddd95c68abf09aa",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 120,
+    "after_first_line": 144,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "96e614e3c4c87c063a6d0a1474d866d3a8f806a7569a7348b5c2d6a96a7db884",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 169,
+    "after_first_line": 193,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "35c5b8c7782d30e9e026fce4f7b5921390b70dd56151c9d1175edaa25c4d56e7",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 227,
+    "after_first_line": 261,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "4e52f02f04741ebf00edfbd5a991fdff34530e67f0336e307c8cfab09fcb525a",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 252,
+    "after_first_line": 286,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "466855eb966f95e968297f8c853781f54467dc60ef262726f370547b3782d1c2",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 275,
+    "after_first_line": 309,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "a3485ea5b6911f8e4f6602037a075a0a8e5fd8c50771f6a8e02bfc1602a17eec",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 314,
+    "after_first_line": 348,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "bfb83f253bd0bc29efbf837e2e471fd2388b92b2cc26db1a5a4c3c6c4189ef76",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 371,
+    "after_first_line": 405,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "754cbe59c499c0360b6c4f6697e1b4c3a54043c5dc808dcd8bebe8af94be32d3",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 407,
+    "after_first_line": 443,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "7f232c1692697178f18b10a4113bc056dfb43b84bce378ac8ccf6f0e182f37d3",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 425,
+    "after_first_line": 461,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "13023e0a198b307520c8060c4e9b271467aeddadcadc47ad127893952a708335",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 445,
+    "after_first_line": 481,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "0823dc3a40e008e70a56579670018d53f610299bde0fdf1efa5d2d871a937aee",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 490,
+    "after_first_line": 538,
+    "classification": "COMPOSABLE-METHOD-WITH-TYPED-PARAMETERS-AND-SHARED-DIRECTIVES",
+    "body_sha256": "64afa4ae312015f8bf4c44aeb8cbab9998bdd6fc9b6b05b2e7b1cd1015136c18",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_first_line": 504,
+    "after_first_line": 552,
+    "classification": "INSTALL-OR-RUN-COMMAND",
+    "body_sha256": "046fb57c1c2179f989bf499ee3127beccef40319c89f9b9736a8cdbef73f55e7",
+    "decision": "RETAIN-EXACT-BODY",
+    "scope": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "compilation": "NOT RUN; historical results retain their original scope",
+    "runtime": "NOT RUN"
+  },
+  {
+    "path": "src/OpenPgp/src/Kdf.cs",
+    "classification": "ILLUSTRATIVE-PROTOCOL-FRAGMENT; NOT C#",
+    "body_sha256": "d1dbe251c5e1ea1f4cdf5a2ec6d4e8236c5e145a618e5aedaaf2151429e1a3d0",
+    "decision": "RETAIN-EXACT-BODY",
+    "compilation": "NOT APPLICABLE"
+  },
+  {
+    "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+    "classification": "ILLUSTRATIVE-PROTOCOL-FRAGMENT; NOT C#",
+    "body_sha256": "50a864f7255a635186f4f2f18be873ecf441cc970c8a6c89610af916de0688dd",
+    "decision": "RETAIN-EXACT-BODY",
+    "compilation": "NOT APPLICABLE"
+  }
+]

@@ -1,0 +1,712 @@
+{
+  "entries": [
+    {
+      "id": "EXT-076",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-076.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "aebcf29c0553576fc967675612f2d443cb17fbf8f036f1464715b4276424d47e",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing System;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nnamespace Audit20261111.DocExamples.External76;\ninternal static class Body\n{\n",
+      "body": "static async Task WithRawScpAsync(\n    IYubiKey device,\n    ScpKeyParameters scpParameters,\n    FirmwareVersion firmwareVersion,\n    Func<RawSmartCardSession, CancellationToken, Task> action,\n    CancellationToken cancellationToken)\n{\n    await using RawSmartCardSession raw = await device.CreateRawSmartCardSessionAsync(\n        scpParameters,\n        firmwareVersion,\n        cancellationToken: cancellationToken);\n    await action(raw, cancellationToken);\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "using System;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "3947f5dc5a6e2a0bb06a30636b4894937bb6b37ccf9c78c6763717e0ecc54c02",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-078",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-078.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "3ba5a55de7333450f7b6c3d48cd13b89133c371c0f0f19a02c6b094554307141",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.External78;\ninternal static class Body\n{\ninternal static void CompileOnly()\n{\n",
+      "body": "byte[] pivApplicationId = ApplicationIds.Piv.ToArray();",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "293d1a2978ae399a672bda15572c743ebb78fcbb9ec84344783cdbf684ada7d1",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-081",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-081.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "764b77e2da59194c77b76d4493213dd92d625f85228a485f59faf4204850fde0",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Devices;\nnamespace Audit20261111.DocExamples.External81;\ninternal static class Body\n{\ninternal static async Task CompileOnly(CancellationToken cancellationToken)\n{\n",
+      "body": "var devices = await YubiKeyManager.FindAllAsync(\n    ConnectionType.All,\n    cancellationToken: cancellationToken);\nvar device = devices.First();",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "using Yubico.YubiKit.Core.Devices;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "1065a0ca06d60f3a61eb6bf2ab0016c70b5d7c571a887ef44ec088dbccdc0b97",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-083",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-083.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "f5922156e681df5b30455e08be9a8414b6eb8e0855c31c28983136fdb9048ff2",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External83;\ninternal static class Body\n{\ninternal static async Task CompileOnly(CancellationToken cancellationToken)\n{\n",
+      "body": "var device = await YubiKeyManager.FindFirstAsync(cancellationToken: cancellationToken);\nawait using var session = await device.CreateManagementSessionAsync(\n    cancellationToken: cancellationToken);\n\nvar info = await session.GetDeviceInfoAsync(cancellationToken);\nConsole.WriteLine(info.SerialNumber);\nConsole.WriteLine(info.VersionName);",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "using Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Management;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "5e1bd1785b37a371cf512b32aaa4e2f1e57c3c4bbc315d31e356472b280606b9",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-085",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-085.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "73fb777a8099f5f60c4609a4e53bf22898fec62d4b7d69bbd0db90dc7749ae55",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Piv;\nnamespace Audit20261111.DocExamples.External85;\ninternal static class Body\n{\ninternal static async Task CompileOnly(IYubiKey device, CancellationToken cancellationToken)\n{\n",
+      "body": "await using var piv = await device.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "using Yubico.YubiKit.Piv;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "e823cae3db202d6ca571db530662b3aeb45034315fb1523cd45df6f114a7fafa",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-087",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-087.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "2f3911ca63c3f177a5ab010dfea471bc5d008bbbf11f030f02f367f970f6293c",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing System.Security.Cryptography;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Piv;\nnamespace Audit20261111.DocExamples.External87;\ninternal static class Body\n{\ninternal static async Task CompileOnly(IYubiKey device, CancellationToken cancellationToken)\n{\n",
+      "body": "await using var piv = await device.CreatePivSessionAsync(\n    cancellationToken: cancellationToken);\n\n// Evaluation only: the installed active key must be this 24-byte factory value.\nbyte[] managementKey = PivSession.DefaultManagementKey.ToArray();\ntry\n{\n    await piv.AuthenticateAsync(managementKey, cancellationToken);\n\n    var publicKey = await piv.GenerateKeyAsync(\n        Slot.Authentication,\n        KeyType.P256,\n        new KeyCreationOptions\n        {\n            PinPolicy = PinPolicy.Default,\n            TouchPolicy = TouchPolicy.Default\n        },\n        cancellationToken);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(managementKey);\n}",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "using System.Security.Cryptography;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Piv;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "3690e5febaf0615498a32c4e3a99e50ac697a0105acd8aa5d45686e1db5be283",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-089",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-089.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "adb0c3c80d5cb98f9361e6ef0ac1f58dc18b0cbfe7cd0e04c30d06a3edcff804",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2;\nnamespace Audit20261111.DocExamples.External89;\ninternal static class Body\n{\ninternal static async Task CompileOnly(IYubiKey device, CancellationToken cancellationToken)\n{\n",
+      "body": "var info = await device.GetCtap2InfoAsync(cancellationToken: cancellationToken);",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "using Yubico.YubiKit.Ctap2;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "1b8738355242e8f6a8f069e0fb541835d6040044e5af2be54c0fa49d9615d8d9",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-090",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-090.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "687d77382b08e377cd433ff33b7eb58f3b6688be03843705f2e99f7f11ef71af",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Ctap2;\nnamespace Audit20261111.DocExamples.External90;\ninternal static class Body\n{\ninternal static async Task CompileOnly(IYubiKey device, CancellationToken cancellationToken)\n{\n",
+      "body": "await using var fido = await device.CreateCtap2SessionAsync(\n    cancellationToken: cancellationToken);\n\nvar info = await fido.GetInfoAsync(cancellationToken);",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "a570dcb1d1d73a49c220e95819d41696593461401c57a17595a0d2f3d4a2cda7",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-092",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-092.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "e2831fbabf124a8f1a20c4949b85cf5dc5ca300be2ec708e744ed976763d777b",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Oath;\nnamespace Audit20261111.DocExamples.External92;\ninternal static class Body\n{\ninternal static async Task CompileOnly(IYubiKey device, CancellationToken cancellationToken)\n{\n",
+      "body": "await using var oath = await device.CreateOathSessionAsync(\n    cancellationToken: cancellationToken);\n\nusing var credentialData = CredentialData.ParseUri(\n    \"otpauth://totp/Yubico:alice@example.com?secret=JBSWY3DPEHPK3PXP&issuer=Yubico&algorithm=SHA1&digits=6&period=30\");\n\nawait oath.PutCredentialAsync(credentialData, cancellationToken: cancellationToken);\nvar codes = await oath.CalculateAllAsync(cancellationToken: cancellationToken);",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "using Yubico.YubiKit.Oath;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "246f6c954aedbb01a9b3893a41a73c09d58de7fe96809c0462a0f7eea500f632",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-093",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-093.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "19cf6e25fe19bfcf87b52099bb2d18dee74be763a2c081d542fa237f67bfa53a",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.External93;\ninternal static class Body\n{\ninternal static async Task CompileOnly(Yubico.YubiKit.Oath.CredentialData credentialData)\n{\n",
+      "body": "byte[] copy = credentialData.Secret.ToArray();\ntry\n{\n    // Pass copy to the array-only consumer; await completion before clearing it.\n}\nfinally\n{\n    System.Security.Cryptography.CryptographicOperations.ZeroMemory(copy);\n}",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "bcfe3b61750cde295f8b875fe45b2fb13c10173d18bf798b18876f8a66e7ceef",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-095",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-095.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "8e9e16180e86a02ea11e0b5d4155a6168cc09446e50a0c3e2b5e089b4c25c5af",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing System;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.YubiOtp;\nnamespace Audit20261111.DocExamples.External95;\ninternal static class Body\n{\ninternal static async Task CompileOnly(IYubiKey device, byte[] hmacKey, byte[] challenge, CancellationToken cancellationToken)\n{\n",
+      "body": "ReadOnlyMemory<byte> response = default;\ntry\n{\n    await using var otp = await device.CreateYubiOtpSessionAsync(\n        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp },\n        cancellationToken);\n    using var config = new HmacSha1SlotConfiguration(hmacKey);\n    config.UseShortChallenge();\n\n    await otp.PutConfigurationAsync(\n        Slot.Two,\n        config,\n        cancellationToken: cancellationToken);\n\n    response = await otp.CalculateHmacSha1Async(\n        Slot.Two,\n        challenge,\n        cancellationToken);\n    // Consume the caller-owned response with your verifier; do not log it.\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(hmacKey);\n    CryptographicOperations.ZeroMemory(challenge);\n    // This is the documented caller-owned SDK output, not arbitrary borrowed read-only memory.\n    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);\n}",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "using System;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.YubiOtp;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "2ce6df32d3da44f4615a8ab5821da7435476bbd5331bff1446195dcc71343759",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-097",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-097.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "8196e90039e4c7a8511bac33472d99ffcb6c9c65b8b50774fa299c93173a6339",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Piv;\nnamespace Audit20261111.DocExamples.External97;\ninternal static class Body\n{\n",
+      "body": "static async Task EnableProtectedAdministrationAsync(\n    IYubiKey device,\n    ReadOnlyMemory<byte> pin,\n    ReadOnlyMemory<byte> activeManagementKey,\n    CancellationToken cancellationToken)\n{\n    await using var piv = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);\n    await piv.AuthenticateAsync(activeManagementKey, cancellationToken);\n    await piv.SetPinOnlyModeAsync(\n        PinOnlyMode.PinProtected,\n        pin,\n        activeManagementKey,\n        cancellationToken);\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "using Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Piv;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "6fd2fd9c6fac6df2031088dfdcc3204183c8df23830648e9d532bb7984376825",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-099",
+      "context": "consumer",
+      "generated_path": "host/src/EXT-099.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "bf6f62ddb797020e7ec68c4035cd699e787b47bfd1efdad12dc6f66d4b414f30",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing System;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Oath;\nnamespace Audit20261111.DocExamples.External99;\ninternal static class Body\n{\n",
+      "body": "static async Task ReadCodesAsync(\n    IYubiKey device,\n    byte[] ownedPassword,\n    CancellationToken cancellationToken)\n{\n    try\n    {\n        await using var oath = await device.CreateOathSessionAsync(\n            cancellationToken: cancellationToken);\n\n        var codes = await oath.AuthenticateAndRetryAsync(\n            ct => oath.CalculateAllAsync(cancellationToken: ct),\n            _ => Task.FromResult<ReadOnlyMemory<byte>>(ownedPassword),\n            cancellationToken);\n        Console.WriteLine($\"Returned {codes.Count} credential entries.\");\n    }\n    finally\n    {\n        CryptographicOperations.ZeroMemory(ownedPassword);\n    }\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "using System;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Oath;\n",
+      "source_document": {
+        "path": "docs/migration/v1-to-v2.md",
+        "bytes": 67109,
+        "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49"
+      },
+      "source_body_sha256": "de90589f345671858b066de89fd5ec606d3a7fdeeeff280056021b477c0f6071",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-consumer-body",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-204",
+      "context": "Oath.IntegrationTests",
+      "generated_path": "injections/Oath.IntegrationTests/EXT-204.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "98f1bbe00e355d6dd72211081ff39356fe839b426cbc0f8fb185c717859aaac8",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Oath;\nnamespace Audit20261111.DocExamples.External204;\npublic static class DocumentationExtensions\n{\n",
+      "body": "public static async Task WithOathAsync(\n    this YubiKeyTestState state,\n    Func<OathSession, DeviceInfo, Task> action,\n    ScpKeyParameters? scpKeyParams = null,\n    CancellationToken cancellationToken = default)\n{\n    await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\n    await using var session = await OathSession.CreateAsync(\n        connection,\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: cancellationToken);\n\n    await action(session, state.DeviceInfo);\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "bytes": 13536,
+        "sha256": "bf5121b4117a8657ecd5ba98fccb2c36d4b6caa42b52e1688cc0bbdbf9aaba6f"
+      },
+      "source_body_sha256": "bd3392c2de10cdcae573b007506a0dcc6c254715c7d7e3d3df1ee0e60f717390",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-206",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-206.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "b9ea9de1c145aa3418074fc6bf1e27f97049ef2a78ae86fe0242fb8d1a993a7e",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\n    using System.Threading.Tasks;\n    using Yubico.YubiKit.Tests.Shared;\n    using Yubico.YubiKit.Tests.Shared.Infrastructure;\n    using Xunit;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External206;\n",
+      "body": "    public sealed class SerialRangeFilter : IYubiKeyFilter\n    {\n        public bool Matches(YubiKeyTestState device)\n        {\n            // Narrow the already authorized fixture list; never authorize production keys.\n            return device.SerialNumber > 10_000_000;\n        }\n\n        public string GetDescription()\n        {\n            return \"Dedicated test keys with SN > 10000000\";\n        }\n    }\n\n    public sealed class MetadataTests\n    {\n        [SkippableTheory]\n        [WithYubiKey(CustomFilter = typeof(SerialRangeFilter))]\n        public async Task ReadMetadata(YubiKeyTestState state)\n        {\n            await state.WithManagementAsync(async (session, cachedInfo) =>\n            {\n                var freshInfo = await session.GetDeviceInfoAsync();\n                Assert.Equal(cachedInfo.SerialNumber, freshInfo.SerialNumber);\n            });\n        }\n    }\n        ",
+      "suffix": "\n",
+      "original_import_prefix": "    using System.Threading.Tasks;\n    using Yubico.YubiKit.Tests.Shared;\n    using Yubico.YubiKit.Tests.Shared.Infrastructure;\n    using Xunit;\n",
+      "source_document": {
+        "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+        "bytes": 2864,
+        "sha256": "eae08ac681f5f486da9ab9116bb9ca1e5825374adc1b4197082eaf0c89e30f33"
+      },
+      "source_body_sha256": "b6c75407334cbcc84bf4d6b86b2ce98cebfd50b266fbbc0b576990dcd8e14b17",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-210",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-210.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "550c39ddc8b408d6c66dc2d9e93bbd40d4763048c2d09061c95183aa34dfd3ab",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External210;\npublic sealed class DocumentationBody\n{\ninternal void CompileOnly(FilterCriteria criteria, int serialNumber)\n{\n",
+      "body": "    // Get all authorized devices\n    var devices = AuthorizedDevices.GetAll();\n    \n    // Get the first authorized device (throws if none available)\n    var device = AuthorizedDevices.GetFirstOrSkip();\n    \n    // Filter authorized devices\n    var filtered = AuthorizedDevices.GetFiltered(criteria);\n    \n    // Check if a specific device is authorized\n    var isAuthorized = AuthorizedDevices.IsAllowed(serialNumber);\n        ",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/Infrastructure/AuthorizedDevices.cs",
+        "bytes": 6572,
+        "sha256": "57869029de0d89d7d2179e8c55311cdc288cfc237a40c9e380249834e9c0d1be"
+      },
+      "source_body_sha256": "ae2d83e27313aa6295d33204cc960287e1e9a69e1f11e890e17181985eb19b9e",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-215",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-215.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "d78599207517847dcf80c699b822d5f2dd30559c174fa6bc1832c4c414cac8a5",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External215;\npublic sealed class DocumentationBody\n{\n",
+      "body": "    // Single configuration\n    [SkippableTheory]\n    [WithYubiKey(MinFirmware = \"5.7.2\")]\n    public async Task ReadModernDevice(YubiKeyTestState device)\n    {\n        var info = await device.Device.GetDeviceInfoAsync();\n        Assert.Equal(device.SerialNumber, info.SerialNumber);\n    }\n\n    // Multiple configurations\n    [SkippableTheory]\n    [WithYubiKey(MinFirmware = \"5.0.0\")]\n    [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]\n    [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]\n    public async Task ReadIndependentlyBoundRows(YubiKeyTestState device)\n    {\n        var info = await device.Device.GetDeviceInfoAsync();\n        Assert.Equal(device.SerialNumber, info.SerialNumber);\n    }\n\n    // Custom filter example\n    public class ProductionKeysOnly : IYubiKeyFilter\n    {\n        public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;\n        public string GetDescription() => \"Production keys (SN > 10000000)\";\n    }\n        ",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+        "bytes": 8126,
+        "sha256": "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435"
+      },
+      "source_body_sha256": "c40ed58bd48214790d77813dd4e377c66883d835dffe44b11cdef23dd3b6fc9e",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-216",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-216.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "bb98d6f7aa9d25ae2f9b617609187e995b7677029c1dd18541da23cd0061e66d",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External216;\npublic sealed class DocumentationBody\n{\n",
+      "body": "    public class ProductionKeysOnly : IYubiKeyFilter\n    {\n        public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;\n        public string GetDescription() => \"Production keys (SN > 10000000)\";\n    }\n\n    [SkippableTheory]\n    [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]\n    public async Task ReadSelectedRange(YubiKeyTestState device)\n    {\n        var info = await device.Device.GetDeviceInfoAsync();\n        Assert.Equal(device.SerialNumber, info.SerialNumber);\n    }\n        ",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+        "bytes": 8126,
+        "sha256": "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435"
+      },
+      "source_body_sha256": "28cb36b5b9a6c99755624057c40d07ffe749853c68bb2c7544e66f35ba58d9e8",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-227",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-227.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "08a3a108d16687466d007a76fbde42fae2db89ad249c947eff53a85895b3f73b",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External227;\n",
+      "body": "public class MyIntegrationTests\n{\n    [SkippableTheory]\n    [WithYubiKey]\n    public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state)\n    {\n        await state.WithManagementAsync(async (mgmt, deviceInfo) =>\n        {\n            var info = await mgmt.GetDeviceInfoAsync();\n            Assert.Equal(state.SerialNumber, info.SerialNumber);\n        });\n    }\n\n    [SkippableTheory]\n    [WithYubiKey(MinFirmware = \"5.7.0\")]\n    public async Task ModernFeatures_RequireFirmware570(YubiKeyTestState state)\n    {\n        using var scpKeyParams = Scp03KeyParameters.Default;\n        await state.WithManagementAsync(async (mgmt, deviceInfo) =>\n        {\n            var fresh = await mgmt.GetDeviceInfoAsync();\n            Assert.Equal(deviceInfo.SerialNumber, fresh.SerialNumber);\n        }, scpKeyParams: scpKeyParams);\n    }\n}",
+      "suffix": "\n",
+      "original_import_prefix": "using Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\n",
+      "source_document": {
+        "path": "src/Tests.Shared/README.md",
+        "bytes": 15659,
+        "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b"
+      },
+      "source_body_sha256": "700782ef4516dafaf0734e457877b126babd9f8a6cc7f1859e8126fbf7a568b3",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-230",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-230.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "2f769fef653dd26fca4697945c5015e2f5ac681e654fa52f91c93486e460da2e",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External230;\npublic sealed class DocumentationBody\n{\n",
+      "body": "[SkippableTheory]\n[WithYubiKey]\npublic async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState state)\n{\n    await state.WithManagementAsync(async (mgmt, cachedInfo) =>\n    {\n        var info = await mgmt.GetDeviceInfoAsync();\n\n        Assert.Equal(state.SerialNumber, info.SerialNumber);\n        Assert.Equal(cachedInfo.FirmwareVersion, info.FirmwareVersion);\n    });\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/README.md",
+        "bytes": 15659,
+        "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b"
+      },
+      "source_body_sha256": "f980287ec618a538ab7bb51d3110e3408fd11b4603467f12d53c884abfc659a2",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-231",
+      "context": "SecurityDomain.IntegrationTests",
+      "generated_path": "injections/SecurityDomain.IntegrationTests/EXT-231.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "91de2389648e9ff4480216ff2a2f24e2b3bf72bc2f35a476a6065a9d3f17ce97",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External231;\npublic sealed class DocumentationBody\n{\n",
+      "body": "[SkippableTheory]\n[WithYubiKey(MinFirmware = \"5.3.0\", ConnectionType = ConnectionType.SmartCard)]\npublic async Task Scp03_AfterReset_ReturnsKeyInfo(YubiKeyTestState state)\n{\n    using var scpKeyParams = Scp03KeyParameters.Default;\n    await state.WithSecurityDomainSessionAsync(\n        resetBeforeUse: true,\n        async session =>\n        {\n            var keyInfo = await session.ListKeyInformationAsync();\n            Assert.NotEmpty(keyInfo);\n        },\n        scpKeyParams: scpKeyParams);\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n",
+      "source_document": {
+        "path": "src/Tests.Shared/README.md",
+        "bytes": 15659,
+        "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b"
+      },
+      "source_body_sha256": "30f7a3d75031d2387181eda0bcc3b3c16b9fbb5c4de7c1e622de8ddf4c3887e2",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-232",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-232.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "94e0699b6f3ff4f7d76cb34eff16c28221c2fe2e19f02b39b1ff0a3c2dc05abe",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External232;\n",
+      "body": "public sealed class SerialRangeFilter : IYubiKeyFilter\n{\n    public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;\n    public string GetDescription() => \"Dedicated test keys in the selected serial range\";\n}\n\npublic sealed class SerialRangeTests\n{\n    [SkippableTheory]\n    [WithYubiKey(CustomFilter = typeof(SerialRangeFilter))]\n    public async Task RunsOnAuthorizedSerialRange(YubiKeyTestState state)\n    {\n        await state.WithManagementAsync(async (mgmt, info) =>\n        {\n            var freshInfo = await mgmt.GetDeviceInfoAsync();\n            Assert.True(freshInfo.SerialNumber > 10_000_000);\n            Assert.Equal(info.SerialNumber, freshInfo.SerialNumber);\n        });\n    }\n}",
+      "suffix": "\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/README.md",
+        "bytes": 15659,
+        "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b"
+      },
+      "source_body_sha256": "bbd503924564ed578ec75acc47b76922fa41c852984fe645798a2f259aa27f01",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-233",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-233.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "29dfab98daf759ba21cb5ca2455aa8c5931c5050094a8036c901e5013788270c",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External233;\npublic sealed class DocumentationBody\n{\n",
+      "body": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]\npublic async Task ReadMetadata_OverOtpHid(YubiKeyTestState state)\n{\n    await state.WithManagementAsync(async (mgmt, _) =>\n    {\n        Assert.Equal(ConnectionType.HidOtp, mgmt.ConnectionType);\n        var info = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, info.SerialNumber);\n    }, preferredConnection: state.ConnectionType);\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/README.md",
+        "bytes": 15659,
+        "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b"
+      },
+      "source_body_sha256": "8df4ddf8a82e72e5809fff50742ac8a5636b56eff2f910ac136ac1fcd9b2d4b1",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-234",
+      "context": "Oath.IntegrationTests",
+      "generated_path": "injections/Oath.IntegrationTests/EXT-234.cs",
+      "compilation_alias_of": "EXT-204",
+      "generated_sha256": "e62d4babf6caf16fe860bec10bd8b084265cdbcd60e105c09e44cca6e9800c98",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Oath;\nnamespace Audit20261111.DocExamples.External234;\npublic static class DocumentationExtensions\n{\n",
+      "body": "public static async Task WithOathAsync(\n    this YubiKeyTestState state,\n    Func<OathSession, DeviceInfo, Task> action,\n    ScpKeyParameters? scpKeyParams = null,\n    CancellationToken cancellationToken = default)\n{\n    await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\n    await using var session = await OathSession.CreateAsync(\n        connection,\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: cancellationToken);\n\n    await action(session, state.DeviceInfo);\n}",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/README.md",
+        "bytes": 15659,
+        "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b"
+      },
+      "source_body_sha256": "bd3392c2de10cdcae573b007506a0dcc6c254715c7d7e3d3df1ee0e60f717390",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-235",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-235.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "805dcd625c8f4e3ff4dbd5a2d2a132714505c9959a0fe59049d8ced0081167b4",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External235;\npublic sealed class DocumentationBody\n{\ninternal async Task CompileOnly()\n{\n",
+      "body": "await using var connection = new RecordingSmartCardConnection([0x90, 0x00]);\nbyte[] command = [0x00, 0xA4, 0x04, 0x00, 0x00]; // Nonsecret synthetic fixture.\nReadOnlyMemory<byte> response = await connection.TransmitAndReceiveAsync(command);\n\nAssert.Equal(command, Assert.Single(connection.TransmittedCommands));\nAssert.Equal(new byte[] { 0x90, 0x00 }, response.ToArray());",
+      "suffix": "\n}\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/README.md",
+        "bytes": 15659,
+        "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b"
+      },
+      "source_body_sha256": "ab044438a617a0ff3004b8ce94f3ab22a50f9f1df8e4d62740ef7f4f862eda29",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-240",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-240.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "d10eda49776bf5155e44749441bcd3cab13f9b9a2b61e9d61422f9306494fab6",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External240;\npublic sealed class DocumentationBody\n{\n",
+      "body": "[SkippableTheory]\n[WithYubiKey]\npublic async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state)\n{\n    await state.WithManagementAsync(async (mgmt, info) =>\n    {\n        var deviceInfo = await mgmt.GetDeviceInfoAsync();\n        Assert.Equal(info.SerialNumber, deviceInfo.SerialNumber);\n    });\n}\n    ",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/YubiKeyTestStateExtensions.cs",
+        "bytes": 8781,
+        "sha256": "fb3fa012ee11dfe4324d9cd4bd38b1480a092db2faac3c035efd6834ad844ad4"
+      },
+      "source_body_sha256": "439465d3bf11b7bce31885b9bd825021eb6f2d90a32f588fb9f1149d8be3fd1b",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-241",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-241.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "1bac5f2e252ca71c30973964d6810811f25ea6ff103dcd55539919693d8aca40",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External241;\npublic sealed class DocumentationBody\n{\n",
+      "body": "[SkippableTheory]\n[WithYubiKey]\npublic async Task CheckDeviceProperties(YubiKeyTestState state)\n{\n    await state.WithManagementAsync((mgmt, info) =>\n    {\n        Assert.True(info.SerialNumber > 0);\n        Assert.NotEqual(FormFactor.Unknown, info.FormFactor);\n    });\n}\n    ",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/YubiKeyTestStateExtensions.cs",
+        "bytes": 8781,
+        "sha256": "fb3fa012ee11dfe4324d9cd4bd38b1480a092db2faac3c035efd6834ad844ad4"
+      },
+      "source_body_sha256": "4bd87722ac39e5c9222f6d9462d561f556f5d9aeb8dfcdeafbd12d476d0f420f",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    },
+    {
+      "id": "EXT-242",
+      "context": "Management.IntegrationTests",
+      "generated_path": "injections/Management.IntegrationTests/EXT-242.cs",
+      "compilation_alias_of": null,
+      "generated_sha256": "45223354550c1a5556470d8e62109be407d54a6298dd7f95d79ab3705da23cbf",
+      "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.IO;\nusing System.Linq;\nusing System.Runtime.InteropServices;\nusing System.Security.Cryptography;\nusing System.Security.Cryptography.X509Certificates;\nusing System.Text;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Credentials;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Utilities;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Xunit;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nnamespace Audit20261111.DocExamples.External242;\npublic sealed class DocumentationBody\n{\n",
+      "body": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]\npublic async Task ReadMetadata_WithBorrowedConnection(YubiKeyTestState state)\n{\n    await state.WithConnectionAsync(async connection =>\n    {\n        await using var session = await ManagementSession.CreateAsync(connection);\n        var info = await session.GetDeviceInfoAsync();\n        Assert.Equal(state.SerialNumber, info.SerialNumber);\n    });\n}\n    ",
+      "suffix": "\n}\n",
+      "original_import_prefix": "",
+      "source_document": {
+        "path": "src/Tests.Shared/YubiKeyTestStateExtensions.cs",
+        "bytes": 8781,
+        "sha256": "fb3fa012ee11dfe4324d9cd4bd38b1480a092db2faac3c035efd6834ad844ad4"
+      },
+      "source_body_sha256": "48c6f0db97977138bab67bf2bc88bccb005562a74584e2e077edd47c8dfa391a",
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+        "bytes": 8070,
+        "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+      },
+      "compilation_status": "prepared-existing-project-injection",
+      "execution_status": "not-run",
+      "ownership": "Original complete resource scopes remain exact. Caller parameters are real typed inputs; EXT-095 receives dedicated arrays whose cleanup is explicitly transferred to its original finally scope."
+    }
+  ],
+  "existing_projects": {
+    "Oath.IntegrationTests": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj",
+    "Management.IntegrationTests": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+    "SecurityDomain.IntegrationTests": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj"
+  },
+  "unique_compilations": 27,
+  "no_historical_invalid_api_revival": true,
+  "no_execution": true
+}

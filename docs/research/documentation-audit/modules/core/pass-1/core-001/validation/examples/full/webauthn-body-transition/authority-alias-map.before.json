@@ -1,0 +1,763 @@
+{
+  "status": "baseline mapping only; no authority or body repin admitted",
+  "document": "src/WebAuthn/CLAUDE.md",
+  "document_rows": [
+    {
+      "id": "FULL-031",
+      "ordinal": 1,
+      "disposition": "non-csharp-excluded",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 28,
+      "last_line": 68,
+      "raw_start_byte": 1667,
+      "raw_end_byte": 4111,
+      "raw_body_sha256": "c24ebfb234dd9e6b1571a9ba2aed2164d18b7d10b1c009d3b41755defb485ef1",
+      "decoded_body_sha256": "1f508b3769f3d693b6e00f40f9f73f5936a7304c1231c00f48b90258cfc45f35",
+      "editor_body_sha256": "c24ebfb234dd9e6b1571a9ba2aed2164d18b7d10b1c009d3b41755defb485ef1",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "document identity and coordinates must be independently re-extracted after accepted prose/fence change; body/raw/decoded equality required, not assumed"
+    },
+    {
+      "id": "FULL-032",
+      "ordinal": 2,
+      "disposition": "prepared-real-test-context",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 78,
+      "last_line": 82,
+      "raw_start_byte": 4454,
+      "raw_end_byte": 4620,
+      "raw_body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+      "decoded_body_sha256": "7c2396900aa0b184930cb26cb1854b0d2efc3001cae2f004a72a17d789245ff5",
+      "editor_body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "pending actual accepted body+prose change; must regenerate exact accepted body, not wrapper workaround",
+      "compiled_source_document_alias": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "compiled_review_alias": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "compilation_alias_of": null
+    },
+    {
+      "id": "FULL-033",
+      "ordinal": 3,
+      "disposition": "prepared-consumer-body",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 97,
+      "last_line": 138,
+      "raw_start_byte": 5363,
+      "raw_end_byte": 6969,
+      "raw_body_sha256": "f44e8ca6945c23f1a0d4bebdb81dfc8c245fb083a68039d29192eefeed176c8e",
+      "decoded_body_sha256": "47b307bc456aa782eee598e040bef69da902076542faa282b3df0ee1ba45cddb",
+      "editor_body_sha256": "f44e8ca6945c23f1a0d4bebdb81dfc8c245fb083a68039d29192eefeed176c8e",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "document identity and coordinates must be independently re-extracted after accepted prose/fence change; body/raw/decoded equality required, not assumed"
+    },
+    {
+      "id": "FULL-034",
+      "ordinal": 4,
+      "disposition": "prepared-consumer-body",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 143,
+      "last_line": 156,
+      "raw_start_byte": 7115,
+      "raw_end_byte": 7526,
+      "raw_body_sha256": "e0677825b85caa34b553a487995fdf20ff602fec0154d63c3da6d5edc986b2cc",
+      "decoded_body_sha256": "046e3d4f4cb447d6110df1573c0be1594c5b0f756f75e510e6dd01b5b137a913",
+      "editor_body_sha256": "e0677825b85caa34b553a487995fdf20ff602fec0154d63c3da6d5edc986b2cc",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "document identity and coordinates must be independently re-extracted after accepted prose/fence change; body/raw/decoded equality required, not assumed"
+    },
+    {
+      "id": "FULL-035",
+      "ordinal": 5,
+      "disposition": "prepared-consumer-body",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 211,
+      "last_line": 218,
+      "raw_start_byte": 11897,
+      "raw_end_byte": 12078,
+      "raw_body_sha256": "4c5ab6a0050f19f920060753b033e597c7978e26a90d430e30085591b1a5fd1a",
+      "decoded_body_sha256": "7ad8f3f404e509aa630ca094581a8f1729a1c61d870a15ec2649ce8e7307a97e",
+      "editor_body_sha256": "4c5ab6a0050f19f920060753b033e597c7978e26a90d430e30085591b1a5fd1a",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "document identity and coordinates must be independently re-extracted after accepted prose/fence change; body/raw/decoded equality required, not assumed"
+    },
+    {
+      "id": "FULL-036",
+      "ordinal": 6,
+      "disposition": "prepared-consumer-body",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 365,
+      "last_line": 382,
+      "raw_start_byte": 22899,
+      "raw_end_byte": 23628,
+      "raw_body_sha256": "1a1750130108d9a0c450005da0cd66c4745bdf3bbede62186c824b1dc47a0401",
+      "decoded_body_sha256": "c0ef7ab120b30a69def9ca676279bddb09ed3bf9167969593964891270ccea00",
+      "editor_body_sha256": "1a1750130108d9a0c450005da0cd66c4745bdf3bbede62186c824b1dc47a0401",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "document identity and coordinates must be independently re-extracted after accepted prose/fence change; body/raw/decoded equality required, not assumed"
+    },
+    {
+      "id": "FULL-037",
+      "ordinal": 7,
+      "disposition": "prepared-real-test-context",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 502,
+      "last_line": 526,
+      "raw_start_byte": 32986,
+      "raw_end_byte": 33932,
+      "raw_body_sha256": "7823c21785cde771b57b15f577d52699e3be79aa789e5e7e8dd06efabe5821f1",
+      "decoded_body_sha256": "e61df2ba3ad1a4d79821ff7ad17ebe169b19dc8dcd0389e97ee592cef88d7379",
+      "editor_body_sha256": "7823c21785cde771b57b15f577d52699e3be79aa789e5e7e8dd06efabe5821f1",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "document identity and coordinates must be independently re-extracted after accepted prose/fence change; body/raw/decoded equality required, not assumed",
+      "compiled_source_document_alias": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "compiled_review_alias": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "compilation_alias_of": null
+    },
+    {
+      "id": "FULL-038",
+      "ordinal": 8,
+      "disposition": "non-csharp-excluded",
+      "document": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "bytes": 36508,
+        "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+      },
+      "first_line": 529,
+      "last_line": 541,
+      "raw_start_byte": 33964,
+      "raw_end_byte": 34452,
+      "raw_body_sha256": "cb3dc2e16ced682a081d00298166d7e1b394174a9ca98659c9521fdd0c7e410c",
+      "decoded_body_sha256": "2cc3e821c72550ed607b3d21475fda10be72615bef01db9960c0a9d59f91231f",
+      "editor_body_sha256": "cb3dc2e16ced682a081d00298166d7e1b394174a9ca98659c9521fdd0c7e410c",
+      "editor_formula": "literal-xml-or-fence",
+      "authority": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+        "bytes": 54694,
+        "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+      },
+      "review": {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+        "bytes": 7385,
+        "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+      },
+      "source_change_classification": "document identity and coordinates must be independently re-extracted after accepted prose/fence change; body/raw/decoded equality required, not assumed"
+    }
+  ],
+  "authority_guide_entries": [
+    {
+      "index": 30,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 1,
+        "language": "",
+        "classification": "directory diagram",
+        "before_line": 28,
+        "after_line": 28,
+        "body": "src/\n\u251c\u2500\u2500 Client/                       # WebAuthn Client API\n\u2502   \u251c\u2500\u2500 WebAuthnClient.cs                 # ctors, disposal, shared state\n\u2502   \u251c\u2500\u2500 WebAuthnClient.Registration.cs    # MakeCredential ceremony\n\u2502   \u251c\u2500\u2500 WebAuthnClient.Authentication.cs  # GetAssertion ceremony\n\u2502   \u251c\u2500\u2500 WebAuthnClient.Ceremony.cs        # shared attempts, probes, UV escalation\n\u2502   \u251c\u2500\u2500 WebAuthnClient.PinUvAuth.cs       # PIN/UV token acquisition and prompting\n\u2502   \u251c\u2500\u2500 WebAuthnClient.Validation.cs      # option validation and CTAP error mapping\n\u2502   \u251c\u2500\u2500 WebAuthnClientOptions.cs\n\u2502   \u251c\u2500\u2500 RpIdValidator.cs          # public application-authorization delegate\n\u2502   \u251c\u2500\u2500 WebAuthnBackend.cs        # internal\n\u2502   \u251c\u2500\u2500 IWebAuthnBackend.cs       # internal\n\u2502   \u251c\u2500\u2500 PinUvAuthTokenSession.cs  # internal\n\u2502   \u251c\u2500\u2500 PinUvSharedSecret.cs      # internal shared-secret owner\n\u2502   \u251c\u2500\u2500 CeremonyDeadline.cs       # cooperative cancellation timer\n\u2502   \u251c\u2500\u2500 CredentialFilter.cs       # exclude/allow-list probes\n\u2502   \u251c\u2500\u2500 WebAuthnClientData.cs\n\u2502   \u251c\u2500\u2500 WebAuthnOrigin.cs\n\u2502   \u251c\u2500\u2500 UserVerification/         # UV/PIN decision logic\n\u2502   \u2502   \u2514\u2500\u2500 UvDecision.cs\n\u2502   \u251c\u2500\u2500 Registration/             # Registration options and responses\n\u2502   \u2502   \u251c\u2500\u2500 PublicKeyCredentialCreationOptions.cs\n\u2502   \u2502   \u2514\u2500\u2500 RegistrationResponse.cs\n\u2502   \u2514\u2500\u2500 Authentication/           # Authentication options and responses\n\u2502       \u251c\u2500\u2500 PublicKeyCredentialRequestOptions.cs\n\u2502       \u251c\u2500\u2500 AuthenticationResponse.cs\n\u2502       \u251c\u2500\u2500 CredentialMatcher.cs\n\u2502       \u2514\u2500\u2500 MatchedCredential.cs\n\u251c\u2500\u2500 Attestation/                  # Attestation object types\n\u2502   \u2514\u2500\u2500 WebAuthnAttestationObject.cs\n\u251c\u2500\u2500 Extensions/                   # WebAuthn client extension processing\n\u2502   \u251c\u2500\u2500 Codec/                    # per-extension translation, delegates wire CBOR to Ctap2\n\u2502   \u251c\u2500\u2500 Inputs/  Outputs/\n\u2502   \u251c\u2500\u2500 PreviewSign/              # previewSign extension types\n\u2502   \u2514\u2500\u2500 Processing/               # sessions, interfaces, output builders, Processors/\n\u251c\u2500\u2500 Preferences/                  # AttestationPreference, ResidentKeyPreference,\n\u2502                                 # UserVerificationPreference\n\u251c\u2500\u2500 WebAuthnAuthenticatorData.cs\n\u2514\u2500\u2500 WebAuthnClientError.cs        # Error handling\n",
+        "body_sha256": "c24ebfb234dd9e6b1571a9ba2aed2164d18b7d10b1c009d3b41755defb485ef1",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 28
+      }
+    },
+    {
+      "index": 31,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 2,
+        "language": "csharp",
+        "classification": "fragment / alternative: depends on surrounding supplied variables, imports and outer resource scopes",
+        "before_line": 78,
+        "after_line": 78,
+        "body": "private static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();\n\nLogger.LogDebug(\"Selected algorithm: {Algorithm}\", selectedAlgorithm);\n",
+        "body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 78
+      }
+    },
+    {
+      "index": 32,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 3,
+        "language": "csharp",
+        "classification": "fragment / alternative: depends on surrounding supplied variables, imports and outer resource scopes",
+        "before_line": 97,
+        "after_line": 97,
+        "body": "// Alternative 1: transfer an existing CTAP2 session on successful construction.\n// The application owns RP validity and authorization of each origin/RP pair.\n// WebAuthnClientOptions and its RpIdValidator are required. CredentialPrompt remains optional.\nawait using var client = new WebAuthnClient(\n    ctap2Session,\n    origin,\n    new WebAuthnClientOptions\n    {\n        RpIdValidator = (requestOrigin, rpId) =>\n            requestOrigin.StringValue == \"https://example.com\" && rpId == \"example.com\",\n        CredentialPrompt = myCredentialPrompt,\n        MaxPromptAttempts = 3\n    });\n\n// Registration\nvar createOptions = new PublicKeyCredentialCreationOptions\n{\n    Rp = new PublicKeyCredentialRpEntity(\"example.com\", \"Example\"),\n    User = new PublicKeyCredentialUserEntity(userId, \"user@example.com\", \"User\"),\n    Challenge = registrationChallenge,\n    PubKeyCredParams = [CoseAlgorithm.Es256],\n    Extensions = registrationExtensions\n};\n\n// Pass pinBytes to supply a PIN directly, or leave it null to use the configured prompt.\nvar credential = await client.MakeCredentialAsync(createOptions, pinBytes: null);\n\n// Authentication\nvar requestOptions = new PublicKeyCredentialRequestOptions\n{\n    Challenge = authenticationChallenge,\n    RpId = \"example.com\",\n    AllowCredentials = [new PublicKeyCredentialDescriptor(credential.CredentialId)],\n    Extensions = authenticationExtensions\n};\n\nvar matches = await client.GetAssertionAsync(requestOptions, pinBytes: null);\nif (matches.Count == 0)\n    return; // Normal no-match path; no response to submit.\nvar assertion = await matches[0].SelectAsync();\n",
+        "body_sha256": "f44e8ca6945c23f1a0d4bebdb81dfc8c245fb083a68039d29192eefeed176c8e",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 97
+      }
+    },
+    {
+      "index": 33,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 4,
+        "language": "csharp",
+        "classification": "fragment / alternative: depends on surrounding supplied variables, imports and outer resource scopes",
+        "before_line": 143,
+        "after_line": 143,
+        "body": "await using var client = await yubiKey.CreateWebAuthnClientAsync(\n    origin,\n    clientOptions: new WebAuthnClientOptions\n    {\n        RpIdValidator = rpValidationService.IsRpValidForOrigin,\n        CredentialPrompt = myCredentialPrompt\n    },\n    sessionOptions: new SessionCreationOptions\n    {\n        PreferredConnectionType = ConnectionType.SmartCard,\n        ScpKeyParameters = scpKeyParameters\n    });\n",
+        "body_sha256": "e0677825b85caa34b553a487995fdf20ff602fec0154d63c3da6d5edc986b2cc",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 143
+      }
+    },
+    {
+      "index": 34,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 5,
+        "language": "csharp",
+        "classification": "interface contract excerpt; not a consumer implementation",
+        "before_line": 203,
+        "after_line": 211,
+        "body": "public interface ICredentialPrompt\n{\n    ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(\n        CredentialPromptContext context,\n        CancellationToken cancellationToken);\n}\n",
+        "body_sha256": "4c5ab6a0050f19f920060753b033e597c7978e26a90d430e30085591b1a5fd1a",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 211
+      }
+    },
+    {
+      "index": 35,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 6,
+        "language": "csharp",
+        "classification": "fragment / alternative: depends on surrounding supplied variables, imports and outer resource scopes",
+        "before_line": 352,
+        "after_line": 365,
+        "body": "// Registration: request a generated signing key.\nvar registrationExtensions = new RegistrationExtensionInputs(\n    PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.Es256));\n\n// Authentication: provide keyHandle, algorithm-specific tbs, and optional raw additionalArgs.\nvar signingParams = new PreviewSignSigningParams(\n    keyHandle: generatedKey.KeyHandle,\n    tbs: toBeSigned,\n    additionalArgs: algorithmSpecificAdditionalArgs);\n\nvar authenticationExtensions = new AuthenticationExtensionInputs(\n    PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(\n        new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>\n        {\n            [credentialId] = signingParams\n        }));\n",
+        "body_sha256": "1a1750130108d9a0c450005da0cd66c4745bdf3bbede62186c824b1dc47a0401",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 365
+      }
+    },
+    {
+      "index": 36,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 7,
+        "language": "csharp",
+        "classification": "integration-test scaffold with omitted test body; not a complete executable example",
+        "before_line": 489,
+        "after_line": 502,
+        "body": "[SkippableTheory]\n[WithYubiKey]\n[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]\npublic async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKeyTestState state)\n{\n    // Test setup mutates PIN state; run only with the approval described above.\n    await using (var setupSession = await state.Device.CreateCtap2SessionAsync())\n    {\n        await WebAuthnTestHelpers.NormalizePinAsync(setupSession);\n    }\n\n    if (!WebAuthnOrigin.TryParse(WebAuthnTestHelpers.TestOriginUrl, out var origin))\n        throw new InvalidOperationException(\"Unsupported test origin.\");\n    await using var client = await state.Device.CreateWebAuthnClientAsync(\n        origin,\n        new WebAuthnClientOptions\n        {\n            RpIdValidator = (requestOrigin, rpId) =>\n                requestOrigin.StringValue == WebAuthnTestHelpers.TestOriginUrl && rpId == WebAuthnTestHelpers.TestRpId\n        });\n\n    // Test logic...\n}\n",
+        "body_sha256": "7823c21785cde771b57b15f577d52699e3be79aa789e5e7e8dd06efabe5821f1",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 502
+      }
+    },
+    {
+      "index": 37,
+      "entry": {
+        "path": "src/WebAuthn/CLAUDE.md",
+        "fence": 8,
+        "language": "bash",
+        "classification": "unexecuted shell command",
+        "before_line": 516,
+        "after_line": 529,
+        "body": "# All WebAuthn unit tests\ndotnet toolchain.cs -- test --project WebAuthn\n\n# Integration tests (no UP)\ndotnet toolchain.cs -- test --integration --project WebAuthn --filter \"Category!=RequiresUserPresence\"\n\n# Integration tests (with UP, human-coordinated only)\ndotnet toolchain.cs -- test --integration --project WebAuthn --filter \"Category=RequiresUserPresence\"\n\n# Smoke tests only (skip Slow and RequiresUserPresence)\ndotnet toolchain.cs -- test --integration --project WebAuthn --smoke\n",
+        "body_sha256": "cb3dc2e16ced682a081d00298166d7e1b394174a9ca98659c9521fdd0c7e410c",
+        "body_unchanged": true,
+        "compiled": false,
+        "executed": false,
+        "reviewed_after_line": 529
+      }
+    }
+  ],
+  "shared_authority": {
+    "identity": {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+      "bytes": 54694,
+      "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+    },
+    "referencing_ids": [
+      "FULL-001",
+      "FULL-002",
+      "FULL-003",
+      "FULL-004",
+      "FULL-005",
+      "FULL-006",
+      "FULL-007",
+      "FULL-008",
+      "FULL-009",
+      "FULL-010",
+      "FULL-011",
+      "FULL-012",
+      "FULL-013",
+      "FULL-014",
+      "FULL-015",
+      "FULL-016",
+      "FULL-017",
+      "FULL-018",
+      "FULL-019",
+      "FULL-020",
+      "FULL-021",
+      "FULL-022",
+      "FULL-023",
+      "FULL-024",
+      "FULL-025",
+      "FULL-026",
+      "FULL-027",
+      "FULL-028",
+      "FULL-029",
+      "FULL-030",
+      "FULL-031",
+      "FULL-032",
+      "FULL-033",
+      "FULL-034",
+      "FULL-035",
+      "FULL-036",
+      "FULL-037",
+      "FULL-038",
+      "FULL-039",
+      "FULL-040",
+      "FULL-041",
+      "FULL-042",
+      "FULL-043",
+      "FULL-044",
+      "FULL-045",
+      "FULL-046",
+      "FULL-047"
+    ],
+    "scope": "47 file-identity references are not 47 body changes. Existing aggregate authority remains immutable unless explicit accepted successor/overlay states the exact mapping; do not blanket repin."
+  },
+  "shared_review": {
+    "identity": {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+      "bytes": 7385,
+      "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+    },
+    "referencing_ids": [
+      "FULL-001",
+      "FULL-002",
+      "FULL-003",
+      "FULL-004",
+      "FULL-005",
+      "FULL-006",
+      "FULL-007",
+      "FULL-008",
+      "FULL-009",
+      "FULL-010",
+      "FULL-011",
+      "FULL-012",
+      "FULL-013",
+      "FULL-014",
+      "FULL-015",
+      "FULL-016",
+      "FULL-017",
+      "FULL-018",
+      "FULL-019",
+      "FULL-020",
+      "FULL-021",
+      "FULL-022",
+      "FULL-023",
+      "FULL-024",
+      "FULL-025",
+      "FULL-026",
+      "FULL-027",
+      "FULL-028",
+      "FULL-029",
+      "FULL-030",
+      "FULL-031",
+      "FULL-032",
+      "FULL-033",
+      "FULL-034",
+      "FULL-035",
+      "FULL-036",
+      "FULL-037",
+      "FULL-038",
+      "FULL-039",
+      "FULL-040",
+      "FULL-041",
+      "FULL-042",
+      "FULL-043",
+      "FULL-044",
+      "FULL-045",
+      "FULL-046",
+      "FULL-047"
+    ],
+    "scope": "Same distinction: preserve old review; append actual focused acceptance, never relabel previous review."
+  },
+  "same_decoded_body_ids": [
+    "FULL-032"
+  ],
+  "compilation_aliases_of_FULL032": [],
+  "generator_inventory_aliases": {
+    "current-inventory.json": [
+      {
+        "id": "FULL-031",
+        "ordinal": 1,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "c24ebfb234dd9e6b1571a9ba2aed2164d18b7d10b1c009d3b41755defb485ef1",
+        "decoded_sha256": "1f508b3769f3d693b6e00f40f9f73f5936a7304c1231c00f48b90258cfc45f35",
+        "first_line": 28,
+        "last_line": 68,
+        "raw_start_byte": 1667,
+        "raw_end_byte": 4111
+      },
+      {
+        "id": "FULL-032",
+        "ordinal": 2,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+        "decoded_sha256": "7c2396900aa0b184930cb26cb1854b0d2efc3001cae2f004a72a17d789245ff5",
+        "first_line": 78,
+        "last_line": 82,
+        "raw_start_byte": 4454,
+        "raw_end_byte": 4620
+      },
+      {
+        "id": "FULL-033",
+        "ordinal": 3,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "f44e8ca6945c23f1a0d4bebdb81dfc8c245fb083a68039d29192eefeed176c8e",
+        "decoded_sha256": "47b307bc456aa782eee598e040bef69da902076542faa282b3df0ee1ba45cddb",
+        "first_line": 97,
+        "last_line": 138,
+        "raw_start_byte": 5363,
+        "raw_end_byte": 6969
+      },
+      {
+        "id": "FULL-034",
+        "ordinal": 4,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "e0677825b85caa34b553a487995fdf20ff602fec0154d63c3da6d5edc986b2cc",
+        "decoded_sha256": "046e3d4f4cb447d6110df1573c0be1594c5b0f756f75e510e6dd01b5b137a913",
+        "first_line": 143,
+        "last_line": 156,
+        "raw_start_byte": 7115,
+        "raw_end_byte": 7526
+      },
+      {
+        "id": "FULL-035",
+        "ordinal": 5,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "4c5ab6a0050f19f920060753b033e597c7978e26a90d430e30085591b1a5fd1a",
+        "decoded_sha256": "7ad8f3f404e509aa630ca094581a8f1729a1c61d870a15ec2649ce8e7307a97e",
+        "first_line": 211,
+        "last_line": 218,
+        "raw_start_byte": 11897,
+        "raw_end_byte": 12078
+      },
+      {
+        "id": "FULL-036",
+        "ordinal": 6,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "1a1750130108d9a0c450005da0cd66c4745bdf3bbede62186c824b1dc47a0401",
+        "decoded_sha256": "c0ef7ab120b30a69def9ca676279bddb09ed3bf9167969593964891270ccea00",
+        "first_line": 365,
+        "last_line": 382,
+        "raw_start_byte": 22899,
+        "raw_end_byte": 23628
+      },
+      {
+        "id": "FULL-037",
+        "ordinal": 7,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "7823c21785cde771b57b15f577d52699e3be79aa789e5e7e8dd06efabe5821f1",
+        "decoded_sha256": "e61df2ba3ad1a4d79821ff7ad17ebe169b19dc8dcd0389e97ee592cef88d7379",
+        "first_line": 502,
+        "last_line": 526,
+        "raw_start_byte": 32986,
+        "raw_end_byte": 33932
+      },
+      {
+        "id": "FULL-038",
+        "ordinal": 8,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "cb3dc2e16ced682a081d00298166d7e1b394174a9ca98659c9521fdd0c7e410c",
+        "decoded_sha256": "2cc3e821c72550ed607b3d21475fda10be72615bef01db9960c0a9d59f91231f",
+        "first_line": 529,
+        "last_line": 541,
+        "raw_start_byte": 33964,
+        "raw_end_byte": 34452
+      }
+    ],
+    "final-current-inventory.json": [
+      {
+        "id": "FULL-031",
+        "ordinal": 1,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "c24ebfb234dd9e6b1571a9ba2aed2164d18b7d10b1c009d3b41755defb485ef1",
+        "decoded_sha256": "1f508b3769f3d693b6e00f40f9f73f5936a7304c1231c00f48b90258cfc45f35",
+        "first_line": 28,
+        "last_line": 68,
+        "raw_start_byte": 1667,
+        "raw_end_byte": 4111
+      },
+      {
+        "id": "FULL-032",
+        "ordinal": 2,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+        "decoded_sha256": "7c2396900aa0b184930cb26cb1854b0d2efc3001cae2f004a72a17d789245ff5",
+        "first_line": 78,
+        "last_line": 82,
+        "raw_start_byte": 4454,
+        "raw_end_byte": 4620
+      },
+      {
+        "id": "FULL-033",
+        "ordinal": 3,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "f44e8ca6945c23f1a0d4bebdb81dfc8c245fb083a68039d29192eefeed176c8e",
+        "decoded_sha256": "47b307bc456aa782eee598e040bef69da902076542faa282b3df0ee1ba45cddb",
+        "first_line": 97,
+        "last_line": 138,
+        "raw_start_byte": 5363,
+        "raw_end_byte": 6969
+      },
+      {
+        "id": "FULL-034",
+        "ordinal": 4,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "e0677825b85caa34b553a487995fdf20ff602fec0154d63c3da6d5edc986b2cc",
+        "decoded_sha256": "046e3d4f4cb447d6110df1573c0be1594c5b0f756f75e510e6dd01b5b137a913",
+        "first_line": 143,
+        "last_line": 156,
+        "raw_start_byte": 7115,
+        "raw_end_byte": 7526
+      },
+      {
+        "id": "FULL-035",
+        "ordinal": 5,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "4c5ab6a0050f19f920060753b033e597c7978e26a90d430e30085591b1a5fd1a",
+        "decoded_sha256": "7ad8f3f404e509aa630ca094581a8f1729a1c61d870a15ec2649ce8e7307a97e",
+        "first_line": 211,
+        "last_line": 218,
+        "raw_start_byte": 11897,
+        "raw_end_byte": 12078
+      },
+      {
+        "id": "FULL-036",
+        "ordinal": 6,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "1a1750130108d9a0c450005da0cd66c4745bdf3bbede62186c824b1dc47a0401",
+        "decoded_sha256": "c0ef7ab120b30a69def9ca676279bddb09ed3bf9167969593964891270ccea00",
+        "first_line": 365,
+        "last_line": 382,
+        "raw_start_byte": 22899,
+        "raw_end_byte": 23628
+      },
+      {
+        "id": "FULL-037",
+        "ordinal": 7,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "7823c21785cde771b57b15f577d52699e3be79aa789e5e7e8dd06efabe5821f1",
+        "decoded_sha256": "e61df2ba3ad1a4d79821ff7ad17ebe169b19dc8dcd0389e97ee592cef88d7379",
+        "first_line": 502,
+        "last_line": 526,
+        "raw_start_byte": 32986,
+        "raw_end_byte": 33932
+      },
+      {
+        "id": "FULL-038",
+        "ordinal": 8,
+        "document": {
+          "path": "src/WebAuthn/CLAUDE.md",
+          "bytes": 36508,
+          "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+        },
+        "raw_sha256": "cb3dc2e16ced682a081d00298166d7e1b394174a9ca98659c9521fdd0c7e410c",
+        "decoded_sha256": "2cc3e821c72550ed607b3d21475fda10be72615bef01db9960c0a9d59f91231f",
+        "first_line": 529,
+        "last_line": 541,
+        "raw_start_byte": 33964,
+        "raw_end_byte": 34452
+      }
+    ],
+    "external-current-inventory.json": []
+  }
+}

@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>    <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>     <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>     <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<title>YKOATH Protocol</title>
+<meta content="" name="description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="/vendor/font-awesome/css/all.min.css" rel="stylesheet"/>
+<link href="/vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="/css/main.css" rel="stylesheet"/>
+<link href="/css/pygments.css" rel="stylesheet"/>
+<link href="/css/pygmentsmaterial.css" rel="stylesheet"/>
+<link href="/css/code-tabs.css" rel="stylesheet"/>
+<link href="/css/asciidoc.css" rel="stylesheet"/>
+<link href="/vendor/vanilla-cookieconsent/dist/cookieconsent.css" rel="stylesheet"/>
+<link href="/css/cookieconsent-yubicostyle.css" rel="stylesheet"/>
+<link href="/vendor/jquery.tablesorter/dist/css/theme.default.min.css" rel="stylesheet"/>
+<link href="/favicon-192x192.png" rel="icon" sizes="192x192"/>
+<!--<script src="/vendor/modernizr/dist/modernizr-build.js"></script>-->
+<!-- Google Tag Manager -->
+<script data-cookiecategory="analytics" type="text/plain">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KRP726L');</script>
+<!-- End Google Tag Manager -->
+<!-- Hotjar Tracking Code for www.yubico.com -->
+<script data-cookiecategory="analytics" type="text/plain">
+      (function(h,o,t,j,a,r){
+          h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+          h._hjSettings={hjid:835276,hjsv:6};
+          a=o.getElementsByTagName('head')[0];
+          r=o.createElement('script');r.async=1;
+          r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+          a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script>
+</head>
+<body>
+<!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+<nav class="navbar navbar-expand-lg navbar-top navbar-dark">
+<div class="container">
+<a class="navbar-brand" href="/"><img src="/logo.png"/></a>
+<button aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarToggler" data-bs-toggle="collapse" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="navbar-collapse collapse" id="navbarToggler">
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<li class="nav-item"><a "="" class="nav-link fw-bold" href="/Passkeys">Passkeys</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/WebAuthn">WebAuthn</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/CTAP">CTAP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/OTP">OTP</a></li><li class="nav-item"><a "="" aria-current="page" class="nav-link active fw-bold" href="/OATH">OATH</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PGP">PGP</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/PIV">PIV</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Secure_Domain">Secure Domain</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/YubiHSM2">YubiHSM2</a></li><li class="nav-item"><a "="" class="nav-link fw-bold" href="/Software_Projects">Software Projects</a></li>
+</ul>
+<!-- Google Custom Search Engine -->
+<div class="navbar-form navbar-right" id="search-box">
+<script data-cookiecategory="functional" type="text/plain">
+          (function() {
+            var cx = '4d44ab063517e6a2e';
+            var gcse = document.createElement('script');
+            gcse.type = 'text/javascript';
+            gcse.async = true;
+            gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+            '//www.google.com/cse/cse.js?cx=' + cx;
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(gcse, s);
+          })();
+          </script>
+<gcse:searchbox-only></gcse:searchbox-only>
+</div>
+<!-- End Google Custom Search Engine -->
+</div><!--/.navbar-collapse -->
+</div>
+</nav>
+<div class="container">
+<div class="row bg-light">
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="/OATH">OATH</a></li>
+<li class="breadcrumb-item active">YKOATH Protocol</li>
+</ol>
+</div>
+<div class="row">
+<div class="col-md-4" style="padding-left: 0;">
+<!-- Sidebar -->
+<ul class="nav nav-side card card-body bg-light">
+<li class="active"><a href="/OATH">OATH</a><ul class="">
+<li><a href="/OATH/OATH_Walk-Through.html">OATH Walk-Through</a></li>
+<li class="active"><a href="/OATH/YKOATH_Protocol.html">YKOATH Protocol</a>
+<li><a href="/OATH/YubiKey_OATH_software.html">YubiKey OATH software</a></li>
+</li></ul>
+</li></ul>
+<!-- End sidebar -->
+</div>
+<div class="col-md-8">
+<!-- Main content -->
+<div class="sidelinks">
+<ul></ul>
+</div>
+<div id="page-content">
+<div class="sect1">
+<h1 id="_ykoath_protocol_specification">YKOATH Protocol Specification</h1>
+<div class="sectionbody">
+<div class="paragraph"><p>The YKOATH protocol is used to manage and use OATH credentials with a YubiKey
+NEO, YubiKey 4, or YubiKey 5. It can be accessed over USB (when the CCID transport is enabled) or
+over NFC, using ISO 7816-4 commands as defined in this document.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_general_definitions">General Definitions</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_instructions">Instructions</h3>
+<div class="paragraph"><p>Instructions marked as <em>Require Auth</em> require a successful VALIDATE command to be
+performed before they are available, if a validation code is set.</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Name           </th>
+<th class="tableblock halign-left valign-top">Code </th>
+<th class="tableblock halign-left valign-top"> Require Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PUT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x01</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DELETE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x02</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SET CODE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x03</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">RESET</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x04</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LIST</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CALCULATE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VALIDATE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CALCULATE ALL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SEND REMAINING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_algorithms">ALGORITHMS</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HMAC-SHA1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HMAC-SHA256</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x02</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HMAC-SHA512</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x03</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">HMAC-SHA512 requires YubiKey 4.3.1 or later.</td>
+</tr></table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_types">TYPES</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HOTP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x10</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TOTP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x20</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_properties">PROPERTIES</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<col style="width:33%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Only increasing</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x01</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enforces that a challenge is always higher than the previous</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Require touch</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x02</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Require button press to generate OATH codes</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Require touch requires YubiKey 4.2.4 or later.</td>
+</tr></table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_select_instruction">SELECT INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Selects the application for use and returns version, ID and a challenge if
+authentication is configured (see the validate instruction below).</p></div>
+<div class="sect2">
+<h3 id="_request_syntax">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa4</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x04</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of AID (7)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AID (0xa0 0x00 0x00 0x05 0x27 0x21 0x01)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_syntax">Response Syntax</h3>
+<div class="paragraph"><p>A challenge is returned if the authentication object is set. In that case
+an authentication is required for all commands except VALIDATE and RESET.</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Version tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x79</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Version length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of version</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Version data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Version</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x71</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x74</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of challenge</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algorithm tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x7b</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algorithm length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of algorithm (1)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algorithm</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">What algorithm to use</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_put_instruction">PUT INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Adds a new (or overwrites) OATH credential.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_2">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of Data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Put Data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_put_data">Put Data</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x71</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of name data, max 64 bytes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x73</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of key data + 2</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key algorithm</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">High 4 bits is type, low 4 bits is algorithm</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Digits</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of digits in OATH code</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Property tag(o)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x78</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Property(o)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Property byte</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IMF tag(o)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x7a (only valid for HOTP)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IMF length(o)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of imf data, always 4 bytes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">IMF data(o)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Imf</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No space</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6a84</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auth required</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6982</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrong syntax</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6a80</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_delete_instruction">DELETE INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Deletes an existing credential.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_3">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x02</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of Data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delete Data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_delete_data">Delete Data</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x71</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of name data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes_2">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No such object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6984</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auth required</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6982</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrong syntax</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6a80</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_set_code_instruction">SET CODE INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Configures Authentication.
+If length 0 is sent, authentication is removed.
+The key to be set is expected to be a user-supplied UTF-8 encoded password
+passed through 1000 rounds of PBKDF2 with the ID from select used as salt. 16
+bytes of that are used. When configuring authentication you are required to send
+an 8 byte challenge and one authentication-response with that key, in order to confirm
+that the application and the host software can calculate the same response for that key.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_4">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x03</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of Data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Set Code Data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_set_code_data">Set Code Data</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x73</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of key data + 1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key algorithm</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algorithm</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x74</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of challenge data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x75</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of response data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes_3">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response doesn’t match</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6984</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auth required</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6982</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrong syntax</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6a80</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reset_instruction">RESET INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Resets the application to just-installed state.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_5">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x04</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xde</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xad</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes_4">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_list_instruction">LIST INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Lists configured credentials.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_6">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_syntax_2">Response Syntax</h3>
+<div class="paragraph"><p>Response will be a continual list of objects looking like:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name list tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x72</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of name + 1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algorithm</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">High 4 bits is type, low 4 bits is algorithm</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes_5">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">More data available</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x61xx</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auth required</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6982</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generic error</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6581</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_calculate_instruction">CALCULATE INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Performs CALCULATE for one named credential.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_7">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa2</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00 for full response 0x01 for truncated</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Calculate data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_calculate_data">Calculate Data</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x71</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of name data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x74</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of challenge</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_syntax_3">Response Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x75 for full response, 0x76 for truncated</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of response + 1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Digits</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of digits in the OATH code</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes_6">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No such object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6984</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auth required</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6982</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrong syntax</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6a80</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generic error</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6581</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_validate_instruction">VALIDATE INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Validates authentication (mutually).
+The challenge for this comes from the SELECT command. The response if computed by
+performing the correct HMAC function of that challenge with the correct key.
+A new challenge is then sent to the application, together with the response.
+The application will then respond with a similar calculation that the host
+software can verify.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_8">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa3</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Validate data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_validate_data">Validate Data</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x75</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of response</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x74</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of challenge</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_syntax_4">Response Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x75</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of response</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes_7">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auth not enabled</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6984</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrong syntax</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6a80</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generic error</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6581</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_calculate_all_instruction">CALCULATE ALL INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Performs CALCULATE for all available credentials, returns name + response for TOTP and
+just name for HOTP and credentials requiring touch.</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_9">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa4</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00 for full response 0x01 for truncated</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Calculate all data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_calculate_all_data">Calculate All Data</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x74</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of challenge</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Challenge</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_syntax_5">Response Syntax</h3>
+<div class="paragraph"><p>For HOTP the response tag is 0x77 (No response)
+For credentials requiring touch the response tag is 0x7c (No response)
+The response will be a list of the following objects:</p></div>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x71</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name length</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x77 for HOTP, 0x7c for touch, 0x75 for full response or 0x76 for truncated response</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response len</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Length of response + 1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Digits</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of digits in the OATH code</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Response</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_codes_8">Response Codes</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Success</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x9000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">More data available</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x61xx</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auth required</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6982</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrong syntax</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6a80</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generic error</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x6581</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_send_remaining_instruction">SEND REMAINING INSTRUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Gets remaining data if everything didn’t fit in previous response (response
+code was 61xx).</p></div>
+<div class="sect2">
+<h3 id="_request_syntax_10">Request Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0xa5</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">P2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0x00</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_response_syntax_6">Response Syntax</h3>
+<table class="table table-bordered table-striped tableblock frame-all grid-all" style="
+width:100%;
+">
+<col style="width:50%;"/>
+<col style="width:50%;"/>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Continued data where previous command left off</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- End main content -->
+</div>
+</div>
+</div>
+<footer class="container">
+<div class="row" style="margin-top:30px;padding-top:20px;border-top:1px solid #eee;">
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%">
+<strong><a href="/" style="color:#000">DEV.YUBICO</a></strong><br/>
+<a href="/Passkeys">Passkeys</a><br/>
+<a href="/WebAuthn">WebAuthn</a><br/>
+<a href="/CTAP">CTAP</a><br/>
+<a href="/OTP">OTP</a><br/>
+<a href="/OATH">OATH</a><br/>
+<a href="/PGP">PGP</a><br/>
+<a href="/PIV">PIV</a><br/>
+<a href="/Secure_Domain">Secure Domain</a><br/>
+<a href="/YubiHSM2">YubiHSM2</a><br/>
+<a href="/Software_Projects">Software Projects</a><br/>
+</p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong>RESOURCES</strong><br/>
+<a href="https://www.yubico.com/store/" rel="noopener noreferrer" target="_blank">Buy YubiKeys</a><br/>
+<a href="https://www.yubico.com/blog/" rel="noopener noreferrer" target="_blank">Blog</a><br/>
+<a href="https://www.yubico.com/email-subscription/" rel="noopener noreferrer" target="_blank">Newsletter</a><br/>
+<a href="https://forum.yubico.com/" rel="noopener noreferrer" target="_blank">Yubico Forum Archive</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:2em;font-size:90%"><strong><a href="https://www.yubico.com/" rel="noopener noreferrer" style="color:#000" target="_blank">YUBICO.COM</a></strong><br/>
+<a href="https://www.yubico.com/why-yubico/" rel="noopener noreferrer" target="_blank">Why Yubico</a><br/>
+<a href="https://www.yubico.com/about/about-us/" rel="noopener noreferrer" target="_blank">About Yubico</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/cookie-notice/" rel="noopener noreferrer" target="_blank">Cookie</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/" rel="noopener noreferrer" target="_blank">Legal</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/privacy-notice/" rel="noopener noreferrer" target="_blank">Privacy</a><br/>
+<a href="https://www.yubico.com/support/terms-conditions/yubico-website-terms-conditions/" rel="noopener noreferrer" target="_blank">Terms of use</a><br/>
+<a href="https://www.yubico.com/trust/" rel="noopener noreferrer" target="_blank">Trust</a></p>
+</div>
+<div class="col-md-3">
+<p style="line-height:1em;font-size:90%"> </p>
+<table align="right" cellpadding="0" cellspacing="0" style="color:#9aca3c">
+<tbody>
+<tr>
+<td style="padding:10px"><a href="https://www.yubico.com/feed/" rel="noopener noreferrer" target="_blank" title="Blog RSS"><i class="fa fa-rss"></i></a></td>
+<td style="padding:10px"><a href="https://twitter.com/yubico" rel="noopener noreferrer" target="_blank" title="Twitter"><i class="fa-brands fa-twitter"></i></a></td>
+<td style="padding:10px"><a href="https://www.facebook.com/Yubikey" rel="noopener noreferrer" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a></td>
+<td style="padding:10px"><a href="https://www.youtube.com/c/Yubico" rel="noopener noreferrer" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a></td>
+<td style="padding:10px 0 10px 10px"><a href="https://github.com/Yubico" rel="noopener noreferrer" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</footer>
+<script src="/vendor/jquery/dist/jquery.min.js"></script>
+<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/vendor/jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
+<script src="/js/code-tabs.js"></script>
+<script src="/js/main.js"></script>
+<!-- Cookie Consent -->
+<script defer="" src="/vendor/vanilla-cookieconsent/dist/cookieconsent.js"></script>
+<script defer="" src="/js/cookieconsent-init.js"></script>
+<!-- End Cookie Consent -->
+</body>
+</html>

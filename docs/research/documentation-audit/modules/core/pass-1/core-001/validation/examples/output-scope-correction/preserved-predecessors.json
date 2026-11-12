@@ -1,0 +1,33 @@
+{
+  "review": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/review.md",
+    "sha256": "fac2e84d2bb68242f24859d4de2cd9b7bc8813d8d08e7e97c216ad5cafb9185c"
+  },
+  "files": [
+    {
+      "original": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/preparation-identities.json",
+      "snapshot": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/output-scope-correction/preparation-identities.json.snapshot",
+      "bytes": 41554,
+      "sha256": "77fdf952861491d35288531a6070d6ff069df155e18d1633c950bdd8f9d7657d"
+    },
+    {
+      "original": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/provenance.json",
+      "snapshot": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/output-scope-correction/provenance.json.snapshot",
+      "bytes": 3568,
+      "sha256": "fe5c9d57389d6727a0553810cd5237439f38bb0e5180f308fbc3ceb2e2acf857"
+    },
+    {
+      "original": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/static-verification.json",
+      "snapshot": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/output-scope-correction/static-verification.json.snapshot",
+      "bytes": 107234,
+      "sha256": "20b42a609819e28fa1197e32bba13a4379825de4afceaa897c3a2e63037db789"
+    },
+    {
+      "original": "docs/research/documentation-audit/modules/core/pass-1/core-001/example-validation-preparation.md",
+      "snapshot": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/output-scope-correction/example-validation-preparation.md.snapshot",
+      "bytes": 8629,
+      "sha256": "e26d2deff2bf4e2cd5259e0aae1029ac84a5be15217543e870cc8979d63b74c4"
+    }
+  ],
+  "original_descriptor_fixed_input_delta": []
+}

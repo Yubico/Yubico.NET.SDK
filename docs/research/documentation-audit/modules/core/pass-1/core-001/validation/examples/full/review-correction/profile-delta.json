@@ -1,0 +1,104 @@
+{
+  "changed_existing_participants": [
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.py",
+        "bytes": 6580,
+        "sha256": "acaf3f438cf103388da1ae600502a139a1ca6f729f054fa0df462d18ebf0d4bf"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.py",
+        "bytes": 7838,
+        "sha256": "175480934087da62df5c9cfeee3fa4335a1c2727440480408fcb62d4fa4486f2"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-211.cs",
+        "bytes": 1112,
+        "sha256": "afd804ac99cc8b7c92d314ad3d91d3ca3c94a9aaa620e9519a0eb4b7f6cca631"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-211.cs",
+        "bytes": 1112,
+        "sha256": "c831150b9a796cfb77b54e7620ed95cb3b4c67ffde9db26abee71ce73af57a75"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-027.cs",
+        "bytes": 1361,
+        "sha256": "38aa8aba676c38c7378552abc4c9e9ce5839e06d7556b4b9945a7e598aaa6480"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-027.cs",
+        "bytes": 1380,
+        "sha256": "fd16f812a587768c29de2667ec6db89d4a41c1542ac263b278fbc9f0df9cce06"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-244.cs",
+        "bytes": 1241,
+        "sha256": "bdd3145ed272b805b01deed4d9acee58e3967ea7353cce5a48af755f95cdfdc0"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-244.cs",
+        "bytes": 1235,
+        "sha256": "061334440222e4d7921a0cc1ca258228d408315efcab8159aa9b0bb4892075d7"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 5929,
+        "sha256": "4934e09597f442683e45daeec8e23bdb734c67f1b4854c68320d5744c74e6833"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 6079,
+        "sha256": "39cfa3cd71241849dfeb777e60a47170dcf40dd16145ee101a5b58801c4f009d"
+      }
+    }
+  ],
+  "replaced_manifest": [
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/manifest-current.json",
+        "bytes": 2312417,
+        "sha256": "bc34edaf8dcb153765aba87ebb786695f83010042d9df3d2bcb1af0923eef545"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/manifest-corrected.json",
+        "bytes": 2312526,
+        "sha256": "2f24bb423c7d2751017bf302f6b153308da026c9954acf3eebd40f64a9c0db4d"
+      }
+    }
+  ],
+  "added_participants": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/test-contexts.py",
+      "bytes": 8726,
+      "sha256": "e34f9f79e98b7805596a80024f5c77ad791bcf8394e777c78960ac8be5631ea8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/review-correction/verify.py",
+      "bytes": 5508,
+      "sha256": "db2565779271b5562bc71a9a391565be8b0b4bd354c13a34a77adf8a7d800aac"
+    }
+  ],
+  "unchanged_original_participants": 1707,
+  "old_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-current.json",
+    "bytes": 586272,
+    "sha256": "806ce07d050835dbcac7e4ce33ffb2b0006c5c8e9937e4321f3af6f569a4dc5c"
+  },
+  "new_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-corrected.json",
+    "bytes": 587466,
+    "sha256": "cc9da7b2d9520c7b69fa54471b443744fa95e8e1b42c539f7649cb44ac11ef46"
+  },
+  "compile_source_membership_unchanged": true,
+  "project_closure_unchanged": true,
+  "scope": "No source/root/SDK/qualified logger/checker/binder participant changed. Full profile/preparation only."
+}

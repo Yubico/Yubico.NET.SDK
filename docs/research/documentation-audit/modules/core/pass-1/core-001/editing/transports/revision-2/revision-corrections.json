@@ -1,0 +1,89 @@
+[
+  {
+    "review_id": "M1",
+    "verification": "SUPPORTED-BY-CURRENT-CONTROL-FLOW; NO CONTRADICTION FOUND",
+    "candidate": "CORE-B3-C003",
+    "proposal": "FPT-042",
+    "original_unit_ids": [
+      "core-001:unit:cef6b843926775c3",
+      "core-001:unit:549db4976f21f028"
+    ],
+    "supporting_candidate_and_proposal": [],
+    "decisive_current_source": [
+      "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs:65-85",
+      "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs:72-105"
+    ],
+    "retained_original_anchor": "investigation/B3/sources/IOHIDDevice.h:87-102; IOKitUser 323ead896d04424f87184d8f6ff0cce811aab106",
+    "rationale_and_correction": "Corrected both device parameters to a valid IOHIDDeviceRef kept valid by the caller during the property query; an opened report connection is not required. Pre-open enumeration calls were checked. Existing absence/type/conversion outcomes and held null-set/CFNumber ABI findings are unchanged.",
+    "paths": [
+      {
+        "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+        "reviewed_sha256": "eddb9d35404dc8cb00fda38577ac8e0772c7ed0448d469599cc8cafb4a397c63",
+        "successor_sha256": "81c0010ee6352821adca2a5c7bbf4aa0f9c753ff27ae901141b5d451e12680fc"
+      }
+    ],
+    "independent_review": "PENDING-FOCUSED-SUCCESSOR-REVIEW",
+    "runtime_change": false
+  },
+  {
+    "review_id": "M2",
+    "verification": "SUPPORTED-BY-CURRENT-CONTROL-FLOW; NO CONTRADICTION FOUND",
+    "candidate": "CORE-B4-C004",
+    "proposal": "FPT-051",
+    "original_unit_ids": [
+      "core-001:unit:97f3c89d0819e76e",
+      "core-001:unit:3ac34ce64d139f54"
+    ],
+    "supporting_candidate_and_proposal": [],
+    "decisive_current_source": [
+      "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs:232-276"
+    ],
+    "retained_original_anchor": "investigation/B4/sources/createfile.html desired access/share parameters; hidd-getfeature.html Parameters/Remarks; retained live Win32 reference, not deployed-driver evidence",
+    "rationale_and_correction": "Corrected constructor metadata description: first zero desired access, then read/write retry when opening or capability retrieval throws UnauthorizedAccessException. Constructor success is not zero-access success proof; neither route exercises feature GET/SET. Separate feature-open policy and all access flags are unchanged.",
+    "paths": [
+      {
+        "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+        "reviewed_sha256": "ce3fa7f7dfe85620c761b20cbb2fabfbbabb51c452f41a06d7f4c4f7c285e62a",
+        "successor_sha256": "183a5bcd93e003b9a4f6fb17178fe2e72c1e221652fc0c4287cbecb330a18d86"
+      }
+    ],
+    "independent_review": "PENDING-FOCUSED-SUCCESSOR-REVIEW",
+    "runtime_change": false
+  },
+  {
+    "review_id": "M3",
+    "verification": "SUPPORTED-BY-CURRENT-CONTROL-FLOW; NO CONTRADICTION FOUND",
+    "candidate": "CORE-B4-C002",
+    "proposal": "FPT-049",
+    "original_unit_ids": [
+      "core-001:unit:6f60e2b189737226",
+      "core-001:unit:c40476271e99068b",
+      "core-001:unit:8aa16b126b5c3c3b"
+    ],
+    "supporting_candidate_and_proposal": [
+      "CORE-B3-C005",
+      "FPT-044"
+    ],
+    "decisive_current_source": [
+      "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs:85-113",
+      "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs:138-147",
+      "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs:294-306"
+    ],
+    "retained_original_anchor": "investigation/B4/sources/cm-unregister.html Return value/Remarks: CR_SUCCESS versus failure, pending-callback wait and callback-thread deadlock restriction",
+    "rationale_and_correction": "Qualified Stop and Dispose(bool) summaries as shutdown/cleanup requests or attempts and the Windows collected-target callback comment as an unregister attempt. Retained-state safety rationale and all platform control flow remain unchanged; return/status alone proves no native release.",
+    "paths": [
+      {
+        "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+        "reviewed_sha256": "b36df078091dcbab835c2a9245f1e52908a60970c4b82dfa72cc109a981628cf",
+        "successor_sha256": "9b4ec4fd9bbfd5b6e459e64152a0aa0f555168493cefd42d80a318bbfd90207c"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+        "reviewed_sha256": "dc4ce0f2d9aa5943a902022d3ff166b9e9cc4ccc4e67e864b845faa8a56d6eaf",
+        "successor_sha256": "e36965aadaee30ef241c45b7da5a2141b117a2e41495d1b391fdb0c0ede4507d"
+      }
+    ],
+    "independent_review": "PENDING-FOCUSED-SUCCESSOR-REVIEW",
+    "runtime_change": false
+  }
+]

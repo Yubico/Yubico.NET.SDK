@@ -54,7 +54,9 @@ public sealed partial class OpenPgpSession
         var activateCmd = new ApduCommand(0x00, (int)Ins.Activate, 0x00, 0x00);
         await TransmitNoThrowAsync(activateCmd, cancellationToken).ConfigureAwait(false);
 
-        // Step 6: Re-initialize — re-SELECT and refresh cached state
+        // Step 6: Re-SELECT with the existing backend and refresh cached application state.
+        // An SCP session retains its secure graph: SELECT is plain, subsequent sends use the retained
+        // keys/state, and no new handshake runs. Existing readiness/authentication flags are not reset here.
         _logger.LogDebug("Re-initializing session after reset");
 
         // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet

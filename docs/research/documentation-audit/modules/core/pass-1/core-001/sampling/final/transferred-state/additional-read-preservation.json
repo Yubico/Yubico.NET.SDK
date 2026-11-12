@@ -1,0 +1,1214 @@
+{
+  "actual_additional_units": 151,
+  "new_supported_units_lost": [],
+  "units": [
+    {
+      "id": "core-001:unit:0052beaaca7e3aab",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:035ae50978ce88d7",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:0389bce1986c0ea9",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:04aeedc7f7928b92",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:0b2135f2f301e2c1",
+      "raw_category": "source-evidence-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:0b5f8163f489c670",
+      "raw_category": "documentation-miss",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": false,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:0c27fcfbe45d9806",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:0cb494f7969547df",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:0d64e57897a15be3",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:13971cb61434ba4c",
+      "raw_category": "source-evidence-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:13efa480557b5601",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:15611fb8dbaa0ab5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:197270a7f7e9bffc",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:1d9844353d945bf9",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:1dc08e7d03f341ef",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:1dcf2e836efee1d5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:1f646b31d8d5f48a",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:21bef981d5360feb",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:21cfb83cdc2b4263",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:25673509b9d722bf",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:26a01b51fa2d612f",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:283dfadc640419c8",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:287e6410db16f0e7",
+      "raw_category": "documentation-miss",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": false,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:297e68004991d4a8",
+      "raw_category": "protected-output-qualification",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:2a47e7cc5a9259e3",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:2ab1f3fe98ee5ca4",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:32032fade9d7fddb",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:353ef7aa94348bf2",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:3a5c3c12f2af0a27",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:3c6044a5e5f76ea2",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:3ccf06e816f277d2",
+      "raw_category": "source-observation",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:3f79f975e26f3c6c",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:4089aedab94d4e23",
+      "raw_category": "known-implementation-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:418fbc28a73c4bd5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:41a13990682e5fd2",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:4264b15d39c60d99",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:42e5db3e323167cb",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:4330e60d07cd5417",
+      "raw_category": "source-evidence-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:44a66dad89e6e9e9",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:457a4879daaf1b55",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:47befc3dc2cc5dd5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:49031be8c8952c54",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:4c275c7d070e03a5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:4c48c7d8d8d2e37a",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:4c955b22a2de68df",
+      "raw_category": "source-evidence-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:4f7f2feb81045f0f",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:548bc1460a3f9b8f",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:572af9c8e29c74f9",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:5f636711739239fe",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:606c7462df485c41",
+      "raw_category": "known-implementation-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:62ede839d51aa516",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:6afae0cb3a2a58c7",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:6cf5cdf2f8dbbd2b",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:6e6307d613511921",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:6e9c74a6b5e82dc5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:7045e0544998269f",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:7070cc291aec3e7e",
+      "raw_category": "specific-ineligible",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:727ad82dd732b613",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:72ae07bf970ed5ec",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:761f1552c9ab4aaf",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:76b664da02352c87",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:77cd47f2db7ebab8",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:78622499bfedf099",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:791a10be0b884998",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:792fc8aff569fa2e",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:7b5daf3c140bfbc6",
+      "raw_category": "source-evidence-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:7dc8f2fc14f0186c",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:82f001f6db22d507",
+      "raw_category": "source-evidence-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": false,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:8490dabf2e2bd6ea",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:876d6e14e704aec5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:889cfdef6f963950",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:891bea911fc43528",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:8e7356e172293835",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:8ee0f42300c2c7e1",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:8f341f2d9ed91af4",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:9220def02b369490",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:939161b425c3e89f",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:944095256af7ecd9",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:94abe99ff516c417",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:94c5acf06136d521",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9a180bff18d16922",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9b2517c252b41c26",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9b2b20dfbae1bf78",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9c8ab813d3edc094",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9cd17279b86d5878",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9d8102989bf52740",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9dc7ab5953064c3f",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:9e1f0228fabdcb5d",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:a327c384b612ddf6",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:a4315aa9922ecd83",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:a581a1ab8be230d2",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:a92c6aa039f27e15",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:a9443056da14fe17",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:abc48bf7ccf04d19",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:abfcfd663b9df0f2",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:ac046b142303c33e",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:ad16310453b46d29",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:aeadc0996d07ac60",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:b1b8f3f0d43abb21",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:b45b5794aa92008c",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:b530f2ba7c68da7e",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:b605ac9cbec57270",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:b63489aa81cdbaf2",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:b8a66cb98708847b",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:ba9bbbedd0ad0f34",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:be11505c581308a5",
+      "raw_category": "known-implementation-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:c17392c263e81b14",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:c2de2d6f26065229",
+      "raw_category": "documentation-miss",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": false,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:c5b35440184cef31",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:c680372cf0dd564e",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:c695a3c8180b434c",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:cec556dd8f62b863",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:cf330b6a639970cd",
+      "raw_category": "edited-overlap",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": false,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:cf3538431462d4ab",
+      "raw_category": "known-implementation-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:d0048ac2b4474b13",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:d0757dfa453abbeb",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:d27f5051f8d21199",
+      "raw_category": "known-implementation-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:d28709e3276a4138",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:d41ecdd3d18d0e91",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:d5838c51b4cca87e",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:d5ffab3651d9f944",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:d7f277c73e9d67c6",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:d8f176c067aa0fd3",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:db781bee61b48612",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:dd179ffbb8315a43",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:df3667e8c83d1eb5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e02a91097cd322b3",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e1789c5c3edd2e8e",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:e3d8ada85fd182e2",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e5b5533e4df67ea7",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e6e22f9870456ae8",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e8471885414d88c9",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e90e615ba927962a",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e954bf0af6c49fba",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:e9d68bf588ab00e4",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:eb2ea938be1dc7f7",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:eb5669b588b07d03",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:edaef2dcf282acc6",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:eea6325dac26e880",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f00b1d2526f62fe3",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f1df5948d71dcc9d",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f24674b7449e617e",
+      "raw_category": "source-evidence-qualified",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f266412cbf666ee5",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:f5a358ec89b4c4ce",
+      "raw_category": "specific-ineligible",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f713ea0c593064bf",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f7a53cd9184afd96",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f7fc274baa684518",
+      "raw_category": "specific-ineligible",
+      "logical_pretransfer_credit": 0,
+      "final_candidate_credit": 0,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f82d55d29d5e7e42",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:f96355d3db0dfcd7",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": true
+    },
+    {
+      "id": "core-001:unit:fb09fe35ad8505f1",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    },
+    {
+      "id": "core-001:unit:fb2be78aaf8f6f25",
+      "raw_category": "supported-pending-final-eligibility",
+      "logical_pretransfer_credit": 1,
+      "final_candidate_credit": 1,
+      "semantic_interval_match": true,
+      "reviewed_EOF_only_file": false
+    }
+  ]
+}

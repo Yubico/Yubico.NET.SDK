@@ -1,0 +1,312 @@
+[
+  {
+    "id": "CORE-HSM-X001",
+    "state": "PROVISIONAL-LOCAL-CANDIDATE",
+    "accepted_id": null,
+    "documentation": "PROPOSED-LOCAL-CLARIFICATION",
+    "runtime": "DEFERRED-SEPARATE-AUTHORIZATION",
+    "decision": "MAINTAINER-POLICY-SEPARATE",
+    "qualification": "UNRUN-PRESERVE-EXISTING-GAPS",
+    "aliases_nonadditive": [
+      "yubihsm-001:HSM-DEP-001",
+      "yubihsm-001:HSM-DEP-002",
+      "CORE-B5-C001",
+      "CORE-B5-C006",
+      "CORE-B6-C011",
+      "CORE-B6-C012",
+      "CORE-B6-C015"
+    ],
+    "unit_ids": [
+      "core-001:unit:f4a1e21e6fa236ac",
+      "core-001:unit:46216fa4bb477d2d",
+      "core-001:unit:c4d04ce56e188f14"
+    ],
+    "related_unit_ids": [
+      "core-001:unit:71bd62554fc11bca",
+      "core-001:unit:eac986726ec4b27c",
+      "core-001:unit:cbb38c36d4b5a688",
+      "core-001:unit:ac34af5219eeb53f",
+      "core-001:unit:7142071d50d6d4b7",
+      "core-001:unit:261e37fb24419500"
+    ],
+    "unchanged_paths": [
+      "src/YubiHsm/CLAUDE.md",
+      "src/YubiHsm/README.md",
+      "src/YubiHsm/src/HsmAuthSession.cs",
+      "src/YubiHsm/src/IHsmAuthSession.cs",
+      "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "src/YubiHsm/tests/CLAUDE.md",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/ResetCommand.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ResetMenu.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ResetHsmAuth.cs"
+    ],
+    "reopening_map": "candidates.md#core-hsm-x001 (complete candidate section, XML/guide/sample/test/migration triggers)"
+  },
+  {
+    "id": "CORE-HSM-X002",
+    "state": "PROVISIONAL-LOCAL-CANDIDATE",
+    "accepted_id": null,
+    "documentation": "PROPOSED-LOCAL-CLARIFICATION",
+    "runtime": "DEFERRED-SEPARATE-AUTHORIZATION",
+    "decision": "MAINTAINER-POLICY-SEPARATE",
+    "qualification": "UNRUN-PRESERVE-EXISTING-GAPS",
+    "aliases_nonadditive": [
+      "yubihsm-001:HSM-DEP-003",
+      "yubihsm-001:HSM-IMP-002",
+      "CORE-C-C005",
+      "CORE-C-C006",
+      "CORE-C-C007",
+      "CORE-C-C020",
+      "CORE-B6-C002",
+      "CORE-B6-C006",
+      "CORE-B6-C007"
+    ],
+    "unit_ids": [
+      "core-001:unit:3ceb4c49a09206e1"
+    ],
+    "related_unit_ids": [
+      "core-001:unit:bbb19744be9a1564",
+      "core-001:unit:00e817cb60c87971",
+      "core-001:unit:2f26c7ab9c51df33",
+      "core-001:unit:6c71d3e46dddd93e",
+      "core-001:unit:0ba7de36589f8d1c",
+      "core-001:unit:92c1b5732f4ff9b8",
+      "core-001:unit:36849dd60dafde94",
+      "core-001:unit:512eeb739fe18a50",
+      "core-001:unit:b1e69ebc4ce3b9be",
+      "core-001:unit:084fa91d45ef9b3d",
+      "core-001:unit:b7d95c24d028842c"
+    ],
+    "unchanged_paths": [
+      "src/YubiHsm/CLAUDE.md",
+      "src/YubiHsm/README.md",
+      "src/YubiHsm/src/HsmAuthSession.cs",
+      "src/YubiHsm/src/SessionKeys.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/SessionKeysTests.cs"
+    ],
+    "reopening_map": "candidates.md#core-hsm-x002 (complete candidate section, XML/guide/sample/test/migration triggers)"
+  },
+  {
+    "id": "CORE-HSM-X003",
+    "state": "PROVISIONAL-LOCAL-CANDIDATE",
+    "accepted_id": null,
+    "documentation": "PROPOSED-LOCAL-CLARIFICATION",
+    "runtime": "DEFERRED-SEPARATE-AUTHORIZATION",
+    "decision": "MAINTAINER-POLICY-SEPARATE",
+    "qualification": "UNRUN-PRESERVE-EXISTING-GAPS",
+    "aliases_nonadditive": [
+      "yubihsm-001:HSM-DEP-002",
+      "CORE-B5-C006",
+      "CORE-C-C008"
+    ],
+    "unit_ids": [
+      "core-001:unit:04bbe6a58cdfc823",
+      "core-001:unit:851afa54e70f73e4"
+    ],
+    "related_unit_ids": [
+      "core-001:unit:f719110786267801",
+      "core-001:unit:1efcc215023da128",
+      "core-001:unit:d2053b26d9b0f9c9",
+      "core-001:unit:9a67b77c4103c979"
+    ],
+    "unchanged_paths": [
+      "src/YubiHsm/CLAUDE.md",
+      "src/YubiHsm/README.md",
+      "src/YubiHsm/src/HsmAuthSession.cs",
+      "src/YubiHsm/src/IHsmAuthSession.cs",
+      "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "src/YubiHsm/tests/CLAUDE.md",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/TouchNotificationTests.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs"
+    ],
+    "reopening_map": "candidates.md#core-hsm-x003 (complete candidate section, XML/guide/sample/test/migration triggers)"
+  },
+  {
+    "id": "CORE-HSM-X004",
+    "state": "PROVISIONAL-LOCAL-CANDIDATE",
+    "accepted_id": null,
+    "documentation": "PROPOSED-LOCAL-CLARIFICATION",
+    "runtime": "DEFERRED-SEPARATE-AUTHORIZATION",
+    "decision": "MAINTAINER-POLICY-SEPARATE",
+    "qualification": "UNRUN-PRESERVE-EXISTING-GAPS",
+    "aliases_nonadditive": [
+      "yubihsm-001:HSM-DEP-001",
+      "CORE-A-C015",
+      "CORE-B5-C001"
+    ],
+    "unit_ids": [
+      "core-001:unit:f4566399afef2281"
+    ],
+    "related_unit_ids": [
+      "core-001:unit:0e2a6b8014b211f1",
+      "core-001:unit:c143c8dcfc8723a2",
+      "core-001:unit:3270b468d31dc8c9"
+    ],
+    "unchanged_paths": [
+      "src/YubiHsm/CLAUDE.md",
+      "src/YubiHsm/README.md",
+      "src/YubiHsm/src/Backend/HsmAuthBackend.cs",
+      "src/YubiHsm/src/HsmAuthSession.cs",
+      "src/YubiHsm/src/IYubiKeyExtensions.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs"
+    ],
+    "reopening_map": "candidates.md#core-hsm-x004 (complete candidate section, XML/guide/sample/test/migration triggers)"
+  },
+  {
+    "id": "CORE-HSM-X005",
+    "state": "PROVISIONAL-LOCAL-CANDIDATE",
+    "accepted_id": null,
+    "documentation": "RETAIN-EXISTING-QUALIFICATION",
+    "runtime": "DEFERRED-SEPARATE-AUTHORIZATION",
+    "decision": "MAINTAINER-POLICY-SEPARATE",
+    "qualification": "UNRUN-PRESERVE-EXISTING-GAPS",
+    "aliases_nonadditive": [
+      "yubihsm-001:HSM-IMP-008",
+      "yubihsm-001:HSM-IMP-007"
+    ],
+    "unit_ids": [],
+    "related_unit_ids": [
+      "core-001:unit:1ae1a01ebf7f3e5d",
+      "core-001:unit:229cbbf0c816393f",
+      "core-001:unit:bdf74ceb5f2099b0",
+      "core-001:unit:29006ac1de1a54fe",
+      "core-001:unit:328fa7631af38d2d",
+      "core-001:unit:839fa04eb5965974"
+    ],
+    "unchanged_paths": [
+      "src/YubiHsm/CLAUDE.md",
+      "src/YubiHsm/README.md",
+      "src/YubiHsm/src/HsmAuthSession.cs",
+      "src/YubiHsm/src/IHsmAuthSession.cs",
+      "src/YubiHsm/src/SessionKeys.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/SessionKeysTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs"
+    ],
+    "reopening_map": "candidates.md#core-hsm-x005 (complete candidate section, XML/guide/sample/test/migration triggers)"
+  },
+  {
+    "id": "CORE-HSM-X006",
+    "state": "PROVISIONAL-LOCAL-CANDIDATE",
+    "accepted_id": null,
+    "documentation": "RETAIN-EXISTING-QUALIFICATION",
+    "runtime": "DEFERRED-SEPARATE-AUTHORIZATION",
+    "decision": "MAINTAINER-POLICY-SEPARATE",
+    "qualification": "UNRUN-PRESERVE-EXISTING-GAPS",
+    "aliases_nonadditive": [
+      "yubihsm-001:HSM-IMP-001",
+      "yubihsm-001:HSM-IMP-003",
+      "yubihsm-001:HSM-IMP-007"
+    ],
+    "unit_ids": [],
+    "related_unit_ids": [
+      "core-001:unit:570cf77dfe20754d",
+      "core-001:unit:66033149e18930bd",
+      "core-001:unit:a64f8e655d13ab4d",
+      "core-001:unit:ae7529f6ebd6a069",
+      "core-001:unit:4c6a50aaddea40e8"
+    ],
+    "unchanged_paths": [
+      "src/YubiHsm/CLAUDE.md",
+      "src/YubiHsm/README.md",
+      "src/YubiHsm/src/HsmAuthSession.cs",
+      "src/YubiHsm/src/IHsmAuthSession.cs",
+      "src/YubiHsm/src/HsmAuthAlgorithm.cs",
+      "src/YubiHsm/src/HsmAuthCredential.cs",
+      "src/YubiHsm/src/HsmAuthRetryException.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs"
+    ],
+    "reopening_map": "candidates.md#core-hsm-x006 (complete candidate section, XML/guide/sample/test/migration triggers)"
+  },
+  {
+    "id": "CORE-HSM-X007",
+    "state": "PROVISIONAL-LOCAL-CANDIDATE",
+    "accepted_id": null,
+    "documentation": "PROPOSED-LOCAL-CLARIFICATION",
+    "runtime": "DEFERRED-SEPARATE-AUTHORIZATION",
+    "decision": "MAINTAINER-POLICY-SEPARATE",
+    "qualification": "UNRUN-PRESERVE-EXISTING-GAPS",
+    "aliases_nonadditive": [
+      "yubihsm-001:HSM-IMP-002",
+      "yubihsm-001:HSM-IMP-004",
+      "yubihsm-001:HSM-IMP-005",
+      "yubihsm-001:HSM-IMP-006"
+    ],
+    "unit_ids": [
+      "core-001:unit:d9d9f5602dca2c1b"
+    ],
+    "related_unit_ids": [
+      "core-001:unit:6f10e0219c81beab",
+      "core-001:unit:99a7878f9ae10fdf",
+      "core-001:unit:bbd2f1c7724f4002",
+      "core-001:unit:45663117c7a6201c",
+      "core-001:unit:fa30412cc3d933a1",
+      "core-001:unit:8f16d503ab482d17",
+      "core-001:unit:1000e7195b8cf769",
+      "core-001:unit:4760ac6b0859b54d",
+      "core-001:unit:1e8b86a55b54704e",
+      "core-001:unit:44f88b2df5bc2e57",
+      "core-001:unit:7490364af15b4c37",
+      "core-001:unit:b6882212fe01e6f0",
+      "core-001:unit:fad4dd2efec2dcf5",
+      "core-001:unit:e8ca6f7526282022",
+      "core-001:unit:3a4109de6d14d68b",
+      "core-001:unit:e685a68c7e261d51",
+      "core-001:unit:5884e757b9dc6bcf",
+      "core-001:unit:e01b2c496b4b2231",
+      "core-001:unit:208d789ca32e5779",
+      "core-001:unit:bdf0b9fa2e22c201",
+      "core-001:unit:0769b13e6234b944"
+    ],
+    "unchanged_paths": [
+      "src/YubiHsm/tests/CLAUDE.md",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthAsymmetricTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/HsmAuthSessionTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/TestExtensions/HsmAuthTestStateExtensions.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/CredentialPasswordTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthCredentialTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthRetryExceptionTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/HsmAuthSessionByteLevelTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/LabelValidationTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Pbkdf2DerivationTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/RetryExtractionTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/SessionKeysTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/TouchNotificationTests.cs",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/AccessCommand.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CommandArgs.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/CredentialsCommand.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/ResetCommand.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/CredentialMenu.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ManagementKeyMenu.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/ResetMenu.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Menus/SessionKeyMenu.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Output/OutputHelpers.cs",
+      "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddDerivedCredential.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/AddSymmetricCredential.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/CalculateSessionKeys.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ChangeManagementKey.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/DeleteCredential.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GenerateAsymmetricCredential.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/GetManagementKeyRetries.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ListCredentials.cs",
+      "src/YubiHsm/examples/HsmAuthTool/HsmAuthExamples/ResetHsmAuth.cs",
+      "src/YubiHsm/CLAUDE.md",
+      "src/YubiHsm/README.md",
+      "src/YubiHsm/src/HsmAuthRetryException.cs"
+    ],
+    "reopening_map": "candidates.md#core-hsm-x007 (complete candidate section, XML/guide/sample/test/migration triggers)"
+  }
+]

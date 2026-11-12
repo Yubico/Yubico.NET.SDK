@@ -1,0 +1,56 @@
+"""Core record manifests: retained text kinds, actual Git-clean policy and exact index bytes."""
+import argparse
+import json
+from pathlib import Path
+from foundation import HERE, ROOT, RUN, PINS, INTEGRATION, pinned, require
+
+
+def classify(relative, raw):
+    path = Path(relative)
+    require(not {'bin', 'obj', 'node_modules', '__pycache__', '.git'}.intersection(path.parts),
+            f'Generated payload directory: {relative}')
+    # A compound metadata name is a text candidate; a final binary extension is a payload.
+    require(path.suffix.lower() not in {'.dll', '.exe', '.pdb', '.so', '.a', '.o', '.dylib', '.pyc', '.nupkg', '.zip'},
+            f'Binary/cache payload name: {relative}')
+    text = raw.decode('utf-8-sig')  # Invalid UTF-8 is a failed record, never an omitted input.
+    require(b'\0' not in raw and not raw.startswith((b'MZ', b'\x7fELF', b'PK\x03\x04', b'!<arch>\n')),
+            f'Binary payload content: {relative}')
+    if path.suffix == '.json' or path.name.endswith('.json.snapshot'):
+        json.loads(text)
+        return 'utf8-json'
+    return 'utf8-text'
+
+
+def load():
+    original = INTEGRATION / 'validation/check-records.py'
+    source = pinned(original, PINS['check-records.py']).decode()
+    old = '''    forbidden = {"bin", "obj", "node_modules", "__pycache__", ".git"}
+    require(not forbidden.intersection(path.relative_to(PACKET).parts), f"Generated directory: {path}")
+    require(not any(suffix.lower() in {".dll", ".exe", ".pdb", ".so", ".a", ".o", ".dylib", ".pyc", ".nupkg", ".zip"}
+                    for suffix in path.suffixes), f"Binary/cache artifact: {path}")
+'''
+    require(source.count(old) == 1, 'Reconcile the pinned classification site')
+    scope = dict(__file__=str(original), __name__='core_record_algorithm')
+    exec(compile(source.replace(old, ''), str(original) + '[Core-content-kinds]', 'exec'), scope)
+    scope.update(HERE=HERE, ROOT=ROOT, PACKET=RUN, PREFIX=RUN.relative_to(ROOT).as_posix() + '/')
+    original_record = scope['record']
+
+    def record(path):
+        require(not path.is_symlink() and path.resolve().is_relative_to(RUN), f'Escaping/symlinked record: {path}')
+        raw = path.read_bytes()
+        kind = classify(path.relative_to(RUN).as_posix(), raw)
+        result = original_record(path)
+        from foundation import sha
+        require(result['raw_sha256'] == sha(raw), 'Record changed between classification and capture')
+        return dict(result, kind=kind)
+
+    scope['record'] = record
+    return scope
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=('snapshot', 'check', 'staged'))
+    parser.add_argument('--manifest', type=Path, required=True, help='Fresh manifest directly under validation/')
+    args = parser.parse_args()
+    load()['execute'](args.mode, args.manifest)

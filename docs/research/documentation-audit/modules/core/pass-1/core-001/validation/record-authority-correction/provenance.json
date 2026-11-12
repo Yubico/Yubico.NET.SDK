@@ -1,0 +1,42 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_checker_sha256": "e115552ca79243091ad160bddb0667e4bb1dc9d2d1cd86800b4152ac8ab2f552",
+  "adaptation": "Only original module.primary_sources is rebound to the explicit author normalization/validation function before calling its unchanged load(). Original classify/source_kind/record/execute/Git-clean/index algorithms remain unchanged.",
+  "known_schema_paths": {
+    "B4": "investigation/B4/sources/captures.json",
+    "B6": "investigation/B6/sources/final-manifest.json"
+  },
+  "fixed_source_authority_inputs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/manifest.json",
+      "bytes": 6049,
+      "sha256": "c4b16c0fbe850d6d2d36f3a3d70138b0388cd854f3324d077929124a17580fdb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/captures.json",
+      "bytes": 20378,
+      "sha256": "fa23a0ea656bed9bf1a56cea3e1cc3ae1a7e1efafe288bfe9c33e63629c31b6b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-manifest.json",
+      "bytes": 15881,
+      "sha256": "45e64aebedf728bb3f91553e301a7eb75a736876470fbbb3bd0ee1cfd8bbe16c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/ber-source-attempts.json",
+      "bytes": 830,
+      "sha256": "3e726b442d4aba64e44bef953b514edb215a873ec91c22c6260e947048834ade"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/completion-fetch-manifest.json",
+      "bytes": 2610,
+      "sha256": "d58a3128174a768c1541cb316dc696fe1fc9ac38785bfeae3c8b2494b90131e1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sources/primary-binaries.json",
+      "bytes": 4052,
+      "sha256": "a98fae4d5a5f5acc55cdc5b590eb613fcdf561ae0eb5a2149b5bb609f23f629f"
+    }
+  ],
+  "limits": "Record-only additive checker; no changes to pilot or qualified logger/checker/binder participants. No final freeze or staged verification."
+}

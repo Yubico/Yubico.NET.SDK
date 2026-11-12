@@ -1,0 +1,50 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/R2-comments.diff",
+    "sha256": "23c1bca2c42545dc62437a0badfdff64801b510907103e7c830b61841be96674"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/R2-path-decisions.json",
+    "sha256": "cdcb6861c6e8f9707827c630351d7a8d8716d65d92196d86478944cf7aba60a5"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/candidate-decisions.md",
+    "sha256": "0b113f0936093ec4d91843c27b94bc926043eb7d3c735d341e2542952fcbb2e2"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/citations.md",
+    "sha256": "8f44384882efc4c8ae0b2ec6c0caea677226b0ae438f327b709113080d93987e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/example-preservation.json",
+    "sha256": "4903082e9c8fe29eb8143bd6203721180b42d60a464a4778fd2c13521df1083a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/history-preservation.json",
+    "sha256": "05b5406296788d0bfbf984643d080b987617cc4449550a97162bb5165f7a2a25"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/path-decisions.json",
+    "sha256": "2414b45a57381ee489ffde0843ee9a8e4ec1d040d1c13b8ed26c4ddccb58b067"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/product.diff",
+    "sha256": "e15e4afcc7c2ae932858408db0f50793f5174d415b84ea10fe22dfc3fe438df8"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/record-revision.py",
+    "sha256": "cb122c5dc7362d4afa8ae2789867dbda541b407b0c850c0006e7af5953d00b68"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/report.md",
+    "sha256": "20087af3257b10c1b87c9fdff59ef8c7dc27c74872da961d660cdaf94b0ae4b1"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/source-anchors.json",
+    "sha256": "613929963b2e058742892629d84c2ac2bcd6f229036d0bb1d1d9666eb27bf80e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/static-checks.json",
+    "sha256": "3ffb8c32d9caf89b26836baf4114e844669ec55d972f7d6103199ea12176c7a2"
+  }
+]

@@ -1,0 +1,3751 @@
+{
+  "copy_count": 208,
+  "total_bytes": 19352598,
+  "files": [
+    {
+      "context": "consumer",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.deps.json",
+        "bytes": 13964,
+        "sha256": "9604db23baa7c5ff71b26049e7b022818ea8a2255851723b8d7d08ae0845f864"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0000-Yubico.YubiKit.Audit20261111.DocExamples.Full.deps.json",
+        "bytes": 13964,
+        "sha256": "9604db23baa7c5ff71b26049e7b022818ea8a2255851723b8d7d08ae0845f864"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0001-Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0002-Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0003-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.AssemblyInfo.cs",
+        "bytes": 1692,
+        "sha256": "07e9fe5ab5123372e33f0aae07d6a6485c6ec64d72a732ac268510fe75825f09"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0004-Yubico.YubiKit.Audit20261111.DocExamples.Full.AssemblyInfo.cs",
+        "bytes": 1692,
+        "sha256": "07e9fe5ab5123372e33f0aae07d6a6485c6ec64d72a732ac268510fe75825f09"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 801,
+        "sha256": "a4ccff2c9ec1d045f49cbcaeb5471f12b4f10af0df11e856908ccf84dfae6083"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0005-Yubico.YubiKit.Audit20261111.DocExamples.Full.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 801,
+        "sha256": "a4ccff2c9ec1d045f49cbcaeb5471f12b4f10af0df11e856908ccf84dfae6083"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0006-Yubico.YubiKit.Audit20261111.DocExamples.Full.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0007-Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0008-Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0009-Yubico.YubiKit.Audit20261111.DocExamples.Full.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/refint/Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 83968,
+        "sha256": "3102d815af56eb4694ac85e4ea84f12bc254485034bfef1849b8b98ec7a4272e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0010-Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 83968,
+        "sha256": "3102d815af56eb4694ac85e4ea84f12bc254485034bfef1849b8b98ec7a4272e"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/project.assets.json",
+        "bytes": 123987,
+        "sha256": "b85d625bda317b01ff6377c422e5708d6586d5c1ffb01aef86bfee415001c11c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0011-project.assets.json",
+        "bytes": 123987,
+        "sha256": "b85d625bda317b01ff6377c422e5708d6586d5c1ffb01aef86bfee415001c11c"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Commands.dll",
+        "bytes": 74240,
+        "sha256": "3ffc45835cce4f898d0f899b21d5f7c429ad750a0129cdeac95861510b9e6023"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0012-Yubico.YubiKit.Cli.Commands.dll",
+        "bytes": 74240,
+        "sha256": "3ffc45835cce4f898d0f899b21d5f7c429ad750a0129cdeac95861510b9e6023"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll",
+        "bytes": 20480,
+        "sha256": "4f17a86ff096446344249eeca5d81caed9f88957632e1f8a50c3771f9d5f92a1"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0013-Yubico.YubiKit.Cli.Shared.dll",
+        "bytes": 20480,
+        "sha256": "4f17a86ff096446344249eeca5d81caed9f88957632e1f8a50c3771f9d5f92a1"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0014-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0015-Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/examples/ManagementTool/obj/Release/net10.0/ref/ManagementTool.dll",
+        "bytes": 19968,
+        "sha256": "ab7539778759d56f0a508cc12fbc1d8b6baf4cbacdf0c202aeb25326b6e2fd17"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0016-ManagementTool.dll",
+        "bytes": 19968,
+        "sha256": "ab7539778759d56f0a508cc12fbc1d8b6baf4cbacdf0c202aeb25326b6e2fd17"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0017-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 18,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0018-Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 19,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll",
+        "bytes": 49664,
+        "sha256": "401ed5a14e54b35d5818af87e2d60a954d5f8f950cc5413eab58f6a163cb7bbc"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0019-Yubico.YubiKit.OpenPgp.dll",
+        "bytes": 49664,
+        "sha256": "401ed5a14e54b35d5818af87e2d60a954d5f8f950cc5413eab58f6a163cb7bbc"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 20,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/ref/PivTool.dll",
+        "bytes": 51200,
+        "sha256": "73a76d365d11547769b56850bbab1f0e5fbbbd3815bec50649721d04f5a3f709"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0020-PivTool.dll",
+        "bytes": 51200,
+        "sha256": "73a76d365d11547769b56850bbab1f0e5fbbbd3815bec50649721d04f5a3f709"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 21,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0021-Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 22,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/obj/Release/net10.0/ref/Yubico.YubiKit.SecurityDomain.dll",
+        "bytes": 22016,
+        "sha256": "71892b04fab30cd467245a5ee15db3d0829aca351aec1a64e617c8afe4a6b6a4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0022-Yubico.YubiKit.SecurityDomain.dll",
+        "bytes": 22016,
+        "sha256": "71892b04fab30cd467245a5ee15db3d0829aca351aec1a64e617c8afe4a6b6a4"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 23,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll",
+        "bytes": 65536,
+        "sha256": "7462615bbd034ce974686139a584237699fdb8084451a1feefebf4b42f1fc0e5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0023-Yubico.YubiKit.WebAuthn.dll",
+        "bytes": 65536,
+        "sha256": "7462615bbd034ce974686139a584237699fdb8084451a1feefebf4b42f1fc0e5"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 24,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll",
+        "bytes": 23552,
+        "sha256": "0fa064cffa70b9ffc04a1f86f646b3bd77024a0442d52c77ec8fe61c1d41c6c9"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0024-Yubico.YubiKit.YubiHsm.dll",
+        "bytes": 23552,
+        "sha256": "0fa064cffa70b9ffc04a1f86f646b3bd77024a0442d52c77ec8fe61c1d41c6c9"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "consumer",
+      "index": 25,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiOtp.dll",
+        "bytes": 24064,
+        "sha256": "e445ed8be0c9d81abf72d950ea3b703e5c4b2e9b00b0cecdc0ba5266ed152866"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0025-Yubico.YubiKit.YubiOtp.dll",
+        "bytes": 24064,
+        "sha256": "e445ed8be0c9d81abf72d950ea3b703e5c4b2e9b00b0cecdc0ba5266ed152866"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0001-Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.deps.json",
+        "bytes": 29803,
+        "sha256": "11870d4f2c75df17100e5b99880bc66c6fe8fdfe3bb6683784cee815f4876e1b"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0002-Yubico.YubiKit.Ctap2.UnitTests.deps.json",
+        "bytes": 29803,
+        "sha256": "11870d4f2c75df17100e5b99880bc66c6fe8fdfe3bb6683784cee815f4876e1b"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.dll",
+        "bytes": 412672,
+        "sha256": "08097083d3e6c415cbd4118624b45b4d66dbc888a217b60f42ff540b3fd2ad70"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0003-Yubico.YubiKit.Ctap2.UnitTests.dll",
+        "bytes": 412672,
+        "sha256": "08097083d3e6c415cbd4118624b45b4d66dbc888a217b60f42ff540b3fd2ad70"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.pdb",
+        "bytes": 95052,
+        "sha256": "b19397dc50906c59b50d192bf44916227695ff9effaefd7dfcd2461b8ab6acaa"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0004-Yubico.YubiKit.Ctap2.UnitTests.pdb",
+        "bytes": 95052,
+        "sha256": "b19397dc50906c59b50d192bf44916227695ff9effaefd7dfcd2461b8ab6acaa"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0005-Yubico.YubiKit.Ctap2.UnitTests.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0006-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+        "bytes": 749,
+        "sha256": "78191c561505256c094b3eb3f3e35d52348ffa26ccf23435be0f5204728ee12c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0007-SelfRegisteredExtensions.cs",
+        "bytes": 749,
+        "sha256": "78191c561505256c094b3eb3f3e35d52348ffa26ccf23435be0f5204728ee12c"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+        "bytes": 716,
+        "sha256": "c5ce568ed16c62bf3e274344514445f68950915b511c30dae7f59009fdf77437"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0008-XunitAutoGeneratedEntryPoint.cs",
+        "bytes": 716,
+        "sha256": "c5ce568ed16c62bf3e274344514445f68950915b511c30dae7f59009fdf77437"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.AssemblyInfo.cs",
+        "bytes": 1319,
+        "sha256": "2f56852109d4f10605792e454d2fa175fc20f931eb15b9f8c84f4193babb545c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0009-Yubico.YubiKit.Ctap2.UnitTests.AssemblyInfo.cs",
+        "bytes": 1319,
+        "sha256": "2f56852109d4f10605792e454d2fa175fc20f931eb15b9f8c84f4193babb545c"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 736,
+        "sha256": "4c05a516f3c0b9a0dce653ea06d98087342081ebef103e45bea463363220deb3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0010-Yubico.YubiKit.Ctap2.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 736,
+        "sha256": "4c05a516f3c0b9a0dce653ea06d98087342081ebef103e45bea463363220deb3"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0011-Yubico.YubiKit.Ctap2.UnitTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.dll",
+        "bytes": 412672,
+        "sha256": "08097083d3e6c415cbd4118624b45b4d66dbc888a217b60f42ff540b3fd2ad70"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0012-Yubico.YubiKit.Ctap2.UnitTests.dll",
+        "bytes": 412672,
+        "sha256": "08097083d3e6c415cbd4118624b45b4d66dbc888a217b60f42ff540b3fd2ad70"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.pdb",
+        "bytes": 95052,
+        "sha256": "b19397dc50906c59b50d192bf44916227695ff9effaefd7dfcd2461b8ab6acaa"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0013-Yubico.YubiKit.Ctap2.UnitTests.pdb",
+        "bytes": 95052,
+        "sha256": "b19397dc50906c59b50d192bf44916227695ff9effaefd7dfcd2461b8ab6acaa"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0014-Yubico.YubiKit.Ctap2.UnitTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Release/net10.0/refint/Yubico.YubiKit.Ctap2.UnitTests.dll",
+        "bytes": 196608,
+        "sha256": "ff051c5ce7b4f805201b9eb49e78a7c28a5e20f3df6b6035353dd419a883a91d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0015-Yubico.YubiKit.Ctap2.UnitTests.dll",
+        "bytes": 196608,
+        "sha256": "ff051c5ce7b4f805201b9eb49e78a7c28a5e20f3df6b6035353dd419a883a91d"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/project.assets.json",
+        "bytes": 172915,
+        "sha256": "e26664215f376a89ca44b72fc651feaab5de89919b998b0be2b32354a006456d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-unit-first/0016-project.assets.json",
+        "bytes": 172915,
+        "sha256": "e26664215f376a89ca44b72fc651feaab5de89919b998b0be2b32354a006456d"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0001-Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.deps.json",
+        "bytes": 38182,
+        "sha256": "bbb991f8ae654ac7ff40004654b5371020bb9deba485efc130070a4da3947f43"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0002-Yubico.YubiKit.Ctap2.IntegrationTests.deps.json",
+        "bytes": 38182,
+        "sha256": "bbb991f8ae654ac7ff40004654b5371020bb9deba485efc130070a4da3947f43"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0003-Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0004-Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0005-Yubico.YubiKit.Ctap2.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0006-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1236,
+        "sha256": "4441e06f3b23b3b811306a460f37589e979be552764f693a538ef5270177b7f0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0007-Yubico.YubiKit.Ctap2.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1236,
+        "sha256": "4441e06f3b23b3b811306a460f37589e979be552764f693a538ef5270177b7f0"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 750,
+        "sha256": "2508460d4e31d125362af9ae8eb51f18f890b4c80e4b5d63a4d6f50571995625"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0008-Yubico.YubiKit.Ctap2.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 750,
+        "sha256": "2508460d4e31d125362af9ae8eb51f18f890b4c80e4b5d63a4d6f50571995625"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0009-Yubico.YubiKit.Ctap2.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0010-Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 286208,
+        "sha256": "1cec4c576346e69e610a512ebe7cdf64c7f5aaecf7e95ee0f4c295e003d258e0"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0011-Yubico.YubiKit.Ctap2.IntegrationTests.pdb",
+        "bytes": 66064,
+        "sha256": "ebf39aa1993e44b44cd19e4d60c87e5e6e271b049709559190fb3faae0cc5214"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0012-Yubico.YubiKit.Ctap2.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 83968,
+        "sha256": "4ca0cd2b9608f177d73123b5d5f6fa860788438ce04b7aa82f16f336d6b8fd44"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0013-Yubico.YubiKit.Ctap2.IntegrationTests.dll",
+        "bytes": 83968,
+        "sha256": "4ca0cd2b9608f177d73123b5d5f6fa860788438ce04b7aa82f16f336d6b8fd44"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0014-Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0015-Yubico.YubiKit.Ctap2.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/project.assets.json",
+        "bytes": 193712,
+        "sha256": "db75140c40e1c06484d26c4a23db32db91903417b82b9e79d6b8e5127ce02208"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0016-project.assets.json",
+        "bytes": 193712,
+        "sha256": "db75140c40e1c06484d26c4a23db32db91903417b82b9e79d6b8e5127ce02208"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0017-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "index": 18,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-ctap-integration-second/0018-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0001-Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0002-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0003-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll",
+        "bytes": 65536,
+        "sha256": "7462615bbd034ce974686139a584237699fdb8084451a1feefebf4b42f1fc0e5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0004-Yubico.YubiKit.WebAuthn.dll",
+        "bytes": 65536,
+        "sha256": "7462615bbd034ce974686139a584237699fdb8084451a1feefebf4b42f1fc0e5"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.deps.json",
+        "bytes": 38525,
+        "sha256": "146f6b5fd419098cc147a6e750dc03778ff9793d8c98adff9d3c2e3a974f5566"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0005-Yubico.YubiKit.WebAuthn.IntegrationTests.deps.json",
+        "bytes": 38525,
+        "sha256": "146f6b5fd419098cc147a6e750dc03778ff9793d8c98adff9d3c2e3a974f5566"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.dll",
+        "bytes": 98304,
+        "sha256": "34d8c0ced1625b77e3bfcd5f526ed7e22909bedf3df2af4ac3a1fab7b241527c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0006-Yubico.YubiKit.WebAuthn.IntegrationTests.dll",
+        "bytes": 98304,
+        "sha256": "34d8c0ced1625b77e3bfcd5f526ed7e22909bedf3df2af4ac3a1fab7b241527c"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.pdb",
+        "bytes": 29292,
+        "sha256": "53236cc669f8cb99c4e0137707e5202fdb75ee11dd8dc7065be0427cace396cc"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0007-Yubico.YubiKit.WebAuthn.IntegrationTests.pdb",
+        "bytes": 29292,
+        "sha256": "53236cc669f8cb99c4e0137707e5202fdb75ee11dd8dc7065be0427cace396cc"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0008-Yubico.YubiKit.WebAuthn.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0009-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1242,
+        "sha256": "80e1b8fdeb2203e5c85711d9c939e98a95feba8b624e2d5619bd340ef0731095"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0010-Yubico.YubiKit.WebAuthn.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1242,
+        "sha256": "80e1b8fdeb2203e5c85711d9c939e98a95feba8b624e2d5619bd340ef0731095"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 759,
+        "sha256": "011a806b95fd180226f8d4828b6cfd79a3ff955cb52a84c8c854640e2baf0972"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0011-Yubico.YubiKit.WebAuthn.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 759,
+        "sha256": "011a806b95fd180226f8d4828b6cfd79a3ff955cb52a84c8c854640e2baf0972"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0012-Yubico.YubiKit.WebAuthn.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.dll",
+        "bytes": 98304,
+        "sha256": "34d8c0ced1625b77e3bfcd5f526ed7e22909bedf3df2af4ac3a1fab7b241527c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0013-Yubico.YubiKit.WebAuthn.IntegrationTests.dll",
+        "bytes": 98304,
+        "sha256": "34d8c0ced1625b77e3bfcd5f526ed7e22909bedf3df2af4ac3a1fab7b241527c"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.pdb",
+        "bytes": 29292,
+        "sha256": "53236cc669f8cb99c4e0137707e5202fdb75ee11dd8dc7065be0427cace396cc"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0014-Yubico.YubiKit.WebAuthn.IntegrationTests.pdb",
+        "bytes": 29292,
+        "sha256": "53236cc669f8cb99c4e0137707e5202fdb75ee11dd8dc7065be0427cace396cc"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0015-Yubico.YubiKit.WebAuthn.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.WebAuthn.IntegrationTests.dll",
+        "bytes": 31232,
+        "sha256": "35add0276a46ece25a1786857d3f2b11a5f3bebaa053110530790a816fe10f34"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0016-Yubico.YubiKit.WebAuthn.IntegrationTests.dll",
+        "bytes": 31232,
+        "sha256": "35add0276a46ece25a1786857d3f2b11a5f3bebaa053110530790a816fe10f34"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0017-Yubico.YubiKit.WebAuthn.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 18,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0018-Yubico.YubiKit.WebAuthn.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "index": 19,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/project.assets.json",
+        "bytes": 194147,
+        "sha256": "0befaa42fc96eb7f48434c49297d6bf288d71fe0c2516aaa65f23aede045bee8"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-webauthn-second/0019-project.assets.json",
+        "bytes": 194147,
+        "sha256": "0befaa42fc96eb7f48434c49297d6bf288d71fe0c2516aaa65f23aede045bee8"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.deps.json",
+        "bytes": 25505,
+        "sha256": "f4519830bbcf931608024f5c76f92f1a5882d51ac67e6a4b86bcef82a6530df0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0001-Yubico.YubiKit.Core.UnitTests.deps.json",
+        "bytes": 25505,
+        "sha256": "f4519830bbcf931608024f5c76f92f1a5882d51ac67e6a4b86bcef82a6530df0"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll",
+        "bytes": 2439168,
+        "sha256": "315424419d451bc10536e69837cdf511e081471729e180cf0e4f3ed3333ddd54"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0002-Yubico.YubiKit.Core.UnitTests.dll",
+        "bytes": 2439168,
+        "sha256": "315424419d451bc10536e69837cdf511e081471729e180cf0e4f3ed3333ddd54"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.pdb",
+        "bytes": 458764,
+        "sha256": "6a63048c387856abbcf9758e25289b16705c060d90467561c76c5436d9607529"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0003-Yubico.YubiKit.Core.UnitTests.pdb",
+        "bytes": 458764,
+        "sha256": "6a63048c387856abbcf9758e25289b16705c060d90467561c76c5436d9607529"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0004-Yubico.YubiKit.Core.UnitTests.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0005-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+        "bytes": 748,
+        "sha256": "e22e32a7b820d10c3bec48e7df308bb2c9b17d690b8c9ba380d89084fd1cc8c0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0006-SelfRegisteredExtensions.cs",
+        "bytes": 748,
+        "sha256": "e22e32a7b820d10c3bec48e7df308bb2c9b17d690b8c9ba380d89084fd1cc8c0"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+        "bytes": 715,
+        "sha256": "59fcdac5b9b1c717daf8ad9ef76a81455b8d5a00b8f27ea227fd5a0cca3b195c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0007-XunitAutoGeneratedEntryPoint.cs",
+        "bytes": 715,
+        "sha256": "59fcdac5b9b1c717daf8ad9ef76a81455b8d5a00b8f27ea227fd5a0cca3b195c"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.AssemblyInfo.cs",
+        "bytes": 1317,
+        "sha256": "a191024ed986ab5def26e70b7eaea8e2d700fcc9b70405f400e6d0baaf2fae42"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0008-Yubico.YubiKit.Core.UnitTests.AssemblyInfo.cs",
+        "bytes": 1317,
+        "sha256": "a191024ed986ab5def26e70b7eaea8e2d700fcc9b70405f400e6d0baaf2fae42"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 1185,
+        "sha256": "179e3fb42a45e2c0cf644bd674e99b63e4cc04d9fb8950128c11805f6931517c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0009-Yubico.YubiKit.Core.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 1185,
+        "sha256": "179e3fb42a45e2c0cf644bd674e99b63e4cc04d9fb8950128c11805f6931517c"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0010-Yubico.YubiKit.Core.UnitTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll",
+        "bytes": 2439168,
+        "sha256": "315424419d451bc10536e69837cdf511e081471729e180cf0e4f3ed3333ddd54"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0011-Yubico.YubiKit.Core.UnitTests.dll",
+        "bytes": 2439168,
+        "sha256": "315424419d451bc10536e69837cdf511e081471729e180cf0e4f3ed3333ddd54"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.pdb",
+        "bytes": 458764,
+        "sha256": "6a63048c387856abbcf9758e25289b16705c060d90467561c76c5436d9607529"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0012-Yubico.YubiKit.Core.UnitTests.pdb",
+        "bytes": 458764,
+        "sha256": "6a63048c387856abbcf9758e25289b16705c060d90467561c76c5436d9607529"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0013-Yubico.YubiKit.Core.UnitTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/refint/Yubico.YubiKit.Core.UnitTests.dll",
+        "bytes": 992768,
+        "sha256": "01a71652b60860be684ae39840f81eb1a59ac29f5f3f40d3450b2b41ddc200a5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0014-Yubico.YubiKit.Core.UnitTests.dll",
+        "bytes": 992768,
+        "sha256": "01a71652b60860be684ae39840f81eb1a59ac29f5f3f40d3450b2b41ddc200a5"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.UnitTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/project.assets.json",
+        "bytes": 173076,
+        "sha256": "7537e7c68390bd66c2903d7545c8bfd0b7580d301a6c5fed94ec62304d998b95"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-unit-first/0015-project.assets.json",
+        "bytes": 173076,
+        "sha256": "7537e7c68390bd66c2903d7545c8bfd0b7580d301a6c5fed94ec62304d998b95"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.deps.json",
+        "bytes": 37144,
+        "sha256": "da26ca47e1b26138a83b8c07d4f4b2fa3f4259f9bdfa3b0f20f7af8f2c313c6a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0002-Yubico.YubiKit.Management.IntegrationTests.deps.json",
+        "bytes": 37144,
+        "sha256": "da26ca47e1b26138a83b8c07d4f4b2fa3f4259f9bdfa3b0f20f7af8f2c313c6a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.dll",
+        "bytes": 206848,
+        "sha256": "a83cb4709176b60bddc85270756ed4cd909783759ae17df3f8d593077746446b"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0003-Yubico.YubiKit.Management.IntegrationTests.dll",
+        "bytes": 206848,
+        "sha256": "a83cb4709176b60bddc85270756ed4cd909783759ae17df3f8d593077746446b"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.pdb",
+        "bytes": 50488,
+        "sha256": "85493b32fd2054f3178d3ebb7a5f80cb94ae1da1f7ff1cce1dbe14f77d37590d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0004-Yubico.YubiKit.Management.IntegrationTests.pdb",
+        "bytes": 50488,
+        "sha256": "85493b32fd2054f3178d3ebb7a5f80cb94ae1da1f7ff1cce1dbe14f77d37590d"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0005-Yubico.YubiKit.Management.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0006-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1246,
+        "sha256": "e8bc363453ad22381922f3fc4128943d09d14ff74a00866a3779385e8ede7db6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0007-Yubico.YubiKit.Management.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1246,
+        "sha256": "e8bc363453ad22381922f3fc4128943d09d14ff74a00866a3779385e8ede7db6"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 765,
+        "sha256": "4ba3100f312c1fe9cd4222f882054f9744b0759568ff135f69a6f15cd8ef398d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0008-Yubico.YubiKit.Management.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 765,
+        "sha256": "4ba3100f312c1fe9cd4222f882054f9744b0759568ff135f69a6f15cd8ef398d"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0009-Yubico.YubiKit.Management.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.dll",
+        "bytes": 206848,
+        "sha256": "a83cb4709176b60bddc85270756ed4cd909783759ae17df3f8d593077746446b"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0010-Yubico.YubiKit.Management.IntegrationTests.dll",
+        "bytes": 206848,
+        "sha256": "a83cb4709176b60bddc85270756ed4cd909783759ae17df3f8d593077746446b"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.pdb",
+        "bytes": 50488,
+        "sha256": "85493b32fd2054f3178d3ebb7a5f80cb94ae1da1f7ff1cce1dbe14f77d37590d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0011-Yubico.YubiKit.Management.IntegrationTests.pdb",
+        "bytes": 50488,
+        "sha256": "85493b32fd2054f3178d3ebb7a5f80cb94ae1da1f7ff1cce1dbe14f77d37590d"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0012-Yubico.YubiKit.Management.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Management.IntegrationTests.dll",
+        "bytes": 78336,
+        "sha256": "a5b8ae0d720889e3f6129949941808629f6074fbe0a0bf9b8536b9951ac9a217"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0013-Yubico.YubiKit.Management.IntegrationTests.dll",
+        "bytes": 78336,
+        "sha256": "a5b8ae0d720889e3f6129949941808629f6074fbe0a0bf9b8536b9951ac9a217"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0014-Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0015-Yubico.YubiKit.Management.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/project.assets.json",
+        "bytes": 191491,
+        "sha256": "50bd8134c4786add3b08e90e458696fe72d16cd9169cfda475520652d8bc2d1d"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0016-project.assets.json",
+        "bytes": 191491,
+        "sha256": "50bd8134c4786add3b08e90e458696fe72d16cd9169cfda475520652d8bc2d1d"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-second/0017-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.deps.json",
+        "bytes": 46754,
+        "sha256": "c220deadd12045f14216ab421a0aa4b92e6533335de23b837fcc77b860ba6f91"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0001-Yubico.YubiKit.Core.IntegrationTests.deps.json",
+        "bytes": 46754,
+        "sha256": "c220deadd12045f14216ab421a0aa4b92e6533335de23b837fcc77b860ba6f91"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.dll",
+        "bytes": 129536,
+        "sha256": "5a14927f7dda6356b100d077d481dc42ae148fd6d2aa4cef5272bc630fdfd030"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0002-Yubico.YubiKit.Core.IntegrationTests.dll",
+        "bytes": 129536,
+        "sha256": "5a14927f7dda6356b100d077d481dc42ae148fd6d2aa4cef5272bc630fdfd030"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.pdb",
+        "bytes": 37124,
+        "sha256": "9854c569ad522560d0ef8aa89fdd37191dda62287ed5e421ef1045a8753d6f27"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0003-Yubico.YubiKit.Core.IntegrationTests.pdb",
+        "bytes": 37124,
+        "sha256": "9854c569ad522560d0ef8aa89fdd37191dda62287ed5e421ef1045a8753d6f27"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0004-Yubico.YubiKit.Core.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0005-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1234,
+        "sha256": "3d53a16345bf35a6ddbc84d90564d9ddbb4d6b089d33e60c48888cc21bb9523e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0006-Yubico.YubiKit.Core.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1234,
+        "sha256": "3d53a16345bf35a6ddbc84d90564d9ddbb4d6b089d33e60c48888cc21bb9523e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 747,
+        "sha256": "50b30d92f0fa2ff77da896e2f1929c4f3e067aa3d28bc4e55d7c87c57a8f11d5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0007-Yubico.YubiKit.Core.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 747,
+        "sha256": "50b30d92f0fa2ff77da896e2f1929c4f3e067aa3d28bc4e55d7c87c57a8f11d5"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 308,
+        "sha256": "6edb655138d05750d0277e58a764d5b01553d8c1b4a86a7140db030ffb726d42"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0008-Yubico.YubiKit.Core.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 308,
+        "sha256": "6edb655138d05750d0277e58a764d5b01553d8c1b4a86a7140db030ffb726d42"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.dll",
+        "bytes": 129536,
+        "sha256": "5a14927f7dda6356b100d077d481dc42ae148fd6d2aa4cef5272bc630fdfd030"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0009-Yubico.YubiKit.Core.IntegrationTests.dll",
+        "bytes": 129536,
+        "sha256": "5a14927f7dda6356b100d077d481dc42ae148fd6d2aa4cef5272bc630fdfd030"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.pdb",
+        "bytes": 37124,
+        "sha256": "9854c569ad522560d0ef8aa89fdd37191dda62287ed5e421ef1045a8753d6f27"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0010-Yubico.YubiKit.Core.IntegrationTests.pdb",
+        "bytes": 37124,
+        "sha256": "9854c569ad522560d0ef8aa89fdd37191dda62287ed5e421ef1045a8753d6f27"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0011-Yubico.YubiKit.Core.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Core.IntegrationTests.dll",
+        "bytes": 42496,
+        "sha256": "f06fd3756455fcd2b14c5bb97871054876365fa0dc827839e5504eaac8aa4b16"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0012-Yubico.YubiKit.Core.IntegrationTests.dll",
+        "bytes": 42496,
+        "sha256": "f06fd3756455fcd2b14c5bb97871054876365fa0dc827839e5504eaac8aa4b16"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Yubico.YubiKit.Core.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3445,
+        "sha256": "ad281fcbaa3c785a31d1bc1c100d399aae8f05f2258bf28e3eac66db633ada78"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0013-Yubico.YubiKit.Core.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3445,
+        "sha256": "ad281fcbaa3c785a31d1bc1c100d399aae8f05f2258bf28e3eac66db633ada78"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Yubico.YubiKit.Core.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 3212,
+        "sha256": "5ca4867bcaac9a1e333c26b5ea9101861397ee25522059ad9e865dda529ca6a6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0014-Yubico.YubiKit.Core.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 3212,
+        "sha256": "5ca4867bcaac9a1e333c26b5ea9101861397ee25522059ad9e865dda529ca6a6"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/project.assets.json",
+        "bytes": 214293,
+        "sha256": "9d4b0874db15975cde5467c306b335ba7787d3f34fbd03353caa3ee19bb278a9"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0015-project.assets.json",
+        "bytes": 214293,
+        "sha256": "9d4b0874db15975cde5467c306b335ba7787d3f34fbd03353caa3ee19bb278a9"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0016-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-core-integration-first/0017-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/obj/Release/net10.0/ref/Yubico.YubiKit.SecurityDomain.dll",
+        "bytes": 22016,
+        "sha256": "71892b04fab30cd467245a5ee15db3d0829aca351aec1a64e617c8afe4a6b6a4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0002-Yubico.YubiKit.SecurityDomain.dll",
+        "bytes": 22016,
+        "sha256": "71892b04fab30cd467245a5ee15db3d0829aca351aec1a64e617c8afe4a6b6a4"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.deps.json",
+        "bytes": 37589,
+        "sha256": "e680f21e3233faad277a8fdb0202cb303329739fd8ffddc0b5fee154668f3015"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0003-Yubico.YubiKit.SecurityDomain.IntegrationTests.deps.json",
+        "bytes": 37589,
+        "sha256": "e680f21e3233faad277a8fdb0202cb303329739fd8ffddc0b5fee154668f3015"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.dll",
+        "bytes": 100352,
+        "sha256": "13b9c9a86282294cfdc628841af8f29debd839891db3dcd19731c3ff63c6e057"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0004-Yubico.YubiKit.SecurityDomain.IntegrationTests.dll",
+        "bytes": 100352,
+        "sha256": "13b9c9a86282294cfdc628841af8f29debd839891db3dcd19731c3ff63c6e057"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.pdb",
+        "bytes": 30712,
+        "sha256": "9e90c8304def9ba45acfe1859bbfde4d6908433d5213aa0f332ac87b9727ca07"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0005-Yubico.YubiKit.SecurityDomain.IntegrationTests.pdb",
+        "bytes": 30712,
+        "sha256": "9e90c8304def9ba45acfe1859bbfde4d6908433d5213aa0f332ac87b9727ca07"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0006-Yubico.YubiKit.SecurityDomain.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0007-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1254,
+        "sha256": "dcd08ec56b18bce532920a52409ab09728fafeb413c163c023a9bd17c79b6e54"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0008-Yubico.YubiKit.SecurityDomain.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1254,
+        "sha256": "dcd08ec56b18bce532920a52409ab09728fafeb413c163c023a9bd17c79b6e54"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 777,
+        "sha256": "391543bdeb219c16b549f627b9b8366de6b61d83c9fbe5cc8099b48a11c96e42"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0009-Yubico.YubiKit.SecurityDomain.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 777,
+        "sha256": "391543bdeb219c16b549f627b9b8366de6b61d83c9fbe5cc8099b48a11c96e42"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0010-Yubico.YubiKit.SecurityDomain.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.dll",
+        "bytes": 100352,
+        "sha256": "13b9c9a86282294cfdc628841af8f29debd839891db3dcd19731c3ff63c6e057"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0011-Yubico.YubiKit.SecurityDomain.IntegrationTests.dll",
+        "bytes": 100352,
+        "sha256": "13b9c9a86282294cfdc628841af8f29debd839891db3dcd19731c3ff63c6e057"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.pdb",
+        "bytes": 30712,
+        "sha256": "9e90c8304def9ba45acfe1859bbfde4d6908433d5213aa0f332ac87b9727ca07"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0012-Yubico.YubiKit.SecurityDomain.IntegrationTests.pdb",
+        "bytes": 30712,
+        "sha256": "9e90c8304def9ba45acfe1859bbfde4d6908433d5213aa0f332ac87b9727ca07"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0013-Yubico.YubiKit.SecurityDomain.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.SecurityDomain.IntegrationTests.dll",
+        "bytes": 34304,
+        "sha256": "b54153b05fc950ee104b065d17e6906bebcfb452402f3555d600370a5a3cde27"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0014-Yubico.YubiKit.SecurityDomain.IntegrationTests.dll",
+        "bytes": 34304,
+        "sha256": "b54153b05fc950ee104b065d17e6906bebcfb452402f3555d600370a5a3cde27"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0015-Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0016-Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/project.assets.json",
+        "bytes": 192195,
+        "sha256": "e523866ca76c7753b232542bb630d1d5cf61d652ab3b1dd06351ecd556a98f95"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0017-project.assets.json",
+        "bytes": 192195,
+        "sha256": "e523866ca76c7753b232542bb630d1d5cf61d652ab3b1dd06351ecd556a98f95"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "index": 18,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-security-domain-second/0018-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0002-Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.deps.json",
+        "bytes": 37512,
+        "sha256": "d0faf1aa367830a130569ce103a1f31ae6c6288947609e099f024f91eb059686"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0003-Yubico.YubiKit.Piv.IntegrationTests.deps.json",
+        "bytes": 37512,
+        "sha256": "d0faf1aa367830a130569ce103a1f31ae6c6288947609e099f024f91eb059686"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0004-Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0005-Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0006-Yubico.YubiKit.Piv.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0007-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1232,
+        "sha256": "10f7162b8f2f8b9394277414c2f6528cf09cd9c032f5c4e9953e2fbe8c5c0a9a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0008-Yubico.YubiKit.Piv.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1232,
+        "sha256": "10f7162b8f2f8b9394277414c2f6528cf09cd9c032f5c4e9953e2fbe8c5c0a9a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 744,
+        "sha256": "abfa3351e07b935b74c77af7596317004d5d4e2210023a91b8d5f1bac6dc7459"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0009-Yubico.YubiKit.Piv.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 744,
+        "sha256": "abfa3351e07b935b74c77af7596317004d5d4e2210023a91b8d5f1bac6dc7459"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0010-Yubico.YubiKit.Piv.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0011-Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 251904,
+        "sha256": "6341e38d6110ee28f4363257a3568007643af00ec8aef4981d74427b73f0dbd5"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0012-Yubico.YubiKit.Piv.IntegrationTests.pdb",
+        "bytes": 54692,
+        "sha256": "b91820af23f7982a6485698286c1dc9b6598ffa13f14c703f9c7100ae11ced60"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0013-Yubico.YubiKit.Piv.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 68608,
+        "sha256": "609bb03a48d71fcceddd6fc1bc55b454e786ba7fa8bc08e25973de6593d5863c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0014-Yubico.YubiKit.Piv.IntegrationTests.dll",
+        "bytes": 68608,
+        "sha256": "609bb03a48d71fcceddd6fc1bc55b454e786ba7fa8bc08e25973de6593d5863c"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0015-Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0016-Yubico.YubiKit.Piv.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/project.assets.json",
+        "bytes": 191975,
+        "sha256": "0a58806b7d376955bfea12a9abc490ee01dffe576b99fde0ebd48506700419e2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0017-project.assets.json",
+        "bytes": 191975,
+        "sha256": "0a58806b7d376955bfea12a9abc490ee01dffe576b99fde0ebd48506700419e2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "index": 18,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-piv-first/0018-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0002-Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.deps.json",
+        "bytes": 37519,
+        "sha256": "b98e70d6c729feea32ff39db4b7142cbff04b7627a22fc7d3b0d50a14c61c1ee"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0003-Yubico.YubiKit.Oath.IntegrationTests.deps.json",
+        "bytes": 37519,
+        "sha256": "b98e70d6c729feea32ff39db4b7142cbff04b7627a22fc7d3b0d50a14c61c1ee"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0004-Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0005-Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0006-Yubico.YubiKit.Oath.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0007-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1234,
+        "sha256": "e29c7868e0f61043d421c9b86b2f3a61bd4e00227708618268068d771dd4c25a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0008-Yubico.YubiKit.Oath.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1234,
+        "sha256": "e29c7868e0f61043d421c9b86b2f3a61bd4e00227708618268068d771dd4c25a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 747,
+        "sha256": "75eb2497ad6d2fe13cb07c3ce31cf29ab2d0423a91d29e145e8b239781b250d0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0009-Yubico.YubiKit.Oath.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 747,
+        "sha256": "75eb2497ad6d2fe13cb07c3ce31cf29ab2d0423a91d29e145e8b239781b250d0"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0010-Yubico.YubiKit.Oath.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0011-Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0012-Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0013-Yubico.YubiKit.Oath.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 41472,
+        "sha256": "383bf2c1fc026507020f474f9992a04a197e1587052eaafc9d560e8ccbff3e4f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0014-Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 41472,
+        "sha256": "383bf2c1fc026507020f474f9992a04a197e1587052eaafc9d560e8ccbff3e4f"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0015-Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0016-Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 17,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/project.assets.json",
+        "bytes": 191995,
+        "sha256": "3bcb3c57799b5c5b67f51ed2d5c1fa8e4577d752ba43dc57095c72a2a3b877f0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0017-project.assets.json",
+        "bytes": 191995,
+        "sha256": "3bcb3c57799b5c5b67f51ed2d5c1fa8e4577d752ba43dc57095c72a2a3b877f0"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "index": 18,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0018-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 0,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 1,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 2,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Management.UnitTests.deps.json",
+        "bytes": 20996,
+        "sha256": "c69b733fd71a0e7658430b609d18e7d9ea02c7a618aa78b82f6d7b088f76fe10"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0002-Yubico.YubiKit.Management.UnitTests.deps.json",
+        "bytes": 20996,
+        "sha256": "c69b733fd71a0e7658430b609d18e7d9ea02c7a618aa78b82f6d7b088f76fe10"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 3,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Management.UnitTests.dll",
+        "bytes": 79360,
+        "sha256": "6191d319d840d10421632008cb333b32d2a01e4c2513b213185b6f61f7a32be6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0003-Yubico.YubiKit.Management.UnitTests.dll",
+        "bytes": 79360,
+        "sha256": "6191d319d840d10421632008cb333b32d2a01e4c2513b213185b6f61f7a32be6"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 4,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Management.UnitTests.pdb",
+        "bytes": 28036,
+        "sha256": "a2fe03301d980abbeb1e531bcddaf77dbef2189dba31d31096cfd1711c9f2766"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0004-Yubico.YubiKit.Management.UnitTests.pdb",
+        "bytes": 28036,
+        "sha256": "a2fe03301d980abbeb1e531bcddaf77dbef2189dba31d31096cfd1711c9f2766"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 5,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Management.UnitTests.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0005-Yubico.YubiKit.Management.UnitTests.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      },
+      "roles": [
+        "final-own-output-or-runtime-metadata"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 6,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0006-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 7,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+        "bytes": 754,
+        "sha256": "37470aaafb4d5f615828b7c4fef2c0745814d6700434cec0e154bf4e20af8785"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0007-SelfRegisteredExtensions.cs",
+        "bytes": 754,
+        "sha256": "37470aaafb4d5f615828b7c4fef2c0745814d6700434cec0e154bf4e20af8785"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 8,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+        "bytes": 721,
+        "sha256": "051fbd5c7f0a6f2cd710394e996c1e811de5a3e2d7184f3e082039d041bdcce2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0008-XunitAutoGeneratedEntryPoint.cs",
+        "bytes": 721,
+        "sha256": "051fbd5c7f0a6f2cd710394e996c1e811de5a3e2d7184f3e082039d041bdcce2"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 9,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Management.UnitTests.AssemblyInfo.cs",
+        "bytes": 1329,
+        "sha256": "20448d9b0a9f5a17116489be5c15c504ae4c74784a4946428b7d1efbf6297d95"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0009-Yubico.YubiKit.Management.UnitTests.AssemblyInfo.cs",
+        "bytes": 1329,
+        "sha256": "20448d9b0a9f5a17116489be5c15c504ae4c74784a4946428b7d1efbf6297d95"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 10,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Management.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 751,
+        "sha256": "85fe340883edacd6d7f177933123d883916aa59ec37eac7dd01b01b92588f873"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0010-Yubico.YubiKit.Management.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 751,
+        "sha256": "85fe340883edacd6d7f177933123d883916aa59ec37eac7dd01b01b92588f873"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 11,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Management.UnitTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0011-Yubico.YubiKit.Management.UnitTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 12,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Management.UnitTests.dll",
+        "bytes": 79360,
+        "sha256": "6191d319d840d10421632008cb333b32d2a01e4c2513b213185b6f61f7a32be6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0012-Yubico.YubiKit.Management.UnitTests.dll",
+        "bytes": 79360,
+        "sha256": "6191d319d840d10421632008cb333b32d2a01e4c2513b213185b6f61f7a32be6"
+      },
+      "roles": [
+        "Csc-implementation"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 13,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Management.UnitTests.pdb",
+        "bytes": 28036,
+        "sha256": "a2fe03301d980abbeb1e531bcddaf77dbef2189dba31d31096cfd1711c9f2766"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0013-Yubico.YubiKit.Management.UnitTests.pdb",
+        "bytes": 28036,
+        "sha256": "a2fe03301d980abbeb1e531bcddaf77dbef2189dba31d31096cfd1711c9f2766"
+      },
+      "roles": [
+        "Csc-PDB"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 14,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Management.UnitTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0014-Yubico.YubiKit.Management.UnitTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 15,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Release/net10.0/refint/Yubico.YubiKit.Management.UnitTests.dll",
+        "bytes": 47616,
+        "sha256": "57afb267fbefcf63cf8ca75d286d50f5be8fe807215471fa68b66954fe096873"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0015-Yubico.YubiKit.Management.UnitTests.dll",
+        "bytes": 47616,
+        "sha256": "57afb267fbefcf63cf8ca75d286d50f5be8fe807215471fa68b66954fe096873"
+      },
+      "roles": [
+        "Csc-reference"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    },
+    {
+      "context": "Management.UnitTests",
+      "index": 16,
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/project.assets.json",
+        "bytes": 153654,
+        "sha256": "84399d3c004c2dd7ebf824f2425396413d94ed8888d3df16c63d22de21e3595a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-management-unit-first/0016-project.assets.json",
+        "bytes": 153654,
+        "sha256": "84399d3c004c2dd7ebf824f2425396413d94ed8888d3df16c63d22de21e3595a"
+      },
+      "roles": [
+        "captured-compiler-input"
+      ],
+      "authority": "Retained copy; original live path intentionally not read or required to remain equal."
+    }
+  ],
+  "scope": "Every retained copy byte/hash verified. No original mutable bin/obj path was read, compared or demanded unchanged."
+}

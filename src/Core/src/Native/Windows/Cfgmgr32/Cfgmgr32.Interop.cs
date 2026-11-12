@@ -211,6 +211,9 @@ internal static partial class NativeMethods
         int bufferLen)
         => CM_Get_Device_Id(dnDevInst, buffer, bufferLen, 0);
 
+    // Native PULONG points to a 32-bit value even in a 64-bit process. The IntPtr count storage in
+    // this size wrapper and the property wrappers below is a separate declaration-width finding.
+    // Property buffer sizes are bytes; device-ID lengths are UTF-16 characters.
     internal static CmErrorCode CM_Get_Device_Id_Size(
         out IntPtr pulLen,
         int dnDevInst)
@@ -278,6 +281,9 @@ internal static partial class NativeMethods
     );
 
 
+    // Native contract: LPGUID is a pointer, and the list capacity/count uses 32-bit ULONG characters
+    // (UTF-16), not bytes. These by-value Guid declarations need separate ABI correction: Windows x64's
+    // indirect 16-byte aggregate convention can hide the difference, without proving x86/arm64 compatibility.
     [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_ListW",
         StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

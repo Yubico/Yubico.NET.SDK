@@ -1,0 +1,57 @@
+[
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "target": "../../CLAUDE.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../../README.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../../docs/linux-setup.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../Core/README.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../../docs/architecture/raw-access-tiers.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../../docs/usage/user-interaction.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../Core/README.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../Piv/README.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../Management/README.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "target": "../../docs/DEV-GUIDE.md",
+    "exists": true
+  },
+  {
+    "path": "src/OpenPgp/tests/CLAUDE.md",
+    "target": "../../../docs/TESTING.md",
+    "exists": true
+  }
+]

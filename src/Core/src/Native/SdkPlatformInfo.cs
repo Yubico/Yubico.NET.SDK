@@ -18,8 +18,11 @@ using System.Text;
 
 namespace Yubico.YubiKit.Core.Native;
 
+/// <summary>Exposes runtime platform detection and platform-selected helper values.</summary>
+/// <remarks>Each native API still needs its own encoding and ABI contract.</remarks>
 public static class SdkPlatformInfo
 {
+    /// <summary>Gets UTF-16 on Windows and UTF-8 on the other recognized platforms.</summary>
     public static Encoding Encoding => OperatingSystem switch
     {
         SdkPlatform.Windows => Encoding.Unicode,
@@ -27,6 +30,7 @@ public static class SdkPlatformInfo
         _ => Encoding.UTF8
     };
 
+    /// <summary>Gets the helper encoding's code-unit width in bytes: two on Windows, otherwise one.</summary>
     public static int CharSize => OperatingSystem switch
     {
         SdkPlatform.Windows => 2,
@@ -34,12 +38,18 @@ public static class SdkPlatformInfo
         _ => 1
     };
 
+    /// <summary>Gets the existing size selection: eight bytes on Linux, otherwise four.</summary>
+    /// <remarks>
+    ///     This is not a universal native DWORD rule. Windows DWORD is always 32 bits; Unix API typedefs
+    ///     depend on the selected header and target ABI. Inspect each imported structure separately.
+    /// </remarks>
     public static int DwordSize => OperatingSystem switch
     {
         SdkPlatform.Linux => 8,
         _ => 4
     };
 
+    /// <summary>Gets the detected Windows, macOS, or Linux platform, or Unknown.</summary>
     public static SdkPlatform OperatingSystem
     {
         get
@@ -54,6 +64,8 @@ public static class SdkPlatformInfo
         }
     }
 
+    /// <summary>Checks Windows Administrator-role membership; returns false on other platforms.</summary>
+    /// <remarks>This check does not establish access to a particular HID collection or PC/SC reader.</remarks>
     public static bool IsElevated
     {
         get

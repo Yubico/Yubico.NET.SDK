@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/native-tokens.py", line 97, in <module>
+    print(json.dumps(verify(), indent=2))
+                     ~~~~~~^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/native-tokens.py", line 82, in verify
+    require(before and before == current, 'Native-source membership changed or no native source found')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py", line 28, in require
+    raise ValueError(message)
+ValueError: Native-source membership changed or no native source found

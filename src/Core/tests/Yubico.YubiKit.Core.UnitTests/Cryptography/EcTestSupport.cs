@@ -36,9 +36,9 @@ internal static class EcTestSupport
     };
 
     /// <summary>
-    /// The coordinate size of each supported prime curve, restated from the curve definitions rather
+    /// The coordinate size of the P-256/P-384/P-521 fixtures, restated from the curve definitions rather
     /// than looked up through <c>CryptographicDefinitions</c>, for the same reason as
-    /// <see cref="UncompressedPoint"/>. The private scalar is the same width.
+    /// <see cref="UncompressedPoint"/>. The private scalar uses the same byte width for these curves.
     /// </summary>
     public static int CoordinateSize(string curveOid) => curveOid switch
     {

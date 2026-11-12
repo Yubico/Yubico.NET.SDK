@@ -1,0 +1,1834 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "receipt_order": [
+    "accepted-A-C.json",
+    "accepted-protocols.json",
+    "accepted-FIDO.json",
+    "accepted-transports.json",
+    "accepted-SHARED.json",
+    "accepted-applets.json",
+    "accepted-PGP-PIV.json",
+    "accepted-sampling-A.json",
+    "accepted-sampling-SHARED.json",
+    "accepted-external.json",
+    "accepted-sampling-B2.json",
+    "accepted-sampling-B3.json",
+    "accepted-sampling-B4.json"
+  ],
+  "product_files": [
+    {
+      "path": "CLAUDE.md",
+      "previous_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+      "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+      "accepted_receipt": "accepted-sampling-B4.json"
+    },
+    {
+      "path": "README.md",
+      "sha256": "880a27ff7d753d32ae70b882bbd5d90adfd6125a3cc32fe193b7b3c6ecb322f0",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "TOOLCHAIN.md",
+      "sha256": "6bb043914b7e4b6b10a306ddd1f005577dd80038c71482519dd20984517880bc",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "sha256": "fb1f5d1c0c952e7aae43c120ffe261d95e0445c1e13170c0b90513a858e63d08",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "sha256": "3970aa710e5fe538bc871459e7eaa9c1636275247e634d2d500a4862aea0615f",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "docs/CRYPTO-APIS.md",
+      "sha256": "7105fb2135f1a41ea5dd1325266e279b8bd1146dc8e90e968b9ea7f23a9daa36",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/LOGGING.md",
+      "sha256": "f7deba4e7bc6624b4fc3262d49f565960fe9c4fe7da452a129f229df97cd3027",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/MEMORY-MANAGEMENT.md",
+      "sha256": "021e50e33f8de3d4ae281935a333669396ce3d6644bdcc28b682f9fea1989005",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/NATIVE-AOT.md",
+      "sha256": "2c9f215b859253aec25290dece7a97109f1dadc4de073340b802deaa5b54b1a0",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/SDK-HOUSE-STYLE.md",
+      "sha256": "992fcf31949f90c1707be1e3f77ca3438d2e3ff8f607dc7e314b91fc568756d7",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/TESTING.md",
+      "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "sha256": "c4e33e77acd4e1727750a8d458a0a282f356757dc00e23094c1fe8c3897ce5dd",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/device-discovery-guarantees.md",
+      "sha256": "265259281e30477e2cdfc2c2ddeee0bfb79891e3ed26509b53de091066aed8f2",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/device-identity.md",
+      "sha256": "526cb5bfda5e6716a641b121564b6e8a07a0fa26dcc72e667b21da7521e87875",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/event-driven-device-discovery.md",
+      "previous_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+      "sha256": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c",
+      "accepted_receipt": "accepted-sampling-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/physical-device-model.md",
+      "sha256": "476f0a922f7c8f176d9f3c49301be1b7f5c45121c841541e88a29d543399f6b5",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "sha256": "7ecaf86bafda5516a810a34ac5b09b170bf774d487421b2d34c2ce2a2ba91fc1",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/architecture/webauthn-extension-processing.md",
+      "sha256": "3b6d71d6832ce6b38697666d701d9c7d1af8b114c8ad407bb410e0432b384a02",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/linux-setup.md",
+      "sha256": "5bc7f0a7e8cd2bdd990284fbbc1b5f1a20976addb2d7ab32661b973f06ff1d35",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "sha256": "b2bc266b12d7c1aa01abad1066cb0ed76d0b542596c56ce8bdb8bfadbe6e5e49",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "docs/usage/device-discovery.md",
+      "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/usage/tlv-processing.md",
+      "sha256": "68dd783ff47dd63d0001bd07e0b14fa7af8ad4e25fee08b1f5da296a62899be8",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "sha256": "7a57752e981f8d3110119bba78a871690469416b56d96a22e937470b902bf8da",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "previous_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+      "sha256": "4797f0c57ce247952d35bf2e03a63a826f3b63f21b995d4da877484249dafb13",
+      "accepted_receipt": "accepted-sampling-B4.json"
+    },
+    {
+      "path": "docs/v2-highlights.md",
+      "sha256": "2772db478fe8c7eed4705ad49b1be2931f7f5736d7d1082b6ae530cb6756169d",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "scripts/toolchain/Process.cs",
+      "sha256": "84fe870fabdf44a6033c514722bcc256f73a5cf7ef9268c6b0e5c433be4cf133",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "scripts/toolchain/Results.cs",
+      "sha256": "90a595695e19a88a1f0e55a60708ffebcae8ee12a2753662b5444b3fecf48abe",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "sha256": "b257b57172bbd9967b7ec46754deffdaa3f044f2288ea7d22ed3f3b3c7593337",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "sha256": "f37278b4f43deea2015746d1786fcbf7d1a1a8f2328bd5c9e430c45d247d0f01",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "sha256": "a63fd0d90987929519c69e37f6d189001ea67ff73ec57136c686987469f62ba0",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "sha256": "11eae9d558df0673c0aa47365f6d32044d84a32d9cf561fbfc00fd0afc67c20a",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+      "sha256": "7f0d92f60394cd665f59b0536065e4b96902e062f8e5879fad979c236c82a1d4",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Cli.Shared/src/Output/PinPrompt.cs",
+      "sha256": "1534e933163b496f857df300184dee76f2de7401e668047da5d4b425eac52382",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Cli.Shared/src/Output/SecureCredential.cs",
+      "sha256": "2d043c73349cb63bd24bfa058f9333a310783ccd8d98e5b85025af7371b3dba1",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+      "sha256": "cb814522ab3ce7212d2848b3f8cbb201bd4878f223ebc0d491967331f57e0ce3",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "src/Core/README.md",
+      "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "src/Core/src/Abstractions/IApplicationSession.cs",
+      "sha256": "c00e90d5217233ea9e7063815e5f65725ce6b1405a83a147e9ed49404e8517bd",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Abstractions/IProtocol.cs",
+      "sha256": "f71931ea7ef4a2df862fb51c819ed1d2e5da5ae6d2f2b5afee5e0270067fd432",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Abstractions/IYubiKey.cs",
+      "sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "sha256": "7e375afde276858564d7ca7699a9b888096facb62e633ff19e7dbd640b2523d9",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/CredentialPromptContext.cs",
+      "sha256": "6ffb3f8f7700b8fb6736a5af274cb9f646b2d4c68c1e2ecf60cb19a0209303fd",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+      "sha256": "38db90c0798d78426885729202e0095ec1bea05669c2ef1239f2f5acd5f90fa5",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "sha256": "f2b6a0687cc3d628a52c65ee27d77df45e0458aa6eab2b3537bd7cb6fe3ee669",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "sha256": "7aaca59de916782b7762b1c6d3f4ff614a31109ff5077c78c8a9c88627310c8f",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+      "sha256": "9606437dfc5bb05a71754956cdf8ee962acde15d56aa1e05cd2d2cb7dd2d3baa",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AesUtilities.cs",
+      "sha256": "17f3932d55346e8e4d11c27b9137135e5d9283c93be9926f1af59d3979659425",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ArkgPrimitives.cs",
+      "sha256": "a01efcdb859522d65147ef3194d255537f9e993a3226a8c2a0c2fc110e7b164a",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "sha256": "82f8d05d60381ff6a793e14c04b392752b0cb4b69fe7f6ed9765c84da225883e",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "sha256": "8ee77d7217e93934f341755d721b9dd2076e84ef6b75e1b14e7ffc0946880e97",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "sha256": "8504b99a7f51a6f867bd1a101652ba50ee24477ef3799d19e14de63d593f94e8",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+      "sha256": "26b7907b746f9a296d99f66128cae255e38c86a766b66321ed6f9a8c9ab1ca78",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnUtilities.cs",
+      "sha256": "15587cfb868ec3d36b5c0d83dff66a823608b4d70ecf59c2c751f3e6b7061707",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+      "sha256": "a668602bef0417d1a7235da49a8e7c62b97e6ae20455ad007c555816900f5a7a",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+      "sha256": "5c19d5a3538db6a1f31a663f9f6f707c4e422508fe277e6983a4915c5ffaecf5",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+      "sha256": "6c237d7c9881e20dbbd31be119d012a8214eed6135124f0c7176b35e287c5de4",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+      "sha256": "299644fa0ce91355c674780157f3528f304e20dd2fdcfc923322d2b13fcdea44",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+      "sha256": "75725ac0e25041a681382cafcd60cdcead480c0c6a700e094e1bb13668fc4b00",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+      "sha256": "ffe47de2652fd7dca99d9b3d6141a2725aa03a770712211865fbd272defc6906",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECParametersExtensions.cs",
+      "sha256": "05e16bbbe01261b47a03a96b286c3eb3dfe1c129b9586f7d2c457a3c00c82f96",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+      "sha256": "b5da4960c915723491bf70ad610b0652fa722e451a69ce68122a098fdab7e7cb",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+      "sha256": "e9f9d6b291e8b93e310154f3e070fcca11fbfef0f1ec249c033cc4c44c485a13",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/IArkgPrimitives.cs",
+      "sha256": "e2e6a3d3fd2cccc655db0a1a93e3ec1896d43aa0b513dced58e676c36f7dfb6a",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+      "sha256": "d18fde691b1a4316a1b0a582a39c76a0a9a5192a099bd36e28e4949df1076493",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "sha256": "f4d100755cc3130896c3cca87a8a8e9e191aa2478be12ed60ca564f7a36081f6",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/PrivateKey.cs",
+      "sha256": "db8b4268ed403aa80d262c308e99b391124535d05f9503f698fbddadc5e7a8da",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+      "sha256": "3d6c47f447a20766ea20a3a7e9c7feb661639c02b588a8c60dd32a7121cbbda0",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "sha256": "45a6c27b898b24aeefc1681b21e561e3566f010244a7283aacc89b9cfd7459c9",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "sha256": "f65cd61ee52425ab9e952a2eee5e987ae7ece24f2826493d5a2731334ac50072",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAPublicKey.cs",
+      "sha256": "54784fc400d7221094f4111fb69db34ef1bcb959450965f8d0500cdb663eb5f5",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/X963Kdf.cs",
+      "sha256": "99dbc7e0cd8468c2f3febeaf6fdbdfc2aa46b3373d5baad10a8b481541f6abf4",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/CompositeMetadataReader.cs",
+      "sha256": "da79a689b7796657916a063cafcae3f42780ebdd75460bd0c8f9c823e7d392ec",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/ConnectionType.cs",
+      "sha256": "a2c8ad1644c0f3f62c70121556d7db18a29f5fa10a6fcacfaad3075f18c65e37",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+      "sha256": "411eba67b0dc877cfd7aa8697fa6743ed85d5ec442fceac3000fb62e3aa565f3",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceChange.cs",
+      "sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "previous_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+      "sha256": "46ef5ee7ecd8410de85da36cf73b34f8a4d86a1f3b705872e2b80efb5f2bdb6e",
+      "accepted_receipt": "accepted-sampling-A.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "sha256": "19a6ff2836c687491016f0ba3d51eeef5641fa773cba4f92ce58ce298274b720",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceFlags.cs",
+      "sha256": "7f8985ff2a8a8d0317d4821a4df80307a82bd5fabb667fba030905bf16c7d884",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceInfo.cs",
+      "sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+      "sha256": "b997455d9083553111e134ff972f439356e1271b5837edcd89d6e61c18eda350",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryBudgets.cs",
+      "sha256": "c9c644d13dec23e08b732e01024e8b239ea6c9c5f6b327b674588e5106ccf6e2",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+      "sha256": "aa1dcb809f31374d15236b35bb0fa12069a228cbf019314d2d8eaa7996a7e640",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+      "sha256": "1d7ee756959e44f2067332c3282ec0d3f8700aa8d045d14dff442671451215d9",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryReadScope.cs",
+      "sha256": "07545c692d1b70ef6534fb45db9af115aa55c9095a0559d256411e3fb347b776",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+      "previous_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+      "sha256": "00b5b7d5f223bb281444bb29ec937cc03c84ffff339fe5a477ed778e9dbf4e67",
+      "accepted_receipt": "accepted-sampling-A.json"
+    },
+    {
+      "path": "src/Core/src/Devices/Feature.cs",
+      "sha256": "40e111b46516aa81eca2d53cbfc9b890f39d4c659d7c75a9ca983779dae38318",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/FindYubiKeys.cs",
+      "sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/FirmwareVersion.cs",
+      "sha256": "8dcf389cde5f6f6f2e1d3ddc9960a1aa972cd33f21ff5b2d729a3a71658cb822",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/FormFactor.cs",
+      "sha256": "928557d20487d2a3f8b72ba42d0f399fda94be87508817b74bb0bbd25c0488ad",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "sha256": "016e4d3b76e1e099d584b084047221d0699767aa9b10deb46395591c5ae1b63b",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Devices/HotplugSignals.cs",
+      "previous_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+      "sha256": "70925f5b5f694990a5c0dd03b963259922e15604c1884741e50e11dab59db093",
+      "accepted_receipt": "accepted-sampling-A.json"
+    },
+    {
+      "path": "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+      "sha256": "9c0a8df4166168199c8d84b26c72c2af015ee141beed01480d5ae827fd1b8d63",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/PcscConnectionSlot.cs",
+      "sha256": "3e5a04199d228468ab0ca5b661ebaf2dded78ff3db75956d03250d0b7d0df9d1",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+      "sha256": "c6b19c10e85e53bd57929b1118c7d555fe38db9a75e5b4c779e4f94493699f58",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/README.md",
+      "sha256": "e7e06959fac0cac0a1af7ec74e3c8f3c47eefea9c1e17ff489307ceda48dbe44",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "src/Core/src/Devices/RegisteredConnections.cs",
+      "sha256": "f8d8b39cb29a4225cd933ca868fd39d20d588c03fdde2ee485db3c153d5cb8e0",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "sha256": "aa7bdd0872f1558de3fe53ed7a92d92e1420b2816a3a15c38f0566f624412838",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/VersionQualifier.cs",
+      "sha256": "49e4da583adf701744ae22c473ebe6b64067c5ef6f1a358dcad42e297c0ec39d",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+      "sha256": "5f71a78c58e7781bb0cbf7c905e905813cb6185f171db4c86c79ebd0857ea56a",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+      "sha256": "cb499bcf262c92f001179ddbd561ba3063ef81bbe838beef32ac7a1ee7c2b102",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "sha256": "beed8d6754ed94be3c939e80c56d4bed83c4d91aad52d5ad6e842d7770d0b32c",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyManager.cs",
+      "sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+      "sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Exceptions.cs",
+      "sha256": "1d9a8899928ee17b860bb9e63a1f54918205e2d0d12b64a97661a8e037e53231",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCard.Interop.cs",
+      "sha256": "09370f2c2e610c860387a08fdc49c91d087a63ffb46319380b5eb9b9b2f160f7",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardException.cs",
+      "sha256": "25c39edce657b4d7d18fbff92e6ae0a221a7b64e676490ebe2f9ac634e81b7b0",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardIORequest.cs",
+      "sha256": "36b67f4191b6cf590736865575f37356c7a70df9ecd741b57238fc73eb80293e",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardProtocol.cs",
+      "sha256": "d98eaad86428065bd7148f71457207c0ec7d797a5017b08728335b5eeca9d10e",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+      "sha256": "382d46e09439844c5b3ae5e74ce7fe5d4ab72b8b07dd2271afa92928d1eefc07",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardScope.cs",
+      "sha256": "85b88d1b9a3fdc56b8cd8e30adc42a263bc30698311c11b777da80f9c7c59b8d",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardShare.cs",
+      "sha256": "77fcc5da58938edfc90238f4744212a3ac7ced210d4ea86179de31b7db5c8693",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardStatus.cs",
+      "sha256": "2d5bdb905d18d2d9b224cd91ca096ee9cb40285012123650fe9effb76a44a8a5",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Libraries.cs",
+      "sha256": "228bace3632e2e8ed98f27db908f2001bc0d328d1e7f92c198ee2a7769176214",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+      "sha256": "6926589e3b9bdbb6ad07796f1e95d5ea33f360dfd574dc99102e0cff971f93c4",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Linux.Libraries.cs",
+      "sha256": "bf9848eafe4dc95596c76852c639ef419443942058530a832e5887dc4fe4811e",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "sha256": "59ec90d1127cfdfeeb7ae52d440526643694a6dbeeff2089b74191fe246df30f",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+      "sha256": "ad4e0a5761fad445d329b7c6b36fb1056e7583f64e3f5f178b06e98a20119132",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/NativeMethods.cs",
+      "sha256": "00f56a5b00d35f5ebc60516b664295b081dcdf1078a7741492f43ff7e2919167",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/PlatformApiException.cs",
+      "sha256": "84cf37aa7ed011470303a44a0946727519bf2619845c5c4b11722074f61a6d03",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/SdkPlatformInfo.cs",
+      "sha256": "7e39b186cb6bb50a153b555624fdf7870c495b7687d4d1671b4c9f2fb1b2c181",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/UnmanagedDynamicLibrary.cs",
+      "sha256": "346b40085678d2cee542ba7d8785089ee84ffcb41bac7f17d24a41c90d900e72",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "sha256": "ab0e190ddf0adf7a17333516bb0c84a220a8edc0f72017c85aee36f2a61716f7",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "sha256": "8c7dfabb8b3d011317912b1c71dc6374b2a15318cb49918d40acb125da5bbd21",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "sha256": "183a5bcd93e003b9a4f6fb17178fe2e72c1e221652fc0c4287cbecb330a18d86",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "sha256": "704f758a7a63bd48de1cd9c07b20b24fc882c49f85867a5acea167517fe69e39",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "sha256": "2c2b0b6b0ba3d92a3ffe49039e9e88e64b6bc69f2dd49efed2632691261e2804",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+      "sha256": "91a6c0cb7521bf610a867a681be0dc28e9592d634ca1f1e4361ccd6bd77f37c1",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+      "sha256": "b4a20c0c7ee06b04c61e158be99afab1fff6ae476eb56adb298f025707db02bd",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+      "sha256": "68d4857bf19e25b6ec7cd16c8903351846a964128d6f3d31a446ef1fa6030318",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+      "sha256": "21c650a1b07398ba9abb5847cdf2f93b1d11e482fe09e6f49e011f2e91feda00",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "sha256": "ac5bda03907f4a65beda4e8d60753df05d522fdc428704606a96aa19b1b39e4d",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "sha256": "eebd95ddec5391e6de801e08cb92f14d0ef02f0caf200505e5d2141b87787a21",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "sha256": "749263a8472ce616903867e57973d708a7541552103a7f6e7174d0955e60bd32",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "sha256": "0079223fc932ce772326f80a6836517d610756bbb7689fc923962bf1d21d10c0",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+      "sha256": "8fb261a5183bde0702bf1f652f4bbe1e440be43e1d262e04fb67d03ae6719974",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "sha256": "750dca027db182a40edcccb2be7ae80af7feeca38ac952c8dba21b8ed66b888f",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+      "sha256": "72d3f9381e2650ca736827933ff5b6b1ffeb29ec2761eb94d98978ce79bd5789",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "sha256": "cb0d5714544b2c2f1bee244244d5a5132c59d089b743517b0a278cecac9ece69",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+      "sha256": "0dad810df61c74ad362c01c5475b44a1024ff571fdddd4c1ae800bf9af1ac4d1",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+      "sha256": "6d621aaf43155e7a6e979aa67a6358cc968ce97d5f5dbea800222a3a3e8af296",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+      "sha256": "71bdb6b8015535fc288e30ce9dd413e899efcca9b57e3f8e1b3cb7c3d7a1348d",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+      "sha256": "86a0ec43837c8b6bac713426d484ce6b90252ffe061582b08b59d525f52d2336",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+      "sha256": "940c10773225b5db09d6860f9600a4db005c6ec9be5d27fc8741eaa7d038f273",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "sha256": "d388a3328c180bf8774b8982aab17cf5045879816595e8888cc4df6347269195",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "sha256": "f53a867d24a594dcdd86509e353c653d8216834a60f953980082a5a824a751d6",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "sha256": "b7abba893759a13f358e16d35c718318e509cb589d39eab99ad52fb8423dc605",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "sha256": "a05ab92661982b550969ae49696668d15cf48a1d72f2d0979a1d83afc6551fdb",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "sha256": "f20d7c53ac2c7955b26a0a0ad1ca850e6eaf17d4acf60c01ec99915d6da487be",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+      "sha256": "59f205664fdca77193513177f6f725f8f07d7c45784b85d23b5b6c97b0dff87a",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "sha256": "c8d49b216c963eaade43fcd638d938140fae87d5d7e9002a28a0ca5a3c5727fa",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "sha256": "77694a8ee3a9ed292cfc2efb30f60c5a05216722bd9c565b18efc280c2c35b03",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+      "sha256": "511ca690c1df8a4a6b662c1f18fab9a093d2d0a40eeb8b38c5ae59917a08d919",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+      "sha256": "b06462cebcbe708c0d8508e0116b02404308272a0293df87969d057234f0c0a5",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "sha256": "39c27442ce9667fc4282b41a8c5d09926fe6bc7b6d66f009e69baa4d5e501c6d",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "sha256": "1d7bbee6d20260c060836e5fce23d418db7c21bd7d822353f2c857342d4e9688",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "sha256": "4910574b13ba81aec0fe886e6e2a3c49c10c09ae2043f634f7ddc5896f098a52",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/ServiceLocator.cs",
+      "sha256": "1a56af874d020260085c5b1c374c109ac60448b6acd2bd2436fe28b76b04130d",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Sessions/ApplicationSession.cs",
+      "sha256": "75c65e859d7404aa3cb9255507b061ea43dbc5eba1b19b3c0c8b57313e9bb754",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Sessions/ConnectionSessionGuard.cs",
+      "sha256": "64336dc4e4c91dab83932c3f313495e0d9edddc2deda71436d822bbd3800cdec",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+      "sha256": "c323c5801cb53f54317247aa9aabcbb734f5eaed5a443eeb427847c54a6e1eb8",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+      "sha256": "08ee917ada2b0dd6274f78a89110b3322d03a9209935a0c96de00440917ac605",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+      "sha256": "e0d4fed1f37089581c13f60bf66767664fbb1adbcb96f6622bd44b5c3da1c213",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+      "sha256": "9393cbf2d5f5ee0628fd75ec248b97497b525daa768abb6feccd42549db55eb3",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Transport.cs",
+      "sha256": "77deae45f285c6449f27eaf098975c5b9a709a8b7136db90955d6973333794f7",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+      "sha256": "05659dd5b10e5df0ecca4ac123d4c01f7f570a496ba36372710476928b8b71c6",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+      "sha256": "9b4ec4fd9bbfd5b6e459e64152a0aa0f555168493cefd42d80a318bbfd90207c",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/IHidInterface.cs",
+      "sha256": "242c8d2e14eb75965c91ff550d55b2df449e105ab20b8c9e2c618f34fd1fb799",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+      "sha256": "1658f4b211f4f2c97901bf73d816ce5e1f4235a2eb7883018c5cc9f9b1f6cfdb",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+      "sha256": "21b93e6a95b7ee7182c5697381be0ef54131e8be0266c55a51b979307ec96dcc",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs",
+      "sha256": "297c7f2a0452cad079e92b54a829566d1503555172fedf78a4ad2a681d68e003",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs",
+      "sha256": "cac8382f45a045c4475a85bbbfd8604c108fbc0a25a001f3cd78d0d62296b428",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+      "sha256": "c5d18e19be6baa9823c7cd6bcdeea1375d02f9b1d062a99e9cf8796401326964",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "previous_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+      "accepted_receipt": "accepted-sampling-B2.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "previous_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+      "accepted_receipt": "accepted-sampling-B2.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+      "sha256": "ac9a1c896f82d766b28ab456e2ae511e9ac326b983df57012e4cfe82335633d0",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "previous_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "sha256": "18d3f8ef6d7d2b72d0bb668ed6301eee634a2659c20ed89e2d8b75e1a69dadd3",
+      "accepted_receipt": "accepted-sampling-B3.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "sha256": "81c0010ee6352821adca2a5c7bbf4aa0f9c753ff27ae901141b5d451e12680fc",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "sha256": "3510a3ff0a1ed360bad0b9eb44fbe8bc0c53820644c1b542a990c2ff567dcf4e",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "sha256": "9f586abba719425f246bf3731a854163c21a533dc472e9de7bf6486250f09cfa",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "sha256": "e36965aadaee30ef241c45b7da5a2141b117a2e41495d1b391fdb0c0ede4507d",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/IDeviceChangeListener.cs",
+      "sha256": "fd9ad294ec6d199f7044289834b1f0be752eb203f6aa068e86f0a87aa70ea1a5",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+      "sha256": "d079f655a8c0261c32f9687bf26e8a09f8d2eecc5242d8d45545c7b184a28b7b",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+      "sha256": "6112c337e3b701da891c2ca39de8be270bb94a49c27c5b64f64fad05e9e47053",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+      "sha256": "53395c3f41bb3d12aa31142c365d47407f01b380fc4d7d1d67194b70460420a0",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "sha256": "e0d25805f1b42b4eb0666f7ffa22674e5f173cbc28c04a8887564522075aa817",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "sha256": "3cd87b0435f55032d75613d1b1adacd505a40628d9a0dccdb81e873c104545e6",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+      "sha256": "1bc88cbc1d76f0c5d13ec6a563231fefb2178af776783798682c6038a0a38136",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/BerLength.cs",
+      "sha256": "da923dae9ab0248000b149cae26611cd20ef7a84d4eca023bb8f3cec3bd65698",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+      "sha256": "6a1a905f9c9b655f5d0c617891a78e0d8dfa7f9e40ff497798d0b2e292495724",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableBufferHandle.cs",
+      "sha256": "3f2a3b6c5c9b7f8e31fbd16eccf382df7e66fa8663520b8969774a07a708b980",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableTlvList.cs",
+      "sha256": "13aaaf632d7d18748b07d902e705877f199d79e547bb49fe2600fa0f9bb90bdf",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+      "sha256": "568935c28ac2b809f59c0097664397bfccbb0fa145bed894b94df038e86aa41a",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/MemoryExtensions.cs",
+      "sha256": "98505ef4490a1596f9a8a071b70dc60fad435d3f86a75a9ea4b81d4ac1669cf9",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/Tlv.cs",
+      "sha256": "dfdf9731f0f4521b6749afda8506a9fa2a3a6d0a68fa437383adab1739eef028",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/Utilities/TlvHelper.cs",
+      "sha256": "af4e21d6a3913c38bf3c7e3f1afbe8ee1625e3c355facebbb2ab85d696fbe1ab",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/src/YubiKitLogging.cs",
+      "sha256": "a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/CLAUDE.md",
+      "sha256": "6ead47ab0e401351f6050e3f54ec022ac35753f0b65d880965b75a4577d7eb75",
+      "accepted_receipt": "accepted-SHARED.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+      "sha256": "ce5c091da33607cde9717174c4fee9092ce393dcffd09895ea4ad1fca47ee408",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+      "sha256": "5ba047b54e86ebcc66b12a6b314d2ed7ce305337f06e21551ffee251b2aaab0f",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+      "sha256": "2725180d951f0eaadc3635379f97d5eddfdd595dcc1818e7f43d93f882664115",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+      "sha256": "36daf0fd92f19d386d3d43d22b48a262ebd1014530427e40c70207566eeb06af",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs",
+      "sha256": "47e92b43da068107fb7ca2415a6c88b8b61b2a04fd45d920e7fb79505d1f9c06",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs",
+      "sha256": "7a7316cf12935d66c42fa013f9245fdb2a92a4a40447cfa68d7aa08c1e20c420",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+      "sha256": "4c5cba1c0c827f8a15cb3c545672e183252d9244a647a019ecc723435eb2b537",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "sha256": "ecaa0167ed46ba84809f1789d121d0bbba314e6e6e6a3951cf87020e6a910c48",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "sha256": "fe0f0337ed59109a259590a1497320c7a4e7e233db07911c0ad6b21b04a47556",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+      "sha256": "de9ee73e9d918441d66e3f71cc0197c1105b4625f30185fa2a987612b7215fc0",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "sha256": "375581b5321b6b8c4975d137c17e389d27e2ab7ea7b11c221fb51dbb20bafd44",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+      "sha256": "4051b8ba7c567249aeb6871d2eb5864a52b2c652cb24c93977f960dc6b272145",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+      "sha256": "3ba5f002966c4566ff894a214079b9c570167304dd1a7b512a898640febbfaf6",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+      "sha256": "d66e1e5976ce1090b6545cacefba11e4f66c07f4e060d417e58cd94bfd6a511b",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+      "sha256": "3d176b07a6c9ee5a51c88efbf49e06fb9273d54f6d42bbb96207655a718cad8a",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+      "sha256": "8c9ecb3fbfc3407945111b012b39c4171961ed9c652e07b5dc7d134a406cf0dd",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+      "sha256": "b0b0ea4eeec11dd117983b4f1cd854bf6a230ac03514d249e0cb1dfc86c7c5c0",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+      "sha256": "c40f52063e35bbd97a0f1ab60c9a4b1e25a03cc7af20615be4aee6ff5333feff",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "sha256": "a4adb44b77ba49b91f3bc6311130e627fe25d96c8d059cd33f3f3254576e4bf3",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+      "sha256": "7fb638eb701db765ada5fbd04796f272baa78fae19cb213e7c4f7cf66c5957c2",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "sha256": "d07b2786c2201ce46ea2b6f06e92bb9cfd03ce18c70d9e57162920f7b0649618",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "sha256": "0f1a4eff327d3d87ab02e9b6f6a6fd69df1be586881f66409b6912b1c2789bf3",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "sha256": "0309afaef1dd32bc103b3aa064effdcdf8fb8a747c8f3273731defa804303494",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "sha256": "366f2813be1a73df6e0c9fcfafd415260da0910f8e7b2421c4b4e8ab47f17240",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+      "sha256": "e86dd2e2d88973d0bec0419a293e721c693502681ca2048e4977cd20e76b49f2",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "sha256": "006dbb8a4760392d01988703709a6e0c74cf441c9bf359c4f9dc196af51c1013",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+      "sha256": "6db4dcab6ef539a976e76e032de5004970e71caaa565bad4ceef9877763c7c58",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+      "sha256": "6ba679af8ed31428777fc5872a9355f3b602c784b482481999366e67293d760d",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+      "sha256": "a6fcce466e6c12262dbe9c4d7fe6b856993e9f6aa6ebb7e1beca66774ca59bc1",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "sha256": "2cba79d85a56d031cccb3190a80da9db59e30316ef6cfb12f706e8ef1e21a859",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "sha256": "d4e0973e0eaa5864f603876404656d19f06cf0f09e946dd1f0f0ad50370f4806",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+      "sha256": "163ad7c64d6cfd2429c5fb264ab9e9a982f18fcbca89469b52e777150282320f",
+      "accepted_receipt": "accepted-protocols.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs",
+      "sha256": "f7ddfe4cf0c5cb08c62c4044121286192c639d990ea32697533122dd11d97318",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs",
+      "sha256": "0bc79209f2fac5db4c4f63b456bd9265c154a6e148b48f5d869bb55889692879",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "sha256": "d592c70ef9ce35b70d6fa1cdb87201398573896ecf3bb7329f88ece79089f550",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "sha256": "a17c5ca5567636e3f32ab0e203843377a8cb02e5328f21c1f1c7dc83ef51f215",
+      "accepted_receipt": "accepted-transports.json"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+      "sha256": "03cd00c4c169df7f097684c14545575bf3bdcb3e102bba8bd237cc9309645afb",
+      "accepted_receipt": "accepted-A-C.json"
+    },
+    {
+      "path": "src/Ctap2/CLAUDE.md",
+      "sha256": "00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Ctap2/README.md",
+      "sha256": "78da8838a98ddb4110d82b5f07a7188adb90cc4a932236f64738d0c766230891",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "sha256": "6e59a89acffe19912d0a8432fd313deba0ac0fcb18f43eb3189f767c07f8f29b",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "sha256": "149367792f1fe0fb5b9c1389cd77dcc5dfc709daeee14e9c581df0bee7444f50",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "sha256": "447797997e8f407d97bc30bec29c428d80c4c5f20370c23bcdc53a02b622a7df",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Ctap2/src/Ctap2Session.cs",
+      "sha256": "d2bf4fe2344bb17b49892fc97dbd824c1381f570ec882ba6a4f1ef16e4f14ff9",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Ctap2/src/ICtap2Session.cs",
+      "sha256": "30640a8723290b03020cf3448fe3e54d331510975854b79258974282d0c99dc3",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Ctap2/tests/CLAUDE.md",
+      "sha256": "2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/Management/CLAUDE.md",
+      "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/README.md",
+      "sha256": "d3ff3a13e4eca3a15bbdb5189845af2f899c5e6c052a0ae5530a84cecf2f247e",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+      "sha256": "22158d4f9e64608319653231416c1d9e14d1c1d240ac3c5ea92eb7ca5c7d9f11",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+      "sha256": "f3ef2ec902ce969b951f94215fd18ba746448a46ff74081bf21e27559348c651",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/src/IManagementSession.cs",
+      "sha256": "4c4195bfb177e2b38ea5bfeeb444235bc19eccef4aced3563bdc62ceef7b7db8",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/src/ManagementSession.cs",
+      "sha256": "25fb320e15c027896505ccef2ec5d135d54ea93183a2f1e9334a242383f4f1da",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+      "sha256": "9cb1109ce846c43d4902a92b3c9d38d572c44028a5debdb1817a500472fd343d",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "sha256": "e0ee15b55542aa7c7e5867064039538ca43986073fbbde9eee74b243059f7256",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs",
+      "sha256": "691551e376171339ff27b0dfc7b408fc86fe660f7fd08e9428862529e7bf1079",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "sha256": "b2fb7e6c388c09a014113ea1f7bf05fff77438153db217e12375b9e126d44baf",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/CLAUDE.md",
+      "sha256": "33e4b003c3645448fa19af00ca1b6a443d07ba2b611fe4c8d35712a19a8a266e",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/README.md",
+      "sha256": "a538193a8720ba3203e62a18c2855e0a8e968fc291e41ff32ae4c3505eb19750",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/src/Credentials/OathCredentialOptions.cs",
+      "sha256": "45d571a7123ccc0bc7b0a575883e769e9dbd27d2070bd866cd648cf77fe4f473",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/src/IOathSession.cs",
+      "sha256": "f40c2703bd088144d2ac70f3a26047cb4574c817050adc5ae7410496c2455a8b",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/src/IYubiKeyExtensions.cs",
+      "sha256": "bfa09a700b21b3c204bb84f1ddcdd7cfb6ba4a22ad31eedc47e9ddf0d2eaa060",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+      "sha256": "5f51a9ada1345f62eb51b04652f359c8c9e648d9ec9f9468df17015b16082559",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+      "sha256": "25a0169945a7770594923505464a9b2632baa0ac9489fb42b357ae7c3df046a1",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "sha256": "3c1fa27dd653266d5177b1b165edf77ff3e4561a9cdf37bca5a0f97809971c97",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/OpenPgp/CLAUDE.md",
+      "sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/README.md",
+      "sha256": "d2035cf8a57f16dd5ba4f895b90c408d384c67e7b6f3535d75a60ba92a0b5762",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "sha256": "23c3985a3fd1b9fa344917db33b8186ec2c350718e11c765f91edb1074bc57e9",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "sha256": "0a652dbd773cdd634a357e5cd9f7adddb654761404babf34a768517614502b15",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "sha256": "4127df8af0efee371c0dbe851cb061e17571e2a182c853d0c883162855c024d9",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+      "sha256": "0869eb6ee872f520132e4856cfe492cdb3fb6e06f6c69d185b03e2cecd6a6988",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "sha256": "3e2cc825ab4bd1227f7b19bf26e37504c0f2f4dba0704929f9e0a099c9069e83",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/Kdf.cs",
+      "sha256": "899a908e9b7a0a14979ab68225533128855aa50b6462cf24a069b7dfd9c65d15",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "sha256": "ab35501aff68ffe955c16f210b031abfa1302653e28c9451651ff5889472f807",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "sha256": "56c1ec91bf7e5e230866432662d38ba407ab42494c25684881007eae616ffc19",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "sha256": "1509f0e864ab5424dbc5d9482978ad020951304545c9732212c5e375d33e4663",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.cs",
+      "sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+      "sha256": "2281e630a43346e33376365cfaaf5bd578add06e8c8f26876c5caf1c4571c0f7",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "sha256": "8143bdcf68b605697757b386fe31c37017bd9e54fa30012aa0a9d6042ccf0701",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/tests/CLAUDE.md",
+      "sha256": "4d5017e2de94d53b1c215ff755f81c1ac534f2a6b3383b62b9b5e6509f7b901e",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "sha256": "7d4338b27a41d8516806f62466b3276464f1560c82fd18f64c7487dc62e1f7bd",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "sha256": "8fd707acf4c1f4db33393908dcbe6d009096c94bb6fa7ea4256c76b09d9cc931",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "sha256": "de79b8e299566ab1260fe758bb5fff3dd42da89bb3ef69524cfdf7a47f75577a",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "sha256": "4d5af3e8939230a5c2247821f97742a33182d1a53d6d25ce1adfab4f7e00a05f",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "sha256": "c5fc7c6d5bc7c09d96157477afd22a8e9e238427d7ac348342dddd100b28f580",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "sha256": "01797e8aed2d0f884f8033201779db7717927bb6829f8179ae7ea58fb4da2f4b",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/src/IPivSession.cs",
+      "sha256": "6cf9b7d917d852316d6292c840cec4b9b15739ff437c98cff926b7a9f672db7f",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "sha256": "951665fa054ab7906a06cee19784f4b91f2d1dc03050db879206e2b0c2c0f46c",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/src/Keys/KeyProtocol.cs",
+      "sha256": "cbb73402f1c4ae839c8ca6efe7c3930603c5f596351a20e251b8c9d71691b73f",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/src/PivSession.cs",
+      "sha256": "cba2261e6c6f591de3d6cb189fc092dfab8f1295b748c18b7ab1715d0dc9349a",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+      "sha256": "62124c562e12fa72dbd982b4b704aeb867526f833ed1489a4f50974f7940c68c",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+      "sha256": "cdbc621258158f25578792a576c0463d5e1694f08ff44ed7ac090caf566e6bb5",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+      "sha256": "3d304c794c59f59b4b7ade5f5f285c97598e2650566f4119847687080901e9c5",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "sha256": "6b77a88bb23a9afa0b47eccc56ccec6ee16301995c08401b0efd1394e175ec70",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "sha256": "9d2699c1e4d1516d1e146e8c439d8fcd5c0d70caa1bd07036e3ebc5ac0d991d7",
+      "accepted_receipt": "accepted-PGP-PIV.json"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+      "sha256": "d124ace259665ee216d33bd9d0b7ce30482f981d3536694bd0adee29c1b24cf7",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+      "sha256": "b0d92eb5261a9f74e85a45ef84084b8c100ab77fc9b3bfd578b40add76b57a1e",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "sha256": "b3d46b1fea71882743f393e64bd419bd4698c197770295f565bff132280a7341",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "sha256": "581adabd105a02891f575af262dde7a28baea06dae52df17d474aca3e277893b",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "sha256": "dda8d5baada84262265af8d7b746ea7ccb813ab1121a3620e2c9170f46c01cd1",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "sha256": "f7668dcadbe1af80f0cc874813e10504717c02f3fe94ca9096b74fefd952d875",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "sha256": "632e76c517481656194b4f8cbd51b05d165ac8c98c7bef2cff2835bc652fc36e",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "sha256": "515fcf13aca4968f21635c6172d0c5a4cfd8caadf8254b60408c5a66f1620d5f",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "sha256": "54ff07282113f7e4ae41d00ee3ed8a8bd9b4f6b062464a46c3143960836b0a32",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/Tests.Shared/CLAUDE.md",
+      "sha256": "bf5121b4117a8657ecd5ba98fccb2c36d4b6caa42b52e1688cc0bbdbf9aaba6f",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+      "sha256": "eae08ac681f5f486da9ab9116bb9ca1e5825374adc1b4197082eaf0c89e30f33",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "sha256": "e495dd528a33a5302ae12b0fddee60fae5ed48bfee92f558b3aa7cb0d4d55bce",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "sha256": "c2d596d0d3c380b07317df8fd9ffc2936dac7b2815ecc09f149c2f70171b8f9c",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+      "sha256": "820f9f2ebed195d1fabf36c200df937bc1d9fd096df261663a71da73dcf7f32f",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+      "sha256": "2fa737b315df81137b73f495045d4689f8ad166daa7f72264ce683167bd64ee0",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "sha256": "982b9bc5c2656974ab291ef78b0d43393f8f5fc035c8ea294073f5f9d5e1eb77",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "sha256": "cf28fd54950dca187c7ac9c8428998ce7866a73c9b06d01eab67958d80557c30",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "sha256": "b30d3dd8249b5bc6e1112ee4de828c4044d7c55f4e6a2e936c4dff2e5d2af39e",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "src/WebAuthn/CLAUDE.md",
+      "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/WebAuthn/README.md",
+      "sha256": "fbfe9912165f654cedc40e72ab5a868d7b5c6b171de63d5a7fb9bb29e4dc7a5a",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "sha256": "78f359a17f9743cda2fd9ab11e599219241a36ac10e414354c5d903ea04915e7",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "sha256": "50e087309ced66d0fba57b6e9fb924e5995d0155c2f71082104672c45f4750ca",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "sha256": "6e7831adf4b8e067d1f08687f0d0ca00ba848d05bbd11232935a710bca822e3f",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "sha256": "543741db31d0b1aad86a96012f6d9a75cde6c613e33425242a6868f5022fff7a",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "sha256": "11d3038d26597aac1a85b5ee9bec85cd8d34b1f7d64e9131626e92a24441c187",
+      "accepted_receipt": "accepted-FIDO.json"
+    },
+    {
+      "path": "src/YubiHsm/CLAUDE.md",
+      "sha256": "1cd895d999092727e9fcc42a19c6228f372a6ca40e19c34637b92e4d8692aced",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiHsm/README.md",
+      "sha256": "1cbe224f2bbcadaeefeda7761005a84bce98e71bcc6f0d9e8e4426d9dcff705c",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "sha256": "45955f7a3841931adfcb24e381f1cc9421312c3b8e8ad0acfd55edb71722c804",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthRetryException.cs",
+      "sha256": "adbe42f805d81d2c8c4a357daaaad07418156d4643f3650b91cf8b713557cd5b",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "sha256": "85b81c44c0ea5652eada4b39b21cccd81eae4ca9ad8fc9720f5227daa3922147",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "sha256": "a575c81e8d98fba442207c1a20a873c559333f70fcc46de7c4a75dc7bed173b2",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiOtp/CLAUDE.md",
+      "sha256": "fb4570594450e7031362a983d6539b19bc935af350b5141584c9aa2a58c95890",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "sha256": "956333d0ffcd42d44c95ac7eb95df67a8b2bf82024ce8328ea55ba2a75f5c92e",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "sha256": "650fb88348d7a3a13cde282bee0647de9ec7df06efad7b398d9a7576aa114992",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "sha256": "9f59e27f3bf73d2b63e27755942f1a21f667583fb9f27a40b2d5eeb6e0b75e6c",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+      "sha256": "89b4f243431bd45920e3b2c6f914fb40290d4f6277c44e50cf15fffb39fa125a",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "sha256": "647d4cbce5dbc6597a9175fe95e4d7f69b407d3f7ebeadbd598bf8fd665050f2",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "sha256": "9d1509f4ba3bf6b0a455d559e0410a828291b9e18d170b9a8e4494da41031373",
+      "accepted_receipt": "accepted-applets.json"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/MacOSHidInputVerification/Program.cs",
+      "sha256": "ef4c55ace3a7ab0185b678de84d8d276c9adb5d819ae952dc03c2939ca621963",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/Program.cs",
+      "sha256": "d5b99076bac9be69231db6de26f9ba69f27d4f33027de7a246edf226545f4a2b",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "sha256": "109ae75b5018807486140d4bf0fb144075484b2971b9a3724d44d7fedf975272",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/NativeAotVerification/Program.cs",
+      "sha256": "a4ccfef7152cc440c2eba998e7225cfc7e9f3932d66fe17eeafd9434857e39fb",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "sha256": "ce565faa26c8221ef8d3679a4f4ee6f0313fb720cf9208dc3b04c0d25a7b3298",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/Program.cs",
+      "sha256": "bec35657a48d4f1ad104cf043797b83a9f7e75ce1919b28612d604e8222bbee8",
+      "accepted_receipt": "accepted-external.json"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+      "sha256": "ebca9ba8179574d90066a152d778a02bd8f7e3d35f0902be6a57d28ddf4b9e09",
+      "accepted_receipt": "accepted-external.json"
+    }
+  ]
+}

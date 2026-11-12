@@ -1,0 +1,4 @@
+  using (SHA256 sha256Object = CryptographyProviders.Sha256Creator())
+  {
+      // Use the hash object within this disposal scope.
+  }

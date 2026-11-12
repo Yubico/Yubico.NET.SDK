@@ -1,0 +1,70 @@
+{
+  "status": "qualified-disposable-python-cases",
+  "attempt": "core-foundation-first",
+  "cases": [
+    {
+      "case": "nonzero",
+      "wrapper_exit": 1,
+      "child_exit": 7,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/nonzero/final.json",
+      "signals": []
+    },
+    {
+      "case": "orphan",
+      "wrapper_exit": 1,
+      "child_exit": 9,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/orphan/final.json",
+      "signals": [
+        "SIGTERM",
+        "SIGKILL"
+      ]
+    },
+    {
+      "case": "retention",
+      "wrapper_exit": 1,
+      "child_exit": 0,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/retention/final.json",
+      "signals": []
+    },
+    {
+      "case": "receipt",
+      "wrapper_exit": 1,
+      "child_exit": 0,
+      "quiescent": true,
+      "durable_external_receipt": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/receipt/final.json",
+      "signals": []
+    }
+  ],
+  "atomic_overwrite_rejected": true,
+  "failed_fsync_preserved_partial_without_publishing": true,
+  "historical_parser_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build",
+      "test",
+      "docs-qa",
+      "docs-architecture",
+      "complexity"
+    ],
+    "projects": 13,
+    "executed": 4124,
+    "skipped": 5,
+    "failed": 0,
+    "warnings": 0
+  },
+  "fail_closed_parser_rejections": [
+    "exit",
+    "target",
+    "warnings",
+    "membership",
+    "zero-execution",
+    "failed-test"
+  ],
+  "logger_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+  "qualifier_sha256": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6",
+  "limits": "Python process/I/O qualification and historical parser replay only; no SDK build/test/native/device execution."
+}

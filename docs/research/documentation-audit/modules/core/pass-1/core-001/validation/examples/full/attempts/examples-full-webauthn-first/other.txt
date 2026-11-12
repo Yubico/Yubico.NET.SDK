@@ -1,0 +1,5 @@
+obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.sourcelink.json
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.GlobalUsings.g.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.AssemblyInfo.cs

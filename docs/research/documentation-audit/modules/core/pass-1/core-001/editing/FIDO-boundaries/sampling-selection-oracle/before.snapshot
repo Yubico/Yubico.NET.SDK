@@ -1,0 +1,533 @@
+// Copyright Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using NSubstitute;
+using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
+
+namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
+
+public class WebAuthnClientGetAssertionTests
+{
+    private readonly IWebAuthnBackend _mockBackend;
+    private readonly WebAuthnOrigin _origin;
+    private readonly WebAuthnClient _client;
+
+    public WebAuthnClientGetAssertionTests()
+    {
+        _mockBackend = Substitute.For<IWebAuthnBackend>();
+        if (!WebAuthnOrigin.TryParse("https://example.com", out _origin!))
+            throw new InvalidOperationException("Failed to parse origin");
+
+        // Setup default mock responses
+        var mockInfo = MockCtap2Responses.CreateMockAuthenticatorInfo();
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(mockInfo);
+
+        _client = new WebAuthnClient(
+            _mockBackend,
+            _origin,
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
+    }
+
+    [Fact]
+    public async Task GetAssertion_BuildsClientDataHash_PassedToBackend()
+    {
+        // Arrange
+        var challenge = RandomNumberGenerator.GetBytes(32);
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = challenge,
+            RpId = "example.com"
+        };
+
+        BackendGetAssertionRequest? capturedRequest = null;
+        _mockBackend.GetAssertionAsync(
+            Arg.Do<BackendGetAssertionRequest>(r => capturedRequest = r),
+            Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(credentialId));
+
+        // Act
+        await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(capturedRequest);
+        var expectedClientData = WebAuthnClientData.Create("webauthn.get", challenge, _origin, crossOrigin: null, topOrigin: null);
+        Assert.Equal(expectedClientData.Hash.ToArray(), capturedRequest.ClientDataHash.ToArray());
+    }
+
+    [Fact]
+    public async Task GetAssertion_ApplicationRejectsRpId_ThrowsSecurity()
+    {
+        // Arrange
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "evil.com"
+        };
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None));
+
+        Assert.Equal(WebAuthnClientErrorCode.Security, ex.Code);
+    }
+
+    [Fact]
+    public async Task GetAssertion_Discoverable_EnumeratesViaGetNextAssertion()
+    {
+        // Arrange
+        var cred1 = RandomNumberGenerator.GetBytes(32);
+        var cred2 = RandomNumberGenerator.GetBytes(32);
+        var cred3 = RandomNumberGenerator.GetBytes(32);
+
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com",
+            AllowCredentials = null // Discoverable
+        };
+
+        // First call returns numberOfCredentials = 3
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(cred1, numberOfCredentials: 3));
+
+        // GetNextAssertion called twice
+        _mockBackend.GetNextAssertionAsync(Arg.Any<CancellationToken>())
+            .Returns(
+                MockCtap2Responses.CreateMockGetAssertionResponse(cred2),
+                MockCtap2Responses.CreateMockGetAssertionResponse(cred3));
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
+
+        // Assert
+        Assert.Equal(3, result.Count);
+        await _mockBackend.Received(2).GetNextAssertionAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetAssertion_MatchedCredential_SelectAsync_IsIdempotent()
+    {
+        // Arrange
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(credentialId));
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
+        var matched = result[0];
+
+        var response1 = await matched.SelectAsync(TestContext.Current.CancellationToken);
+        var response2 = await matched.SelectAsync(TestContext.Current.CancellationToken);
+
+        // Assert - same instance or value-equal
+        Assert.Equal(response1.CredentialId.ToArray(), response2.CredentialId.ToArray());
+        Assert.Equal(response1.Signature.ToArray(), response2.Signature.ToArray());
+
+        // Backend GetAssertion should have been called only once during GetAssertionAsync
+        await _mockBackend.Received(1).GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetAssertion_MatchedCredential_SelectAsync_PopulatesSignatureAndCredentialId()
+    {
+        // Arrange
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var signature = RandomNumberGenerator.GetBytes(64);
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(credentialId, signature: signature));
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
+        var response = await result[0].SelectAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(credentialId, response.CredentialId.ToArray());
+        Assert.Equal(signature, response.Signature.ToArray());
+    }
+
+    [Fact]
+    public async Task GetAssertion_PuatRequired_RetriesWithUserVerificationRequired()
+    {
+        // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        var requests = new List<BackendGetAssertionRequest>();
+        var callCount = 0;
+        _mockBackend.GetAssertionAsync(
+            Arg.Do<BackendGetAssertionRequest>(r => requests.Add(r)),
+            Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    throw new CtapException(CtapStatus.PuatRequired);
+                }
+
+                return MockCtap2Responses.CreateMockGetAssertionResponse(credentialId);
+            });
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal(2, requests.Count);
+        Assert.Null(requests[0].Options);
+        // The token is the verification; CTAP §6.2 forbids "uv" next to pinUvAuthParam.
+        Assert.False(requests[1].Options?.ContainsKey("uv") ?? false);
+        Assert.NotNull(requests[1].PinUvAuthParam);
+        Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
+    }
+
+    [Fact]
+    public async Task GetAssertion_PuatRequiredThenNoCredentials_ReturnsEmptyList()
+    {
+        // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com"
+        };
+
+        var callCount = 0;
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ =>
+            {
+                callCount++;
+                throw new CtapException(callCount == 1 ? CtapStatus.PuatRequired : CtapStatus.NoCredentials);
+            });
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
+
+        // Assert
+        Assert.Empty(result);
+        Assert.Equal(2, callCount);
+    }
+
+    [Fact]
+    public async Task GetAssertion_EmptyAllowList_OnAuthenticatorWithoutDiscoverable_ReturnsEmpty()
+    {
+        // Arrange
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "example.com",
+            AllowCredentials = null
+        };
+
+        // Backend throws "no credentials" CTAP error
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(x => throw new CtapException(CtapStatus.NoCredentials));
+
+        // Act
+        var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
+
+        // Assert - empty list, NOT exception
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetAssertion_Success_ZeroesTheTokenSessionBuffer()
+    {
+        // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
+
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(credentialId));
+
+        // Act
+        var result = await _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Single(result);
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a successful ceremony must dispose the token session");
+    }
+
+    [Fact]
+    public async Task GetAssertion_BackendThrows_ZeroesTheTokenSessionBuffer()
+    {
+        // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
+
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ => throw new CtapException(CtapStatus.InvalidCbor));
+
+        // Act
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        Assert.Equal(WebAuthnClientErrorCode.Unknown, ex.Code);
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a failed ceremony must dispose the token session");
+    }
+
+    [Fact]
+    public async Task GetAssertion_Cancelled_ZeroesTheTokenSessionBuffer()
+    {
+        // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
+
+        using var cts = new CancellationTokenSource();
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ =>
+            {
+                // Cancel once the token is minted and in use, which is the window the
+                // token session has to survive and then clean up.
+                cts.Cancel();
+                throw new OperationCanceledException(cts.Token);
+            });
+
+        // Act
+        _ = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            cts.Token));
+
+        // Assert
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a cancelled ceremony must dispose the token session");
+    }
+
+    /// <summary>
+    /// Control for <see cref="GetAssertion_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted"/>:
+    /// proves the protocol double actually records the tags it issues.
+    /// </summary>
+    /// <remarks>
+    /// Without this, the "no tag was issued" assertion could pass because the recording is broken
+    /// rather than because the ceremony genuinely produced nothing.
+    /// </remarks>
+    [Fact]
+    public async Task GetAssertion_WhenTokenIsUsed_RecordsExactlyOnePinUvAuthParam()
+    {
+        // Arrange
+        var protocol = new TestPinUvAuthProtocol();
+        ArrangePinTokenAcquisition(protocol);
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
+
+        // Act
+        _ = await _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Single(protocol.IssuedAuthTags);
+    }
+
+    /// <summary>
+    /// Invalid extension input is rejected when the extension session is created, before any PIN/UV token
+    /// is minted (largeBlob support at authentication: WebAuthn L3 §10.1.5).
+    /// </summary>
+    [Fact]
+    public async Task GetAssertion_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted()
+    {
+        var protocol = new TestPinUvAuthProtocol();
+        ArrangePinTokenAcquisition(protocol);
+        var options = CreateUvRequiredOptions() with
+        {
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Preferred })
+        };
+
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.GetAssertionAsync(
+            options, "123456"u8.ToArray(), TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
+        Assert.Empty(protocol.IssuedAuthTags);
+        await _mockBackend.DidNotReceive().GetPinUvTokenAsync(
+            Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(), Arg.Any<string?>(),
+            Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Arranges token acquisition that hands the session the supplied protocol, so a test can
+    /// inspect which authentication tags the ceremony produced.
+    /// </summary>
+    private void ArrangePinTokenAcquisition(TestPinUvAuthProtocol protocol)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, extensions: MockCtap2Responses.AllKnownExtensions, largeBlobsSupported: true));
+
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(protocol, TokenBufferAssert.CreateSentinelToken()));
+    }
+
+    /// <summary>
+    /// Arranges an authenticator with a PIN set and hands the client a token session that owns
+    /// <paramref name="token"/>, so the test can inspect that buffer after the ceremony.
+    /// </summary>
+    /// <remarks>
+    /// The session does not copy the array, so <paramref name="token"/> is the session's owned
+    /// buffer and is also the buffer <c>ClientPin</c> would have returned in production.
+    /// </remarks>
+    private void ArrangePinTokenAcquisition(byte[] token)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), token));
+    }
+
+    /// <summary>
+    /// Guards the zeroing assertions against passing for the wrong reason: a ceremony that never
+    /// minted a token would never have had a buffer to clear.
+    /// </summary>
+    private async Task AssertTokenWasAcquired() =>
+        await _mockBackend.Received(1).GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>());
+
+    private static PublicKeyCredentialRequestOptions CreateUvRequiredOptions() => new()
+    {
+        Challenge = RandomNumberGenerator.GetBytes(32),
+        RpId = "example.com",
+        UserVerification = UserVerificationPreference.Required
+    };
+
+    [Fact(Timeout = 5000)]
+    public async Task MatchedCredential_SelectAsync_HonorsCancellationToken()
+    {
+        // An internal slow factory tests waiting semantics; production matches already hold built responses.
+        var credentialId = RandomNumberGenerator.GetBytes(32);
+        var tcs = new TaskCompletionSource<AuthenticationResponse>();
+
+        var rawAuthData = MockCtap2Responses.BuildAuthData();
+        var mockResponse = new AuthenticationResponse
+        {
+            CredentialId = credentialId,
+            RawAuthenticatorData = rawAuthData,
+            Signature = RandomNumberGenerator.GetBytes(64),
+            SignCount = 1,
+            ClientData = WebAuthnClientData.Create("webauthn.get", RandomNumberGenerator.GetBytes(32), _origin, null, null),
+            ClientExtensionResults = null,
+            AuthenticatorData = WebAuthnAuthenticatorData.Decode(rawAuthData),
+            User = null
+        };
+
+        var match = new MatchedCredential(
+            credentialId,
+            user: null,
+            responseFactory: _ => tcs.Task);
+
+        // Act - Call with already-cancelled token (factory hasn't completed yet)
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => match.SelectAsync(cts.Token));
+
+        // Complete the factory
+        tcs.SetResult(mockResponse);
+
+        // Verify calling again with None works (lazy is now complete)
+        var response = await match.SelectAsync(CancellationToken.None);
+        Assert.NotNull(response);
+        Assert.Equal(credentialId, response.CredentialId.ToArray());
+    }
+}

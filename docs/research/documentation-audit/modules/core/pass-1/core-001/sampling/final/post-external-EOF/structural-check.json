@@ -1,0 +1,23 @@
+{
+  "result": "BOUNDED TWO-FILE SUCCESSOR VERIFIED; READY FOR ASTRA/FRESH INDEPENDENT REVIEW",
+  "actual_unique_reads": 1134,
+  "counted_supported_candidate": 1071,
+  "target": 1071,
+  "shortfall": 0,
+  "conservative_population": 9352,
+  "roles": 94,
+  "owners": 17,
+  "changed_source_files": 2,
+  "current_manifest_paths": 363,
+  "affected_population_records": 41,
+  "affected_actual_maps": 6,
+  "original_unit_literal_range_differences": 0,
+  "eligibility_losses": 0,
+  "new_reads": 0,
+  "new_credit_awards": 0,
+  "predecessor_seal_preserved": true,
+  "Astra_adjudication": "PENDING REVIEW",
+  "fresh_independent_adjudication": "PENDING REVIEW",
+  "sampler_PASS": null,
+  "compiler_complete_claim": false
+}

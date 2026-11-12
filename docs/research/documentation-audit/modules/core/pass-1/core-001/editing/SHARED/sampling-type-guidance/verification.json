@@ -1,0 +1,27 @@
+{
+  "only_product_delta_from_accepted_before": [
+    "CLAUDE.md",
+    "docs/v1-to-v2-comparison.md"
+  ],
+  "other_24_product_paths_unchanged": true,
+  "original_editor_review_and_patch_records_preserved": 45,
+  "previous_lifecycle_patch_sha256": "37074361c54bb2232ff8406ae37af482a73c51b029a3dfd8328e467f697e274e",
+  "complete_fenced_bodies_unchanged": 17,
+  "specific_migration_table_and_Base32_pointer_unchanged": true,
+  "unclosed_fences": 0,
+  "new_missing_local_file_targets": [],
+  "scope": "Local file targets; anchors and external URLs not checked.",
+  "static_checks": {
+    "diff-whitespace": {
+      "exit": 0,
+      "output": ""
+    },
+    "focused-patch": {
+      "exit": 0,
+      "output": ""
+    }
+  },
+  "index_unchanged": true,
+  "build_test_formatter_compiler_native_crypto_device": "NOT RUN",
+  "focused_independent_review": "pending"
+}

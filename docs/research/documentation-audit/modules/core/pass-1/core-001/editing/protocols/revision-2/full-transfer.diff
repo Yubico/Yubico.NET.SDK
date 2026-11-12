@@ -1,0 +1,2298 @@
+diff --git c/src/Core/src/Abstractions/IApplicationSession.cs w/src/Core/src/Abstractions/IApplicationSession.cs
+index 43d7bdf5f6a838d33b7c61497e21f0223a4fe639..541ee0405284a1b1e71c01f461ec606886d06ee8 100644
+--- c/src/Core/src/Abstractions/IApplicationSession.cs
++++ w/src/Core/src/Abstractions/IApplicationSession.cs
+@@ -20,8 +20,9 @@ public interface IApplicationSession : IDisposable, IAsyncDisposable
+ {
+     /// <summary>
+     ///     Gets the effective firmware version used to configure the application protocol and evaluate features.
+-    ///     This is the detected applet or device version unless session creation explicitly supplied a firmware
+-    ///     version override.
++    ///     Depending on the session, the value is detected, explicitly supplied, assumed, or unknown (0.0.0).
++    ///     Raw HID sessions retain 0.0.0 even after their protocol discovers a device version. Security Domain
++    ///     uses the supplied override or assumes 5.3.0. The value remains readable after disposal.
+     /// </summary>
+     FirmwareVersion FirmwareVersion { get; }
+ 
+@@ -29,7 +30,8 @@ public interface IApplicationSession : IDisposable, IAsyncDisposable
+     ConnectionType ConnectionType { get; }
+ 
+     /// <summary>
+-    ///     Gets a value indicating whether the session has initialized its application protocol.
++    ///     Gets whether session initialization has completed. Applet sessions complete their initializer;
++    ///     raw HID sessions are attached and ready for first use, with wire initialization still deferred.
+     ///     Returns <c>false</c> once disposal begins.
+     /// </summary>
+     bool IsInitialized { get; }
+@@ -37,9 +39,15 @@ public interface IApplicationSession : IDisposable, IAsyncDisposable
+     /// <summary>
+     ///     Gets a value indicating whether the session has established application-protocol authentication,
+     ///     such as SCP. Applet-specific authentication state is exposed by the respective session type.
++    ///     SCP11b authenticates the device to the host; this flag grants no applet PIN, UV, or management authority
++    ///     and is not an ongoing channel-liveness check.
+     ///     Returns <c>false</c> once disposal begins.
+     /// </summary>
+     bool IsAuthenticated { get; }
+     /// <summary>Evaluates known firmware compatibility, not runtime authorization or operation success.</summary>
++    /// <remarks>
++    ///     This query remains available after disposal. Major-zero versions use the SDK's permissive development
++    ///     policy; a positive result for an unknown raw-session version is not evidence of device support.
++    /// </remarks>
+     bool IsSupported(Feature feature);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Abstractions/IProtocol.cs w/src/Core/src/Abstractions/IProtocol.cs
+index 883eb9428602777f6420db739c3fe8f15f668359..06ce97e750c4ff792e57a16918e5c501cc90af2e 100644
+--- c/src/Core/src/Abstractions/IProtocol.cs
++++ w/src/Core/src/Abstractions/IProtocol.cs
+@@ -37,6 +37,8 @@ namespace Yubico.YubiKit.Core.Abstractions;
+ ///         Implementations admit one logical exchange at a time. An overlapping operation throws
+ ///         <see cref="InvalidOperationException" /> immediately because YubiKey transports maintain chained
+ ///         APDU, CTAP HID, OTP HID, or SCP state across packets.
++///         This admission covers an exchange rather than a complete multi-exchange public workflow;
++///         callers await the whole workflow before disposal or competing work.
+ ///     </para>
+ ///     <para>
+ ///         Application sessions keep the effective protocol for the session lifetime and dispose it when
+@@ -46,4 +48,4 @@ namespace Yubico.YubiKit.Core.Abstractions;
+ internal interface IProtocol : IDisposable
+ {
+     void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs w/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs
+index 2e92e519c7c2069cab32769b04ab197746345536..d26291e3b3bd611ea50164239ad515d2e756c463 100644
+--- c/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs
++++ w/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs
+@@ -13,7 +13,7 @@ internal static class CtapConstants
+     public const byte CtapHidCbor = 0x10;       // CTAP2 CBOR encoded message
+     public const byte CtapHidInit = 0x06;       // Initialize channel
+     public const byte CtapHidPing = 0x01;       // Echo data through local processing
+-    public const byte CtapHidCancel = 0x11;     // Cancel outstanding request
++    public const byte CtapHidCancel = 0x11;     // Cancel active CBOR work; no response to CANCEL itself
+     public const byte CtapHidError = 0x3F;      // Error response
+     public const byte CtapHidKeepAlive = 0x3B;  // Processing status notification
+     public const byte KeepAliveStatusUpNeeded = 0x02;
+@@ -25,7 +25,7 @@ internal static class CtapConstants
+     public const byte CtapReadConfig = 0xC2;           // 0x80 | 0x42
+     public const byte CtapWriteConfig = 0xC3;          // 0x80 | 0x43
+ 
+-    // Packet Structure
++    // This SDK uses 64-byte reports; CTAPHID also permits descriptor-defined report sizes.
+     public const int PacketSize = 64;
+     public const int MaxPayloadSize = 7609;     // 64 - 7 + 128 * (64 - 5)
+ 
+@@ -41,4 +41,4 @@ internal static class CtapConstants
+ 
+     // Bit masks
+     public const byte InitPacketMask = 0x80;    // Bit 7 set for init packets
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs w/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs
+index 45ffb348d555176602d99dc4bcaa2a6165728d67..f774b24562c2436a94eb5ccae6bb2942c6aec233 100644
+--- c/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs
++++ w/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs
+@@ -20,11 +20,10 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
+ /// Based on FIDO CTAP HID Protocol Specification.
+ /// </summary>
+ /// <remarks>
+-///     Concurrency: CTAP HID permits one transaction at a time per channel — a request is an init
+-///     packet plus continuation packets, and a foreign init packet mid-transaction aborts it on the
+-///     device. This class serializes full logical exchanges (including lazy channel initialization)
+-///     through an internal guard: overlapping calls are refused immediately. An exchange in flight runs to
+-///     completion.
++///     This class admits one logical exchange, including lazy channel initialization, at a time and refuses
++///     overlap. CTAP 2.3 Proposed Standard (February 26, 2026), §11.2.5 distinguishes same-channel INIT
++///     resynchronization from another channel's busy response; an arbitrary foreign initialization packet
++///     is not an abort command. The guard covers an exchange rather than a multi-exchange applet workflow.
+ /// </remarks>
+ internal class FidoHidProtocol(
+     IFidoHidConnection connection,
+@@ -168,7 +167,8 @@ private async Task AcquireCtapHidChannelAsync(CancellationToken cancellationToke
+             // Extract channel ID (bytes 8-11, big-endian)
+             _channelId = BinaryPrimitives.ReadUInt32BigEndian(response.Span[8..12]);
+ 
+-            // Extract firmware version (bytes 13-15) - skip protocol version byte at 12
++            // INIT's vendor-defined major/minor/build bytes (13-15), distinct from protocol version at 12.
++            // CTAP 2.3 Proposed Standard §11.2.9.1.3 permits responses longer than the 17-byte base layout.
+             if (response.Length >= 16)
+             {
+                 var major = response.Span[13];
+@@ -267,8 +267,10 @@ private async Task SendRequest(
+     /// </summary>
+     /// <remarks>
+     /// <paramref name="exchangeToken"/> governs the reads and is uncancellable inside an
+-    /// exchange, so a partially framed response is never stranded. <paramref name="callerToken"/>
+-    /// is signal-only: it never aborts a read, it makes this method send CTAPHID_CANCEL.
++    /// exchange. <paramref name="callerToken"/> is signal-only: after a keep-alive it can trigger one
++    /// CTAPHID_CANCEL, followed by draining the original response. It never interrupts a pending read;
++    /// without further input the exchange can remain pending indefinitely. Transport/framing failures
++    /// still require recovery; an uncancellable read token alone does not ensure a successful drain.
+     /// </remarks>
+     private async Task<ReadOnlyMemory<byte>> ReceiveResponse(
+         uint channelId,
+@@ -295,14 +297,13 @@ await ReadResponseDataAsync(initPacket, responseData, responseLength, channelId,
+                 _logger.LogTrace("Received {Length} bytes in response", responseLength);
+                 terminalResponseDrained = true;
+ 
+-                // Only here is the channel provably clean. Throwing any earlier would strand the
+-                // remaining frames for the next exchange to misread.
++                // Assemble the complete terminal response before surfacing cancellation or callback failure,
++                // so its continuation packets are consumed rather than left for the next exchange.
+                 promptFailure?.Throw();
+ 
+-                // CTAP 2.3 §11.2.9.1.5: a cancelled request "will reply with the error
+-                // CTAP2_ERR_KEEPALIVE_CANCEL". A touch that raced the cancel yields a real success
+-                // instead; the authenticator has done the work (a credential may now exist), and the
+-                // spec never says to discard it, so it is returned.
++                // CTAP 2.3 Proposed Standard §11.2.9.1.5 requires the authenticator to return
++                // KEEPALIVE_CANCEL on the canceled original CBOR request, with no reply to CANCEL itself.
++                // Returning a raced CBOR success is this SDK's nonrollback policy, not a normative host rule.
+                 if (cancelRequested && !IsCtapSuccess(expectedCommand, responseData))
+                     callerToken.ThrowIfCancellationRequested();
+ 
+@@ -414,6 +415,8 @@ private static int ValidateTerminalResponse(ReadOnlySpan<byte> packet, uint chan
+     private async Task ReadResponseDataAsync(ReadOnlyMemory<byte> initPacket, byte[] responseData,
+         int responseLength, uint channelId, CancellationToken exchangeToken)
+     {
++        // responseData is a separate accumulation owner. This reader copies connection-returned reports
++        // without clearing their storage; clearing the result alone does not erase those incoming copies.
+         int initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
+         initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength).CopyTo(responseData);
+ 
+@@ -559,4 +562,4 @@ public ValueTask DisposeAsync()
+             _disposed = true;
+         });
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs w/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
+index 9b7ec349ceb0c3dc650a5b286604397416f1e1ee..ed71736497636a1660d2ac88a77b742bffb0de7c 100644
+--- c/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
++++ w/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
+@@ -22,9 +22,10 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///         The physical FIDO HID interface admits exactly one live SDK connection and native HID handle.
+-///         A second connection attempt is refused with <see cref="Devices.ConnectionInUseException" />
+-///         before the native interface is opened. Dispose the current connection before reopening it.
++///         Device-managed opens use an in-process registry to admit one live connection across known physical
++///         members. A conflicting open is refused with <see cref="Devices.ConnectionInUseException" /> before
++///         native acquisition. Direct expert report opens and external implementations have separate ownership
++///         contracts; this registry provides no cross-process exclusion. Dispose the current connection before reopening it.
+ ///     </para>
+ /// </remarks>
+ public interface IFidoHidConnection : IConnection
+@@ -67,4 +68,4 @@ public interface IFidoHidConnection : IConnection
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The received packet (64 bytes).</returns>
+     Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs w/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
+index 24efb4dae92c0aae2bb74b0b1a7907334a70ec92..0b83a6f2271cacef6dbb65ab276ea9e0cc9e8893 100644
+--- c/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
++++ w/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
+@@ -14,7 +14,9 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
+ /// <remarks>
+ ///     Implementations admit one full logical exchange at a time. An overlapping operation throws
+ ///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
+-///     in flight runs to completion to avoid stranding the device mid-transaction.
++///     in flight keeps receiving the original response. Caller cancellation can send CANCEL after a keep-alive;
++///     it does not interrupt a pending read or impose a deadline. Use request/response commands here, not the
++///     no-response CANCEL control command. A failed partial exchange requires connection recovery by the caller.
+ /// </remarks>
+ internal interface IFidoHidProtocol : IProtocol
+ {
+@@ -58,7 +60,8 @@ Task<ReadOnlyMemory<byte>> SendCommandAsync(
+     bool IsChannelInitialized { get; }
+ 
+     /// <summary>
+-    /// Gets the firmware version reported during channel initialization.
++    /// Gets the vendor-defined device version bytes reported during channel initialization, distinct from
++    /// the CTAPHID protocol version and CTAP specification edition.
+     /// </summary>
+     FirmwareVersion? FirmwareVersion { get; }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs w/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs
+index 59ce16e599110ac3295f6afa23d77f5b69d54b44..6e12a71629683073fbe9393996579eaa20cd1ee4 100644
+--- c/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs
++++ w/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs
+@@ -25,7 +25,9 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
+ /// <remarks>
+ ///     Implementations admit one full logical exchange at a time. An overlapping operation throws
+ ///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
+-///     in flight runs to completion to avoid stranding the device mid-frame.
++///     in flight retains admission through response handling or cleanup. Touch cancellation, local poll
++///     deadlines, transport failures, and a failed-reset refusal have separate outcomes; the guard alone
++///     supplies no completion deadline or inbound CRC authentication.
+ /// </remarks>
+ internal interface IOtpHidProtocol : IProtocol
+ {
+diff --git c/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs w/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs
+index f4cdd50d9fd51eef5d33ff5a87ce692088879ad3..0f0ef50d17ba8822b0b32c40779e0f6d6e9cf718 100644
+--- c/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs
++++ w/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs
+@@ -16,7 +16,7 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
+ 
+ /// <summary>
+ /// Constants for OTP HID protocol (8-byte feature reports).
+-/// Based on the YubiKey OTP slot protocol specification.
++/// Describes the Yubico slot/report layout used by this implementation.
+ /// </summary>
+ public static class OtpConstants
+ {
+@@ -66,7 +66,7 @@ public static class OtpConstants
+     public const byte SequenceMask = 0x1F;
+ 
+     /// <summary>
+-    /// Offset of programming sequence in status byte.
++    /// Offset of the programming sequence byte in the eight-byte status report.
+     /// </summary>
+     public const int StatusOffsetProgSeq = 4;
+ 
+@@ -81,12 +81,14 @@ public static class OtpConstants
+     public const byte ConfigSlotsProgrammedMask = 0b00000011;
+ 
+     /// <summary>
+-    /// Offset of response length in the response frame (same as SlotDataSize).
++    /// Legacy assumed response-length offset. The current reader does not use this value;
++    /// inbound data length is command-specific rather than a universal field at byte 64.
+     /// </summary>
+     public const int ResponseLengthOffset = SlotDataSize;
+ 
+     /// <summary>
+-    /// Offset of CRC in the response frame.
++    /// Legacy assumed response-CRC offset. The current reader does not use this value;
++    /// callers validate CRC at the command's expected data length.
+     /// </summary>
+     public const int ResponseCrcOffset = ResponseLengthOffset + 1;
+ 
+@@ -105,4 +107,4 @@ public static class OtpConstants
+     /// Write device info command.
+     /// </summary>
+     public const byte CmdYk4SetDeviceInfo = 0x15;
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs w/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs
+index bb843d34eeabfe7969bdcebe17c6eb3387122501..f593024a53d4a8e3b5d6d6ee366cd6965f410e46 100644
+--- c/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs
++++ w/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs
+@@ -45,7 +45,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
+     private readonly DisposalGate _disposalGate = new();
+     private readonly ILogger<OtpHidProtocol> _logger;
+     private readonly ArrayPool<byte> _bufferPool;
+-    // Production keeps the device's 14-second touch window; the internal override makes timeout tests deterministic.
++    // The SDK uses a local 14-second touch deadline; native report calls can outlast that deadline.
+     private readonly TimeSpan _touchTimeout;
+     private FirmwareVersion? _firmwareVersion;
+     private Exception? _resetFailure;
+@@ -116,7 +116,8 @@ await SendAndReceiveCoreUnderGuardAsync(
+             }
+             catch when (_resetFailure is null)
+             {
+-                // Expected to fail - the scan map command should be rejected
++                // Rejection is expected, but this filter also suppresses other refresh failures when no
++                // reset failure is latched. Successful initialization here is not proof of a refreshed sequence.
+             }
+             finally
+             {
+@@ -191,7 +192,7 @@ private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreUnderGuardAsync(
+             var programmingSequence = await SendFrameAsync(
+                 slot, payload, exchangeToken, () => wireAttempted = true).ConfigureAwait(false);
+ 
+-            // Read response using Java-style single polling loop
++            // Poll for completion or pending data, then assemble command-specific response bytes.
+             return await ReadFrameJavaStyleAsync(
+                     programmingSequence,
+                     userPresenceNotification,
+@@ -215,9 +216,8 @@ await ResetStateAfterAbandonmentAsync("incomplete OTP HID exchange", exchangeTok
+     }
+ 
+     /// <summary>
+-    /// Reads one frame response using the legacy C# approach:
+-    /// 1. First wait for ReadPending flag (like WaitForReadPending)
+-    /// 2. Then read data packets using the frame reader pattern
++    /// Polls until response data is pending or the programming sequence indicates status-only completion,
++    /// then reads sequenced seven-byte data chunks when present.
+     /// </summary>
+     /// <param name="programmingSequence">The programming sequence before the command was sent.</param>
+     /// <param name="userPresenceNotification">The non-null handle for the SDK operation.</param>
+@@ -231,7 +231,7 @@ private async Task<ReadOnlyMemory<byte>> ReadFrameJavaStyleAsync(
+     {
+         _logger.LogDebug("ReadFrameJavaStyleAsync starting, programmingSequence={ProgSeq}", programmingSequence);
+ 
+-        // Phase 1: Wait for ReadPending flag (legacy C# WaitForReadPending approach)
++        // Wait for pending data or status-only completion.
+         var (firstReport, hasData) = await WaitForReadyToReadAsync(
+                 programmingSequence,
+                  () => userPresenceNotification.RequestAsync(UserPresenceBasis.DeviceWaiting, callerToken),
+@@ -247,13 +247,14 @@ private async Task<ReadOnlyMemory<byte>> ReadFrameJavaStyleAsync(
+             return statusResponse;
+         }
+ 
+-        // Phase 2: Read data packets (legacy C# frame reader pattern)
++        // Assemble the pending data reports.
+         return await ReadDataPacketsAsync(firstReport, exchangeToken).ConfigureAwait(false);
+     }
+ 
+     /// <summary>
+     /// Waits for the device to be ready to read (ReadPending flag set) or command complete.
+-    /// Uses tight polling - the write-side delays provide sufficient device processing time.
++    /// Unchanged status and busy reports are polled without a delay. The local three-second deadline is
++    /// checked between reads, so it does not bound native GET duration or guarantee asynchronous invocation.
+     /// </summary>
+     private async Task<(ReadOnlyMemory<byte> Report, bool HasData)> WaitForReadyToReadAsync(
+         int programmingSequence,
+@@ -322,7 +323,8 @@ private async Task<ReadOnlyMemory<byte>> ReadFrameJavaStyleAsync(
+ 
+     /// <summary>
+     /// Reads data packets after ReadPending was detected.
+-    /// Uses the legacy C# frame reader pattern.
++    /// The accumulation buffer is cleared and returned; individual connection-returned report storage has
++    /// a separate lifetime and is not cleared by this reader.
+     /// </summary>
+     private async Task<ReadOnlyMemory<byte>> ReadDataPacketsAsync(
+         ReadOnlyMemory<byte> firstReport,
+@@ -537,7 +539,7 @@ private async Task<int> SendFrameAsync(
+             payload.CopyTo(frame.AsSpan());
+             frame[OtpConstants.SlotDataSize] = slot;
+ 
+-            // Calculate and write CRC (little-endian)
++            // CRC covers the padded 64-byte payload; write it uncomplemented, little-endian.
+             var crc = ChecksumUtils.CalculateCrc(payload, payload.Length);
+             BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(OtpConstants.SlotDataSize + 1), crc);
+             // Last 3 bytes are filler (already zero)
+@@ -589,7 +591,8 @@ private async Task<int> SendFrameAsync(
+     }
+ 
+     /// <summary>
+-    /// Resets the state of YubiKey from reading.
++    /// Sends the invalid-sequence dummy report to end response reading; this is protocol cleanup,
++    /// not a persistent applet or factory reset.
+     /// </summary>
+     private async Task ResetStateAsync(CancellationToken cancellationToken)
+     {
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs w/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs
+index 2261cfc2ef582af5b8a8e2e25528de4152f10f84..5f4930179ffd5bfac8462d729eaee1e71cd0ea73 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs
+@@ -24,17 +24,35 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ ///     <b>Ownership and zeroing:</b> <see cref="ApduCommand"/> stores a reference to the caller-provided
+ ///     <see cref="Data"/> buffer — it does <b>not</b> clone it. When the payload carries sensitive material
+ ///     such as PIN bytes, key material, or cryptograms, the <b>caller</b> is responsible for zeroing the
+-///     source buffer after the command has been transmitted.
++///     source buffer in finally after the actual exchange task is terminal. Keep the data unchanged until then;
++///     a canceled outer wait does not end the borrow.
+ ///     </para>
+ ///     <code>
+-///     // ✅ Correct — caller zeroes the source buffer after transmission
+-///     var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
+-///     await protocol.TransmitAndReceiveAsync(command, ct);
+-///     CryptographicOperations.ZeroMemory(pinnedPin); // zeroes the buffer command.Data referenced
+-///
+-///     // ✅ Non-sensitive commands need no special handling
+-///     var command = new ApduCommand(0x00, InsSelect, 0x04, 0x00, appId);
+-///     var response = await protocol.TransmitAndReceiveAsync(command, ct);
++///     // The caller supplies an open connection, an applet-specific header, and owned payload bytes.
++///     // This helper borrows the connection and consumes the payload, clearing it even if creation fails.
++///     static async Task&lt;short&gt; SendAndClearAsync(
++///         Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection connection,
++///         byte cla, byte ins, byte p1, byte p2, byte[] payload, CancellationToken ct)
++///     {
++///         try
++///         {
++///             await using var session = await Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(connection, ct);
++///             var command = new ApduCommand(cla, ins, p1, p2, payload);
++///             var response = await session.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken: ct);
++///             try
++///             {
++///                 return response.SW; // Inspect status before clearing the response owner.
++///             }
++///             finally
++///             {
++///                 response.Clear();
++///             }
++///         }
++///         finally
++///         {
++///             System.Security.Cryptography.CryptographicOperations.ZeroMemory(payload);
++///         }
++///     }
+ ///     </code>
+ /// </remarks>
+ public readonly record struct ApduCommand
+@@ -62,7 +80,12 @@ public ApduCommand(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte> data =
+     /// <summary>Gets the P2 byte.</summary>
+     public byte P2 { get; init; }
+ 
+-    /// <summary>Gets the Le value.</summary>
++    /// <summary>Gets the expected response-length value passed to the selected formatter.</summary>
++    /// <remarks>
++    ///     Both SDK formatters append Le; zero encodes a zero field rather than omitting it. Short formatting
++    ///     accepts 0 through 255 (use zero for the maximum wire encoding); extended formatting accepts 0 through
++    ///     65536, with both zero and 65536 encoded as two zero bytes. There is no absent-Le representation here.
++    /// </remarks>
+     public int Le { get; init; }
+ 
+     /// <summary>
+@@ -81,4 +104,4 @@ public override string ToString() =>
+     // NOTE: record struct auto-generates Equals/GetHashCode over all properties.
+     // ReadOnlyMemory<byte> uses reference equality (pointer + offset + length), not content equality.
+     // Do not use ApduCommand in Dictionary, HashSet, or == comparisons that expect content-based equality.
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs w/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs
+index 025c0a894af4b38c0563d053935ada005e76c867..69be2a4bbd567fc4c5af8ac866f84cc44e49bdb2 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs
+@@ -17,6 +17,10 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ /// <summary>
+ ///     The exception that is thrown when an ISO 7816 application has encountered an error.
+ /// </summary>
++/// <remarks>
++///     When throwOnError is enabled, the Core exchange API throws for any final status other than 0x9000,
++///     including warnings. With it disabled, inspect the returned response's raw status before clearing it.
++/// </remarks>
+ [Serializable]
+ public class ApduException : Exception
+ {
+@@ -139,4 +143,4 @@ public static ApduException FromStatusWord(short sw, string? additionalContext =
+ 
+         return new ApduException(message) { SW = sw };
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs w/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs
+index 77638a22740e9aadd938cf1bfb1a70c0e22cde20..d9e11f55a6d50e2aff0c37781b27bbc21a43e4e7 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs
+@@ -27,7 +27,7 @@ public Memory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<
+         if (le is < 0 or > 65536)
+             throw new ArgumentException("Le must be between 0 and 65536", nameof(le));
+ 
+-        // ISO 7816-4 extended APDU formats used here always include Le:
++        // This formatter always includes Le; these layouts describe SDK output rather than every ISO case:
+         // Case 2E (no data): CLA INS P1 P2 00 Le_hi Le_lo (7 bytes)
+         // Case 4E (data): CLA INS P1 P2 00 Lc_hi Lc_lo [data] Le_hi Le_lo (9+ bytes)
+ 
+@@ -68,4 +68,4 @@ public Memory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<
+         return buffer.ToArray();
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs w/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs
+index c9c77c94997c84995fb87af8594b4feda293acaf..18afe59a0d87b3f0e117212b9051aa19ca58594f 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs
+@@ -14,6 +14,8 @@
+ 
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ 
++// Emits a trailing Le byte even when the API value is zero; explicit 256 is rejected here.
++// The returned heap encoding and temporary stack copy have separate cleanup scopes.
+ internal class ApduFormatterShort : IApduFormatter
+ {
+     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
+@@ -55,4 +57,4 @@ public Memory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<
+     public Memory<byte> Format(ApduCommand apdu) =>
+         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs w/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
+index 346d21bb714448646ab3d9425f8860795bc702e3..16e9bc41ec545d698f3a806ad0269459835bf200 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
+@@ -20,6 +20,11 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ /// <summary>
+ ///     Represents an ISO 7816 application response.
+ /// </summary>
++/// <remarks>
++///     Constructors copy input into a private owner. For sensitive output, inspect status and parse data within
++///     a try block, then call Clear in finally. Clearing also zeroes status and all Data/RawData aliases; it
++///     leaves caller input, transport staging, previous fragments, and other intermediate copies unchanged.
++/// </remarks>
+ public sealed class ApduResponse
+ {
+     private readonly byte[] _rawData;
+@@ -97,4 +102,4 @@ public ApduResponse(byte[] dataWithoutSW, short sw)
+     /// data, including status bytes, never the caller's source. Repeated clearing is harmless.
+     /// </remarks>
+     public void Clear() => CryptographicOperations.ZeroMemory(_rawData);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs w/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
+index 58983cb427baac2bf1d15e4882e6acbcdd5b6ae6..733bea5f76cb330b2677b26aed6026e9cfdd3808 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
+@@ -16,6 +16,9 @@
+ 
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ 
++// Plain continuation exceptions notify recovery only after a successful fragment advanced offset.
++// A first-fragment transport failure can leave wire state uncertain without that notification;
++// absence of a local refusal latch is not evidence that the card can safely accept another command.
+ internal class ChainedApduTransmitter(
+     ISmartCardConnection connection, IApduFormatter formatter, Action<Exception>? onContinuationFailure = null,
+     bool rejectIntermediateFragment = false)
+@@ -63,4 +66,4 @@ public override async Task<ApduResponse> TransmitAsync(ApduCommand command, bool
+             throw;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs w/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
+index fac728f3147560dd4a8051a7811c8f4fe954ae87..1a6922b1413d4879c0e19e9d0452c889101d5ed5 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
+@@ -17,6 +17,10 @@
+ 
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ 
++// Assemble 0x61 responses using fixed-zero CLA/P1/P2/Le and the configured remaining-data instruction.
++// This receiver neither retries 0x6C corrected lengths nor imposes a total response-size/fragment budget.
++// Each fragment owner and the final copied owner have separate cleanup scopes; Clear on the result
++// does not clear discarded fragment owners. The writer is currently cleared only after successful assembly.
+ internal class ChainedResponseReceiver(
+     FirmwareVersion? firmwareVersion,
+     IApduProcessor apduTransmitter,
+@@ -74,4 +78,4 @@ public async Task<ApduResponse> TransmitAsync(
+ 
+     public void Dispose() => (apduTransmitter as IDisposable)?.Dispose();
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs w/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
+index 4c9bf0183d6cdfcff4e39d1519dada03917a252d..77abe27c24f788fc87780a072687b5bf5034e838 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
+@@ -23,7 +23,9 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ ///     Implementations admit one logical exchange at a time. An overlapping call throws
+ ///     <see cref="InvalidOperationException" /> immediately because parallel APDU streams would corrupt chained
+ ///     commands, chained responses, and SCP MAC chains. A token is checked before entry; an exchange already
+-///     in flight runs to completion so no partial chained state is left on the card.
++///     in flight retains admission until terminal, with uncancellable constituent transmits. Transport or
++///     framing failure can still leave card state uncertain; local recovery notifications are not a universal
++///     recovery guarantee. Await complete public workflows separately from this per-exchange guard.
+ /// </remarks>
+ internal interface ISmartCardProtocol : IProtocol
+ {
+@@ -32,7 +34,7 @@ internal interface ISmartCardProtocol : IProtocol
+     /// </summary>
+     /// <param name="command">The APDU command to transmit.</param>
+     /// <param name="throwOnError">
+-    /// When <c>true</c> (default), throws <see cref="ApduException"/> for non-success status words.
++    /// When <c>true</c> (default), throws <see cref="ApduException"/> for any final status other than 0x9000, including warnings.
+     /// When <c>false</c>, returns the response without throwing.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -44,4 +46,4 @@ Task<ApduResponse> TransmitAndReceiveAsync(
+ 
+     Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
+         CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs w/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs
+index 3b9e174163e7acc05f514f9139374c0c6a4aba58..0f9c0b854a6fa07ec274f86f2c619ae382146e95 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs
+@@ -14,9 +14,18 @@
+ 
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ 
++/// <summary>Supplies APDU formatting and response-follow-up settings before SCP establishment.</summary>
+ public readonly record struct ProtocolConfiguration
+ {
++    /// <summary>Gets whether configured production firmware should use short APDU command chaining.</summary>
++    /// <remarks>
++    ///     Applied for production firmware 4.0 and later. Earlier firmware retains the existing format;
++    ///     major-zero development firmware follows a separate permissive configuration path.
++    /// </remarks>
+     public bool ForceShortApdus { get; init; }
+ 
++    /// <summary>Gets the instruction for 0x61 response follow-ups; null leaves the current instruction unchanged.</summary>
++    /// <value>The override instruction, or null. A default protocol starts with 0xC0.</value>
++    /// <remarks>Follow-ups use CLA, P1, P2, and API Le zero rather than copying the original header or SW2.</remarks>
+     public byte? InsSendRemaining { get; init; }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs w/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs
+index f407cdaa3e10007e189252738a932bc0a2417f79..2678b540bdcc0101821fbc9a67d3f7d0d6d41538 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs
+@@ -195,6 +195,11 @@ public static bool IsVerifyFailWithRetries(short sw) =>
+     /// </summary>
+     /// <param name="sw">The status word to describe.</param>
+     /// <returns>A descriptive message explaining the status word meaning.</returns>
++    /// <remarks>
++    ///     Descriptions are diagnostic text, not success classification. In particular, the signed-short
++    ///     fallback can label an unknown high-bit value as an unknown success code. Core IsOK checks exactly
++    ///     0x9000; preserve and inspect the raw status when interpreting an unmodeled value.
++    /// </remarks>
+     public static string GetStatusMessage(short sw) => sw switch
+     {
+         Success => "Command completed successfully",
+@@ -279,4 +284,4 @@ public static bool IsVerifyFailWithRetries(short sw) =>
+             _ => sw >= 0 ? $"Unknown status word (SW=0x{sw:X4})" : $"Unknown success code (SW=0x{sw:X4})"
+         }
+     };
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs w/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs
+index 51e4c20e0dfd2a91461311b5fd30b254cbec41dc..0dc72673ba053a26005c0a915c5a0de55850ccc6 100644
+--- c/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs
++++ w/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs
+@@ -17,19 +17,20 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+ public static class SmartCardMaxApduSizes
+ {
+     /// <summary>
+-    ///     The max APDU command size for the YubiKey NEO
++    ///     The SDK's NEO complete-command ceiling in bytes, including framing rather than just data.
+     /// </summary>
+     public const int Neo = 1390;
+ 
+     /// <summary>
+-    ///     The max APDU command size for the YubiKey 4 and greater
++    ///     The SDK's YubiKey 4 complete-command ceiling in bytes, including framing.
+     /// </summary>
+     public const int Yk4 = 2038;
+ 
+     /// <summary>
+-    ///     The max APDU command size for the YubiKey 4.3 and greater
++    ///     The SDK's YubiKey 4.3-and-later complete-command ceiling in bytes, including framing.
+     /// </summary>
+     public const int Yk43 = 3062;
+ 
++    /// <summary>Maximum command-data bytes per short APDU fragment, distinct from a complete-command ceiling.</summary>
+     public const int ShortApduMaxChunkSize = 255;
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs w/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs
+index c664f0136b1a5c803fc8fdc5f6a06bd1c6a5c058..52232abaf231412b096a09d6622809b3e584b9d4 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs
+@@ -17,6 +17,11 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ /// <summary>
+ ///     Delegate for encrypting data using the DEK (Data Encryption Key) of a current SCP session.
+ /// </summary>
++/// <remarks>
++///     The delegate borrows live session keys; use it only while its SCP session remains alive. The caller owns
++///     input and returned storage and clears sensitive bytes separately. Disposing parameters is not a substitute
++///     for disposing the session's derived-key owner.
++/// </remarks>
+ /// <param name="data">The data to encrypt.</param>
+ /// <returns>The encrypted data.</returns>
+-public delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);
+\ No newline at end of file
++public delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs w/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs
+index abc1b2a468c1e900b9b2a5c71e1331ec3ef4bf1e..08a814e43d6d07c1d8ff0cb8fef401bc3c81e06c 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs
+@@ -15,8 +15,13 @@
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+-///     Reference to an SCP key, uniquely identified by KID (Key ID) and KVN (Key Version Number).
++///     Carries an SCP key ID (KID), key version number (KVN), and cached constructor encoding.
+ /// </summary>
++/// <remarks>
++///     Construct a new value when changing the reference. Init-property changes, including with-expressions,
++///     leave the cached encoding unchanged; default(KeyReference) has empty encoding. Generated equality also
++///     includes that cached memory, so separately constructed values are not a content-key comparison contract.
++/// </remarks>
+ public readonly record struct KeyReference(byte Kid, byte Kvn)
+ {
+     private readonly Memory<byte> _bytes = new byte[] { Kid, Kvn };
+@@ -34,9 +39,9 @@ public readonly record struct KeyReference(byte Kid, byte Kvn)
+     public static KeyReference Default => new(0x01, 0xFF);
+ 
+     /// <summary>
+-    ///     Returns a byte array representation of this key reference.
++    ///     Returns a view of the cached constructor encoding.
+     /// </summary>
+-    /// <returns>A two-byte array containing [Kid, Kvn].</returns>
++    /// <returns>Constructor bytes [Kid, Kvn], or empty memory for the default value.</returns>
+     public ReadOnlyMemory<byte> AsMemory() => _bytes;
+ 
+     public ReadOnlySpan<byte> AsSpan() => _bytes.Span;
+@@ -45,4 +50,4 @@ public readonly record struct KeyReference(byte Kid, byte Kvn)
+     ///     Returns a string representation of this key reference.
+     /// </summary>
+     public override string ToString() => $"KeyRef{{kid=0x{Kid:X2}, kvn=0x{Kvn:X2}}}";
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs w/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
+index 7d0e0cd754b51a499642539ff5cc4f74ef8df2b3..6c891d5b857b0c2f4708b7781428997e7430e778 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
+@@ -20,7 +20,8 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+ ///     Decorator that wraps an ISmartCardProtocol with SCP (Secure Channel Protocol) functionality.
+-///     All APDU transmissions are encrypted and MACed through the SCP processor. Overlapping calls are refused
++///     Ordinary exchanges use the SCP processor; SelectAsync sends a plaintext SELECT and retains the local
++///     secure graph rather than reestablishing authentication. Overlapping calls are refused
+ ///     by the same guard as the wrapped protocol (SCP MAC chaining makes
+ ///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
+ /// </summary>
+@@ -141,4 +142,4 @@ private void DisposeAfterDrain()
+         }
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs w/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs
+index 54cfb101b26e33c803c41081bfd74c3b1b9f8c6e..40b678f9573ffa0156a1a0be7c82ca02874499d3 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs
+@@ -18,6 +18,12 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ ///     SCP key parameters for SCP03 authentication.
+ ///     SCP03 uses three keys (enc, mac, dek) with shared KVN but different KIDs.
+ /// </summary>
++/// <remarks>
++///     This owner retains and disposes the exact StaticKeys instance supplied by the caller. A record with-clone
++///     shares that owner rather than cloning its key arrays. Keep parameters alive until all using sessions have
++///     been disposed; Security Domain also borrows them for reset. Supply per-card keys: initialization does not
++///     diversify a base master key from INITIALIZE UPDATE's diversification bytes.
++/// </remarks>
+ public sealed record Scp03KeyParameters : ScpKeyParameters
+ {
+     private bool _disposed;
+@@ -42,6 +48,8 @@ public Scp03KeyParameters(KeyReference keyReference, StaticKeys keys)
+     /// </summary>
+     public StaticKeys Keys { get; }
+ 
++    /// <summary>Creates a new owner containing the public factory-default SCP03 keys.</summary>
++    /// <remarks>Use only with an authorized key still configured with those defaults; they provide no secret provisioning.</remarks>
+     public static Scp03KeyParameters Default => new(KeyReference.Default, StaticKeys.GetDefaultKeys());
+     public override void Dispose()
+     {
+@@ -57,4 +65,4 @@ public override void Dispose()
+             _disposed = true;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs w/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs
+index e38476e52b50893e557d095e7fd6bb82aa014cd2..f8c55e8c28a7db114023c3fadf743c56f925751b 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs
+@@ -18,8 +18,20 @@
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+-///     SCP key parameters for SCP11 authentication (supports SCP11a, SCP11b, SCP11c).
++///     Carries key and certificate inputs for SCP11a, SCP11b, or SCP11c setup.
+ /// </summary>
++/// <remarks>
++///     Supply inputs compatible with Core's fixed P-256/AES-128 setup path. Constructor shape checks do not establish
++///     curve compatibility, certificate trust, validity, order, or key association. The caller selects a trusted
++///     Security Domain public key and supplies the OCE chain in device-required order; Core sends that chain,
++///     and the Security Domain checks it under its provisioning policy.
++///     The parameters retain the exact key and certificate objects, copying only the certificate collection.
++///     Dispose releases the private key and certificates, not the public key. Record with-clones share these
++///     owners. Dispose sessions before parameters, including Security Domain sessions that reuse them on reset.
++///     Setup receipt verification is distinct from applet authorization. In the inspected SCP11 1.3.0.13
++///     Public Review (August 2023), §4.3, a/c host authentication also requires the first correct-MAC APDU
++///     after establishment. This implementation is not a statement of verified final 1.4 profile conformance.
++/// </remarks>
+ public sealed record Scp11KeyParameters : ScpKeyParameters
+ {
+     private bool _disposed;
+@@ -30,7 +42,7 @@ public sealed record Scp11KeyParameters : ScpKeyParameters
+     /// <param name="keyReference">The key reference (KID must be 0x11, 0x13, or 0x15).</param>
+     /// <param name="pkSdEcka">The Security Domain public key.</param>
+     /// <param name="skOceEcka">The Off-Card Entity private key (required for SCP11a/c).</param>
+-    /// <param name="oceKeyRef">The Off-Card Entity key reference (required for SCP11a/c).</param>
++    /// <param name="oceKeyRef">The provisioned Off-Card Entity reference for SCP11a/c; null currently sends 00/00.</param>
+     /// <param name="certificates">The certificate chain (required for SCP11a/c).</param>
+     /// <exception cref="ArgumentException">Thrown if KID is invalid or required parameters are missing.</exception>
+     public Scp11KeyParameters(
+@@ -78,19 +90,20 @@ public Scp11KeyParameters(KeyReference keyReference, ECPublicKey pkSdEcka)
+ 
+     /// <summary>
+     ///     Gets the private key of the Off-Card Entity ECKA.
+-    ///     Required for SCP11a and SCP11c, null for SCP11b.
++    ///     Required for SCP11a and SCP11c. Normal SCP11b setup uses the short constructor and no static OCE key;
++    ///     the long constructor admits one without establishing that input's profile compatibility.
+     /// </summary>
+     public ECPrivateKey? SkOceEcka { get; }
+ 
+     /// <summary>
+     ///     Gets the Off-Card Entity key reference.
+-    ///     Required for SCP11a and SCP11c, null for SCP11b.
++    ///     Supply the provisioned reference for SCP11a/c; null currently falls back to 00/00 on the wire.
+     /// </summary>
+     public KeyReference? OceKeyRef { get; }
+ 
+     /// <summary>
+     ///     Gets the certificate chain for the Off-Card Entity.
+-    ///     Required for SCP11a and SCP11c (non-empty), empty for SCP11b.
++    ///     Required for SCP11a and SCP11c (non-empty). The short SCP11b constructor supplies an empty collection.
+     /// </summary>
+     public IReadOnlyList<X509Certificate2> Certificates { get; }
+ 
+@@ -118,4 +131,4 @@ private static void ValidateKid(byte kid)
+             throw new ArgumentException(
+                 $"Invalid SCP11 KID: 0x{kid:X2}. Must be 0x11 (SCP11a), 0x13 (SCP11b), or 0x15 (SCP11c).");
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs w/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
+index 2e572e7a65659979f595345c10c722a906c3569a..f43b08f01fbcd02c587c8e8d07319ec58454d242 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
+@@ -18,6 +18,10 @@
+ 
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ 
++// Implements the fixed P-256/SHA-256/AES-128 derivation shape: two 32-byte agreements form
++// the 64-byte input ka1 || ka2. X9.63 then produces 80 bytes, split into five 16-byte values:
++// receipt key, S-ENC, S-MAC, S-RMAC, and DEK. Parameter admission is broader than
++// this parser's fixed curve/coordinate widths; it does not establish generic SCP11 profile support.
+ internal static class Scp11X963Kdf
+ {
+     internal static SessionKeys DeriveSessionKeys(
+@@ -25,7 +29,7 @@ internal static SessionKeys DeriveSessionKeys(
+         ECDiffieHellman skOceEcka, // Host static or ephemeral private key
+         ReadOnlyMemory<byte> oceAuthenticateData, // Host Authenticate EC KeyAgreement TLV Bytes
+         ECDiffieHellmanPublicKey pkSdEcka, // Yubikey Public Key
+-        ReadOnlyMemory<byte> ePkSdEcka, // Yubikey Ephemeral SD Public Key Bytes
++        ReadOnlyMemory<byte> ePkSdEcka, // Returned SD public-key TLV: ephemeral for a/b, static for c
+         ReadOnlyMemory<byte> sdReceipt // Yubikey receipt
+     )
+     {
+@@ -141,9 +145,8 @@ private static byte[] GetSharedSecret(
+             if (staticParameters.D is null)
+                 throw new CryptographicException("The static ECDH key has no private value.");
+ 
+-            // Key agreement 1: ephemeral OCE private key with ephemeral SD public key.
+-            // ephemeralParameters carries the local key's own matching Q/D pair; the SD's
+-            // ephemeral public key is the remote party.
++            // Key agreement 1: ephemeral OCE private key with the returned SD public key
++            // (ephemeral for a/b, static for c). The local parameters carry their matching Q/D pair.
+             ka1 = ecdh.ComputeSharedSecret(ephemeralParameters, ePkSdEcka.ExportParameters());
+ 
+             // Key agreement 2: static/ephemeral OCE private key with static SD public key.
+@@ -215,19 +218,7 @@ internal static byte[] GenerateOceReceiptAesCmac(
+         ReadOnlySpan<byte> keyAgreementData,
+         Func<int, byte[]> receiptBufferFactory)
+     {
+-        // var useOpenSsl = false; // Try AesCmac instead of OpenSSL
+-        // if (useOpenSsl)
+-        // {
+-        //     using var cmacObj =
+-        //         new CmacPrimitivesOpenSsl(CmacBlockCipherAlgorithm.Aes128); // This works in legacy code.
+-        //
+-        //     Span<byte> oceReceipt = stackalloc byte[16];
+-        //     cmacObj.CmacInit(receiptVerificationKey);
+-        //     cmacObj.CmacUpdate(keyAgreementData);
+-        //     cmacObj.CmacFinal(oceReceipt); // Our generated receipt
+-        //     return oceReceipt.ToArray();
+-        // }
+-
++        // The configured CMAC primitive owns provider resources; the returned receipt has a separate owner.
+         byte[]? receipt = receiptBufferFactory(16);
+         try
+         {
+@@ -255,4 +246,4 @@ internal static byte[] GenerateOceReceiptAesCmac(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs w/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs
+index d7fe567c828ccbd1394b16e1e7525815ef0719c5..d9e77a254cbbb94d38f69f7ae1df22194fcf6dd3 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs
+@@ -128,9 +128,10 @@ internal static IApduProcessor CreateSecureProcessor(
+         try
+         {
+             // Construct the SCP processor, send EXTERNAL AUTHENTICATE with the host cryptogram, then
+-            // request the data encryptor. Dispose state (and its session keys) on ANY failure in this
+-            // block — including SCP processor construction, EXTERNAL AUTHENTICATE, or a missing-DEK
+-            // failure from GetDataEncryptor() — otherwise session keys leak to the GC finalizer (T10).
++            // request the data encryptor. Dispose returned state on failure in this block, including
++            // processor construction, EXTERNAL AUTHENTICATE, or missing DEK. State and SessionKeys have
++            // no finalizer; deterministic disposal owns their cleanup. Earlier Scp03InitAsync failures
++            // have their own narrower cleanup scope.
+             // Disposing state directly (rather than a possibly-not-yet-constructed scpProcessor) mirrors
+             // InitScp11Async and stays correct even if the guarded block's first statement throws.
+             try
+@@ -186,9 +187,8 @@ internal static IApduProcessor CreateSecureProcessor(
+                 cancellationToken)
+             .ConfigureAwait(false);
+ 
+-        // Dispose state (and its live session keys) on any post-init failure — otherwise
+-        // session keys leak to the GC finalizer, mirroring the SCP03 EXTERNAL AUTHENTICATE
+-        // failure-cleanup discipline above (T10).
++        // Dispose returned state on post-init failure. State and SessionKeys have no finalizer;
++        // this guard owns cleanup until the secure processor takes over the returned state.
+         try
+         {
+             var scpProcessor = CreateSecureProcessor(
+@@ -207,4 +207,4 @@ internal static IApduProcessor CreateSecureProcessor(
+             throw;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs w/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs
+index 895284115e7fd2e5680cd189f92a55d34bc0879f..6bdf22006d78a6c81e286d4a64e0f977a9a10e1a 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs
+@@ -15,8 +15,12 @@
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+-///     Base interface for SCP key parameters used during authentication.
++///     Base disposable record for SCP key parameters used during channel setup.
+ /// </summary>
++/// <remarks>
++///     Sessions borrow parameters; the caller owns their disposal. Concrete records retain contained key
++///     and certificate owners, and with-clones share those references rather than creating independent owners.
++/// </remarks>
+ public abstract record ScpKeyParameters : IDisposable
+ {
+     /// <summary>
+@@ -26,4 +30,4 @@ public abstract record ScpKeyParameters : IDisposable
+     public KeyReference KeyReference { get; protected init; }
+ 
+     public abstract void Dispose();
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs w/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs
+index 54a0309f174329d02435715b87f6d1b2c33b9c53..df0eac0ec5e39e6379aca4dce83c011cca0410da 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs
+@@ -35,7 +35,8 @@ public static class ScpKid
+     public const byte SCP11b = 0x13;
+ 
+     /// <summary>
+-    ///     Key ID for SCP11c protocol (mutual authentication with certificate chain, variant C).
++    ///     Key ID for SCP11c, the certificate-based offline-scripting variant using the SD static key
++    ///     in both agreements. Replay and authorization restrictions depend on the applicable device profile.
+     /// </summary>
+     public const byte SCP11c = 0x15;
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs w/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
+index 6e4b9b0588e851367bad3c6ab17f3a59fde6a051..0781c4a797beed3d8ca0b9942182c381e3928691 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
+@@ -43,7 +43,7 @@ internal class ScpProcessor(
+     /// </summary>
+     public void Dispose() => State.Dispose();
+ 
+-    /// <summary>9000, 62xx and 63xx: the status words a card answers with an R-MAC (SCP03 Amd D §6.2.5).</summary>
++    /// <summary>9000, 62xx and 63xx: response statuses protected when R-MAC is selected (SCP03 1.1.2 Public Release, §6.2.5).</summary>
+     private static bool IsSuccessOrWarning(short sw) =>
+         sw == SWConstants.Success || (sw & 0xFF00) is 0x6200 or 0x6300;
+ 
+@@ -64,20 +64,22 @@ public async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp,
+ 
+         byte[]? scpCommandData = null;
+         byte[]? finalCommandData = null;
+-        byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
++        byte[]? encryptedData = null; // Retain the encrypted copy for finally cleanup on every exit.
+         Memory<byte> formattedApdu = default;
+ 
+-        // Encrypt() advances the encryption counter and Mac() advances the MAC chain, both before the
+-        // command reaches the card. A failure before either leaves host and card provably in step, so
+-        // the session stays usable. A failure after either (provider, transport, bad R-MAC) means the
+-        // host's state moved and the card's may or may not have: no later command can be trusted to
+-        // chain correctly, so the protocol must latch "recovery required" with the original failure.
++        // Record completed Encrypt/Mac calls so subsequent failures notify the recovery owner. Encrypt
++        // increments its counter before AES can fail, whereas this flag is set only after it returns;
++        // an exception inside Encrypt can therefore escape this notification boundary. This flag alone
++        // is not proof that host/card state remains synchronized after every provider failure.
+         var stateAdvanced = false;
+ 
+         try
+         {
+             // Step 1: Encrypt command data if requested
+-            // Note: Even empty data must be encrypted (padded) to maintain counter synchronization
++            // Current code pads and encrypts empty input too. When C-DECRYPTION and C-MAC are required,
++            // SCP03 1.1.2 Public Release §6.2.6 instead requires the off-card entity to advance the counter
++            // without encrypting an absent data field. Core's SCP03 initializer selects both in 0x33.
++            // Preserve that implementation/profile discrepancy separately from counter synchronization.
+             var commandData = command.Data;
+             if (encrypt)
+             {
+@@ -136,8 +138,8 @@ public async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp,
+                 var unmacdData = State.Unmac(response.Data.Span, response.SW);
+ 
+                 // Step 11: Decrypt response data
+-                // Note: Response is ALWAYS encrypted once SCP session is established,
+-                // regardless of whether the command data was encrypted
++                // This processor decrypts nonempty un-MACed response data, independently of command
++                // encryption. The decrypted temporary and the response's cloned owner are separate copies.
+                 if (unmacdData.Length > 0)
+                 {
+                     try
+@@ -153,10 +155,11 @@ public async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp,
+                 return new ApduResponse(unmacdData, response.SW);
+             }
+ 
+-            // No data field. The card puts an R-MAC on every success or warning response, data or not
+-            // (SCP03 Amd D §6.2.5), and none on an error. The one unauthenticated success is the
+-            // EXTERNAL AUTHENTICATE reply, which precedes the R-MAC session. Anything else claiming
+-            // success without an R-MAC did not come from the card.
++            // With R-MAC selected (as in Core's SCP03 level 0x33), SCP03 1.1.2 Public Release §6.2.5
++            // requires card R-MAC for 9000/62xx/63xx except EXTERNAL AUTHENTICATE. Error statuses return
++            // status only, without protection. R-MAC is optional across SCP03 security levels. The check
++            // below identifies the exception by INS 82 alone, not by handshake phase; later raw INS 82
++            // calls also reach it. Missing-R-MAC rejection is not universal phase-gating evidence.
+             if (IsSuccessOrWarning(response.SW) && command.Ins != InsExternalAuthenticate)
+             {
+                 throw new BadResponseException(
+@@ -165,9 +168,9 @@ public async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp,
+ 
+             return response;
+         }
+-        // Includes cancellation: a token observed after Encrypt()/Mac() still leaves the counter or
+-        // chain advanced. Report the original failure to the protocol so it refuses further exchanges
+-        // (see PcscProtocol.MarkRecoveryRequired), then rethrow unchanged: no wrapping, no replay.
++        // After a completed Encrypt/Mac call, report the original failure (including cancellation) so
++        // the owner refuses further exchanges. Rethrow unchanged and without replay. Earlier internal
++        // counter mutation can precede this flag; see its declaration above.
+         catch (Exception ex) when (stateAdvanced)
+         {
+             onSecureFailure?.Invoke(ex);
+@@ -195,4 +198,4 @@ public Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
+         CancellationToken cancellationToken = default)
+         => TransmitAsync(command, useScp, true, cancellationToken);
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs w/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
+index de4ac094600cc2f0f4f192f5cf791a72d19adf7b..b532611b33319abc2093c6e1f2059eb229c19829 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
+@@ -25,7 +25,7 @@ internal partial class ScpState
+     private const byte DerivationTypeCardCryptogram = 0x00;
+     private const byte DerivationTypeHostCryptogram = 0x01;
+     private const byte DerivationContextLength = 0x40; // Cryptogram length in bits: 64 = 8 bytes
+-    private const int InitializeUpdateResponseLength = 29; // Amd D §7.1.1.3: 10 div data + 3 key info + 8 challenge + 8 cryptogram
++    private const int InitializeUpdateResponseLength = 29; // Minimum parsed prefix: 10 div data + 3 key info + 8 challenge + 8 cryptogram
+ 
+     /// <summary>
+     ///     Runs the host side of the SCP03 INITIALIZE UPDATE step (Amd D §7.1.1): derives the session
+@@ -36,6 +36,14 @@ internal partial class ScpState
+     ///     (Amd D §7.1.2) to complete the handshake. The MAC chain starts at zero; EXTERNAL AUTHENTICATE
+     ///     is the first command MAC'd through it.
+     /// </returns>
++    /// <remarks>
++    ///     References here use SCP03 1.1.2 Public Release (March 2019). Its §7.1.1.6/Table 7-3 lists 29 mandatory
++    ///     bytes plus a three-byte sequence counter for pseudo-random challenge generation. This parser consumes
++    ///     the 29-byte prefix without validating that profile or key-info fields; diversification bytes are unused,
++    ///     so supplied static keys must already be per-card.
++    ///     The caller owns returned state and cryptogram. The initializer's post-return cleanup does not cover
++    ///     provider failures during cryptogram derivation after this method has allocated SessionKeys.
++    /// </remarks>
+     /// <exception cref="BadResponseException">
+     ///     The response is shorter than 29 bytes, or the card cryptogram does not match (wrong key set).
+     /// </exception>
+@@ -68,7 +76,7 @@ internal partial class ScpState
+         var cardChallenge = responseData[13..21];
+         var cardCryptogram = responseData[21..29];
+ 
+-        // Derivation context is host challenge || card challenge (Amd D §6.2.2.1)
++        // Host challenge || card challenge: SCP03 1.1.2 Public Release §6.2.1.
+         Span<byte> context = stackalloc byte[16];
+         hostChallenge.AsSpan().CopyTo(context);
+         cardChallenge.CopyTo(context[8..]);
+@@ -91,4 +99,4 @@ internal partial class ScpState
+ 
+         return (new ScpState(sessionKeys, new byte[16]), hostCryptogramBytes.ToArray());
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs w/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
+index 3eb54cb337d35ac6ebf5782a1974ed8254e59cf4..89f6416c7f8b97d904c49e453899ce668b8feae9 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
+@@ -21,7 +21,8 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ 
+ internal partial class ScpState
+ {
+-    // SCP identifier parameter "i" in the 90 tag of the authenticate command (Amd F §7.6.2.3):
++    // Citations in this file use SCP11 1.3.0.13 Public Review (August 2023), not unverified final 1.4.
++    // SCP identifier parameters in tag 90 (§7.1.1); request fields are in §7.6.2.3 (a/c) and §7.7.2.3 (b):
+     // SCP11a mutual authentication with OCE certificates, SCP11b card-only authentication,
+     // SCP11c like SCP11a with offline-scripting support.
+     private const byte Scp11aTypeParam = 0x01;
+@@ -32,15 +33,17 @@ internal partial class ScpState
+     private const byte Scp11KeyType = 0x88; // AES (tag 80)
+ 
+     private const byte InsPerformSecurityOperation = 0x2A; // Amd F §7.5: send the OCE certificate chain
+-    private const byte InsInternalAuthenticate = 0x88; // Amd F §7.6: SCP11b
++    private const byte InsInternalAuthenticate = 0x88; // Amd F §7.7: SCP11b INTERNAL AUTHENTICATE
+     private const byte InsExternalAuthenticate = 0x82; // Amd F §7.6: SCP11a/c (named MUTUAL AUTHENTICATE in the spec)
+-    private const int TagEpkSdEcka = 0x5F49; // Ephemeral SD public key in the authenticate response
++    private const int TagEpkSdEcka = 0x5F49; // Returned SD public key: ephemeral for a/b, static for c
+     private const int TagReceipt = 0x86; // Receipt: card's key-confirmation MAC, becomes the initial MAC chaining value
+ 
+     /// <summary>
+-    ///     Runs the host side of the SCP11 handshake (Amd F §7.1.1): sends the OCE certificate chain for
++    ///     Runs host-side SCP11 setup (Public Review §§7.5–7.7): sends the OCE certificate chain for
+     ///     SCP11a/c, performs the ECKA key agreement with the SD, derives the session keys and verifies
+-    ///     the receipt. Unlike SCP03 there is no second step; the returned state is ready for use.
++    ///     the receipt. The returned state supports secure messaging. Under the inspected Public Review §4.3,
++    ///     the SD authenticates the a/c OCE using its certificate and the first correct-MAC APDU after
++    ///     establishment; host receipt verification does not complete that device-side phase or grant applet authority.
+     /// </summary>
+     /// <exception cref="BadResponseException">
+     ///     The authenticate response does not carry the two expected TLVs, or the receipt does not match.
+@@ -50,7 +53,7 @@ public static async Task<ScpState> Scp11InitAsync(
+         Scp11KeyParameters keyParams,
+         CancellationToken cancellationToken = default)
+     {
+-        // GPC v2.3 Amendment F (SCP11) v1.4 §7.1.1
++        // Key roles: Public Review §3.1.1. Identifier/parameter coding: §7.1.1, rather than handshake processing.
+         var kid = keyParams.KeyReference.Kid;
+         var kvn = keyParams.KeyReference.Kvn;
+ 
+@@ -97,7 +100,8 @@ public static async Task<ScpState> Scp11InitAsync(
+             epkOce = ownEphemeralPublicKey.ExportParameters().ToUncompressedPoint();
+         }
+ 
+-        // GPC v2.3 Amendment F (SCP11) v1.4 §7.6.2.3
++        // Public Review request data: §7.6.2.3 for a/c; §7.7.2.3 for b incorporates that processing
++        // with its own key-agreement modifications. This request selects AES-128 and no HostID/CardGroup option.
+         // Construct the host authentication command
+         // These contain the parameters for the host authentication command that the YubiKey will respond to.
+         // EncodeAndDisposeList rather than EncodeList: these Tlvs are constructed inline and
+@@ -124,28 +128,30 @@ public static async Task<ScpState> Scp11InitAsync(
+             if (response.SW != SWConstants.Success)
+                 throw ApduException.FromResponse(response, authenticateCommand, "SCP11 authentication failed");
+ 
+-            // Receive and process response (ephemeral SD public key and receipt)
+-            // GPC v2.3 Amendment F (SCP11) v1.4 §7.1.3: ePK.SD.ECKA (5F49) followed by the receipt (86)
++            // Public Review response data: a/c §7.6.3.1/Table 7-18; b §7.7.3.1/Table 7-22.
++            // Both list the returned SD key (5F49), then receipt (86).
++            // The c response carries the static SD key; a/b carry an ephemeral SD key.
++            // Only the first two tag positions are checked here; additional decoded TLVs are unused.
+             using var tlvs = TlvHelper.DecodeList(response.Data.Span);
+             if (tlvs.Count < 2 || tlvs[0].Tag != TagEpkSdEcka || tlvs[1].Tag != TagReceipt)
+                 throw new BadResponseException(
+                     "Malformed SCP11 authentication response: expected ePK.SD.ECKA (5F49) followed by receipt (86)");
+ 
+-            var epkSdEckaTlv = tlvs[0]; // YubiKey ephemeral SD public key
++            var epkSdEckaTlv = tlvs[0]; // Returned SD key, with variant-dependent static/ephemeral role
+             var sdReceipt = tlvs[1].Value; // YubiKey receipt
+ 
+             // Oce static host key private key (SCP11a/c), or ephemeral key again (SCP11b)
+             using ECDiffieHellman? staticOceKey = keyParams.SkOceEcka?.ToECDiffieHellman();
+             ECDiffieHellman skOceEcka = staticOceKey ?? eskOceEcka;
+ 
+-            // GPC v2.3 Amendment F (SCP11) v1.3 §3.1.2 Key Derivation
++            // Inspected Amendment F Public Review §3.1.2 key derivation.
+             using ECDiffieHellmanPublicKey staticSdPublicKey = pkSdEcka.ToECDiffieHellmanPublicKey();
+             var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(
+                 eskOceEcka, // Host ephemeral private key
+                 skOceEcka, // Host static or ephemeral private key
+                 oceAuthenticateData, // Host Authenticate EC KeyAgreement TLV Bytes
+                 staticSdPublicKey, // Yubikey Public Key
+-                epkSdEckaTlv.AsMemory(), // Yubikey Ephemeral SD Public Key Bytes
++                epkSdEckaTlv.AsMemory(), // Returned SD key bytes (static for c)
+                 sdReceipt); // Yubikey receipt
+ 
+             return new ScpState(sessionKeys, sdReceipt.Span.ToArray());
+@@ -158,7 +164,9 @@ public static async Task<ScpState> Scp11InitAsync(
+ 
+     /// <summary>
+     ///     Sends the OCE certificate chain to the SD, one PERFORM SECURITY OPERATION per certificate,
+-    ///     leaf last, with P2 bit 8 set on every command except the final one (Amd F §7.5).
++    ///     in caller order, with P2 bit 8 set on every command except the final one. The caller supplies the
++    ///     device-required chain order (leaf last); Core does not build or validate a host trust chain.
++    ///     The inspected SCP11 Public Review §7.5.1 assigns submitted-chain verification to the SD.
+     /// </summary>
+     private static async Task PerformSecurityOperation(IApduProcessor processor, Scp11KeyParameters keyParams,
+         CancellationToken cancellationToken)
+@@ -185,4 +193,4 @@ private static async Task PerformSecurityOperation(IApduProcessor processor, Scp
+                 throw ApduException.FromResponse(resp, certCommand, "SCP11 PERFORM SECURITY OPERATION failed");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs w/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
+index c5109c82f53a9904fe4f2e0520cc28ece6b9c273..592441d726926ada8155de903b18c26c5e62fbf0 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
+@@ -23,13 +23,16 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ /// <summary>
+ ///     Per-session secure messaging state for an established SCP03 or SCP11 channel: the session keys,
+ ///     the MAC chaining value and the encryption counter. Applies and removes C-MAC, C-DECRYPTION, R-MAC
+-///     and R-ENCRYPTION (GlobalPlatform Card Spec v2.3 Amd D v1.1.2.6 §6.2). SCP11 reuses the SCP03
+-///     secure messaging layer once its keys are derived (Amd F v1.4 §6).
++///     and R-ENCRYPTION. The inspected authority is GlobalPlatform Card Spec v2.3 Amendment D,
++///     SCP03 1.1.2 Public Release (March 2019), §6.2. The previously cited 1.1.2.6 is a separate
++///     December 2019 Public Review edition. SCP11 1.3.0.13 Public Review (August 2023), §4.4 applies
++///     SCP03 messaging after key establishment; final SCP11 1.4 clauses were not verified here.
+ /// </summary>
+ /// <remarks>
+ ///     Establish a session with <see cref="Scp03InitAsync" /> or <see cref="Scp11InitAsync" />; the
+ ///     partial files hold the protocol-specific handshakes. <c>macChain</c> is the initial MAC chaining
+-///     value: 16 zero bytes for SCP03 (Amd D §6.2.4), the receipt for SCP11 (Amd F §6.2.1).
++///     value: 16 zero bytes for SCP03 EXTERNAL AUTHENTICATE (the inspected Public Release §6.2.3), the receipt for SCP11
++///     (the inspected Public Review §5.3.2). These citations describe selected rules, not blanket conformance.
+ /// </remarks>
+ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null) : IDisposable
+ {
+@@ -56,7 +59,8 @@ public void Dispose()
+ 
+     /// <summary>
+     ///     Returns an encryptor using the session DEK, for wrapping key material carried inside a
+-    ///     command (for example PUT KEY). Zero IV, caller supplies whole blocks.
++    ///     command (for example PUT KEY). The caller supplies whole blocks. CbcEncrypt's stack IV has no
++    ///     explicit initialization, so its storage declaration alone does not establish a zero-IV guarantee.
+     /// </summary>
+     public DataEncryptor GetDataEncryptor() =>
+         keys.Dek.IsEmpty
+@@ -67,8 +71,10 @@ public DataEncryptor GetDataEncryptor() =>
+     ///     Pads and encrypts a command data field (GlobalPlatform SCP03 Amd D §6.2.6).
+     /// </summary>
+     /// <remarks>
+-    ///     Advances the encryption counter. Call exactly once per protected command, even for an empty
+-    ///     data field, so the counter stays in step with the card.
++    ///     Advances the counter before IV derivation completes, including on some provider failures. Current
++    ///     empty input produces an encrypted padding block. When C-DECRYPTION and C-MAC are both required,
++    ///     SCP03 1.1.2 Public Release §6.2.6 instead requires the off-card entity to advance the counter without
++    ///     encryption when command data is absent. Core's SCP03 initializer selects these protections in 0x33.
+     /// </remarks>
+     /// <returns>The ciphertext. The caller owns it and must zero it after transmission.</returns>
+     public byte[] Encrypt(ReadOnlySpan<byte> data)
+@@ -240,7 +246,8 @@ public byte[] Unmac(ReadOnlySpan<byte> data, short sw)
+     /// <summary>
+     ///     The R-MAC the card would put on a response of <paramref name="data" /> and <paramref name="sw" />
+     ///     at the current chaining value (the same computation <see cref="Unmac" /> checks against).
+-    ///     Does not change state. Lets a test double answer a secured command the way the card does.
++    ///     Does not change state. Supplies a synthetic response MAC; callers must separately model whether
++    ///     the selected status carries protection under the applicable profile.
+     /// </summary>
+     internal byte[] ComputeRmac(ReadOnlySpan<byte> data, short sw)
+     {
+@@ -262,8 +269,8 @@ internal byte[] ComputeRmac(ReadOnlySpan<byte> data, short sw)
+ 
+     /// <summary>
+     ///     Writes CMAC(<paramref name="key" />, <paramref name="chain" /> || <paramref name="data" />) to
+-    ///     <paramref name="destination" />. Only provider failures are wrapped, as
+-    ///     <see cref="NotSupportedException" />; other exceptions propagate unchanged.
++    ///     <paramref name="destination" />. Exceptions from primitive creation, initialization, update,
++    ///     finalization, or disposal are wrapped as <see cref="NotSupportedException" />.
+     /// </summary>
+     private static void ComputeCmac(
+         ReadOnlySpan<byte> key, ReadOnlySpan<byte> chain, ReadOnlySpan<byte> data, Span<byte> destination)
+@@ -284,11 +291,14 @@ private static void ComputeCmac(
+     }
+ 
+     /// <summary>
+-    ///     Writes the SCP03 ICV, AES-ECB(S-ENC, prefix || 0..0 || counter), to <paramref name="destination" />
+-    ///     (GlobalPlatform SCP03 Amd D §6.2.6).
++    ///     Derives an SCP03 ICV with AES-ECB, the command/response prefix, and counter, writing to
++    ///     <paramref name="destination" />. The zero-filled layout is specified in the inspected Public Release
++    ///     §6.2.6; this implementation explicitly initializes only the prefix and counter fields.
+     /// </summary>
+     private static void DeriveIv(Aes aes, byte prefix, int counter, Span<byte> destination)
+     {
++        // Only prefix and counter are explicitly written. The intervening stack bytes need separate
++        // initialization before a portable prefix || zeros || counter guarantee can be made.
+         Span<byte> ivData = stackalloc byte[BlockSize];
+         ivData[0] = prefix;
+         BinaryPrimitives.WriteInt32BigEndian(ivData[12..], counter);
+@@ -302,11 +312,11 @@ private static byte[] CbcEncrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> data
+     {
+         using var aes = Aes.Create();
+         aes.SetKey(key);
+-        Span<byte> iv = stackalloc byte[BlockSize]; // Zero IV
++        Span<byte> iv = stackalloc byte[BlockSize]; // No explicit initialization; stackalloc alone is not a zero-IV guarantee.
+         var encrypted = new byte[data.Length];
+         var bytesWritten = aes.EncryptCbc(data, iv, encrypted, PaddingMode.None);
+         return bytesWritten != data.Length
+             ? throw new InvalidOperationException("CBC encryption failed")
+             : encrypted;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs w/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs
+index bf5674eb22bcf568187334b8b27c6f88d2a53bc3..b72104db23541058086803588bf5b9bde666ef99 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs
+@@ -19,6 +19,10 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ /// <summary>
+ ///     Holds the session keys derived for an SCP session.
+ /// </summary>
++/// <remarks>
++///     Construction clones the inputs. Dispose zeroes and releases the owned arrays, so subsequent property
++///     reads are empty and previously obtained views refer to zeroed storage. Input buffers have separate owners.
++/// </remarks>
+ internal sealed class SessionKeys : IDisposable
+ {
+     private byte[]? _dek;
+@@ -73,7 +77,7 @@ public SessionKeys(ReadOnlySpan<byte> senc, ReadOnlySpan<byte> smac, ReadOnlySpa
+ 
+ 
+     /// <summary>
+-    ///     Releases the resources used by this instance and securely zeroes all key material.
++    ///     Zeroes and releases this instance's owned key arrays.
+     /// </summary>
+     public void Dispose()
+     {
+@@ -106,4 +110,4 @@ public void Dispose()
+         _disposed = true;
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs w/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs
+index bf09088014312610f0a317f8aa09232c3e4a8082..f83ae9228fad0c782f06ea49a19143fefcb5e77e 100644
+--- c/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs
++++ w/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs
+@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ /// <summary>
+ ///     Manages static SCP03 keys and derives session keys from them.
+ /// </summary>
++/// <remarks>
++///     Construction clones the supplied key bytes. Dispose zeroes only those owned arrays; the caller clears
++///     source buffers separately. Existing Enc/Mac/Dek views then expose zeroed storage. Derivation produces
++///     AES-128 S-ENC, S-MAC, and S-RMAC from host || card challenge, while the optional DEK is copied unchanged.
++/// </remarks>
+ public sealed class StaticKeys : IDisposable
+ {
+     // Key Derivation Constants
+@@ -78,7 +83,7 @@ public StaticKeys(ReadOnlySpan<byte> enc, ReadOnlySpan<byte> mac, ReadOnlySpan<b
+ 
+ 
+     /// <summary>
+-    ///     Releases the resources used by this instance and securely zeroes all key material.
++    ///     Zeroes this instance's owned key arrays, leaving caller source storage unchanged.
+     /// </summary>
+     public void Dispose()
+     {
+@@ -133,8 +138,7 @@ internal SessionKeys Derive(
+             DeriveKey(_mac, DerivationTypeSMac, context, SessionKeyLengthBits, smac);
+             DeriveKey(_mac, DerivationTypeSRMac, context, SessionKeyLengthBits, srmac);
+ 
+-            // DEK is NOT derived - it's passed through as-is (used for PUTKEY operations)
+-            // This matches the Java implementation
++            // SessionKeys copies the unchanged DEK for key-data encryption, independently of the derived keys.
+ 
+             return _dek is not null
+                 ? new SessionKeys(senc, smac, srmac, _dek)
+@@ -186,4 +190,4 @@ internal static void DeriveKey(ReadOnlySpan<byte> key, byte derivationType, Read
+             CryptographicOperations.ZeroMemory(mac);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Sessions/ApplicationSession.cs w/src/Core/src/Sessions/ApplicationSession.cs
+index 675d5d69b4b4beaea0126981b2962a6bc02e9a47..37bf4ce8793d27cde132fa0a03a12eec34cbb2ea 100644
+--- c/src/Core/src/Sessions/ApplicationSession.cs
++++ w/src/Core/src/Sessions/ApplicationSession.cs
+@@ -36,6 +36,12 @@ namespace Yubico.YubiKit.Core.Sessions;
+ ///         Protocol construction and initialization are internal SDK seams. External derived classes cannot
+ ///         inject or replace Core protocol implementations; compose over a public raw session for low-level work.
+ ///     </para>
++///     <para>
++///         Protocol guards admit individual logical exchanges, not an entire multi-exchange applet workflow.
++///         Await each complete public operation, including parsing and callbacks, before disposing the session
++///         or starting a competing workflow. Disposal drains the admitted exchange, not every public task or
++///         detached callback task. Keep disposal outside the operation and its user-presence callbacks.
++///     </para>
+ /// </remarks>
+ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
+ {
+@@ -436,10 +442,11 @@ protected void ThrowIfDisposed()
+         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposalStarted) != 0, this);
+     }
+ 
+-    /// <summary>Closes operation admission, drains an admitted exchange, and releases session resources.</summary>
++    /// <summary>Closes session admission, drains an admitted protocol exchange, and releases session resources.</summary>
+     /// <remarks>
+     ///     This synchronous path blocks while an admitted exchange finishes. Prefer <see cref="DisposeAsync" />
+-    ///     for asynchronous callers, and never invoke synchronous disposal from inside the operation being drained.
++    ///     for asynchronous callers. Invoke either disposal path outside the operation and its callbacks;
++    ///     awaiting asynchronous disposal from a callback can also wait on its own exchange.
+     /// </remarks>
+     public void Dispose()
+     {
+@@ -449,8 +456,9 @@ public void Dispose()
+     }
+ 
+     /// <summary>
+-    ///     Closes operation admission, asynchronously drains an admitted exchange, and releases session resources.
++    ///     Closes session admission, asynchronously drains an admitted protocol exchange, and releases session resources.
+     /// </summary>
++    /// <remarks>Await complete public workflows first; the drain covers the exchange rather than the whole workflow.</remarks>
+     public async ValueTask DisposeAsync()
+     {
+         BeginDisposal();
+@@ -566,4 +574,4 @@ private bool TryClaimRelease()
+         ConnectionSessionGuard.Detach(Connection, this);
+         return true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Sessions/ConnectionSessionGuard.cs w/src/Core/src/Sessions/ConnectionSessionGuard.cs
+index d17a1d82ef2d566e3ccde47a676a0c17b4e366db..a72a9465014bde4f344ea6ec845c32e88badaa7a 100644
+--- c/src/Core/src/Sessions/ConnectionSessionGuard.cs
++++ w/src/Core/src/Sessions/ConnectionSessionGuard.cs
+@@ -29,10 +29,8 @@ namespace Yubico.YubiKit.Core.Sessions;
+ ///         interface deselects whatever the other session was using.
+ ///     </para>
+ ///     <para>
+-///         Enforced at binding, before any wire operation, which is what canonical yubikit does — Rust makes a
+-///         second session a compile error by taking the connection by value; Python's base <c>Session</c> stores
+-///         itself on the connection at construction. Refusal happens on the call that would cause the damage,
+-///         not on the victim's next operation.
++///         Binding refuses a second session before it can perform wire I/O. This protects the incumbent
++///         session's selected application rather than detecting the conflict on its next operation.
+ ///     </para>
+ ///     <para>
+ ///         Keyed by connection identity in a <see cref="ConditionalWeakTable{TKey,TValue}" /> rather than by a
+@@ -104,4 +102,4 @@ private sealed class Slot
+     {
+         public object? Session { get; set; }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Sessions/RawCtapHidSession.cs w/src/Core/src/Sessions/RawCtapHidSession.cs
+index 4dcd6fab32e2e47b3beb76d838709c71f97aede8..205a471f527bcc373fdcf8dc1aa71899bd37251c 100644
+--- c/src/Core/src/Sessions/RawCtapHidSession.cs
++++ w/src/Core/src/Sessions/RawCtapHidSession.cs
+@@ -36,7 +36,10 @@ private RawCtapHidSession(IFidoHidConnection connection)
+     }
+ 
+     /// <summary>Creates a raw FIDO HID session that borrows <paramref name="connection" />.</summary>
+-    /// <remarks>CTAP HID channel initialization is deferred until the first operation.</remarks>
++    /// <remarks>
++    ///     Creation attaches the session without wire I/O and sets IsInitialized. The first exchange initializes
++    ///     the channel; the session's inherited FirmwareVersion remains unknown (0.0.0).
++    /// </remarks>
+     public static Task<RawCtapHidSession> CreateAsync(
+         IFidoHidConnection connection,
+         CancellationToken cancellationToken = default)
+@@ -58,8 +61,17 @@ public static Task<RawCtapHidSession> CreateAsync(
+ 
+     /// <summary>Sends one caller-defined CTAP HID command and returns its correlated response payload.</summary>
+     /// <remarks>
++    ///     Use a request/response CTAPHID command, not a CTAP2 operation code. CANCEL (0x11) has no response of
++    ///     its own and is not an ordinary exchange for this method. Channel-control sequences require their own
++    ///     protocol handling. After a partial framing or transport failure, dispose and reopen the connection.
++    ///     Caller cancellation is observed between reads: after a keep-alive the protocol can send CANCEL and
++    ///     drain the original response. Without another report, the operation can remain pending indefinitely.
++    ///     CTAPHID cancellation is defined for active CBOR requests; vendor commands have their own semantics.
++    ///     Keep payload storage unchanged until the actual returned task is terminal, including lazy INIT and
++    ///     incremental packet sends. Canceling an outer wait does not end this borrow.
+     ///     SDK-owned outgoing packet copies are cleared after use; caller-owned <paramref name="payload" /> is not
+-    ///     modified. Returned memory remains live after return and is caller-owned for sensitive-data handling.
++    ///     modified. Returned memory survives session disposal; the caller must clear its actual backing storage
++    ///     when sensitive bytes are no longer needed. This cleanup does not reach intermediate received reports.
+     /// </remarks>
+     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+         byte command,
+@@ -73,4 +85,4 @@ public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+             UserPresenceNotification.None,
+             cancellationToken);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Sessions/RawOtpHidSession.cs w/src/Core/src/Sessions/RawOtpHidSession.cs
+index 419bebe00095297c3be391bf66e00f67b267b2ce..8328f11e8ee9223ced6cac5a3d9419cc09a38ee3 100644
+--- c/src/Core/src/Sessions/RawOtpHidSession.cs
++++ w/src/Core/src/Sessions/RawOtpHidSession.cs
+@@ -39,7 +39,10 @@ private RawOtpHidSession(IOtpHidConnection connection)
+     }
+ 
+     /// <summary>Creates a raw OTP HID session that borrows <paramref name="connection" />.</summary>
+-    /// <remarks>OTP status initialization is deferred until the first operation.</remarks>
++    /// <remarks>
++    ///     Creation attaches the session without wire I/O and sets IsInitialized. The first exchange reads status;
++    ///     the session's inherited FirmwareVersion remains unknown (0.0.0).
++    /// </remarks>
+     public static Task<RawOtpHidSession> CreateAsync(
+         IOtpHidConnection connection,
+         CancellationToken cancellationToken = default)
+@@ -63,8 +66,12 @@ public static Task<RawOtpHidSession> CreateAsync(
+     /// <remarks>
+     ///     For a command with a known response length, the caller can validate inbound CRC with
+     ///     <see cref="ChecksumUtils.CheckCrc(ReadOnlySpan{byte},int)" /> over <c>expectedLength + 2</c> bytes.
++    ///     CRC detects corruption rather than authenticating the response. Keep payload storage unchanged until
++    ///     the actual returned task is terminal: lazy initialization precedes the payload copy. Canceling an
++    ///     outer wait does not end this borrow.
+     ///     SDK-owned outgoing buffers are cleared after use; caller-owned <paramref name="payload" /> is not
+-    ///     modified. Returned memory remains live after return and is caller-owned for sensitive-data handling.
++    ///     modified. Returned memory survives session disposal; the caller must clear its actual backing storage
++    ///     when sensitive bytes are no longer needed. This cleanup does not reach intermediate received reports.
+     /// </remarks>
+     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+         byte command,
+@@ -74,4 +81,4 @@ public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+         ThrowIfDisposed();
+         return OtpProtocol.SendAndReceiveAsync(command, payload, cancellationToken);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Sessions/RawSmartCardSession.cs w/src/Core/src/Sessions/RawSmartCardSession.cs
+index 33d012a1857526b926950df227c6b0bcd2c74090..942b414943fa035d459a70ba89dbc1e83b4cf809 100644
+--- c/src/Core/src/Sessions/RawSmartCardSession.cs
++++ w/src/Core/src/Sessions/RawSmartCardSession.cs
+@@ -28,8 +28,10 @@ namespace Yubico.YubiKit.Core.Sessions;
+ ///     passed to <see cref="CreateAsync(ISmartCardConnection,CancellationToken)" />; an
+ ///     <see cref="Abstractions.IYubiKey" /> convenience factory owns its hidden connection. Operations refuse overlap,
+ ///     while direct <see cref="ISmartCardConnection.TransmitAndReceiveAsync" /> calls bypass that guard.
+-///     If a command or response continuation fails, this session refuses further exchanges without replaying them.
+-///     Dispose and reopen the connection before continuing; disposing a borrowed session alone does not recover it.
++///     Recovery notifications from command/response continuation or secure processing latch refusal without replay.
++///     They do not cover every uncertain failure, including a plain first-fragment transport failure. After a
++///     partial exchange leaves state uncertain, dispose and reopen the connection even if local admission remains
++///     open; disposing a borrowed session alone is not device recovery.
+ /// </remarks>
+ public sealed class RawSmartCardSession : ApplicationSession
+ {
+@@ -46,7 +48,10 @@ private RawSmartCardSession(ISmartCardConnection connection, bool usesScp)
+     // Existing alpha overload family: preserve the simple and SCP-specific raw-session entry points.
+ #pragma warning disable RS0026
+     /// <summary>Creates a raw APDU session that borrows <paramref name="connection" />.</summary>
+-    /// <remarks>No APDU is transmitted and no application is selected during creation.</remarks>
++    /// <remarks>
++    ///     Creation transmits no APDU and selects no application. FirmwareVersion starts unknown (0.0.0);
++    ///     Configure records a caller-supplied version rather than discovering it.
++    /// </remarks>
+     public static Task<RawSmartCardSession> CreateAsync(
+         ISmartCardConnection connection,
+         CancellationToken cancellationToken = default) =>
+@@ -122,6 +127,10 @@ await session.ConfigureProtocolAsync(
+     }
+ 
+     /// <summary>Selects exactly the supplied application identifier.</summary>
++    /// <remarks>
++    ///     On an SCP session, SELECT is sent in plaintext while the local secure processor is retained. It is
++    ///     not a reauthentication procedure. Prefer an applet factory for selection followed by SCP establishment.
++    /// </remarks>
+     public Task<ReadOnlyMemory<byte>> SelectAsync(
+         ReadOnlyMemory<byte> applicationId,
+         CancellationToken cancellationToken = default)
+@@ -137,6 +146,12 @@ public Task<ReadOnlyMemory<byte>> SelectAsync(
+     ///     the returned response preserves both data and status bytes.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation checked before the stateful exchange is admitted.</param>
++    /// <remarks>
++    ///     Keep command data unchanged until this task is terminal, then clear sensitive source storage in finally.
++    ///     The returned response owns a copy. Inspect status and parse data before calling ApduResponse.Clear in
++    ///     finally for sensitive output; Clear invalidates its status and data aliases, not transport staging or
++    ///     earlier response fragments. With throwOnError enabled, every final status other than 0x9000 throws.
++    /// </remarks>
+     public Task<ApduResponse> TransmitAndReceiveAsync(
+         ApduCommand command,
+         bool throwOnError = true,
+@@ -165,4 +180,4 @@ public void Configure(
+         SmartCardProtocol.Configure(firmwareVersion, configuration);
+         FirmwareVersion = firmwareVersion;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Sessions/SessionCreationOptions.cs w/src/Core/src/Sessions/SessionCreationOptions.cs
+index 9688f2dbb4c0cd3438b33b0cbb8785f9b9649d70..82202e40db1878b634ba9ed953b3261ae3e1e97f 100644
+--- c/src/Core/src/Sessions/SessionCreationOptions.cs
++++ w/src/Core/src/Sessions/SessionCreationOptions.cs
+@@ -23,9 +23,11 @@ namespace Yubico.YubiKit.Core.Sessions;
+ ///     Configures cross-cutting behavior when an application session is created.
+ /// </summary>
+ /// <remarks>
+-///     Factories snapshot these values when called and do not retain this object. Sessions retain the referenced
+-///     <see cref="UserPresencePrompt" /> for their lifetime without taking ownership of it. The caller retains
+-///     ownership and disposal responsibility for both that service and <see cref="ScpKeyParameters" />.
++///     Factories pass the settings to initialization. An initializer can retain this options object while
++///     creation is pending; returned sessions retain the selected values and references rather than the carrier.
++///     Referenced keys, certificates, and services are shared objects, not deep copies. Sessions that use
++///     <see cref="UserPresencePrompt" /> retain it without taking ownership; Management and Security Domain
++///     ignore it. The caller owns the prompt and <see cref="ScpKeyParameters" />.
+ /// </remarks>
+ public sealed class SessionCreationOptions
+ {
+@@ -34,7 +36,8 @@ public sealed class SessionCreationOptions
+ 
+     /// <summary>
+     ///     Gets optional Secure Channel Protocol key parameters. The parameters are borrowed for initialization;
+-    ///     the caller retains ownership and disposal responsibility.
++    ///     the caller retains ownership and disposal responsibility. Security Domain also retains them for
++    ///     reset and reinitialization. Keep the parameters alive until that session has been disposed.
+     /// </summary>
+     public ScpKeyParameters? ScpKeyParameters { get; init; }
+ 
+@@ -56,7 +59,9 @@ public sealed class SessionCreationOptions
+     ///     presence.
+     /// </summary>
+     /// <remarks>
+-    ///     A session retains the referenced service for its lifetime. The SDK does not own or dispose it.
++    ///     Sessions that use this service retain it for their lifetime without disposing it. Management and
++    ///     Security Domain ignore it. Keep callbacks non-reentrant: disposing the session from its own callback,
++    ///     synchronously or asynchronously, can wait on the exchange that is awaiting that callback.
+     /// </remarks>
+     public IUserPresencePrompt? UserPresencePrompt { get; init; }
+ 
+@@ -77,4 +82,4 @@ public SessionCreationOptions WithPreferredConnectionType(ConnectionType connect
+             FirmwareVersionOverride = FirmwareVersionOverride,
+             UserPresencePrompt = UserPresencePrompt
+         };
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/src/Utilities/ExchangeGuard.cs w/src/Core/src/Utilities/ExchangeGuard.cs
+index b2980dd7dd5ce35c9ec0db1029e2380dae9edc60..5a2cb660ff60b1442f3615957851cd2240f7283a 100644
+--- c/src/Core/src/Utilities/ExchangeGuard.cs
++++ w/src/Core/src/Utilities/ExchangeGuard.cs
+@@ -21,12 +21,13 @@ namespace Yubico.YubiKit.Core.Utilities;
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///         Sessions support one operation at a time. An overlapping caller receives an
++///         This guard supports one logical exchange at a time, rather than leasing an entire public workflow.
++///         An overlapping caller receives an
+ ///         <see cref="InvalidOperationException" /> immediately rather than waiting. Once entered, the exchange
+-///         runs to completion: the delegate receives
+-///         <see cref="CancellationToken.None" />, so a caller's token can never abort a logical exchange
+-///         between its constituent transmits (which would strand chained command/response or SCP MAC state
+-///         on the card and poison the next caller's exchange).
++///         retains admission until its delegate terminates. The delegate receives
++///         <see cref="CancellationToken.None" />, so entry cancellation does not interrupt constituent
++///         transmits. Transport failures and protocol-level cancellation/recovery have separate behavior;
++///         this token alone guarantees neither completion within a deadline nor reusable device state.
+ ///     </para>
+ ///     <para>
+ ///         The guard must not be re-entered from within a running exchange. Keep the wrapped delegate confined
+@@ -43,8 +44,7 @@ internal sealed class ExchangeGuard
+     /// <summary>
+     ///     Runs <paramref name="exchange" /> exclusively; overlapping calls are refused immediately.
+     ///     A pre-canceled <paramref name="cancellationToken" /> throws before the guard is claimed.
+-    ///     The delegate is invoked with <see cref="CancellationToken.None" /> so the in-flight exchange always
+-    ///     completes.
++    ///     The delegate is invoked with <see cref="CancellationToken.None" /> and retains admission until terminal.
+     /// </summary>
+     public async Task<T> RunAsync<T>(
+         Func<CancellationToken, Task<T>> exchange,
+@@ -137,4 +137,4 @@ private void Exit()
+ 
+         drained?.TrySetResult();
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
+index 87e5c1ec75fd94b0f9c9b44523a725cb20bb2c15..02860928ef353dc63acf2e5b107d09c224be325b 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
+@@ -30,8 +30,8 @@ namespace Yubico.YubiKit.Core.UnitTests.AuditV2;
+ public class CoreScpAuditReproTests
+ {
+     /// <summary>
+-    ///     Data lengths 1..5 make <c>msgLength = data.Length - 8 + 2</c> negative, which reaches
+-    ///     <c>stackalloc</c> and terminates the process. Runs in a child process.
++    ///     Guards against the former negative-stack-length failure for response lengths 1..5. The child
++    ///     asserts typed rejection; the parent checks normal exit and its success marker.
+     /// </summary>
+     [Fact]
+     [Trait("Audit", "YESDK-1631")]
+@@ -61,8 +61,8 @@ public async Task YESDK1631_ChildBody_OneToFiveByteResponse_ThrowsBadResponse()
+     }
+ 
+     /// <summary>
+-    ///     Data lengths 6 and 7 do not crash, but are reported as a cryptography-provider problem
+-    ///     (NotSupportedException "does not support AESCMAC") instead of a bad device response.
++    ///     Checks that response lengths 6 and 7 are rejected as BadResponseException, rather than the
++    ///     former cryptography-provider error classification.
+     /// </summary>
+     [Theory]
+     [Trait("Audit", "YESDK-1631")]
+@@ -121,7 +121,9 @@ await Assert.ThrowsAsync<BadResponseException>(() => processor.TransmitAsync(
+     // --- N2 (no Jira key): SCP initialization and response parsing must fail with BadResponseException ---
+ 
+     /// <summary>
+-    ///     GP Amd D §7.1.1.3: INITIALIZE UPDATE returns 10 + 3 + 8 + 8 = 29 bytes. Anything shorter is malformed.
++    ///     Checks rejection below the implementation's 29-byte INITIALIZE UPDATE minimum prefix. SCP03 1.1.2
++    ///     Public Release (March 2019), §7.1.1.6/Table 7-3 lists 10 + 3 + 8 + 8 mandatory bytes plus a three-byte
++    ///     sequence counter for pseudo-random challenge generation; 29 is not a universal exact response size.
+     /// </summary>
+     [Theory]
+     [Trait("Audit", "N2")]
+@@ -138,7 +140,8 @@ await Assert.ThrowsAsync<BadResponseException>(() =>
+     }
+ 
+     /// <summary>
+-    ///     GP Amd F §7.1.3: the SCP11 authenticate response is ePK.SD.ECKA (5F49) followed by the receipt (86).
++    ///     Checks the SCP11b response's first two tags: ePK.SD.ECKA (5F49), then receipt (86), as listed in
++    ///     SCP11 1.3.0.13 Public Review (August 2023), §7.7.3.1/Table 7-22. These cases do not exercise a/c setup.
+     /// </summary>
+     [Theory]
+     [Trait("Audit", "N2")]
+@@ -199,4 +202,4 @@ private static byte[] EncryptBlockForResponse(ScpState state, byte[] plaintextBl
+     }
+ 
+     private static string Head(string text) => text.Length <= 300 ? text : text[..300];
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs
+index 9792ae46887947cd713c863720d3bbc50ac3aff3..fd4eda5536625fe02d943c4b639991acb66797a5 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs
+@@ -19,11 +19,8 @@
+ namespace Yubico.YubiKit.Core.UnitTests.Protocols.Fido.Hid;
+ 
+ /// <summary>
+-///     Proves and guards the serialization contract of <see cref="FidoHidProtocol" />: CTAP HID allows
+-///     one transaction at a time per channel — a request is an init packet plus continuation packets,
+-///     and a foreign init packet transmitted mid-request aborts the transaction on a real device
+-///     (CTAP1_ERR_INVALID_SEQ / ERR_CHANNEL_BUSY). Overlapping operations are therefore refused, and lazy
+-///     channel initialization must run exactly once.
++///     Checks managed exchange exclusion, lazy initialization count, payload correlation, and packet order
++///     using a scripted HID connection. These assertions are not physical-device arbitration evidence.
+ /// </summary>
+ public class FidoHidProtocolConcurrencyTests
+ {
+@@ -58,7 +55,7 @@ public async Task SendCommandAsync_OverlappingOperation_ThrowsImmediately()
+         var payloadA = CreatePayload(PayloadTagA, 100);
+         var payloadB = CreatePayload(PayloadTagB, 100);
+ 
+-        // Operation A's init packet goes out and is held in flight — its continuation packet is still owed.
++        // The first held send is lazy broadcast INIT, before application-message framing starts.
+         fake.HoldSends();
+         var operationA = protocol.SendCommandAsync(VendorCommandA, payloadA, cancellationToken: ct);
+         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
+@@ -109,8 +106,7 @@ await Assert.ThrowsAsync<InvalidOperationException>(() =>
+         fake.ReleaseSends();
+         var responseA = await operationA.WaitAsync(CompletionBound, ct);
+ 
+-        // Exactly one CTAPHID_INIT exchange may reach the device; a second INIT mid-flight reassigns
+-        // the channel and cross-delivers nonces.
++        // The script observes one lazy channel allocation and the first operation's echoed payload.
+         Assert.Equal(1, fake.InitExchangeCount);
+         Assert.Equal(payloadA.ToArray(), responseA.ToArray());
+     }
+@@ -327,4 +323,4 @@ private void EnqueueResponse(byte command, byte[] payload)
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs
+index 86a2c4669adddeae7a0337ed9a059041985fb231..906aea032283b83db23d60b1771c90786c246894 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs
+@@ -556,10 +556,9 @@ public async Task SendCommandAsync_NonCborResponseStartingWithUnknownStatus_Does
+     }
+ 
+     /// <summary>
+-    /// Abandoning a ceremony while the authenticator is asking for a touch must tell the
+-    /// authenticator, or it keeps that request pending on a channel nobody is servicing and the
+-    /// key stays unusable until it is physically re-plugged. The cancel is sent once, not on
+-    /// every keep-alive frame that follows it, and the channel is left immediately reusable.
++    /// Checks one CANCEL, original-response drain, and a subsequent scripted exchange after cancellation
++    /// during keep-alive. The vendor-command script is a managed lifetime oracle, not normative CBOR
++    /// cancellation behavior or evidence that a physical key requires re-plugging.
+     /// </summary>
+     /// <remarks>
+     /// The caller is abandoned mid-exchange rather than up front: <see cref="ExchangeGuard"/>
+@@ -579,8 +578,8 @@ public async Task SendCommandAsync_AbandonedDuringKeepAlive_SendsExactlyOneCance
+         var context = CreateUserPresenceContext();
+         using var cts = new CancellationTokenSource();
+ 
+-        // The authenticator reports it is waiting for a touch, then answers the cancel with
+-        // CTAP2_ERR_KEEPALIVE_CANCEL (0x2D).
++        // The script reports a touch wait, then terminates the original vendor command with byte 0x2D.
++        // CTAPHID CANCEL itself has no response; normative KEEPALIVE_CANCEL belongs to a CBOR response.
+         connection.QueueResponsePackets([
+             .. Enumerable.Range(0, keepAliveCount).Select(_ =>
+                 CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded])),
+@@ -607,8 +606,7 @@ await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+         Assert.Single(prompt.Requested);
+         Assert.Empty(prompt.Resolved);
+ 
+-        // The symptom the fix exists to prevent: before it, the abandoned user-presence request
+-        // left the channel busy and the next exchange failed until the key was re-plugged.
++        // A later scripted response checks that the original response was consumed before reuse.
+         connection.OnResponseDequeued = null;
+         connection.QueueResponsePackets(
+             CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
+@@ -692,10 +690,8 @@ public async Task SendCommandAsync_WhenCallbackAndTerminalValidationFail_Preserv
+     }
+ 
+     /// <summary>
+-    /// A touch landing at the same moment the caller abandons makes the authenticator's answer a
+-    /// real multi-packet response rather than the one-byte cancel acknowledgement. Every
+-    /// continuation frame must still be drained before cancellation is surfaced, or the next
+-    /// exchange reads the leftovers as its own response.
++    /// Checks that a multi-packet vendor response is drained before surfacing cancellation. The later
++    /// scripted exchange must receive its own bytes rather than the original response's continuation.
+     /// </summary>
+     [Fact]
+     [Trait("Category", "RuntimeResilience")]
+@@ -741,10 +737,10 @@ await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+     }
+ 
+     /// <summary>
+-    /// A touch that lands as the caller abandons produces a real CTAP success instead of
+-    /// CTAP2_ERR_KEEPALIVE_CANCEL. CTAP 2.3 §11.2.9.1.5 says a cancelled request "will reply with"
+-    /// 0x2D; it never says to discard a success. The authenticator did the work, so the answer is
+-    /// returned (python-fido2 hid/__init__.py _do_call behaves the same).
++    /// Checks the SDK's policy of returning a scripted CBOR success that races caller cancellation.
++    /// CTAP 2.3 Proposed Standard (February 26, 2026), §11.2.9.1.5 requires the authenticator to return
++    /// KEEPALIVE_CANCEL for canceled CBOR work and forbids a reply to CANCEL itself. Returning the raced
++    /// success here is an SDK nonrollback policy, rather than a host requirement from that passage.
+     /// </summary>
+     [Fact]
+     [Trait("Category", "RuntimeResilience")]
+@@ -1065,4 +1061,4 @@ public void Log<TState>(
+             Exceptions.Add(exception);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs
+index a31b9a389d968975c10edcbd0bce6e8dc02180b8..1ec6d87f08fa2bac5bfcbb16fc6980c1e6a71306 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs
+@@ -33,9 +33,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols;
+ ///     </para>
+ ///     <para>
+ ///         <see cref="Devices.ConnectionOwnershipContractTests" /> already pins this for
+-///         <c>PcscProtocol</c>. The HID protocols had no equivalent, which made the rule silently
+-///         reversible for them — exactly the kind of one-line semantic regression a large merge can
+-///         introduce without turning a single test red. These close that gap.
++///         <c>PcscProtocol</c>. These HID cases observe the supplied connection's DisposeCount directly.
+ ///     </para>
+ /// </remarks>
+ public class ProtocolConnectionOwnershipTests
+@@ -105,4 +103,4 @@ public ValueTask DisposeAsync()
+             return ValueTask.CompletedTask;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs
+index d3a9b4e03eba91305d9992f5f64d3f33a94cb156..402199e2fb0c0400196f6d1cc9daa9bdbdfd91b4 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs
+@@ -336,8 +336,8 @@ public async Task SelectAsync_ConstructsCorrectApdu()
+ 
+         // Assert
+         Assert.Single(_fakeConnection.TransmittedCommands);
+-        // Note: We can't directly inspect the APDU structure from transmitted bytes
+-        // but we verified it doesn't throw, which means the command was accepted
++        // This assertion checks command count only; the fake also exposes copied transmitted bytes.
++        // The successful scripted response does not independently verify SELECT header/data encoding.
+     }
+ 
+     [Fact]
+@@ -400,8 +400,7 @@ public async Task Dispose_DisposesConnection()
+         // Act
+         protocol.Dispose();
+ 
+-        // Assert - Subsequent operations should fail on disposed connection
+-        // (FakeSmartCardConnection throws ObjectDisposedException when disposed)
++        // Assert refusal by the disposed protocol; this does not assert disposal of the borrowed connection.
+         await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
+         {
+             var response = new byte[] { 0x90, 0x00 };
+@@ -440,4 +439,4 @@ public void Dispose()
+         public ValueTask DisposeAsync() => default;
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs
+index 0fa24363f2dbbd07063c754f3cc45cf40643ec92..3f07d9bf0a52c1bfc2196142d930012c21242e49 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs
+@@ -18,9 +18,9 @@
+ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+-///     Unit tests for AES-CMAC implementation using official test vectors from:
+-///     - RFC 4493: The AES-CMAC Algorithm
+-///     - NIST SP 800-38B: Recommendation for Block Cipher Modes of Operation (CMAC)
++///     Checks RFC 4493 (Informational, June 2006), §4 full-value examples alongside separate length,
++///     chunking-consistency, and disposed-method-refusal cases. Those narrower cases do not independently
++///     verify a MAC value or observe retained key storage after disposal.
+ /// </summary>
+ public class AesCmacTests
+ {
+@@ -56,8 +56,7 @@ public void AesCmac_SubkeyGeneration_MatchesRfc4493()
+         Assert.True(cmac.DebugGetSubkey1().SequenceEqual(ExpectedK1));
+         Assert.True(cmac.DebugGetSubkey2().SequenceEqual(ExpectedK2));
+ #else
+-    // In release builds, skip internal validation
+-    // RFC vectors provide end-to-end verification
++    // This release branch makes no subkey assertion; the separate RFC cases check full MAC values.
+     Assert.True(true);
+ #endif
+     }
+@@ -206,8 +205,7 @@ public void AesCmac_SingleByte_ProducesCorrectMac()
+ 
+         Assert.Equal(16, mac.Length);
+ 
+-        // Verify padding path was taken (incomplete block)
+-        // Single byte should be padded with 0x80 followed by zeros
++        // The preceding assertion checks output length for a single-byte message, not the padding bytes.
+     }
+ 
+     [Fact]
+@@ -241,7 +239,7 @@ public void AesCmac_IncrementalFillsBufferExactly_ProducesCorrectMac()
+         // First call: 10 bytes (partial buffer)
+         cmac.AppendData(data[..10]);
+ 
+-        // Second call: 6 bytes (completes buffer to 16, triggers ProcessBlock)
++        // Second call: 6 bytes fills the candidate final block; processing waits for more input.
+         cmac.AppendData(data[10..16]);
+ 
+         // Third call: 32 bytes (2 complete blocks)
+@@ -491,4 +489,4 @@ public void AesCmac_Dispose_ZeroesKeyMaterial()
+         Assert.Throws<ObjectDisposedException>(() => cmac.AppendData([0x01]));
+         Assert.Throws<ObjectDisposedException>(() => cmac.GetHashAndReset());
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs
+index 828fd3bd649c22a48331d924c90fd81d23f61a17..2dbcc4e101e960cb55b61b76b34bf810400f6b54 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs
+@@ -26,8 +26,10 @@
+ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+-///     Unit tests for ScpProtocolAdapter class.
+-///     Tests the decorator pattern implementation that wraps a protocol with SCP.
++///     Checks the SCP protocol decorator using synthetic responses and a local card model. The model's
++///     protected 0x61xx/0x6A82 responses and padded empty commands describe its script, not independently
++///     verified SCP03 status/error or empty-data behavior. Split encrypted-response interoperability
++///     requires independent expected bytes or device/profile evidence.
+ /// </summary>
+ /// <remarks>
+ ///     Shares <see cref="CryptographyProvidersCollection"/> because SCP paths read the mutable
+@@ -809,4 +811,4 @@ public Task<ApduResponse> TransmitAsync(
+ 
+         public void Dispose() => DisposeCount++;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs
+index 4ddcf802fc34e891f7cfb6a33267b582e3e1c792..0ba5c89920f9d1239cc8e07b4976054e20a5bdc7 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs
+@@ -55,7 +55,8 @@ internal static class Scp11TestData
+         """);
+ 
+     /// <summary>
+-    ///     PKCS12 container with OCE private key and full certificate chain.
++    ///     PKCS12 fixture bytes intended to contain OCE material. The current unit test checks nonempty
++    ///     bytes and password text, rather than importing or validating the container and its key associations.
+     ///     Password: "password"
+     /// </summary>
+     public static readonly Memory<byte> Oce = Convert.FromBase64String("""
+@@ -106,12 +107,13 @@ internal static class Scp11TestData
+     public static readonly ReadOnlyMemory<char> OcePassword = "password".AsMemory();
+ 
+     /// <summary>
+-    ///     Serial numbers from the OCE certificate chain.
+-    ///     Used for allowlist testing in SCP11a/c.
++    ///     Serial-number fixtures for proposed allowlist tests. The listed root value differs from the PEM
++    ///     root serial (49FE7DC08A4228EACD18D73914C3D30FDCC31950); these values are not a verified chain allowlist.
++    ///     Intended for a future SCP11a/c allowlist test after fixture association is corrected.
+     /// </summary>
+     public static readonly string[] OceCertSerialNumbers =
+     [
+         "7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A", // Intermediate cert
+-        "6B90028800909F9FFCD641346933242748FBE9AD" // Root CA cert
++        "6B90028800909F9FFCD641346933242748FBE9AD" // Legacy root label; does not match the PEM root serial.
+     ];
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs
+index 15ae488e459bac1a2d2e844dedffb58f0c1a72b5..3bd86643fbdac4c3ef4bc30ccd9b9ecafddae0c0 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs
+@@ -22,7 +22,8 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+ ///     Unit tests for SCP11 (Secure Channel Protocol 11) API.
+-///     These tests verify the SCP11KeyParams and related types work correctly.
++///     Checks parameter shapes and fixture subject/public-key parsing, rather than certificate trust,
++///     private-key association, or a device handshake. Skipped bodies below are proposed plans only.
+ /// </summary>
+ public class Scp11Tests
+ {
+@@ -186,7 +187,7 @@ public void Scp11_TestData_OcePkcs12_IsValid()
+         var pkcs12Data = Scp11TestData.Oce;
+         var password = Scp11TestData.OcePassword.Span;
+ 
+-        // Assert - Should be able to load PKCS12
++        // Checks nonempty container bytes and the password fixture; this test does not import the PKCS12.
+         Assert.NotEmpty(pkcs12Data.ToArray());
+         Assert.Equal("password", new string(password));
+     }
+@@ -203,8 +204,8 @@ public async Task Scp11b_FullAuthentication_WithRealDevice_Succeeds() =>
+         // 1. Get YubiKey device
+         // 2. Connect SmartCard
+         // 3. Query certificate bundle from device
+-        // 4. Extract leaf certificate public key
+-        // 5. Create Scp11KeyParams
++        // 4. Validate the chain against independently trusted provisioning before selecting the SD public key
++        // 5. Create Scp11KeyParameters with that trusted key
+         // 6. Initialize SCP session
+         // 7. Verify encrypted communication works
+         await Task.CompletedTask;
+@@ -253,4 +254,4 @@ private static List<X509Certificate2> ParseTestCertificates()
+         return certs;
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs
+index 57ef9b4648d7c1eec4f2e3d3a165866af3e7a14c..ff1bf229b7e1659ec063404febaf0b4d3ff7e4ea 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs
+@@ -57,7 +57,7 @@ public void TestGetSharedSecret()
+         var sharedSecret = Scp11X963Kdf.GetSharedSecret(ephemeralOceEcka, skOceEcka, pkSdEcka, epkSdEckaTlvBytes);
+ 
+         // Expected shared secret: concatenation of ka1 and ka2
+-        // For test purposes, we can compute expected manually or assert length
++        // This case asserts only the combined width, not independently expected shared-secret bytes.
+         Assert.Equal(64, sharedSecret.Length); // 32 bytes each for P-256
+     }
+ 
+@@ -208,14 +208,14 @@ private static ReadOnlyMemory<byte> CreateTestHostAuthenticateTlv()
+     [Fact]
+     public void TestDeriveSessionKeys_WithDeterministicData()
+     {
+-        // Deterministic test using fixed cryptographic material captured from a real SCP11b session
+-        // This validates the entire SCP11b key derivation pipeline: ECDH + X9.63 KDF + AES-CMAC
++        // Fixed-input ECDH/KDF/receipt regression. The original claimed device capture has no retained
++        // capture identity here; treat the literals as deterministic fixtures, not device qualification.
+         //
+         // Test setup (artificial but deterministic):
+-        // - Both OCE and YubiKey use the SAME static keypair (private key imported into YubiKey SD)
+-        // - SCP11b uses same key for ephemeral and static OCE (both use the private key below)
+-        // - YubiKey generates its own ephemeral key for the session
+-        // - With fixed keys, ECDH produces deterministic shared secrets → deterministic receipt
++        // - The fixed OCE keypair also supplies the fixture's static SD public key.
++        // - Both OCE agreement inputs reuse that private key, as in the normal SCP11b key-role shape.
++        // - A separate fixed SD ephemeral point supplies the response fixture.
++        // - Fixed inputs make the expected receipt reproducible without a live device.
+ 
+         // Private key (same for both OCE ephemeral, OCE static, and YubiKey static)
+         var privateKeyBytes =
+@@ -227,12 +227,11 @@ public void TestDeriveSessionKeys_WithDeterministicData()
+             Convert.FromHexString(
+                 "04680103F07EBE8E9F8C56A39BA96CC7A0F236D94F68410A05C62A1675C14712079A93453F9A52F76EB87E75C5A0D600AD88C843B260820A6DF978205B2B388BAC");
+ 
+-        // YubiKey's ephemeral public key TLV (from AUTHENTICATE response in the captured session)
+-        // This is a different key that the YubiKey generated for this specific session
++        // Fixed SD ephemeral public-key TLV used as the authenticate-response fixture.
+         var epkSdEckaTlvBytes = Convert.FromHexString(
+             "5F494104182899E51687194868973A16A397EE4BED7DC76800B5614747828DF04446BB4E01AE0614B481317115EEC5A5D09F1E18119BE57B716D87D739288D15BF051167");
+ 
+-        // Expected sdReceipt computed from these inputs (captured from real YubiKey)
++        // Fixed expected receipt for these inputs; original capture provenance remains unverified.
+         var expectedSdReceipt = Convert.FromHexString("171632BF1F7B2CCC8A7BA3254F987AAA");
+ 
+         // Reconstruct ECDH keys
+@@ -274,7 +273,7 @@ public void TestDeriveSessionKeys_WithDeterministicData()
+         Assert.NotNull(sessionKeys);
+ 
+         // The fact that DeriveSessionKeys didn't throw means the computed receipt matched expectedSdReceipt
+-        // This validates the entire ECDH + X9.63 KDF + AES-CMAC pipeline
++        // This checks receipt agreement and a nonnull owner, not each returned session-key value or wire step.
+     }
+ 
+     private static ECDiffieHellman CreateECDiffieHellmanFromPrivateKey(byte[] privateKeyBytes)
+@@ -305,4 +304,4 @@ private static ECDiffieHellmanPublicKey CreatePublicKeyFromCoordinates(byte[] x,
+         using var ecdh = ECDiffieHellman.Create(parameters);
+         return ecdh.PublicKey;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
+index f3adc953aac81d211229647cf07750a52a088f7e..5f3ec5658c1167deca3b638557297a211a0ab638 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
+@@ -7,10 +7,11 @@
+ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
+ 
+ /// <summary>
+-///     Under SCP with R-MAC in the security level, the card authenticates every success response,
+-///     including one with no data (GlobalPlatform SCP03 Amd D §6.2.5); a YubiKey appends the 8-byte
+-///     R-MAC to an empty 9000 under SCP03 and SCP11. A success response without one is therefore not
+-///     the card's, and is refused like a wrong MAC. Error status words carry no R-MAC and pass through.
++///     Checks missing-R-MAC rejection for ordinary success responses and the initialization exception.
++///     With R-MAC selected, as in Core's SCP03 level 0x33, SCP03 1.1.2 Public Release (March 2019), §6.2.5
++///     requires the card to protect 9000/62xx/63xx except EXTERNAL AUTHENTICATE. Other statuses return status
++///     only without protection; R-MAC is optional across SCP03 security levels. These synthetic
++///     cases do not establish device/profile interoperability or phase-gating of a later raw INS 82 call.
+ /// </summary>
+ [Collection(CryptographyProvidersCollection.Name)]
+ public sealed class ScpEmptyResponseTests
+@@ -82,4 +83,4 @@ public async Task ExternalAuthenticateWithoutData_IsAccepted()
+ 
+     private static ScpState CreateZeroedScpState() =>
+         new(new SessionKeys(new byte[16], new byte[16], new byte[16]), new byte[16]);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
+index dfbb67ff6ad69bad05290169c2ccb59a57e4bd1f..397eae36626b6aa9e5b85c11f2cde6104283111d 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
+@@ -170,14 +170,14 @@ public async Task InitializeScpAsync_Scp03_UnknownFirmware_Proceeds()
+         var keyParams = new Scp03KeyParameters(new KeyReference(0x01, 0xFF), staticKeys);
+ 
+         // Act & Assert
+-        // Should proceed to initialization (will fail, but not due to firmware check)
++        // Null firmware fails ScpInitializer's configured-processor admission before the support branch.
++        // This broad exception assertion does not establish that the branch or handshake was reached.
+         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
+             await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
+ 
+-        // Should NOT be NotSupportedException about firmware requirements
++        // The conditional message assertion below does not require the current ArgumentException outcome.
+         if (ex is NotSupportedException notSupported)
+-            // If it IS NotSupportedException, it should be from device (CLA_NOT_SUPPORTED),
+-            // not from firmware version check
++            // For a NotSupportedException, it only excludes this firmware threshold from the message.
+             Assert.DoesNotContain("5.3.0", notSupported.Message);
+     }
+ 
+@@ -213,11 +213,13 @@ public async Task InitializeScpAsync_Scp11_UnknownFirmware_Proceeds()
+             publicKey
+         );
+ 
++        // Null firmware fails configured-processor admission before the SCP11 support branch or handshake.
++        // The broad exception assertion below does not require that current ArgumentException outcome.
+         // Act & Assert
+         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
+             await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
+ 
+-        // Should NOT be NotSupportedException about firmware requirements
++        // This conditional check only excludes the firmware threshold if the exception has this type.
+         if (ex is NotSupportedException notSupported) Assert.DoesNotContain("5.7.2", notSupported.Message);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs
+index eb7a0eb4619d5f5aaf380eb4002611bc23e2d038..f0ecdeb7f98ee7043fb7a7e71e5fa90972ecfbd8 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs
+@@ -20,6 +20,10 @@
+ 
+ namespace Yubico.YubiKit.Core.UnitTests.Sessions;
+ 
++/// <summary>
++///     Checks raw OTP framing and lifetime against a scripted connection. CRC recomputation uses the same
++///     ChecksumUtils helper as production, making it a consistency check rather than an independent known-answer vector.
++/// </summary>
+ public class RawOtpHidSessionTests
+ {
+     [Fact]
+@@ -165,4 +169,4 @@ public ValueTask DisposeAsync()
+             return ValueTask.CompletedTask;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs
+index a8a31ae4ebd01a05296cb7513d6ecbf19862b855..de872fd9840169d61c612dc869cec033b2d99925 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs
+@@ -22,6 +22,11 @@
+ 
+ namespace Yubico.YubiKit.Core.UnitTests.Sessions;
+ 
++/// <summary>
++///     Exercises production managed PC/SC/session lifetime code over a controlled SCard API seam.
++///     Held calls model admission, drain, and sequential reuse; they do not execute an operating-system
++///     resource manager or establish physical-device release or recovery.
++/// </summary>
+ [Collection(DiscoveryWorkerAdmissionCollection.Name)]
+ public class RawSmartCardNativeBoundaryTests
+ {
+@@ -164,4 +169,4 @@ public async Task BorrowedRawSession_FailedNativeResponseContinuation_RefusesSam
+         Assert.Equal(new byte[] { 0x00, 0xA1, 0x00, 0x00, 0x00 }, api.TransmitBuffers[0]);
+         Assert.Equal(new byte[] { 0x00, 0xC0, 0x00, 0x00, 0x00 }, api.TransmitBuffers[1]);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs
+index a995b047075870466023870c1bda6e9041fada6d..71c817b830c0a101b3b64808d401af48d2f300e6 100644
+--- c/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs
++++ w/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs
+@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Sessions;
+ /// <remarks>
+ ///     Binding happens in <c>ApplicationSession.Construct</c> rather than in the constructor precisely so the
+ ///     failing-constructor case cannot strand a claim: when construction throws, nothing has been bound yet.
+-///     Found by cross-vendor review (G5, ISA Phase 16 Finding 2).
++///     The fake connection checks binding and disposal bookkeeping, rather than wire or device recovery.
+ /// </remarks>
+ public class SessionConstructionGuardTests
+ {
+@@ -186,4 +186,4 @@ public void Dispose()
+         {
+         }
+     }
+-}
+\ No newline at end of file
++}

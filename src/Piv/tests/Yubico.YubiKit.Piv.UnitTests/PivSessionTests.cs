@@ -192,9 +192,9 @@ public class PivSessionTests
     ///     metadata is unavailable.
     /// </summary>
     /// <remarks>
-    ///     A major version of 0 marks a development key, which is at least 5.8.0 and therefore defaults
-    ///     to AES-192. Assuming Triple-DES for it would pick an algorithm the key does not use. See
-    ///     <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+    ///     A major-zero fixture selects the SDK's optimistic development-version policy and AES-192
+    ///     fallback. These synthetic bytes establish no physical firmware minimum or installed key type.
+    ///     Available management metadata takes precedence. See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
     /// </remarks>
     [Theory]
     [InlineData(0, 0, 0)]
@@ -503,9 +503,9 @@ public class PivSessionTests
     [Fact]
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
-        // Regression test for the BlockPukAsync -> AuthenticationProtocol.BlockPukAsync extraction:
-        // the APDU sequence (PIN metadata, VERIFY-until-blocked, RESET RETRY-until-blocked P2=0x80,
-        // RESET, re-fetch management key metadata) must be unchanged.
+        // The queued responses model PIN metadata/blocking, PUK blocking, RESET and metadata refresh.
+        // Assertions below check membership of VERIFY, RESET RETRY P2=80 and RESET commands,
+        // not equality of the complete command sequence or a device erasure postcondition.
         var connection = CreateInitializedConnection(
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
             [0x63, 0xC0], // VERIFY empty PIN -> blocked (0 retries)
@@ -545,8 +545,9 @@ public class PivSessionTests
     ///     After reset on an alpha or beta key whose metadata is unsupported, the fallback is AES-192.
     /// </summary>
     /// <remarks>
-    ///     <c>VersionResponse</c> reports 0.0.1, marking a development key, which is at least 5.8.0 and
-    ///     therefore defaults to AES-192. See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+    ///     <c>VersionResponse</c> supplies 0.0.1. The test checks the SDK's development-version AES-192
+    ///     fallback and management-flag clearing, not a physical 5.8.0 minimum or real reset default.
+    ///     See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
     /// </remarks>
     [Fact]
     public async Task ResetAsync_WhenMetadataUnsupportedOnAlphaFirmware_UsesAes192FallbackAndClearsAuthentication()

@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build --project Yubico.YubiKit.Ctap2.IntegrationTests --clean",
+  "started": "2026-11-12T05:11:41.9133368+01:00",
+  "durationSeconds": 7,
+  "runDirectory": "artifacts/toolchain/runs/20261112-051141-913-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 6.9,
+      "error": "`dotnet build src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-051141-913-build/02-build-Ctap2.IntegrationTests.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

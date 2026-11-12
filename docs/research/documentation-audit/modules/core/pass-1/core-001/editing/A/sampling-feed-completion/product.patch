@@ -1,0 +1,26 @@
+diff --git a/src/Core/src/Devices/DeviceChangeFeed.cs b/src/Core/src/Devices/DeviceChangeFeed.cs
+index 0a56ebbbb..e8497fac4 100644
+--- a/src/Core/src/Devices/DeviceChangeFeed.cs
++++ b/src/Core/src/Devices/DeviceChangeFeed.cs
+@@ -108,7 +108,13 @@ internal void Fault(Exception error)
+         }
+     }
+ 
+-    /// <summary>Ends subscriptions normally after the producer has stopped; later subscriptions end empty.</summary>
++    /// <summary>
++    /// Requests normal completion for remaining healthy subscriptions; later subscriptions end empty.
++    /// </summary>
++    /// <remarks>
++    /// Call after the producer has stopped. Existing subscription faults, including overflow, retain
++    /// their errors. Captured replay and buffered changes may still drain before the stream ends.
++    /// </remarks>
+     internal void Complete()
+     {
+         lock (_gate)
+@@ -169,4 +175,4 @@ internal void Complete(Exception? error = null)
+ 
+         public void Dispose() => owner.Unsubscribe(this);
+     }
+-}
+\ No newline at end of file
++}

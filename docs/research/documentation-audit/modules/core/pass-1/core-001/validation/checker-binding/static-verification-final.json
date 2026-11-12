@@ -1,0 +1,1799 @@
+{
+  "scope": "Final static R1 binding preparation only. No compiler/checker/native/device execution or logger qualification by this worker.",
+  "selfchecks": {
+    "scope": "Pure metadata admission and byte-identity checks; no SDK/process/native/device execution.",
+    "accepted_complete_fixture": true,
+    "accepted_known_sha256_vector": true,
+    "exact_csc_membership_fixture": true,
+    "sigterm_exception_path": true,
+    "root_policy_import": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.targets",
+    "rejected": [
+      "source-changed",
+      "source-missing",
+      "no-csc",
+      "dll-replaced",
+      "dll-missing",
+      "wrong-dll-path",
+      "failed-build",
+      "incomplete-stream",
+      "incomplete-retention",
+      "live-child",
+      "warnings",
+      "nonzero-exit",
+      "stale-external-output",
+      "missing-external-output",
+      "missing-source",
+      "duplicate-reference",
+      "missing-analyzer",
+      "different-config",
+      "unbound-source-link",
+      "response-file",
+      "skipped-analyzers",
+      "weakened-warnings"
+    ]
+  },
+  "current_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final.json",
+    "bytes": 70749,
+    "sha256": "65a53f340bd1496b259c98e4e15e20254cab61b394fb39e8f8f128b94a503e80"
+  },
+  "fixed_inputs": 242,
+  "text_snapshots": 30,
+  "superseded_profile_rejections": [
+    {
+      "profile": "reviewed-inputs.json",
+      "error": "Input/output bytes changed: /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/bind.py"
+    },
+    {
+      "profile": "reviewed-inputs-r1.json",
+      "error": "Input/output bytes changed: /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/bind.py"
+    }
+  ],
+  "unchanged_original_identities": {
+    "foundation.py": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+    "run-command.py": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+    "qualify-logger.py": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6",
+    "foundation-verification.json": "3508896b9945bb5041d35df8cf7eb03ee65ddb0740d0a5b7367dad7539997477",
+    "reuse-provenance.json": "caeacf20664cf857cd0e0358142616e05f46b3cbbea3b656817247f714eac4eb",
+    "checker/src/Program.cs": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b"
+  },
+  "original_review_sha256": "b788cb19aa760041590b14d254a1a2e6d234b92b8b158f3e835d9fab8f61d371",
+  "checked_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/.gitattributes",
+      "bytes": 29,
+      "raw_sha256": "afd8f4a4aec9d01813c7fcf7dc9db454e42917c1e9dd97b246776145a1f32029",
+      "normalized_sha256": "afd8f4a4aec9d01813c7fcf7dc9db454e42917c1e9dd97b246776145a1f32029",
+      "staged_sha256": "afd8f4a4aec9d01813c7fcf7dc9db454e42917c1e9dd97b246776145a1f32029",
+      "staged_oid": "59b30c14b133929714e10ce8382dc5b476172fa4",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/bind.py",
+      "bytes": 27214,
+      "raw_sha256": "f84745dd4b649ded891a9c0870dbd03e5163a765cb893b736d520fffb148633e",
+      "normalized_sha256": "f84745dd4b649ded891a9c0870dbd03e5163a765cb893b736d520fffb148633e",
+      "staged_sha256": "f84745dd4b649ded891a9c0870dbd03e5163a765cb893b736d520fffb148633e",
+      "staged_oid": "abd38fedafdaac9e764296b7d164d5158542dbcb",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/handoff.md",
+      "bytes": 9111,
+      "raw_sha256": "a41124cc0c99a02f0fe2e8db1d39a40cf13747594928a5cc9af583a9074f71ba",
+      "normalized_sha256": "a41124cc0c99a02f0fe2e8db1d39a40cf13747594928a5cc9af583a9074f71ba",
+      "staged_sha256": "a41124cc0c99a02f0fe2e8db1d39a40cf13747594928a5cc9af583a9074f71ba",
+      "staged_oid": "2e724458dd14f435b5018a856a3fd22390caf32b",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/hook.targets",
+      "bytes": 5732,
+      "raw_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "normalized_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_oid": "4732719548eef7d033c2506bbd66e47297203772",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/pre-r1-validation-preparation.md.snapshot",
+      "bytes": 15786,
+      "raw_sha256": "105c6c428f26ccac5363f1408143f5861fc65fbdace0f11d0d07a2db07bf048b",
+      "normalized_sha256": "105c6c428f26ccac5363f1408143f5861fc65fbdace0f11d0d07a2db07bf048b",
+      "staged_sha256": "105c6c428f26ccac5363f1408143f5861fc65fbdace0f11d0d07a2db07bf048b",
+      "staged_oid": "de79081da172f5faa0f199bb81cf6cad1926e8f8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/provenance.json",
+      "bytes": 2484,
+      "raw_sha256": "a47fd047beb6881a64d38f226776e99e7c091d095d4b1ba65f3980a4b0503a89",
+      "normalized_sha256": "a47fd047beb6881a64d38f226776e99e7c091d095d4b1ba65f3980a4b0503a89",
+      "staged_sha256": "a47fd047beb6881a64d38f226776e99e7c091d095d4b1ba65f3980a4b0503a89",
+      "staged_oid": "ad0483097f4b7228f367b79cb1f03620f7b4c5d1",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937-Output.cs.snapshot",
+      "bytes": 10241,
+      "raw_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "normalized_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "staged_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "staged_oid": "52022fbffe129d27eb2e6606efa8ae60a41843f8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f-Directory.Packages.props.snapshot",
+      "bytes": 3227,
+      "raw_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "normalized_sha256": "b23da80b99da850555f2eea923994e748c35e725c1f9d79630df789a89bf3054",
+      "staged_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "staged_oid": "a8c30524b80d644ae38506288480a5a5ac20426f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 50,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b-Yubico.YubiKit.Audit20261111.DocCheck.csproj.snapshot",
+      "bytes": 516,
+      "raw_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "normalized_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_oid": "4b66d7e88896e9288be03d6781c29065700f8b7c",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003-PackageTargets.cs.snapshot",
+      "bytes": 5121,
+      "raw_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "normalized_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "staged_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "staged_oid": "b9703aa4dac318de36323ff9746d95b0da2f79e5",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba-TargetRegistry.cs.snapshot",
+      "bytes": 1444,
+      "raw_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "normalized_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "staged_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "staged_oid": "d34c4e210d1bb77dc367d3f374c40372eeb3a539",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64-hook.targets.snapshot",
+      "bytes": 5732,
+      "raw_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "normalized_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_oid": "4732719548eef7d033c2506bbd66e47297203772",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5-TestTargets.cs.snapshot",
+      "bytes": 14282,
+      "raw_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "normalized_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "staged_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "staged_oid": "1cff20cb5edcf5943f3640c883a3070f45337120",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot",
+      "bytes": 10824,
+      "raw_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "normalized_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "staged_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "staged_oid": "23ec362bd741b1aebad5c38258abcedf77877db2",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf-run-command.py.snapshot",
+      "bytes": 1670,
+      "raw_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "normalized_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_oid": "a2885f46fb75c62f6a7bfe9f0160ae490153355d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861-Usage.cs.snapshot",
+      "bytes": 3124,
+      "raw_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "normalized_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "staged_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "staged_oid": "0cadefe0078e39d6755d1c6716bebce648580692",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90-Process.cs.snapshot",
+      "bytes": 7654,
+      "raw_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "normalized_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "staged_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "staged_oid": "dd2f180babd46710f135e10ac885ec384082526f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b-Program.cs.snapshot",
+      "bytes": 7700,
+      "raw_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "normalized_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_oid": "59a67e42e6410aca9320e2eabff10eb148a7008f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279-Results.cs.snapshot",
+      "bytes": 6826,
+      "raw_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "normalized_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "staged_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "staged_oid": "a8d9ac1d73dd64f893f8f1583320629e2d506cfc",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e-Context.cs.snapshot",
+      "bytes": 4681,
+      "raw_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "normalized_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "staged_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "staged_oid": "7bcd27f3546dbcc982fbc38598ae84b9ae3ad9d8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7-Discovery.cs.snapshot",
+      "bytes": 5896,
+      "raw_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "normalized_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "staged_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "staged_oid": "2f51c2ced74f1d8e27bb2d03234129b845acf682",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03-Directory.Build.props.snapshot",
+      "bytes": 575,
+      "raw_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "normalized_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_oid": "1c31cf22b5c861ee56a9981ce7aeea8c4e7a6579",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162-BenchmarkTargets.cs.snapshot",
+      "bytes": 725,
+      "raw_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "normalized_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "staged_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "staged_oid": "6f9aa3ee767a5452f60bc1f13af1f4ace3a23c6a",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89-Conventions.cs.snapshot",
+      "bytes": 2485,
+      "raw_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "normalized_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "staged_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "staged_oid": "cd698247bceab2647b031732f8f3bcf67ad3f1c5",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e-toolchain.cs.snapshot",
+      "bytes": 4176,
+      "raw_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "normalized_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "staged_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "staged_oid": "75a1bf2b759bddfe84497ee27dcd0fa168bd0a02",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e-Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "raw_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "normalized_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "staged_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "staged_oid": "b0cdf0bc20659c291df80c0f2c0fc4c84b37b638",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7-global.json.snapshot",
+      "bytes": 81,
+      "raw_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "normalized_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "staged_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "staged_oid": "34cc7a14df9be0d7076b3d864fc67530c487050b",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa-foundation.py.snapshot",
+      "bytes": 3241,
+      "raw_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "normalized_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_oid": "b3acb92f8e827adf40252a9e81f5427157b08d80",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95-DocsTargets.cs.snapshot",
+      "bytes": 14435,
+      "raw_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "normalized_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "staged_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "staged_oid": "025a559807ec2bcdce6c179e46a46d6ccd4084d0",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa-RunLog.cs.snapshot",
+      "bytes": 21004,
+      "raw_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "normalized_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "staged_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "staged_oid": "0afa0f0319c25766a2222c0df694945c73057774",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100-Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "raw_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "normalized_sha256": "e27951c0c26be8796b9bdbe9b80454efb58fc5d3894f757dd0beb67d4e49952c",
+      "staged_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "staged_oid": "6604048d614eb1244027653570f7464bf3cd873d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 128,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77-Options.cs.snapshot",
+      "bytes": 4425,
+      "raw_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "normalized_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "staged_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "staged_oid": "53e622b56f71ed124fc38c1960cecde44cae174b",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831-CoverageTargets.cs.snapshot",
+      "bytes": 11548,
+      "raw_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "normalized_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "staged_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "staged_oid": "81eaffa520cb98dec285854d2c9706780b72cf83",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/f84745dd4b649ded891a9c0870dbd03e5163a765cb893b736d520fffb148633e-bind.py.snapshot",
+      "bytes": 27214,
+      "raw_sha256": "f84745dd4b649ded891a9c0870dbd03e5163a765cb893b736d520fffb148633e",
+      "normalized_sha256": "f84745dd4b649ded891a9c0870dbd03e5163a765cb893b736d520fffb148633e",
+      "staged_sha256": "f84745dd4b649ded891a9c0870dbd03e5163a765cb893b736d520fffb148633e",
+      "staged_oid": "abd38fedafdaac9e764296b7d164d5158542dbcb",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867-BuildTargets.cs.snapshot",
+      "bytes": 19267,
+      "raw_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "normalized_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "staged_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "staged_oid": "238a28b8b093e621b96c8f372aacde977a270ba8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final-inputs/ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327-nuget.config.snapshot",
+      "bytes": 782,
+      "raw_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "normalized_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "staged_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "staged_oid": "272f7be00be8633c3770c4d15a85a975f2c91155",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-final.json",
+      "bytes": 70749,
+      "raw_sha256": "65a53f340bd1496b259c98e4e15e20254cab61b394fb39e8f8f128b94a503e80",
+      "normalized_sha256": "65a53f340bd1496b259c98e4e15e20254cab61b394fb39e8f8f128b94a503e80",
+      "staged_sha256": "65a53f340bd1496b259c98e4e15e20254cab61b394fb39e8f8f128b94a503e80",
+      "staged_oid": "9422a3e01e9143b5d4c4dcff10907477b63ff29d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937-Output.cs.snapshot",
+      "bytes": 10241,
+      "raw_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "normalized_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "staged_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "staged_oid": "52022fbffe129d27eb2e6606efa8ae60a41843f8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f-Directory.Packages.props.snapshot",
+      "bytes": 3227,
+      "raw_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "normalized_sha256": "b23da80b99da850555f2eea923994e748c35e725c1f9d79630df789a89bf3054",
+      "staged_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "staged_oid": "a8c30524b80d644ae38506288480a5a5ac20426f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 50,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b-Yubico.YubiKit.Audit20261111.DocCheck.csproj.snapshot",
+      "bytes": 516,
+      "raw_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "normalized_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_oid": "4b66d7e88896e9288be03d6781c29065700f8b7c",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003-PackageTargets.cs.snapshot",
+      "bytes": 5121,
+      "raw_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "normalized_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "staged_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "staged_oid": "b9703aa4dac318de36323ff9746d95b0da2f79e5",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba-TargetRegistry.cs.snapshot",
+      "bytes": 1444,
+      "raw_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "normalized_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "staged_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "staged_oid": "d34c4e210d1bb77dc367d3f374c40372eeb3a539",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64-hook.targets.snapshot",
+      "bytes": 5732,
+      "raw_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "normalized_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_oid": "4732719548eef7d033c2506bbd66e47297203772",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5-TestTargets.cs.snapshot",
+      "bytes": 14282,
+      "raw_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "normalized_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "staged_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "staged_oid": "1cff20cb5edcf5943f3640c883a3070f45337120",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot",
+      "bytes": 10824,
+      "raw_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "normalized_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "staged_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "staged_oid": "23ec362bd741b1aebad5c38258abcedf77877db2",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf-run-command.py.snapshot",
+      "bytes": 1670,
+      "raw_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "normalized_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_oid": "a2885f46fb75c62f6a7bfe9f0160ae490153355d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861-Usage.cs.snapshot",
+      "bytes": 3124,
+      "raw_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "normalized_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "staged_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "staged_oid": "0cadefe0078e39d6755d1c6716bebce648580692",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90-Process.cs.snapshot",
+      "bytes": 7654,
+      "raw_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "normalized_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "staged_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "staged_oid": "dd2f180babd46710f135e10ac885ec384082526f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b-Program.cs.snapshot",
+      "bytes": 7700,
+      "raw_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "normalized_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_oid": "59a67e42e6410aca9320e2eabff10eb148a7008f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279-Results.cs.snapshot",
+      "bytes": 6826,
+      "raw_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "normalized_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "staged_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "staged_oid": "a8d9ac1d73dd64f893f8f1583320629e2d506cfc",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e-Context.cs.snapshot",
+      "bytes": 4681,
+      "raw_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "normalized_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "staged_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "staged_oid": "7bcd27f3546dbcc982fbc38598ae84b9ae3ad9d8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7-Discovery.cs.snapshot",
+      "bytes": 5896,
+      "raw_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "normalized_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "staged_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "staged_oid": "2f51c2ced74f1d8e27bb2d03234129b845acf682",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03-Directory.Build.props.snapshot",
+      "bytes": 575,
+      "raw_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "normalized_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_oid": "1c31cf22b5c861ee56a9981ce7aeea8c4e7a6579",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162-BenchmarkTargets.cs.snapshot",
+      "bytes": 725,
+      "raw_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "normalized_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "staged_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "staged_oid": "6f9aa3ee767a5452f60bc1f13af1f4ace3a23c6a",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89-Conventions.cs.snapshot",
+      "bytes": 2485,
+      "raw_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "normalized_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "staged_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "staged_oid": "cd698247bceab2647b031732f8f3bcf67ad3f1c5",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e-toolchain.cs.snapshot",
+      "bytes": 4176,
+      "raw_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "normalized_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "staged_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "staged_oid": "75a1bf2b759bddfe84497ee27dcd0fa168bd0a02",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e-Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "raw_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "normalized_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "staged_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "staged_oid": "b0cdf0bc20659c291df80c0f2c0fc4c84b37b638",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7-global.json.snapshot",
+      "bytes": 81,
+      "raw_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "normalized_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "staged_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "staged_oid": "34cc7a14df9be0d7076b3d864fc67530c487050b",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa-foundation.py.snapshot",
+      "bytes": 3241,
+      "raw_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "normalized_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_oid": "b3acb92f8e827adf40252a9e81f5427157b08d80",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/cb7a59e38100d7315b34c79e404c045392e035e58007592158aef840ce78f46c-bind.py.snapshot",
+      "bytes": 26618,
+      "raw_sha256": "cb7a59e38100d7315b34c79e404c045392e035e58007592158aef840ce78f46c",
+      "normalized_sha256": "cb7a59e38100d7315b34c79e404c045392e035e58007592158aef840ce78f46c",
+      "staged_sha256": "cb7a59e38100d7315b34c79e404c045392e035e58007592158aef840ce78f46c",
+      "staged_oid": "e8ebc3b2963d5548771cd6f7b2e568414e6d9c96",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95-DocsTargets.cs.snapshot",
+      "bytes": 14435,
+      "raw_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "normalized_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "staged_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "staged_oid": "025a559807ec2bcdce6c179e46a46d6ccd4084d0",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa-RunLog.cs.snapshot",
+      "bytes": 21004,
+      "raw_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "normalized_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "staged_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "staged_oid": "0afa0f0319c25766a2222c0df694945c73057774",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100-Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "raw_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "normalized_sha256": "e27951c0c26be8796b9bdbe9b80454efb58fc5d3894f757dd0beb67d4e49952c",
+      "staged_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "staged_oid": "6604048d614eb1244027653570f7464bf3cd873d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 128,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77-Options.cs.snapshot",
+      "bytes": 4425,
+      "raw_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "normalized_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "staged_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "staged_oid": "53e622b56f71ed124fc38c1960cecde44cae174b",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831-CoverageTargets.cs.snapshot",
+      "bytes": 11548,
+      "raw_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "normalized_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "staged_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "staged_oid": "81eaffa520cb98dec285854d2c9706780b72cf83",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867-BuildTargets.cs.snapshot",
+      "bytes": 19267,
+      "raw_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "normalized_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "staged_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "staged_oid": "238a28b8b093e621b96c8f372aacde977a270ba8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-inputs/ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327-nuget.config.snapshot",
+      "bytes": 782,
+      "raw_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "normalized_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "staged_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "staged_oid": "272f7be00be8633c3770c4d15a85a975f2c91155",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937-Output.cs.snapshot",
+      "bytes": 10241,
+      "raw_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "normalized_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "staged_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+      "staged_oid": "52022fbffe129d27eb2e6606efa8ae60a41843f8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f-Directory.Packages.props.snapshot",
+      "bytes": 3227,
+      "raw_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "normalized_sha256": "b23da80b99da850555f2eea923994e748c35e725c1f9d79630df789a89bf3054",
+      "staged_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "staged_oid": "a8c30524b80d644ae38506288480a5a5ac20426f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 50,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b-Yubico.YubiKit.Audit20261111.DocCheck.csproj.snapshot",
+      "bytes": 516,
+      "raw_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "normalized_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_oid": "4b66d7e88896e9288be03d6781c29065700f8b7c",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003-PackageTargets.cs.snapshot",
+      "bytes": 5121,
+      "raw_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "normalized_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "staged_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+      "staged_oid": "b9703aa4dac318de36323ff9746d95b0da2f79e5",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba-TargetRegistry.cs.snapshot",
+      "bytes": 1444,
+      "raw_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "normalized_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "staged_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+      "staged_oid": "d34c4e210d1bb77dc367d3f374c40372eeb3a539",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64-hook.targets.snapshot",
+      "bytes": 5732,
+      "raw_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "normalized_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_sha256": "389b76a955734aae953da450767a2f139fae26f84d076499567023483558bf64",
+      "staged_oid": "4732719548eef7d033c2506bbd66e47297203772",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5-TestTargets.cs.snapshot",
+      "bytes": 14282,
+      "raw_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "normalized_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "staged_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "staged_oid": "1cff20cb5edcf5943f3640c883a3070f45337120",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3-.editorconfig.snapshot",
+      "bytes": 10824,
+      "raw_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "normalized_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "staged_sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3",
+      "staged_oid": "23ec362bd741b1aebad5c38258abcedf77877db2",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf-run-command.py.snapshot",
+      "bytes": 1670,
+      "raw_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "normalized_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_oid": "a2885f46fb75c62f6a7bfe9f0160ae490153355d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861-Usage.cs.snapshot",
+      "bytes": 3124,
+      "raw_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "normalized_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "staged_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+      "staged_oid": "0cadefe0078e39d6755d1c6716bebce648580692",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90-Process.cs.snapshot",
+      "bytes": 7654,
+      "raw_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "normalized_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "staged_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "staged_oid": "dd2f180babd46710f135e10ac885ec384082526f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b-Program.cs.snapshot",
+      "bytes": 7700,
+      "raw_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "normalized_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_oid": "59a67e42e6410aca9320e2eabff10eb148a7008f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/7c8bff48080826d5b6157fead1d040d42a580e3ca0fce949ebf9fbc6c735b343-bind.py.snapshot",
+      "bytes": 26781,
+      "raw_sha256": "7c8bff48080826d5b6157fead1d040d42a580e3ca0fce949ebf9fbc6c735b343",
+      "normalized_sha256": "7c8bff48080826d5b6157fead1d040d42a580e3ca0fce949ebf9fbc6c735b343",
+      "staged_sha256": "7c8bff48080826d5b6157fead1d040d42a580e3ca0fce949ebf9fbc6c735b343",
+      "staged_oid": "9d6470bb19b1b2f3903b53dd502fd6305c9bd351",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279-Results.cs.snapshot",
+      "bytes": 6826,
+      "raw_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "normalized_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "staged_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "staged_oid": "a8d9ac1d73dd64f893f8f1583320629e2d506cfc",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e-Context.cs.snapshot",
+      "bytes": 4681,
+      "raw_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "normalized_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "staged_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+      "staged_oid": "7bcd27f3546dbcc982fbc38598ae84b9ae3ad9d8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7-Discovery.cs.snapshot",
+      "bytes": 5896,
+      "raw_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "normalized_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "staged_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "staged_oid": "2f51c2ced74f1d8e27bb2d03234129b845acf682",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03-Directory.Build.props.snapshot",
+      "bytes": 575,
+      "raw_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "normalized_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_oid": "1c31cf22b5c861ee56a9981ce7aeea8c4e7a6579",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162-BenchmarkTargets.cs.snapshot",
+      "bytes": 725,
+      "raw_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "normalized_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "staged_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+      "staged_oid": "6f9aa3ee767a5452f60bc1f13af1f4ace3a23c6a",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89-Conventions.cs.snapshot",
+      "bytes": 2485,
+      "raw_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "normalized_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "staged_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+      "staged_oid": "cd698247bceab2647b031732f8f3bcf67ad3f1c5",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e-toolchain.cs.snapshot",
+      "bytes": 4176,
+      "raw_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "normalized_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "staged_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+      "staged_oid": "75a1bf2b759bddfe84497ee27dcd0fa168bd0a02",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e-Directory.Build.targets.snapshot",
+      "bytes": 2665,
+      "raw_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "normalized_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "staged_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+      "staged_oid": "b0cdf0bc20659c291df80c0f2c0fc4c84b37b638",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7-global.json.snapshot",
+      "bytes": 81,
+      "raw_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "normalized_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "staged_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+      "staged_oid": "34cc7a14df9be0d7076b3d864fc67530c487050b",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa-foundation.py.snapshot",
+      "bytes": 3241,
+      "raw_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "normalized_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_oid": "b3acb92f8e827adf40252a9e81f5427157b08d80",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95-DocsTargets.cs.snapshot",
+      "bytes": 14435,
+      "raw_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "normalized_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "staged_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+      "staged_oid": "025a559807ec2bcdce6c179e46a46d6ccd4084d0",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa-RunLog.cs.snapshot",
+      "bytes": 21004,
+      "raw_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "normalized_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "staged_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+      "staged_oid": "0afa0f0319c25766a2222c0df694945c73057774",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100-Directory.Build.props.snapshot",
+      "bytes": 8270,
+      "raw_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "normalized_sha256": "e27951c0c26be8796b9bdbe9b80454efb58fc5d3894f757dd0beb67d4e49952c",
+      "staged_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "staged_oid": "6604048d614eb1244027653570f7464bf3cd873d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 128,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77-Options.cs.snapshot",
+      "bytes": 4425,
+      "raw_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "normalized_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "staged_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+      "staged_oid": "53e622b56f71ed124fc38c1960cecde44cae174b",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831-CoverageTargets.cs.snapshot",
+      "bytes": 11548,
+      "raw_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "normalized_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "staged_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+      "staged_oid": "81eaffa520cb98dec285854d2c9706780b72cf83",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867-BuildTargets.cs.snapshot",
+      "bytes": 19267,
+      "raw_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "normalized_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "staged_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "staged_oid": "238a28b8b093e621b96c8f372aacde977a270ba8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1-inputs/ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327-nuget.config.snapshot",
+      "bytes": 782,
+      "raw_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "normalized_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "staged_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "staged_oid": "272f7be00be8633c3770c4d15a85a975f2c91155",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-r1.json",
+      "bytes": 70659,
+      "raw_sha256": "627dd67d60d6281282bdacfd7f8e6623dd885cc20791b3891e1838f3f436f6e6",
+      "normalized_sha256": "627dd67d60d6281282bdacfd7f8e6623dd885cc20791b3891e1838f3f436f6e6",
+      "staged_sha256": "627dd67d60d6281282bdacfd7f8e6623dd885cc20791b3891e1838f3f436f6e6",
+      "staged_oid": "c091adeaabc3889f3ae5a28848b83401d5fdbdd2",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs.json",
+      "bytes": 70569,
+      "raw_sha256": "0bf83aa43cbf64bb4747f16ec84169678d6e296ae935ba301b3dd985464a4864",
+      "normalized_sha256": "0bf83aa43cbf64bb4747f16ec84169678d6e296ae935ba301b3dd985464a4864",
+      "staged_sha256": "0bf83aa43cbf64bb4747f16ec84169678d6e296ae935ba301b3dd985464a4864",
+      "staged_oid": "e016cc5fc87e6bf00eb37c4d67092b75f185ba76",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/selfcheck.py",
+      "bytes": 5885,
+      "raw_sha256": "ce244f2572d6cd680728d58719a35f12069d6cdd61d6716bdb16887d5f920af8",
+      "normalized_sha256": "ce244f2572d6cd680728d58719a35f12069d6cdd61d6716bdb16887d5f920af8",
+      "staged_sha256": "ce244f2572d6cd680728d58719a35f12069d6cdd61d6716bdb16887d5f920af8",
+      "staged_oid": "9f45ad9fbdff3bdbb62c2d9ca18de5d261467668",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/static-verification.json",
+      "bytes": 60793,
+      "raw_sha256": "a931a6898204bf7f26badb2aebf306e2a1af6aa15463ed252b3fd0d7fdc89c6b",
+      "normalized_sha256": "a931a6898204bf7f26badb2aebf306e2a1af6aa15463ed252b3fd0d7fdc89c6b",
+      "staged_sha256": "a931a6898204bf7f26badb2aebf306e2a1af6aa15463ed252b3fd0d7fdc89c6b",
+      "staged_oid": "ddb31d4057bb58b1b2aae902686f839d282f0df1",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation-preparation.md",
+      "bytes": 16535,
+      "raw_sha256": "6210c21014c45de6843f79c7d07bfeb50e9ffbbe0f58e14c3e955e0c6faf099e",
+      "normalized_sha256": "6210c21014c45de6843f79c7d07bfeb50e9ffbbe0f58e14c3e955e0c6faf099e",
+      "staged_sha256": "6210c21014c45de6843f79c7d07bfeb50e9ffbbe0f58e14c3e955e0c6faf099e",
+      "staged_oid": "559002c51c7e1bbb6f846b0a85de580bca839f6f",
+      "attributes": {
+        "text": "set",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    }
+  ],
+  "coordinator_qualification": "Coordinator reports separate core-foundation-first Python qualification passed; original participating sources unchanged.",
+  "pending": "Fresh independent R1 review, explicit SDK release, actual canonical checker build/hook validation, emitted seal acceptance and bound checker selfcheck/tokens/API."
+}

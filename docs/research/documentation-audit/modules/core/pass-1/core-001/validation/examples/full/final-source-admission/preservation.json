@@ -1,0 +1,126 @@
+{
+  "predecessor_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-helper-imports-fixed.json",
+    "bytes": 713786,
+    "sha256": "52234498f7d167899c296daadec96dd0a543d9dbbd3f72c72007d1983fc099e7"
+  },
+  "before": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-helper-imports-fixed.json",
+        "bytes": 713786,
+        "sha256": "52234498f7d167899c296daadec96dd0a543d9dbbd3f72c72007d1983fc099e7"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/reviewed-inputs-helper-imports-fixed.json.snapshot",
+        "bytes": 713786,
+        "sha256": "52234498f7d167899c296daadec96dd0a543d9dbbd3f72c72007d1983fc099e7"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/manifest-helper-imports-fixed.json",
+        "bytes": 2308887,
+        "sha256": "1d89859816e601d620eb6a9951b94241799c545648416e1e8a463774d34d94ff"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/manifest-helper-imports-fixed.json.snapshot",
+        "bytes": 2308887,
+        "sha256": "1d89859816e601d620eb6a9951b94241799c545648416e1e8a463774d34d94ff"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs",
+        "bytes": 1181,
+        "sha256": "6d7d82a0b0fbba0909878e27f61f4defe0ce2d8b4cf918526f45a82b69938cc8"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/injections/WebAuthn.IntegrationTests/FULL-032.cs.snapshot",
+        "bytes": 1181,
+        "sha256": "6d7d82a0b0fbba0909878e27f61f4defe0ce2d8b4cf918526f45a82b69938cc8"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.py",
+        "bytes": 12082,
+        "sha256": "e13001424b75b5fa83e7f1fe0b0ace2739f0f2e16c787e3de2306262fed7caa8"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/capture.py.snapshot",
+        "bytes": 12082,
+        "sha256": "e13001424b75b5fa83e7f1fe0b0ace2739f0f2e16c787e3de2306262fed7caa8"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.targets",
+        "bytes": 3680,
+        "sha256": "ff4d4a5eff05e391e27418e1932b0b9b189663b9dbc6c4d6deb6cf6d7cc2b74c"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/capture.targets.snapshot",
+        "bytes": 3680,
+        "sha256": "ff4d4a5eff05e391e27418e1932b0b9b189663b9dbc6c4d6deb6cf6d7cc2b74c"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/run.py",
+        "bytes": 8785,
+        "sha256": "99dfdfa57a17041f5164e56f0fc97b7841eaa5236ad48fe0d851746e2a5d7261"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/run.py.snapshot",
+        "bytes": 8785,
+        "sha256": "99dfdfa57a17041f5164e56f0fc97b7841eaa5236ad48fe0d851746e2a5d7261"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiled-contexts-runner-fixed.json",
+        "bytes": 12202,
+        "sha256": "bde980ff7ae7d73f3407f769469c0306b12857a8a586c61b237af1dc0da06a67"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/compiled-contexts-runner-fixed.json.snapshot",
+        "bytes": 12202,
+        "sha256": "bde980ff7ae7d73f3407f769469c0306b12857a8a586c61b237af1dc0da06a67"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-admission-runner-fixed.json",
+        "bytes": 5044,
+        "sha256": "6b87d219e42435fef25aca465c67b9b32c5a96ac0e2de398da3768fd95f37b08"
+      },
+      "snapshot": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/before/package-entrypoint-admission-runner-fixed.json.snapshot",
+        "bytes": 5044,
+        "sha256": "6b87d219e42435fef25aca465c67b9b32c5a96ac0e2de398da3768fd95f37b08"
+      }
+    }
+  ],
+  "nine_checkpoints_and_300_source_baseline": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/preservation.json",
+    "bytes": 1862722,
+    "sha256": "e8c260f9b9a57b424119f115bc87f57982fb17d751facd30a7ce1891854d1a52"
+  },
+  "baseline_compilation_index": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/compilation-index.before.json",
+    "bytes": 690491,
+    "sha256": "70078eaed755551fd5290fc793f357d08210415d97852b307b43e4abaf85c0ee"
+  },
+  "baseline_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/before/manifest-helper-imports-fixed.json.snapshot",
+    "bytes": 2308887,
+    "sha256": "1d89859816e601d620eb6a9951b94241799c545648416e1e8a463774d34d94ff"
+  },
+  "baseline_sources": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/generated-sources.before.json.snapshot",
+    "bytes": 515398,
+    "sha256": "edb717475039169a7871f3f068484ce67bc7963f6e2529ba618d50fc12bb65cb"
+  },
+  "scope": "One accepted FULL032 body change plus exact reviewed whole-file metadata transitions; old attempts/profiles/checkpoints remain immutable. No build/capture replay/test execution."
+}

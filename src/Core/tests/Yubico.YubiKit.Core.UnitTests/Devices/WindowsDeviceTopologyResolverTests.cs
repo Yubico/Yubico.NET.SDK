@@ -211,8 +211,8 @@ public class WindowsDeviceTopologyResolverTests
     [Fact]
     public void NullResolver_AlwaysReportsUnknown_PinnedPlatformBound()
     {
-        // macOS/Linux platform bound: no reader/interface → USB device mapping exists, so topology
-        // evidence is never available and tiers 2..5 always decide.
+        // This SDK currently selects the null topology resolver on macOS/Linux. These calls pin its
+        // false/null results, rather than the availability of mapping APIs on those operating systems.
         var resolver = NullDeviceTopologyResolver.Instance;
 
         Assert.False(resolver.TryGetTopologyKey(new FakeDevice("any"), ConnectionType.SmartCard, out var ccid));

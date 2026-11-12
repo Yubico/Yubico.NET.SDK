@@ -1,0 +1,62 @@
+[
+  {
+    "sample_issue": "SAMPLE-PGP-001",
+    "selected_unit_id": "core-001:unit:710814862611f595",
+    "path": "src/OpenPgp/CLAUDE.md",
+    "label": "## User-presence notifications",
+    "original_inventory": {
+      "source_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+      "range_sha256": "7a87d4759e414455647804d973259ef455146f5b3516c835854c9a57133e0427",
+      "first_line": 192,
+      "last_line": 202,
+      "start_character": 11912,
+      "end_character_exclusive": 12926
+    },
+    "accepted_before_unit": {
+      "first_line": 212,
+      "last_line": 222,
+      "start_character": 14060,
+      "end_character_exclusive": 15073,
+      "range_sha256": "8a06c0e55015aa659e4b998b437ccfc94fb89498193deb5a20b0d035c9947a40"
+    },
+    "corrected_unit": {
+      "first_line": 212,
+      "last_line": 223,
+      "start_character": 14060,
+      "end_character_exclusive": 15180,
+      "range_sha256": "448c486c195731b20d7dc89139c34b8914e934502a963b88b3b8b1795db5a9cc"
+    },
+    "miss": "Unconditional advisory-fallback wording omitted failure of diagnostic logging before PolicyMayRequire assignment.",
+    "disposition": "Focused documentation correction; owner/sampler retains existing logging-related engineering/qualification ownership; zero new unique Core bug allocation."
+  },
+  {
+    "sample_issue": "SAMPLE-PGP-001",
+    "selected_unit_id": "core-001:unit:8b2a95f01db9bf2c",
+    "path": "src/OpenPgp/src/OpenPgpSession.cs",
+    "label": "Yubico.YubiKit.OpenPgp.OpenPgpSession :: private async Task<UserPresenceContext?> GetUserPresenceContextAsync( KeyRef keyRef, string operation, CancellationToken cancellationToken) ",
+    "original_inventory": {
+      "source_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+      "range_sha256": "19eb9a94af9c4b6f044490e9b3995c18107fca88f80f0994e256f930776d9719",
+      "first_line": 320,
+      "last_line": 372,
+      "start_character": 12303,
+      "end_character_exclusive": 14175
+    },
+    "accepted_before_unit": {
+      "first_line": 327,
+      "last_line": 377,
+      "start_character": 12874,
+      "end_character_exclusive": 14744,
+      "range_sha256": "f5f0e7155081d9cfe49b3c8355cbbf8949292e4a2248a67ab89d4013de498b4e"
+    },
+    "corrected_unit": {
+      "first_line": 327,
+      "last_line": 378,
+      "start_character": 12874,
+      "end_character_exclusive": 14848,
+      "range_sha256": "cc831a4db236841a2fcb2e824a01f292e369fb195f97743aa6e393dfd02e2dc4"
+    },
+    "miss": "Unconditional advisory-fallback wording omitted failure of diagnostic logging before PolicyMayRequire assignment.",
+    "disposition": "Focused documentation correction; owner/sampler retains existing logging-related engineering/qualification ownership; zero new unique Core bug allocation."
+  }
+]

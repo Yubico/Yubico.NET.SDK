@@ -196,6 +196,8 @@ public sealed partial class OpenPgpSession
 
         _logger.LogInformation("Setting KDF configuration");
 
+        // ToBytes creates a separate encoding that may contain initial PIN hashes. This call currently
+        // retains no owner to clear that payload; disposing the KDF clears only its own backing arrays.
         await PutDataAsync(DataObject.Kdf, kdf.ToBytes(), cancellationToken)
             .ConfigureAwait(false);
 

@@ -1,0 +1,239 @@
+{
+  "result": "PASS",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "exact_assigned_units": 239,
+  "candidate_files": 56,
+  "vendor_capture": true,
+  "reused_sources": 16,
+  "inherited_keys": 13,
+  "substantive_clean_nominees": 16,
+  "local_candidates": 6,
+  "counts": {
+    "READ-CLEAN": 158,
+    "READ-CANDIDATE": 28,
+    "READ-CONTEXT": 53
+  },
+  "unread": 0,
+  "accepted_core_ids": 0,
+  "failures": [],
+  "narrow_dependency_identities": [
+    {
+      "path": "src/Core/src/Sessions/ApplicationSession.cs",
+      "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+      "pinned_raw_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+      "sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+      "pinned_raw_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+      "pinned_raw_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Devices/Feature.cs",
+      "sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+      "pinned_raw_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Devices/FirmwareVersion.cs",
+      "sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+      "pinned_raw_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3",
+      "pinned_raw_sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67",
+      "pinned_raw_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "sha256": "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1",
+      "pinned_raw_sha256": "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+      "pinned_raw_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+      "pinned_raw_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+      "sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+      "pinned_raw_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+      "pinned_raw_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "sha256": "7512b65eba1c0bb65fb6794bf07a7149a9568bdb269c611763d1a4a34c374d76",
+      "pinned_raw_sha256": "7512b65eba1c0bb65fb6794bf07a7149a9568bdb269c611763d1a4a34c374d76",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+      "sha256": "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f",
+      "pinned_raw_sha256": "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Utilities/Base32.cs",
+      "sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+      "pinned_raw_sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+      "sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+      "pinned_raw_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+      "pinned_raw_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+      "sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+      "pinned_raw_sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4",
+      "pinned_raw_sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "sha256": "b96f8bb765a5a8f60052c1bba193f93352fa7cf3597e0aca217699f218c22c70",
+      "pinned_raw_sha256": "b96f8bb765a5a8f60052c1bba193f93352fa7cf3597e0aca217699f218c22c70",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/Cli.Commands/src/Oath/OathHelpers.cs",
+      "sha256": "3ae4fb841b2b478574a7d934ad842eb34bb0eaec584357ffdb3a1147f690e64c",
+      "pinned_raw_sha256": "3ae4fb841b2b478574a7d934ad842eb34bb0eaec584357ffdb3a1147f690e64c",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+      "pinned_raw_sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+      "pinned_raw_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+      "role": "Read-only dependency, no primary coverage credit; complete relevant caller/helper scope"
+    }
+  ],
+  "owned_record_hashes": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/analysis.md",
+      "sha256": "4e94fa704ff0d86c96ce2b42af10fa92acb1be1df9fb53ef657834d80f28bb93"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/candidate-index.json",
+      "sha256": "94437b9c10dfd69fc51514ded2534c310ad1600378bae0367c44f6ee9a23287b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/candidates.md",
+      "sha256": "2758d21c9f73a498a1d95aad5006c85268bb294ce43431335ddc479917fe15ca"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/capture_sources.py",
+      "sha256": "429537e1c2da754e968843d75d95e674378477d6331666c705cb3ac7ac982e73"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/clean-nominees.json",
+      "sha256": "6e47b0c2d1dcafe180beba0c7ca1bc1d11cb7d6b4774ec299117fe8600dbe5d6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/coverage-summary.json",
+      "sha256": "45975ef75fa196e9d073e3fcc23bbaffe2a39afda948abfe6b368972167a37cb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/file-dispositions.json",
+      "sha256": "0731ab9fd88e6c6f92e4a49aae34eb4af86bfa18271a464dc146fdde834fecbc"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/file-notes.json",
+      "sha256": "5e499c4fdce3af3c39b9aa36736a74a860b2f28e537a87d5641c2ac04b1cc396"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/inherited-dispositions.json",
+      "sha256": "358ab35f2caaf0c4b15d4706fe69785b054f442461b521c12bc5580153f693f9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/prepare_records.py",
+      "sha256": "9547f4c041df6791c1e626c46a9493dfaf09d276d57322ba8a54f218976df378"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/record-preparation-attempt-1.txt",
+      "sha256": "587ec270b524d6b194b8248567f2010c7a004b93368ad1b22f87b1e88f93cda0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/record-verification-attempt-1.txt",
+      "sha256": "427ac840af57b92145486d664790888e184a3051b25ba0de297768bf11fd6ecb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/source-manifest.json",
+      "sha256": "e9d1d77b8bfa7404958ec5a53a406b1310abc139820bfdd88686071110cd2de8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/sources.md",
+      "sha256": "716783fd769eae76a81aaec448586bce71d801a5b739984c3ceaab40c32a5eb6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/unit-dispositions.json",
+      "sha256": "362cb1a1b7481bbf53f0fe08ed0afe24c89f5f1a153a8b25492eb9b15b2c7400"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/verify_records.py",
+      "sha256": "41f44cab879080523e4f779f66985799ebb2a95422f405a697e078575edbe71f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/ykoath-protocol.html",
+      "sha256": "44b94628c1a6a9bced1b11fa62370f62f62ec71390980ebe0ea3a46e64eab896"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Oath.md",
+      "sha256": "f76dfc32758b1219b0ce5ae01d9719632281d821aa0dafa99557447c8b0a5984"
+    }
+  ],
+  "limits": "Mechanical verification only. Independent content/citation review, edits, sample acceptance, compilation and runtime remain pending.",
+  "sdk_tests": 0,
+  "builds": 0,
+  "native_runs": 0,
+  "crypto_runs": 0,
+  "device_operations": 0
+}

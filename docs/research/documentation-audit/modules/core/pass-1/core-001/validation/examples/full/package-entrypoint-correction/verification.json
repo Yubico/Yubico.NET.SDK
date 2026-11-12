@@ -1,0 +1,327 @@
+{
+  "scope": "Static Full-local exact-package source admission only; no SDK build/test/capture phase or replay/native/device/provider/formatter/Git mutation/subagent execution.",
+  "profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-package-entrypoint.json",
+    "bytes": 681528,
+    "sha256": "fa8db15afb99ca26f5e7912e2754981fb8a4cffba59e76df5a76136080652aed"
+  },
+  "static": {
+    "scope": "Static exact source-region/wrapper/real-context and preserved-pilot checks only; no compilation or test/example execution.",
+    "counts": {
+      "additional_authority_records": 662,
+      "pilot_records": 41,
+      "total_authority_records": 703,
+      "additional_prepared_occurrences": 302,
+      "unique_additional_compilations": 300,
+      "consumer_bodies": 244,
+      "existing_test_body_occurrences": 58,
+      "unique_existing_test_bodies": 56,
+      "proposed_illustration_qualifications": 34,
+      "compile_contexts": 10
+    },
+    "exact_additional_compiled_source_files": 300,
+    "pilot_current_record_bytes_unchanged": true,
+    "accepted_source_regions_unchanged": true,
+    "wrappers_reconstructed": true,
+    "bounded_review_correction": {
+      "scope": "Pure metadata/path/import/resource-layout checks only; no Csc/capture/build/test/example execution.",
+      "descriptor_positive_contexts": [
+        {
+          "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+          "paths": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/example.sourcelink.json",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/shared comma,file.cs",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/payload, with space.bin"
+          ],
+          "raw_arguments_unchanged": true
+        },
+        {
+          "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+          "paths": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/example.sourcelink.json",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/shared comma,file.cs",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/payload, with space.bin"
+          ],
+          "raw_arguments_unchanged": true
+        },
+        {
+          "project": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj",
+          "paths": [
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/obj/Release/net10.0/example.sourcelink.json",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/shared comma,file.cs",
+            "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/obj/payload, with space.bin"
+          ],
+          "raw_arguments_unchanged": true
+        }
+      ],
+      "rejected_project_or_membership_cases": [
+        "relative-project",
+        "foreign-project",
+        "non-project",
+        "old-doccheck-base",
+        "wrong-selected-project"
+      ],
+      "qualified_parser_project_and_root_unchanged": true,
+      "using_directive_and_resource_declaration_distinguished": true,
+      "literal_body_reconstructions": [
+        "FULL-027",
+        "FULL-211",
+        "FULL-238",
+        "FULL-244"
+      ],
+      "alias_238_same_real_context": true,
+      "synchronous_244": true,
+      "framework_import_027": true
+    },
+    "compiler_import_correction": {
+      "status": "Preserved historical static result; all current imports rechecked by remaining-context verifier.",
+      "record": "compiler-import-correction/verification.json",
+      "sha256": "d0bfa48894af32a92b0e467a470efc17b0feb0ee6e208893d475d2c4572ad4f6"
+    },
+    "compiler_context_correction": {
+      "scope": "Static finite remaining-context correction only; no compilation, capture replay or execution.",
+      "source_count": 300,
+      "consumer_sources": 244,
+      "test_sources": 56,
+      "changed_sources": [
+        "FULL-036",
+        "FULL-163",
+        "FULL-209",
+        "FULL-232",
+        "FULL-250",
+        "FULL-263",
+        "FULL-268",
+        "FULL-279",
+        "FULL-281",
+        "FULL-329",
+        "FULL-411"
+      ],
+      "original_bodies_directives_and_nonprefix_remainders_exact": true,
+      "emitted_diagnostics": 21,
+      "accepted_body_defects": [],
+      "failed_attempt_records_preserved": 549,
+      "qualification": "No general C# binding proof. Later compiler/body diagnostics remain possible and belong to the coordinator/editor.",
+      "all_source_fault_family_classifications": 300
+    },
+    "package_entrypoint_correction": {
+      "scope": "Static exact package/archive/assets/import/source-admission proof; no capture phase, build or test execution.",
+      "included_contexts": [
+        "Core.IntegrationTests",
+        "Ctap2.IntegrationTests",
+        "Management.IntegrationTests",
+        "Oath.IntegrationTests",
+        "Piv.IntegrationTests",
+        "SecurityDomain.IntegrationTests",
+        "WebAuthn.IntegrationTests"
+      ],
+      "excluded_contexts": [
+        "Core.UnitTests",
+        "Ctap2.UnitTests",
+        "consumer"
+      ],
+      "negative_cases_rejected": [
+        "GenerateProgramFile",
+        "GeneratedProgramFile",
+        "NuGetPackageRoot",
+        "Language",
+        "wrong-package-content-hash",
+        "wrong-package-path",
+        "source-absent-from-assets",
+        "producer-absent-from-assets",
+        "foreign-project-assets",
+        "producer-import-wrong-version",
+        "producer-import-condition-weakened",
+        "excluded-project"
+      ],
+      "source_sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a",
+      "producer_sha256": "93e2c4a4e08fa8db6af3b5907205741ad5184e642181bfdbe949c5109e19aa2f",
+      "archive_sha512": "cfpn4IW0Q+emID8eUocS7xfmwwYgD/JX5S+zCZA2l7gcYzxZ1vvfcdZHcKkuzCH4gMbBYqcZqtBn9uZa0WJRUg==",
+      "package_metadata_content_hash": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+      "hash_roles_not_conflated": true,
+      "package_source_observed_in_failed_before_items": true,
+      "qualified_kernel_parser_and_exact_csc_membership_unchanged": true,
+      "generated_sources_and_manifest_unchanged": 300,
+      "prior_accepted_compilation_shas": [
+        "e044ba23cd4a0a55caa6cf0679716c6aba98c15f82adc292e05361bdf186c357",
+        "9ff6235c1c8c077d7767f14f2a53f125b9b591a074eca42ace60725652d77e8a",
+        "097d83207ee0bd098cd42fb862b2f91fa318f955ff762e24d1f8880c08d637c8"
+      ],
+      "failed_attempt_identities_preserved": 19,
+      "effective_policy_qualification": "Positive metadata cases use explicit synthetic expected policy; actual effective GenerateProgramFile/GeneratedProgramFile/NuGetPackageRoot/Language are newly observed and required at coordinator retry.",
+      "actual_retry": "Pending focused review and examples-full-ctap-integration-second; no new Csc acceptance or runtime claim."
+    },
+    "proposed_qualifications": "34 source-backed noncompiled qualifications accepted by original Full review; scope unchanged.",
+    "actual_full_build": "Consumer-fourth and two unit contexts accepted at unchanged profile 3e40cb...; integration admission retry pending after before-Csc guard failure. No build run by this correction worker.",
+    "final_checker_binding": "Separate existing-binder profile db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1; no rebuild by this worker."
+  },
+  "contexts": [
+    {
+      "name": "consumer",
+      "project_count": 15,
+      "fixed_source_state_rows": 1764,
+      "expected_compile_sources": 244,
+      "pinned_package_program_expected": false
+    },
+    {
+      "name": "Ctap2.UnitTests",
+      "project_count": 3,
+      "fixed_source_state_rows": 1749,
+      "expected_compile_sources": 52,
+      "pinned_package_program_expected": false
+    },
+    {
+      "name": "Ctap2.IntegrationTests",
+      "project_count": 5,
+      "fixed_source_state_rows": 1752,
+      "expected_compile_sources": 34,
+      "pinned_package_program_expected": true
+    },
+    {
+      "name": "WebAuthn.IntegrationTests",
+      "project_count": 6,
+      "fixed_source_state_rows": 1754,
+      "expected_compile_sources": 10,
+      "pinned_package_program_expected": true
+    },
+    {
+      "name": "Core.UnitTests",
+      "project_count": 2,
+      "fixed_source_state_rows": 1752,
+      "expected_compile_sources": 180,
+      "pinned_package_program_expected": false
+    },
+    {
+      "name": "Management.IntegrationTests",
+      "project_count": 4,
+      "fixed_source_state_rows": 1750,
+      "expected_compile_sources": 47,
+      "pinned_package_program_expected": true
+    },
+    {
+      "name": "Core.IntegrationTests",
+      "project_count": 4,
+      "fixed_source_state_rows": 1750,
+      "expected_compile_sources": 16,
+      "pinned_package_program_expected": true
+    },
+    {
+      "name": "SecurityDomain.IntegrationTests",
+      "project_count": 5,
+      "fixed_source_state_rows": 1752,
+      "expected_compile_sources": 14,
+      "pinned_package_program_expected": true
+    },
+    {
+      "name": "Piv.IntegrationTests",
+      "project_count": 5,
+      "fixed_source_state_rows": 1752,
+      "expected_compile_sources": 26,
+      "pinned_package_program_expected": true
+    },
+    {
+      "name": "Oath.IntegrationTests",
+      "project_count": 5,
+      "fixed_source_state_rows": 1752,
+      "expected_compile_sources": 9,
+      "pinned_package_program_expected": true
+    }
+  ],
+  "fixed_rows": 1743,
+  "known_compile_source_paths": 1331,
+  "only_compile_source_added": {
+    "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+    "bytes": 218,
+    "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a"
+  },
+  "projects": 25,
+  "accepted_product_paths": 361,
+  "all_original_compile_paths_and_product_map_unchanged": true,
+  "all_300_sources_wrappers_and_manifest_unchanged": true,
+  "qualified_kernel_parser_doccheck_and_root_product_inputs_unchanged": true,
+  "successful_contexts_not_rerun_or_rebound": [
+    {
+      "label": "examples-full-consumer-fourth",
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-consumer-fourth/accepted-compilation.json",
+        "bytes": 170843,
+        "sha256": "e044ba23cd4a0a55caa6cf0679716c6aba98c15f82adc292e05361bdf186c357"
+      },
+      "profile": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-contexts-fixed.json",
+        "bytes": 670995,
+        "sha256": "3e40cb440ddd872de8bfba3ae3c0e45166ff5dbcb3a44aad890b968c97885228"
+      },
+      "retained_files": 26
+    },
+    {
+      "label": "examples-full-core-unit-first",
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-core-unit-first/accepted-compilation.json",
+        "bytes": 167393,
+        "sha256": "9ff6235c1c8c077d7767f14f2a53f125b9b591a074eca42ace60725652d77e8a"
+      },
+      "profile": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-contexts-fixed.json",
+        "bytes": 670995,
+        "sha256": "3e40cb440ddd872de8bfba3ae3c0e45166ff5dbcb3a44aad890b968c97885228"
+      },
+      "retained_files": 16
+    },
+    {
+      "label": "examples-full-ctap-unit-first",
+      "accepted_compilation": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-ctap-unit-first/accepted-compilation.json",
+        "bytes": 166994,
+        "sha256": "097d83207ee0bd098cd42fb862b2f91fa318f955ff762e24d1f8880c08d637c8"
+      },
+      "profile": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-contexts-fixed.json",
+        "bytes": 670995,
+        "sha256": "3e40cb440ddd872de8bfba3ae3c0e45166ff5dbcb3a44aad890b968c97885228"
+      },
+      "retained_files": 17
+    }
+  ],
+  "retained_prior_output_files": 59,
+  "failed_attempt_remains_before_csc": true,
+  "live_restored_assets_imports_match_frozen_snapshot_at_static_check": true,
+  "all_retry_labels_fresh": [
+    "examples-full-ctap-integration-second",
+    "examples-full-management-first",
+    "examples-full-security-domain-first",
+    "examples-full-piv-first",
+    "examples-full-core-integration-first",
+    "examples-full-webauthn-first",
+    "examples-full-oath-first"
+  ],
+  "policy_qualification": "Positive metadata cases use explicit synthetic expected policy; actual effective GenerateProgramFile/GeneratedProgramFile/NuGetPackageRoot/Language are newly observed and required at coordinator retry.",
+  "source_admission": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-admission.json",
+    "bytes": 4872,
+    "sha256": "502d4f2dcf8cccd3c50105b601ff647a7600914dc1b8cfe314758f16c28880fd"
+  },
+  "profile_delta": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-correction/profile-delta.json",
+    "bytes": 5994,
+    "sha256": "f77a641a0910d90b7c54a45084bd2d2976bb8aae07317b9d1103a5137b2729f1"
+  },
+  "capture_delta": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-correction/capture.delta.json",
+    "bytes": 12798,
+    "sha256": "c4de9cc1204ce78af2728b7a178f1a81d96bbf3f5a8482e07101d694842ed140"
+  },
+  "handoff": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-correction/handoff.md",
+    "bytes": 8160,
+    "sha256": "554b9ac43c73a46a4206003d2738b5b5099d7944ffb3d501024d8639f61ee2d3"
+  },
+  "preparation_handoff": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/full-example-preparation.md",
+    "bytes": 15784,
+    "sha256": "3986480f4a7118f3575ecf1c2619e064af7a3333e34b43d94f66403be8f06a12"
+  },
+  "retry": "Pending focused review; Ctap2.IntegrationTests second then remaining six; three prior accepted checkpoints stay on original profile3e40."
+}

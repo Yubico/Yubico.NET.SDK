@@ -1,0 +1,1094 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of120 complete pinned B2 units plus relevant current source; final overlap/mapping and history eligibility pending",
+  "reading_sha256": "68b1e67e122d535ff474fea6d108f09ee77c5fe535604c80b8a71311aeb4def6",
+  "context": [
+    "LinuxHidDeviceListener Start/Stop/event loop",
+    "LinuxHidEventSource WaitForEvent/SignalShutdown/Dispose",
+    "LinuxHidReadReactor Release and wake transfer",
+    "LinuxFidoHidNativeOwner Receive/cancel/typed completion",
+    "LinuxOtpHidNativeOwner Send copy/dispatch/clear completion"
+  ],
+  "units": [
+    {
+      "id": "core-001:unit:80c8b4e5e4742b49",
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs",
+      "range_sha256": "d8e5fd884e717c4fd54fcfb6503391985b8e5004c61280c9ce2cb712af97bfcb",
+      "current_file_sha256": "0991c7b8b52cee0019202cdb2cfbe6a0bfac1c73606395e2ab945e833282ff3e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "ReleaseReference guard verified against reactor Release: reactor/early calls reject, in-progress/failed states reject, completed release idempotent. Owner-worker execution remains caller contract."
+    },
+    {
+      "id": "core-001:unit:ffa89fbb1f0e0006",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidConnection.cs",
+      "range_sha256": "5b5647ed3008e3efbb30c5ec3f880fc00d4a50c2cb152fbbf8fd7108e023d7eb",
+      "current_file_sha256": "4d5479f8295369c67a74f838c335410be84315543986d61aab20dc7e4f104736",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b4a0cd296ec54259",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+      "range_sha256": "4830666d2adeb38abd33ceb102b50e999798252fdbaab027e330d05eae2e9945",
+      "current_file_sha256": "1a59f4c9ee3c5582787977467be560c5fa8e1f6a1b1c23bc3362e26072e42ec2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:03d13df41d843868",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+      "range_sha256": "c170e52d87fbbe8dc186d534f70eaf1662cc144f8bfafe949c90cdb770207376",
+      "current_file_sha256": "1a59f4c9ee3c5582787977467be560c5fa8e1f6a1b1c23bc3362e26072e42ec2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5c0f333d06ef9126",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "range_sha256": "2207b51f3945973ef6872a1b6489728942394f5e49b8cd1b1aa2156f04ee9513",
+      "current_file_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B2-002: event-source factory runs for a new listener-session attempt, not every Start invocation; already-started guard returns first."
+    },
+    {
+      "id": "core-001:unit:7a90c15f7fb4a767",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "range_sha256": "52059f37083dfb05e60717748db08dba1c00c4b64bd0bc812c5db8e508d34e92",
+      "current_file_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B2-001: void shutdown signal attempts may no-op or log failed/short writes; indefinite poll wake/loop completion is not acknowledged. Related bounded-exit wording requires scope qualification."
+    },
+    {
+      "id": "core-001:unit:2ab3cc1db2ed4269",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "range_sha256": "4d95c55a7f81e7e80c8b071e54bb55bfd4a720bcb01b2d28c6b4e8060d8d437f",
+      "current_file_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B2-001: void shutdown signal attempts may no-op or log failed/short writes; indefinite poll wake/loop completion is not acknowledged. Related bounded-exit wording requires scope qualification."
+    },
+    {
+      "id": "core-001:unit:ad5d17565598504e",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "range_sha256": "35300b77d139e714f8cf53f7e43f26e6c8328a3f7480c9471fcb6ebcfa2c8887",
+      "current_file_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:e49c9459b92a84fe",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "range_sha256": "05e708171414095de0ef4ddb97c0f657296397490d5ecb21c919d861b553d381",
+      "current_file_sha256": "5a3faea74b7cd54edc036a01dcaa749585c5193f9fd5b36ba96df7c7d0118559",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:619f21dd8869ecc6",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "range_sha256": "e2bad6aa226482fef98b6ef9aaf7aab472e0c0c57b32523b433f1fd8e7d7295f",
+      "current_file_sha256": "5a3faea74b7cd54edc036a01dcaa749585c5193f9fd5b36ba96df7c7d0118559",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7075351c8f5cf706",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "range_sha256": "b718f67248a0740959e699e97389f526078bb2b7c1bcc1aef6b84edf7a1397b8",
+      "current_file_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d882128459cef5b6",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReportApi.cs",
+      "range_sha256": "861cd0f5fda790ad8be1d9b75b484f983ecbae4f9220b145675ad564b2bf1415",
+      "current_file_sha256": "f140a69fa754d417d8df118b633d75259ee9f7ba76f0c2c0fc0f3fbd2f7616e1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c165b37fa4483b00",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+      "range_sha256": "65a2b9f707ca6d10c833354cafde6452ccc68d2d923e626309627f90e5af9c99",
+      "current_file_sha256": "be5207547d332a77dabeafa9d0f0e7106c9f9c3b122b948367bd2b8d882621be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:1683ba031d3bcddb",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+      "range_sha256": "345a24c4f681ba55df41bbf0633374006b1acb2b24d253f09e06d120adafa40b",
+      "current_file_sha256": "be5207547d332a77dabeafa9d0f0e7106c9f9c3b122b948367bd2b8d882621be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:bbc2caa0424d0694",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+      "range_sha256": "c859d43083754af5d3656a6db607e673ab982b8ef45d625b60f5e7fd736d07d9",
+      "current_file_sha256": "be5207547d332a77dabeafa9d0f0e7106c9f9c3b122b948367bd2b8d882621be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:93ecc26f4e0dd820",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "range_sha256": "9284637a607639f08e19764ff586abe95e0f64e48455fa1ac021f4c897d0cbeb",
+      "current_file_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:07d157697b0b7bf6",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "range_sha256": "ff00a16317c00ce33b92df9162ae60f706c234b14365c8a092831d39d91fc34c",
+      "current_file_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2e88f97d2c6a2093",
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+      "range_sha256": "64ccad39a00bf5ebd6d4640c9dcdabce8771993cee74740a56254aebba881ffd",
+      "current_file_sha256": "5a16c7924d5c04e26007f4087e67f487b5d506609345d91183c15afd455bbf6d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:01b6c348853851b0",
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+      "range_sha256": "a672da9b958723fbee16c4b60e5a749d39f6d072c7eb03cea44c1fad9c32f2e4",
+      "current_file_sha256": "5a16c7924d5c04e26007f4087e67f487b5d506609345d91183c15afd455bbf6d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:452d5a7d1e85fa15",
+      "path": "verification/LinuxHidRouteVerification/DescriptorReportApi.cs",
+      "range_sha256": "23873c9d41f2f7807a66a9ce95529326aeca950d8f13fa019754518deb898ade",
+      "current_file_sha256": "bc7c937a03ff8495785cf59f8c2f9466a08b3dd3573ec3b11ed809e8fe4c63ee",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:91b29ba69cecef54",
+      "path": "verification/LinuxHidRouteVerification/DescriptorReportApi.cs",
+      "range_sha256": "dbdf8bbc11aa0f7bac721cc1291a75a6d6fcecc7da9a88bd1b2381096071c568",
+      "current_file_sha256": "bc7c937a03ff8495785cf59f8c2f9466a08b3dd3573ec3b11ed809e8fe4c63ee",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:f687d465a7684888",
+      "path": "verification/LinuxHidRouteVerification/DescriptorReportApi.cs",
+      "range_sha256": "b522e4f561cba7873ab7ae052c780c7699f9906c50b54daf9bfd726fbe112670",
+      "current_file_sha256": "bc7c937a03ff8495785cf59f8c2f9466a08b3dd3573ec3b11ed809e8fe4c63ee",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c90c88a41999d609",
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "range_sha256": "8b1d98a12dd5ba43319eb91c3057fa04ffc9563b26ead8247d694a9600cba53d",
+      "current_file_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:f9d1a1faca427e57",
+      "path": "verification/LinuxHidRouteVerification/HardwareScenarios.cs",
+      "range_sha256": "ba0d02f07deb3b0c3d1cccf05ceaa9c1d410f58016895495fbe4b496a93f445f",
+      "current_file_sha256": "73c4132ce116b29d5ea84cdef51a2acdeecda3a3dbed56ab152278923d2d84ce",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:1bfd7941724527c9",
+      "path": "verification/LinuxHidRouteVerification/NativeDescriptors.cs",
+      "range_sha256": "62d83023d61134d2b6a5073087643b1bdde9f66ba30656204fc2cce2e268828c",
+      "current_file_sha256": "b626c4e74bc3270bbabc9b5876d2498a1870f24e3b8c5b5f487f17777aaf0b68",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0d9113578140c285",
+      "path": "verification/LinuxHidRouteVerification/NativeScenarios.cs",
+      "range_sha256": "5fb01ba876910118b60f832519e3a892b558f0a6fe19a3ebf83f033d76359569",
+      "current_file_sha256": "7c9fb3018e97e0e181f8c9bcccc5eba8a61d3049b22934493343feb477641e40",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:219683fbfc255c91",
+      "path": "verification/LinuxHidRouteVerification/NativeScenarios.cs",
+      "range_sha256": "890c745ee1796aede0e1f29da08d6c1066fa8bfa101654efd0440a495c9681ac",
+      "current_file_sha256": "7c9fb3018e97e0e181f8c9bcccc5eba8a61d3049b22934493343feb477641e40",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:00d808339ba79b32",
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "range_sha256": "ba1591b779333b40aaee4ffbe7341d451892bdac88411f9b8f10f52b92f64907",
+      "current_file_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:369bda1d0cd58318",
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "range_sha256": "1eb9cc87d9986386e97c006fbbe7b437b5fc0f89172545c664afd5664735965a",
+      "current_file_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:299ddffe24179413",
+      "path": "verification/LinuxHidRouteVerification/evidence_gate.py",
+      "range_sha256": "625f765ec9fc123c360b4ef83af1ca4bf890c4facdffc1cff6ea0d78c10af094",
+      "current_file_sha256": "625f765ec9fc123c360b4ef83af1ca4bf890c4facdffc1cff6ea0d78c10af094",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete result gate read: typed runtime flag, exact mode/source label, unique nonempty checks and exact intended negative signature; SourceHash label explicitly distinguished from build attestation."
+    },
+    {
+      "id": "core-001:unit:ede5800cd9c43e80",
+      "path": "verification/LinuxHidRouteVerification/test_evidence_gates.py",
+      "range_sha256": "1ef6aaa3c5e8fd60e9f939139146e43ca585c3e2713ab6ce6efe498ed34d003d",
+      "current_file_sha256": "1ef6aaa3c5e8fd60e9f939139146e43ca585c3e2713ab6ce6efe498ed34d003d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "All439lines read: isolated synthetic publish/restore/import/package fixtures and patched child runner assert recorded positive/negative gates; no fixture binary or hardware is executed by those mocked paths. Existing tempfile routing is not changed or replayed."
+    },
+    {
+      "id": "core-001:unit:4a4f4fb2ee3e00b0",
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs",
+      "range_sha256": "8982b63da2d9440d68d8f6dfc70eb414ee4f4c1e6d08fa4145cad7a13fe25f70",
+      "current_file_sha256": "0991c7b8b52cee0019202cdb2cfbe6a0bfac1c73606395e2ab945e833282ff3e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9599c37631e3b2ce",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+      "range_sha256": "8b556c4721b8559772956c7bdffe056346c2ddf40c9da03cd08c2a822cfd98ac",
+      "current_file_sha256": "1a59f4c9ee3c5582787977467be560c5fa8e1f6a1b1c23bc3362e26072e42ec2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:f31714ee80fcdd9c",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+      "range_sha256": "fb20d21fe60d55d2c4048974536e7a4529bed61b0cebab7458f50cdd40789903",
+      "current_file_sha256": "1a59f4c9ee3c5582787977467be560c5fa8e1f6a1b1c23bc3362e26072e42ec2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d8e54703866180d9",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "range_sha256": "f6d7b209b10df43e887a8e9fece3093ae501e26191e4f19c640d1f8e5617c8d7",
+      "current_file_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:a5d65fe0ab80f2ee",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "range_sha256": "a8976e0b01fa7176be77070e30e138f3df908f2c29c01bfb3901176c5e7cfd7a",
+      "current_file_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:df36d6f917e324ff",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "range_sha256": "829ca3f8ca222982ad57d82fec0799e29e1d4f7c72572d744da7d70add3a0c03",
+      "current_file_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2ec84f79a016d9ee",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "range_sha256": "9a6780b290515f4ef29e047bc51b8186c2e1e095c99631c60e48eda810e5dd88",
+      "current_file_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5a9e64bc80430a1f",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs",
+      "range_sha256": "46b28ff23a921b9f83c54390f32beefb8511fd163a482f700425f1c29ede5044",
+      "current_file_sha256": "c69601befd66580de9a6762012f31ff0221058d6689c44f48711f97f6a2a7c09",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:75027cec36d20d7e",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+      "range_sha256": "1c364b41c221bc6618c6ef40c9c62224e4d5e462377d4a38b3cade4a6e57ca3c",
+      "current_file_sha256": "ac9a1c896f82d766b28ab456e2ae511e9ac326b983df57012e4cfe82335633d0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9922abc84a69e7ef",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "range_sha256": "1c43ebc662feba039b19aba241c232bdb9b7043ad113f87907317f1bfc391dd3",
+      "current_file_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:82e49d4a6292a59a",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "range_sha256": "699a9ef781f00e0b32a698aa1971530fa3394dc3b81462c26e268f7a110d4453",
+      "current_file_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:ca89fa5459284c88",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "range_sha256": "0bca7d2598e252c5ca19be6b703a9743fd5fef497112e32d02d9a4436ed96c6a",
+      "current_file_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:11c91ef6840e9deb",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "range_sha256": "88af7d87f3c7ee27ae90b6154d78d27769dfb62fcb79a1774d0cf095f200c042",
+      "current_file_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9d959fcda5cb4947",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReportApi.cs",
+      "range_sha256": "741d7d7d28c410d4151ac624fea8ca83f21b91a7cddd476454accbbe4067e2fc",
+      "current_file_sha256": "f140a69fa754d417d8df118b633d75259ee9f7ba76f0c2c0fc0f3fbd2f7616e1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6bcbf73be9feb50f",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+      "range_sha256": "4b5f5147429b4ef84461ed513c9ad68a53e20fbb95a8e1f2c6ac1a612f63fb42",
+      "current_file_sha256": "be5207547d332a77dabeafa9d0f0e7106c9f9c3b122b948367bd2b8d882621be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8eb6258e1c70c357",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "range_sha256": "ffbee5dd1076204ae874691a3cce2c5721c8594ddf521061b6c950db49a51f6e",
+      "current_file_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0c159721aed9ae3b",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "range_sha256": "2ad2990691cee443e8a3c88c5e1df2df8a96367fcef4748756297839dea73a88",
+      "current_file_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:feddcabc6205e907",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "range_sha256": "380cea622a36e54f2514a53b732d1225d3e441a8bcf13753c3723ba5097a3c41",
+      "current_file_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:43d291b5ded400cc",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "range_sha256": "99a49ed8a04600cf9b8328ade0cc81c0ec7d3ea174e118d5363a96f4e6064b57",
+      "current_file_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7b5c151d9a3ebbdc",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "range_sha256": "0404edb71669bfd9bf4a44bc1a8736e79047a005842d192dabb26a481ea59728",
+      "current_file_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:95ad4b56865f1456",
+      "path": "docs/research/linux-fido-async-lifetime.md",
+      "range_sha256": "33612d9aba3d144a4928531260270cafc900962ba32fb380c5c9571e8776081b",
+      "current_file_sha256": "9cd6e5c387ec005f26fb5be7b7a56f032c5c870a7e1c93c2bdd1678b9347bfc4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    {
+      "id": "core-001:unit:b37c3e449550734a",
+      "path": "docs/research/linux-managed-acceptance.md",
+      "range_sha256": "a20490dc02d71388b61c1b78512e7690b821eb6244e89e0c0a80bcc14f5ae5c6",
+      "current_file_sha256": "34a88eed8ff8cc2dbe75da225c103638fe204a5259eac16af1c043a5daa5afc3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    {
+      "id": "core-001:unit:cfea2933573b757f",
+      "path": "docs/research/linux-native-acceptance.md",
+      "range_sha256": "6f5a60a77806c46bbdc346c582155e81ce13772202e270b74ec3c4fe47999272",
+      "current_file_sha256": "4c9ba74f1c0b3ee0e7f40d6bebe6385053d571b208df2c79a6aa2c8a0a941e7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    {
+      "id": "core-001:unit:6612f3e188e74e2b",
+      "path": "docs/research/linux-native-report-access.md",
+      "range_sha256": "665df72eed31cc679a905308db39d8e6b9cbde5dec01be8b0b2bb4c952dbd407",
+      "current_file_sha256": "137a3ae7cb705435bde5a66ab9145d9d3e85fbb5913b5c648cba553a303cd467",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    {
+      "id": "core-001:unit:094e7f926bf428c5",
+      "path": "docs/research/linux-otp-async-lifetime.md",
+      "range_sha256": "7af0f6261915b82fd5d2dffed4ca7f3c813e49efb5ea8da527f845fe8e9127b6",
+      "current_file_sha256": "1b6379a822f311c56e64ccaf17c00cceefc9e253fca028e9a7044a501ad26cd5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    {
+      "id": "core-001:unit:ebf81d7eeea93827",
+      "path": "docs/research/linux-otp-async-lifetime.md",
+      "range_sha256": "b49990895acfed2eb062fa4c798b0d230e2f06015040dc557588604bf18c77c0",
+      "current_file_sha256": "1b6379a822f311c56e64ccaf17c00cceefc9e253fca028e9a7044a501ad26cd5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Read as phase-scoped historical research/evidence, not a current whole-platform or device-acceptance claim. Preserve chronology and later superseding evidence; final eligibility adjudication remains explicit."
+    },
+    {
+      "id": "core-001:unit:dd174674513eff1e",
+      "path": "src/Core/src/Native/Linux/Libc/Libc.Interop.cs",
+      "range_sha256": "40a5009c670364de32f90ff3edb97b4129efc990def1ea74fd404746ef9b6554",
+      "current_file_sha256": "98ede15c0e2ea60928c77b61de8c4016592b1951d2c1d27288989daa007fdee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:27680597d9ca147d",
+      "path": "src/Core/src/Native/Linux/Libc/Libc.Interop.cs",
+      "range_sha256": "ea472910f63371100ceee9c1dac6ab1cf5f539d3bfc658e6273e7e69e3ce8a26",
+      "current_file_sha256": "98ede15c0e2ea60928c77b61de8c4016592b1951d2c1d27288989daa007fdee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:19339d4b89793206",
+      "path": "src/Core/src/Native/Linux/Libc/Libc.Interop.cs",
+      "range_sha256": "323feb65fd8f9ae0a999c41da7d3b57aa34b0ac8b16e4f6ce43961332aa23f10",
+      "current_file_sha256": "98ede15c0e2ea60928c77b61de8c4016592b1951d2c1d27288989daa007fdee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0118113189c88a86",
+      "path": "src/Core/src/Native/Linux/Libc/Libc.Interop.cs",
+      "range_sha256": "520feab73facae9266372d03e46efa0bc29915aa385e2b7b097ae58d4d1a7eff",
+      "current_file_sha256": "98ede15c0e2ea60928c77b61de8c4016592b1951d2c1d27288989daa007fdee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:988ca0b5bd1e1aa4",
+      "path": "src/Core/src/Native/Linux/Libc/Libc.Interop.cs",
+      "range_sha256": "4849ef1c93e5695fb3638e7ad049456b8db1a611617ab1b9356a1be6a6fe41e0",
+      "current_file_sha256": "98ede15c0e2ea60928c77b61de8c4016592b1951d2c1d27288989daa007fdee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c7edeed9fe6d2e6c",
+      "path": "src/Core/src/Native/Linux/Libc/LibcFcntlConstants.cs",
+      "range_sha256": "aea2a7eb1c8a630a97c1afdff8d1f46abad92dc7b31dcea16d477445fc9029a5",
+      "current_file_sha256": "8b9f23386e009c0bbd35291aee55906d4084f1f6b0d080b9878ebbfc4a8f8b1a",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "License, warning directive and namespace only; no substantive declaration/explanation. Preserve bytes, exclude clean quota."
+    },
+    {
+      "id": "core-001:unit:d7636cd1bd712128",
+      "path": "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+      "range_sha256": "31ea0a39411f18f7c03896dfe94c714fce8b77b3db95b0fb6bfd88a7efa36ebb",
+      "current_file_sha256": "6926589e3b9bdbb6ad07796f1e95d5ea33f360dfd574dc99102e0cff971f93c4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:3404421c88096564",
+      "path": "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+      "range_sha256": "98ddc633dce27fdeaeeb9d580d11b4a5f92c3a67cd66aef078f66183b37b2e72",
+      "current_file_sha256": "6926589e3b9bdbb6ad07796f1e95d5ea33f360dfd574dc99102e0cff971f93c4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:73088629e7e5a9ce",
+      "path": "src/Core/src/Native/Linux/LinuxUnmanagedDynamicLibrary.cs",
+      "range_sha256": "eb55f61932d71dde96df8b007a7f93e658d177309ef7d07c1bb201999c2b48fa",
+      "current_file_sha256": "5a70741d60e5b668505c66db952fcc85ac4acde1c8794492308c71cd85f6a9b0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:db8b04f37f7bd313",
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdev.cs",
+      "range_sha256": "d3dcf5a808eea73619c5121435280c38973427c1ac5a07e36334b6460db53186",
+      "current_file_sha256": "1defd8c603435de12ae2777200f51c5a23f9b73872c2a45165363f8fbf1b1144",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:bc8b0f8d9f94511f",
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdevSafeHandle.cs",
+      "range_sha256": "2023992168e1fc0a6c0b4fc5d167de62bdf0fb3c67d2514a1a4a598df046cc62",
+      "current_file_sha256": "e472a91ec29afc1b1a806d1374c7e9979846140e91fd6288e858e556a91f286d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:09d455b96b0731b1",
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdevSafeHandle.cs",
+      "range_sha256": "6a47eba62195b3317fc78b2fce037c281b7663157c9d44125683cea536eaa0f3",
+      "current_file_sha256": "e472a91ec29afc1b1a806d1374c7e9979846140e91fd6288e858e556a91f286d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:30aeca91d375799b",
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "range_sha256": "356fe997fafd3893eea54bbfb64db4741a9076a5b8e3f6e5c669568c34b8c842",
+      "current_file_sha256": "59ec90d1127cfdfeeb7ae52d440526643694a6dbeeff2089b74191fe246df30f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d6382b511d208a17",
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "range_sha256": "70a72b7f10cde44abbadbde26d25e773fefc0f27a717e65cb9b42bf9ac1e1092",
+      "current_file_sha256": "59ec90d1127cfdfeeb7ae52d440526643694a6dbeeff2089b74191fe246df30f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d9a881e7b8d313d1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "range_sha256": "b228ff1ba55f30835e13e6a0aca7b086d700881ec78a5e54bf2a7fe08b858297",
+      "current_file_sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5b3552bacdbc0934",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "range_sha256": "43b3ac333eea20b4dfb96c111bc258d7c8477ff965970b9478117427fbb70629",
+      "current_file_sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:a2cb8ebfb76024bf",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "range_sha256": "367d41a567d7bcb75cf30890d0520c0ea130baa587f450dd859fdcba53ab7f99",
+      "current_file_sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:3c8c5a92530e6a78",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "range_sha256": "cab1c45a73674851df07e7ffaf5b9f8a7ed52c46ea229685850034b38ef7fd8d",
+      "current_file_sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9e44429263919c04",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "range_sha256": "90fd4eaabf31f9f305d53ca735bec02c14657d8145140de5d2b9a1ef14cbb3b5",
+      "current_file_sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b47685856a8443f5",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "range_sha256": "d14b4f8cb2e2e34e8f5347ff21ba951ba7852ba168a70c6178e29b553ae55113",
+      "current_file_sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6faa75eb756e9f3e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDirectFacadeAcceptanceTests.cs",
+      "range_sha256": "488342fffc9ee3c03599e4a015afc6ff225ec5a919c70c63998c2d8a0c726836",
+      "current_file_sha256": "c3d6e7f173a0affe60f4127304c5c199d4c90f6f6a8310d00bbe32d2ce8c5538",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:395e018fc7e2d73a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDirectFacadeAcceptanceTests.cs",
+      "range_sha256": "fd7271568c8ce222fc199c178d2a2de61354d66c7f761aad94befb732825f579",
+      "current_file_sha256": "c3d6e7f173a0affe60f4127304c5c199d4c90f6f6a8310d00bbe32d2ce8c5538",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8383c5433a62e079",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+      "range_sha256": "48de62ab29878993007977fbee6951fd67fd4ed46601d22cae2c9caf08c5ef74",
+      "current_file_sha256": "50731b914229e48d1cdaafc620e054737aa377a7391d29c2854314a63fd21ae8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:3c2c6c9d37bbe9a3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+      "range_sha256": "d6c6d21e7b5f4d8264464ad15816e0aab8deae4278da85a924f0ed8825a83c75",
+      "current_file_sha256": "50731b914229e48d1cdaafc620e054737aa377a7391d29c2854314a63fd21ae8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:058831bc607e39bf",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+      "range_sha256": "61216d9196c8b9bc4b2a21bcde46cfadfed6dc70bf1262c8b36869287cbda504",
+      "current_file_sha256": "50731b914229e48d1cdaafc620e054737aa377a7391d29c2854314a63fd21ae8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:38107865bd5f9cc4",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+      "range_sha256": "bfcc30dd3b03dc8a729bb33df32c2102855601e782ad540f600a86fba577bf28",
+      "current_file_sha256": "50731b914229e48d1cdaafc620e054737aa377a7391d29c2854314a63fd21ae8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6c9be3cfd34e0b43",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+      "range_sha256": "eab5ba6445a8674ab3d9b159a71a225f435e685e3f1a2ebc96eb6ff51cebc9fa",
+      "current_file_sha256": "50731b914229e48d1cdaafc620e054737aa377a7391d29c2854314a63fd21ae8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:ac82c5fd3a2083b2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.Native.cs",
+      "range_sha256": "703cb27dc521b9037c7314a1a1edf48c77cb442737ec4e40883beb20b75dd520",
+      "current_file_sha256": "5e5589c0453d60bfac21a3fa97bd49490d746cf3b0f09db46c62e116d03ce4b3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2264327db253f484",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.Native.cs",
+      "range_sha256": "f0cec539ff3939e3383473cf2533158232ade6f1c8388da0df5e08ceacb5d777",
+      "current_file_sha256": "5e5589c0453d60bfac21a3fa97bd49490d746cf3b0f09db46c62e116d03ce4b3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:44d48f1f907a4c54",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.Native.cs",
+      "range_sha256": "f98b08932e5f67bef199c8912d8e9e3a54a5c83fafb3ea9d176c09bc4d2252de",
+      "current_file_sha256": "5e5589c0453d60bfac21a3fa97bd49490d746cf3b0f09db46c62e116d03ce4b3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:21b391fa4dca9bab",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+      "range_sha256": "3b75e5e571a60bf833cf663865bf6e7ec41102e370dba420c56071a2a7dd3fbe",
+      "current_file_sha256": "d614d59ee542bf53c343b2b3cd0da1e7f2d5aa748141bd9465a127c32be73338",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:050924edfdbb9b99",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+      "range_sha256": "3bfad3e4ad32c5609a6a59e5e6cef981c320bd85c8e3b75bd59c2fa016cdf189",
+      "current_file_sha256": "d614d59ee542bf53c343b2b3cd0da1e7f2d5aa748141bd9465a127c32be73338",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:95b76832a71d899e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+      "range_sha256": "7b640b18f738f4860c1200da87a24c885a0193b201ac3f8a6f6c27aa28d3d294",
+      "current_file_sha256": "d614d59ee542bf53c343b2b3cd0da1e7f2d5aa748141bd9465a127c32be73338",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:746c6ecb75508240",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+      "range_sha256": "e4eb1f5d3ab4dc819d6214d574aab085c5f02bc635c8e23b813589dee5a627d2",
+      "current_file_sha256": "d614d59ee542bf53c343b2b3cd0da1e7f2d5aa748141bd9465a127c32be73338",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:75da4c68bcfef47d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+      "range_sha256": "05aac0e91a477789d649e080c7fddfb730aaf3b3a63332eafa570a5fea32cf16",
+      "current_file_sha256": "d614d59ee542bf53c343b2b3cd0da1e7f2d5aa748141bd9465a127c32be73338",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:47669f96fd907b74",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReportApiTests.cs",
+      "range_sha256": "668e9dc052e19e3458336362c88ab12df27efdbee6d656a80d414c3f4e62e8e9",
+      "current_file_sha256": "ae7e3ec195ea7e547328399199f9fa225abac4e69f401d61745eadd3637e72be",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:fcfe703561725672",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "b1321043cffab7d70011b74b4fff039caa17adaa18c275018b4f3aa91ac0988f",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2bce912e1f9afd3c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "6a49e523355dd5be4737e98036e7643a6ad68f088e352e5127ecbbccb5abfcbd",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:3c9a7c8b541cca31",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "69f9c5ccd30d403cd2bf3f9dfe703faa04c2ef92dd6c4cbda086af6ea8549050",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:089ef2e148592b06",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "05b249c26169c88286a6e252bf8819ccea96e764090ee7369ea3823475b6bd84",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:1466040321727ca1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "a59ee52c401b0e8663fa3044847f45562e301a29e855ff7449dbb227d78c5a05",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:db2e439fd0b74649",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "b3d74aea34e56273cef845e3208c245766b2a505eb51e23496d4865a29d73d8a",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:32b260c58ffe3225",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "67cc65c46dfd75c74ae4eb5f81abaac20875a421c739fb57f014367b01cdc17c",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8f26a9a7db7a0a71",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "range_sha256": "141283ee74440cc78d71d962fb09937e49eef871efb7cfd93004169dfb44b0e6",
+      "current_file_sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:29a9ae241fca9754",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpRecoveryTests.cs",
+      "range_sha256": "b270c5c1d243516ce92cacf6a3d87f7a3971fe83408c7546cb1869b042dbec64",
+      "current_file_sha256": "bdece8baba7e33e16e1f07ed23815ed331c54f069e10b12e8fa3fb14ced3c4b6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:f1a0056cc1ac63d2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpWorkerFailureTests.cs",
+      "range_sha256": "c30880eb94768f86be8dad5f28bc25597a3fd1dd4d72607c3d35afe5f049a78f",
+      "current_file_sha256": "007a6ff3a9102a557ff55bca692fd3fe901460cedf4debb0fc0255023f41527a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:ac7381252ca00098",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxReportConnectionTests.cs",
+      "range_sha256": "59f60c394abc86e3476fac2eca2b2093e3ac6b6fcdb99631884311fca4ae982f",
+      "current_file_sha256": "290c8a6b70fca49984fe0f91a914cc3615d00348ed43952ee814339f082036ed",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:ffaec5087ccd9b2e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxReportConnectionTests.cs",
+      "range_sha256": "ccbf988653335cbe70220382fdce78e937a7751a166e12298bffacf930f3bf83",
+      "current_file_sha256": "290c8a6b70fca49984fe0f91a914cc3615d00348ed43952ee814339f082036ed",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7c0317e63f6ccad4",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxReportConnectionTests.cs",
+      "range_sha256": "f740e8b7336372cb4a01d284dd5b112476b603b049bec5b3c3fbe7d74609863e",
+      "current_file_sha256": "290c8a6b70fca49984fe0f91a914cc3615d00348ed43952ee814339f082036ed",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7914e385fc0fae13",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxReportConnectionTests.cs",
+      "range_sha256": "fdb1884cdcc8c0126a471c9b1e2d03878f0fad353e79f3cdda3c8e8e6be3b328",
+      "current_file_sha256": "290c8a6b70fca49984fe0f91a914cc3615d00348ed43952ee814339f082036ed",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b026a1d3f3cba7dd",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDescriptorParsingTests.cs",
+      "range_sha256": "65c3bc7bc1db1140d0fd15bf0da3ae65dbaa6d9302bd69721832af60d6845fbb",
+      "current_file_sha256": "e4988b8f8dc3251631fd83b882e61a515f73c4044e55fe518d7802ed81f83a5f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:582b0239814eeab7",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDescriptorParsingTests.cs",
+      "range_sha256": "de1587ba5068679b9406cff3d871990360d31bf9de88e0f2fa5071656b2152d5",
+      "current_file_sha256": "e4988b8f8dc3251631fd83b882e61a515f73c4044e55fe518d7802ed81f83a5f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:3905ec0b40f3903a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "range_sha256": "f51e95ea6ad96505593d2440b2af89032ed704ecb746ec506a1e819a7ff38b9b",
+      "current_file_sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6681a2a4ace73933",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "range_sha256": "fb27fa79d3df8976f4b074fce5d59cd582e5d9efb489f384a52408a92ffb4ac0",
+      "current_file_sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c300adac76f89b3f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "range_sha256": "6e8b1bdb674b132bcfea6b30d1d10fbe7224702bb2e9ccf4c4ef3c604f166864",
+      "current_file_sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7a82b232c6cd76a2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "range_sha256": "c81fbb38f276395aec85c26b967373d69b4a50426e4d4a4b7682b122a5d58bbb",
+      "current_file_sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5f228badc05c83c6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "range_sha256": "c308b1ed5d1c916691dfa3670248ae0539040ec69be3bab0bdc6da42a8ede269",
+      "current_file_sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b9f1af2ad8097ba1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "range_sha256": "876e9011376ba65e379fdcdb17e86b6ab6c603172ad3d8c47e03136494fd9944",
+      "current_file_sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8bf36df32b3a4156",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "range_sha256": "3b8027b85b92ef1fb417d9e9dcd72856bdc96d6074f8f4cb15cd17622258a03e",
+      "current_file_sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:16841907c5b3f5d2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxUdevHidEventSourceTests.cs",
+      "range_sha256": "5acb9c23b5d01b4752f2cfeb6a3bdefae58d131bcda55cc1a38c709acf305770",
+      "current_file_sha256": "8829b2d0b190b7446813c1e12bd3c76be7494b5a9014178d8560c48217b6dbc4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:a9463dcf672055d2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxUdevHidEventSourceTests.cs",
+      "range_sha256": "b4893384b4382eacb7ed6e90d18d95eb945423a81efc58bdf2cad30948f076c8",
+      "current_file_sha256": "8829b2d0b190b7446813c1e12bd3c76be7494b5a9014178d8560c48217b6dbc4",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9d688231691df7a1",
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "range_sha256": "7fd233ebdb7eea962c02dc2b4748980104e87947be383c8125a55b37e958cbd6",
+      "current_file_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    },
+    {
+      "id": "core-001:unit:fc1fb9627bba154a",
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "range_sha256": "100e9bf1234f86b836af026b391c17b371fc972cf153acfb869bd3b953f0a87a",
+      "current_file_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra. Documentation/declaration and exact controlled oracle supported; no fresh native/device or universal timing/release qualification inferred."
+    }
+  ]
+}

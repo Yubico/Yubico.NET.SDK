@@ -1,0 +1,305 @@
+{
+  "frozen_outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/allowlist.json",
+      "bytes": 17261,
+      "sha256": "6927882dcda84e26bc4b28bad74f89b2ad866ad55f64e970bcd3bec5bad5b9d0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/boundary-referrals.json",
+      "bytes": 7182,
+      "sha256": "75cbb1ad8ac1221a38688412c058bf15f14c5d93e89b0c040f01b2a99dde2a63"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/candidate-decisions.json",
+      "bytes": 1277243,
+      "sha256": "54f0f93ee8b1165fc1870fa0d5b2777fa4933494234a99130da276ed9db5ab3f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/citations-and-handoff.md",
+      "bytes": 11996,
+      "sha256": "f5f9b8944410291205cffc135eed635e43adecee1a720ea13222808404e7bf9f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/example-bodies.json",
+      "bytes": 278628,
+      "sha256": "57a42ee778dff84c3d4314b52d522db48e64988f4fc963a35af2216c692b7641"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/final-checks.json",
+      "bytes": 3995,
+      "sha256": "0763f1ca4a85400adc7c8c0098393212e096a99082f4e4fc65a2f0b964515a0f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/input-identities.json",
+      "bytes": 9809,
+      "sha256": "8cc9faedf188fd9761f2625f8c89bc14fc0b86b9b97998b78fa1f6b4e6494250"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/outside-owner-followups.json",
+      "bytes": 2095401,
+      "sha256": "7bf6fb6f9a9dc85e1323cbc06af161a114e6bf71c8267d7c5d4080ac76c7ea5d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/path-decisions.json",
+      "bytes": 867716,
+      "sha256": "7845efecc5810fe71c0764068111d15401a142b16bb21edb20536496a338140c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/record.py",
+      "bytes": 23378,
+      "sha256": "6f8f671de831997c62a48402ab64b3b87f0ef35dbe35fe3a139566683fc589b8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/source.patch",
+      "bytes": 63507,
+      "sha256": "ec6997bd2b14af3f2ad82988d60487fe4e542dbaccf38e1e96e026892ac03727"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-attempts.md",
+      "bytes": 1201,
+      "sha256": "08b5a9ff47f70162c228ba56fff95c101d6dfa6c86c2c161d15ea36d742ee925"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-preservation.json",
+      "bytes": 5737,
+      "sha256": "a8bb41c818554e68087dff50a5edbfb6155a56d62e925a8bbd02e75b1b08985e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/supplemental-dependencies.json",
+      "bytes": 110587,
+      "sha256": "97fb0499d3df941a0554ccdfec51ea87396d0bdb38ed8eb033147efc953edf83"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-external.md",
+      "bytes": 10713,
+      "sha256": "599805116675b83a08c9a43e1f5dcb33ba9fb176dfe6c19a90795af58daf92b4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/output-identities.json",
+      "bytes": 3376,
+      "sha256": "7fb2c6bad5f06a300ab582bb82b6faa78fde7361a1dc4c66d4e37b2abc7eaa52"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/candidate-decisions.json",
+      "bytes": 3952953,
+      "sha256": "fb3d4e3cdbef96d88f1e14912995faf5985ab40008a54d9f1299556e68a79e72"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/edit-external-revision-2.md",
+      "bytes": 13379,
+      "sha256": "1d0f2a686bd9cf0c765f054b7d779d009b80f74f2012f52eb3ff4db972c8da0a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/example-bodies.json",
+      "bytes": 290568,
+      "sha256": "9dd8d13ac9144cc1505e1b590d46759f7f26c98ea3651616963bc3c26cbb1109"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/expanded-allowlist.json",
+      "bytes": 19746,
+      "sha256": "f5f8128fbe43c3c4ee20d37296cb0238c09c3e5070d9f5b1294cc43945da1ec2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/final-checks.json",
+      "bytes": 6273,
+      "sha256": "21ddb51dd5a26385c0b1c2eb00050ab52a73859e65446f8ca59ea3c7a82978fe"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/full-successor-candidate-decisions.json",
+      "bytes": 5529934,
+      "sha256": "a089953241799102e7c4ed4ea48fe66246e4edcb97a284efdb235c524ff90260"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/full-successor-path-decisions.json",
+      "bytes": 4722892,
+      "sha256": "32d8147725a97213ece64b12e48e72a2555d3158e06fe42a4b6538f038fd0d4d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/history-preservation.json",
+      "bytes": 187513,
+      "sha256": "b58bf463feb89f10671e4b43783653fdc99e677fdbefe346e43bee49ebde674a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/input-identities.json",
+      "bytes": 5663,
+      "sha256": "b586cac22067e937abf06d61418b6a4bfd86d259e91331a0cf727e03687ca849"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/path-decisions.json",
+      "bytes": 4038498,
+      "sha256": "06c290e448a043f33a62ed27c616625521161fb6cf3264e5da76210e3a7bf5c0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/record.py",
+      "bytes": 14511,
+      "sha256": "4de86716e9d858c48d94eab4bd3184dafc24747d71c963e728b4a8a262f73b0d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/remaining-referrals.json",
+      "bytes": 723301,
+      "sha256": "69da37c1024d1ee9afa7e64fccf4933afe4fab7206f94383f2155ecf958fca2a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/semantic-decisions.json",
+      "bytes": 26279,
+      "sha256": "5dac4542e142f338e499c5df89b73c06cd8a523875fd31b5da1be954978bf2fb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/static-preservation.json",
+      "bytes": 16404,
+      "sha256": "508ca6d3385005b1f9ee2433684a4dc7df4066fe3a241319ea7b27974b6fa4b3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/successor-source.patch",
+      "bytes": 82660,
+      "sha256": "f4ed4fc218300b64b2adb8595230a035a8b785a9a036de53ea9310596429e4e3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/output-identities.json",
+      "bytes": 3617,
+      "sha256": "2306b4c604208d04d7a3be9c5b8ccb2dcd81d4d669a97bbc7ab2e39003d0112e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/allowlist.json",
+      "bytes": 11331,
+      "sha256": "b7393815bfce7bf18c34eb12ed2bc2d65bb9a4fd68a77715396e06a09c9e22c8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/candidate-decisions.json",
+      "bytes": 3904,
+      "sha256": "99d0d212eb5475a9577702b474c8a54a28e446634b642167f81f62e62bf7e905"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/citations-and-examples.json",
+      "bytes": 2044,
+      "sha256": "9aacd28a15371abec7388a5203e0867b400eaac0cb6f6f2c6d8e3c3e035d1645"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/comment-delta.json",
+      "bytes": 27353,
+      "sha256": "1b41283b3ce4983d54dc2eb3e299ca03fb8b64a095f1195ca04f628508ac6a93"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/comment-delta.patch",
+      "bytes": 4618,
+      "sha256": "a969db4b8204501fa8e5ec2a07f1fb6191e7807672c6b3168703373b68b3bc7a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/final-checks.json",
+      "bytes": 8234,
+      "sha256": "ffee1465e3763c6a0d884a7a34ffc844ea55a7f01a1d70d832e1ecb2b42eff31"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/final-external-return.md",
+      "bytes": 8624,
+      "sha256": "85681965beb7fe2cf261ee3a191f7e4b7d9732c332b0c652949a809692e40078"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/final-successor-source.patch",
+      "bytes": 87278,
+      "sha256": "76244276822b64598a78ab11b2db94d116da4bf021b555a73d4e02acaca836db"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/history-preservation.json",
+      "bytes": 10515,
+      "sha256": "13d4e5f3fec55b432eb9565d352b1ec34e49d32bd140015e4076d9a692b34275"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/path-decisions.json",
+      "bytes": 4725030,
+      "sha256": "6414715321998642765d3b5abde812ddf3368629301f17f9699847982435c6f6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/record.py",
+      "bytes": 11212,
+      "sha256": "228471ec26dd624fd4f6b7863969000647f1ced8772087e779853164b940ea29"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/remaining-referrals.json",
+      "bytes": 276970,
+      "sha256": "b9bb0f41744f294a1e4142fdcd0b91f1fd0d1629516b51e63c97f5598f1eb515"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/static-attempts.md",
+      "bytes": 751,
+      "sha256": "7cfb5c4a848180750eef722e681be738339567c4b298d82b61ff264f69a01d1f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/static-preservation.json",
+      "bytes": 3779,
+      "sha256": "53f34cf05301bf59cbe2fdef6b2ba53ecb8bc125625160a5c098b01d662b9414"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/output-identities.json",
+      "bytes": 3326,
+      "sha256": "cf2d9fdeba9c31c2a7eceedb8a200fb3a139070684657e100d5a9395446e29f3"
+    }
+  ],
+  "frozen_reviews": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/review-identities.json",
+      "bytes": 14028,
+      "sha256": "1ac72b60c314fb2dc2d3e1b1f74a452d27e63bc81b949a5033a819e77dbbb46f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/review.md",
+      "bytes": 16095,
+      "sha256": "ae2ed83fab2a0271148a06b49d74562c20bda6aa353de619cd6fbcc88cd6d3f7"
+    }
+  ],
+  "previous_35_product_manifest": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/path-decisions.json",
+    "bytes": 4725030,
+    "sha256": "6414715321998642765d3b5abde812ddf3368629301f17f9699847982435c6f6"
+  },
+  "unchanged_previous_product_files": [
+    "TOOLCHAIN.md",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "docs/migration/v1-to-v2.md",
+    "scripts/toolchain/Process.cs",
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+    "src/Cli.Shared/src/Output/PinPrompt.cs",
+    "src/Cli.Shared/src/Output/SecureCredential.cs",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    "src/Tests.Shared/CLAUDE.md",
+    "src/Tests.Shared/IYubiKeyFilter.cs",
+    "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    "src/Tests.Shared/Infrastructure/TestCategories.cs",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "src/Tests.Shared/YubiKeyTestState.cs",
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "verification/MacOSHidBoundaryComparison/Program.cs",
+    "verification/MacOSHidInputVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "verification/MacOSHidRouteVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "verification/NativeAotVerification/Program.cs",
+    "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+    "verification/NativeCompatibilityVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs"
+  ],
+  "accepted_toolchain_comments_unchanged": [
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs",
+    "scripts/toolchain/Process.cs"
+  ],
+  "intentional_prior_README_hash_supersession": {
+    "path": "src/Tests.Shared/README.md",
+    "old_sha256": "ac76332e3643fa62ce6ad5dffaeb4369ca2cbe319e91f5f990dd03edceb65157",
+    "new_sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b",
+    "review": "R1",
+    "reason": "EDIT R1 completion of CORE-A-C013/FPT-013: overview and Known Limitations now distinguish empty-configuration exit with unknown serials disabled, filtered rejected/read-failed views, and empty-fixture SkipException at binding. No authorization policy or executable output change."
+  },
+  "result": "All earlier patches/receipts/review records byte-exact. Current README is the expressly authorized R1 supersession, not a claim that its old raw product hash remains current."
+}

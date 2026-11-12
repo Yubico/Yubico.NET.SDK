@@ -2,7 +2,7 @@
 
 In v2 of the SDK, an `IYubiKey` represents **one physical YubiKey**, not a single transport interface.
 A composite USB YubiKey exposes several interfaces at once — PC/SC CCID (smart card), HID FIDO, and HID OTP
-— and discovery returns **one** `IYubiKey` for that physical key, with the interfaces it exposes described
+— and discovery groups observed interfaces into an `IYubiKey` when its evidence permits, with those interfaces described
 by `AvailableConnections`. This document explains the model, how to discover and connect, where read-only
 metadata lives, how each applet picks a transport, and how to migrate code written against the old
 per-interface-handle model.
@@ -23,8 +23,10 @@ See also: [device identity and physical-device correlation](./device-identity.md
 - `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
   an owned `YubiKeyMonitor` repository, its `DeviceId` remains stable for that uninterrupted physical presence while its
   physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
-  originally published object across evidence-tier flips so its eventual `Removed` event correlates with
-  the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
+  object only while fresh known serial evidence does not contradict it. A known-serial substitution
+  produces `DeviceRemoved` followed by `DeviceAdded` for a new object. The repository retains the
+  originally published object across evidence-tier flips so its eventual `DeviceRemoved` event correlates with
+  the earlier `DeviceAdded` event. A fresh direct scan object can still have an evidence-tier-derived ID
   (`ykphysical:topology:*`, `ykphysical:{serial}`, or `ykphysical:pid:*`) different from an earlier scan;
   do not treat independently created scan objects as durable identity records. The repository correlates
   physical presence by interface set (`YubiKeyDevice.PhysicalIdentityKeyFor`, internal).
@@ -35,7 +37,7 @@ See also: [device identity and physical-device correlation](./device-identity.md
 - `int? SerialNumber` — discovery's independently latched durable hardware identity, when known; see
   [device identity](device-identity.md). It is not derived from the latest metadata snapshot.
 - `DeviceInfo? CachedDeviceInfo` — last-known read-only metadata, available without I/O. It can be null or
-  stale; existing discovery/repository updates may replace it without a device event. The default interface
+  stale; changed metadata on a retained monitor object produces `DeviceUpdated`. The default interface
   implementation returns null for custom implementations.
 - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The
   concrete values (`SmartCard`, `HidFido`, `HidOtp`) test a specific openable interface; the `Hid` group
@@ -82,11 +84,11 @@ the PC/SC reader name (serial number is consulted only to disambiguate multiple 
 physical key is returned as one device even when no connection is opened and even when another process holds
 the CCID exclusively. NFC PC/SC devices are never merged with USB interfaces.
 
-The one-device-per-physical-key result is the common merge case, not an absolute guarantee. Discovery
-intentionally degrades to conservative **no-merge** in ambiguous cases — for example when a USB CCID reader
-name cannot be parsed for its Product ID, or when a serial number needed to disambiguate same-Product-ID
-keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
-distinct keys, so one physical key can surface as more than one row.
+The one-device-per-physical-key result is the common merge case, not an absolute guarantee. Ambiguous
+observations can leave a key split across rows. Conversely, complementary partial observations from
+two same-PID keys can satisfy the PID-completeness heuristic and form a cross-key composite. A slot
+still opens its enumerated path, but selecting the composite by serial does not independently verify
+every slot against that serial. See the [G2 evidence bound](device-discovery-guarantees.md#g2-the-epistemic-bound).
 
 Every `FindAllAsync`, `FindFirstAsync`, and `FindFirstOrDefaultAsync` call performs independent one-shot
 discovery with fresh per-call evidence, including after an earlier empty result. First-result methods
@@ -107,8 +109,10 @@ await foreach (var change in monitor.WatchAsync(cancellationToken))
 
 manager watch creates a producer; monitor watch subscribes to an existing one.
 
-The monitor's finder retains successful identity/metadata evidence until observed interface absence,
-PID change, or listener activity invalidates it. When a later scan obtains metadata for an unchanged
+The monitor's finder retains successful evidence until invalidation. Observed absence and listener
+activity evict identity and metadata; PID changes are checked by the identity cache, while the metadata
+cache currently lacks an equivalent PID check. Successful serial-less metadata can also remain cached.
+When a later scan obtains metadata for an unchanged
 physical device, the diff updates its retained object and emits `DeviceUpdated` if metadata changed.
 This is last-known data, not continuously refreshed configuration. Request live Management data when
 current configuration matters. `WatchAsync` changes come from snapshot diffs, not native hints.
@@ -175,8 +179,10 @@ exposes `YubiKeyDevice`'s existing atomically published snapshot, not a second c
 DeviceInfo? lastKnown = device.CachedDeviceInfo; // No I/O or presence check.
 ```
 
-Null means unavailable. Failed metadata reads do not clear a successful snapshot, and returned values do
-not change when a later discovery/change-feed update replaces it. The data is not guaranteed current and
+Null means unavailable. Failed metadata reads preserve a successful snapshot, and replacing that snapshot
+preserves the scalar fields in a previously returned value. `ChallengeResponseTimeout` currently aliases its input
+TLV memory, so read-only access does not establish independent storage or stability after owner cleanup.
+The data is not guaranteed current and
 can remain historical on retained objects after configuration changes or disconnection. A replacement
 object does not inherit its predecessor's snapshot. `SerialNumber` keeps its independent identity contract
 even if the latest snapshot has no serial. See [cached device metadata](../usage/device-discovery.md#cached-device-metadata).
@@ -247,9 +253,11 @@ interface after `ConnectionInUseException`, PC/SC sharing errors, cancellation, 
 
 ## One Connection Per Physical Device, One Session Per Connection
 
-A YubiKey's CCID interface holds exactly one selected application. Selecting another deselects the first and
-destroys its security state — measured: after a second applet is selected, the first session's next command
-returns `SW=0x6D00` (*instruction not supported*), and nothing at the intervening call site reports a problem.
+A YubiKey's basic CCID channel has one selected application. Selecting another applet changes that
+selection and can disturb the first session. In the recorded PIV/Management hardware sequence, the
+next PIV command returned `SW=0x6D00` (*instruction not supported*). That observation does not establish
+that every applet's security state is cleared by selection; PIV PIN state and power/reset effects have
+their own conditions.
 
 The SDK refuses that at acquisition, before any command reaches the card, so the error lands on the call that
 would have caused the damage rather than on the victim's next operation:
@@ -272,9 +280,8 @@ await using (var piv = await PivSession.CreateAsync(connection))
 await using var oath = await OathSession.CreateAsync(connection);
 ```
 
-This mirrors canonical yubikit: Rust's applet sessions take the connection by value and hand it back with
-`into_connection`, making a second concurrent session a compile error; Python's base `Session` binds itself
-to the connection at construction. Neither inspects the wire.
+Core enforces this lifetime through its connection/session guards before applet initialization. This
+managed ownership rule is separate from the operating system's sharing mode and the card's security state.
 
 **Who disposes what:** whoever created the connection. The `device.Create<App>SessionAsync()` convenience
 methods open a connection the caller never sees, so the session they return owns and disposes it through the
@@ -287,7 +294,8 @@ timely teardown or lease release. Use deterministic disposal to observe completi
 
 The registry is process-local; it does not exclude other processes' handles. Opening any grouped member
 claims all known stable member interface IDs. When conservative discovery cannot
-prove grouping, a standalone record retains a one-element scope; the SDK does not guess associations.
+establish grouping, a standalone record retains a one-element scope. The PID-completeness exception
+described above remains a bound on what a grouped object proves.
 
 macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK
 exclusivity is enforced before native open; seizing would add a separate platform-wide exclusion policy

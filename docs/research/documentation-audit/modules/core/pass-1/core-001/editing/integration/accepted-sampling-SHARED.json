@@ -1,0 +1,79 @@
+{
+  "scope": "Reviewed sampling lifecycle correction; previous full guide acceptance retained",
+  "patch_sha256": "37074361c54bb2232ff8406ae37af482a73c51b029a3dfd8328e467f697e274e",
+  "product_files": [
+    {
+      "path": "docs/architecture/event-driven-device-discovery.md",
+      "previous_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+      "sha256": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/report.md",
+      "sha256": "b3208cbcc46f47a0d7895116dcb1b92e1748fa048bd5dd7981dd08b15f0f4249",
+      "bytes": 4561
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/before.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/before.md",
+      "sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+      "bytes": 12139
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/preserved-record-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/preserved-record-identities.json",
+      "sha256": "dbd28838f3e8a28be6b63a192b61a99e7c734817c136dee7e323b366417b4290",
+      "bytes": 4953
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/source-evidence.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/source-evidence.json",
+      "sha256": "6ee9dbd9453025c41a310f8ee6398f5bb20642663993c8beba5234b5408774da",
+      "bytes": 48704
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/after.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/after.md",
+      "sha256": "22a4d6e06ac319934bb541abc910286831a99f3159510c2e1b392ac22bf3c70c",
+      "bytes": 13461
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/product.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/product.patch",
+      "sha256": "37074361c54bb2232ff8406ae37af482a73c51b029a3dfd8328e467f697e274e",
+      "bytes": 5881
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/changed-path-sha256.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/changed-path-sha256.json",
+      "sha256": "e6ff511cdae1c0a39bd55a57a65cbdca25e5b42998cd84fcb44aa1fd9f589e77",
+      "bytes": 699
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/verification.json",
+      "sha256": "69ac992e52e460d6c9102dccf951cfc5bbe0e99f15503237a79a179a514ee4a4",
+      "bytes": 1075
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/output-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/output-identities.json",
+      "sha256": "289f236981401cf194575c3c4350d212f6c05f8d6ed0cb1fd876bf5e6b0def42",
+      "bytes": 983
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/review.md",
+      "sha256": "69d75c0f67d96e39c0277ff6b64a54bfa74ed44e3bee82fd7db3804128f5b0a9",
+      "bytes": 6583
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-correction/review-identities.json",
+      "sha256": "8904cd044f15c9bc99a1d6fd060b1c90093de6ce99c2088c172f6fcfa60ee2f7",
+      "bytes": 4607
+    }
+  ]
+}

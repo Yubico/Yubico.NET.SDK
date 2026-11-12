@@ -24,13 +24,15 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <remarks>
 ///     <para>
 ///         The lease belongs to the CONNECTION, not to a session: it is acquired before physical connection
-///         creation and released if creation fails or when that connection is disposed. Sessions come and go
-///         over a connection without touching it.
+///         creation. The connection's route controls release after creation failure or disposal; owners that
+///         cannot prove native release can retain and quarantine the claim. Borrowed sessions come and go
+///         over a connection without releasing its lease.
 ///     </para>
 ///     <para>
 ///         A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. A second
-///         acquisition through any known member is refused immediately with
-///         <see cref="ConnectionInUseException" />; it never waits for an unbounded holder to end.
+///         acquisition is refused with <see cref="ConnectionInUseException" /> when it reaches an already-held
+///         member. Acquisition visits sorted IDs sequentially: discovery on an earlier member can delay that
+///         check. It waits for discovery, rather than waiting for an existing connection to end.
 ///     </para>
 ///     <para>
 ///         Discovery holds its exclusive lease across physical connect, device-info exchange, and connection

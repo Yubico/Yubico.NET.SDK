@@ -1,0 +1,67 @@
+{
+  "scope": "Reviewed Security Domain namespace-map sampling correction; example bodies unchanged",
+  "patch_sha256": "b1cb5c00f569c94499060cd1539edf2bafa67057763126e3786c3f0e83c8ab65",
+  "product_files": [
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "previous_sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+      "sha256": "dd24dbcc43606abd77888fecdf9368b0c103b74b860fba1c46d3c10ccdab9022"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/before.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/before.md",
+      "sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+      "bytes": 14005
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/before-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/before-identities.json",
+      "sha256": "fd496f18bc78fe4b92264bd4d7d9085613d953d373703e28b05c6e7f4e825a81",
+      "bytes": 6020
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/source-evidence.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/source-evidence.json",
+      "sha256": "04e5ed3fe7def5a6d49a481ddf92529d77a17185b8971bc8a4add52f9c676a7b",
+      "bytes": 873
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/report.md",
+      "sha256": "f50ef24e2ede03f3e61f57d69ac749e73afd0f45cb097bc20e33b2046da406fa",
+      "bytes": 2068
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/focused.diff",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/focused.diff",
+      "sha256": "b1cb5c00f569c94499060cd1539edf2bafa67057763126e3786c3f0e83c8ab65",
+      "bytes": 467
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/verification.json",
+      "sha256": "f79a9a6b50ae368f604cd5da77196af00626065bb29054f2d6648bf6f7fc79fc",
+      "bytes": 1040
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/output-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/output-identities.json",
+      "sha256": "c62d3bab6855cbb4892ed841f33cd62ac5db35ed8e0339a01badb1fb0134aeed",
+      "bytes": 1394
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/review.md",
+      "sha256": "220d6ecdf70e94b87bce8b840deb08c19c7c1bea81e22114e8b1a7f4448bf807",
+      "bytes": 2164
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/sampling-SD-namespace/review-identities.json",
+      "sha256": "dc72d99646bb08ec587013076a3d827a65008bc0f991e5dc15fb50e2e0c2f074",
+      "bytes": 3280
+    }
+  ]
+}

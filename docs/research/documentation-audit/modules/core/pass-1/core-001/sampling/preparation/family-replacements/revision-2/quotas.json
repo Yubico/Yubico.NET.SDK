@@ -1,0 +1,16 @@
+{
+  "owner": "B6",
+  "stratum": "XML-contracts",
+  "broad_original_population": 104,
+  "original_minimum_quota": 11,
+  "original_qualification_replacement_slots": 5,
+  "retained_non_SW_slot": 1,
+  "retired_SW_provisional_slots": 4,
+  "requested_new_non_SW_slots": 4,
+  "available_non_SW_unselected_unedited_pool": 49,
+  "new_slots_filled": 4,
+  "shortfall": 0,
+  "total_successor_family_replacements": 8,
+  "global_denominator_change": 0,
+  "policy": "SWConstants skipped only in replacement pool; original statuses/source gaps and 104 denominator unchanged. New units require Astra reading/source acceptance."
+}

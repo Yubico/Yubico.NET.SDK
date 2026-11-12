@@ -1,0 +1,164 @@
+{
+  "source_log": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-third/toolchain/20261112-050059-729-build/02-build-Audit20261111.DocExamples.Full.log",
+    "bytes": 22729,
+    "sha256": "ec74afde36e2b3e1e0c2239ba27e4a5eb9a78232611352b20b5c4ff701cdfbee"
+  },
+  "unique_diagnostics": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-036.cs",
+      "line": "44",
+      "column": "18",
+      "code": "CS0104",
+      "message": "'PreviewSignRegistrationInput' is an ambiguous reference between 'Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput' and 'Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput'"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-036.cs",
+      "line": "47",
+      "column": "25",
+      "code": "CS0104",
+      "message": "'PreviewSignSigningParams' is an ambiguous reference between 'Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams' and 'Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams'"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-036.cs",
+      "line": "54",
+      "column": "46",
+      "code": "CS0104",
+      "message": "'PreviewSignSigningParams' is an ambiguous reference between 'Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams' and 'Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams'"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-411.cs",
+      "line": "32",
+      "column": "19",
+      "code": "CS1061",
+      "message": "'IYubiKey' does not contain a definition for 'GetDeviceInfoAsync' and no accessible extension method 'GetDeviceInfoAsync' accepting a first argument of type 'IYubiKey' could be found (are you missing a using directive or an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-163.cs",
+      "line": "33",
+      "column": "6",
+      "code": "CS0103",
+      "message": "The name 'ChecksumUtils' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-209.cs",
+      "line": "40",
+      "column": "58",
+      "code": "CS0246",
+      "message": "The type or namespace name 'IFidoHidConnection' could not be found (are you missing a using directive or an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-232.cs",
+      "line": "32",
+      "column": "63",
+      "code": "CS0246",
+      "message": "The type or namespace name 'IFidoHidConnection' could not be found (are you missing a using directive or an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-250.cs",
+      "line": "34",
+      "column": "33",
+      "code": "CS0103",
+      "message": "The name 'customProtocolConfig' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-263.cs",
+      "line": "38",
+      "column": "7",
+      "code": "CS0103",
+      "message": "The name 'session' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-263.cs",
+      "line": "41",
+      "column": "5",
+      "code": "CS0103",
+      "message": "The name 'cancellationToken' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-263.cs",
+      "line": "38",
+      "column": "1",
+      "code": "CS4033",
+      "message": "The 'await' operator can only be used within an async method. Consider marking this method with the 'async' modifier and changing its return type to 'Task'."
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-268.cs",
+      "line": "38",
+      "column": "5",
+      "code": "CS0103",
+      "message": "The name 'connection' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-268.cs",
+      "line": "37",
+      "column": "24",
+      "code": "CS4033",
+      "message": "The 'await' operator can only be used within an async method. Consider marking this method with the 'async' modifier and changing its return type to 'Task'."
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-268.cs",
+      "line": "37",
+      "column": "1",
+      "code": "CS4033",
+      "message": "The 'await' operator can only be used within an async method. Consider marking this method with the 'async' modifier and changing its return type to 'Task'."
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-279.cs",
+      "line": "38",
+      "column": "11",
+      "code": "CS0103",
+      "message": "The name 'session' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-279.cs",
+      "line": "40",
+      "column": "68",
+      "code": "CS0103",
+      "message": "The name 'ct' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-279.cs",
+      "line": "38",
+      "column": "5",
+      "code": "CS4033",
+      "message": "The 'await' operator can only be used within an async method. Consider marking this method with the 'async' modifier and changing its return type to 'Task'."
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-281.cs",
+      "line": "37",
+      "column": "66",
+      "code": "CS8604",
+      "message": "Possible null reference argument for parameter 'newLockCode' in 'Task<ConfigResult> DeviceConfiguration.SetLockCodeAsync(IManagementSession session, byte[]? currentLockCode, byte[] newLockCode, CancellationToken cancellationToken = default(CancellationToken))'."
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-329.cs",
+      "line": "38",
+      "column": "39",
+      "code": "CS0103",
+      "message": "The name 'accessCode' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-329.cs",
+      "line": "38",
+      "column": "70",
+      "code": "CS0103",
+      "message": "The name 'accessCode' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-329.cs",
+      "line": "42",
+      "column": "40",
+      "code": "CS0103",
+      "message": "The name 'accessCode' does not exist in the current context"
+    }
+  ],
+  "code_counts": {
+    "CS0104": 3,
+    "CS1061": 1,
+    "CS0103": 10,
+    "CS0246": 2,
+    "CS4033": 4,
+    "CS8604": 1
+  }
+}

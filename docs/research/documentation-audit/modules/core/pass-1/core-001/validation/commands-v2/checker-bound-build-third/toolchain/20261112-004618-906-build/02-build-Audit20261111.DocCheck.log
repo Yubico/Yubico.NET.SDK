@@ -1,0 +1,10 @@
+$ dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release --no-incremental
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Audit20261111.DocCheck -> /home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.78

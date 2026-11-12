@@ -1,0 +1,556 @@
+[
+  {
+    "id": "CORE-SD-X001",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X001",
+        "path": "src/SecurityDomain/README.md",
+        "first_line": 126,
+        "last_line": 152,
+        "reason": "SCP11 task lacks immediate required effective-version creation example"
+      },
+      {
+        "candidate": "CORE-SD-X001",
+        "path": "src/SecurityDomain/README.md",
+        "first_line": 202,
+        "last_line": 207,
+        "reason": "Retain accurate assumed/explicit version conditions; add setup gate consequence"
+      },
+      {
+        "candidate": "CORE-SD-X001",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 125,
+        "last_line": 205,
+        "reason": "Actual override/default -> Core gate; local config and version not retained"
+      },
+      {
+        "candidate": "CORE-SD-X001",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 765,
+        "last_line": 799,
+        "reason": "Both reset callbacks omit config/version, retain exact SCP parameters"
+      },
+      {
+        "candidate": "CORE-SD-X001",
+        "path": "src/SecurityDomain/CLAUDE.md",
+        "first_line": 130,
+        "last_line": 147,
+        "reason": "Local setup/version provenance and selected catch must stay together"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:056bb2d2ee7dccd2",
+      "core-001:unit:572767bad7b1779f",
+      "core-001:unit:283244cd37231bac",
+      "core-001:unit:2fcb3ff5ddb5b6e7",
+      "core-001:unit:7627cd13e06e5bbb",
+      "core-001:unit:f76a3d02a3f6308a",
+      "core-001:unit:7679f0f25aae49de",
+      "core-001:unit:05bcceb4a33b3560",
+      "core-001:unit:df1c91e3d5ac42a2"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/CLAUDE.md",
+      "src/SecurityDomain/README.md",
+      "src/SecurityDomain/src/SecurityDomainSession.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  },
+  {
+    "id": "CORE-SD-X002",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X002",
+        "path": "src/SecurityDomain/README.md",
+        "first_line": 215,
+        "last_line": 225,
+        "reason": "Contained private-key/certificate identity needs actionable ownership wording"
+      },
+      {
+        "candidate": "CORE-SD-X002",
+        "path": "src/SecurityDomain/CLAUDE.md",
+        "first_line": 123,
+        "last_line": 128,
+        "reason": "Replace unverified deep ownership caveat with source-qualified containment details"
+      },
+      {
+        "candidate": "CORE-SD-X002",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 83,
+        "last_line": 101,
+        "reason": "Exact retained caller parameter object and borrowed connection"
+      },
+      {
+        "candidate": "CORE-SD-X002",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 608,
+        "last_line": 617,
+        "reason": "Caller-owned private D alias, distinct encrypted copy"
+      },
+      {
+        "candidate": "CORE-SD-X002",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 646,
+        "last_line": 652,
+        "reason": "Curve byte stackalloc uninitialized; source-quality qualification only"
+      },
+      {
+        "candidate": "CORE-SD-X002",
+        "path": "src/SecurityDomain/src/SecurityDomainKeyMaterial.cs",
+        "first_line": 32,
+        "last_line": 108,
+        "reason": "Pooled plaintext finally versus separate KCV/ciphertext/provider temporaries"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:e25d9531f1de042f",
+      "core-001:unit:e8085f0234238b3c",
+      "core-001:unit:c4294de8202acc80",
+      "core-001:unit:f8768ea616de70c2",
+      "core-001:unit:3e30a952f1b50945",
+      "core-001:unit:08b2448f7d6ebcaf",
+      "core-001:unit:d0d7e8b770c92a2c",
+      "core-001:unit:1cf5ec7944e3f10c",
+      "core-001:unit:0add514122d569f5",
+      "core-001:unit:9ac1377fc8e41615",
+      "core-001:unit:2c283ac5c6fb485c"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/CLAUDE.md",
+      "src/SecurityDomain/README.md",
+      "src/SecurityDomain/src/SecurityDomainKeyMaterial.cs",
+      "src/SecurityDomain/src/SecurityDomainSession.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  },
+  {
+    "id": "CORE-SD-X003",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X003",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 816,
+        "last_line": 823,
+        "reason": "Facade strips response owner and exposes Data alias"
+      },
+      {
+        "candidate": "CORE-SD-X003",
+        "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "first_line": 35,
+        "last_line": 52,
+        "reason": "Input borrow and result owner/clear policy absent; supplemental XML read"
+      },
+      {
+        "candidate": "CORE-SD-X003",
+        "path": "src/SecurityDomain/README.md",
+        "first_line": 215,
+        "last_line": 225,
+        "reason": "Public source/result cleanup responsibility needs hidden-owner qualification"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:e8085f0234238b3c",
+      "core-001:unit:edfd285e8f310bd1",
+      "core-001:unit:be1e851b1430035b",
+      "core-001:unit:d876d24346376dab"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/README.md",
+      "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "src/SecurityDomain/src/SecurityDomainSession.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  },
+  {
+    "id": "CORE-SD-X004",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X004",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 765,
+        "last_line": 936,
+        "reason": "Raw attempts bypass guard; flags clear only after attempts/disposal, failure cleanup local"
+      },
+      {
+        "candidate": "CORE-SD-X004",
+        "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "first_line": 312,
+        "last_line": 332,
+        "reason": "Add failed-reset disposal/reopen condition near existing destructive limits"
+      },
+      {
+        "candidate": "CORE-SD-X004",
+        "path": "src/SecurityDomain/README.md",
+        "first_line": 172,
+        "last_line": 190,
+        "reason": "Cancellation/failed-reset lifecycle and diagnostic completion boundaries"
+      },
+      {
+        "candidate": "CORE-SD-X004",
+        "path": "src/SecurityDomain/CLAUDE.md",
+        "first_line": 74,
+        "last_line": 99,
+        "reason": "Keep attempt count and fresh-session workaround, add stale graph/failure action"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:ebc307f42397a227",
+      "core-001:unit:9d5846951c8e739d",
+      "core-001:unit:e4e22f2c24fb5771",
+      "core-001:unit:00e95db1f526e238",
+      "core-001:unit:df1c91e3d5ac42a2",
+      "core-001:unit:be1e851b1430035b",
+      "core-001:unit:d876d24346376dab",
+      "core-001:unit:d8e941dfbcb52d89",
+      "core-001:unit:deba85819a3b2725",
+      "core-001:unit:8607d417d3f92c3c"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/CLAUDE.md",
+      "src/SecurityDomain/README.md",
+      "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "src/SecurityDomain/src/SecurityDomainSession.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  },
+  {
+    "id": "CORE-SD-X005",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X005",
+        "path": "src/SecurityDomain/src/SecureChannelException.cs",
+        "first_line": 70,
+        "last_line": 74,
+        "reason": "Message embeds opaque immediate failure text; supplemental helper read"
+      },
+      {
+        "candidate": "CORE-SD-X005",
+        "path": "src/SecurityDomain/CLAUDE.md",
+        "first_line": 142,
+        "last_line": 148,
+        "reason": "Keep selected wrapper; useful nested status/local gate diagnosis"
+      },
+      {
+        "candidate": "CORE-SD-X005",
+        "path": "src/SecurityDomain/CLAUDE.md",
+        "first_line": 175,
+        "last_line": 179,
+        "reason": "Global logging and opaque exception provenance, no blanket privacy assurance"
+      },
+      {
+        "candidate": "CORE-SD-X005",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 232,
+        "last_line": 244,
+        "reason": "GET DATA warning forwards exception object"
+      },
+      {
+        "candidate": "CORE-SD-X005",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 485,
+        "last_line": 489,
+        "reason": "SCP03 import error forwards exception object"
+      },
+      {
+        "candidate": "CORE-SD-X005",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 666,
+        "last_line": 670,
+        "reason": "EC import error forwards exception object"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:572767bad7b1779f",
+      "core-001:unit:135b835907349ee1",
+      "core-001:unit:05bcceb4a33b3560",
+      "core-001:unit:ec357204141b02e2",
+      "core-001:unit:2c283ac5c6fb485c"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/CLAUDE.md",
+      "src/SecurityDomain/src/SecureChannelException.cs",
+      "src/SecurityDomain/src/SecurityDomainSession.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  },
+  {
+    "id": "CORE-SD-X006",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X006",
+        "path": "src/SecurityDomain/README.md",
+        "first_line": 30,
+        "last_line": 37,
+        "reason": "Add a/c first post-setup correct-MAC phase beside existing b/authority qualification"
+      },
+      {
+        "candidate": "CORE-SD-X006",
+        "path": "src/SecurityDomain/README.md",
+        "first_line": 137,
+        "last_line": 163,
+        "reason": "Retain draft permission/counter condition and trust role distinction"
+      },
+      {
+        "candidate": "CORE-SD-X006",
+        "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "first_line": 25,
+        "last_line": 31,
+        "reason": "Setup flag versus device auth phase; draft final/profile scope"
+      },
+      {
+        "candidate": "CORE-SD-X006",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+        "first_line": 61,
+        "last_line": 70,
+        "reason": "Protected public listing after flag is not an administrative-authority oracle"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:bba63cfd2e959369",
+      "core-001:unit:2fcb3ff5ddb5b6e7",
+      "core-001:unit:fadb854aa0b0f703"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/README.md",
+      "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  },
+  {
+    "id": "CORE-SD-X007",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X007",
+        "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "first_line": 35,
+        "last_line": 52,
+        "reason": "Zero Le and configured format limits; no absent-Le promise"
+      },
+      {
+        "candidate": "CORE-SD-X007",
+        "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+        "first_line": 281,
+        "last_line": 290,
+        "reason": "One logical STORE DATA may physically chain through Core"
+      },
+      {
+        "candidate": "CORE-SD-X007",
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "first_line": 208,
+        "last_line": 228,
+        "reason": "Common empty requestData/Le0 follows Core encryption/format policy"
+      },
+      {
+        "candidate": "CORE-SD-X007",
+        "path": "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+        "first_line": 32,
+        "last_line": 36,
+        "reason": "Forwarding dependency only, not a new local mechanism"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:6c20505a704de0a4",
+      "core-001:unit:edfd285e8f310bd1",
+      "core-001:unit:05bcceb4a33b3560"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+      "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "src/SecurityDomain/src/SecurityDomainSession.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  },
+  {
+    "id": "CORE-SD-X008",
+    "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "definition": "candidates.md",
+    "anchors": [
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+        "first_line": 167,
+        "last_line": 192,
+        "reason": "Unscoped borrowed fake and exact failed-reinit oracle, not device reset proof"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+        "first_line": 68,
+        "last_line": 75,
+        "reason": "Fixture owns derived arrays separately from StaticKeys"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+        "first_line": 104,
+        "last_line": 109,
+        "reason": "Dispose only static keys, not fixture derived buffers"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+        "first_line": 24,
+        "last_line": 50,
+        "reason": "DisposeCount/no synchronous Dispose is narrower than complete disposal observer"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+        "first_line": 217,
+        "last_line": 435,
+        "reason": "Nonnull/config inputs or transmit assertion do not verify all propagated settings/disposal"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+        "first_line": 1,
+        "last_line": 103,
+        "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+        "first_line": 1,
+        "last_line": 216,
+        "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+        "first_line": 1,
+        "last_line": 196,
+        "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+        "first_line": 1,
+        "last_line": 366,
+        "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+        "first_line": 1,
+        "last_line": 183,
+        "reason": "Actual test/provider/parameter/token/cleanup scope; full oracle record supplied"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+        "first_line": 1,
+        "last_line": 86,
+        "reason": "Supplemental complete fixture read; exact caller trust/cleanup owner SD-IMP-007/008"
+      },
+      {
+        "candidate": "CORE-SD-X008",
+        "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/Scp11TestData.cs",
+        "first_line": 1,
+        "last_line": 94,
+        "reason": "Supplemental complete fixture read; exact caller trust/cleanup owner SD-IMP-007/008"
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:046fa07b5caa508d",
+      "core-001:unit:9fad6a0a857ad2a0",
+      "core-001:unit:d5e6888410468242",
+      "core-001:unit:87a4fdb35e367783",
+      "core-001:unit:98b89636718cd9a3",
+      "core-001:unit:a7219dfa0bd19379",
+      "core-001:unit:82a8a43a3422cddf",
+      "core-001:unit:be143f94e8d9f03b",
+      "core-001:unit:04336a18c61d42bd",
+      "core-001:unit:f530e58c9df8141c",
+      "core-001:unit:5346c2b3860e5f98",
+      "core-001:unit:474a3cdcd35ff811",
+      "core-001:unit:784200f7518e35ce",
+      "core-001:unit:8649ba16a2d8af11",
+      "core-001:unit:3115aa88a2ac305b",
+      "core-001:unit:0649770e70ca6ed1",
+      "core-001:unit:22061801680f8e90",
+      "core-001:unit:caf0f0962d92c616",
+      "core-001:unit:fc2db58cb088c298",
+      "core-001:unit:18be8a285d491df9",
+      "core-001:unit:1218c1d899ef8e9d",
+      "core-001:unit:fadb854aa0b0f703",
+      "core-001:unit:f92eab8aac772796",
+      "core-001:unit:e25fda345f7fdf96",
+      "core-001:unit:19a93e6a896c9867",
+      "core-001:unit:0b7e6cea26f3a635",
+      "core-001:unit:989d5977d9ec79b9",
+      "core-001:unit:9e3bad7982f63212",
+      "core-001:unit:d442c74abcc4d2d7",
+      "core-001:unit:ca8e6ba488dfaee5",
+      "core-001:unit:892dd66b317ed92a",
+      "core-001:unit:a21b6e7220a0c9ed",
+      "core-001:unit:d5b43a4ad6695944",
+      "core-001:unit:33ee4ec6fc2e664d",
+      "core-001:unit:17c629d64c466e15",
+      "core-001:unit:d92ee37f9f3dd8fa",
+      "core-001:unit:09f1ca477aff67b2",
+      "core-001:unit:63eeb771075f74d3",
+      "core-001:unit:8f748e51f984fda5",
+      "core-001:unit:62cfcc1c3b736efe"
+    ],
+    "unchanged_paths": [
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/Scp11TestData.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs"
+    ],
+    "documentation": "CANDIDATE, fresh edit/review pending",
+    "implementation": "UNCHANGED; separate authorization",
+    "decision": "Explicit per-group policy choice in candidates.md; not accepted as intended defect contract",
+    "qualification": "SOURCE-ONLY; original edition/profile and platform/device bounds retained",
+    "counting": "Caller-specific association; Core mechanism and inherited aliases nonadditive"
+  }
+]

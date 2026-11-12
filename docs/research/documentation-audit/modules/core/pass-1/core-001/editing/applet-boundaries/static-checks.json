@@ -1,0 +1,311 @@
+{
+  "baseline_HEAD": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "all_233_before_hashes_match_final_boundary_file_ledgers": true,
+  "original_local_candidate_groups": 33,
+  "git_diff_check": "PASS",
+  "eligible_paths": 233,
+  "edited_paths": 37,
+  "retained_paths": 196,
+  "csharp_preservation_and_XML": [
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Management/src/IManagementSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Management/src/ManagementSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Oath/src/Credentials/OathCredentialOptions.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Oath/src/IOathSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Oath/src/IYubiKeyExtensions.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthRetryException.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    },
+    {
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "all_non_comment_lines_exact": true,
+      "before_xml_errors": [],
+      "after_xml_errors": []
+    }
+  ],
+  "Markdown": [
+    {
+      "path": "src/Management/CLAUDE.md",
+      "fence_marker_count": 58,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Management/PACKAGE_README.md",
+      "fence_marker_count": 2,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Management/README.md",
+      "fence_marker_count": 16,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/README.md",
+      "fence_marker_count": 4,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Management/tests/CLAUDE.md",
+      "fence_marker_count": 6,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "fence_marker_count": 6,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/SecurityDomain/PACKAGE_README.md",
+      "fence_marker_count": 2,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "fence_marker_count": 14,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/SecurityDomain/tests/CLAUDE.md",
+      "fence_marker_count": 4,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/SecurityDomain/tests/README.md",
+      "fence_marker_count": 6,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Oath/CLAUDE.md",
+      "fence_marker_count": 2,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Oath/PACKAGE_README.md",
+      "fence_marker_count": 2,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Oath/README.md",
+      "fence_marker_count": 22,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/Oath/tests/CLAUDE.md",
+      "fence_marker_count": 0,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiOtp/CLAUDE.md",
+      "fence_marker_count": 10,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiOtp/PACKAGE_README.md",
+      "fence_marker_count": 2,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "fence_marker_count": 22,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiOtp/tests/CLAUDE.md",
+      "fence_marker_count": 0,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiHsm/CLAUDE.md",
+      "fence_marker_count": 0,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiHsm/PACKAGE_README.md",
+      "fence_marker_count": 2,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiHsm/README.md",
+      "fence_marker_count": 16,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    },
+    {
+      "path": "src/YubiHsm/tests/CLAUDE.md",
+      "fence_marker_count": 0,
+      "balanced_fences": true,
+      "missing_local_link_targets": []
+    }
+  ],
+  "issues": [],
+  "SDK_build_tests_format_native_device_crypto_connector": "NOT-RUN",
+  "independent_content_citation_review": "PENDING"
+}

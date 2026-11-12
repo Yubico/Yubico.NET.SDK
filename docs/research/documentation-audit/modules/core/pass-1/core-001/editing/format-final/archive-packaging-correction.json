@@ -1,0 +1,3050 @@
+{
+  "correction": "archive packaging only; predecessor evidence and EOF patch unchanged",
+  "original_run_archive": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/source-snapshots.tar.gz",
+    "sha256": "0f2bbee75e18f18e6ac46262c18a5e93fc3d01bef0c81080ab0ef5e9c774db14",
+    "bytes": 931644,
+    "disposition": "relocated externally after exact-copy and replacement-text verification; no archive bytes retained in RUN"
+  },
+  "external_archive": {
+    "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/format-final-reconciliation/source-snapshots.tar.gz",
+    "sha256": "0f2bbee75e18f18e6ac46262c18a5e93fc3d01bef0c81080ab0ef5e9c774db14",
+    "bytes": 931644,
+    "byte_exact_original_copy": true
+  },
+  "text_bundle": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/source-snapshots.json",
+    "sha256": "e4cac85a915335280ab5d4282a880c2b6da777d04447bc5c6eddd2f816aeb680",
+    "bytes": 4905553,
+    "paths": 239,
+    "entries": 478,
+    "encoding": "utf-8; literal parsed source strings round-trip without BOM stripping"
+  },
+  "entry_identity_mapping": [
+    {
+      "archive_entry": "before/src/Core/src/Abstractions/IApplicationSession.cs",
+      "text_bundle_pointer": "/files/0/before/text",
+      "sha256": "c00e90d5217233ea9e7063815e5f65725ce6b1405a83a147e9ed49404e8517bd",
+      "bytes": 2653
+    },
+    {
+      "archive_entry": "after/src/Core/src/Abstractions/IApplicationSession.cs",
+      "text_bundle_pointer": "/files/0/after/text",
+      "sha256": "f855a2c9e57c1ea901483ffa17d4627acf8dba069d2538ea494e063804e14e37",
+      "bytes": 2652
+    },
+    {
+      "archive_entry": "before/src/Core/src/Abstractions/IProtocol.cs",
+      "text_bundle_pointer": "/files/1/before/text",
+      "sha256": "f71931ea7ef4a2df862fb51c819ed1d2e5da5ae6d2f2b5afee5e0270067fd432",
+      "bytes": 2470
+    },
+    {
+      "archive_entry": "after/src/Core/src/Abstractions/IProtocol.cs",
+      "text_bundle_pointer": "/files/1/after/text",
+      "sha256": "0d8a7745dc9edff3ea635703975922758b4fdb9dfcfcb8935c85f60a71519e9e",
+      "bytes": 2469
+    },
+    {
+      "archive_entry": "before/src/Core/src/Abstractions/IYubiKey.cs",
+      "text_bundle_pointer": "/files/2/before/text",
+      "sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+      "bytes": 14348
+    },
+    {
+      "archive_entry": "after/src/Core/src/Abstractions/IYubiKey.cs",
+      "text_bundle_pointer": "/files/2/after/text",
+      "sha256": "33f695c62aa0e45f28d1a2a923984c0b14fd0d11497353f35864885eb7035e6c",
+      "bytes": 14347
+    },
+    {
+      "archive_entry": "before/src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "text_bundle_pointer": "/files/3/before/text",
+      "sha256": "7e375afde276858564d7ca7699a9b888096facb62e633ff19e7dbd640b2523d9",
+      "bytes": 13667
+    },
+    {
+      "archive_entry": "after/src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "text_bundle_pointer": "/files/3/after/text",
+      "sha256": "b13a482d15a04e9331d748257db9da46c7ec5a44b47f1da0fb6372f7bc520759",
+      "bytes": 13666
+    },
+    {
+      "archive_entry": "before/src/Core/src/Credentials/CredentialPromptContext.cs",
+      "text_bundle_pointer": "/files/4/before/text",
+      "sha256": "6ffb3f8f7700b8fb6736a5af274cb9f646b2d4c68c1e2ecf60cb19a0209303fd",
+      "bytes": 2967
+    },
+    {
+      "archive_entry": "after/src/Core/src/Credentials/CredentialPromptContext.cs",
+      "text_bundle_pointer": "/files/4/after/text",
+      "sha256": "6451dc73ced1ba59564a0999e853a92e417fbffc2c9be7b9020bb403c9377c9a",
+      "bytes": 2966
+    },
+    {
+      "archive_entry": "before/src/Core/src/Credentials/CredentialReaderOptions.cs",
+      "text_bundle_pointer": "/files/5/before/text",
+      "sha256": "38db90c0798d78426885729202e0095ec1bea05669c2ef1239f2f5acd5f90fa5",
+      "bytes": 5283
+    },
+    {
+      "archive_entry": "after/src/Core/src/Credentials/CredentialReaderOptions.cs",
+      "text_bundle_pointer": "/files/5/after/text",
+      "sha256": "ccdbdd5baef6f913776970572c164f38dab7c13de618d98c95a128fbb66e21a8",
+      "bytes": 5282
+    },
+    {
+      "archive_entry": "before/src/Core/src/Credentials/ICredentialPrompt.cs",
+      "text_bundle_pointer": "/files/6/before/text",
+      "sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee",
+      "bytes": 5412
+    },
+    {
+      "archive_entry": "after/src/Core/src/Credentials/ICredentialPrompt.cs",
+      "text_bundle_pointer": "/files/6/after/text",
+      "sha256": "06e7ad040206837e0b7f888c34b437ba95a02634e10c6af390bed49db478d4a7",
+      "bytes": 5411
+    },
+    {
+      "archive_entry": "before/src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "text_bundle_pointer": "/files/7/before/text",
+      "sha256": "f2b6a0687cc3d628a52c65ee27d77df45e0458aa6eab2b3537bd7cb6fe3ee669",
+      "bytes": 4372
+    },
+    {
+      "archive_entry": "after/src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "text_bundle_pointer": "/files/7/after/text",
+      "sha256": "015e913525cdeeeaac7139bdecc3ce4cad3cb2af92ab8aa0aa7d18fe26b96920",
+      "bytes": 4371
+    },
+    {
+      "archive_entry": "before/src/Core/src/Credentials/UserPresenceIntent.cs",
+      "text_bundle_pointer": "/files/8/before/text",
+      "sha256": "7aaca59de916782b7762b1c6d3f4ff614a31109ff5077c78c8a9c88627310c8f",
+      "bytes": 5769
+    },
+    {
+      "archive_entry": "after/src/Core/src/Credentials/UserPresenceIntent.cs",
+      "text_bundle_pointer": "/files/8/after/text",
+      "sha256": "5e88bdf699429adf693f625caa700996c4d988807bda5530e1f97449acb766eb",
+      "bytes": 5768
+    },
+    {
+      "archive_entry": "before/src/Core/src/Credentials/UserPresenceNotification.cs",
+      "text_bundle_pointer": "/files/9/before/text",
+      "sha256": "9606437dfc5bb05a71754956cdf8ee962acde15d56aa1e05cd2d2cb7dd2d3baa",
+      "bytes": 9235
+    },
+    {
+      "archive_entry": "after/src/Core/src/Credentials/UserPresenceNotification.cs",
+      "text_bundle_pointer": "/files/9/after/text",
+      "sha256": "2b8d6a4850a922fc7d7fff24a0e73a5426765627235409f25ad4152b9bea2982",
+      "bytes": 9234
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/AesUtilities.cs",
+      "text_bundle_pointer": "/files/10/before/text",
+      "sha256": "17f3932d55346e8e4d11c27b9137135e5d9283c93be9926f1af59d3979659425",
+      "bytes": 10010
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/AesUtilities.cs",
+      "text_bundle_pointer": "/files/10/after/text",
+      "sha256": "7f7dc1795f13bf79e687a56c51cae32d41e82b5cd435930933d322b895b8df38",
+      "bytes": 10009
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "text_bundle_pointer": "/files/11/before/text",
+      "sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "bytes": 8562
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "text_bundle_pointer": "/files/11/after/text",
+      "sha256": "1d5e271be680b3467f3e7a6c6b655e02f7c64cb5420467b93acc7757c9d26c7d",
+      "bytes": 8561
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/ArkgPrimitives.cs",
+      "text_bundle_pointer": "/files/12/before/text",
+      "sha256": "a01efcdb859522d65147ef3194d255537f9e993a3226a8c2a0c2fc110e7b164a",
+      "bytes": 1926
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/ArkgPrimitives.cs",
+      "text_bundle_pointer": "/files/12/after/text",
+      "sha256": "c9faffa5a128751cae8eb6c976767af57ffd8165f0372785bcb8d3ed9810294d",
+      "bytes": 1925
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "text_bundle_pointer": "/files/13/before/text",
+      "sha256": "82f8d05d60381ff6a793e14c04b392752b0cb4b69fe7f6ed9765c84da225883e",
+      "bytes": 28356
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "text_bundle_pointer": "/files/13/after/text",
+      "sha256": "76f3cd2b0e0522e23d04dfda6e17a4703f3f958e5f98f4a46bde4d41666da71e",
+      "bytes": 28355
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "text_bundle_pointer": "/files/14/before/text",
+      "sha256": "8ee77d7217e93934f341755d721b9dd2076e84ef6b75e1b14e7ffc0946880e97",
+      "bytes": 18007
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "text_bundle_pointer": "/files/14/after/text",
+      "sha256": "0f13bbd1d9060c68bd9967436085a5f645b21c276411864e32cda6719011a257",
+      "bytes": 18006
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "text_bundle_pointer": "/files/15/before/text",
+      "sha256": "8504b99a7f51a6f867bd1a101652ba50ee24477ef3799d19e14de63d593f94e8",
+      "bytes": 12446
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "text_bundle_pointer": "/files/15/after/text",
+      "sha256": "9532632379f6d1b4831ed6e6bab1b5eeaf8478e3ba5ee042c8a05fcd374a8b78",
+      "bytes": 12445
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+      "text_bundle_pointer": "/files/16/before/text",
+      "sha256": "26b7907b746f9a296d99f66128cae255e38c86a766b66321ed6f9a8c9ab1ca78",
+      "bytes": 6001
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+      "text_bundle_pointer": "/files/16/after/text",
+      "sha256": "18f50aa51220593368b411705f7a00779d11d0877d5186800aaa3269ddf0c556",
+      "bytes": 6000
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/AsnUtilities.cs",
+      "text_bundle_pointer": "/files/17/before/text",
+      "sha256": "15587cfb868ec3d36b5c0d83dff66a823608b4d70ecf59c2c751f3e6b7061707",
+      "bytes": 14298
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/AsnUtilities.cs",
+      "text_bundle_pointer": "/files/17/after/text",
+      "sha256": "3521e61e894a11bd94bacc2abaa500efc20d6363d554f8f9b934ab82310c5cfb",
+      "bytes": 14297
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+      "text_bundle_pointer": "/files/18/before/text",
+      "sha256": "a668602bef0417d1a7235da49a8e7c62b97e6ae20455ad007c555816900f5a7a",
+      "bytes": 10799
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+      "text_bundle_pointer": "/files/18/after/text",
+      "sha256": "b978cd39ec6bf314e6118de053b7bffdeb03477a97f37f415a66f375e9ee7d3d",
+      "bytes": 10798
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+      "text_bundle_pointer": "/files/19/before/text",
+      "sha256": "5c19d5a3538db6a1f31a663f9f6f707c4e422508fe277e6983a4915c5ffaecf5",
+      "bytes": 2047
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+      "text_bundle_pointer": "/files/19/after/text",
+      "sha256": "9cdf864f16380c1f5b87212a577d0dcbb891b9bac3deecd065e895ed8376c095",
+      "bytes": 2046
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+      "text_bundle_pointer": "/files/20/before/text",
+      "sha256": "6c237d7c9881e20dbbd31be119d012a8214eed6135124f0c7176b35e287c5de4",
+      "bytes": 2393
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+      "text_bundle_pointer": "/files/20/after/text",
+      "sha256": "3fceebae5feb18205ae991556bad96e81b83f352a88ebb5e389643a00dc5fbb9",
+      "bytes": 2392
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+      "text_bundle_pointer": "/files/21/before/text",
+      "sha256": "299644fa0ce91355c674780157f3528f304e20dd2fdcfc923322d2b13fcdea44",
+      "bytes": 1461
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+      "text_bundle_pointer": "/files/21/after/text",
+      "sha256": "20300502335d5838da7cf9d5b0b45da2218717654207e485f665b27c08669f14",
+      "bytes": 1460
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/CryptographyProviders.cs",
+      "text_bundle_pointer": "/files/22/before/text",
+      "sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03",
+      "bytes": 16090
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/CryptographyProviders.cs",
+      "text_bundle_pointer": "/files/22/after/text",
+      "sha256": "620c57483a26100a8edc13a81f0162f5ced603aed3d69601fce96ecef815d57a",
+      "bytes": 16089
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+      "text_bundle_pointer": "/files/23/before/text",
+      "sha256": "75725ac0e25041a681382cafcd60cdcead480c0c6a700e094e1bb13668fc4b00",
+      "bytes": 6137
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+      "text_bundle_pointer": "/files/23/after/text",
+      "sha256": "7efc182bc7653772f11d944f4492436a6e52fda6bfaec8f5b8f967ca8f8bf5e2",
+      "bytes": 6136
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/Curve25519PublicKey.cs",
+      "text_bundle_pointer": "/files/24/before/text",
+      "sha256": "ffe47de2652fd7dca99d9b3d6141a2725aa03a770712211865fbd272defc6906",
+      "bytes": 4929
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/Curve25519PublicKey.cs",
+      "text_bundle_pointer": "/files/24/after/text",
+      "sha256": "ebb2fc026983063852f56f55a8881fa4836d1a393590e55590df37a90951f723",
+      "bytes": 4928
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/ECParametersExtensions.cs",
+      "text_bundle_pointer": "/files/25/before/text",
+      "sha256": "05e16bbbe01261b47a03a96b286c3eb3dfe1c129b9586f7d2c457a3c00c82f96",
+      "bytes": 2110
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/ECParametersExtensions.cs",
+      "text_bundle_pointer": "/files/25/after/text",
+      "sha256": "359982c6389b2cfa9966718b75e024cc77678b5bf9d31322077442af5e64ff3e",
+      "bytes": 2109
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/ECPrivateKey.cs",
+      "text_bundle_pointer": "/files/26/before/text",
+      "sha256": "b5da4960c915723491bf70ad610b0652fa722e451a69ce68122a098fdab7e7cb",
+      "bytes": 13932
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/ECPrivateKey.cs",
+      "text_bundle_pointer": "/files/26/after/text",
+      "sha256": "f64e97e987ab1c48f71c3d612ef1dd8db2368b5c0bc72c3e785cce79db3b7990",
+      "bytes": 13931
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/ECPublicKey.cs",
+      "text_bundle_pointer": "/files/27/before/text",
+      "sha256": "e9f9d6b291e8b93e310154f3e070fcca11fbfef0f1ec249c033cc4c44c485a13",
+      "bytes": 9694
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/ECPublicKey.cs",
+      "text_bundle_pointer": "/files/27/after/text",
+      "sha256": "22dc784de18a401c1847a374c41cf152db4214ad9b1522d823b4ac9658a6cb98",
+      "bytes": 9693
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/IArkgPrimitives.cs",
+      "text_bundle_pointer": "/files/28/before/text",
+      "sha256": "e2e6a3d3fd2cccc655db0a1a93e3ec1896d43aa0b513dced58e676c36f7dfb6a",
+      "bytes": 3947
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/IArkgPrimitives.cs",
+      "text_bundle_pointer": "/files/28/after/text",
+      "sha256": "28d18c02b7ab9548f5c97b20a9ffb5548fbd0db9b72dc3c4b721abfa88c43d1b",
+      "bytes": 3946
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/IEcdhPrimitives.cs",
+      "text_bundle_pointer": "/files/29/before/text",
+      "sha256": "d18fde691b1a4316a1b0a582a39c76a0a9a5192a099bd36e28e4949df1076493",
+      "bytes": 1671
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/IEcdhPrimitives.cs",
+      "text_bundle_pointer": "/files/29/after/text",
+      "sha256": "b87e9b5cbcf590c8521e275742d2823ca1ee92769b0e2936caace23ab62548db",
+      "bytes": 1670
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "text_bundle_pointer": "/files/30/before/text",
+      "sha256": "f4d100755cc3130896c3cca87a8a8e9e191aa2478be12ed60ca564f7a36081f6",
+      "bytes": 2410
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "text_bundle_pointer": "/files/30/after/text",
+      "sha256": "edaa6090701b90e16fc1b927849ff86d761a7d4a1089e64d5c0f669034116c30",
+      "bytes": 2409
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/PrivateKey.cs",
+      "text_bundle_pointer": "/files/31/before/text",
+      "sha256": "db8b4268ed403aa80d262c308e99b391124535d05f9503f698fbddadc5e7a8da",
+      "bytes": 2676
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/PrivateKey.cs",
+      "text_bundle_pointer": "/files/31/after/text",
+      "sha256": "738263734ccf22a1e76a4b99646c41a8d9f043553f65c61e256b6a6e50854f96",
+      "bytes": 2675
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+      "text_bundle_pointer": "/files/32/before/text",
+      "sha256": "3d6c47f447a20766ea20a3a7e9c7feb661639c02b588a8c60dd32a7121cbbda0",
+      "bytes": 6008
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+      "text_bundle_pointer": "/files/32/after/text",
+      "sha256": "9275e445e0637b33bc10325c3417e12cea281d9e959a81c161d31929a37bcaa7",
+      "bytes": 6007
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "text_bundle_pointer": "/files/33/before/text",
+      "sha256": "45a6c27b898b24aeefc1681b21e561e3566f010244a7283aacc89b9cfd7459c9",
+      "bytes": 5400
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "text_bundle_pointer": "/files/33/after/text",
+      "sha256": "df7a856435b66877456225de7f7da8a27d5e978841c3a74ed58a31a207448bea",
+      "bytes": 5399
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "text_bundle_pointer": "/files/34/before/text",
+      "sha256": "f65cd61ee52425ab9e952a2eee5e987ae7ece24f2826493d5a2731334ac50072",
+      "bytes": 7489
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "text_bundle_pointer": "/files/34/after/text",
+      "sha256": "918a550a3222975bf35d50f3be420975fd6e9494213a64ec8c15cea00d063f6e",
+      "bytes": 7488
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/RSAPublicKey.cs",
+      "text_bundle_pointer": "/files/35/before/text",
+      "sha256": "54784fc400d7221094f4111fb69db34ef1bcb959450965f8d0500cdb663eb5f5",
+      "bytes": 4587
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/RSAPublicKey.cs",
+      "text_bundle_pointer": "/files/35/after/text",
+      "sha256": "ba708ccfec2deca34af69ba579e33d50275191df9b899ead72d43bc5f6f005ac",
+      "bytes": 4586
+    },
+    {
+      "archive_entry": "before/src/Core/src/Cryptography/X963Kdf.cs",
+      "text_bundle_pointer": "/files/36/before/text",
+      "sha256": "99dbc7e0cd8468c2f3febeaf6fdbdfc2aa46b3373d5baad10a8b481541f6abf4",
+      "bytes": 3351
+    },
+    {
+      "archive_entry": "after/src/Core/src/Cryptography/X963Kdf.cs",
+      "text_bundle_pointer": "/files/36/after/text",
+      "sha256": "fbb756ecd9c26be2b383dd746189a2c7368ae6a6aa8b558bf468e82e5b002f34",
+      "bytes": 3350
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "text_bundle_pointer": "/files/37/before/text",
+      "sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+      "bytes": 24322
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "text_bundle_pointer": "/files/37/after/text",
+      "sha256": "ef0321f57a7f49126fdccf9e0a41a1d16fe68c28d763b57922686bd87975a4a6",
+      "bytes": 24321
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/CompositeMetadataReader.cs",
+      "text_bundle_pointer": "/files/38/before/text",
+      "sha256": "da79a689b7796657916a063cafcae3f42780ebdd75460bd0c8f9c823e7d392ec",
+      "bytes": 3958
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/CompositeMetadataReader.cs",
+      "text_bundle_pointer": "/files/38/after/text",
+      "sha256": "7f7bea1a70d28b96fb64ad842899fb037f973b83eae908cd8eb856dedf911dc0",
+      "bytes": 3957
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/ConnectionType.cs",
+      "text_bundle_pointer": "/files/39/before/text",
+      "sha256": "a2c8ad1644c0f3f62c70121556d7db18a29f5fa10a6fcacfaad3075f18c65e37",
+      "bytes": 1680
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/ConnectionType.cs",
+      "text_bundle_pointer": "/files/39/after/text",
+      "sha256": "bdf1c5afd518136521d038e39001535e8b449d69cf716e88064adf44123847f5",
+      "bytes": 1679
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DeviceCapabilities.cs",
+      "text_bundle_pointer": "/files/40/before/text",
+      "sha256": "411eba67b0dc877cfd7aa8697fa6743ed85d5ec442fceac3000fb62e3aa565f3",
+      "bytes": 2176
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DeviceCapabilities.cs",
+      "text_bundle_pointer": "/files/40/after/text",
+      "sha256": "d09568307a7b161d0438f38417ebee5189790ff3f73d42265ee598eea61392e3",
+      "bytes": 2175
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DeviceChange.cs",
+      "text_bundle_pointer": "/files/41/before/text",
+      "sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+      "bytes": 2821
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DeviceChange.cs",
+      "text_bundle_pointer": "/files/41/after/text",
+      "sha256": "87045c46d731ffee346ae08c1bf6e42e3b90e64c8b93147302fae1bd044164c9",
+      "bytes": 2820
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DeviceChangeFeed.cs",
+      "text_bundle_pointer": "/files/42/before/text",
+      "sha256": "46ef5ee7ecd8410de85da36cf73b34f8a4d86a1f3b705872e2b80efb5f2bdb6e",
+      "bytes": 6955
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DeviceChangeFeed.cs",
+      "text_bundle_pointer": "/files/42/after/text",
+      "sha256": "5ec10c90a604122c51fa02c3fc8f367af4f1a6b9a4eeb22480846590da43791a",
+      "bytes": 6954
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DeviceFlags.cs",
+      "text_bundle_pointer": "/files/43/before/text",
+      "sha256": "7f8985ff2a8a8d0317d4821a4df80307a82bd5fabb667fba030905bf16c7d884",
+      "bytes": 2035
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DeviceFlags.cs",
+      "text_bundle_pointer": "/files/43/after/text",
+      "sha256": "e0fbb5a1afeb413277c25fb4966967881945d6ae5ad81e5340c0524319bd3e39",
+      "bytes": 2034
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DeviceInfo.cs",
+      "text_bundle_pointer": "/files/44/before/text",
+      "sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+      "bytes": 21430
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DeviceInfo.cs",
+      "text_bundle_pointer": "/files/44/after/text",
+      "sha256": "90ede3d4e933ac78e3b1a610f31137fde83ac1ba4ae7c4de56019b1b3e0be0b7",
+      "bytes": 21429
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DeviceInfoReader.cs",
+      "text_bundle_pointer": "/files/45/before/text",
+      "sha256": "b997455d9083553111e134ff972f439356e1271b5837edcd89d6e61c18eda350",
+      "bytes": 7721
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DeviceInfoReader.cs",
+      "text_bundle_pointer": "/files/45/after/text",
+      "sha256": "e433e7dd64a848d64da141adc6f32f075d50b21594095f56ed233dfb06ff4d23",
+      "bytes": 7720
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DiscoveryBudgets.cs",
+      "text_bundle_pointer": "/files/46/before/text",
+      "sha256": "c9c644d13dec23e08b732e01024e8b239ea6c9c5f6b327b674588e5106ccf6e2",
+      "bytes": 1651
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DiscoveryBudgets.cs",
+      "text_bundle_pointer": "/files/46/after/text",
+      "sha256": "10cc31a0415e1e3b105909214a60813bbed65bd2c529b0bf98483e836e353e7d",
+      "bytes": 1650
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+      "text_bundle_pointer": "/files/47/before/text",
+      "sha256": "aa1dcb809f31374d15236b35bb0fa12069a228cbf019314d2d8eaa7996a7e640",
+      "bytes": 5549
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+      "text_bundle_pointer": "/files/47/after/text",
+      "sha256": "8325e80f0589e9c4a30cf28e2b33624987ae0882b6dea3e7fae6a83dd13f1149",
+      "bytes": 5548
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DiscoveryIdentityReader.cs",
+      "text_bundle_pointer": "/files/48/before/text",
+      "sha256": "1d7ee756959e44f2067332c3282ec0d3f8700aa8d045d14dff442671451215d9",
+      "bytes": 4968
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DiscoveryIdentityReader.cs",
+      "text_bundle_pointer": "/files/48/after/text",
+      "sha256": "5d5929af41b720e381b53c239f5c0881c5639ba722cbd0e56a6b31e55633c676",
+      "bytes": 4967
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DiscoveryReadScope.cs",
+      "text_bundle_pointer": "/files/49/before/text",
+      "sha256": "07545c692d1b70ef6534fb45db9af115aa55c9095a0559d256411e3fb347b776",
+      "bytes": 4664
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DiscoveryReadScope.cs",
+      "text_bundle_pointer": "/files/49/after/text",
+      "sha256": "9193c787d46895f463f998fc5d92d342fe2b9fbe08991b6a9ce79549d7c44f01",
+      "bytes": 4663
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+      "text_bundle_pointer": "/files/50/before/text",
+      "sha256": "00b5b7d5f223bb281444bb29ec937cc03c84ffff339fe5a477ed778e9dbf4e67",
+      "bytes": 3028
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+      "text_bundle_pointer": "/files/50/after/text",
+      "sha256": "24ba6dbd36bcaa5571743ad2a65b57bd6881156c50d42c5b6ebf3e0bf1e3fcae",
+      "bytes": 3027
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/Feature.cs",
+      "text_bundle_pointer": "/files/51/before/text",
+      "sha256": "40e111b46516aa81eca2d53cbfc9b890f39d4c659d7c75a9ca983779dae38318",
+      "bytes": 2922
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/Feature.cs",
+      "text_bundle_pointer": "/files/51/after/text",
+      "sha256": "4d87c2abb4d195145f9995eea82f83782a5ddd0d44f0d9402e5ec9f47b918881",
+      "bytes": 2921
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/FindYubiKeys.cs",
+      "text_bundle_pointer": "/files/52/before/text",
+      "sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+      "bytes": 27348
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/FindYubiKeys.cs",
+      "text_bundle_pointer": "/files/52/after/text",
+      "sha256": "eedeef3a512e17a1846ac99500d8523a0b8d38544227e2ccb7daa9d7f0db9697",
+      "bytes": 27347
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/FirmwareVersion.cs",
+      "text_bundle_pointer": "/files/53/before/text",
+      "sha256": "8dcf389cde5f6f6f2e1d3ddc9960a1aa972cd33f21ff5b2d729a3a71658cb822",
+      "bytes": 10618
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/FirmwareVersion.cs",
+      "text_bundle_pointer": "/files/53/after/text",
+      "sha256": "aae577686ff815cb60e4ec2c78d586f041eda91efc78f02f3762f7dfa2e47f06",
+      "bytes": 10617
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/FormFactor.cs",
+      "text_bundle_pointer": "/files/54/before/text",
+      "sha256": "928557d20487d2a3f8b72ba42d0f399fda94be87508817b74bb0bbd25c0488ad",
+      "bytes": 1978
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/FormFactor.cs",
+      "text_bundle_pointer": "/files/54/after/text",
+      "sha256": "b61f30f093903c1e6d636f173186866da4c87bc8ed56c08729b534e75532406f",
+      "bytes": 1977
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/HotplugSignals.cs",
+      "text_bundle_pointer": "/files/55/before/text",
+      "sha256": "70925f5b5f694990a5c0dd03b963259922e15604c1884741e50e11dab59db093",
+      "bytes": 5189
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/HotplugSignals.cs",
+      "text_bundle_pointer": "/files/55/after/text",
+      "sha256": "194a92c1f96f4d0d96b6e42aefaf0de940243b89ca9423847ce476c9f0f1f15c",
+      "bytes": 5188
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/IDeviceTopologyResolver.cs",
+      "text_bundle_pointer": "/files/56/before/text",
+      "sha256": "9c0a8df4166168199c8d84b26c72c2af015ee141beed01480d5ae827fd1b8d63",
+      "bytes": 3471
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/IDeviceTopologyResolver.cs",
+      "text_bundle_pointer": "/files/56/after/text",
+      "sha256": "37db32912e8ca317429a17cf945a32f628cda3834f589b3590421f7cc37347ae",
+      "bytes": 3470
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/ProtocolDeviceInfo.cs",
+      "text_bundle_pointer": "/files/57/before/text",
+      "sha256": "c6b19c10e85e53bd57929b1118c7d555fe38db9a75e5b4c779e4f94493699f58",
+      "bytes": 2330
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/ProtocolDeviceInfo.cs",
+      "text_bundle_pointer": "/files/57/after/text",
+      "sha256": "48347c5d6ae74fb0d1f0b80e05b2f9df95cd0887ebc489821a8cf038c77a0ee7",
+      "bytes": 2329
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "text_bundle_pointer": "/files/58/before/text",
+      "sha256": "aa7bdd0872f1558de3fe53ed7a92d92e1420b2816a3a15c38f0566f624412838",
+      "bytes": 14477
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "text_bundle_pointer": "/files/58/after/text",
+      "sha256": "ba072b3d0bf55003ff4b4bae305473a634b20684bfc1041c5f5f1462e9c14392",
+      "bytes": 14476
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/VersionQualifier.cs",
+      "text_bundle_pointer": "/files/59/before/text",
+      "sha256": "49e4da583adf701744ae22c473ebe6b64067c5ef6f1a358dcad42e297c0ec39d",
+      "bytes": 4627
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/VersionQualifier.cs",
+      "text_bundle_pointer": "/files/59/after/text",
+      "sha256": "55a6d9a35fce8d2acc428264ac227600aecda2a17ab7ade323d624644e80efce",
+      "bytes": 4626
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+      "text_bundle_pointer": "/files/60/before/text",
+      "sha256": "5f71a78c58e7781bb0cbf7c905e905813cb6185f171db4c86c79ebd0857ea56a",
+      "bytes": 4687
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+      "text_bundle_pointer": "/files/60/after/text",
+      "sha256": "ba35513ac412b872340fade1cf12bb5140c15db8e2b7247f4b62a52103fea394",
+      "bytes": 4686
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+      "text_bundle_pointer": "/files/61/before/text",
+      "sha256": "cb499bcf262c92f001179ddbd561ba3063ef81bbe838beef32ac7a1ee7c2b102",
+      "bytes": 4729
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+      "text_bundle_pointer": "/files/61/after/text",
+      "sha256": "7c57aff4545e5a0d19d803830fb9261a6bac8d47aa2b484f0d87e9d0cc5110e2",
+      "bytes": 4728
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/YubiKeyManager.cs",
+      "text_bundle_pointer": "/files/62/before/text",
+      "sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+      "bytes": 9778
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/YubiKeyManager.cs",
+      "text_bundle_pointer": "/files/62/after/text",
+      "sha256": "92e0ace95e5b4274e30df159efbe6a72e53f1045915242c86f33ea87a0347524",
+      "bytes": 9777
+    },
+    {
+      "archive_entry": "before/src/Core/src/Devices/YubiKeyMonitor.cs",
+      "text_bundle_pointer": "/files/63/before/text",
+      "sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+      "bytes": 10912
+    },
+    {
+      "archive_entry": "after/src/Core/src/Devices/YubiKeyMonitor.cs",
+      "text_bundle_pointer": "/files/63/after/text",
+      "sha256": "bef36c3fb9574e01469d7fce7ad93d55d92416ef45db8267d28d732c43caaed0",
+      "bytes": 10911
+    },
+    {
+      "archive_entry": "before/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+      "text_bundle_pointer": "/files/64/before/text",
+      "sha256": "ad4e0a5761fad445d329b7c6b36fb1056e7583f64e3f5f178b06e98a20119132",
+      "bytes": 5157
+    },
+    {
+      "archive_entry": "after/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+      "text_bundle_pointer": "/files/64/after/text",
+      "sha256": "320341abb485dceb4c1f7d6375bce366c4b59613a75a4d8637c2731ad7fcf0e4",
+      "bytes": 5156
+    },
+    {
+      "archive_entry": "before/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "text_bundle_pointer": "/files/65/before/text",
+      "sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "bytes": 18748
+    },
+    {
+      "archive_entry": "after/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "text_bundle_pointer": "/files/65/after/text",
+      "sha256": "1140ea7d1563e7c7a324f5b36200c8cdfa2b8ecce942ab7dc2f5beefabebd750",
+      "bytes": 18747
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "text_bundle_pointer": "/files/66/before/text",
+      "sha256": "704f758a7a63bd48de1cd9c07b20b24fc882c49f85867a5acea167517fe69e39",
+      "bytes": 2059
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "text_bundle_pointer": "/files/66/after/text",
+      "sha256": "7142781c0b651fe6507c590f6bd9ac9e9af061609aee030de81d7d3076936e6b",
+      "bytes": 2058
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "text_bundle_pointer": "/files/67/before/text",
+      "sha256": "2c2b0b6b0ba3d92a3ffe49039e9e88e64b6bc69f2dd49efed2632691261e2804",
+      "bytes": 24737
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "text_bundle_pointer": "/files/67/after/text",
+      "sha256": "f5239a4dcbc266eafa1b4942118bb0678c732ff4fc9610433c7ff58e0ec107d5",
+      "bytes": 24736
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+      "text_bundle_pointer": "/files/68/before/text",
+      "sha256": "91a6c0cb7521bf610a867a681be0dc28e9592d634ca1f1e4361ccd6bd77f37c1",
+      "bytes": 3854
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+      "text_bundle_pointer": "/files/68/after/text",
+      "sha256": "2ea1a1e403419b9544b6ee68bbd5f065391ce842f7b4122426d08491bf8f3abf",
+      "bytes": 3853
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+      "text_bundle_pointer": "/files/69/before/text",
+      "sha256": "b4a20c0c7ee06b04c61e158be99afab1fff6ae476eb56adb298f025707db02bd",
+      "bytes": 3262
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+      "text_bundle_pointer": "/files/69/after/text",
+      "sha256": "e93893b81ba587d275320e90692e4874bd6dec8d5780a1b91d609dbf394e5b65",
+      "bytes": 3261
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+      "text_bundle_pointer": "/files/70/before/text",
+      "sha256": "68d4857bf19e25b6ec7cd16c8903351846a964128d6f3d31a446ef1fa6030318",
+      "bytes": 3613
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+      "text_bundle_pointer": "/files/70/after/text",
+      "sha256": "4be37cc60b9a1176387bbd0c03a5841a9f5172e947c6f7769ede1b1ac7bbca63",
+      "bytes": 3612
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+      "text_bundle_pointer": "/files/71/before/text",
+      "sha256": "21c650a1b07398ba9abb5847cdf2f93b1d11e482fe09e6f49e011f2e91feda00",
+      "bytes": 3675
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+      "text_bundle_pointer": "/files/71/after/text",
+      "sha256": "9b7da9baefccf41231c7d7b5a9cc20fe122b150c62515c368f1af8e0a8c6a1e4",
+      "bytes": 3674
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "text_bundle_pointer": "/files/72/before/text",
+      "sha256": "ac5bda03907f4a65beda4e8d60753df05d522fdc428704606a96aa19b1b39e4d",
+      "bytes": 27195
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "text_bundle_pointer": "/files/72/after/text",
+      "sha256": "c0e06e22ec78262dc8cd12e57e7f26df8a5b306e8664e94784146271c2576684",
+      "bytes": 27194
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "text_bundle_pointer": "/files/73/before/text",
+      "sha256": "eebd95ddec5391e6de801e08cb92f14d0ef02f0caf200505e5d2141b87787a21",
+      "bytes": 4782
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "text_bundle_pointer": "/files/73/after/text",
+      "sha256": "da0577dd3d934ecbf47a4ba7926105c765bb6e50c983522c79bcdbbcb564b330",
+      "bytes": 4781
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "text_bundle_pointer": "/files/74/before/text",
+      "sha256": "749263a8472ce616903867e57973d708a7541552103a7f6e7174d0955e60bd32",
+      "bytes": 5783
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "text_bundle_pointer": "/files/74/after/text",
+      "sha256": "0efc75aac287b0df6dc15cc6b848d57c5f9dec6e772f1a3aab65bf7d196789c8",
+      "bytes": 5782
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "text_bundle_pointer": "/files/75/before/text",
+      "sha256": "0079223fc932ce772326f80a6836517d610756bbb7689fc923962bf1d21d10c0",
+      "bytes": 2433
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "text_bundle_pointer": "/files/75/after/text",
+      "sha256": "0ddda125b0096bac678f38883b34927ea7524586ba9a19f334d773979bbecc96",
+      "bytes": 2432
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+      "text_bundle_pointer": "/files/76/before/text",
+      "sha256": "8fb261a5183bde0702bf1f652f4bbe1e440be43e1d262e04fb67d03ae6719974",
+      "bytes": 2158
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+      "text_bundle_pointer": "/files/76/after/text",
+      "sha256": "4099aac411b42082eac268a07a086f471ca5a0d6a223b73ca7d696863e4333fc",
+      "bytes": 2157
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "text_bundle_pointer": "/files/77/before/text",
+      "sha256": "750dca027db182a40edcccb2be7ae80af7feeca38ac952c8dba21b8ed66b888f",
+      "bytes": 4059
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "text_bundle_pointer": "/files/77/after/text",
+      "sha256": "d01e8d4732e2c760ee1b19bed0f91cec363c0a54f6737bc9aa0f63cfbe6e1eb3",
+      "bytes": 4058
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+      "text_bundle_pointer": "/files/78/before/text",
+      "sha256": "72d3f9381e2650ca736827933ff5b6b1ffeb29ec2761eb94d98978ce79bd5789",
+      "bytes": 3165
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+      "text_bundle_pointer": "/files/78/after/text",
+      "sha256": "bc2e22313a3e1ec271990822834b62ebda7b72835803a28b303ef97f82396e59",
+      "bytes": 3164
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "text_bundle_pointer": "/files/79/before/text",
+      "sha256": "cb0d5714544b2c2f1bee244244d5a5132c59d089b743517b0a278cecac9ece69",
+      "bytes": 3193
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "text_bundle_pointer": "/files/79/after/text",
+      "sha256": "c1db8cb3ced56cd68950497a15bead4c0e8f60ff0396e54595f7776b7c1fdb44",
+      "bytes": 3192
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+      "text_bundle_pointer": "/files/80/before/text",
+      "sha256": "0dad810df61c74ad362c01c5475b44a1024ff571fdddd4c1ae800bf9af1ac4d1",
+      "bytes": 2351
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+      "text_bundle_pointer": "/files/80/after/text",
+      "sha256": "b8e7e162be9d37076fbddfbf3ad0869264628a674e4fbbbb836c22ca5e672228",
+      "bytes": 2350
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+      "text_bundle_pointer": "/files/81/before/text",
+      "sha256": "6d621aaf43155e7a6e979aa67a6358cc968ce97d5f5dbea800222a3a3e8af296",
+      "bytes": 1592
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+      "text_bundle_pointer": "/files/81/after/text",
+      "sha256": "936b0f30641a00ce743d06845cf89ff7206a56f261afa77802af41929295a6e6",
+      "bytes": 1591
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+      "text_bundle_pointer": "/files/82/before/text",
+      "sha256": "71bdb6b8015535fc288e30ce9dd413e899efcca9b57e3f8e1b3cb7c3d7a1348d",
+      "bytes": 1364
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+      "text_bundle_pointer": "/files/82/after/text",
+      "sha256": "61f22f0b15cc9ef7bbbf3a5f78d28cdd3c8020856956842950bff31d5f787944",
+      "bytes": 1363
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "text_bundle_pointer": "/files/83/before/text",
+      "sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "bytes": 12393
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "text_bundle_pointer": "/files/83/after/text",
+      "sha256": "a22d355591e3630ad6b95b90b3536c55651f3c24d23e260865901ae6a226214e",
+      "bytes": 12392
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+      "text_bundle_pointer": "/files/84/before/text",
+      "sha256": "86a0ec43837c8b6bac713426d484ce6b90252ffe061582b08b59d525f52d2336",
+      "bytes": 1243
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+      "text_bundle_pointer": "/files/84/after/text",
+      "sha256": "72b1652db7cd7cf5ac6a4e580742c84d9197443430398c39f16ac00f3606c7bb",
+      "bytes": 1242
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+      "text_bundle_pointer": "/files/85/before/text",
+      "sha256": "940c10773225b5db09d6860f9600a4db005c6ec9be5d27fc8741eaa7d038f273",
+      "bytes": 2056
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+      "text_bundle_pointer": "/files/85/after/text",
+      "sha256": "397b7a2d613df1d9a9ddfeab4d8e1f233751289e20b3e329483b3b5be4027d5e",
+      "bytes": 2055
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "text_bundle_pointer": "/files/86/before/text",
+      "sha256": "d388a3328c180bf8774b8982aab17cf5045879816595e8888cc4df6347269195",
+      "bytes": 5337
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "text_bundle_pointer": "/files/86/after/text",
+      "sha256": "a8028323387506457325c8ee1d99ff50f1cbaf3acb924848b3831ba6e1b2767f",
+      "bytes": 5336
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "text_bundle_pointer": "/files/87/before/text",
+      "sha256": "f53a867d24a594dcdd86509e353c653d8216834a60f953980082a5a824a751d6",
+      "bytes": 2820
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "text_bundle_pointer": "/files/87/after/text",
+      "sha256": "be1cb7296f19af356ad54d2f6b0d36feb3aaea9fe271c2f79ea1b24cb22b715e",
+      "bytes": 2819
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "text_bundle_pointer": "/files/88/before/text",
+      "sha256": "b7abba893759a13f358e16d35c718318e509cb589d39eab99ad52fb8423dc605",
+      "bytes": 5840
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "text_bundle_pointer": "/files/88/after/text",
+      "sha256": "d67b547e5f72a53ac5adb90f74f1019ba96d36d2f58918ae6900384d8069f2a7",
+      "bytes": 5839
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "text_bundle_pointer": "/files/89/before/text",
+      "sha256": "a05ab92661982b550969ae49696668d15cf48a1d72f2d0979a1d83afc6551fdb",
+      "bytes": 10530
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "text_bundle_pointer": "/files/89/after/text",
+      "sha256": "ad8d9887e09244568d16e30217ee7355bec30d0d4d4b401c81e02f710f49fc70",
+      "bytes": 10529
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "text_bundle_pointer": "/files/90/before/text",
+      "sha256": "f20d7c53ac2c7955b26a0a0ad1ca850e6eaf17d4acf60c01ec99915d6da487be",
+      "bytes": 9734
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "text_bundle_pointer": "/files/90/after/text",
+      "sha256": "29c370dde277d48e69adb3e57a1a6d8419f92ba01a69a09ef716901f01efaa55",
+      "bytes": 9733
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+      "text_bundle_pointer": "/files/91/before/text",
+      "sha256": "59f205664fdca77193513177f6f725f8f07d7c45784b85d23b5b6c97b0dff87a",
+      "bytes": 1315
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+      "text_bundle_pointer": "/files/91/after/text",
+      "sha256": "b52264e5c49c70e611bc115cebfb29526982140d6c326ddbb9d1b8cb92d836c7",
+      "bytes": 1314
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "text_bundle_pointer": "/files/92/before/text",
+      "sha256": "c8d49b216c963eaade43fcd638d938140fae87d5d7e9002a28a0ca5a3c5727fa",
+      "bytes": 1511
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "text_bundle_pointer": "/files/92/after/text",
+      "sha256": "f3b12079ef7c6a2837d6ce406a2dafa5ea28c661b2578b06b0fc2c2775ef2530",
+      "bytes": 1510
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "text_bundle_pointer": "/files/93/before/text",
+      "sha256": "77694a8ee3a9ed292cfc2efb30f60c5a05216722bd9c565b18efc280c2c35b03",
+      "bytes": 9657
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "text_bundle_pointer": "/files/93/after/text",
+      "sha256": "9a9aa9c1f67c52db424a2a8e0e38ec796acba737714ea9195fa4a9db10820227",
+      "bytes": 9656
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "text_bundle_pointer": "/files/94/before/text",
+      "sha256": "39c27442ce9667fc4282b41a8c5d09926fe6bc7b6d66f009e69baa4d5e501c6d",
+      "bytes": 14312
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "text_bundle_pointer": "/files/94/after/text",
+      "sha256": "4a790800f53ade42c37a8501a080ae9f224065bd721a5d31b4f28deb572eb272",
+      "bytes": 14311
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+      "text_bundle_pointer": "/files/95/before/text",
+      "sha256": "511ca690c1df8a4a6b662c1f18fab9a093d2d0a40eeb8b38c5ae59917a08d919",
+      "bytes": 4935
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+      "text_bundle_pointer": "/files/95/after/text",
+      "sha256": "4a6cf069bd79b28610e3769d2763ea3939fc72e57fa428b74d0c6f697de4114d",
+      "bytes": 4934
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+      "text_bundle_pointer": "/files/96/before/text",
+      "sha256": "b06462cebcbe708c0d8508e0116b02404308272a0293df87969d057234f0c0a5",
+      "bytes": 10176
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+      "text_bundle_pointer": "/files/96/after/text",
+      "sha256": "e64e3b6ca4b5e0e13f5b655fc7f3a9b0654b156513cf439bfc074f159bfab9dd",
+      "bytes": 10175
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "text_bundle_pointer": "/files/97/before/text",
+      "sha256": "1d7bbee6d20260c060836e5fce23d418db7c21bd7d822353f2c857342d4e9688",
+      "bytes": 3885
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "text_bundle_pointer": "/files/97/after/text",
+      "sha256": "c36ea0d122a4347717a1782018e0d6ce0ffa5ca98a625e5afdff3ea327e132b2",
+      "bytes": 3884
+    },
+    {
+      "archive_entry": "before/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "text_bundle_pointer": "/files/98/before/text",
+      "sha256": "4910574b13ba81aec0fe886e6e2a3c49c10c09ae2043f634f7ddc5896f098a52",
+      "bytes": 8299
+    },
+    {
+      "archive_entry": "after/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "text_bundle_pointer": "/files/98/after/text",
+      "sha256": "b8b17ba1b1dc3591939c80599db67229a9cd2165916bb1c25d2d850368490484",
+      "bytes": 8298
+    },
+    {
+      "archive_entry": "before/src/Core/src/Sessions/ApplicationSession.cs",
+      "text_bundle_pointer": "/files/99/before/text",
+      "sha256": "75c65e859d7404aa3cb9255507b061ea43dbc5eba1b19b3c0c8b57313e9bb754",
+      "bytes": 23905
+    },
+    {
+      "archive_entry": "after/src/Core/src/Sessions/ApplicationSession.cs",
+      "text_bundle_pointer": "/files/99/after/text",
+      "sha256": "3808d0d0082ed7db5f0b5e5c4525987a204441cb77c84159fef1aab2a940f558",
+      "bytes": 23904
+    },
+    {
+      "archive_entry": "before/src/Core/src/Sessions/ConnectionSessionGuard.cs",
+      "text_bundle_pointer": "/files/100/before/text",
+      "sha256": "64336dc4e4c91dab83932c3f313495e0d9edddc2deda71436d822bbd3800cdec",
+      "bytes": 4435
+    },
+    {
+      "archive_entry": "after/src/Core/src/Sessions/ConnectionSessionGuard.cs",
+      "text_bundle_pointer": "/files/100/after/text",
+      "sha256": "9b60d191b0989b76d9f1adadd95003c5e6b860b2b563d16755e37aa3dc7a88ff",
+      "bytes": 4434
+    },
+    {
+      "archive_entry": "before/src/Core/src/Sessions/RawCtapHidSession.cs",
+      "text_bundle_pointer": "/files/101/before/text",
+      "sha256": "c323c5801cb53f54317247aa9aabcbb734f5eaed5a443eeb427847c54a6e1eb8",
+      "bytes": 4248
+    },
+    {
+      "archive_entry": "after/src/Core/src/Sessions/RawCtapHidSession.cs",
+      "text_bundle_pointer": "/files/101/after/text",
+      "sha256": "a03a77ff57862137aee52e91a6ed7619244aebdf828fba75ccb97e230dabe21b",
+      "bytes": 4247
+    },
+    {
+      "archive_entry": "before/src/Core/src/Sessions/RawOtpHidSession.cs",
+      "text_bundle_pointer": "/files/102/before/text",
+      "sha256": "08ee917ada2b0dd6274f78a89110b3322d03a9209935a0c96de00440917ac605",
+      "bytes": 4096
+    },
+    {
+      "archive_entry": "after/src/Core/src/Sessions/RawOtpHidSession.cs",
+      "text_bundle_pointer": "/files/102/after/text",
+      "sha256": "5d51c3b5da3e266a5629878c2ac01b64c38e6c4559d739960103448f433d75d7",
+      "bytes": 4095
+    },
+    {
+      "archive_entry": "before/src/Core/src/Sessions/RawSmartCardSession.cs",
+      "text_bundle_pointer": "/files/103/before/text",
+      "sha256": "e0d4fed1f37089581c13f60bf66767664fbb1adbcb96f6622bd44b5c3da1c213",
+      "bytes": 8227
+    },
+    {
+      "archive_entry": "after/src/Core/src/Sessions/RawSmartCardSession.cs",
+      "text_bundle_pointer": "/files/103/after/text",
+      "sha256": "7d6faad9d29ca6b26869850b1e03a599e71992139a16cb2bf074f859c2451d85",
+      "bytes": 8226
+    },
+    {
+      "archive_entry": "before/src/Core/src/Sessions/SessionCreationOptions.cs",
+      "text_bundle_pointer": "/files/104/before/text",
+      "sha256": "9393cbf2d5f5ee0628fd75ec248b97497b525daa768abb6feccd42549db55eb3",
+      "bytes": 4299
+    },
+    {
+      "archive_entry": "after/src/Core/src/Sessions/SessionCreationOptions.cs",
+      "text_bundle_pointer": "/files/104/after/text",
+      "sha256": "f27409e09f59d14fa4fdc28193e2a8eb9d131a2b0e25d9eafcdf07f5b02e9a90",
+      "bytes": 4298
+    },
+    {
+      "archive_entry": "before/src/Core/src/Transport.cs",
+      "text_bundle_pointer": "/files/105/before/text",
+      "sha256": "77deae45f285c6449f27eaf098975c5b9a709a8b7136db90955d6973333794f7",
+      "bytes": 1107
+    },
+    {
+      "archive_entry": "after/src/Core/src/Transport.cs",
+      "text_bundle_pointer": "/files/105/after/text",
+      "sha256": "0bb87013ff0b44e057f62995d2f23867b01f7b502a7bc99eb34ffb7d47bc0ef3",
+      "bytes": 1106
+    },
+    {
+      "archive_entry": "before/src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+      "text_bundle_pointer": "/files/106/before/text",
+      "sha256": "05659dd5b10e5df0ecca4ac123d4c01f7f570a496ba36372710476928b8b71c6",
+      "bytes": 4194
+    },
+    {
+      "archive_entry": "after/src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+      "text_bundle_pointer": "/files/106/after/text",
+      "sha256": "228dbcc0e87a8ed4b05214a16007eb1f44c5e6b584163bf3f4231ffce47199fc",
+      "bytes": 4193
+    },
+    {
+      "archive_entry": "before/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "text_bundle_pointer": "/files/107/before/text",
+      "sha256": "18d3f8ef6d7d2b72d0bb668ed6301eee634a2659c20ed89e2d8b75e1a69dadd3",
+      "bytes": 8679
+    },
+    {
+      "archive_entry": "after/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "text_bundle_pointer": "/files/107/after/text",
+      "sha256": "a5a5b91d87edbcc20cc1323fa424d2f826c49af4f55188b8a79e8149548cd2db",
+      "bytes": 8678
+    },
+    {
+      "archive_entry": "before/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "text_bundle_pointer": "/files/108/before/text",
+      "sha256": "81c0010ee6352821adca2a5c7bbf4aa0f9c753ff27ae901141b5d451e12680fc",
+      "bytes": 4246
+    },
+    {
+      "archive_entry": "after/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "text_bundle_pointer": "/files/108/after/text",
+      "sha256": "c45d68b7507588d10807a5d36d48b9e7566cd26561b4cf9223e48a760d0fdeb8",
+      "bytes": 4245
+    },
+    {
+      "archive_entry": "before/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "text_bundle_pointer": "/files/109/before/text",
+      "sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "bytes": 19346
+    },
+    {
+      "archive_entry": "after/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "text_bundle_pointer": "/files/109/after/text",
+      "sha256": "6f6601af9dfec03072ca7a7de0440dea335bc91111063877be351974004b0595",
+      "bytes": 19345
+    },
+    {
+      "archive_entry": "before/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "text_bundle_pointer": "/files/110/before/text",
+      "sha256": "3510a3ff0a1ed360bad0b9eb44fbe8bc0c53820644c1b542a990c2ff567dcf4e",
+      "bytes": 2421
+    },
+    {
+      "archive_entry": "after/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "text_bundle_pointer": "/files/110/after/text",
+      "sha256": "2b685e9c67573f9391a304399b06daa9f13e387827420532690f5cf2e62fd696",
+      "bytes": 2420
+    },
+    {
+      "archive_entry": "before/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "text_bundle_pointer": "/files/111/before/text",
+      "sha256": "9f586abba719425f246bf3731a854163c21a533dc472e9de7bf6486250f09cfa",
+      "bytes": 3158
+    },
+    {
+      "archive_entry": "after/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "text_bundle_pointer": "/files/111/after/text",
+      "sha256": "becae751ff36326064b91bdcec5aa77e43169f50ce1b83836ecca2104a715f61",
+      "bytes": 3157
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/BerLength.cs",
+      "text_bundle_pointer": "/files/112/before/text",
+      "sha256": "da923dae9ab0248000b149cae26611cd20ef7a84d4eca023bb8f3cec3bd65698",
+      "bytes": 2044
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/BerLength.cs",
+      "text_bundle_pointer": "/files/112/after/text",
+      "sha256": "baa6b0b844b28408ed302a648cec52a8de08d93923c057016a759e5c2019ee22",
+      "bytes": 2043
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+      "text_bundle_pointer": "/files/113/before/text",
+      "sha256": "6a1a905f9c9b655f5d0c617891a78e0d8dfa7f9e40ff497798d0b2e292495724",
+      "bytes": 3361
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+      "text_bundle_pointer": "/files/113/after/text",
+      "sha256": "5edd469aecd20d3ccec7c6f9452773ba275eda1574db96e0b180a497e2be5444",
+      "bytes": 3360
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/DisposableBufferHandle.cs",
+      "text_bundle_pointer": "/files/114/before/text",
+      "sha256": "3f2a3b6c5c9b7f8e31fbd16eccf382df7e66fa8663520b8969774a07a708b980",
+      "bytes": 2065
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/DisposableBufferHandle.cs",
+      "text_bundle_pointer": "/files/114/after/text",
+      "sha256": "07f8154c389b517c73d51ed1aa941d6d5702dce36214f4049fe9a9d36596ac16",
+      "bytes": 2064
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/DisposableTlvList.cs",
+      "text_bundle_pointer": "/files/115/before/text",
+      "sha256": "13aaaf632d7d18748b07d902e705877f199d79e547bb49fe2600fa0f9bb90bdf",
+      "bytes": 3134
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/DisposableTlvList.cs",
+      "text_bundle_pointer": "/files/115/after/text",
+      "sha256": "1b908809acf6eb626e51321d8cf9a921d37b1bb1697c9301e76245b19fb65b58",
+      "bytes": 3133
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/ExchangeGuard.cs",
+      "text_bundle_pointer": "/files/116/before/text",
+      "sha256": "568935c28ac2b809f59c0097664397bfccbb0fa145bed894b94df038e86aa41a",
+      "bytes": 5105
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/ExchangeGuard.cs",
+      "text_bundle_pointer": "/files/116/after/text",
+      "sha256": "983b6f7f1f52bd3c64d0ccb2a9d27e31bba05b2fce643c16bf4f67fe8a7c234b",
+      "bytes": 5104
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/MemoryExtensions.cs",
+      "text_bundle_pointer": "/files/117/before/text",
+      "sha256": "98505ef4490a1596f9a8a071b70dc60fad435d3f86a75a9ea4b81d4ac1669cf9",
+      "bytes": 1891
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/MemoryExtensions.cs",
+      "text_bundle_pointer": "/files/117/after/text",
+      "sha256": "522c82874a6545d8a00dd669335c88f8c116bbeacd307cb6e740bb89a91082b4",
+      "bytes": 1890
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/Tlv.cs",
+      "text_bundle_pointer": "/files/118/before/text",
+      "sha256": "dfdf9731f0f4521b6749afda8506a9fa2a3a6d0a68fa437383adab1739eef028",
+      "bytes": 10246
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/Tlv.cs",
+      "text_bundle_pointer": "/files/118/after/text",
+      "sha256": "992263ee9174a3c09aa1fed808e57e0defd9686b570677383472092455030068",
+      "bytes": 10245
+    },
+    {
+      "archive_entry": "before/src/Core/src/Utilities/TlvHelper.cs",
+      "text_bundle_pointer": "/files/119/before/text",
+      "sha256": "af4e21d6a3913c38bf3c7e3f1afbe8ee1625e3c355facebbb2ab85d696fbe1ab",
+      "bytes": 11086
+    },
+    {
+      "archive_entry": "after/src/Core/src/Utilities/TlvHelper.cs",
+      "text_bundle_pointer": "/files/119/after/text",
+      "sha256": "c99d30210090a5c65b079a2c14b1a5afe78e278def34c72c7ae3d1eca97cfc53",
+      "bytes": 11085
+    },
+    {
+      "archive_entry": "before/src/Core/src/YubiKitLogging.cs",
+      "text_bundle_pointer": "/files/120/before/text",
+      "sha256": "a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b",
+      "bytes": 3155
+    },
+    {
+      "archive_entry": "after/src/Core/src/YubiKitLogging.cs",
+      "text_bundle_pointer": "/files/120/after/text",
+      "sha256": "982e3feed1088104b12600571c827188ef801c0a59d8f8ee6e7b9c4596bcfb3f",
+      "bytes": 3154
+    },
+    {
+      "archive_entry": "before/src/Management/src/IManagementSession.cs",
+      "text_bundle_pointer": "/files/121/before/text",
+      "sha256": "4c4195bfb177e2b38ea5bfeeb444235bc19eccef4aced3563bdc62ceef7b7db8",
+      "bytes": 9756
+    },
+    {
+      "archive_entry": "after/src/Management/src/IManagementSession.cs",
+      "text_bundle_pointer": "/files/121/after/text",
+      "sha256": "ac808ecdfff3140cd8c3ac8987676255beae14d6de2cff85e9b0bd30f4d71243",
+      "bytes": 9755
+    },
+    {
+      "archive_entry": "before/src/Management/src/ManagementSession.cs",
+      "text_bundle_pointer": "/files/122/before/text",
+      "sha256": "25fb320e15c027896505ccef2ec5d135d54ea93183a2f1e9334a242383f4f1da",
+      "bytes": 12036
+    },
+    {
+      "archive_entry": "after/src/Management/src/ManagementSession.cs",
+      "text_bundle_pointer": "/files/122/after/text",
+      "sha256": "1b0ff2f6276f18bbc78bf2ccd7d95fbf86a066e43dc32da88cae1957a3d08dfb",
+      "bytes": 12035
+    },
+    {
+      "archive_entry": "before/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+      "text_bundle_pointer": "/files/123/before/text",
+      "sha256": "9cb1109ce846c43d4902a92b3c9d38d572c44028a5debdb1817a500472fd343d",
+      "bytes": 18976
+    },
+    {
+      "archive_entry": "after/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+      "text_bundle_pointer": "/files/123/after/text",
+      "sha256": "78d52ea0b6b1d24b2f0f330e22c0111ad49c4afd183ab7e8ce10c8ae5b5a99d6",
+      "bytes": 18975
+    },
+    {
+      "archive_entry": "before/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "text_bundle_pointer": "/files/124/before/text",
+      "sha256": "e0ee15b55542aa7c7e5867064039538ca43986073fbbde9eee74b243059f7256",
+      "bytes": 10536
+    },
+    {
+      "archive_entry": "after/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "text_bundle_pointer": "/files/124/after/text",
+      "sha256": "1211a63c353f5ce0e485020f45ccb92f4ea9fc1b7f76f0b506acdbfbd369c83f",
+      "bytes": 10535
+    },
+    {
+      "archive_entry": "before/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs",
+      "text_bundle_pointer": "/files/125/before/text",
+      "sha256": "691551e376171339ff27b0dfc7b408fc86fe660f7fd08e9428862529e7bf1079",
+      "bytes": 12322
+    },
+    {
+      "archive_entry": "after/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs",
+      "text_bundle_pointer": "/files/125/after/text",
+      "sha256": "3d7e8789d647de7cd473e4f2102d14a57d9bf066a461b787de7f64ccf6feb178",
+      "bytes": 12321
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+      "text_bundle_pointer": "/files/126/before/text",
+      "sha256": "ce5c091da33607cde9717174c4fee9092ce393dcffd09895ea4ad1fca47ee408",
+      "bytes": 19924
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+      "text_bundle_pointer": "/files/126/after/text",
+      "sha256": "d334b61b8bc9f978037115add7e42c31c7a00af6986ff9e9135ef8bc55894f39",
+      "bytes": 19923
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+      "text_bundle_pointer": "/files/127/before/text",
+      "sha256": "5ba047b54e86ebcc66b12a6b314d2ed7ce305337f06e21551ffee251b2aaab0f",
+      "bytes": 10938
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+      "text_bundle_pointer": "/files/127/after/text",
+      "sha256": "d3dc494dc5462b0d472d2fe2b3f5ab8fe1f752caf8fee747b23cd5344ca4f7c9",
+      "bytes": 10937
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+      "text_bundle_pointer": "/files/128/before/text",
+      "sha256": "2725180d951f0eaadc3635379f97d5eddfdd595dcc1818e7f43d93f882664115",
+      "bytes": 9668
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+      "text_bundle_pointer": "/files/128/after/text",
+      "sha256": "fbc725c9c7747a573ca4e5f4e83aeab740c244ef58727f641894685a8dbe2621",
+      "bytes": 9667
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+      "text_bundle_pointer": "/files/129/before/text",
+      "sha256": "36daf0fd92f19d386d3d43d22b48a262ebd1014530427e40c70207566eeb06af",
+      "bytes": 3289
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+      "text_bundle_pointer": "/files/129/after/text",
+      "sha256": "b78221451ee8e452eeb40ab3eb9a8781278bfec6c8b52ad9c5d7b246838e3a0a",
+      "bytes": 3288
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+      "text_bundle_pointer": "/files/130/before/text",
+      "sha256": "4c5cba1c0c827f8a15cb3c545672e183252d9244a647a019ecc723435eb2b537",
+      "bytes": 8231
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+      "text_bundle_pointer": "/files/130/after/text",
+      "sha256": "b76d228db8e2d192f834ff50037c13b7369bb6ebd5521dc572603f65dc68d90d",
+      "bytes": 8230
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "text_bundle_pointer": "/files/131/before/text",
+      "sha256": "ecaa0167ed46ba84809f1789d121d0bbba314e6e6e6a3951cf87020e6a910c48",
+      "bytes": 7503
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "text_bundle_pointer": "/files/131/after/text",
+      "sha256": "b16cf30232d736506822be1ae4dae68c88d3831aff9b3ee0dcc498a58af69110",
+      "bytes": 7502
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "text_bundle_pointer": "/files/132/before/text",
+      "sha256": "fe0f0337ed59109a259590a1497320c7a4e7e233db07911c0ad6b21b04a47556",
+      "bytes": 9524
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "text_bundle_pointer": "/files/132/after/text",
+      "sha256": "4b090d962e6729f4466b104f96d9007897056d2ce29e0fdd83e5484eea5e9a45",
+      "bytes": 9523
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+      "text_bundle_pointer": "/files/133/before/text",
+      "sha256": "de9ee73e9d918441d66e3f71cc0197c1105b4625f30185fa2a987612b7215fc0",
+      "bytes": 5027
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+      "text_bundle_pointer": "/files/133/after/text",
+      "sha256": "2aaa264192c696fafe702e2ff89b9e66f661a975b6867aa286aec1c2727d92db",
+      "bytes": 5026
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "text_bundle_pointer": "/files/134/before/text",
+      "sha256": "375581b5321b6b8c4975d137c17e389d27e2ab7ea7b11c221fb51dbb20bafd44",
+      "bytes": 22563
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "text_bundle_pointer": "/files/134/after/text",
+      "sha256": "84ade80b3f31fbab03fc1a90fbabb934aea39e5a5ecf7627be3ea415b481e0e7",
+      "bytes": 22562
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+      "text_bundle_pointer": "/files/135/before/text",
+      "sha256": "4051b8ba7c567249aeb6871d2eb5864a52b2c652cb24c93977f960dc6b272145",
+      "bytes": 21890
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+      "text_bundle_pointer": "/files/135/after/text",
+      "sha256": "3fa8441b5c084904a78c4ad26e4dd230328af2d04fa1fa76362f5778f11dab4f",
+      "bytes": 21889
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+      "text_bundle_pointer": "/files/136/before/text",
+      "sha256": "3ba5f002966c4566ff894a214079b9c570167304dd1a7b512a898640febbfaf6",
+      "bytes": 11177
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+      "text_bundle_pointer": "/files/136/after/text",
+      "sha256": "bcf26eeb026de55b3513d78f62f4f10269444376e3319a54485ba1d1fbbcaacf",
+      "bytes": 11176
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+      "text_bundle_pointer": "/files/137/before/text",
+      "sha256": "d66e1e5976ce1090b6545cacefba11e4f66c07f4e060d417e58cd94bfd6a511b",
+      "bytes": 11100
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+      "text_bundle_pointer": "/files/137/after/text",
+      "sha256": "415d1d9fb75798b3ca05456c7745ffc15832da4be5c9825de22d6b866d472eb8",
+      "bytes": 11099
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+      "text_bundle_pointer": "/files/138/before/text",
+      "sha256": "3d176b07a6c9ee5a51c88efbf49e06fb9273d54f6d42bbb96207655a718cad8a",
+      "bytes": 5659
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+      "text_bundle_pointer": "/files/138/after/text",
+      "sha256": "d75688122355755f5dddf75502a5a6d4373b0de88435438c423675a60214edd8",
+      "bytes": 5658
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+      "text_bundle_pointer": "/files/139/before/text",
+      "sha256": "8c9ecb3fbfc3407945111b012b39c4171961ed9c652e07b5dc7d134a406cf0dd",
+      "bytes": 2291
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+      "text_bundle_pointer": "/files/139/after/text",
+      "sha256": "e9dc5dc43b2cd152bec9c3b255aeecd37c2f6c52cb933a2829406bf483bb0dca",
+      "bytes": 2290
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+      "text_bundle_pointer": "/files/140/before/text",
+      "sha256": "b0b0ea4eeec11dd117983b4f1cd854bf6a230ac03514d249e0cb1dfc86c7c5c0",
+      "bytes": 5171
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+      "text_bundle_pointer": "/files/140/after/text",
+      "sha256": "9b29063d58a26a18a689dc9c2593ff77de69d76fe9eb3d005b2bd0adb196817c",
+      "bytes": 5170
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+      "text_bundle_pointer": "/files/141/before/text",
+      "sha256": "c40f52063e35bbd97a0f1ab60c9a4b1e25a03cc7af20615be4aee6ff5333feff",
+      "bytes": 14874
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+      "text_bundle_pointer": "/files/141/after/text",
+      "sha256": "296d2058bd6b588122efb4f8c30b8360cd397d065a866fb77ec3d54e82349daf",
+      "bytes": 14873
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "text_bundle_pointer": "/files/142/before/text",
+      "sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159",
+      "bytes": 9459
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "text_bundle_pointer": "/files/142/after/text",
+      "sha256": "f2c9f22beabf92ccd098a7fcc97ef04a2f07abcf14b11a40515e0c3b66e9f256",
+      "bytes": 9458
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "text_bundle_pointer": "/files/143/before/text",
+      "sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03",
+      "bytes": 42010
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "text_bundle_pointer": "/files/143/after/text",
+      "sha256": "c473d4464ac0f9bce9df4b917c85ba750afca2d25743a51023a668b787bf7af5",
+      "bytes": 42009
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "text_bundle_pointer": "/files/144/before/text",
+      "sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+      "bytes": 15348
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "text_bundle_pointer": "/files/144/after/text",
+      "sha256": "1c29293cb066bb3929ab4f449cf6e2bdef6bd37386b9f41d5f61b7a4ea36f15e",
+      "bytes": 15347
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "text_bundle_pointer": "/files/145/before/text",
+      "sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+      "bytes": 5255
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "text_bundle_pointer": "/files/145/after/text",
+      "sha256": "ac58407f672e7ffed0f3ca55ef9190c0d4c06da64c311e364a4dbc8635c11f93",
+      "bytes": 5254
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+      "text_bundle_pointer": "/files/146/before/text",
+      "sha256": "7fb638eb701db765ada5fbd04796f272baa78fae19cb213e7c4f7cf66c5957c2",
+      "bytes": 4035
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+      "text_bundle_pointer": "/files/146/after/text",
+      "sha256": "36d2df18d619215b8615546b90d3167b8687a0b8652c5a89cbdebeeec8442540",
+      "bytes": 4034
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "text_bundle_pointer": "/files/147/before/text",
+      "sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "bytes": 46259
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "text_bundle_pointer": "/files/147/after/text",
+      "sha256": "001bfbc7b0349770f088aae090a483271e5cebfe9b48512e901fb02c1d09a5f4",
+      "bytes": 46258
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "text_bundle_pointer": "/files/148/before/text",
+      "sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c",
+      "bytes": 11890
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "text_bundle_pointer": "/files/148/after/text",
+      "sha256": "9fad4d7cdbfbfa4ab52f3f0dbeee0fdd53c4c642c3e0b67e3ff93a87c38f0996",
+      "bytes": 11889
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "text_bundle_pointer": "/files/149/before/text",
+      "sha256": "d07b2786c2201ce46ea2b6f06e92bb9cfd03ce18c70d9e57162920f7b0649618",
+      "bytes": 13691
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "text_bundle_pointer": "/files/149/after/text",
+      "sha256": "26f62034f2c1e179b8a0cd4ddfaa9c5ad46bb2c8efdbc745b8dae0745a46bf0d",
+      "bytes": 13690
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "text_bundle_pointer": "/files/150/before/text",
+      "sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "bytes": 46612
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "text_bundle_pointer": "/files/150/after/text",
+      "sha256": "c4b10dc50d33235e67f766cb04be4b79ae84d534b4b02b4bf7978a3ccdc4ecc6",
+      "bytes": 46611
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "text_bundle_pointer": "/files/151/before/text",
+      "sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c",
+      "bytes": 3811
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "text_bundle_pointer": "/files/151/after/text",
+      "sha256": "92f82a6803c9ccf0eb4bd1d893a4e542069e7a88995652097cfc8065565f1398",
+      "bytes": 3810
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "text_bundle_pointer": "/files/152/before/text",
+      "sha256": "0f1a4eff327d3d87ab02e9b6f6a6fd69df1be586881f66409b6912b1c2789bf3",
+      "bytes": 15888
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "text_bundle_pointer": "/files/152/after/text",
+      "sha256": "28b3811bda840fa47936fdd7558803e4ba100a30addaa5cbf6738dece7681aa9",
+      "bytes": 15887
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "text_bundle_pointer": "/files/153/before/text",
+      "sha256": "0309afaef1dd32bc103b3aa064effdcdf8fb8a747c8f3273731defa804303494",
+      "bytes": 16120
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "text_bundle_pointer": "/files/153/after/text",
+      "sha256": "3479ebe650269decdc16377febf1f1ee32ba2ce886269cd46094bb317e00d3ea",
+      "bytes": 16119
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "text_bundle_pointer": "/files/154/before/text",
+      "sha256": "366f2813be1a73df6e0c9fcfafd415260da0910f8e7b2421c4b4e8ab47f17240",
+      "bytes": 38722
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "text_bundle_pointer": "/files/154/after/text",
+      "sha256": "ca8170303e1f22482d67642233cc6849c82564207ef3931aa89ef9d628a74908",
+      "bytes": 38721
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+      "text_bundle_pointer": "/files/155/before/text",
+      "sha256": "e86dd2e2d88973d0bec0419a293e721c693502681ca2048e4977cd20e76b49f2",
+      "bytes": 9716
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+      "text_bundle_pointer": "/files/155/after/text",
+      "sha256": "d8e93b0d822bd3e39072c9e2f842683735ed5af79e42f8f65468b5abed86db99",
+      "bytes": 9715
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "text_bundle_pointer": "/files/156/before/text",
+      "sha256": "006dbb8a4760392d01988703709a6e0c74cf441c9bf359c4f9dc196af51c1013",
+      "bytes": 10079
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "text_bundle_pointer": "/files/156/after/text",
+      "sha256": "875b0b19bc36c0123a13a0a54320c6bbdc4b38ff4036b1fd1638f1b57fcd3b21",
+      "bytes": 10078
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+      "text_bundle_pointer": "/files/157/before/text",
+      "sha256": "6db4dcab6ef539a976e76e032de5004970e71caaa565bad4ceef9877763c7c58",
+      "bytes": 13127
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+      "text_bundle_pointer": "/files/157/after/text",
+      "sha256": "7f954fb3e06d5011b73cf33f8b42c80ce0fa98d42429dc9d999ff96c50cd7937",
+      "bytes": 13126
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+      "text_bundle_pointer": "/files/158/before/text",
+      "sha256": "6ba679af8ed31428777fc5872a9355f3b602c784b482481999366e67293d760d",
+      "bytes": 4243
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+      "text_bundle_pointer": "/files/158/after/text",
+      "sha256": "d5034a24077559d21ddce63682c62f33225e1c4c0b136f1d74ab4e875f68dd0c",
+      "bytes": 4242
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+      "text_bundle_pointer": "/files/159/before/text",
+      "sha256": "a6fcce466e6c12262dbe9c4d7fe6b856993e9f6aa6ebb7e1beca66774ca59bc1",
+      "bytes": 9721
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+      "text_bundle_pointer": "/files/159/after/text",
+      "sha256": "14ca5247e40037dd450ae41f6ff634fc4f6e1ebae10e80a0af62eb190bbaed33",
+      "bytes": 9720
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "text_bundle_pointer": "/files/160/before/text",
+      "sha256": "2cba79d85a56d031cccb3190a80da9db59e30316ef6cfb12f706e8ef1e21a859",
+      "bytes": 7270
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "text_bundle_pointer": "/files/160/after/text",
+      "sha256": "ea6a28d79dcd72da79fcf2c478fc44a844c26d825f3dd6807ede9be573089f5d",
+      "bytes": 7269
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "text_bundle_pointer": "/files/161/before/text",
+      "sha256": "d4e0973e0eaa5864f603876404656d19f06cf0f09e946dd1f0f0ad50370f4806",
+      "bytes": 8233
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "text_bundle_pointer": "/files/161/after/text",
+      "sha256": "63b7ffa338becdf1b055391b02133240c57688e7dab61335d64fb4ab8fbe8cb2",
+      "bytes": 8232
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+      "text_bundle_pointer": "/files/162/before/text",
+      "sha256": "163ad7c64d6cfd2429c5fb264ab9e9a982f18fcbca89469b52e777150282320f",
+      "bytes": 6735
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+      "text_bundle_pointer": "/files/162/after/text",
+      "sha256": "56baaeb59f9a11634736576e7a8b03d4602778195a32fe7ea32629672d72a985",
+      "bytes": 6734
+    },
+    {
+      "archive_entry": "before/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+      "text_bundle_pointer": "/files/163/before/text",
+      "sha256": "03cd00c4c169df7f097684c14545575bf3bdcb3e102bba8bd237cc9309645afb",
+      "bytes": 8049
+    },
+    {
+      "archive_entry": "after/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+      "text_bundle_pointer": "/files/163/after/text",
+      "sha256": "abf7af9bee90f31eb97d510ea531812536f90ef76d716e314ee1df16eb01aa89",
+      "bytes": 8048
+    },
+    {
+      "archive_entry": "before/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "text_bundle_pointer": "/files/164/before/text",
+      "sha256": "b2fb7e6c388c09a014113ea1f7bf05fff77438153db217e12375b9e126d44baf",
+      "bytes": 14064
+    },
+    {
+      "archive_entry": "after/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "text_bundle_pointer": "/files/164/after/text",
+      "sha256": "a746da75945207478012f756389799993bf5e0fe49973e8bb65ee4d0a8f520b0",
+      "bytes": 14063
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/Infrastructure/AllowList.cs",
+      "text_bundle_pointer": "/files/165/before/text",
+      "sha256": "e495dd528a33a5302ae12b0fddee60fae5ed48bfee92f558b3aa7cb0d4d55bce",
+      "bytes": 4035
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/Infrastructure/AllowList.cs",
+      "text_bundle_pointer": "/files/165/after/text",
+      "sha256": "12e76a0e272d9ccccf31a5e0eb20558b851cea94bdcb8f711ddf814eaa584a6d",
+      "bytes": 4034
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "text_bundle_pointer": "/files/166/before/text",
+      "sha256": "c2d596d0d3c380b07317df8fd9ffc2936dac7b2815ecc09f149c2f70171b8f9c",
+      "bytes": 5790
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "text_bundle_pointer": "/files/166/after/text",
+      "sha256": "e974602d33cd31c80dedc87533896b47720ea0c4df8b813ce6e11ba4a63b9213",
+      "bytes": 5789
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/Infrastructure/OperatorCue.cs",
+      "text_bundle_pointer": "/files/167/before/text",
+      "sha256": "820f9f2ebed195d1fabf36c200df937bc1d9fd096df261663a71da73dcf7f32f",
+      "bytes": 3773
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/Infrastructure/OperatorCue.cs",
+      "text_bundle_pointer": "/files/167/after/text",
+      "sha256": "4f043c0f8f388f156342c2dd7de79b681dfdefe4b8fff32c4211fd08dc3babd1",
+      "bytes": 3772
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/Infrastructure/TestCategories.cs",
+      "text_bundle_pointer": "/files/168/before/text",
+      "sha256": "2fa737b315df81137b73f495045d4689f8ad166daa7f72264ce683167bd64ee0",
+      "bytes": 4047
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/Infrastructure/TestCategories.cs",
+      "text_bundle_pointer": "/files/168/after/text",
+      "sha256": "d5a291014dce20ec390d44326044fa33d29f07b7a33554b79f8cd27bf4ae3f04",
+      "bytes": 4046
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "text_bundle_pointer": "/files/169/before/text",
+      "sha256": "982b9bc5c2656974ab291ef78b0d43393f8f5fc035c8ea294073f5f9d5e1eb77",
+      "bytes": 15032
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "text_bundle_pointer": "/files/169/after/text",
+      "sha256": "6145195b0a8cddbc494ddaa3585867692e8b4cd801943e767effa1a6d3e6da55",
+      "bytes": 15031
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/IYubiKeyFilter.cs",
+      "text_bundle_pointer": "/files/170/before/text",
+      "sha256": "eae08ac681f5f486da9ab9116bb9ca1e5825374adc1b4197082eaf0c89e30f33",
+      "bytes": 2864
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/IYubiKeyFilter.cs",
+      "text_bundle_pointer": "/files/170/after/text",
+      "sha256": "bff5a30697195866b0cceecef21cf6fef752ac5ccb726b53ca8f7b9444db6249",
+      "bytes": 2863
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "text_bundle_pointer": "/files/171/before/text",
+      "sha256": "cf28fd54950dca187c7ac9c8428998ce7866a73c9b06d01eab67958d80557c30",
+      "bytes": 3024
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "text_bundle_pointer": "/files/171/after/text",
+      "sha256": "9f7926137e6b977cd3907cd529d0fa615025cf26349b4542168d9adbcba40696",
+      "bytes": 3023
+    },
+    {
+      "archive_entry": "before/src/Tests.Shared/YubiKeyTestState.cs",
+      "text_bundle_pointer": "/files/172/before/text",
+      "sha256": "b30d3dd8249b5bc6e1112ee4de828c4044d7c55f4e6a2e936c4dff2e5d2af39e",
+      "bytes": 20821
+    },
+    {
+      "archive_entry": "after/src/Tests.Shared/YubiKeyTestState.cs",
+      "text_bundle_pointer": "/files/172/after/text",
+      "sha256": "2b23d5727874a726086f64fb0d03a32fd0caad1b92ae16d849406b56daed224a",
+      "bytes": 20820
+    },
+    {
+      "archive_entry": "before/src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "text_bundle_pointer": "/files/173/before/text",
+      "sha256": "01797e8aed2d0f884f8033201779db7717927bb6829f8179ae7ea58fb4da2f4b",
+      "bytes": 19358
+    },
+    {
+      "archive_entry": "after/src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "text_bundle_pointer": "/files/173/after/text",
+      "sha256": "5fb010f03e9250e9e200b8af3e77524dd0bfe26eb1cef37e2d3ecb18d2e215a3",
+      "bytes": 19357
+    },
+    {
+      "archive_entry": "before/src/Piv/src/IPivSession.cs",
+      "text_bundle_pointer": "/files/174/before/text",
+      "sha256": "6cf9b7d917d852316d6292c840cec4b9b15739ff437c98cff926b7a9f672db7f",
+      "bytes": 39524
+    },
+    {
+      "archive_entry": "after/src/Piv/src/IPivSession.cs",
+      "text_bundle_pointer": "/files/174/after/text",
+      "sha256": "c04fe9a3ac65c65193a3b44e986f6aefcf49600a6553c8cf8ff7641c0a02cfcd",
+      "bytes": 39523
+    },
+    {
+      "archive_entry": "before/src/Piv/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/175/before/text",
+      "sha256": "951665fa054ab7906a06cee19784f4b91f2d1dc03050db879206e2b0c2c0f46c",
+      "bytes": 3186
+    },
+    {
+      "archive_entry": "after/src/Piv/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/175/after/text",
+      "sha256": "6e3a0ed63ede6ea56bfbd677db102bfc062d36e00360f728fd1b2d569d8733d1",
+      "bytes": 3185
+    },
+    {
+      "archive_entry": "before/src/Piv/src/Keys/KeyProtocol.cs",
+      "text_bundle_pointer": "/files/176/before/text",
+      "sha256": "cbb73402f1c4ae839c8ca6efe7c3930603c5f596351a20e251b8c9d71691b73f",
+      "bytes": 21751
+    },
+    {
+      "archive_entry": "after/src/Piv/src/Keys/KeyProtocol.cs",
+      "text_bundle_pointer": "/files/176/after/text",
+      "sha256": "59e981136e92deef3b2015295e03776a8bd41ae7926682030254dfd92ff207c7",
+      "bytes": 21750
+    },
+    {
+      "archive_entry": "before/src/Piv/src/PivSession.cs",
+      "text_bundle_pointer": "/files/177/before/text",
+      "sha256": "cba2261e6c6f591de3d6cb189fc092dfab8f1295b748c18b7ab1715d0dc9349a",
+      "bytes": 47059
+    },
+    {
+      "archive_entry": "after/src/Piv/src/PivSession.cs",
+      "text_bundle_pointer": "/files/177/after/text",
+      "sha256": "5c0c970884329fcc3f77a5526a63dcb4dea74f56f772278dfe71afab50b70ca9",
+      "bytes": 47058
+    },
+    {
+      "archive_entry": "before/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "text_bundle_pointer": "/files/178/before/text",
+      "sha256": "6b77a88bb23a9afa0b47eccc56ccec6ee16301995c08401b0efd1394e175ec70",
+      "bytes": 8081
+    },
+    {
+      "archive_entry": "after/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "text_bundle_pointer": "/files/178/after/text",
+      "sha256": "d6fd638f54fe4ebedd611bcd4050b740caf604b2b1336b1611ea6640a9414196",
+      "bytes": 8080
+    },
+    {
+      "archive_entry": "before/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "text_bundle_pointer": "/files/179/before/text",
+      "sha256": "9d2699c1e4d1516d1e146e8c439d8fcd5c0d70caa1bd07036e3ebc5ac0d991d7",
+      "bytes": 33748
+    },
+    {
+      "archive_entry": "after/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "text_bundle_pointer": "/files/179/after/text",
+      "sha256": "e6ca6da265a9461413f13ae489f9c89eec0d28111d456a08ff070acb8b6ca948",
+      "bytes": 33747
+    },
+    {
+      "archive_entry": "before/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+      "text_bundle_pointer": "/files/180/before/text",
+      "sha256": "62124c562e12fa72dbd982b4b704aeb867526f833ed1489a4f50974f7940c68c",
+      "bytes": 6855
+    },
+    {
+      "archive_entry": "after/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+      "text_bundle_pointer": "/files/180/after/text",
+      "sha256": "f775fe3e27943d6a03d777683bbd40e51b7082a3437017947951c1a2767646de",
+      "bytes": 6854
+    },
+    {
+      "archive_entry": "before/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+      "text_bundle_pointer": "/files/181/before/text",
+      "sha256": "cdbc621258158f25578792a576c0463d5e1694f08ff44ed7ac090caf566e6bb5",
+      "bytes": 3775
+    },
+    {
+      "archive_entry": "after/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+      "text_bundle_pointer": "/files/181/after/text",
+      "sha256": "114ff74e266c459f9f7f84d737b6bc5ae3ead972de8dc4e7aed59a0ab6a04b10",
+      "bytes": 3774
+    },
+    {
+      "archive_entry": "before/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+      "text_bundle_pointer": "/files/182/before/text",
+      "sha256": "3d304c794c59f59b4b7ade5f5f285c97598e2650566f4119847687080901e9c5",
+      "bytes": 5188
+    },
+    {
+      "archive_entry": "after/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+      "text_bundle_pointer": "/files/182/after/text",
+      "sha256": "bc3eaec960cf69f497bc47c3b6169c6cfdeaa36926c2fd8ab49e0e0ce9ec2b53",
+      "bytes": 5187
+    },
+    {
+      "archive_entry": "before/src/Ctap2/src/Backend/HidBackend.cs",
+      "text_bundle_pointer": "/files/183/before/text",
+      "sha256": "149367792f1fe0fb5b9c1389cd77dcc5dfc709daeee14e9c581df0bee7444f50",
+      "bytes": 4922
+    },
+    {
+      "archive_entry": "after/src/Ctap2/src/Backend/HidBackend.cs",
+      "text_bundle_pointer": "/files/183/after/text",
+      "sha256": "5f6b9c99e648ac2bf8fbef04a82babd1decf9e03a5fc93e50c3e2cee8371ee31",
+      "bytes": 4921
+    },
+    {
+      "archive_entry": "before/src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "text_bundle_pointer": "/files/184/before/text",
+      "sha256": "447797997e8f407d97bc30bec29c428d80c4c5f20370c23bcdc53a02b622a7df",
+      "bytes": 6360
+    },
+    {
+      "archive_entry": "after/src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "text_bundle_pointer": "/files/184/after/text",
+      "sha256": "5395d9197e7636a764a1b43bde55e44156baab122d96756f2a03618aa68ef71b",
+      "bytes": 6359
+    },
+    {
+      "archive_entry": "before/src/Ctap2/src/Ctap2Session.cs",
+      "text_bundle_pointer": "/files/185/before/text",
+      "sha256": "d2bf4fe2344bb17b49892fc97dbd824c1381f570ec882ba6a4f1ef16e4f14ff9",
+      "bytes": 20032
+    },
+    {
+      "archive_entry": "after/src/Ctap2/src/Ctap2Session.cs",
+      "text_bundle_pointer": "/files/185/after/text",
+      "sha256": "82fc239dca019c89e91fc10b9a8d1dd56cd90dc842ba2ada04709a1b17b83d2b",
+      "bytes": 20031
+    },
+    {
+      "archive_entry": "before/src/Ctap2/src/ICtap2Session.cs",
+      "text_bundle_pointer": "/files/186/before/text",
+      "sha256": "30640a8723290b03020cf3448fe3e54d331510975854b79258974282d0c99dc3",
+      "bytes": 15576
+    },
+    {
+      "archive_entry": "after/src/Ctap2/src/ICtap2Session.cs",
+      "text_bundle_pointer": "/files/186/after/text",
+      "sha256": "45ca7bc5c0dd51ce2e0355b5baa6e88d91d1f0c5fc38150be842e74f7d70f68a",
+      "bytes": 15575
+    },
+    {
+      "archive_entry": "before/src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "text_bundle_pointer": "/files/187/before/text",
+      "sha256": "581adabd105a02891f575af262dde7a28baea06dae52df17d474aca3e277893b",
+      "bytes": 22376
+    },
+    {
+      "archive_entry": "after/src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "text_bundle_pointer": "/files/187/after/text",
+      "sha256": "9680597af67133d0571f92b35584c4c41ef5f84a3379bb9ff1a570b2def5054b",
+      "bytes": 22375
+    },
+    {
+      "archive_entry": "before/src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/188/before/text",
+      "sha256": "dda8d5baada84262265af8d7b746ea7ccb813ab1121a3620e2c9170f46c01cd1",
+      "bytes": 4787
+    },
+    {
+      "archive_entry": "after/src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/188/after/text",
+      "sha256": "b95172cf47da017ccded9a3c87485deee787511c63ba709c22537e17221cc1bf",
+      "bytes": 4786
+    },
+    {
+      "archive_entry": "before/src/SecurityDomain/src/SecurityDomainSession.cs",
+      "text_bundle_pointer": "/files/189/before/text",
+      "sha256": "f7668dcadbe1af80f0cc874813e10504717c02f3fe94ca9096b74fefd952d875",
+      "bytes": 38684
+    },
+    {
+      "archive_entry": "after/src/SecurityDomain/src/SecurityDomainSession.cs",
+      "text_bundle_pointer": "/files/189/after/text",
+      "sha256": "8b27ab7d42381c3e84eba8133bc716f58c1c1d944d47dd7d4ba97e916f555b7d",
+      "bytes": 38683
+    },
+    {
+      "archive_entry": "before/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "text_bundle_pointer": "/files/190/before/text",
+      "sha256": "632e76c517481656194b4f8cbd51b05d165ac8c98c7bef2cff2835bc652fc36e",
+      "bytes": 10318
+    },
+    {
+      "archive_entry": "after/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "text_bundle_pointer": "/files/190/after/text",
+      "sha256": "653b7185ab77a78b664925ac4bd6db3439e0908da948e2b26b39153c22943a1d",
+      "bytes": 10317
+    },
+    {
+      "archive_entry": "before/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "text_bundle_pointer": "/files/191/before/text",
+      "sha256": "515fcf13aca4968f21635c6172d0c5a4cfd8caadf8254b60408c5a66f1620d5f",
+      "bytes": 9505
+    },
+    {
+      "archive_entry": "after/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "text_bundle_pointer": "/files/191/after/text",
+      "sha256": "d8cbd521332ab65207a67af39e457c0e2689b6c6db264dd4a3888a92d2f92e7c",
+      "bytes": 9504
+    },
+    {
+      "archive_entry": "before/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "text_bundle_pointer": "/files/192/before/text",
+      "sha256": "54ff07282113f7e4ae41d00ee3ed8a8bd9b4f6b062464a46c3143960836b0a32",
+      "bytes": 7381
+    },
+    {
+      "archive_entry": "after/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "text_bundle_pointer": "/files/192/after/text",
+      "sha256": "8dba43e9156597b38ee906a670a0da58cb13c47fa7c809ea86009f96d490db3b",
+      "bytes": 7380
+    },
+    {
+      "archive_entry": "before/src/Oath/src/Credentials/OathCredentialOptions.cs",
+      "text_bundle_pointer": "/files/193/before/text",
+      "sha256": "45d571a7123ccc0bc7b0a575883e769e9dbd27d2070bd866cd648cf77fe4f473",
+      "bytes": 1582
+    },
+    {
+      "archive_entry": "after/src/Oath/src/Credentials/OathCredentialOptions.cs",
+      "text_bundle_pointer": "/files/193/after/text",
+      "sha256": "394768ff9fc683885233f259e48680d9987ff5ad835abb0fc44179f28c9b5f04",
+      "bytes": 1581
+    },
+    {
+      "archive_entry": "before/src/Oath/src/IOathSession.cs",
+      "text_bundle_pointer": "/files/194/before/text",
+      "sha256": "f40c2703bd088144d2ac70f3a26047cb4574c817050adc5ae7410496c2455a8b",
+      "bytes": 22774
+    },
+    {
+      "archive_entry": "after/src/Oath/src/IOathSession.cs",
+      "text_bundle_pointer": "/files/194/after/text",
+      "sha256": "a55601d69744eb04f56375a8f810fd2f473a0b55f0ea255b50cd5f97de5f16b7",
+      "bytes": 22773
+    },
+    {
+      "archive_entry": "before/src/Oath/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/195/before/text",
+      "sha256": "bfa09a700b21b3c204bb84f1ddcdd7cfb6ba4a22ad31eedc47e9ddf0d2eaa060",
+      "bytes": 5319
+    },
+    {
+      "archive_entry": "after/src/Oath/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/195/after/text",
+      "sha256": "e7ffb9c604a9b2c16afed3f62675cb6eaef0bfee69b5da8131e993765cba95d2",
+      "bytes": 5318
+    },
+    {
+      "archive_entry": "before/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+      "text_bundle_pointer": "/files/196/before/text",
+      "sha256": "5f51a9ada1345f62eb51b04652f359c8c9e648d9ec9f9468df17015b16082559",
+      "bytes": 20325
+    },
+    {
+      "archive_entry": "after/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+      "text_bundle_pointer": "/files/196/after/text",
+      "sha256": "3bc67edb36bfa15a2bb1ff1708b43983cc9eccfcd019f170c6f6817c36b07fe3",
+      "bytes": 20324
+    },
+    {
+      "archive_entry": "before/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+      "text_bundle_pointer": "/files/197/before/text",
+      "sha256": "25a0169945a7770594923505464a9b2632baa0ac9489fb42b357ae7c3df046a1",
+      "bytes": 7493
+    },
+    {
+      "archive_entry": "after/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+      "text_bundle_pointer": "/files/197/after/text",
+      "sha256": "dcea0bba77f9dd85edb8b849d170ec46444c621edf10b12ad751c07d9aeb8fc8",
+      "bytes": 7492
+    },
+    {
+      "archive_entry": "before/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "text_bundle_pointer": "/files/198/before/text",
+      "sha256": "3c1fa27dd653266d5177b1b165edf77ff3e4561a9cdf37bca5a0f97809971c97",
+      "bytes": 31153
+    },
+    {
+      "archive_entry": "after/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "text_bundle_pointer": "/files/198/after/text",
+      "sha256": "1049728f6b6a36b5d0d895e17aaad6fd4174c65ee7b35a7ab4dd285c1a9ffbd7",
+      "bytes": 31152
+    },
+    {
+      "archive_entry": "before/src/YubiHsm/src/HsmAuthRetryException.cs",
+      "text_bundle_pointer": "/files/199/before/text",
+      "sha256": "adbe42f805d81d2c8c4a357daaaad07418156d4643f3650b91cf8b713557cd5b",
+      "bytes": 3462
+    },
+    {
+      "archive_entry": "after/src/YubiHsm/src/HsmAuthRetryException.cs",
+      "text_bundle_pointer": "/files/199/after/text",
+      "sha256": "d22281920f8c40c47d1e2cfd5f0644e2567926c3ae86976a9c8ae300422fef0e",
+      "bytes": 3461
+    },
+    {
+      "archive_entry": "before/src/YubiHsm/src/HsmAuthSession.cs",
+      "text_bundle_pointer": "/files/200/before/text",
+      "sha256": "85b81c44c0ea5652eada4b39b21cccd81eae4ca9ad8fc9720f5227daa3922147",
+      "bytes": 40627
+    },
+    {
+      "archive_entry": "after/src/YubiHsm/src/HsmAuthSession.cs",
+      "text_bundle_pointer": "/files/200/after/text",
+      "sha256": "119aef232bae81320805f5c83390ae9bc0359ca6151bf0345aa7e8545eab971e",
+      "bytes": 40626
+    },
+    {
+      "archive_entry": "before/src/YubiHsm/src/IHsmAuthSession.cs",
+      "text_bundle_pointer": "/files/201/before/text",
+      "sha256": "a575c81e8d98fba442207c1a20a873c559333f70fcc46de7c4a75dc7bed173b2",
+      "bytes": 21886
+    },
+    {
+      "archive_entry": "after/src/YubiHsm/src/IHsmAuthSession.cs",
+      "text_bundle_pointer": "/files/201/after/text",
+      "sha256": "13d3713b0a5bf28fcfe01a114f7e87eaf5e77ba296804d7932ba166c491f7d7f",
+      "bytes": 21885
+    },
+    {
+      "archive_entry": "before/src/YubiOtp/src/Backend/HidBackend.cs",
+      "text_bundle_pointer": "/files/202/before/text",
+      "sha256": "650fb88348d7a3a13cde282bee0647de9ec7df06efad7b398d9a7576aa114992",
+      "bytes": 5560
+    },
+    {
+      "archive_entry": "after/src/YubiOtp/src/Backend/HidBackend.cs",
+      "text_bundle_pointer": "/files/202/after/text",
+      "sha256": "1d7a57ea978438fdebc65b9ca2237efca1bde546c49480a07e83f9a4f4375a6b",
+      "bytes": 5559
+    },
+    {
+      "archive_entry": "before/src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/203/before/text",
+      "sha256": "9f59e27f3bf73d2b63e27755942f1a21f667583fb9f27a40b2d5eeb6e0b75e6c",
+      "bytes": 8624
+    },
+    {
+      "archive_entry": "after/src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/203/after/text",
+      "sha256": "a9f4b8616089cffa779a6f1277c55a02fa64458dff1c6331da1ada1dbb25b820",
+      "bytes": 8623
+    },
+    {
+      "archive_entry": "before/src/YubiOtp/src/IYubiOtpSession.cs",
+      "text_bundle_pointer": "/files/204/before/text",
+      "sha256": "89b4f243431bd45920e3b2c6f914fb40290d4f6277c44e50cf15fffb39fa125a",
+      "bytes": 21350
+    },
+    {
+      "archive_entry": "after/src/YubiOtp/src/IYubiOtpSession.cs",
+      "text_bundle_pointer": "/files/204/after/text",
+      "sha256": "c9c811caa399e21a8f2c5f4af2099b49bc087f4d88ec3db76e1b8a44d20acafe",
+      "bytes": 21349
+    },
+    {
+      "archive_entry": "before/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "text_bundle_pointer": "/files/205/before/text",
+      "sha256": "647d4cbce5dbc6597a9175fe95e4d7f69b407d3f7ebeadbd598bf8fd665050f2",
+      "bytes": 6980
+    },
+    {
+      "archive_entry": "after/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "text_bundle_pointer": "/files/205/after/text",
+      "sha256": "9ae7c6394df23ba8b54533c8a76a1e155111c39ebce17ab6d9b674eb9c7a0b1a",
+      "bytes": 6979
+    },
+    {
+      "archive_entry": "before/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "text_bundle_pointer": "/files/206/before/text",
+      "sha256": "9d1509f4ba3bf6b0a455d559e0410a828291b9e18d170b9a8e4494da41031373",
+      "bytes": 36257
+    },
+    {
+      "archive_entry": "after/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "text_bundle_pointer": "/files/206/after/text",
+      "sha256": "54d5eaa10f1875a0e96e924a0ae0461e72695a365727041ecacb385cf2694f45",
+      "bytes": 36256
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "text_bundle_pointer": "/files/207/before/text",
+      "sha256": "0a652dbd773cdd634a357e5cd9f7adddb654761404babf34a768517614502b15",
+      "bytes": 3780
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "text_bundle_pointer": "/files/207/after/text",
+      "sha256": "4c4eb2dd3e2fc3f781899b15f6864eb64c178dfa331d236e71112799bd7a11ec",
+      "bytes": 3779
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "text_bundle_pointer": "/files/208/before/text",
+      "sha256": "4127df8af0efee371c0dbe851cb061e17571e2a182c853d0c883162855c024d9",
+      "bytes": 2213
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "text_bundle_pointer": "/files/208/after/text",
+      "sha256": "5354d86bb6b0ed5e3de022cb625199e1d12144c00e3585053ddb561c5f7cd703",
+      "bytes": 2212
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/IOpenPgpSession.cs",
+      "text_bundle_pointer": "/files/209/before/text",
+      "sha256": "0869eb6ee872f520132e4856cfe492cdb3fb6e06f6c69d185b03e2cecd6a6988",
+      "bytes": 39081
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/IOpenPgpSession.cs",
+      "text_bundle_pointer": "/files/209/after/text",
+      "sha256": "11f5556a814cc22647affc7dadc60f03b5f6660d8ff1bce2e62e4f469864ee9c",
+      "bytes": 39080
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/210/before/text",
+      "sha256": "3e2cc825ab4bd1227f7b19bf26e37504c0f2f4dba0704929f9e0a099c9069e83",
+      "bytes": 3893
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "text_bundle_pointer": "/files/210/after/text",
+      "sha256": "0462f025d8a568d05be100b92bb3140a99c1bc7bdc881bff8dda10e1cafaefa9",
+      "bytes": 3892
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/Kdf.cs",
+      "text_bundle_pointer": "/files/211/before/text",
+      "sha256": "899a908e9b7a0a14979ab68225533128855aa50b6462cf24a069b7dfd9c65d15",
+      "bytes": 13890
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/Kdf.cs",
+      "text_bundle_pointer": "/files/211/after/text",
+      "sha256": "91fb2cdd88db9c27e6dc60547f9b9377011384904755eb31c5c28a3a2b07915e",
+      "bytes": 13889
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "text_bundle_pointer": "/files/212/before/text",
+      "sha256": "ab35501aff68ffe955c16f210b031abfa1302653e28c9451651ff5889472f807",
+      "bytes": 9426
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "text_bundle_pointer": "/files/212/after/text",
+      "sha256": "775120057c19adb4d2c48e592cc75078e28c0c5eb1f0225dc3e6ed9a048f1ba3",
+      "bytes": 9425
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/OpenPgpSession.cs",
+      "text_bundle_pointer": "/files/213/before/text",
+      "sha256": "a94cc912faad198fb7adc595cb0a6846d98a53b8bf33a489e0e69637451d550e",
+      "bytes": 17036
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/OpenPgpSession.cs",
+      "text_bundle_pointer": "/files/213/after/text",
+      "sha256": "c62f5be6949a3829fdc9d274b85b45987e7fa78aa8dc4a2573887442222426b4",
+      "bytes": 17035
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "text_bundle_pointer": "/files/214/before/text",
+      "sha256": "56c1ec91bf7e5e230866432662d38ba407ab42494c25684881007eae616ffc19",
+      "bytes": 10107
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "text_bundle_pointer": "/files/214/after/text",
+      "sha256": "6cacf4630f7eea8b6c9634a4042645590ffbe99113a8af6968b2e2b9a2bd02fd",
+      "bytes": 10106
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "text_bundle_pointer": "/files/215/before/text",
+      "sha256": "1509f0e864ab5424dbc5d9482978ad020951304545c9732212c5e375d33e4663",
+      "bytes": 4399
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "text_bundle_pointer": "/files/215/after/text",
+      "sha256": "2fb1e963bf99d36b82f2c68cc74646a07ebe1d391ffeb3a36f9b1559a9cc2163",
+      "bytes": 4398
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/PrivateKeyImport.cs",
+      "text_bundle_pointer": "/files/216/before/text",
+      "sha256": "2281e630a43346e33376365cfaaf5bd578add06e8c8f26876c5caf1c4571c0f7",
+      "bytes": 7686
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/PrivateKeyImport.cs",
+      "text_bundle_pointer": "/files/216/after/text",
+      "sha256": "6908a497801be5cf9a1a302c39cf3560db0501231386e7cb4c0e868040e67b53",
+      "bytes": 7685
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "text_bundle_pointer": "/files/217/before/text",
+      "sha256": "8143bdcf68b605697757b386fe31c37017bd9e54fa30012aa0a9d6042ccf0701",
+      "bytes": 7767
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "text_bundle_pointer": "/files/217/after/text",
+      "sha256": "55c10a9b5abf319a78482b269cd27ceb84cffa5527fddc50195b206742c8691c",
+      "bytes": 7766
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "text_bundle_pointer": "/files/218/before/text",
+      "sha256": "7d4338b27a41d8516806f62466b3276464f1560c82fd18f64c7487dc62e1f7bd",
+      "bytes": 8021
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "text_bundle_pointer": "/files/218/after/text",
+      "sha256": "9cd56c7ea2a9d2ba8c8112b3f0b2c0ab941f5f55b9c2b175cbec5c2e39811f74",
+      "bytes": 8020
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "text_bundle_pointer": "/files/219/before/text",
+      "sha256": "8fd707acf4c1f4db33393908dcbe6d009096c94bb6fa7ea4256c76b09d9cc931",
+      "bytes": 3921
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "text_bundle_pointer": "/files/219/after/text",
+      "sha256": "b92683bf587863807883928583e7014f6a5ec49e36d605a953e03a57430c538c",
+      "bytes": 3920
+    },
+    {
+      "archive_entry": "before/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+      "text_bundle_pointer": "/files/220/before/text",
+      "sha256": "22158d4f9e64608319653231416c1d9e14d1c1d240ac3c5ea92eb7ca5c7d9f11",
+      "bytes": 4599
+    },
+    {
+      "archive_entry": "after/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+      "text_bundle_pointer": "/files/220/after/text",
+      "sha256": "375e57f5547b726f13eb84ef3165224958fd37f429bb2cb1cae32984925e923f",
+      "bytes": 4598
+    },
+    {
+      "archive_entry": "before/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+      "text_bundle_pointer": "/files/221/before/text",
+      "sha256": "f3ef2ec902ce969b951f94215fd18ba746448a46ff74081bf21e27559348c651",
+      "bytes": 1704
+    },
+    {
+      "archive_entry": "after/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+      "text_bundle_pointer": "/files/221/after/text",
+      "sha256": "b44c76f43ed9c3e4955c8d7e5f7bb7db35325e13338da77d4b81614fd9fb76eb",
+      "bytes": 1703
+    },
+    {
+      "archive_entry": "before/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "text_bundle_pointer": "/files/222/before/text",
+      "sha256": "45955f7a3841931adfcb24e381f1cc9421312c3b8e8ad0acfd55edb71722c804",
+      "bytes": 1655
+    },
+    {
+      "archive_entry": "after/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "text_bundle_pointer": "/files/222/after/text",
+      "sha256": "52e4b50de3a3fe54aa460e99269de3b5351dd37200a4723b16f1abeac45686fa",
+      "bytes": 1654
+    },
+    {
+      "archive_entry": "before/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "text_bundle_pointer": "/files/223/before/text",
+      "sha256": "6e59a89acffe19912d0a8432fd313deba0ac0fcb18f43eb3189f767c07f8f29b",
+      "bytes": 1610
+    },
+    {
+      "archive_entry": "after/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "text_bundle_pointer": "/files/223/after/text",
+      "sha256": "514ddefd4e7abac4e978c30264b3f3bd83ae28594e34771deb0fc884d3b23ec6",
+      "bytes": 1609
+    },
+    {
+      "archive_entry": "before/src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "text_bundle_pointer": "/files/224/before/text",
+      "sha256": "11eae9d558df0673c0aa47365f6d32044d84a32d9cf561fbfc00fd0afc67c20a",
+      "bytes": 11082
+    },
+    {
+      "archive_entry": "after/src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "text_bundle_pointer": "/files/224/after/text",
+      "sha256": "51d69bd6e9358b3df3ef563b6272c031451c4b47e979273d1b0229689a2ef87e",
+      "bytes": 11081
+    },
+    {
+      "archive_entry": "before/src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+      "text_bundle_pointer": "/files/225/before/text",
+      "sha256": "7f0d92f60394cd665f59b0536065e4b96902e062f8e5879fad979c236c82a1d4",
+      "bytes": 1583
+    },
+    {
+      "archive_entry": "after/src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+      "text_bundle_pointer": "/files/225/after/text",
+      "sha256": "376f0d3ffd5f1cd4d5afbdcdde08b75f6237280ef4bd0f9089b834e4037fa80c",
+      "bytes": 1582
+    },
+    {
+      "archive_entry": "before/src/Cli.Shared/src/Output/PinPrompt.cs",
+      "text_bundle_pointer": "/files/226/before/text",
+      "sha256": "1534e933163b496f857df300184dee76f2de7401e668047da5d4b425eac52382",
+      "bytes": 5743
+    },
+    {
+      "archive_entry": "after/src/Cli.Shared/src/Output/PinPrompt.cs",
+      "text_bundle_pointer": "/files/226/after/text",
+      "sha256": "ec671d868bed7ff227224dd7debf46bf57c64f2afbef64f14224dab910559442",
+      "bytes": 5742
+    },
+    {
+      "archive_entry": "before/src/Cli.Shared/src/Output/SecureCredential.cs",
+      "text_bundle_pointer": "/files/227/before/text",
+      "sha256": "2d043c73349cb63bd24bfa058f9333a310783ccd8d98e5b85025af7371b3dba1",
+      "bytes": 12918
+    },
+    {
+      "archive_entry": "after/src/Cli.Shared/src/Output/SecureCredential.cs",
+      "text_bundle_pointer": "/files/227/after/text",
+      "sha256": "a98e0f0b5b88182ce0bae18ef72c7734755aff7766bb7adc9a7fe67501c16783",
+      "bytes": 12917
+    },
+    {
+      "archive_entry": "before/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "text_bundle_pointer": "/files/228/before/text",
+      "sha256": "23c3985a3fd1b9fa344917db33b8186ec2c350718e11c765f91edb1074bc57e9",
+      "bytes": 5414
+    },
+    {
+      "archive_entry": "after/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "text_bundle_pointer": "/files/228/after/text",
+      "sha256": "756bf6391978242a306b9382cdcdd36da15ca4a3e638960636a15653da9512db",
+      "bytes": 5413
+    },
+    {
+      "archive_entry": "before/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "text_bundle_pointer": "/files/229/before/text",
+      "sha256": "f37278b4f43deea2015746d1786fcbf7d1a1a8f2328bd5c9e430c45d247d0f01",
+      "bytes": 4805
+    },
+    {
+      "archive_entry": "after/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "text_bundle_pointer": "/files/229/after/text",
+      "sha256": "982deba01721c7d1ed679df580d52cb41aaf876ad2ffd7256bdc05ef3ad610c9",
+      "bytes": 4804
+    },
+    {
+      "archive_entry": "before/src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "text_bundle_pointer": "/files/230/before/text",
+      "sha256": "a63fd0d90987929519c69e37f6d189001ea67ff73ec57136c686987469f62ba0",
+      "bytes": 28578
+    },
+    {
+      "archive_entry": "after/src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "text_bundle_pointer": "/files/230/after/text",
+      "sha256": "fc51cbe439a06c88f5b1479a5aa633b59e1f195a965ca230e1c0da492182991d",
+      "bytes": 28577
+    },
+    {
+      "archive_entry": "before/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "text_bundle_pointer": "/files/231/before/text",
+      "sha256": "78f359a17f9743cda2fd9ab11e599219241a36ac10e414354c5d903ea04915e7",
+      "bytes": 9946
+    },
+    {
+      "archive_entry": "after/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "text_bundle_pointer": "/files/231/after/text",
+      "sha256": "84569d29b2120d2e27c7d91fbe1adba19d4d85e2c259fafd51643a6bfb266fef",
+      "bytes": 9945
+    },
+    {
+      "archive_entry": "before/src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "text_bundle_pointer": "/files/232/before/text",
+      "sha256": "50e087309ced66d0fba57b6e9fb924e5995d0155c2f71082104672c45f4750ca",
+      "bytes": 5605
+    },
+    {
+      "archive_entry": "after/src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "text_bundle_pointer": "/files/232/after/text",
+      "sha256": "abf1961d7fda7754f55b13e27f6f192d78f23443f23d08e524f4fc17460afc6d",
+      "bytes": 5604
+    },
+    {
+      "archive_entry": "before/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "text_bundle_pointer": "/files/233/before/text",
+      "sha256": "6e7831adf4b8e067d1f08687f0d0ca00ba848d05bbd11232935a710bca822e3f",
+      "bytes": 5929
+    },
+    {
+      "archive_entry": "after/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "text_bundle_pointer": "/files/233/after/text",
+      "sha256": "294653a8baf447a7321b1811441627ca50590d4d05136b6a49c38bc3641438bb",
+      "bytes": 5928
+    },
+    {
+      "archive_entry": "before/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "text_bundle_pointer": "/files/234/before/text",
+      "sha256": "543741db31d0b1aad86a96012f6d9a75cde6c613e33425242a6868f5022fff7a",
+      "bytes": 23862
+    },
+    {
+      "archive_entry": "after/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "text_bundle_pointer": "/files/234/after/text",
+      "sha256": "ee618c79d160fd26d9b872ff54b6f436105f6a9dbaee5ae3f475b190d5d8b391",
+      "bytes": 23861
+    },
+    {
+      "archive_entry": "before/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+      "text_bundle_pointer": "/files/235/before/text",
+      "sha256": "9223a2299f63cd2f8ceb5479cf5cc56ed5fb99463c084db60590cf3123f4cff1",
+      "bytes": 21249
+    },
+    {
+      "archive_entry": "after/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+      "text_bundle_pointer": "/files/235/after/text",
+      "sha256": "084a965741631de6075f05af3b9ff34d5be809af433dd37248a6b6fa0682dc40",
+      "bytes": 21248
+    },
+    {
+      "archive_entry": "before/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "text_bundle_pointer": "/files/236/before/text",
+      "sha256": "11d3038d26597aac1a85b5ee9bec85cd8d34b1f7d64e9131626e92a24441c187",
+      "bytes": 8682
+    },
+    {
+      "archive_entry": "after/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "text_bundle_pointer": "/files/236/after/text",
+      "sha256": "653d8defeeffd154ac8423838d7e7b4af13485b1df306a9feccc12eed58c1dea",
+      "bytes": 8681
+    },
+    {
+      "archive_entry": "before/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+      "text_bundle_pointer": "/files/237/before/text",
+      "sha256": "d124ace259665ee216d33bd9d0b7ce30482f981d3536694bd0adee29c1b24cf7",
+      "bytes": 2790
+    },
+    {
+      "archive_entry": "after/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+      "text_bundle_pointer": "/files/237/after/text",
+      "sha256": "fcd11654dc31df4d87e54a3f930007dbb6b29c70d17ff93827a61d23af54b985",
+      "bytes": 2789
+    },
+    {
+      "archive_entry": "before/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+      "text_bundle_pointer": "/files/238/before/text",
+      "sha256": "b0d92eb5261a9f74e85a45ef84084b8c100ab77fc9b3bfd578b40add76b57a1e",
+      "bytes": 9288
+    },
+    {
+      "archive_entry": "after/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+      "text_bundle_pointer": "/files/238/after/text",
+      "sha256": "7262f1cd81847216a9c9bbd7aea4967797c77e9fa8455400e04e9551b72cf347",
+      "bytes": 9287
+    }
+  ],
+  "preserved_predecessors": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/baseline-context.json",
+      "sha256": "356ac71f65489c5f6767fad924f6682c2535e05af4aca6b7b30ecba902514bd6",
+      "bytes": 11128
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/baseline-findings.json",
+      "sha256": "b0b3752d4436e24a531abbc20c086e0432f66cbd6199c13013647b253778d3e7",
+      "bytes": 12029
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/eof-identities.json",
+      "sha256": "ecb98825cd981f9b372652f38f68e728ea204edfc6c60af229579bb3fc217ae4",
+      "bytes": 158324
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/eof-only.patch",
+      "sha256": "ee6f3b9e8198dcdcaea69c3016ba7de9352dc4788fe1a6058bb40d616220d516",
+      "bytes": 100335
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/format-membership.json",
+      "sha256": "2e7f5fdd3e750b2b92ebbf0f87d9dbabe0aa3051af926c8e0fd67c7e9e9cfbc5",
+      "bytes": 102149
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/preparation-receipt.json",
+      "sha256": "eb0f97e160c4616fa138d4cfd64c550874bfb37acda51ac89b4be1e7f062e98c",
+      "bytes": 2614
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/prepare-evidence.py",
+      "sha256": "f7cafc2c537e399d808fc3a8369a02346e3f2b627b62cce651e8bf6e4b101cdd",
+      "bytes": 9635
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/report.md",
+      "sha256": "92854f3d03f738a5e6d2b5d408000b103f95d89bf48e6d3834cfa7bcd3fb8358",
+      "bytes": 9743
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/verification-receipt.json",
+      "sha256": "c7df5460e84f59ebac75d3cb09e3e98a24270f05d5e9f33ef1e498ed978dcb1a",
+      "bytes": 2623
+    }
+  ],
+  "unchanged_checker_and_policy": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records.py",
+      "sha256": "e115552ca79243091ad160bddb0667e4bb1dc9d2d1cd86800b4152ac8ab2f552"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records-v2.py",
+      "sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa"
+    },
+    {
+      "path": ".editorconfig",
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    }
+  ],
+  "static_admission": {
+    "method": "execute unchanged classify function AST only; no checker module imports or load/record/execute calls",
+    "scope": "all final format-final files except this self-referential receipt, checked separately before write",
+    "full_git_clean_or_index_admission_executed": false,
+    "records": [
+      {
+        "path": "editing/format-final/archive-packaging-correction.md",
+        "kind": "utf8-text",
+        "sha256": "df0a5496dca9f1f005f8e9503265ca5e5905c5e781f9346b9b2573efe431eb99",
+        "bytes": 2933
+      },
+      {
+        "path": "editing/format-final/baseline-context.json",
+        "kind": "utf8-json",
+        "sha256": "356ac71f65489c5f6767fad924f6682c2535e05af4aca6b7b30ecba902514bd6",
+        "bytes": 11128
+      },
+      {
+        "path": "editing/format-final/baseline-findings.json",
+        "kind": "utf8-json",
+        "sha256": "b0b3752d4436e24a531abbc20c086e0432f66cbd6199c13013647b253778d3e7",
+        "bytes": 12029
+      },
+      {
+        "path": "editing/format-final/eof-identities.json",
+        "kind": "utf8-json",
+        "sha256": "ecb98825cd981f9b372652f38f68e728ea204edfc6c60af229579bb3fc217ae4",
+        "bytes": 158324
+      },
+      {
+        "path": "editing/format-final/eof-only.patch",
+        "kind": "utf8-text",
+        "sha256": "ee6f3b9e8198dcdcaea69c3016ba7de9352dc4788fe1a6058bb40d616220d516",
+        "bytes": 100335
+      },
+      {
+        "path": "editing/format-final/format-membership.json",
+        "kind": "utf8-json",
+        "sha256": "2e7f5fdd3e750b2b92ebbf0f87d9dbabe0aa3051af926c8e0fd67c7e9e9cfbc5",
+        "bytes": 102149
+      },
+      {
+        "path": "editing/format-final/preparation-receipt.json",
+        "kind": "utf8-json",
+        "sha256": "eb0f97e160c4616fa138d4cfd64c550874bfb37acda51ac89b4be1e7f062e98c",
+        "bytes": 2614
+      },
+      {
+        "path": "editing/format-final/prepare-evidence.py",
+        "kind": "utf8-text",
+        "sha256": "f7cafc2c537e399d808fc3a8369a02346e3f2b627b62cce651e8bf6e4b101cdd",
+        "bytes": 9635
+      },
+      {
+        "path": "editing/format-final/report.md",
+        "kind": "utf8-text",
+        "sha256": "92854f3d03f738a5e6d2b5d408000b103f95d89bf48e6d3834cfa7bcd3fb8358",
+        "bytes": 9743
+      },
+      {
+        "path": "editing/format-final/review-identities.json",
+        "kind": "utf8-json",
+        "sha256": "6f5d6947da96124f9842952d9ef5b4efd3410e2abf142feba7d44e11d3cccbbf",
+        "bytes": 2630
+      },
+      {
+        "path": "editing/format-final/review.md",
+        "kind": "utf8-text",
+        "sha256": "2497b432bd3c452150d03edb57ed98a87f6e7d3fd6ff61ae1e811e24f735eed3",
+        "bytes": 5977
+      },
+      {
+        "path": "editing/format-final/source-snapshots.json",
+        "kind": "utf8-json",
+        "sha256": "e4cac85a915335280ab5d4282a880c2b6da777d04447bc5c6eddd2f816aeb680",
+        "bytes": 4905553
+      },
+      {
+        "path": "editing/format-final/verification-receipt.json",
+        "kind": "utf8-json",
+        "sha256": "c7df5460e84f59ebac75d3cb09e3e98a24270f05d5e9f33ef1e498ed978dcb1a",
+        "bytes": 2623
+      }
+    ],
+    "all_checked_records_admitted": true
+  },
+  "verification": {
+    "archive_entries_byte_compared": 478,
+    "runtime_source_entries_byte_compared": 478,
+    "identity_rows_matched": 239,
+    "all_original_text_predecessors_unchanged": true,
+    "eof_patch_unchanged": true,
+    "primary_product_writes": 0,
+    "checker_policy_or_registry_changes": 0,
+    "git_sdk_native_device_subagent_executions": 0
+  }
+}

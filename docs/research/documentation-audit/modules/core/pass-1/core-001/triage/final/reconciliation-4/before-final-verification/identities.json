@@ -1,0 +1,75 @@
+{
+  "scope": "Exact reconciliation-4 predecessor before completed compiler/build/unit/pack receipts; pending states remain historical.",
+  "files": {
+    "triage/final/reconciliation-4/closing-results-placeholders.json": {
+      "snapshot": "closing-results-placeholders.json.snapshot",
+      "sha256": "fc411bf1a614cccd9d9d5800be854ee4435d5c606016b9c415b2fde8dc902779",
+      "bytes": 2592
+    },
+    "triage/final/reconciliation-4/compilation-and-checkpoints.json": {
+      "snapshot": "compilation-and-checkpoints.json.snapshot",
+      "sha256": "9d76cb8fe6f9a2127500d975a96cb9691729a8100f05f23710bf4fc50d74dd61",
+      "bytes": 1750019
+    },
+    "triage/final/reconciliation-4/deferred-finding-continuity.json": {
+      "snapshot": "deferred-finding-continuity.json.snapshot",
+      "sha256": "6177a7a9553c633af9908bd97c1f5196f7ea9899160ce6d017d0af7b4c1a9406",
+      "bytes": 10172
+    },
+    "triage/final/reconciliation-4/deferred-findings.reconciliation-3.md.snapshot": {
+      "snapshot": "deferred-findings.reconciliation-3.md.snapshot.snapshot",
+      "sha256": "1c6f3001b3dbc54b5f31947aba422b6e2d1a85e77975f5f414c16047e30139e4",
+      "bytes": 36845
+    },
+    "triage/final/reconciliation-4/final-source-state.json": {
+      "snapshot": "final-source-state.json.snapshot",
+      "sha256": "650c36c7dcb464e98988222737842577fb4c3cc87d5fe1bae8109ba4a253f74f",
+      "bytes": 839782
+    },
+    "triage/final/reconciliation-4/formatter-state.json": {
+      "snapshot": "formatter-state.json.snapshot",
+      "sha256": "4065d723ab6245c5dc9a1cbe9c775db3726a31f07f33f586e9db3cf7b9fe25c3",
+      "bytes": 277388
+    },
+    "triage/final/reconciliation-4/history-preservation.json": {
+      "snapshot": "history-preservation.json.snapshot",
+      "sha256": "a9ec419cd6985e9865613183b55e96040e805fe1d243099fa31007a3d703b0e7",
+      "bytes": 8080
+    },
+    "triage/final/reconciliation-4/logging-body-retraction.json": {
+      "snapshot": "logging-body-retraction.json.snapshot",
+      "sha256": "ffd0296292fa17fcbb6c06a2632d990da245bae41627c7be2760097feb6bf6ff",
+      "bytes": 14820
+    },
+    "triage/final/reconciliation-4/output-identities.json": {
+      "snapshot": "output-identities.json.snapshot",
+      "sha256": "58c04f331e745ce3830b70aedc4e2bf7430f8a79b3527e0dc297c99c20581fb2",
+      "bytes": 6277
+    },
+    "triage/final/reconciliation-4/reconcile.py": {
+      "snapshot": "reconcile.py.snapshot",
+      "sha256": "c0757eac93a8d7b7190856d78b17a86b25fe419c73e228c472df2e7204938427",
+      "bytes": 30507
+    },
+    "triage/final/reconciliation-4/sampling-state.json": {
+      "snapshot": "sampling-state.json.snapshot",
+      "sha256": "898c692453640d5cf9800f314160afc924d118a2239a7d5041602236f21c93a1",
+      "bytes": 3568094
+    },
+    "triage/final/reconciliation-4/transfers-and-PF02.json": {
+      "snapshot": "transfers-and-PF02.json.snapshot",
+      "sha256": "43b81efc687c04062db91f55b69d54235dc03487e877785ffb37bdae2b7b58b5",
+      "bytes": 649960
+    },
+    "triage/final/reconciliation-4/verification.json": {
+      "snapshot": "verification.json.snapshot",
+      "sha256": "ee1de729d81b4432fe6145c64ad34dcf9fdadb55219387a5bebba7e318e2d3df",
+      "bytes": 16488
+    },
+    "deferred-findings.md": {
+      "snapshot": "deferred-findings.md.snapshot",
+      "sha256": "6bee9cade3f1820c320a184206d50101c7ad72346108a213637d413fd9472d95",
+      "bytes": 52946
+    }
+  }
+}

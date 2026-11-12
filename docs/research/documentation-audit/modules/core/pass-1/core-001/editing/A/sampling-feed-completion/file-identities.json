@@ -1,0 +1,53 @@
+{
+  "sample": "SAMPLE-A003",
+  "kind": "ADDITIONAL-CONTEXT-FINDING-NOT-NEW-SELECTED-SAMPLE",
+  "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+  "baseline_kind": "EXACT-CURRENT-PRIMARY-FILE-BEFORE-CORRECTION",
+  "before_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+  "primary_before_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+  "current_sha256": "46ef5ee7ecd8410de85da36cf73b34f8a4d86a1f3b705872e2b80efb5f2bdb6e",
+  "primary_still_matches_before": true,
+  "before_final_newline": false,
+  "current_final_newline": true,
+  "exact_noncomment_lines_identical": true,
+  "affected_comment": {
+    "original_first_line": 111,
+    "original_last_line": 111,
+    "current_first_line": 111,
+    "current_last_line": 117
+  },
+  "current_xml_blocks": [
+    {
+      "first_line": 22,
+      "last_line": 27,
+      "well_formed": true,
+      "affected": false
+    },
+    {
+      "first_line": 40,
+      "last_line": 40,
+      "well_formed": true,
+      "affected": false
+    },
+    {
+      "first_line": 64,
+      "last_line": 64,
+      "well_formed": true,
+      "affected": false
+    },
+    {
+      "first_line": 97,
+      "last_line": 97,
+      "well_formed": true,
+      "affected": false
+    },
+    {
+      "first_line": 111,
+      "last_line": 117,
+      "well_formed": true,
+      "affected": true
+    }
+  ],
+  "examples_in_file": 0,
+  "review_status": "FOCUSED-REVIEW-PENDING"
+}

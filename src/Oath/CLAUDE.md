@@ -126,7 +126,9 @@ an SDK `NotSupportedException` for touch/SHA-512 credential options from these g
 
 ## Reference Implementation
 
-**Python (authoritative):** `yubikit/oath.py` in yubikey-manager — follow this for exact wire format details.
+**Python comparator:** `yubikit/oath.py` in yubikey-manager supplies related host wire-flow evidence.
+It is not normative conformance or device qualification. Preserve the
+chosen protocol edition/profile separately, especially for Core SCP empty commands and continuations.
 
 ## Testing
 
@@ -146,6 +148,10 @@ success and does not prove no mutation. Borrowed connections remain caller-owned
 them before creating a fresh session; convenience-owned connections are disposed by Core. Do not poison
 connections globally. This deliberate OATH-only policy differs from Python's same-connection reselect/SCP
 rehandshake; it is not a request to change other applets.
+
+Cached IsLocked/IsPasswordProtected/DeviceId/FirmwareVersion observations can remain after disposal;
+operations are terminal, and Salt views reference cleared session storage. Inherited IsAuthenticated
+records Core setup, independently of OATH password unlock and secure-channel recovery state.
 
 `WithOathSessionAsync` uses a separate reset session/owned connection, completes teardown, then opens a
 fresh session/connection for the body. Preserve the first failure if later disposal/independent cleanup
@@ -172,6 +178,9 @@ validates the truncated response before successful resolution; `CalculateAsync` 
 tag, a digit header, and a nonempty HMAC payload. This is structural validation, not verification of a
 particular digest length. It returns an independent copy of the HMAC only, without the digit header,
 after the callback succeeds. The caller owns and clears that returned storage; caller inputs remain unchanged.
+Await the whole public workflow before teardown: CalculateAll followups, password-provider/VALIDATE/retry
+and notification callbacks extend beyond one guarded exchange. Keep borrowed inputs/services alive and
+do not dispose reentrantly. A completed exchange is not completion of detached application callback work.
 Raw VALIDATE and calculation response buffers are cleared in `finally`, and decoded TLV copies are disposed.
 The immutable `Code.Value` string is not formatted until the individual-calculation callback succeeds.
 

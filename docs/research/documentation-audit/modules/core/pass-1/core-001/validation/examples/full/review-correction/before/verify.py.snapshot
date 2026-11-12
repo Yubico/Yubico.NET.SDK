@@ -1,0 +1,102 @@
+"""Independent static source-region/wrapper/real-project readiness; no managed code runs."""
+import ast
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+HERE=Path(__file__).resolve().parent
+V=HERE.parents[1]
+ROOT=HERE.parents[9]
+sys.path.insert(0,str(V))
+
+
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load(name,path):
+    spec=importlib.util.spec_from_file_location(name,path);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
+
+
+def main():
+    manifest=json.loads((HERE/'manifest-current.json').read_bytes())
+    plan=json.loads((HERE/'compiled-contexts.json').read_bytes())
+    assert len(manifest['records'])==662 and manifest['counts']['total_authority_records']==703
+    prepared=[]
+    for row in manifest['records']:
+        for field in ('authority','review','classification_overlay'):
+            if field in row:assert sha(ROOT/row[field]['path'])==row[field]['sha256']
+        if 'raw_body' in row:
+            raw=(ROOT/row['path']).read_bytes()
+            assert sha(ROOT/row['path'])==row['document']['sha256']
+            body=raw[row['raw_start_byte']:row['raw_end_byte']]
+            assert body==row['raw_body'].encode() and hashlib.sha256(body).hexdigest()==row['raw_sha256']
+        if row.get('compilation_status')=='pending-canonical-build':prepared.append(row)
+    assert len(prepared)==302
+    fixture=load('full_source_contexts',HERE/'contexts.py')
+    sources={row['id']:row for row in json.loads((HERE/'final-current-inventory.json').read_bytes())['entries']}
+    generated=set()
+    for row in prepared:
+        if row['disposition']=='prepared-consumer-body':
+            context=fixture.select(dict(sources[row['id']]),sources)
+            path=ROOT/row['generated_source']['path']
+            assert path.read_bytes()==(context['prefix']+context['body']+context['suffix']).encode()
+            assert sha(path)==row['generated_source']['sha256'];generated.add(path)
+            for name in re.findall(r'ReadOnlyMemory<byte>\s+(\w+)',context['typed_parameters']):
+                assert not re.search(r'ZeroMemory\(\s*'+re.escape(name)+r'\s*\)',context['body']), 'Mutable cleanup needs a mutable genuine caller buffer'
+        else:
+            compiled=row['compiled']
+            alias=compiled.get('compilation_alias_of')
+            if alias is not None:
+                original=next(value for value in prepared if value['id']==alias)
+                assert row['decoded_sha256']==original['decoded_sha256']
+                continue
+            path=HERE/compiled.get('generated_path',compiled.get('path'))
+            assert sha(path)==compiled['generated_sha256'];generated.add(path)
+            code=path.read_text();assert code.startswith(compiled['prefix']) and code.endswith(compiled['suffix'])
+            inner=code[len(compiled['prefix']):len(code)-len(compiled['suffix'])]
+            source=row['decoded_body']
+            imported=compiled.get('original_import_prefix',compiled.get('preserved_import_prefix',''))
+            if imported:
+                assert source.startswith(imported)
+                source=re.sub(r'^(?:[ \t]*\n)+','',source[len(imported):])
+            if row['id']=='FULL-032':
+                declaration,source=source.split('\n\n',1);assert declaration in compiled['prefix']
+            assert inner==source,row['id']
+    assert len(generated)==300
+    driver=load('full_context_plan_driver',HERE/'run.py')
+    for context in plan['contexts']:
+        project=ROOT/context['project'];assert project.is_file()
+        if context['name']=='consumer':
+            assert 'core' not in project.stem.lower() and '.UnitTests' not in project.name
+            tree=ET.parse(project).getroot()
+            assert tree.findtext('PropertyGroup/OutputType')=='Library' and tree.findtext('PropertyGroup/IsPackable')=='false'
+        else:
+            assert str(project).startswith(str(ROOT/'src'))
+            assert all((HERE/path).is_file() for path in context['injections'])
+        driver.project_closure(project)
+    assert len(plan['contexts'])==10
+    props=ET.parse(HERE/'Directory.Build.props').getroot()
+    assert (HERE/props.find('Import').attrib['Project'].replace('$(MSBuildThisFileDirectory)','')).resolve()==ROOT/'Directory.Build.props'
+    hook=ET.parse(HERE/'capture.targets').getroot()
+    assert hook.find("Target[@Name='DocExamplesFullCompiler']").attrib['AfterTargets']=='CoreCompile'
+    assert not hook.findall('.//NoWarn') and not hook.findall('.//IsAotCompatible')
+    for source in HERE.glob('*.py'):ast.parse(source.read_bytes(),filename=str(source))
+    for name in ('pilot-output-preservation.json',):
+        preserved=json.loads((HERE/name).read_bytes())
+        assert preserved['accepted_pilot_sha256']=='4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6'
+        for row in preserved['pilot_record_identities']:
+            assert sha(ROOT/row['path'])==row['sha256']
+        for pair in preserved['files']:
+            assert sha(Path(pair['preserved']['path']))==pair['original']['sha256']==pair['preserved']['sha256']
+    return dict(scope='Static exact source-region/wrapper/real-context and preserved-pilot checks only; no compilation or test/example execution.',
+                counts=manifest['counts'],exact_additional_compiled_source_files=len(generated),
+                pilot_current_record_bytes_unchanged=True,source_regions_and_wrappers_unchanged=True,
+                proposed_qualifications='34 explicit source-backed partial/design/fixture qualifications require independent confirmation.',
+                actual_full_build='not-run',final_checker_binding='Separate existing-binder profile db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1; no rebuild by this worker.')
+
+
+if __name__=='__main__':print(json.dumps(main(),indent=2))

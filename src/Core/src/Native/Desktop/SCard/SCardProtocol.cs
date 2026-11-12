@@ -37,6 +37,7 @@ internal enum SCARD_PROTOCOL
     /// </summary>
     T1 = 0x00000002,
 
+    /// <summary>Windows raw-protocol value. pcsc-lite uses a different value; built-in transmit selects T0/T1.</summary>
     Raw = 0x00010000,
 
     /// <summary>

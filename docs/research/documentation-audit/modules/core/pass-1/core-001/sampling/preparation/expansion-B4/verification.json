@@ -1,0 +1,119 @@
+{
+  "result": "STRUCTURAL-B4-EXPANSION-AND-SEPARATE-REPLACEMENT-VERIFIED; NO CONTENT VERDICTS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_B4_reads_reconciled": 121,
+  "original_A_B1_B2_B3_B4_read_total": 638,
+  "other_original_selected_units_unread": 345,
+  "original_narrative_quota": 4,
+  "additional_narrative": 4,
+  "proposed_narrative_total": 8,
+  "known_material_miss_clean_credit": 0,
+  "protected_output_exclusions": 1,
+  "protected_output_clean_credit": 0,
+  "deterministic_same_stratum_replacements": 1,
+  "new_runtime_findings": 0,
+  "overlaps_prior_selections_or_known_edited_new_IDs": 0,
+  "other_owner_role_reductions": 0,
+  "accepted_manifest_paths": 361,
+  "focused_reviewed_patch_sha256": "3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623",
+  "focused_transfer": "PENDING at coordinator handoff; effective overlap already excluded",
+  "final_denominator": null,
+  "current_mapping": "DEFERRED to final canonical reconciliation",
+  "input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/expand.py": "8103c173ac0d0265b9098dff9bf7c972ee2923d81fca069942e698d5ddd59747",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/population.json": "48442fdec87f94bf432608b9dd07d9004d8f117e558e3db668f7e346b9c2a75c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/selection.json": "c1cfa09bdee585d72a51729f445706a10e1095bc6bcb7e831f2e6db316216eb2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/additional-selection.json": "f25aba912998b4e64055f736e8e076e9f729d885ddc67f6a695efde97d2fb778",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A-followup/additional-selection.json": "f90f5635877e18150749cb7bb272babc00c29e5a15b7232e400fd94e0798e87f",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/additional-selection.json": "647de2584cb592d348062f4882cb024231e53573efab02e460c024d7dfd42832",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/replacement-selection.json": "5126b750030c9c46bf9b2673e75238ab3b4443d9b46f8fc7ff067f819819c37c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/conditional-history-replacements.json": "8ddb21c0d1f5a9956f1ca0b01517f2ca3b8f643be4cc0ee2867b1e27e2d1dee9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B3/additional-selection.json": "90a14eee05c22fc49eaf5fa4ff8a066fad99e1f80e6d160da05fb1a2d2e3ee4e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/strata.json": "96d2f8237a8195eef7cdbaa8e110c424393450e120e8bd516717cf22c246b1e8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B4-verdicts.json": "bac85f6b1bf09738aaf92b2871e211f978472df6c0670e67d40c4f2dd41c4106",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B4.md": "f829c0d65acab82b91edf650a7d3c536a9d0f07cc9fe5e8d8450877fae0c1a2d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/expand.py": "c89a45930b26b89132c9f8a172acb1d8320507999c57c4caded1f2a692835fc9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/prepare.py": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json": "d33ac76a90640420d868b77dcbfa285e9e1c84ac1c8ab10b644e314fcbb0d23f",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-A-C.json": "ab02275eeac6cf721239b8965ebb5ac0c841df9e65fffab8fb3f0eafc082daa2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-protocols.json": "3cad8f595449bab9c38fe4e017a0f2b212010639c1bff7862161f535d5a6cab0",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-FIDO.json": "141942e73ebf22918e2cbb03ef24f17fc48e59c959e2faf08c2fc98c0c0ccea3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-transports.json": "8d22ef4cf166ca9b43a21339d745735f1efbfc3bdaefdeedd0881d6c892e2e0a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-SHARED.json": "98a749f7a5853f4da2fd8c3f83a9cbfb5c0112d977fc3641862d65fb441a20ef",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-applets.json": "196b53e3f397b0e241793d4413c4cbf761f3d60550ed4f4d36e4fc97a568164c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-PGP-PIV.json": "9945efaa98a20e502fc9aeb8ac7555faabc9fd8c78aaef9dbc36cd6baeaa85a5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-A.json": "7127792418f5fda0ca4b12e89e9a662d00b30ef37bbb0912240e2e8add80e00b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-SHARED.json": "78ececb0a2687e9c2d42f8d27aef9540e0cca7b428b467849e1aac3d771d1366",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-external.json": "d95731a23966df7564ef056653ca7f235eaa31320dc346a493ccab4b75eae936",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B2.json": "760a2e47df077987f6bac025b4a3f33f914ea17bdfa8e604acb1aa0f0b1f6d94",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B3.json": "e89396e367c6c3efd64e02be0251b19491bbbc1cace99f230a6f972dc449d584",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/accepted-current-B4-role-scope.diff": "4ce72ea21c7935a9d906c5ad5549fd5ca006e2429a84a7e99bb878021d196706",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-type-guidance/review-identities.json": "a4f54de40159d13c5f3dd82cc5b94005cab421119b09f254ddf2620a6b0f46a1",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-type-guidance/product.patch": "3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-type-guidance/before/CLAUDE.md": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-type-guidance/after/CLAUDE.md": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-type-guidance/before/v1-to-v2-comparison.md": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/sampling-type-guidance/after/v1-to-v2-comparison.md": "4797f0c57ce247952d35bf2e03a63a826f3b63f21b995d4da877484249dafb13",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/reviewed-focused-effective-original-scope.diff": "190959ae04e315a97c7dc8e39b581e59fa5c8acd916935f1331414882f19d1e9"
+  },
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/accepted-current-B4-role-scope.diff",
+      "bytes": 54338,
+      "sha256": "4ce72ea21c7935a9d906c5ad5549fd5ca006e2429a84a7e99bb878021d196706"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/accepted-overlap-inputs.json",
+      "bytes": 16898,
+      "sha256": "cc30eced42a8f660601831ad088e5bb936162cc058fef8b707de18641ca95001"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/additional-selection.json",
+      "bytes": 3408,
+      "sha256": "3d8590c62292abb3ce9c780ebfaa797cee06e7ab361f6a375a6c77e29cf57d4e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/expand.py",
+      "bytes": 15650,
+      "sha256": "8103c173ac0d0265b9098dff9bf7c972ee2923d81fca069942e698d5ddd59747"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/miss-overlay.json",
+      "bytes": 1726,
+      "sha256": "1599e200700d0a4fba6a1008306bc292a3ad391cd3be05fc7a1f5d25a2159bf5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/original-units.md",
+      "bytes": 3241,
+      "sha256": "55fb17de982e0b00457d878775baefc325c1b688bef10d0c4c19f7f6884359ae"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/protected-output-overlay.json",
+      "bytes": 773,
+      "sha256": "963d70628fb6612932e62756a03d694610a1511ff6e51c8692ec54ce4366ad50"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/quotas.json",
+      "bytes": 741,
+      "sha256": "3b54d99a9390ccad232008633d5721ed44eba77e04f4a010608a936e1b92a404"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/read-plan.md",
+      "bytes": 2641,
+      "sha256": "dbfa6d72135d7c90d8daa611b73ff933df7ff95b3a94f17199d31bfeca2a0ada"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/replacement-selection.json",
+      "bytes": 875,
+      "sha256": "ab04802dc36979522cb636bb7f954e224657fd907b6abed1e2051a999fd48530"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/reviewed-focused-effective-original-scope.diff",
+      "bytes": 11234,
+      "sha256": "190959ae04e315a97c7dc8e39b581e59fa5c8acd916935f1331414882f19d1e9"
+    }
+  ]
+}

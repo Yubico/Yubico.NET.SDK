@@ -1,0 +1,35 @@
+{
+  "state": "FINAL TRANSFERRED-IDENTITY SAMPLING CANDIDATE; ASTRA/INDEPENDENT ADJUDICATION PENDING REVIEW",
+  "actual_unique_reads": 1134,
+  "original_actual_reads": 983,
+  "additional_actual_reads": 151,
+  "historical_broad_population": 9352,
+  "original_minimum_sum": 983,
+  "authorized_expansion_sum": 88,
+  "required_target_sum": 1071,
+  "actual_current_supported_candidate_count": 1071,
+  "quota_shortfall": 0,
+  "roles": 94,
+  "owners": 17,
+  "current_manifest_paths": 363,
+  "verified_EOF_only_LF_removals": 239,
+  "literal_original_unit_EOF_range_differences": 0,
+  "new_supported_additional_reads_lost_to_final_substantive_edits": [],
+  "original_logging_credit": 0,
+  "identity_and_unit_range_refresh": "COMPLETE",
+  "root_bullet_new_delta_units": [
+    {
+      "id": "core-001:unit:b05cbf7f92ab5484",
+      "original_population_state": "provisionally-excluded-pending-edit-overlap",
+      "admitted_to9352": false,
+      "actually_sampled": false
+    }
+  ],
+  "Astra_adjudication": "PENDING REVIEW",
+  "independent_adjudication": "PENDING REVIEW",
+  "accepted_clean_count": null,
+  "accepted_denominator": null,
+  "sampler_PASS": null,
+  "compiler_or_full_validation_completion": "NOT ASSERTED; no SDK/compiler/formatter execution by this worker; existing evidence limits remain unchanged",
+  "preparer_content_verdicts": 0
+}

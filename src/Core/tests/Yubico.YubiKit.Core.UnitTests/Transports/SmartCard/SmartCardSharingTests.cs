@@ -21,11 +21,10 @@ using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
 
 /// <summary>
-///     How a PC/SC handle is opened and released. The PIV PIN security status is card-wide
-///     (NIST SP 800-73-5 Part 2 §2.4.2), so a shared handle opened by another local process can use a PIN=ONCE
-///     slot during and after an SDK session unless the SDK holds the card exclusively and powers it off on
-///     release. These no-hardware tests prove strict exclusive mode selection, no shared retry on
-///     contention, and SCARD_UNPOWER_CARD on disconnect, not physical card isolation.
+///     Checks managed PC/SC sharing policy and release arguments with a fake native API. Assertions cover
+///     strict exclusive selection, no shared retry on contention, explicit opt-ins, factory policy snapshots,
+///     and requested SCARD_UNPOWER_CARD on disconnect. They measure neither physical power-off/PIN-state
+///     clearing nor access by a competing process. A borrowed session can end before its connection closes.
 /// </summary>
 [Trait("Audit", "YESDK-1630")]
 [Collection(DiscoveryWorkerAdmissionCollection.Name)]
@@ -273,7 +272,7 @@ public class SmartCardSharingTests
         }
     }
 
-    /// <summary>Power the card off on release so PIN=ONCE state cannot outlive the session.</summary>
+    /// <summary>Checks that every sharing mode requests UNPOWER_CARD when the connection is disposed.</summary>
     [Theory]
     [InlineData(SmartCardSharing.Exclusive)]
     [InlineData(SmartCardSharing.Shared)]

@@ -1,0 +1,422 @@
+[
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Management.md",
+    "sha256": "e3d207a2b502b6dfd35365b50a1ff1a79ea6387380d53ebae7ed6520ecf11f9a"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/assemble.py",
+    "sha256": "f82eebf1a49f5f65e51907ab67b03cf1e8d54f7c833f6bb818a45df4fe42d85b"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/boundary-completion.md",
+    "sha256": "439171ddf6e3474cec9ffd8f68b684da48814ed73d009c269315c6ec689956c5"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/candidates.json",
+    "sha256": "0955f7e5df5dccfb311eeedb617a84b5f5b626afd4b5c96bd11e2811ca7b957b"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/capture_sources.py",
+    "sha256": "b3c38f810b80ee9291ea0759894fbeb6c49ab6d3a0b1adcee2d427925b4f1043"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/clean-nominees.json",
+    "sha256": "c0b2b85762a251bb4125bcad90862e21b8e68e1e33f0a8f4d827ca2c6cae889d"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/file-dispositions.json",
+    "sha256": "88779ddcde9f6b10118b982190771f6d71682f5acdd599d078372ac2354e3354"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/followup-B4.json",
+    "sha256": "b057633788ef4b126004faa1f157c7ac41985b26941245e8c1aa679ca137afea"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/followup-B4.md",
+    "sha256": "bf0b79d76656756041bdd9d8fbd806fa01c9551bdace6305fe0ea2e6c7debbdd"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/followup-B6.json",
+    "sha256": "87de531ca871e2ab5661da9ecdfeadaa93046e828fa3a5f8ea7a5b1cca16c98b"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/followup-B6.md",
+    "sha256": "3cea4e7d5d48f76b91f1d760ad3c09c8d7bfc38d0ccb24536ed65659d378556e"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/inherited-dispositions.json",
+    "sha256": "ab5c9818d8e9e4ee3d0b190f5876a9eb98e50a9f3801bb89877ff3d1ab13a65f"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/mechanism-identities.json",
+    "sha256": "89deb02685d7b0a5682e7b1d4c36f9ee452265f99910c3746d67f18b3595bc5f"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/shared-dependencies.json",
+    "sha256": "4415ec2efbda869ee91bcce64bebec13117f10cc8dd8b22927111756807a4655"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/sources/bio-mpe.html",
+    "sha256": "180641a30a73463bca30121f2186919b4452725f193ae825341476d5c7fd2c5a"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/sources/captures.json",
+    "sha256": "d36a9de6e9978c179ff41e67e5264eaadd96f9a05bb5833f997c2b5e974e16cc"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/sources/device-reset-command.html",
+    "sha256": "e818b46ccfbcc6bf3c58b1b7283a4adc0ebe6fe3322d9c38cffebe6e1235bbf0"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/sources.md",
+    "sha256": "1d4384bd1e8aaebd61e29eb802a6bd01158bcffd397b97b50c14c8a251c57bdb"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/unit-dispositions.json",
+    "sha256": "5c327d24b29181363295a43fa5f4767b101447641d724f143b28c265868a5788"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/verification-receipt.json",
+    "sha256": "d1669c1699fe0c4a65fd3f7f7ff8fdaf307d5b0cbc43991c89d0bdfbb71f0bab"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/verification.json",
+    "sha256": "3e5bd0bfc031174682b8060e08d31034db81ff5eb27dc341f6bd9055b91d742b"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/verify_records.py",
+    "sha256": "e8d21e74d3d6b08a007773df2dc9d63879c7d613af2289675f97218443da835e"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-SecurityDomain.md",
+    "sha256": "e5dd342fdef8407750bb884e10548a7f787bc897fd6c00dd5543d4469cb1f7dc"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/assemble.py",
+    "sha256": "0a674cb353df0c6ab6caaf7439d6081d87bb91468ac9a01869aef3a2dbb43456"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/candidate-index.json",
+    "sha256": "2e9f0bfced49c58b93e2a29a9bfdf61a34ba99b09ae5f14d3037837deb5a420a"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/candidates.md",
+    "sha256": "48c7ebb594a75fc80d295ab199e9a8e110c13a8d4156aa17f8f28a847105dbd5"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/clean-nominees.json",
+    "sha256": "758401790197e8514e4596a3b0d2dd065cff29eace120260ec3426ece804c1f1"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/dependency-identities.json",
+    "sha256": "2e44dd8b072daf672b9ac2a9fdf635ec3c0ea67f95781262a84571a4ba3a7cdc"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/file-dispositions.json",
+    "sha256": "1932ec3a6878a1109ae76296a13a95270ec501561b6349e037f7ff9c8c0e2088"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/inherited-dispositions.json",
+    "sha256": "8b526c6ffb37e393adc234a321e0c8fa8323f6ac3deccffbdd70b59545323ce0"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/localized-anchors.json",
+    "sha256": "29f93795d3d7d95531ac8b73fb87752a4517f03f1446b2a61a551f59f2d1c488"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/prepared-examples.md",
+    "sha256": "2ee271fff38d54321065d8439688d29875e906bd0df883164d4c0181b27fa06d"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/reopening-map.json",
+    "sha256": "a7e4fc97d4ea980377fd2b378b4a76cf5b5cddd920eaf7e56fc2fe2f9fce5828"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/sources.md",
+    "sha256": "e64b7dd9f320759d7885bd9ca4b72570c4e441d96eb3bb9b0c18c28865c57016"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/summary.json",
+    "sha256": "ff6f18a0f81635fb7f8ecf21ce456dc8991c1b38dc0fc707631ed9fc92b33131"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/test-oracles.md",
+    "sha256": "0a1f66aa54592a8c16f74e958da74e31655731a1833c11d2194e9c50114ec7b2"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/traces.md",
+    "sha256": "f7989bf1672e5efc2e5b116938bb70dc3124cc81bc279b17d124a87fbfc64847"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/unit-dispositions.json",
+    "sha256": "e7cdb34d90ac1d3c148b75c786f4ea46990f894a1580bab4401a3835f1f0ce02"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/verification-attempt-1.json",
+    "sha256": "81315f0e0d25d6b78259e5fce8f49555f4f7613d78c7a9f62f06a375bff11ee1"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/verification.json",
+    "sha256": "0463510d0305800e4996655a133101aeb5f7907668aac6db856ad4e3740d2331"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/verify_records.py",
+    "sha256": "6c15c9d78400399b04c904cd1745658a22516f6f48c41d23043dd162bf17b1ef"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Oath.md",
+    "sha256": "f76dfc32758b1219b0ce5ae01d9719632281d821aa0dafa99557447c8b0a5984"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/analysis.md",
+    "sha256": "4e94fa704ff0d86c96ce2b42af10fa92acb1be1df9fb53ef657834d80f28bb93"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/candidate-index.json",
+    "sha256": "94437b9c10dfd69fc51514ded2534c310ad1600378bae0367c44f6ee9a23287b"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/candidates.md",
+    "sha256": "2758d21c9f73a498a1d95aad5006c85268bb294ce43431335ddc479917fe15ca"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/capture_sources.py",
+    "sha256": "429537e1c2da754e968843d75d95e674378477d6331666c705cb3ac7ac982e73"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/clean-nominees.json",
+    "sha256": "6e47b0c2d1dcafe180beba0c7ca1bc1d11cb7d6b4774ec299117fe8600dbe5d6"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/coverage-summary.json",
+    "sha256": "45975ef75fa196e9d073e3fcc23bbaffe2a39afda948abfe6b368972167a37cb"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/file-dispositions.json",
+    "sha256": "0731ab9fd88e6c6f92e4a49aae34eb4af86bfa18271a464dc146fdde834fecbc"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/file-notes.json",
+    "sha256": "5e499c4fdce3af3c39b9aa36736a74a860b2f28e537a87d5641c2ac04b1cc396"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/inherited-dispositions.json",
+    "sha256": "358ab35f2caaf0c4b15d4706fe69785b054f442461b521c12bc5580153f693f9"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/prepare_records.py",
+    "sha256": "9547f4c041df6791c1e626c46a9493dfaf09d276d57322ba8a54f218976df378"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/record-preparation-attempt-1.txt",
+    "sha256": "587ec270b524d6b194b8248567f2010c7a004b93368ad1b22f87b1e88f93cda0"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/record-verification-attempt-1.txt",
+    "sha256": "427ac840af57b92145486d664790888e184a3051b25ba0de297768bf11fd6ecb"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/source-manifest.json",
+    "sha256": "e9d1d77b8bfa7404958ec5a53a406b1310abc139820bfdd88686071110cd2de8"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/sources.md",
+    "sha256": "716783fd769eae76a81aaec448586bce71d801a5b739984c3ceaab40c32a5eb6"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/unit-dispositions.json",
+    "sha256": "362cb1a1b7481bbf53f0fe08ed0afe24c89f5f1a153a8b25492eb9b15b2c7400"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/verification.json",
+    "sha256": "1b6aeffcb9c3aa66d2f0338ed89ba05fa66b64c0bec24a672a8baa3f7ced49fb"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/verify_records.py",
+    "sha256": "41f44cab879080523e4f779f66985799ebb2a95422f405a697e078575edbe71f"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/ykoath-protocol.html",
+    "sha256": "44b94628c1a6a9bced1b11fa62370f62f62ec71390980ebe0ea3a46e64eab896"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-YubiOtp.md",
+    "sha256": "2ee6114c87c3cf27b991261e3668b0efc15645422ae39aaf83b24fc9d8ef7e68"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/api-surface-search.json",
+    "sha256": "b871ca8443f9270f669bc75fcfb6da39acf09213ed6fc4c7f306671bbf9a7470"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/applet-findings-dispositions.json",
+    "sha256": "920706e01d416f67f449d36a72b7bc99157f512528f5043bf67aa968ed9572a5"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/assemble.py",
+    "sha256": "02a7d15b420dba20cd7daabbf59728c8df906c6a9c5dd529345d55905c3dd389"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/candidate-index.json",
+    "sha256": "692ad71d336a68755ee01a7838b5dbb7a92b699ce6572d67dbd75df5b0458752"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/candidates.md",
+    "sha256": "4002da3f5909ab3267bbf0b04d1eb1fdf8c0fdae674da6b6621c6c06775ed004"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/clean-nominees.json",
+    "sha256": "cdb593eea593527a6f79c133d06e3f580b09f5e258471ad610ba74c29894e7de"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/coverage-summary.json",
+    "sha256": "7005683fe59ca7f568c4dc3148d82ba9fa15987213c2e4ae926440cf00cd22dd"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/dependency-reads.json",
+    "sha256": "85ae1c4155b25d5037861ee71c76c2863dfdc24f86a81c26ccae5b0f308e55ae"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/file-dispositions.json",
+    "sha256": "bd85e56da869a844bac3369a540125a2b73caac6d91ed0c9a360a40592760fad"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/file-identities.json",
+    "sha256": "fe0df3fc8045cf86e8fe78e2c735aa9e6d462a4e19db5d7d4f67d85105bbdab2"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/flow-and-verification.md",
+    "sha256": "48057958261bf13ef08af6040daca6a66291f6df1c8502fc122c811510ce17f0"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/inherited-dispositions.json",
+    "sha256": "95ac1acab618ffa455eb83cdf5b3fb63c60fa1756f0e29b34b9db121feff4a6e"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/preservation-verification.json",
+    "sha256": "9f90335ed9379a452708b124180814407f161cc6da728f0a7ea59d6f29d782f7"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/semantic-notes.json",
+    "sha256": "f2dea284a2daae2cf37254ac2bd3807227dc9dce9cec273e30e582a5a91319df"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/source-identities.json",
+    "sha256": "412d33d851909ca1c6fc47fe88b114b8389ba12b07ad45639de37c74a7672bd2"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/sources.md",
+    "sha256": "7fb9891a534a9f312d7a7235b148421425773ed3f12c9c2af62adfdf4c04070f"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/unchanged-paths.json",
+    "sha256": "7ae0974fba1a9bef5ffb84bac76b41a4e133b2197e2683b297dfaf7e26f5f4cc"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/unit-dispositions.json",
+    "sha256": "694c3ee51080cbf7f767f13ae4c65fee03c140d3a60e7c20cafda7084de0ca55"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/using-reference-capture.json",
+    "sha256": "8a28957e2017d6a14e73cb9807dda7d5b9369a7d3a5ec7bc335533467c1cfb08"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/using-reference.original.md",
+    "sha256": "9d7f81b54120af6653ca7c8272ad143b004274da05bc9e91e9ae6afa3360ac87"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/verification-receipt.json",
+    "sha256": "9573855eb0cf262ed5c8ee751984b2508ce833ac55804bccfd9ba80826339f0b"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/verify-records.py",
+    "sha256": "04581b60223cf03092eb1e27347f81fc2ec2d219ba2f322e7e0eb4cdaf3595b3"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-YubiHsm.md",
+    "sha256": "fbb36ae91c63f1fbcb468627bcf0e33398ac6bdbf309262854ba96dba31a68ea"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/analysis.md",
+    "sha256": "f6accecda2ab9f08527a5cc6f74fa7701e0425aa7a1aa40472dda50a97e3521b"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/candidate-index.json",
+    "sha256": "98eda140ff2bc7dd6ee04b11e4ac5ea2ea881aee9fb0972f99fb31caea310b70"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/candidates.md",
+    "sha256": "7a37b54a1476312e19d7bbb90ff75fb2db3d74c3d310d2390c73a79c6f339c77"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/clean-nominees.json",
+    "sha256": "3a94c9134bbdb94fcf4c3b3d7dd935cbf71d58506e9ad0b9fc0f252dcf931344"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/corrections.md",
+    "sha256": "58ea4455808f5b0b5baf306c5a6f093b2753e7f40bf7f5368a781d24f934296a"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/coverage-summary.json",
+    "sha256": "fd7ec1b9bde240502e6d64745d9ca3f869a26f1ee5505065f0852578208fb1ba"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/dependency-dispositions.json",
+    "sha256": "f33083fe267dc07ea5e64226e7642f08afa90387194863e453c8573751906da1"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/file-dispositions.json",
+    "sha256": "5566701bf63281b194662c195f8235ec0c4486689e74fe6a032e3eda5604c227"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/inherited-dispositions.json",
+    "sha256": "7d596fc91f57f88eaa90aeae6e91783ad99b0c6bb215a38327511941f2094d07"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/oracles-and-proposals.md",
+    "sha256": "de2dc09a1feb2cab16d5f7b85bca8b095ffab31958206c2f83dbe2ce70969a1d"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/prepare-records.py",
+    "sha256": "f202d68cd574f376d329b508c63db38b4b85f793752881585827fc440d88902d"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/record-manifest.json",
+    "sha256": "2f325f2f7ae36ef80ec2c6d0f1d079ec1c21494b4458b753af05972759651cca"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/source-identities.json",
+    "sha256": "0dc2fd4dc635837090adb8e059edf4b06a1bdb616edc028386999de9e83de253"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/sources.md",
+    "sha256": "3193a7babadad1e26900fd653a3135812a4f5c56b8248e29c7541a738f0eb4a4"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/unit-dispositions.json",
+    "sha256": "ef9898627c3eb00aa348b285a7258f68df54004a88d0c704ff46b2bcb03749e8"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verification-attempt-1.txt",
+    "sha256": "584533af4a9063db74b77d7484e35c6bb830b090a99008c54a5623930355261a"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verification-receipt.json",
+    "sha256": "430646fbaeb68a8a082a497c7b1833a9f022442f4d59139ec2e6b1960d74f58d"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verification.json",
+    "sha256": "2acbe4a7b06392c1ff4518164107ebe702d2bf28eb640e3e5c0272c5e07c3be1"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verify-records.py",
+    "sha256": "82c5b88e8ae0f55f3c9711343367ea6cbd94b8ef31b50efe459d3ac3a9db0d86"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+    "sha256": "33c44266e8c9a45124e18f64e81653e5881d9d5fd4d8b55b0deb2a9f9de1ab65"
+  },
+  {
+    "primary_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/triage-full-family.md",
+    "sha256": "6b8ac53e144eacbed43e0a508c1786b7096d01246b32454e7e05c61ba074e422"
+  }
+]

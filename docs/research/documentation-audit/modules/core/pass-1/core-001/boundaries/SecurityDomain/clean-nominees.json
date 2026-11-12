@@ -1,0 +1,79 @@
+[
+  {
+    "id": "core-001:unit:fab93bc1d63af27a",
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "first_line": 74,
+    "last_line": 95,
+    "source_sha256": "d3c00fed7f2368d136b7646f9ccf48ce142f3f496b91cdb1adbef725eebc5705",
+    "range_sha256": "172b44834eb1db2e0c8c126967be933092cb27397137e6720a94a563e416ed0e",
+    "reason": "Public certificate result contract names caller lifetime, independent session disposal and absent trust/order validation, matching partial failure implementation.",
+    "review": "PENDING; remove edited overlap",
+    "execution": "UNRUN"
+  },
+  {
+    "id": "core-001:unit:f952a6db7aa67162",
+    "path": "src/SecurityDomain/tests/CLAUDE.md",
+    "first_line": 106,
+    "last_line": 147,
+    "source_sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+    "range_sha256": "b76ef40c0b8c3227be2ffec089cbc473419a95cac4df6f4a5cf8f935d8a11d51",
+    "reason": "Complete typed owned-parameter/two-session persistence example with independent cleanup token and truthful reset limit.",
+    "review": "PENDING; remove edited overlap",
+    "execution": "UNRUN"
+  },
+  {
+    "id": "core-001:unit:58172ff4d770bcd1",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs",
+    "first_line": 21,
+    "last_line": 39,
+    "source_sha256": "2719b01755d036e72f724570ed109798f1503c0e67faa353bbdcdf7cb4387a8b",
+    "range_sha256": "31cc975fb38377b52bed7940d53d4643ec8f147b6f4fe34e0c04a476404b4b99",
+    "reason": "Consequential explicit removal wire oracle: exactly one STORE DATA plus A6/ref and zero-length70.",
+    "review": "PENDING; remove edited overlap",
+    "execution": "UNRUN"
+  },
+  {
+    "id": "core-001:unit:de9d48abdf1759d5",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnectionTests.cs",
+    "first_line": 34,
+    "last_line": 46,
+    "source_sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+    "range_sha256": "e5410b250e349a4c0dd5a18f3ab0fb9a78dc144594d209b016357e5b0c5b5927",
+    "reason": "Full published RFC4493 primitive vectors and exact complete tag equality, not length-only/self-consistency.",
+    "review": "PENDING; remove edited overlap",
+    "execution": "UNRUN"
+  },
+  {
+    "id": "core-001:unit:aa6d02c22a70d020",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs",
+    "first_line": 23,
+    "last_line": 57,
+    "source_sha256": "77c9c7bcb956e0c1add350029aa3efbf1a0deb773e63c9d42a3f4b9c31e0c807",
+    "range_sha256": "a59c8be3de37e1e225466138105d1c305f5b4d8517f885ff81724adbd45c4395",
+    "reason": "Real loaded certificate handles, corrupt later item stops iteration, all accumulated handles disposed, failure finally retained.",
+    "review": "PENDING; remove edited overlap",
+    "execution": "UNRUN"
+  },
+  {
+    "id": "core-001:unit:52c46bed2ec7d440",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs",
+    "first_line": 57,
+    "last_line": 98,
+    "source_sha256": "77c9c7bcb956e0c1add350029aa3efbf1a0deb773e63c9d42a3f4b9c31e0c807",
+    "range_sha256": "bdae39d06d35bbe84a632ce6938fbedf6b5086cc7ca98da1d1ccf08242dec14f",
+    "reason": "Exact owner identities/order/DER survive session disposal; caller finally disposes certificates and handles become zero.",
+    "review": "PENDING; remove edited overlap",
+    "execution": "UNRUN"
+  },
+  {
+    "id": "core-001:unit:67a2df596ddf1fd8",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+    "first_line": 505,
+    "last_line": 528,
+    "source_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+    "range_sha256": "e9107654589d1848f1d2861ec6767f016660efbd1ae7198b7c7403063d6eb653",
+    "reason": "Two GET DATA requests independently recorded in KLOC/KLCC order and exact reference/identifier association asserted.",
+    "review": "PENDING; remove edited overlap",
+    "execution": "UNRUN"
+  }
+]

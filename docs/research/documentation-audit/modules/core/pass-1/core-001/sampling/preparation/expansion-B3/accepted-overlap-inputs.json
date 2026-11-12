@@ -1,0 +1,375 @@
+{
+  "manifest": "editing/integration/current-products.json",
+  "manifest_sha256": "24410c0e80bb021d5e06091b26f94b54e80d6c419a4f88f0c8f87abed810176f",
+  "accepted_paths": 361,
+  "target_sampling_paths": [
+    "src/Core/CLAUDE.md",
+    "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs"
+  ],
+  "scope": "B3 candidate XML and existing seven activated history-replacement paths",
+  "command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--no-renames",
+    "--unified=3",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+    "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "--",
+    "src/Core/CLAUDE.md",
+    "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs"
+  ],
+  "diff_sha256": "9a2cd2f2697849022ef1b8c434d3abf130701c5bdfe4e4f4bd40adc191d8d85b",
+  "diff_bytes": 32140,
+  "parser_reuse_sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+  "original_reconstruction_reuse_sha256": "c89a45930b26b89132c9f8a172acb1d8320507999c57c4caded1f2a692835fc9",
+  "original_changed_spans": {
+    "src/Core/CLAUDE.md": [
+      {
+        "start_character": 2867,
+        "end_character_exclusive": 2930,
+        "old_first_line": 61,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3013,
+        "end_character_exclusive": 3013,
+        "old_first_line": 66,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3202,
+        "end_character_exclusive": 3202,
+        "old_first_line": 70,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6635,
+        "end_character_exclusive": 6744,
+        "old_first_line": 110,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22670,
+        "end_character_exclusive": 22727,
+        "old_first_line": 312,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 22892,
+        "end_character_exclusive": 22929,
+        "old_first_line": 321,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 23904,
+        "end_character_exclusive": 24002,
+        "old_first_line": 349,
+        "old_line_count": 3,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 24003,
+        "end_character_exclusive": 24285,
+        "old_first_line": 353,
+        "old_line_count": 6,
+        "added_lines": 8,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 27133,
+        "end_character_exclusive": 27521,
+        "old_first_line": 410,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 28428,
+        "end_character_exclusive": 28428,
+        "old_first_line": 443,
+        "old_line_count": 0,
+        "added_lines": 6,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 32303,
+        "end_character_exclusive": 33017,
+        "old_first_line": 488,
+        "old_line_count": 8,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34367,
+        "end_character_exclusive": 34454,
+        "old_first_line": 518,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34455,
+        "end_character_exclusive": 34598,
+        "old_first_line": 520,
+        "old_line_count": 3,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 34603,
+        "end_character_exclusive": 34603,
+        "old_first_line": 525,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 35604,
+        "end_character_exclusive": 36157,
+        "old_first_line": 536,
+        "old_line_count": 1,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 36700,
+        "end_character_exclusive": 36700,
+        "old_first_line": 544,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 37757,
+        "end_character_exclusive": 37757,
+        "old_first_line": 555,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 51181,
+        "end_character_exclusive": 51245,
+        "old_first_line": 723,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52018,
+        "end_character_exclusive": 52070,
+        "old_first_line": 751,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52099,
+        "end_character_exclusive": 52231,
+        "old_first_line": 754,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52261,
+        "end_character_exclusive": 52310,
+        "old_first_line": 758,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 52429,
+        "end_character_exclusive": 52473,
+        "old_first_line": 764,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 53656,
+        "end_character_exclusive": 53789,
+        "old_first_line": 789,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54090,
+        "end_character_exclusive": 54160,
+        "old_first_line": 805,
+        "old_line_count": 3,
+        "added_lines": 0,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54218,
+        "end_character_exclusive": 54218,
+        "old_first_line": 810,
+        "old_line_count": 0,
+        "added_lines": 1,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 54506,
+        "end_character_exclusive": 54596,
+        "old_first_line": 826,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54676,
+        "end_character_exclusive": 54930,
+        "old_first_line": 828,
+        "old_line_count": 3,
+        "added_lines": 11,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 54971,
+        "end_character_exclusive": 55043,
+        "old_first_line": 838,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55045,
+        "end_character_exclusive": 55101,
+        "old_first_line": 840,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55165,
+        "end_character_exclusive": 55221,
+        "old_first_line": 844,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55300,
+        "end_character_exclusive": 55549,
+        "old_first_line": 852,
+        "old_line_count": 12,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 55550,
+        "end_character_exclusive": 55753,
+        "old_first_line": 865,
+        "old_line_count": 11,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 56462,
+        "end_character_exclusive": 56660,
+        "old_first_line": 882,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 57003,
+        "end_character_exclusive": 58948,
+        "old_first_line": 884,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 61763,
+        "end_character_exclusive": 61867,
+        "old_first_line": 895,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs": [
+      {
+        "start_character": 4569,
+        "end_character_exclusive": 4569,
+        "old_first_line": 106,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 6357,
+        "end_character_exclusive": 6798,
+        "old_first_line": 153,
+        "old_line_count": 5,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs": [
+      {
+        "start_character": 1053,
+        "end_character_exclusive": 1140,
+        "old_first_line": 30,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1482,
+        "end_character_exclusive": 1618,
+        "old_first_line": 41,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2116,
+        "end_character_exclusive": 2189,
+        "old_first_line": 57,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2238,
+        "end_character_exclusive": 2325,
+        "old_first_line": 60,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2464,
+        "end_character_exclusive": 2503,
+        "old_first_line": 66,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      }
+    ]
+  }
+}

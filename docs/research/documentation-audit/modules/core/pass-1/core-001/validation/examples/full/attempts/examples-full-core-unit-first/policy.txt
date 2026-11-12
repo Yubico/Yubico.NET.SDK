@@ -1,0 +1,16 @@
+Project=/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj
+SDK=10.0.404
+SDKPath=/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks
+Version=1.0.0
+TFM=net10.0
+Configuration=Release
+WarningsAsErrors=true
+Analyzers=true
+AnalysisMode=Recommended
+AnalysisLevel=preview
+SkipCompiler=false
+SharedCompiler=false
+ProvideArgs=true
+Assets=/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/project.assets.json
+TargetPath=/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll
+SourceLink=obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.sourcelink.json

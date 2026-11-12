@@ -1,0 +1,68 @@
+{
+  "scope": "Independently reviewed queued correction transferred after compiler sequence stopped; previous checkpoints retained",
+  "admission_note": "Initial preflight expected b/ patch header and rejected the accepted WA w/ header before any file mutation; exact patch hashes and safe stripped paths were then verified.",
+  "patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+  "product_files": [
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "previous_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+      "sha256": "27276323b17745eaddd0b16d1030d01304ae6122d49d516795a945620d040445"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/inputs.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/inputs.json",
+      "sha256": "7678bd8c995afa1891621738b528a287c980d4d34bb8494f94afe7e8d1b0a012",
+      "bytes": 30674
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/source.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/source.patch",
+      "sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+      "bytes": 1052
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/file-disposition.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/file-disposition.json",
+      "sha256": "34b43e1e254971b622b05b7f931dc6d80fc6a02daf16c01452c2f9e777e7a227",
+      "bytes": 3347
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/source-evidence.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/source-evidence.json",
+      "sha256": "8c7622d975b46ded2d5ff28874169ec73582fdffc88bedc21e01d4aa4e2b0606",
+      "bytes": 2714
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/static-preservation.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/static-preservation.json",
+      "sha256": "9405febf09f454983e2433577cc7619ac64128d7df09ede250cd2bdc9c173043",
+      "bytes": 2373
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/report.md",
+      "sha256": "2817f5dc862dbab86e951fe2f42001ac196067c48398572ed9b55bcd6876c6df",
+      "bytes": 4823
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/return-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/return-identities.json",
+      "sha256": "7e5947026d04e1ff9aacc45d9dc9cf0e6421c1ed3d2ae47c987b341f01982348",
+      "bytes": 969
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/review.md",
+      "sha256": "549c7a225f9ba20d0ce50057b8801335defaa729dfaa306e3ea8cf4a36e9551e",
+      "bytes": 5091
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-udev-receive/review-identities.json",
+      "sha256": "c9bef974129d76b5f8d44eeba03cb3737d2cfe56036267f5468388249fc7938a",
+      "bytes": 5041
+    }
+  ]
+}

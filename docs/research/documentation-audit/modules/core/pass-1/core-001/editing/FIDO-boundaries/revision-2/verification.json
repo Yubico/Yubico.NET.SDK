@@ -1,0 +1,50 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "revision_product_paths": [
+    "src/Ctap2/README.md",
+    "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs"
+  ],
+  "full_successor_product_paths": [
+    "src/Ctap2/CLAUDE.md",
+    "src/Ctap2/README.md",
+    "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Ctap2/src/Backend/HidBackend.cs",
+    "src/Ctap2/src/Backend/SmartCardBackend.cs",
+    "src/Ctap2/src/Ctap2Session.cs",
+    "src/Ctap2/src/ICtap2Session.cs",
+    "src/Ctap2/tests/CLAUDE.md",
+    "src/WebAuthn/CLAUDE.md",
+    "src/WebAuthn/README.md",
+    "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+    "src/WebAuthn/src/Client/WebAuthnClient.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs"
+  ],
+  "full_product_patch_sha256": "8f34ede47c7e39c70a021393150b3a4c4fc4ae9cdc3d761f2de9444273b9740c",
+  "corrections_patch_sha256": "fe5de6ae61ec5d2c43db75c9ef8c438a4b4219608f172880802e48c5abf9af01",
+  "preserved_original_editor_review_records": 12,
+  "unchanged_other_packet_paths": 307,
+  "path_population": 310,
+  "eligible_population": 299,
+  "edit_count": 15,
+  "candidate_groups": 35,
+  "fence_bodies_unchanged": 47,
+  "comment_erased_code_preserved": true,
+  "new_xml_errors": 0,
+  "diff_check": "passed",
+  "independent_review": "pending focused revision-2 review",
+  "not_run": [
+    "build",
+    "test",
+    "formatter",
+    "SDK compilation",
+    "crypto experiment",
+    "native",
+    "device",
+    "Git mutation",
+    "subagent"
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "review_kind": "focused independent R1/R2 re-review plus preservation of prior full-batch content/citation review",
+  "decision": "PASS",
+  "scope": "FULL-37-FILE-EXTERNAL-DOCUMENTATION-BATCH-AT-BOUND-IDENTITIES",
+  "mandatory_corrections_remaining": [],
+  "R1": "SATISFIED",
+  "R2": "SATISFIED",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-external",
+  "base_and_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "paths_relative_to": "repository root",
+  "report": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+    "bytes": 8070,
+    "sha256": "afe5feda7988d546d834d47d31952c55f1835968f3b66cd3ce191aeb42d56993"
+  },
+  "full_patch": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/final-successor-source.patch",
+    "bytes": 92857,
+    "sha256": "4738181238db7103d65e47addac0a96c8a936e8c4a464a991885abd8ea788d68",
+    "actual_product_paths": 37,
+    "fresh_git_diff_with_explicit_a_b_prefixes_equals_patch": true,
+    "prior_patch_sections_unchanged": 34,
+    "prior_patch_sections_changed": ["src/Tests.Shared/README.md"],
+    "new_patch_sections": [
+      "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs"
+    ]
+  },
+  "current_164_path_manifest": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/path-decisions.json",
+    "bytes": 4742752,
+    "sha256": "51e4677c67750e030de575ded60e9ad460f71f4a87a700e4e852c10bfd332c96",
+    "unique_paths": 164,
+    "actual_raw_hashes_recomputed": 164,
+    "mismatches": [],
+    "dispositions": {"EDIT": 37, "RETAIN": 99, "HOLD-HISTORICAL": 22, "HOLD": 6},
+    "changed_from_prior_164": [
+      "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "src/Tests.Shared/README.md"
+    ],
+    "other_161_current_raw_hashes_equal": true,
+    "primary_verification_benchmark_ownership": "unchanged 26-path disjoint B2:9/B3:10/B4:7 population; 12 edits/13 retains/1 historical hold"
+  },
+  "focused_product_identities": [
+    {
+      "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "base_raw_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+      "current_raw_sha256": "e495dd528a33a5302ae12b0fddee60fae5ed48bfee92f558b3aa7cb0d4d55bce",
+      "non_full_line_comment_source_equal": true,
+      "xml_documentation_parses": true,
+      "ids": ["CORE-A-C013", "FPT-013", "management-001:MGMT-XREF-003"],
+      "source_review": "Complete constructor48-67, exit predicate56, Boolean IsDeviceAllowed85-86; separate initialization/filtering and lazy-binding source verified"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "base_raw_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+      "current_raw_sha256": "c2d596d0d3c380b07317df8fd9ffc2936dac7b2815ecc09f149c2f70171b8f9c",
+      "non_full_line_comment_source_equal": true,
+      "xml_documentation_parses": true,
+      "ids": ["CORE-A-C013", "FPT-013", "management-001:MGMT-XREF-003"],
+      "source_review": "JSON XML24-38, actual keys42-44 and getters63-96; readable-metadata condition checked in harness",
+      "complete_executable_error_raw_string_unchanged": true,
+      "raw_string_interior_sha256": "a897eb47f0b194042eb8bfd42521061f3c50cb69f901aa3c0851a19e9c02d217",
+      "obsolete_executable_EnableHardFail_example": "preserved; explicit non-D R1_protected_runtime_output referral"
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "prior_reviewed_raw_sha256": "ac76332e3643fa62ce6ad5dffaeb4369ca2cbe319e91f5f990dd03edceb65157",
+      "current_raw_sha256": "c99cfb251760d014c2743b29582ad786b74baac2f4aae5f86c6458140360771b",
+      "inverse_of_only_two_exact_R1_passage_replacements_matches_prior_raw_hash": true,
+      "ids": ["CORE-A-C013", "FPT-013", "management-001:MGMT-XREF-003"],
+      "source_review": "Overview9-10, Safety80-87 and limitations335-337 consistently distinguish configuration exit, per-device filtering and empty-fixture binding SkipException"
+    }
+  ],
+  "bound_successor_records": [
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/focused-review-return.md", "sha256": "515d483244d4c238594a1ccd87050b460e33ea9bb975e8ede43bda4fb520cab3"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/R1-comment-delta.patch", "sha256": "831334afe0df7a602624b425cd4632c233dce05c411da2b337ab4f0b45910f07"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/candidate-decisions.json", "sha256": "5b325d9320ad0c36e3efaf7f523bde968365145fbdee10c895e2d4ab0510a71d"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/example-classification-overlay.json", "sha256": "fae1694ca3434fb18ff84f6ca6c8e2965c1e358cc7b25bd8fd2ac08cb3b2c84e"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/example-inventory.json", "sha256": "41651e0a9234a531424386be290e5670ace41f6f2dc3b5568a499ab850ada1bb"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/history-preservation.json", "sha256": "e1c9ff8879bb2fd0fc10d91f19ad9433f5e908c8e4d7f340195d70979a992100"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/static-preservation.json", "sha256": "ba9c2376dd0f9908c2e4035f255716bf7bad46911c6b088b7d32b66994c30031"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/remaining-referrals.json", "sha256": "cd4ae61d8d0f8456eda6d3fdba33be2b7961462b74679ec88cb3ac3cdd70618e"},
+    {"path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/output-identities.json", "sha256": "b2aa6657d2a00fa2d6b3ace53b41b9b436ffe80e54fb9c65004a84a549f8446c", "entries_independently_verified": 13}
+  ],
+  "R2_verification": {
+    "hash_keyed_updates": 7,
+    "all_immutable_original_entries_equal_frozen_inventory_entries": true,
+    "all_successor_entries_equal_materialized_entries": true,
+    "all_successor_body_hashes_recomputed": true,
+    "current_JSON_exactly_equals_actual_XML_body": true,
+    "current_JSON_keys_and_false_value_checked_without_loading_configuration": true,
+    "raw_XML_amp_references_preserved": true,
+    "separate_shell_derivative_only_expands_amp_references": true,
+    "shell_derivative_sha256": "5c293e080aac266553cc3e0920b1a11d6eb758448ba41340e09b27b1147e67a2",
+    "both_AllowList_sketch_versions_classified_as_sketches": true,
+    "old_invalid_filter_API_example_classified_as_superseded": true,
+    "corrected_current_filter_body_unchanged": true,
+    "initial_body_records": 243,
+    "unchanged_other_initial_entries": 236,
+    "unchanged_primary_historical_entries": 4,
+    "total_materialized_records": 247,
+    "new_CSharp_consumer_bodies": 0,
+    "compilation_configuration_loading_shell_execution": "NOT-RUN"
+  },
+  "history_verification": {
+    "frozen_output_identities_checked": 47,
+    "frozen_review_identities_checked": 2,
+    "frozen_outputs_and_reviews_mismatches": [],
+    "prior_full_review": {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/review.md",
+      "sha256": "ae2ed83fab2a0271148a06b49d74562c20bda6aa353de619cd6fbcc88cd6d3f7"
+    },
+    "prior_full_review_identities": {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-3/review-identities.json",
+      "sha256": "1ac72b60c314fb2dc2d3e1b1f74a452d27e63bc81b949a5033a819e77dbbb46f"
+    },
+    "prior_35_product_files_unchanged_except_authorized_README": true,
+    "prior_README_hash_preserved_as_history_not_claimed_current": true
+  },
+  "accepted_script_proof_recomputed": [
+    {"path": "scripts/toolchain/Process.cs", "current_raw_sha256": "84fe870fabdf44a6033c514722bcc256f73a5cf7ef9268c6b0e5c433be4cf133", "equal_base_and_current_noncomment_sha256": "7f96abb76db0ec0ad4aac597d6f54a76b5bff6db7da93183d82797d138ba410d"},
+    {"path": "scripts/toolchain/Results.cs", "current_raw_sha256": "90a595695e19a88a1f0e55a60708ffebcae8ee12a2753662b5444b3fecf48abe", "equal_base_and_current_noncomment_sha256": "efd56a36bc35d68165b4e7f50432f8d9d400f559b1d35a259bedd74620188440"},
+    {"path": "scripts/toolchain/TestTargets.cs", "current_raw_sha256": "b257b57172bbd9967b7ec46754deffdaa3f044f2288ea7d22ed3f3b3c7593337", "equal_base_and_current_noncomment_sha256": "fad7d9d694d6f73038b2b0639386020df6c24ff1416a37be6b16c46eaf8f6b69"}
+  ],
+  "static_verification_limits": {
+    "git_diff_check_exit_code": 0,
+    "HEAD_unchanged": true,
+    "noncomment_checks": "static text preservation, not compiler/token/API semantic binding",
+    "final_compiler_token_API_example_and_qualified_input_reconciliation": "COORDINATOR",
+    "old_profile_bindings_claimed_current": false,
+    "SDK_build_tests_formatter_native_device_crypto_provider_execution": "NOT-RUN",
+    "new_tooling_framework_or_whole_audit": false
+  },
+  "review_write_scope": [
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review.md",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-4/review-identities.json"
+  ],
+  "no_product_editor_record_profile_or_Git_mutation": true,
+  "no_subagents": true,
+  "qualifications_unchanged": [
+    "runtime/data/policy/experiment and native producer/header/loaded-path/final-profile gaps",
+    "no hardware PASSED evidence from compilation or outer timeout",
+    "exchange drain is not whole-workflow/native completion",
+    "Windows concurrency UNREADY/UNREVIEWED; PIV physical deferrals stand",
+    "serial9681620 historical cause unexplained; serial125 setup6A88-before-RESET supplies no protected reset result"
+  ],
+  "stopping_point": "Finish Core Pass1 publication and deferred-finding handoff after separately owned gates, then stop; no Pass2 or new validation campaign"
+}

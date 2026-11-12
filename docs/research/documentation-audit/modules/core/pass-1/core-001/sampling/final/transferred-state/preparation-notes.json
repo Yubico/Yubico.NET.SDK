@@ -1,0 +1,12 @@
+{
+  "scope": "Preparation diagnostic only; not a sampler/content verdict.",
+  "attempts": [
+    {
+      "attempt": "supplemental EOF-neighbor mapping",
+      "error": "Exact inventory reconstruction unavailable for src/Ctap2/src/Ctap2Session.cs",
+      "cause": "Extending original-unit mapping to every excluded applet remainder introduced files outside the predecessor accepted-diff/admitted-population scope. Their original full-source delta was never a required sampling input.",
+      "correction": "Keep the full239 raw before/after byte proofs. Map all9352 admitted units, all1134 actual reads and applicable same-file neighbors; explicitly identify EOF-only files outside that original-unit scope without promoting them into new content reads or denominator changes.",
+      "impact": "No admitted unit or actual sample was omitted, no denominator changed, no old candidate/seal was rewritten, and no final identity seal had been issued."
+    }
+  ]
+}

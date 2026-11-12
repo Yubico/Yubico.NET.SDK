@@ -1,0 +1,11 @@
+{
+  "id": "core-001:unit:9ea1794bce816ec8",
+  "owner": "B4",
+  "stratum": "implementation-state-and-internal-contracts",
+  "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+  "coordinator_verdict": "KNOWN-DEFERRED-PROTECTED-OUTPUT",
+  "reason": "Runtime help strings are preserved, not documentation-editable. Existing no-tests target/result-policy qualification applies; actual checked target behavior is authoritative and this protected-output unit gets no final clean credit.",
+  "final_clean_credit": 0,
+  "classification": "Protected runtime help/non-D output with existing NoTests policy discrepancy; eligibility exclusion, not a new runtime finding.",
+  "runtime": "UNCHANGED; this preparation edits no runtime help and allocates no new engineering ID"
+}

@@ -1,0 +1,17 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "branch": "yubikit-core-docs-edit-discovery",
+  "changed_cs_paths": 36,
+  "packet_cs_paths": 90,
+  "candidate_rows": 21,
+  "example_bodies": 3,
+  "exact_noncomment_lines_preserved": true,
+  "base_product_equals_source_pin": true,
+  "git_diff_check_exit_code": 0,
+  "patch_sha256": "28cfedee32cba340d041a90edadd79afff3d65ced04317a8863d43854890a517",
+  "xml_blocks_parsed": 186,
+  "scope": "Only packet-A C# full-line comments/XML plus incidental final-newline normalization.",
+  "compiler_and_runtime": "NOT-RUN; no compiler/token-parser/API-bind/native/device claim",
+  "tests_formatter_build_commit_index_push_subagents": "NOT-RUN"
+}

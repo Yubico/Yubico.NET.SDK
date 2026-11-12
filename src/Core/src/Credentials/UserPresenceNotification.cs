@@ -25,7 +25,8 @@ namespace Yubico.YubiKit.Core.Credentials;
 ///     the immutable, shared no-op instance used when no prompt or context was supplied. A successful request is
 ///     emitted at most once, and only that request can be resolved. A request callback exception propagates and
 ///     terminally disables the handle without emitting resolution. A resolution callback exception propagates when
-///     there is no primary operation exception; otherwise it is logged and the primary exception is preserved.
+///     there is no primary operation exception; otherwise the application-supplied exception object is logged
+///     and the primary exception is preserved. Providers may render its message and associated details.
 /// </remarks>
 internal sealed class UserPresenceNotification
 {

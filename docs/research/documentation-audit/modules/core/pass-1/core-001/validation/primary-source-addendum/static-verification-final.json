@@ -1,0 +1,148 @@
+{
+  "scope": "Read-only exact original PDF/encoding-qualified HTML and actual Git-clean proof; no compiler/checker/native/device execution.",
+  "registered_sources": 4,
+  "accepted_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/pcsc5-v2.01.01.pdf",
+      "bytes": 401060,
+      "raw_sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+      "normalized_sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+      "staged_sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+      "staged_oid": "e703957d3b15e6e2da88c4f30222afd6dbd25e70",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 1812,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/B1/sources/pcsc5-v2.01.01.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 401060,
+        "sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+        "url": "https://pcscworkgroup.com/Download/Specifications/pcsc5_v2.01.01.pdf",
+        "access_utc": "2026-11-11T22:35:02.208132+00:00",
+        "authority": "investigation/B1/sources/manifest.json",
+        "applicability": "Exact revision, actor and claim applicability are recorded in investigation/B1/sources/register.md; retaining the PDF supplies no general conformance claim."
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/sec2-v2.pdf",
+      "bytes": 306784,
+      "raw_sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+      "normalized_sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+      "staged_sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+      "staged_oid": "c5c9bda0cd8b362a4669b58999b677bc9a7d4f37",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 4,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/C/sources/sec2-v2.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 306784,
+        "sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+        "url": "https://www.secg.org/sec2-v2.pdf",
+        "access_utc": "2026-11-11T22:51:41.002846+00:00",
+        "authority": "investigation/C/sources/completion-fetch-manifest.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/x690-202102.pdf",
+      "bytes": 840764,
+      "raw_sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+      "normalized_sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+      "staged_sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+      "staged_oid": "70b575cdb8ca5205c4d03a3464551611663fb444",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 4966,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/C/sources/x690-202102.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 840764,
+        "sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+        "url": "https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.690-202102-I!!PDF-E&type=items",
+        "access_utc": "2026-11-11T22:56:23.583516+00:00",
+        "authority": "investigation/C/sources/ber-source-attempts.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/x690-202102-metadata.html",
+      "bytes": 11512,
+      "raw_sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+      "normalized_sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+      "staged_sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+      "staged_oid": "7c84d683b093750fe1bcb2dc7d48367e75f69d48",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 178,
+      "raw_preserved_in_git": true,
+      "kind": "original-source-html",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/C/sources/x690-202102-metadata.html",
+        "kind": "original-source-html",
+        "encoding": "iso-8859-1",
+        "encoding_evidence": "Original HTML declares <META http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">.",
+        "bytes": 11512,
+        "sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+        "url": "https://www.itu.int/rec/T-REC-X.690-202102-I/en",
+        "access_utc": "2026-11-11T22:56:23.143991+00:00",
+        "authority": "investigation/C/sources/ber-source-attempts.json"
+      }
+    }
+  ],
+  "rejected": [
+    "changed-bytes",
+    "changed-length",
+    "unregistered-path",
+    "wrong-kind",
+    "wrong-url",
+    "wrong-hash",
+    "wrong-size",
+    "MZ",
+    "ELF",
+    "bad-magic",
+    "unsafe-path:../outside.pdf",
+    "unsafe-path:/outside.pdf",
+    "symlinked-registered-source",
+    "missing-registered-source",
+    "html-wrong-encoding",
+    "html-no-declaration-evidence",
+    "unregistered-non-utf8-html",
+    "html-wrong-original-response-media-type"
+  ],
+  "classifier": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records.py",
+    "bytes": 8255,
+    "sha256": "e115552ca79243091ad160bddb0667e4bb1dc9d2d1cd86800b4152ac8ab2f552"
+  },
+  "checker_profile_unaffected": true,
+  "source_registry": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sources/primary-binaries.json",
+    "bytes": 2207,
+    "sha256": "1ebcbc30fa343a906158473c8c33686143f711fe6759fcf141f73b140af34421"
+  }
+}

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Serilog.Extensions.Hosting" VersionOverride="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" VersionOverride="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" VersionOverride="7.0.0" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Core/src/Yubico.YubiKit.Core.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Management/src/Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Piv/src/Yubico.YubiKit.Piv.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Oath/src/Yubico.YubiKit.Oath.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Piv/examples/PivTool/PivTool.csproj" />
+    <ProjectReference Include="$(DocExamplesRoot)/src/Management/examples/ManagementTool/ManagementTool.csproj" />
+  </ItemGroup>
+</Project>

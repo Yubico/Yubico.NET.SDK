@@ -35,6 +35,8 @@ public enum KdfHashAlgorithm : byte
 ///     Standalone instances are caller-owned and disposable. A session retains the same object supplied
 ///     to SetKdfAsync or returned by GetKdfAsync and disposes its current cache during teardown. Keep that
 ///     object undisposed while the session uses it; retain outer cleanup scopes for replaced/reset objects.
+///     KdfIterSaltedS2k disposal clears its backing arrays but does not prevent subsequent Process calls.
+///     Disposing an aliased object early can therefore change derivation rather than produce a disposed-object error.
 /// </remarks>
 public abstract class Kdf : IDisposable
 {
@@ -72,6 +74,9 @@ public abstract class Kdf : IDisposable
     ///     Algorithm 3 requires the modeled S2K fields; absent/other identifiers currently produce KdfNone.
     ///     Malformed TLV or missing required S2K fields can fail parsing. Retain raw F9 data when inspecting
     ///     identifiers beyond the model. The returned object is owned by the caller unless retained by a session.
+    ///     Parsing copies TLV fields and clones salts/initial hashes into the result. Result disposal clears
+    ///     its backing arrays, not the caller's encoding or the intermediate dictionary field copies, which
+    ///     currently have no explicit clearing scope.
     /// </remarks>
     public static Kdf Parse(ReadOnlySpan<byte> encoded)
     {
@@ -316,6 +321,8 @@ public sealed class KdfIterSaltedS2k : Kdf
                 tlvs.Add(new Tlv(0x88, hashAdmin.Span));
             }
 
+            // Individual TLVs are disposed below. EncodeList's complete encoding is copied again here;
+            // that intermediate currently has no clearing scope, independently of the caller-owned result.
             return TlvHelper.EncodeList([.. tlvs]).ToArray();
         }
         finally

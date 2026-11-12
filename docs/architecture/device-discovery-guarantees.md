@@ -2,8 +2,8 @@
 
 What the SDK's composite device discovery does and does not guarantee, per platform, and why.
 
-Every guarantee below cites the test that pins it. A guarantee with no pinning test is not a
-guarantee — if you cannot find the citation, treat the behavior as unspecified and report it.
+The named tests below pin selected managed rules and fixture assertions. Scripted inputs establish
+those rules separately from native ABI, physical identity, permissions, and installed-driver evidence.
 
 Scope: grouping multiple USB interfaces (CCID/smart card, HID FIDO, HID OTP) of one physical
 YubiKey into one `IYubiKey`, as performed by `FindYubiKeys.FindAllAsync` and
@@ -33,15 +33,19 @@ Discovery resolves same-PID keys using an **evidence hierarchy**, strongest firs
 | 4 | **Pigeonhole deduction** — an orphan whose type fills the one incomplete anchored composite, under type-count closure | free | always |
 | 5 | **Conservative standalone** — publish the interface on its own rather than guess | free | always |
 
-The hierarchy never guesses. When evidence runs out, interfaces are published separately, which is
-incomplete but never wrong.
+The hierarchy uses the strongest available evidence and often leaves ambiguous interfaces separate.
+PID completeness and pigeonhole grouping still have a consequential limit: complementary partial
+observations from two same-PID keys can look like one complete key and form a cross-key composite.
+Read the [G2 bound](#g2-the-epistemic-bound) before using a composite serial to select a transport slot.
 
 Serial reads are conditional and on demand; discovery does **not** open every interface on every
 scan. It requests serial evidence only when PID correlation is untrusted, more than one physical key
 shares a PID, or a partial-PID shape is ambiguous. Only successful reads are cached, keyed by the
 stable **interface identifier** (`hid:*`, `pcsc:*` — not the physical `ykphysical:*` identifier discussed
 in [Device identity](#device-identity-what-deviceid-does-and-does-not-promise), which is a different
-concept); failures and null serials are retried on later scans. This is pinned by
+concept). Failed identity reads and identity reads without a serial are retried on later scans.
+Successful metadata reads are cached separately, including results without a serial; those results
+need not be reread on an unchanged scan. The failed-read behavior is pinned by
 `FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin`,
 `FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries_Pin`, and
 `FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin` in
@@ -56,8 +60,10 @@ immediately before the hotplug scan. Activity on any transport globally discards
 metadata caches; the reported transport is diagnostic context, not an eviction scope. A fresh different
 serial then makes the repository republish the successor rather than mutate the retained predecessor. A
 composite swap's events can arrive on one transport before another, so per-transport retention could
-combine evidence from the departed and replacement keys. **Configuration**: each entry records the PID
-observed at read time, and a hit under a different PID is a miss. Pinned by
+combine evidence from the departed and replacement keys. **Configuration**: each identity-cache entry
+records the PID observed at read time, and a hit under a different PID is a miss. The separate metadata
+cache stores metadata and member IDs without the same PID check, so a stable-ID configuration change
+can retain stale metadata until another invalidation. The identity and global-invalidation paths are pinned by
 `FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
 `FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
 the global-invalidation vectors in `FindYubiKeysFaultInjectionTests`, and
@@ -228,9 +234,10 @@ two members of the same connection type, invisible in `AvailableConnections` and
 connect time) and they do **not** both mint the id. Instead, the *winner rule* applies: the PID group
 whose serial-anchored census exactly matches its PID's expected interface set keeps `ykphysical:{serial}`;
 every other contested interface publishes standalone. Zero or multiple complete groups is ambiguity, and
-ambiguity fragments conservatively — the next scan converges. Completeness is a heuristic and can pick the
+ambiguity fragments conservatively. Later scans converge only when the evidence changes sufficiently.
+Completeness is a heuristic and can pick the
 stale enumeration when a scan catches it still fully enumerated; both groups are the same physical key, so
-the consequence is bounded to one scan of stale membership and self-corrects. The reasoning is recorded at
+stale membership can persist while that evidence persists. The reasoning is recorded at
 `CompositeDeviceMerger.ResolveContestedSerials`, and the rule is pinned by the `Merge_ContestedSerial_*`
 vectors plus `Merge_AnyVector_ProducesPairwiseDistinctDeviceIds`.
 
@@ -256,9 +263,9 @@ though the device did not. Measured on macOS hardware:
 | 103 alone | `ykphysical:pid:0407` | its PID is unique on the bus; no serial evidence needed |
 | 103 + a same-PID sibling | `ykphysical:103` | serial evidence is now required to tell the two apart |
 
-Inserting an unrelated second key therefore changes how the first one is named. Discovery absorbs this
-without emitting spurious add/remove events for the incumbent, which is the guarantee that matters to
-subscribers, but the identifier itself is not invariant.
+Inserting an unrelated second key can change how a fresh scan names the first one. Within an owned
+monitor, the incumbent is retained when its member and connection sets stay unchanged and no known
+serial contradicts it. The identifier of an independent scan object remains evidence-dependent.
 
 ### A live repository and a fresh scan can disagree
 
@@ -305,7 +312,7 @@ This SDK's merger contains no firmware-version logic, and none should be added f
 |---|---|---|---|---|
 | G1 | No cross-key composite under complete same-PID visibility | yes | yes | yes |
 | G2 | No cross-key composite during partial visibility | yes, with topology evidence | bounded — see [G2 bound](#g2-the-epistemic-bound) | same as macOS |
-| G3 | Same-PID keys that report serials: complete grouping | first scan, with topology | first scan in practice; converges — see [G3](#g3-convergence) | same as macOS |
+| G3 | Same-PID keys that report serials: grouping when consumed evidence resolves them | with usable topology evidence | conditional; see [G3](#g3-convergence) | same as macOS |
 | G4 | Serial-less multi-interface keys: complete grouping | yes, with topology | **no — permanent split** | **no — permanent split** |
 | G5 | Reconfigured key (different enabled interfaces) | yes | yes | yes |
 | G6 | Single-interface keys publish as one-slot flat devices with their transport-shaped `DeviceId` preserved | yes | yes | yes |
@@ -364,15 +371,17 @@ this bound.
 **When it can occur:** staggered USB enumeration during hotplug, the ~3 second reboot window after
 a configuration change, or an interface failing to enumerate.
 
-**How it heals:** on the first scan with complete same-PID visibility, serial evidence, or topology
-evidence. Healing is conditional on evidence, not on elapsed time — an interface that stays absent,
-busy, or unreadable keeps the window open. Discovery keeps scanning, but no scan is guaranteed to
-heal.
+**How it can heal:** later observations can regroup interfaces when they supply evidence actually used
+by the merger's tiers. Complete visibility or newly available serials alone do not guarantee that the
+next scan takes a different tier or discards cached ambiguous evidence. There is no expiry forcing
+one-scan convergence; repeated scans can select the same ambiguous grouping. Healing depends on the
+effective evidence changing, not elapsed time or a promised first complete/serial-bearing scan.
 
-**Blast radius:** raw interface slots are path-bound — PC/SC connects through its enumerated reader
-and HID through its enumerated device handle — so a misgrouped composite never routes a connection to a different physical
-interface than the one it names. The exposure is composite-level metadata and capability-filter
-truth, not connection misdelivery.
+**Blast radius:** raw interface slots are path-bound: PC/SC opens its enumerated reader and HID opens its
+enumerated path. This preserves slot routing, but does not verify that the chosen slot belongs to the
+composite's reported serial. Selecting a misgrouped composite by serial and then opening another slot
+can therefore reach the other physical key. For consequential identity-sensitive work, require suitable
+identity evidence rather than treating path-bound routing as a serial-to-slot guarantee.
 
 **Rejected alternatives**, recorded so they are not re-proposed: (a) always requiring serial
 evidence for every multi-interface merge — imposes seconds of first-scan latency on every
@@ -384,13 +393,13 @@ than closing it, and doubles metadata reads.
 
 Successful serial reads are cached per interface and evicted when an interface disappears or any
 transport activity globally invalidates cached identity and metadata. Between invalidations, knowledge
-accumulates across scans within an owned monitor. In practice a long-lived `YubiKeyMonitor` reaches complete grouping on the first
-scan and stays there until any HID or PC/SC hotplug activity invalidates it. Listener activity is
+accumulates across scans within an owned monitor. An unambiguous readable fixture can group on its first
+scan, but that is not a universal first-scan convergence promise. Listener activity is
 transport-wide and can include devices other than YubiKeys.
 
-Convergence is conditional: it completes **provided each interface is eventually idle and
-identity-readable**. An interface held in use forever, or persistently unreadable, stays
-conservatively split (see G8).
+Convergence depends on the evidence the tiers actually consume. Eventual idle/readable interfaces
+help but do not alone force an ambiguous cached grouping to expire. An interface held in use forever
+or persistently unreadable can remain separate (see G8).
 
 Reader-name renames are safe: a PC/SC reader-name change (`"... 01"` → `"... 02"` as the reader set
 changes) is a cache miss, costing one re-read. A stale serial is never served under a rename.
@@ -401,9 +410,10 @@ A key that reports no serial number offers protocol-level identity nothing to wo
 such keys are connected and each exposes multiple interfaces:
 
 - **Windows** groups them correctly using Container ID — no serial needed, no device I/O.
-- **macOS and Linux cannot group them at all.** Each interface is published as a separate device,
-  permanently. This is a platform bound, not an implementation gap: neither platform offers a
-  supported mapping from a PC/SC reader name to a USB device. On macOS, `TKSmartCardSlot` and the
+- **The current macOS and Linux resolvers supply no topology keys.** With multiple same-PID keys and
+  no serial evidence, the merger can leave their interfaces separate indefinitely. This describes the
+  implemented route, not proof that every possible platform correlation technique is unavailable.
+  On macOS, `TKSmartCardSlot` and the
   PC/SC reader name expose no USB topology, and the `" 02"` suffix is a driver-local enumeration
   artifact. On Linux, the pcsc-lite reader-name serial component comes from the USB
   `iSerialNumber`, which YubiKeys do not expose, and `SCARD_ATTR_CHANNEL_ID` is not a documented
@@ -413,9 +423,9 @@ The v1 SDK had the same bound and never attempted CCID topology correlation on a
 
 ### G8: in-use interfaces
 
-Discovery **never disturbs an open session**: if an interface has a live connection, discovery
-skips its identity read rather than competing for it. That interface therefore has no serial
-evidence while it stays busy.
+Discovery skips reads on registry-claimed member interfaces. Previously cached evidence may still be
+available. A direct unregistered connection, or an unclaimed sibling in a disjoint scoped view, falls
+outside that protection; coordinate those lifetimes explicitly before scanning.
 
 The guarantee is: an in-use interface is attributed **once it first becomes idle AND a subsequent
 scan successfully reads its identity**; the cache retains that attribution thereafter, including

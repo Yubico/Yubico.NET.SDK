@@ -1,0 +1,2237 @@
+{
+  "commands": {
+    "examples-ac-first": {
+      "receipt": {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "Audit20261111.DocExamples",
+          "--clean"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T01:34:23.068511+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [
+          "build"
+        ],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/examples-ac-first",
+        "qualification_faults": [],
+        "exit_code": 0,
+        "status": "passed",
+        "errors": [],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3618913,
+          "sid": 3618913,
+          "leader_start_ticks": 82505290,
+          "before": {
+            "members": [
+              {
+                "pid": 3619018,
+                "state": "S",
+                "ppid": 3618862,
+                "pgid": 3618913,
+                "sid": 3618913,
+                "start_ticks": 82505370
+              },
+              {
+                "pid": 3619019,
+                "state": "S",
+                "ppid": 3618862,
+                "pgid": 3618913,
+                "sid": 3618913,
+                "start_ticks": 82505370
+              },
+              {
+                "pid": 3619106,
+                "state": "S",
+                "ppid": 3618862,
+                "pgid": 3618913,
+                "sid": 3618913,
+                "start_ticks": 82505507
+              },
+              {
+                "pid": 3619132,
+                "state": "S",
+                "ppid": 3619018,
+                "pgid": 3618913,
+                "sid": 3618913,
+                "start_ticks": 82505558
+              }
+            ],
+            "escaped": []
+          },
+          "signals": [
+            {
+              "signal": "SIGTERM",
+              "proven_members": [
+                {
+                  "pid": 3619018,
+                  "state": "S",
+                  "ppid": 3618862,
+                  "pgid": 3618913,
+                  "sid": 3618913,
+                  "start_ticks": 82505370
+                },
+                {
+                  "pid": 3619019,
+                  "state": "S",
+                  "ppid": 3618862,
+                  "pgid": 3618913,
+                  "sid": 3618913,
+                  "start_ticks": 82505370
+                },
+                {
+                  "pid": 3619106,
+                  "state": "S",
+                  "ppid": 3618862,
+                  "pgid": 3618913,
+                  "sid": 3618913,
+                  "start_ticks": 82505507
+                },
+                {
+                  "pid": 3619132,
+                  "state": "S",
+                  "ppid": 3619018,
+                  "pgid": 3618913,
+                  "sid": 3618913,
+                  "start_ticks": 82505558
+                }
+              ]
+            }
+          ],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": {
+          "targets": [
+            "test-infrastructure-qa",
+            "native-aot-contract-qa",
+            "build"
+          ],
+          "projects": 0,
+          "executed": 0,
+          "skipped": 0,
+          "failed": 0,
+          "warnings": 0
+        },
+        "retained": [
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023423-403-build/01-clean-Audit20261111.DocExamples.log",
+              "bytes": 13194,
+              "sha256": "e4da1eb9c1f8829f9d225251a240ecfb458c80fd953118dcbcdd98d229112d1f"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/toolchain/20261112-023423-403-build/01-clean-Audit20261111.DocExamples.log",
+              "bytes": 13194,
+              "sha256": "e4da1eb9c1f8829f9d225251a240ecfb458c80fd953118dcbcdd98d229112d1f"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023423-403-build/02-build-Audit20261111.DocExamples.log",
+              "bytes": 1264,
+              "sha256": "f9522eed354350c48fd5dd64c6a3376fff3303a4fa896bd7caa959b75baa1269"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/toolchain/20261112-023423-403-build/02-build-Audit20261111.DocExamples.log",
+              "bytes": 1264,
+              "sha256": "f9522eed354350c48fd5dd64c6a3376fff3303a4fa896bd7caa959b75baa1269"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023423-403-build/result.json",
+              "bytes": 717,
+              "sha256": "de9bd281c2700c319037e2672f76e8ba237148590ede02fa06df9f1b379165bc"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/toolchain/20261112-023423-403-build/result.json",
+              "bytes": 717,
+              "sha256": "de9bd281c2700c319037e2672f76e8ba237148590ede02fa06df9f1b379165bc"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023423-403-build/result.txt",
+              "bytes": 442,
+              "sha256": "9a52271b1a61a7395e9633a93f648fddd72997436c98c46dcc9e5b472dc4177f"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/toolchain/20261112-023423-403-build/result.txt",
+              "bytes": 442,
+              "sha256": "9a52271b1a61a7395e9633a93f648fddd72997436c98c46dcc9e5b472dc4177f"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023423-403-build/run.log",
+              "bytes": 2124,
+              "sha256": "006cf4fed730b4e2c03d978497e6097c50f8c562b57999f8ba376b54abe8126d"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/toolchain/20261112-023423-403-build/run.log",
+              "bytes": 2124,
+              "sha256": "006cf4fed730b4e2c03d978497e6097c50f8c562b57999f8ba376b54abe8126d"
+            }
+          }
+        ],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/stdout.log",
+            "bytes": 1798,
+            "sha256": "c20515299fb302383a2d9f9042547574d9e94042e63751da37c1881224531733"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T01:34:32.916552+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "c20515299fb302383a2d9f9042547574d9e94042e63751da37c1881224531733",
+      "outcome": "passed",
+      "exit_code": 0,
+      "result_tail": [
+        "=== Validating hardware-test declarations ===",
+        "",
+        "✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package",
+        "",
+        "▶ target: native-aot-contract-qa",
+        "",
+        "=== Validating Native AOT support contract ===",
+        "",
+        "✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type",
+        "✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+        "",
+        "▶ target: build",
+        "",
+        "=== Building ===",
+        "",
+        "▶ RUN dotnet clean docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/Yubico.YubiKit.Audit20261111.DocExamples.csproj -c Release",
+        "  output: artifacts/toolchain/runs/20261112-023423-403-build/01-clean-Audit20261111.DocExamples.log",
+        "▶ RUN dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/Yubico.YubiKit.Audit20261111.DocExamples.csproj -c Release --no-incremental",
+        "  output: artifacts/toolchain/runs/20261112-023423-403-build/02-build-Audit20261111.DocExamples.log",
+        "✓ Built 1 project(s) matching 'Audit20261111.DocExamples': Audit20261111.DocExamples",
+        "",
+        "============================================================",
+        "RESULT: PASSED  (dotnet toolchain.cs -- build --project Audit20261111.DocExamples --clean)",
+        "Targets:",
+        "  ✓ test-infrastructure-qa     0.0s",
+        "  ✓ native-aot-contract-qa     0.0s",
+        "  ✓ build                      9.1s",
+        "Warnings: 0",
+        "Run log: artifacts/toolchain/runs/20261112-023423-403-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)",
+        "============================================================"
+      ],
+      "scope": "Retained coordinator run at its actual input/output checkpoint; no execution by this reconciliation."
+    },
+    "unit-tests-integrated-docs": {
+      "receipt": {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "test",
+          "--filter",
+          "Category!=RequiresHardware&Category!=RequiresUserPresence"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T01:30:26.398986+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/unit-tests-integrated-docs",
+        "qualification_faults": [],
+        "exit_code": 0,
+        "status": "passed",
+        "errors": [],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3612409,
+          "sid": 3612409,
+          "leader_start_ticks": 82481624,
+          "before": {
+            "members": [
+              {
+                "pid": 3612526,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481712
+              },
+              {
+                "pid": 3612527,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481712
+              },
+              {
+                "pid": 3612528,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481712
+              },
+              {
+                "pid": 3612529,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481712
+              },
+              {
+                "pid": 3612530,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481712
+              },
+              {
+                "pid": 3612531,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481712
+              },
+              {
+                "pid": 3612564,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481713
+              },
+              {
+                "pid": 3612567,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481713
+              },
+              {
+                "pid": 3612722,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481820
+              },
+              {
+                "pid": 3612836,
+                "state": "S",
+                "ppid": 3612722,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82481893
+              },
+              {
+                "pid": 3616326,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82488461
+              },
+              {
+                "pid": 3616327,
+                "state": "S",
+                "ppid": 3612382,
+                "pgid": 3612409,
+                "sid": 3612409,
+                "start_ticks": 82488461
+              }
+            ],
+            "escaped": []
+          },
+          "signals": [
+            {
+              "signal": "SIGTERM",
+              "proven_members": [
+                {
+                  "pid": 3612526,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481712
+                },
+                {
+                  "pid": 3612527,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481712
+                },
+                {
+                  "pid": 3612528,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481712
+                },
+                {
+                  "pid": 3612529,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481712
+                },
+                {
+                  "pid": 3612530,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481712
+                },
+                {
+                  "pid": 3612531,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481712
+                },
+                {
+                  "pid": 3612564,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481713
+                },
+                {
+                  "pid": 3612567,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481713
+                },
+                {
+                  "pid": 3612722,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481820
+                },
+                {
+                  "pid": 3612836,
+                  "state": "S",
+                  "ppid": 3612722,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82481893
+                },
+                {
+                  "pid": 3616326,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82488461
+                },
+                {
+                  "pid": 3616327,
+                  "state": "S",
+                  "ppid": 3612382,
+                  "pgid": 3612409,
+                  "sid": 3612409,
+                  "start_ticks": 82488461
+                }
+              ]
+            }
+          ],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": null,
+        "retained": [
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/01-test-Cli.Commands.UnitTests.log",
+              "bytes": 813,
+              "sha256": "c56ce53a3762d83f56cefc2ebd1de5a766d35f9fcb8822a1aacc0153224b4947"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/01-test-Cli.Commands.UnitTests.log",
+              "bytes": 813,
+              "sha256": "c56ce53a3762d83f56cefc2ebd1de5a766d35f9fcb8822a1aacc0153224b4947"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/02-test-Cli.Shared.UnitTests.log",
+              "bytes": 595,
+              "sha256": "6bc15fa835c9c6ae264347390eda3fe4aecb14ee0252cbaeec63bf1c7bce01d5"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/02-test-Cli.Shared.UnitTests.log",
+              "bytes": 595,
+              "sha256": "6bc15fa835c9c6ae264347390eda3fe4aecb14ee0252cbaeec63bf1c7bce01d5"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/03-test-Core.UnitTests.log",
+              "bytes": 4448,
+              "sha256": "9535ee489aa632fc427e7bf8d53c04e8f081d204f9af1e2004b8fe5f6fa619ad"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/03-test-Core.UnitTests.log",
+              "bytes": 4448,
+              "sha256": "9535ee489aa632fc427e7bf8d53c04e8f081d204f9af1e2004b8fe5f6fa619ad"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/04-test-Ctap2.UnitTests.log",
+              "bytes": 567,
+              "sha256": "36bc9f922e161cb5e06c9a30fdf3ddc78e952a73e9169896d86844884b96e651"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/04-test-Ctap2.UnitTests.log",
+              "bytes": 567,
+              "sha256": "36bc9f922e161cb5e06c9a30fdf3ddc78e952a73e9169896d86844884b96e651"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/05-test-Management.UnitTests.log",
+              "bytes": 595,
+              "sha256": "bc7c918422ea4c579c1527d14a916c91a0b497ca0b3d05eb8b76fba03cf8bdfe"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/05-test-Management.UnitTests.log",
+              "bytes": 595,
+              "sha256": "bc7c918422ea4c579c1527d14a916c91a0b497ca0b3d05eb8b76fba03cf8bdfe"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/06-test-Oath.UnitTests.log",
+              "bytes": 39309,
+              "sha256": "31384d7b90f5dccf3b7298620de1c0184e8386be3a29a6eb77a58453683fad9b"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/06-test-Oath.UnitTests.log",
+              "bytes": 39309,
+              "sha256": "31384d7b90f5dccf3b7298620de1c0184e8386be3a29a6eb77a58453683fad9b"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/07-test-OpenPgp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "5e32fa5bd576e9380cab98d52b47468eb940b1800a524e0bbea00c53067ef2d5"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/07-test-OpenPgp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "5e32fa5bd576e9380cab98d52b47468eb940b1800a524e0bbea00c53067ef2d5"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/08-test-Piv.UnitTests.log",
+              "bytes": 555,
+              "sha256": "f3201b8a9cce2ba983c03bd43d7bc6ab026d957f4295229e64e57ff98d0093f0"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/08-test-Piv.UnitTests.log",
+              "bytes": 555,
+              "sha256": "f3201b8a9cce2ba983c03bd43d7bc6ab026d957f4295229e64e57ff98d0093f0"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/09-test-PublicApi.UnitTests.log",
+              "bytes": 589,
+              "sha256": "7d50655a29f4bdf94c354fe1fba18c33b5282583e8bcc327ce63e0750ed0295f"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/09-test-PublicApi.UnitTests.log",
+              "bytes": 589,
+              "sha256": "7d50655a29f4bdf94c354fe1fba18c33b5282583e8bcc327ce63e0750ed0295f"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/10-test-SecurityDomain.UnitTests.log",
+              "bytes": 619,
+              "sha256": "2b290c3d798ab0d691373da760e845698685d4b6203acf9b47f062d7a46dc370"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/10-test-SecurityDomain.UnitTests.log",
+              "bytes": 619,
+              "sha256": "2b290c3d798ab0d691373da760e845698685d4b6203acf9b47f062d7a46dc370"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/11-test-WebAuthn.UnitTests.log",
+              "bytes": 585,
+              "sha256": "939dce80869ea03bc8e95289fb953d8f8f1833e8a75b09dcd3f4ee41c3da684c"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/11-test-WebAuthn.UnitTests.log",
+              "bytes": 585,
+              "sha256": "939dce80869ea03bc8e95289fb953d8f8f1833e8a75b09dcd3f4ee41c3da684c"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/12-test-YubiHsm.UnitTests.log",
+              "bytes": 577,
+              "sha256": "23a11dd9ab84bf550765623296dcb361d426f525eba702a7b2df19c60f678b2f"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/12-test-YubiHsm.UnitTests.log",
+              "bytes": 577,
+              "sha256": "23a11dd9ab84bf550765623296dcb361d426f525eba702a7b2df19c60f678b2f"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/13-test-YubiOtp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "94934576ace7e1fc855dc64e661eaa62ae78be614cef29048b2369d953831fab"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/13-test-YubiOtp.UnitTests.log",
+              "bytes": 579,
+              "sha256": "94934576ace7e1fc855dc64e661eaa62ae78be614cef29048b2369d953831fab"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/result.json",
+              "bytes": 4877,
+              "sha256": "f0a7f417ed29383ca031a3443f4ae916c21f260670843f04a62e1b3caf11fdcd"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/result.json",
+              "bytes": 4877,
+              "sha256": "f0a7f417ed29383ca031a3443f4ae916c21f260670843f04a62e1b3caf11fdcd"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/result.txt",
+              "bytes": 1404,
+              "sha256": "d3e441f5432bc2b6d0b6e0639d3bbbb11a1b51b18fc387856390e28dce06edcd"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/result.txt",
+              "bytes": 1404,
+              "sha256": "d3e441f5432bc2b6d0b6e0639d3bbbb11a1b51b18fc387856390e28dce06edcd"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-023026-756-test/run.log",
+              "bytes": 7265,
+              "sha256": "b8c04059b5f6b3b0f13d2fc9f6d1edf9ed35a69c33fe1420b47ab73fd52687ed"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/run.log",
+              "bytes": 7265,
+              "sha256": "b8c04059b5f6b3b0f13d2fc9f6d1edf9ed35a69c33fe1420b47ab73fd52687ed"
+            }
+          }
+        ],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/stdout.log",
+            "bytes": 6915,
+            "sha256": "696de978a9af4e8bd289d849cdfcd1c5a99b4f11eb326df716aba0cd2499e888"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/unit-tests-integrated-docs/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T01:31:54.587171+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "696de978a9af4e8bd289d849cdfcd1c5a99b4f11eb326df716aba0cd2499e888",
+      "outcome": "passed",
+      "exit_code": 0,
+      "result_tail": [
+        "✓ PASS (91 executed, 0 skipped)",
+        "",
+        "=== Testing: YubiOtp.UnitTests ===",
+        "▶ RUN dotnet run --project src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj -c Release -- --filter-not-trait \"Category=RequiresHardware\" --filter-not-trait \"Category=RequiresUserPresence\"",
+        "  output: artifacts/toolchain/runs/20261112-023026-756-test/13-test-YubiOtp.UnitTests.log",
+        "✓ PASS (205 executed, 0 skipped)",
+        "",
+        "============================================================",
+        "RESULT: PASSED  (dotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence\")",
+        "Targets:",
+        "  ✓ test-infrastructure-qa     0.0s",
+        "  ✓ test                      87.4s",
+        "Projects (test):",
+        "  ✓ PASS      Cli.Commands.UnitTests    48 executed, 1 skipped",
+        "  ✓ PASS      Cli.Shared.UnitTests      78 executed, 0 skipped",
+        "  ✓ PASS      Core.UnitTests            2065 executed, 4 skipped",
+        "  ✓ PASS      Ctap2.UnitTests           495 executed, 0 skipped",
+        "  ✓ PASS      Management.UnitTests      96 executed, 0 skipped",
+        "  ✓ PASS      Oath.UnitTests            436 executed, 0 skipped",
+        "  ✓ PASS      OpenPgp.UnitTests         193 executed, 0 skipped",
+        "  ✓ PASS      Piv.UnitTests             289 executed, 0 skipped",
+        "  ✓ PASS      PublicApi.UnitTests       25 executed, 0 skipped",
+        "  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped",
+        "  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped",
+        "  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped",
+        "  ✓ PASS      YubiOtp.UnitTests         205 executed, 0 skipped",
+        "Totals: projects: 13 passed, 0 failed, 0 with no tests executed; tests: 4442 executed, 0 failed, 5 skipped",
+        "Warnings: 0",
+        "Run log: artifacts/toolchain/runs/20261112-023026-756-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)",
+        "============================================================"
+      ],
+      "scope": "Retained coordinator run at its actual input/output checkpoint; no execution by this reconciliation."
+    },
+    "checker-bound-build-final-edits": {
+      "receipt": {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "Audit20261111.DocCheck",
+          "--clean"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T03:15:35.395595+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [
+          "build"
+        ],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/checker-bound-build-final-edits",
+        "qualification_faults": [],
+        "exit_code": 0,
+        "status": "passed",
+        "errors": [],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3682826,
+          "sid": 3682826,
+          "leader_start_ticks": 83112523,
+          "before": {
+            "members": [
+              {
+                "pid": 3682879,
+                "state": "S",
+                "ppid": 3682801,
+                "pgid": 3682826,
+                "sid": 3682826,
+                "start_ticks": 83112593
+              }
+            ],
+            "escaped": []
+          },
+          "signals": [
+            {
+              "signal": "SIGTERM",
+              "proven_members": [
+                {
+                  "pid": 3682879,
+                  "state": "S",
+                  "ppid": 3682801,
+                  "pgid": 3682826,
+                  "sid": 3682826,
+                  "start_ticks": 83112593
+                }
+              ]
+            }
+          ],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": {
+          "targets": [
+            "test-infrastructure-qa",
+            "native-aot-contract-qa",
+            "build"
+          ],
+          "projects": 0,
+          "executed": 0,
+          "skipped": 0,
+          "failed": 0,
+          "warnings": 0
+        },
+        "retained": [
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-041537-366-build/01-clean-Audit20261111.DocCheck.log",
+              "bytes": 4451,
+              "sha256": "4e340be60fcff7f90fc99742d8e00c4dcb8a226e58ad6fd65c64fafbac430635"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits/toolchain/20261112-041537-366-build/01-clean-Audit20261111.DocCheck.log",
+              "bytes": 4451,
+              "sha256": "4e340be60fcff7f90fc99742d8e00c4dcb8a226e58ad6fd65c64fafbac430635"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-041537-366-build/02-build-Audit20261111.DocCheck.log",
+              "bytes": 534,
+              "sha256": "f8ef44a897cc508e68116cb38d4bffe517c375f719c5baf11d2cb04fd9d96107"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits/toolchain/20261112-041537-366-build/02-build-Audit20261111.DocCheck.log",
+              "bytes": 534,
+              "sha256": "f8ef44a897cc508e68116cb38d4bffe517c375f719c5baf11d2cb04fd9d96107"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-041537-366-build/result.json",
+              "bytes": 714,
+              "sha256": "126f0812575dd87ddbdb3d4055d27144cf508a018ab6d62fd31bea4f3ebc1a6c"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits/toolchain/20261112-041537-366-build/result.json",
+              "bytes": 714,
+              "sha256": "126f0812575dd87ddbdb3d4055d27144cf508a018ab6d62fd31bea4f3ebc1a6c"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-041537-366-build/result.txt",
+              "bytes": 439,
+              "sha256": "f0c11b98e25aae7897efb8f4381f34d9681025c4ad9a101d21f59165a6f45828"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits/toolchain/20261112-041537-366-build/result.txt",
+              "bytes": 439,
+              "sha256": "f0c11b98e25aae7897efb8f4381f34d9681025c4ad9a101d21f59165a6f45828"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-041537-366-build/run.log",
+              "bytes": 2088,
+              "sha256": "2f3d4bf3d4920b22dae65daa92ceaaec0a11a0543cc46c4ca5e51935154629db"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits/toolchain/20261112-041537-366-build/run.log",
+              "bytes": 2088,
+              "sha256": "2f3d4bf3d4920b22dae65daa92ceaaec0a11a0543cc46c4ca5e51935154629db"
+            }
+          }
+        ],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits/stdout.log",
+            "bytes": 1765,
+            "sha256": "72a298092f45968334680c9c241f16fdd22325475c4f4fc633920b13d48bccbc"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/checker-bound-build-final-edits/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T03:15:41.174101+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "72a298092f45968334680c9c241f16fdd22325475c4f4fc633920b13d48bccbc",
+      "outcome": "passed",
+      "exit_code": 0,
+      "result_tail": [
+        "=== Validating hardware-test declarations ===",
+        "",
+        "✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package",
+        "",
+        "▶ target: native-aot-contract-qa",
+        "",
+        "=== Validating Native AOT support contract ===",
+        "",
+        "✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type",
+        "✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+        "",
+        "▶ target: build",
+        "",
+        "=== Building ===",
+        "",
+        "▶ RUN dotnet clean docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release",
+        "  output: artifacts/toolchain/runs/20261112-041537-366-build/01-clean-Audit20261111.DocCheck.log",
+        "▶ RUN dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release --no-incremental",
+        "  output: artifacts/toolchain/runs/20261112-041537-366-build/02-build-Audit20261111.DocCheck.log",
+        "✓ Built 1 project(s) matching 'Audit20261111.DocCheck': Audit20261111.DocCheck",
+        "",
+        "============================================================",
+        "RESULT: PASSED  (dotnet toolchain.cs -- build --project Audit20261111.DocCheck --clean)",
+        "Targets:",
+        "  ✓ test-infrastructure-qa     0.0s",
+        "  ✓ native-aot-contract-qa     0.0s",
+        "  ✓ build                      3.4s",
+        "Warnings: 0",
+        "Run log: artifacts/toolchain/runs/20261112-041537-366-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)",
+        "============================================================"
+      ],
+      "scope": "Retained coordinator run at its actual input/output checkpoint; no execution by this reconciliation."
+    },
+    "source-tokens-final-profile-first": {
+      "receipt": {
+        "command": [
+          "/home/rupicola/.local/share/mise/dotnet-root/dotnet",
+          "exec",
+          "--roll-forward",
+          "Disable",
+          "--fx-version",
+          "10.0.15",
+          "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+          "tokens",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T03:16:48.485732+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/source-tokens-final-profile-first",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/source-tokens-final-profile-first",
+        "qualification_faults": [],
+        "exit_code": 0,
+        "status": "passed",
+        "errors": [],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3683712,
+          "sid": 3683712,
+          "leader_start_ticks": 83119833,
+          "before": {
+            "members": [],
+            "escaped": []
+          },
+          "signals": [],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": null,
+        "retained": [],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/source-tokens-final-profile-first/stdout.log",
+            "bytes": 210829,
+            "sha256": "26478bf287712e79b1cf7eb2358eaa30de9899c8e64181246f5b132a51c0bc41"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/source-tokens-final-profile-first/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T03:16:56.315523+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "26478bf287712e79b1cf7eb2358eaa30de9899c8e64181246f5b132a51c0bc41",
+      "outcome": "passed",
+      "exit_code": 0,
+      "result_tail": [
+        "PASS: tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationEncapsulationTests.cs; SHA256=A7928BA0DD8CFACA8C0DDB9DDD2A621796F5E950540AFE19FC4BC99B83857B73",
+        "PASS: tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs; SHA256=9D1509F4BA3BF6B0A455D559E0410A828291B9E18D170B9A8E4494DA41031373",
+        "PASS: tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs; SHA256=78AC079A5225CD351D9BA1171BC24400B7AF9BC966DBAE4D31D213D9C9BF33E8",
+        "PASS: tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs; SHA256=41E0D3B0D1998FB31652D482145593ECF75C70E1BD685ACEECB86D551B100DDB",
+        "PASS: tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionLinuxCrossLayerTests.cs; SHA256=26EF560ADCA8C3AB6893D27FAED2EF59102FB5D665882121F9ABB56219CA155E",
+        "PASS: tokens/directives src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs; SHA256=1407C923BB859C7942B013A73EF50E86B04C4DC28D6868177C5B71B65AFE1E61",
+        "PASS: tokens/directives toolchain.cs; SHA256=B1331780108717829036BD3952952C0A571D1FEBD4F4504A2611567169C1F74E",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/BlockingReportConnection.cs; SHA256=175517F1FAC130A7C052D95D437594879A314A097E245936F6D1107D32BB65DE",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/DescriptorReportApi.cs; SHA256=BC7C937A03FF8495785CF59F8C2F9466A08B3DD3573EC3B11ED809E8FE4C63EE",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/Evidence.cs; SHA256=FC15C91FF84B283ED5F3D1CA9E4D6690F40DC1B8ECD390A77060A64D9DA53CE5",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/HardwareScenarios.cs; SHA256=73C4132CE116B29D5EA84CDEF51A2ACDEECDA3A3DBED56AB152278923D2D84CE",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/NativeDescriptors.cs; SHA256=B626C4E74BC3270BBABC9B5876D2498A1870F24E3B8C5B5F487F17777AAF0B68",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/NativeScenarios.cs; SHA256=7C9FB3018E97E0E181F8C9BCCCC5EBA8A61D3049B22934493343FEB477641E40",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/ObservedReadinessNative.cs; SHA256=C7D13E06CCE02603238447F1829916C641ACDF1F027084CFB1525566E785223B",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/OperatorScenarios.cs; SHA256=C648272A8B935F508FB9880FE16E9E5938A1DAD962050C7575305CFDC84A712E",
+        "PASS: tokens/directives verification/LinuxHidRouteVerification/Program.cs; SHA256=75FC7B74A912322BAECCE458AB0B1FA423FE1F027479F90E4081E9899C3F0878",
+        "PASS: tokens/directives verification/MacOSHidBoundaryComparison/CurrentProfile.cs; SHA256=7AC06CEB62A29CD3463344FBD7B3CE4D149B109A81388B81BF340CFBE863CEA6",
+        "PASS: tokens/directives verification/MacOSHidBoundaryComparison/Program.cs; SHA256=9A46C56ED96496706868BA7B3B09202AC9835ED3E76F2EC2634C66401EA8B29C",
+        "PASS: tokens/directives verification/MacOSHidBoundaryComparison/RunnerSelfTest.cs; SHA256=DD2FE277AA23ABF7038455B96D086FA86D0605952F2915AE7942AF52AC5880DE",
+        "PASS: tokens/directives verification/MacOSHidInputVerification/Program.cs; SHA256=EF4C55ACE3A7AB0185B678DE84D8D276C9ADB5D819AE952DC03C2939CA621963",
+        "PASS: tokens/directives verification/MacOSHidRouteVerification/AcceptanceScenarios.cs; SHA256=9E24F9CEB435C60ED719D1BE483EDAC263B8E9C0CBACFC7E6F86C029FBE87163",
+        "PASS: tokens/directives verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs; SHA256=649DD53E6314CF5561D61BFAD150695B4AB3777810276BE2E8F76AF54C36E937",
+        "PASS: tokens/directives verification/MacOSHidRouteVerification/ExpertIoScenario.cs; SHA256=7CCFD8846E21040B5FB6831FCAA99C8259E196A5E436C5C9A602A3445540D133",
+        "PASS: tokens/directives verification/MacOSHidRouteVerification/ListenerDrainScenario.cs; SHA256=FC02FF51845B952EBFDEA580C5E9BB5D9EC2728ADF38EE3209561F0EC68682BD",
+        "PASS: tokens/directives verification/MacOSHidRouteVerification/Program.cs; SHA256=D5B99076BAC9BE69231DB6DE26F9BA69F27D4F33027DE7A246EDF226545F4A2B",
+        "PASS: tokens/directives verification/MacOSHidRouteVerification/SmartCardScenario.cs; SHA256=109AE75B5018807486140D4BF0FB144075484B2971B9A3724D44D7FEDF975272",
+        "PASS: tokens/directives verification/NativeAotVerification/Program.cs; SHA256=A4CCFEF7152CC440C2EBA998E7225CFC7E9F3932D66FE17EEAFD9434857E39FB",
+        "PASS: tokens/directives verification/NativeCompatibilityVerification/Program.cs; SHA256=BEC35657A48D4F1AD104CF043797B83A9F7E75CE1919B28612D604E8222BBEE8",
+        "PASS: tokens/directives verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs; SHA256=EBCA9BA8179574D90066A152D778A02BD8F7E3D35F0902BE6A57D28DDF4B9E09",
+        "Token comparison against fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef: files=1320, failures=0; exact import order and all executable structure retained."
+      ],
+      "scope": "Retained coordinator run at its actual input/output checkpoint; no execution by this reconciliation."
+    },
+    "api-final-profile-first": {
+      "receipt": {
+        "command": [
+          "/home/rupicola/.local/share/mise/dotnet-root/dotnet",
+          "exec",
+          "--roll-forward",
+          "Disable",
+          "--fx-version",
+          "10.0.15",
+          "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+          "api",
+          "/home/rupicola/Code/y/Yubico.Yubikit.NET"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T03:16:56.770804+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/api-final-profile-first",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/api-final-profile-first",
+        "qualification_faults": [],
+        "exit_code": 0,
+        "status": "passed",
+        "errors": [],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3685220,
+          "sid": 3685220,
+          "leader_start_ticks": 83120661,
+          "before": {
+            "members": [],
+            "escaped": []
+          },
+          "signals": [],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": null,
+        "retained": [],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/api-final-profile-first/stdout.log",
+            "bytes": 2714,
+            "sha256": "2026f85dda0a4fa9dc0f47b475f49d100b5974198e36dcda9bb2acb442caace9"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/api-final-profile-first/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T03:16:56.961328+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "2026f85dda0a4fa9dc0f47b475f49d100b5974198e36dcda9bb2acb442caace9",
+      "outcome": "passed",
+      "exit_code": 0,
+      "result_tail": [
+        "PASS: API snapshot src/Core/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/Core/src/PublicAPI.Unshipped.txt; SHA256=E993CF43C205AC7C8ABC62AFD1065E5ACB16F7C1B7D6B1012F4954ABE20DCE76",
+        "PASS: API snapshot src/Ctap2/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/Ctap2/src/PublicAPI.Unshipped.txt; SHA256=C50CE758AF58FAC75685C66FB1BCA2355094ECF02B1411008818CED5FE161EF5",
+        "PASS: API snapshot src/Management/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/Management/src/PublicAPI.Unshipped.txt; SHA256=D60DA145A04C93EB007CDD4ABFA058C4DA76A3541EEA9D24674FA046C43F05CA",
+        "PASS: API snapshot src/Oath/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/Oath/src/PublicAPI.Unshipped.txt; SHA256=6FF0ACEEE9B2790EAD7D04C799FCFAAEB437FFFD5B94F8F2E8CE89D04F6EC69E",
+        "PASS: API snapshot src/OpenPgp/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/OpenPgp/src/PublicAPI.Unshipped.txt; SHA256=6E61A840E34D8DE4844DF2B62CC003ED0AA42BF971909625BB8DD78449838BDF",
+        "PASS: API snapshot src/Piv/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/Piv/src/PublicAPI.Unshipped.txt; SHA256=47A8EC228596FA558C78EC5E3AC2B6C41DE81C1449092B7F01EE0A19127A4ECD",
+        "PASS: API snapshot src/SecurityDomain/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/SecurityDomain/src/PublicAPI.Unshipped.txt; SHA256=A8C2E55B8170B31EED2221C9B6F9DF5B8656EC327CCBE20EAF791D1C3B0BD718",
+        "PASS: API snapshot src/WebAuthn/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/WebAuthn/src/PublicAPI.Unshipped.txt; SHA256=58BF398B569712E8C7FD2CC4331DAAC4D03EEE568E4537C01FCFC1E1F6329C41",
+        "PASS: API snapshot src/YubiHsm/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/YubiHsm/src/PublicAPI.Unshipped.txt; SHA256=C747C2D97A421A88EA1C0BACB66558D3FEC954536B33D4B645143705476B08CA",
+        "PASS: API snapshot src/YubiOtp/src/PublicAPI.Shipped.txt; SHA256=3C3B422DDDB1EFEB0FC5B228608FD8682452B2A9507D4031894BCE3C4DEDADBD",
+        "PASS: API snapshot src/YubiOtp/src/PublicAPI.Unshipped.txt; SHA256=9E930E713F6A10AE8008796C7903DF33868949B7875DD1084EE06ACEA8FFBC47",
+        "API snapshot comparison against fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef: files=20, failures=0."
+      ],
+      "scope": "Retained coordinator run at its actual input/output checkpoint; no execution by this reconciliation."
+    },
+    "examples-full-consumer-first": {
+      "receipt": {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "Yubico.YubiKit.Audit20261111.DocExamples.Full",
+          "--clean"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T03:37:59.113132+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [
+          "build"
+        ],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/examples-full-consumer-first",
+        "qualification_faults": [],
+        "exit_code": 1,
+        "status": "failed",
+        "errors": [
+          "ValueError: Command exited 1",
+          "Result unverified: ValueError: RESULT text disagrees"
+        ],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3693312,
+          "sid": 3693312,
+          "leader_start_ticks": 83246895,
+          "before": {
+            "members": [
+              {
+                "pid": 3693399,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246971
+              },
+              {
+                "pid": 3693400,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246971
+              },
+              {
+                "pid": 3693401,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246971
+              },
+              {
+                "pid": 3693402,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246971
+              },
+              {
+                "pid": 3693403,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246971
+              },
+              {
+                "pid": 3693404,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246971
+              },
+              {
+                "pid": 3693405,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246971
+              },
+              {
+                "pid": 3693406,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246972
+              },
+              {
+                "pid": 3693408,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246972
+              },
+              {
+                "pid": 3693411,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246972
+              },
+              {
+                "pid": 3693413,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246972
+              },
+              {
+                "pid": 3693414,
+                "state": "S",
+                "ppid": 3693254,
+                "pgid": 3693312,
+                "sid": 3693312,
+                "start_ticks": 83246972
+              }
+            ],
+            "escaped": []
+          },
+          "signals": [
+            {
+              "signal": "SIGTERM",
+              "proven_members": [
+                {
+                  "pid": 3693399,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246971
+                },
+                {
+                  "pid": 3693400,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246971
+                },
+                {
+                  "pid": 3693401,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246971
+                },
+                {
+                  "pid": 3693402,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246971
+                },
+                {
+                  "pid": 3693403,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246971
+                },
+                {
+                  "pid": 3693404,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246971
+                },
+                {
+                  "pid": 3693405,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246971
+                },
+                {
+                  "pid": 3693406,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246972
+                },
+                {
+                  "pid": 3693408,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246972
+                },
+                {
+                  "pid": 3693411,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246972
+                },
+                {
+                  "pid": 3693413,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246972
+                },
+                {
+                  "pid": 3693414,
+                  "state": "S",
+                  "ppid": 3693254,
+                  "pgid": 3693312,
+                  "sid": 3693312,
+                  "start_ticks": 83246972
+                }
+              ]
+            }
+          ],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": null,
+        "retained": [
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-043759-447-build/01-clean-Audit20261111.DocExamples.Full.log",
+              "bytes": 68524,
+              "sha256": "21d6fe29957193db95e5cd4576a31d92a2e3f96204476016ec84cdd7b47650d5"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/01-clean-Audit20261111.DocExamples.Full.log",
+              "bytes": 68524,
+              "sha256": "21d6fe29957193db95e5cd4576a31d92a2e3f96204476016ec84cdd7b47650d5"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-043759-447-build/02-build-Audit20261111.DocExamples.Full.log",
+              "bytes": 4319,
+              "sha256": "e75df492acc9bb23b076c3c4c1e9b393376d74a1d99531e93e5e15f753828c6b"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/02-build-Audit20261111.DocExamples.Full.log",
+              "bytes": 4319,
+              "sha256": "e75df492acc9bb23b076c3c4c1e9b393376d74a1d99531e93e5e15f753828c6b"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-043759-447-build/result.json",
+              "bytes": 1053,
+              "sha256": "cc54c36be47051d237cd4b451839239bce6bc34f9a22d0de369e16183b256780"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/result.json",
+              "bytes": 1053,
+              "sha256": "cc54c36be47051d237cd4b451839239bce6bc34f9a22d0de369e16183b256780"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-043759-447-build/result.txt",
+              "bytes": 784,
+              "sha256": "240a012c3f3972873ce80870d2fbd2c711e379577a9ddb3f46552a48554ed00f"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/result.txt",
+              "bytes": 784,
+              "sha256": "240a012c3f3972873ce80870d2fbd2c711e379577a9ddb3f46552a48554ed00f"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-043759-447-build/run.log",
+              "bytes": 3597,
+              "sha256": "8adf35fa0cbe61c596c6bbfe9ce0b0688552c853c092ae011f095738beb1b2af"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/run.log",
+              "bytes": 3597,
+              "sha256": "8adf35fa0cbe61c596c6bbfe9ce0b0688552c853c092ae011f095738beb1b2af"
+            }
+          }
+        ],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/stdout.log",
+            "bytes": 3251,
+            "sha256": "acc139f1fbc61809cdd3bb6759f0619519c51194c1131f7cb5fbe17bd943040a"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T03:38:02.772157+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "acc139f1fbc61809cdd3bb6759f0619519c51194c1131f7cb5fbe17bd943040a",
+      "outcome": "failed",
+      "exit_code": 1,
+      "result_tail": [
+        "✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package",
+        "",
+        "▶ target: native-aot-contract-qa",
+        "",
+        "=== Validating Native AOT support contract ===",
+        "",
+        "✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type",
+        "✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+        "",
+        "▶ target: build",
+        "",
+        "=== Building ===",
+        "",
+        "▶ RUN dotnet clean docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release",
+        "  output: artifacts/toolchain/runs/20261112-043759-447-build/01-clean-Audit20261111.DocExamples.Full.log",
+        "▶ RUN dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release --no-incremental",
+        "  output: artifacts/toolchain/runs/20261112-043759-447-build/02-build-Audit20261111.DocExamples.Full.log",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Hosting will not be pruned. This package is automatically available and does not need to be referenced explicitly. Remove the PackageReference item.",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj : error NU1510: Warning As Error: PackageReference Microsoft.Extensions.Logging.Console will not be pruned. This package is automatically available and does not need to be referenced explicitly. Remove the PackageReference item.",
+        "✗ build: `dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-043759-447-build/02-build-Audit20261111.DocExamples.Full.log",
+        "",
+        "============================================================",
+        "RESULT: FAILED  (dotnet toolchain.cs -- build --project Yubico.YubiKit.Audit20261111.DocExamples.Full --clean)",
+        "Targets:",
+        "  ✓ test-infrastructure-qa     0.0s",
+        "  ✓ native-aot-contract-qa     0.0s",
+        "  ✗ build                      3.0s  `dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-043759-447-build/02-build-Audit20261111.DocExamples.Full.log",
+        "Warnings: 0",
+        "Run log: artifacts/toolchain/runs/20261112-043759-447-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)",
+        "============================================================"
+      ],
+      "scope": "Retained coordinator run at its actual input/output checkpoint; no execution by this reconciliation."
+    },
+    "examples-full-consumer-second": {
+      "receipt": {
+        "command": [
+          "dotnet",
+          "toolchain.cs",
+          "--",
+          "build",
+          "--project",
+          "Yubico.YubiKit.Audit20261111.DocExamples.Full",
+          "--clean"
+        ],
+        "cwd": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "logger": {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "bytes": 1670,
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        "preserved_v1_sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640",
+        "started": "2026-11-12T03:44:56.636093+00:00",
+        "environment": {
+          "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "expected_targets": [
+          "build"
+        ],
+        "expected_projects": [],
+        "primary_output": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second",
+        "external_journal": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/command-journals/examples-full-consumer-second",
+        "qualification_faults": [],
+        "exit_code": 1,
+        "status": "failed",
+        "errors": [
+          "ValueError: Command exited 1",
+          "Result unverified: ValueError: RESULT text disagrees"
+        ],
+        "quiescent": true,
+        "ownership": {
+          "pgid": 3696923,
+          "sid": 3696923,
+          "leader_start_ticks": 83288648,
+          "before": {
+            "members": [
+              {
+                "pid": 3697013,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288726
+              },
+              {
+                "pid": 3697014,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288726
+              },
+              {
+                "pid": 3697015,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288726
+              },
+              {
+                "pid": 3697016,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288726
+              },
+              {
+                "pid": 3697017,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288726
+              },
+              {
+                "pid": 3697018,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288726
+              },
+              {
+                "pid": 3697019,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288726
+              },
+              {
+                "pid": 3697062,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288728
+              },
+              {
+                "pid": 3697063,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288728
+              },
+              {
+                "pid": 3697064,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288728
+              },
+              {
+                "pid": 3697067,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288728
+              },
+              {
+                "pid": 3697068,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288728
+              },
+              {
+                "pid": 3697070,
+                "state": "S",
+                "ppid": 3696875,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288728
+              },
+              {
+                "pid": 3697503,
+                "state": "S",
+                "ppid": 3697062,
+                "pgid": 3696923,
+                "sid": 3696923,
+                "start_ticks": 83288988
+              }
+            ],
+            "escaped": []
+          },
+          "signals": [
+            {
+              "signal": "SIGTERM",
+              "proven_members": [
+                {
+                  "pid": 3697013,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288726
+                },
+                {
+                  "pid": 3697014,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288726
+                },
+                {
+                  "pid": 3697015,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288726
+                },
+                {
+                  "pid": 3697016,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288726
+                },
+                {
+                  "pid": 3697017,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288726
+                },
+                {
+                  "pid": 3697018,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288726
+                },
+                {
+                  "pid": 3697019,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288726
+                },
+                {
+                  "pid": 3697062,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288728
+                },
+                {
+                  "pid": 3697063,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288728
+                },
+                {
+                  "pid": 3697064,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288728
+                },
+                {
+                  "pid": 3697067,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288728
+                },
+                {
+                  "pid": 3697068,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288728
+                },
+                {
+                  "pid": 3697070,
+                  "state": "S",
+                  "ppid": 3696875,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288728
+                },
+                {
+                  "pid": 3697503,
+                  "state": "S",
+                  "ppid": 3697062,
+                  "pgid": 3696923,
+                  "sid": 3696923,
+                  "start_ticks": 83288988
+                }
+              ]
+            }
+          ],
+          "after": {
+            "members": [],
+            "escaped": []
+          },
+          "quiescent": true
+        },
+        "stream_complete": true,
+        "retention_complete": true,
+        "result_counts": null,
+        "retained": [
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-044456-975-build/01-clean-Audit20261111.DocExamples.Full.log",
+              "bytes": 291,
+              "sha256": "abfde60dabcaa8f7dc1919e9d66d53f240a51b149c23cd1f68f5c69106e781cf"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second/toolchain/20261112-044456-975-build/01-clean-Audit20261111.DocExamples.Full.log",
+              "bytes": 291,
+              "sha256": "abfde60dabcaa8f7dc1919e9d66d53f240a51b149c23cd1f68f5c69106e781cf"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-044456-975-build/02-build-Audit20261111.DocExamples.Full.log",
+              "bytes": 166716,
+              "sha256": "339c1eb31a067df291a702287e6fa982997b87984990d668d99572fe42512864"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second/toolchain/20261112-044456-975-build/02-build-Audit20261111.DocExamples.Full.log",
+              "bytes": 166716,
+              "sha256": "339c1eb31a067df291a702287e6fa982997b87984990d668d99572fe42512864"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-044456-975-build/result.json",
+              "bytes": 1057,
+              "sha256": "16bd32b44685e987587317453c277066d46e780daa266d9f9e76fa57b22c3c41"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second/toolchain/20261112-044456-975-build/result.json",
+              "bytes": 1057,
+              "sha256": "16bd32b44685e987587317453c277066d46e780daa266d9f9e76fa57b22c3c41"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-044456-975-build/result.txt",
+              "bytes": 784,
+              "sha256": "7a6633a562b1eeba597fc3b8a104aa300ca6a4a2a52b404656456d797cbd6f80"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second/toolchain/20261112-044456-975-build/result.txt",
+              "bytes": 784,
+              "sha256": "7a6633a562b1eeba597fc3b8a104aa300ca6a4a2a52b404656456d797cbd6f80"
+            }
+          },
+          {
+            "source": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/toolchain/runs/20261112-044456-975-build/run.log",
+              "bytes": 85261,
+              "sha256": "c9aa28bef97cdd3e67c8921a1e681718d414dbd549aaa19f9af8ef4ea8edf2c9"
+            },
+            "retained": {
+              "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second/toolchain/20261112-044456-975-build/run.log",
+              "bytes": 85261,
+              "sha256": "c9aa28bef97cdd3e67c8921a1e681718d414dbd549aaa19f9af8ef4ea8edf2c9"
+            }
+          }
+        ],
+        "streams": [
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second/stdout.log",
+            "bytes": 84915,
+            "sha256": "f466adbc5558030a196c50121e5e1651f8cd27c2be9d6395a7e2f542c58b0658"
+          },
+          {
+            "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-second/stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "finished": "2026-11-12T03:45:08.682931+00:00",
+        "reuse": {
+          "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+          "metadata_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+          "files": [
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+              "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+            },
+            {
+              "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+              "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+              "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+            },
+            {
+              "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+              "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "f466adbc5558030a196c50121e5e1651f8cd27c2be9d6395a7e2f542c58b0658",
+      "outcome": "failed",
+      "exit_code": 1,
+      "result_tail": [
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs(30,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Utilities' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs(31,7): error CS0105: The using directive for 'Yubico.YubiKit.OpenPgp' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(22,7): error CS0105: The using directive for 'System.Security.Cryptography' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(23,7): error CS0105: The using directive for 'System.Security.Cryptography.X509Certificates' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(24,7): error CS0105: The using directive for 'System.Text' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(25,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(26,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(27,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Cryptography' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(28,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(29,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs(30,7): error CS0105: The using directive for 'Yubico.YubiKit.Piv' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs(21,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs(22,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs(23,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs(24,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-414.cs(19,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-414.cs(20,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-415.cs(21,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-415.cs(22,7): error CS0105: The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace [/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj]",
+        "✗ build: `dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-044456-975-build/02-build-Audit20261111.DocExamples.Full.log",
+        "",
+        "============================================================",
+        "RESULT: FAILED  (dotnet toolchain.cs -- build --project Yubico.YubiKit.Audit20261111.DocExamples.Full --clean)",
+        "Targets:",
+        "  ✓ test-infrastructure-qa     0.0s",
+        "  ✓ native-aot-contract-qa     0.0s",
+        "  ✗ build                     11.4s  `dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-044456-975-build/02-build-Audit20261111.DocExamples.Full.log",
+        "Warnings: 0",
+        "Run log: artifacts/toolchain/runs/20261112-044456-975-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)",
+        "============================================================"
+      ],
+      "scope": "Retained coordinator run at its actual input/output checkpoint; no execution by this reconciliation."
+    }
+  },
+  "DocCheck": {
+    "profile": "validation/checker-binding/reviewed-inputs-final-edits.json",
+    "profile_sha256": "db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1",
+    "seal": "validation/checker-binding/attempts/checker-bound-build-final-edits/sealed.json",
+    "seal_sha256": "b3583ce08b5b31e7f6b6947ca8764120c46f5d706308c7afd70dd7e5c268b1bc",
+    "profile_matches_seal": true,
+    "qualified_scope": "Valid final DocCheck profile and bound token/API checkpoint before queued sampling patches; no final new product run here."
+  },
+  "retained_successes": {
+    "pilot": "17 bodies, zero warnings at examples-ac-first retained checkpoint",
+    "unit_tests": "4,442 passed, 13 projects, zero failures, five skips at unit-tests-integrated-docs retained checkpoint",
+    "pilot_manifest": "validation/examples/manifest.json",
+    "pilot_result": "validation/commands-v2/examples-ac-first/toolchain/20261112-023423-403-build/result.json",
+    "accepted_pilot_compilation": {
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "command_receipt": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-ac-first/receipt.json",
+        "bytes": 8410,
+        "sha256": "34142d44bf2eac0e10a981703871ad2d6720646f0edeee1d5a0ebd17cf997d0e"
+      },
+      "captures": [
+        {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/source-before.json",
+          "bytes": 161810,
+          "sha256": "1e9b26875576ba8cd6c48d8acba15c80014f98553cc2b27257a02a6db5fcf4d1"
+        },
+        {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/before.json",
+          "bytes": 89449,
+          "sha256": "0ea7afcabb5f24eef8b6944f1e8ff1718d6a8e99c5c69d5d60b7d6852ee44402"
+        },
+        {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/compiler.json",
+          "bytes": 91852,
+          "sha256": "54bd017df0492e2c78e05d990d9bc6985f5c8eaf0ec66758b2c44344f76839e8"
+        },
+        {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/finish.json",
+          "bytes": 63248,
+          "sha256": "11289ddeb9abdb1a31be77998d107e9bf4084c8d9b1c0cfd0cee4154570c9457"
+        },
+        {
+          "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/source-after.json",
+          "bytes": 161810,
+          "sha256": "1e9b26875576ba8cd6c48d8acba15c80014f98553cc2b27257a02a6db5fcf4d1"
+        }
+      ],
+      "body_manifest": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/manifest.json",
+        "bytes": 87165,
+        "sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60"
+      },
+      "outputs": [
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.deps.json",
+          "bytes": 12528,
+          "sha256": "8ea7f2c99b2bee344f94fb9e808ca78ee52f8e4ad331b03e1046a308cfd4f4c4"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.dll",
+          "bytes": 15360,
+          "sha256": "3d4d2f3fbf454d2a8a0f935041a48f464ed514250534b835ba46874aa572d2f0"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.pdb",
+          "bytes": 16088,
+          "sha256": "b1132abfb4e558d8f1e634e34e36337f53edb66524a5bc4c44d12536783c569b"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.xml",
+          "bytes": 157,
+          "sha256": "62e2a3682d76583aabd8ab02c51c15adaf88e75dfa5ed802003005d893349c98"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Core.dll",
+          "bytes": 816128,
+          "sha256": "801d0b2f9215ae4bc10687791e3cd67a57c3b42fdabcabb1ff46fea19eaa020a"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Core.pdb",
+          "bytes": 234532,
+          "sha256": "cfeefea824bb47479901e92558e3ebc8544bf038d44b3e70043a9a62314ea167"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Core.xml",
+          "bytes": 782361,
+          "sha256": "97788d4f85a5e19bd3fa8197d51325942696b5c4b34a79757c2b4a829c01a0c9"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll",
+          "bytes": 206848,
+          "sha256": "3617f072f8c5ffaeacca3fdba0a8d20da0eca128b9b0e76f6b1c8ee109c3d943"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb",
+          "bytes": 73180,
+          "sha256": "d05a7c6667e506c26bc924f5befec2b4636d3bae3e89888b3ebb7cf9aca2342a"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml",
+          "bytes": 418346,
+          "sha256": "bf9bc68ecac5a687f2d48fc72892aa180a2f7fd7d5635ce29b2db11fd19b82d1"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Piv.dll",
+          "bytes": 159744,
+          "sha256": "5b8fc2b74753f18f1b8319816853ef122c5ef26d72d8ab18f28d282c8aed4044"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Piv.pdb",
+          "bytes": 44840,
+          "sha256": "07d99833e471902db27c46b1e06f48fd184a3ed845f64649531bbfda5f212ca7"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.Piv.xml",
+          "bytes": 145355,
+          "sha256": "e3d8d5d18e5eaf8f7f44f25c13fdf5e99e6a60653182d05b075d6f42530ed1ab"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll",
+          "bytes": 165888,
+          "sha256": "3d01584cabb09128a50f3073ab172599c43340178ad24f77891d11e9c30054dd"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.pdb",
+          "bytes": 52492,
+          "sha256": "a8dd9cf68d7f233049d025ed56eb5d1422ab4c0fd4249149110210041d910ae4"
+        },
+        {
+          "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.xml",
+          "bytes": 220990,
+          "sha256": "ebdbbf139b0b14891d2701fe8fdcb7bf72fd7da2b6a9a16c1710b99fea822a37"
+        }
+      ],
+      "scope": "17 accepted A/C bodies compiled in one genuine SDK-reference library context; no example execution.",
+      "execution_status": "not-run",
+      "internal_examples": "2 explicitly qualified internal illustrations, excluded from this consumer host"
+    },
+    "unit_result": "validation/commands-v2/unit-tests-integrated-docs/toolchain/20261112-023026-756-test/result.json",
+    "unit_counts": {
+      "executed": 4442,
+      "failed": 0,
+      "skipped": 5
+    },
+    "unit_project_count": 13
+  },
+  "full_consumer": {
+    "attempt_1": "Failed in restore (NU1510), before Csc; no full compilation acceptance",
+    "attempt_2": "Reached Csc; failed generated imports/duplicates; wrapper correction in progress by validation owner",
+    "diagnostic_record": "validation/examples/full/compiler-import-correction/actual-diagnostics.json",
+    "diagnostic_code_counts": {
+      "CS0105": 146,
+      "CS0234": 31
+    },
+    "restore_correction_handoff": "# NU1510: two redundant audit-host package references\n\n**Bounded restore-configuration correction, ready for confirmation.** The original\n`examples-full-consumer-first` attempt remains **failed before Csc**. It establishes no documentation-body,\ncompiler or runtime failure. No successful full-context compilation or example execution is claimed.\n\n## Exact fix\n\nThe host retains its existing `FrameworkReference Include=\"Microsoft.AspNetCore.App\"`. Remove only:\n\n```xml\n<PackageReference Include=\"Microsoft.Extensions.Hosting\" />\n<PackageReference Include=\"Microsoft.Extensions.Logging.Console\" />\n```\n\nThe three Serilog references/versions, all real project references, bodies, wrappers, observer hooks,\nparser, SDK/root policy and qualified tooling remain exact. No NoWarn, pruning disablement, AOT flag\nor substitute helper is added. `host-only.diff` is the complete two-line project delta.\n\nThe retained toolchain step reports both NU1510 errors and explicitly requests removing those direct\nreferences because they are automatically available. Context7 `/dotnet/docs` .NET 10 SDK/package-pruning\ndocumentation confirms framework-provided references are pruned by default. The installed\n`Microsoft.AspNetCore.App.Ref/10.0.15/data/PackageOverrides.txt` lists Hosting and Logging.Console;\nits exact identity is recorded in `preservation.json`. The actual retry must still prove successful\nrestore, real reference ownership and zero warnings through the existing canonical capture.\n\n## Preserved failure and new profile\n\n`preservation.json` hashes all **13** original attempt/toolchain/stream records, including\n`source-before.json` and the complete failed command receipt. They remain at their original paths.\nThe old host and profile are retained byte-exact as snapshots; original profile\n`8c385b8dae912d846dcd9463c08bf0bbb765ba6a00ffa9f657962a7971f0b81d` remains unchanged.\nNo Csc-before/compiler/finish/accepted-compilation record exists for that failed restore.\n\n`reviewed-inputs-restore-fixed.json` changes **one known host-project input**; the other **1,714** fixed\nrows, compile-source membership, 25-project closure and all manifest/raw body fields remain exact.\nNo capture/verifier selector change was required. Static body/wrapper/source/input guards pass for all\n300 prepared sources and ten actual contexts. This is not a successful restore or compiler result.\n\n**Fresh profile SHA-256:**\n`54170deeb614b2683903b11ed2a52495a16335f0eb787c39a71f1a4b3f66f9ae`\n\n## Coordinator retry after confirmation\n\n```bash\nF=docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full\nP=54170deeb614b2683903b11ed2a52495a16335f0eb787c39a71f1a4b3f66f9ae\npython3 -B \"$F/verify.py\"\npython3 -B \"$F/run.py\" --context consumer --label examples-full-consumer-second \\\n  --profile \"$F/reviewed-inputs-restore-fixed.json\" --profile-sha256 \"$P\"\n```\n\nThe wrapper uses the unchanged qualified logger/capture flow and canonical\n`dotnet toolchain.cs -- build --project Yubico.YubiKit.Audit20261111.DocExamples.Full --clean`.\nAccept its actual complete zero-warning restore/build/Csc/output/preservation proof before continuing\nthe nine unchanged test-context commands with this fresh profile. Stop and retain any first failure.\nNo test or example DLL is run; the final normal uninjected clean solution build still precedes SDK tests.\nNo build/test/capture/native/device/crypto-provider execution, Git mutation or subagent occurred here.\n",
+    "final_full_compile_acceptance": false,
+    "queued_patch_rule": "Current primary reserved for compiler cycle. Independently accepted WA and PGP patches remain queued/untransferred; no main runtime change.",
+    "all_300_prepared_body_bytes": "Unchanged; validation owner is correcting generated wrapper/import context only. No full compilation acceptance inferred."
+  },
+  "readiness": "Not ready to assert final compiler/sampling/Pass-1 completion. Fresh final evidence review follows remaining gates.",
+  "new_sdk_native_device_crypto_executions": 0
+}

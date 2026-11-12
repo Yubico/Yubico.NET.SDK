@@ -1,0 +1,427 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of 46 pinned test/helper/type units; final overlap/current mapping reconciliation pending",
+  "reading_file": "read-004.md",
+  "reading_sha256": "e5660d0c6446247e3c40863f50ddbc68141a17aa1e07d316db7678c0961c4e49",
+  "additional_context": [
+    "Complete DeviceChangeWatcher including readiness and disposal",
+    "Previously read connection-type helpers and fixture construction",
+    "Current monitor creation/disposal and best-effort listener control flow"
+  ],
+  "units": [
+    {
+      "id": "core-001:unit:67e1a8bec12453ab",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+      "range_sha256": "b668da5dbdcc0b4086b308308ef28d332017011deba950cf2b8e04b88f0ec868",
+      "current_file_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:ad828279bcc1a175",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+      "range_sha256": "aa0be707b33db25c610b3fdd89869cd5ae12d5dc218b0735811cdfd2dba4a823",
+      "current_file_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:0b530ce89cb7095a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+      "range_sha256": "b28434fd69296d3d46623082080953aba7f5c6ce4780944ff8c467bfff3547f7",
+      "current_file_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:83af4510d6870b80",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+      "range_sha256": "1179727443bd3ee48aa93ae7b19aa61e71e5e69a52f97013d357c6cd848695fe",
+      "current_file_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:4417d95fc05659c6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysTests.cs",
+      "range_sha256": "cf6259ac54dda0d32b4483b00481d0579812ce3e67a13b8d6824fca24a49fa85",
+      "current_file_sha256": "3ed50f2772f39efefa028a8285c44e7e39d1378fd21555308969d95c5bc76125",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:0815dd8ff2a94421",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysTests.cs",
+      "range_sha256": "fffd0154e6752325ab8292ad418926ffaa75b9c0d3ede2c2ed405fb7557b3b92",
+      "current_file_sha256": "3ed50f2772f39efefa028a8285c44e7e39d1378fd21555308969d95c5bc76125",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:1c7b9d760a3c992a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysTests.cs",
+      "range_sha256": "f30f85a543dda1c69e7736dfce307c56bc42220ce5f0cb6ef603c751a8517434",
+      "current_file_sha256": "3ed50f2772f39efefa028a8285c44e7e39d1378fd21555308969d95c5bc76125",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:11f57474a407f72d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FirmwareVersionSelectResponseTests.cs",
+      "range_sha256": "5f66daf23b9c83cd5e3d8f9282cf9676b0a142c01b535ecd37d9c5c7dd7f43bb",
+      "current_file_sha256": "a68f7ea10a23a40ad64016e03d88fe37e0609b0ba4cd629e0d172e689360d982",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:01a4b75c868acca2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HotplugSignalsTests.cs",
+      "range_sha256": "bae0e41169d549bc43acc8887ed752c288939c649396355bf2d5ee49709272f0",
+      "current_file_sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:42db4fde4cc406d0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HotplugSignalsTests.cs",
+      "range_sha256": "0900e468c894a57bed8df7ede4f723eab892976c3c43cfc1bd848acfe61a595b",
+      "current_file_sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:3fa9b3935e42253a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HotplugSignalsTests.cs",
+      "range_sha256": "c9c97135f82bb9c063f61f171bec08747b26b2bd93467edabe92d358b68683c2",
+      "current_file_sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:86dd7e0403e14eec",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HotplugSignalsTests.cs",
+      "range_sha256": "c9b8021686629c67ec978cb4128965da7b2c810c5b38af36c6f80411a066e749",
+      "current_file_sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:450d843b33a6a063",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PhysicalYubiKeyTests.cs",
+      "range_sha256": "8a4df7fd853d744d1ed6c818dea3e85329cebcde896abd16a9a46f0a31c31cf6",
+      "current_file_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "All nine inline rows agree with concrete/HID-presence/Unknown/All/multi-bit helper semantics; no actual connection is opened."
+    },
+    {
+      "id": "core-001:unit:f125825211ee249e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PhysicalYubiKeyTests.cs",
+      "range_sha256": "50e2b874fc7e223b8f46c2b1202f2ab81aac9beeded61fadcab2eba30d433fcb",
+      "current_file_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:c5f1b3b40ff4c027",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SnapshotDiffTests.cs",
+      "range_sha256": "82af75f3c9d59fd50e76de0e9c59836ad591e6c69a0e77f59d7714619a6a9e58",
+      "current_file_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:4703c2c99161ed3a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "range_sha256": "139059ebcd7aba9cad7a39352b6f36fb75a8b1bdfa5dd207879ce1b25a1a70f7",
+      "current_file_sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:2a405e0a6f71ced1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "range_sha256": "bc972e5096869789d4358b2a6d9455beb2d135095da73f8ebc24722737eb6e9b",
+      "current_file_sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:5579c68c6c6763a3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "0b205733e27d4d2f0da8152a753b72d7a684aed0cea95983d20bfe026b914344",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:2708dc6180c9ad82",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "0ebea9a49fd2f684eb9ac28789a91e55fb70bcb510d5410f2fe2fb0891fed687",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:b870979a9f4e3530",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "44aba7fe241888f3890b421bea77b582b0efd4e0e47815e767d8b8e25c4d0508",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:9d433e7baf55acb8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "fa6863d9f837110be3a451934f6a9b2ff0da737e6a981f8b2be14f28906c7086",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:e99851af4e5d53d8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "fa215f364c20f975592d7edfd470f173229879a37a7d98a0ada92ac291b5fc0f",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:36bcfc8b36e95ae8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "ee9c4f2b2ab00b84cf5ea513d31ad3662c0149e5a637a34a705940354de38770",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:ee2c12cc9ea7f04e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "682dfee24ebc58635eb82feb0d2a978f07a5dcfdbde61450f32d7dcc7e2f11ff",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:5fd5a4456bc2f98a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "5761b5bb501f8b824a3ad2e0f789429df9541880371a527723cc79e8a51886b6",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:61fde3f07bcf9769",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "range_sha256": "e805f15f541dd146868f52f46e88e0640b18aa1822d9f9d7cf8e789382ddbf94",
+      "current_file_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:4b3bc2890cc78b9d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorAcceptanceTests.cs",
+      "range_sha256": "5127c49e8c9beeb24e18b92eda6f095524bc3aa0c9196eb7bcab00b2f889b7c4",
+      "current_file_sha256": "c51bbcda36c0038c8e14736a5121509e1bd36c04affbdc28876f50f1dc03652b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:48b6250a4ff72a5f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorAcceptanceTests.cs",
+      "range_sha256": "c64575b4decb8f6f93eac6a7c140eb3ebad27bca33362084d7ed1fe7eb202f76",
+      "current_file_sha256": "c51bbcda36c0038c8e14736a5121509e1bd36c04affbdc28876f50f1dc03652b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:89f76aaff9cdd2e9",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorAcceptanceTests.cs",
+      "range_sha256": "fb51d83e704c1f32c92ffdf004918d95e7dfaef9d6a15db85b1b4b15a6906873",
+      "current_file_sha256": "c51bbcda36c0038c8e14736a5121509e1bd36c04affbdc28876f50f1dc03652b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:75bc794c75bd22a2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorTests.cs",
+      "range_sha256": "fded109b7a5c08a2f2cda5f0a831796057d1048c9bf1ee5f4e25595cb0ca9a73",
+      "current_file_sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:c7318fc32f6e0ab7",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorTests.cs",
+      "range_sha256": "8584a9d6728c51355e341cce9666ce0d110f6a94742212feb59fab36d83532f7",
+      "current_file_sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Controlled PendingOpen, unrecovered-claim assertion, explicit recovery and DisposeCount observations support the fake native-owner lifetime test; not physical teardown qualification."
+    },
+    {
+      "id": "core-001:unit:4aa7e90a418de9a1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/AsyncWait.cs",
+      "range_sha256": "16bf5cd9fd36c60bb9fa753910b9e4ddbe7e0221b336f076b54e8ab56972ded2",
+      "current_file_sha256": "42616a2053b76e96bd0cf7257874027df77bdab9abfaabdeeffcbfe67483651b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:51c280523f6234e6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/DeviceChangeWatcher.cs",
+      "range_sha256": "96213ea5b58adf60b742f8017ac0a2a8e5aec1814b321dbfed9cdfc528ddb26c",
+      "current_file_sha256": "ce429da64d8c5657c6b4f37c176e72c496edf90117578b7f1f843e73c61e66bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete DeviceChangeWatcher read: only receiving SnapshotComplete sets readiness, StartAsync waits with timeout/cancellation, failure disposes helper, and helper disposal observes pump outcome."
+    },
+    {
+      "id": "core-001:unit:713cc9ce2a5207bd",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/FakeYubiKey.cs",
+      "range_sha256": "cd7aa296f6b67af857146c81815be0b433ac6478b5a447c201ffe38194b97a56",
+      "current_file_sha256": "5c4e5fff6adece702e4a7b736d985b6866f5024d987a634aff6ecc8bd931bf61",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:163cb964de48b8aa",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/FakeYubiKey.cs",
+      "range_sha256": "3b04016e2b548a8eeb2e52e3125183166eb1eada1b217b1973e48e52e4bc05e1",
+      "current_file_sha256": "5c4e5fff6adece702e4a7b736d985b6866f5024d987a634aff6ecc8bd931bf61",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:9cab1848ff8ab7d2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/FakeYubiKey.cs",
+      "range_sha256": "a1b37d7683fd5d1c120ccfe34fea2e3426c4dd2d7c8b24fc9ef3f7f795ecd732",
+      "current_file_sha256": "5c4e5fff6adece702e4a7b736d985b6866f5024d987a634aff6ecc8bd931bf61",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:8bad4a42b615d77e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/ObservedTimeProvider.cs",
+      "range_sha256": "b71cd609d424ec0477026fdd2ca4f7aec043e24c8a0cc0c356b54b56b36fe1b5",
+      "current_file_sha256": "f9e0c12fd31627a11d7b316d00d81cf78d11a61b3ce4506992bd7ea14e692b4b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:70a48e4813608786",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/ObservedTimeProvider.cs",
+      "range_sha256": "497826c13fdecc4bfeff2d179cd4540758062e5f89e73c90580f66a6b5daa221",
+      "current_file_sha256": "f9e0c12fd31627a11d7b316d00d81cf78d11a61b3ce4506992bd7ea14e692b4b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:7a65a03366eb682e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs",
+      "range_sha256": "2a869c0e5f8f21e026c8427ccdd852f8fa34bc4026487feb269592cea2db896f",
+      "current_file_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:680d48b9974bd459",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs",
+      "range_sha256": "ae8f92f5c93c01af08a38be6800b94b7f0a0f14170abf9eb4bcb59dd3d45ab18",
+      "current_file_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:bcdef9ae7ec43a7f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs",
+      "range_sha256": "0af0d1488918add9623a54f57c5ebbe9933fc1e63475724fab5a3eed63dd17c7",
+      "current_file_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:d703dbd287854fe6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs",
+      "range_sha256": "24dad391551e02328cde7c34de3e4a5fb0365d83a386c033a2820c85cf7c26bd",
+      "current_file_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:b64161990dfd9695",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs",
+      "range_sha256": "52741cfde0dba0152cff346e5acf25243666be2508dc5362cd7971059a494973",
+      "current_file_sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:3a2582bf8fc7edd1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/TransientScanRetryTests.cs",
+      "range_sha256": "dedbff9dad8e86ed73ce4d95dbd9fe384a425d28eb1bf6ca560faa19e782940c",
+      "current_file_sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:58782f112f94c8a1",
+      "path": "scripts/toolchain/Discovery.cs",
+      "range_sha256": "712b8a570f3abd68595be733247c167c67253c95fbb018df30a289245d8aadab",
+      "current_file_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    },
+    {
+      "id": "core-001:unit:a60076fefa595227",
+      "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+      "range_sha256": "3cae400f250e0329d5c165ae998596989b68edac73f760799e5efff6bff4e96c",
+      "current_file_sha256": "eae08ac681f5f486da9ab9116bb9ca1e5825374adc1b4197082eaf0c89e30f33",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole sampled unit read by Astra; fake/declaration/assertion scope supported. No hardware or universal resource-release claim inferred."
+    }
+  ]
+}

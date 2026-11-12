@@ -1,0 +1,32 @@
+{
+  "eligible_paths": 233,
+  "edited_paths": 39,
+  "retained_paths": 194,
+  "revision_2_changed_source_paths": [
+    "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+    "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs"
+  ],
+  "R2_CSharp_checks": [
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "all_non_full_line_comment_lines_exact": true,
+      "XML_fragments_parse": true,
+      "before_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+      "after_sha256": "632e76c517481656194b4f8cbd51b05d165ac8c98c7bef2cff2835bc652fc36e"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "all_non_full_line_comment_lines_exact": true,
+      "XML_fragments_parse": true,
+      "before_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+      "after_sha256": "515fcf13aca4968f21635c6172d0c5a4cfd8caadf8254b60408c5a66f1620d5f"
+    }
+  ],
+  "other_231_path_hashes_match_reviewed_233_path_ledger": true,
+  "all_107_examples_unchanged": true,
+  "old_history_files_preserved": 15,
+  "git_diff_check": "PASS",
+  "full_successor_diff_sha256": "e15e4afcc7c2ae932858408db0f50793f5174d415b84ea10fe22dfc3fe438df8",
+  "independent_R1_R2_rereview": "PENDING",
+  "build_tests_formatter_crypto_native_device_connector_git_mutations_subagents": "NOT-RUN"
+}

@@ -1,0 +1,71 @@
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -175,16 +175,20 @@
+ #### Use `readonly struct` (PREFERRED for value types)
+ 
+ **✅ When:**
+-- Type is ≤16 bytes (2 machine words)
++- Type is ≤16 bytes (two 64-bit words)
+ - Immutable data (no fields change after construction)
+ - Passed by value frequently
+ - Used in hot paths (APDU processing, protocol handling)
+ 
+ **✅ Benefits:**
+-- Prevents defensive copies
+-- Clear immutability contract
+-- Potential stack allocation
+-- No GC pressure
++- Avoids defensive copies needed for non-readonly instance members in readonly contexts
++- Read-only struct state; referenced mutable objects can still change
++- Can avoid a separate heap object when stored unboxed; storage and boxing determine allocation
++
++`List<T>` and `T[]` store value-type elements without per-element boxing, although the collection and
++backing array can allocate. Converting a struct value to `object` or an implemented interface, or
++storing it in an object-based non-generic collection, can box it. `readonly` neither guarantees stack
++allocation or zero GC pressure nor makes referenced objects deeply immutable.
+ ```csharp
+ // ✅ BEST - Small, immutable, value semantics
+ public readonly struct StatusWord
+@@ -226,7 +230,9 @@
+ **❌ Don't use for:**
+ - Types >16 bytes (expensive copying)
+ - Mutable data
+-- Types stored in collections (boxing overhead)
++
++Collection storage alone is not a reason to reject a small value type. Consider copying costs and
++the actual use of boxing separately from the project's size and immutability preferences.
+ 
+ #### Use `struct` (mutable value types)
+ 
+@@ -426,12 +432,12 @@
+ | Criterion | readonly struct | struct | class |
+ |-----------|----------------|--------|-------|
+ | Size | ≤16 bytes | ≤16 bytes | Any size |
+-| Mutability | Immutable | Mutable | Either |
++| Mutability | Read-only struct state; references may remain mutable | Mutable | Either |
+ | Contains references | No | No | Yes |
+ | Hot path | ✅ Ideal | ⚠️ Careful | ✅ OK |
+-| Stack allocation | ✅ Yes | ✅ Yes | ❌ Heap only |
+-| Defensive copies | ✅ None | ❌ Many | N/A |
+-| GC pressure | ✅ None | ✅ None | ❌ Yes |
++| Stack allocation | Possible; depends on storage | Possible; depends on storage | Reference-type storage |
++| Defensive copies | Avoids readonly-context defensive copies | Context-dependent | N/A |
++| GC pressure | Depends on containing storage and boxing | Depends on containing storage and boxing | Object allocation contributes |
+ 
+ **When in doubt:** Use `class` for correctness, profile if performance critical, then consider `readonly struct` if ≤16 bytes and immutable.
+ 
+--- a/docs/v1-to-v2-comparison.md
++++ b/docs/v1-to-v2-comparison.md
+@@ -26,8 +26,10 @@
+ 
+ These aren't regressions, and it'd be misleading to describe them as such.
+ V1 made almost everything public, which meant almost every internal
+-improvement became a breaking change. V2 keeps low-level primitives internal
+-so the SDK can keep moving.
++improvement became a breaking change. V2 retires selected low-level extension points and keeps
++protocol composition internal, while retaining public raw sessions, raw connections, and selected
++TLV, Base32, and cryptographic helpers. The smaller extension surface lets internal implementations
++evolve without removing every low-level consumer API.
+ 
+ | V1 capability | V2 status | Why |
+ |---|---|---|

@@ -1,0 +1,1989 @@
+diff --git a/src/Core/src/Abstractions/IYubiKey.cs b/src/Core/src/Abstractions/IYubiKey.cs
+index dca5f1de3..1d5bb5433 100644
+--- a/src/Core/src/Abstractions/IYubiKey.cs
++++ b/src/Core/src/Abstractions/IYubiKey.cs
+@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.Core.Abstractions;
+ /// <summary>
+ ///     Represents a physical YubiKey and the set of connections (interfaces) it exposes.
+ /// </summary>
++/// <remarks>
++///     Discovery groups observed interfaces using available evidence. Partial visibility can split a key,
++///     and complementary partial interfaces from same-PID keys can resemble one complete key. A grouped
++///     serial therefore establishes no independent serial-to-interface verification for each connection slot.
++///     An owned monitor retains a published reference while its member interfaces and connection set remain
++///     unchanged and fresh known serial evidence agrees. Observed absence or contradictory identity ends retention.
++/// </remarks>
+ public interface IYubiKey
+ {
+     /// <summary>
+@@ -41,13 +48,13 @@ public interface IYubiKey
+     ///     <para>
+     ///         <strong>The same physical key can present different values.</strong> Evidence depends on what
+     ///         else is attached: a key alone may group by PID, while inserting a second key of the same
+-    ///         product ID forces serial evidence to tell them apart. Measured on macOS hardware, one key
+-    ///         reported <c>ykphysical:pid:0407</c> alone and <c>ykphysical:103</c> once a same-PID sibling
+-    ///         was inserted. The device did not change; the available evidence did.
++    ///         product ID requires serial evidence to tell them apart. For example, discovery can use
++    ///         <c>ykphysical:pid:0407</c> for a complete lone key and <c>ykphysical:103</c> for the same key
++    ///         when serial 103 distinguishes it from a same-PID sibling. The evidence changed, not the key.
+     ///     </para>
+     ///     <para>
+-    ///         <strong>A live repository and a fresh scan can legitimately disagree.</strong> When an
+-    ///         evidence-only tier change occurs, the repository keeps publishing the object it already
++    ///         <strong>An owned monitor and a fresh scan can legitimately disagree.</strong> When an
++    ///         evidence-only tier change occurs, the monitor keeps publishing the object it already
+     ///         handed out rather than churning subscribers, so a concurrent independent scan may report a
+     ///         different identifier for the same key. Both are correct.
+     ///     </para>
+@@ -69,8 +76,9 @@ public interface IYubiKey
+     /// <summary>
+     ///     The set of concrete connections this physical device exposes (any combination of
+     ///     <see cref="ConnectionType.SmartCard"/>, <see cref="ConnectionType.HidFido"/>, and
+-    ///     <see cref="ConnectionType.HidOtp"/>). Never contains the <see cref="ConnectionType.Hid"/>
+-    ///     group flag or <see cref="ConnectionType.All"/>.
++    ///     <see cref="ConnectionType.HidOtp"/>), including FIDO and OTP together. The separate
++    ///     <see cref="ConnectionType.Hid"/> group bit is absent, so the value also differs from
++    ///     <see cref="ConnectionType.All"/> even when every concrete interface is present.
+     /// </summary>
+     ConnectionType AvailableConnections { get; }
+ 
+@@ -88,12 +96,12 @@ public interface IYubiKey
+     ///         </description></item>
+     ///         <item><description>
+     ///             Once non-<see langword="null" />, it never reverts to <see langword="null" />. It may
+-    ///             transition from <see langword="null" /> to a value after publication, without any
+-    ///             device event.
++    ///             transition from <see langword="null" /> to a value after publication. A monitor's
++    ///             changed metadata publication emits <see cref="DeviceUpdated"/> for the retained object.
+     ///         </description></item>
+     ///         <item><description>
+-    ///             A manager-retained object's known value does not change to another known value. If a
+-    ///             fresh scan reports a different known serial for the same interface set, the manager
++    ///             A monitor-retained object's known value does not change to another known value. If a
++    ///             scan reports a different known serial for the same interface set, the monitor
+     ///             republishes the device as a removal followed by an addition.
+     ///         </description></item>
+     ///         <item><description>
+@@ -108,7 +116,9 @@ public interface IYubiKey
+     ///     </list>
+     ///     <para>
+     ///         This is the only durable physical identity the SDK offers. When it is
+-    ///         <see langword="null" />, physical identity is unknowable without a live session.
++    ///         <see langword="null" />, distinct references have unknown serial-based correlation. A live
++    ///         metadata read may supply a serial, but some devices report none. Successful serial-less
++    ///         discovery reads can be cached for the finder's evidence lifetime rather than retried each scan.
+     ///     </para>
+     /// </remarks>
+     int? SerialNumber => null;
+@@ -119,9 +129,10 @@ public interface IYubiKey
+     /// </summary>
+     /// <remarks>
+     ///     <para>
+-    ///         This is a last-known snapshot, not guaranteed-current device state. Existing discovery and
+-    ///         repository updates may replace it without a device event; a failed metadata read does not
+-    ///         clear a previously successful snapshot. A value already returned to a caller does not change.
++    ///         This is last-known metadata. A monitor replaces changed metadata on a retained object and emits
++    ///         <see cref="DeviceUpdated"/>; a failed metadata read preserves the previous successful snapshot.
++    ///         Replacing the snapshot leaves the scalar fields of a previously returned value unchanged.
++    ///         <see cref="DeviceInfo.ChallengeResponseTimeout"/> retains its source-memory ownership qualification.
+     ///     </para>
+     ///     <para>
+     ///         Metadata may be stale after configuration changes or disconnection. A retained device object
+@@ -154,7 +165,7 @@ public interface IYubiKey
+     ///     inequality and must not be coerced to either result for collection equality or deduplication.
+     ///     No equality comparer over this relation is offered: the serial arrives after publication, so
+     ///     any serial-derived hash could mutate while the object already keys a collection. Key
+-    ///     collections by reference instead — instance retention within one manager makes that a
++    ///     collections by reference instead — instance retention within one owned monitor makes that a
+     ///     supported pattern.
+     /// </remarks>
+     /// <param name="other">The device reference to compare with this reference.</param>
+@@ -222,4 +233,4 @@ _ when (AvailableConnections & ConnectionTypeExtensions.ConcreteConnections) ==
+                 "Use ConnectAsync<TConnection>() or an application-specific session extension to choose a transport.")
+         };
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/CompositeDeviceMerger.cs b/src/Core/src/Devices/CompositeDeviceMerger.cs
+index 8e2f3710c..309525ae0 100644
+--- a/src/Core/src/Devices/CompositeDeviceMerger.cs
++++ b/src/Core/src/Devices/CompositeDeviceMerger.cs
+@@ -48,21 +48,24 @@ internal readonly record struct DeviceInterfaceDescriptor(
+     bool IdentityReadBudgetConsumed = false);
+ 
+ /// <summary>
+-///     Deterministic, side-effect-free merge of per-interface descriptors into physical YubiKey devices,
+-///     correlating by USB Product ID (the Rust reference model).
++///     Groups per-interface descriptors using topology, serial, USB Product ID, and deduction evidence.
+ /// </summary>
+ /// <remarks>
+-///     Primary key is the USB Product ID, applied as a deterministic evidence hierarchy. USB interfaces
+-///     sharing a known PID that is present on exactly one physical key (PID count == 1) merge with no serial
++///     Topology groups first. Among remaining USB interfaces, PID count is the largest count of one
++///     concrete interface type for that PID, rather than an independently observed physical-key count.
++///     Interfaces sharing a known PID with count 1 merge with no serial
+ ///     required, but only when the observed connection set exactly equals the PID's expected interface set
+ ///     (the generalized guard); partial observations fall through to the serial path. When a PID is present
+-///     on more than one physical key (PID count > 1), or when the guard refuses, interfaces are grouped by
++///     more than once for an interface type (PID count > 1), or when the guard refuses, interfaces are grouped by
+ ///     serial evidence within their PID class, remaining null-serial orphans are attributed by pigeonhole
+ ///     deduction (unique candidate, and no interface type outnumbering the candidate keys), and anything
+ ///     still ambiguous stays conservatively standalone. When <c>pidCorrelationUntrusted</c> is set (an
+ ///     unparsed USB CCID reader made PID correlation untrustworthy for this scan), topology evidence still
+ ///     groups first and only the interfaces topology leaves behind are merged by serial, with conservative
+-///     no-collapse for null serials. NFC and null-PID interfaces stand alone.
++///     no-collapse for null serials. NFC stands alone; a null PID also stands alone outside the topology
++///     and serial-only fallback paths. Complementary partial interfaces from different same-PID keys can
++///     resemble one complete key and merge across keys until distinguishing evidence arrives. Slot routing
++///     still follows each enumerated path, which can differ from the key a caller selected by composite serial.
+ /// </remarks>
+ internal static class CompositeDeviceMerger
+ {
+@@ -82,7 +85,7 @@ public static IReadOnlyList<YubiKeyDevice> Merge(
+ 
+         if (pidCorrelationUntrusted)
+         {
+-            // Reader-name drift: correlate remaining USB interfaces by serial (Phase 37 behavior) so an
++            // Reader-name drift: correlate remaining USB interfaces by serial so an
+             // unparsed CCID rejoins its HID siblings. Non-USB interfaces still stand alone.
+             MergeUsbBySerial(usbRemaining, result);
+             AddStandaloneDevices(descriptors.Where(d => !d.IsUsb), result);
+@@ -101,7 +104,7 @@ public static IReadOnlyList<YubiKeyDevice> Merge(
+ 
+         // USB interfaces with a known PID present on exactly one physical key: merge by PID (no serial).
+         // A group holding a contested serial never takes the no-serial shortcut: the shortcut would discard
+-        // the very evidence (the serial) that decides which enumeration keeps the durable identity.
++        // the serial evidence that decides which enumeration keeps the serial-shaped identifier.
+         var mergeableByPid = usbRemaining.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) == 1);
+         foreach (var group in mergeableByPid.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
+         {
+@@ -127,8 +130,8 @@ public static IReadOnlyList<YubiKeyDevice> Merge(
+     }
+ 
+     /// <summary>
+-    ///     Per-PID physical-key count over USB interfaces: the max across transports for each known PID,
+-    ///     mirroring the Rust reference (the same physical key appears once per transport under the same PID).
++    ///     Per-PID count estimate: the largest concrete-interface-type count among USB descriptors for each
++    ///     known PID. Partial enumeration can undercount physical keys.
+     /// </summary>
+     public static IReadOnlyDictionary<ushort, int> ComputePidCounts(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors)
+     {
+@@ -196,7 +199,7 @@ private static bool CanMergeByPidWithoutSerial(IGrouping<ushort, DeviceInterface
+ 
+     /// <summary>
+     ///     The cross-PID contested-serial verdict for one scan: which serials were observed under more
+-    ///     than one PID, and for each, which PID group (if any) won the durable <c>ykphysical:{serial}</c>
++    ///     than one PID, and for each, which PID group (if any) won the scan's <c>ykphysical:{serial}</c>
+     ///     identity.
+     /// </summary>
+     private readonly record struct ContestedSerials(
+@@ -205,7 +208,7 @@ private readonly record struct ContestedSerials(
+     {
+         public static readonly ContestedSerials None = new([], new Dictionary<int, ushort>());
+ 
+-        /// <summary>Whether this (pid, serial) group carries the durable identity.</summary>
++        /// <summary>Whether this (pid, serial) group carries the serial-shaped identifier in this scan.</summary>
+         public bool IsWinner(ushort pid, int serial) =>
+             !Serials.Contains(serial)
+             || (WinnerPidBySerial.TryGetValue(serial, out var winner) && winner == pid);
+@@ -213,7 +216,7 @@ public bool IsWinner(ushort pid, int serial) =>
+ 
+     /// <summary>
+     ///     Finds serials observed under more than one PID and decides which PID group, if any, keeps the
+-    ///     durable <c>ykphysical:{serial}</c> identity: the group whose anchored census exactly matches its
++    ///     serial-shaped <c>ykphysical:{serial}</c> identifier: the group whose anchored census exactly matches its
+     ///     PID's expected interface set. Zero or multiple complete groups leaves the serial with no winner.
+     /// </summary>
+     /// <remarks>
+@@ -224,17 +227,18 @@ public bool IsWinner(ushort pid, int serial) =>
+     ///         enumeration: the stale one is dying interface-by-interface and its census is usually already
+     ///         failing, while the fresh one converges on its PID's full set. It can pick wrong - a scan can
+     ///         catch the stale set still fully enumerated while the fresh set is mid-arrival - and the
+-    ///         consequence is bounded and accepted: both groups are the same physical key, so the id lands
+-    ///         on the right key either way, at worst with one scan of stale membership whose dead members
+-    ///         fail loudly at connect time; the next scan corrects. When completeness cannot decide at all -
+-    ///         no group complete, or more than one - every contested interface publishes standalone and the
+-    ///         next scan converges. Any tie-break beyond completeness (newest PID, enumeration order) would
+-    ///         be guessing with a different name.
++    ///         identifier still names that physical key, but its stale members can fail at connect time.
++    ///         The same evidence can select that stale group on repeated scans: this rule has no age or
++    ///         expiry mechanism. Later regrouping depends on evidence the implemented grouping tiers use
++    ///         to distinguish the members. When completeness cannot decide - no group complete, or more
++    ///         than one - every contested interface publishes standalone while that ambiguity persists.
++    ///         Any tie-break beyond completeness (newest PID, enumeration order) would be guessing with
++    ///         a different name.
+     ///     </para>
+     ///     <para>
+     ///         The census deliberately uses <em>anchored</em> members only (interfaces that actually bear
+     ///         the serial). If attributed null-serial orphans could complete a contested census, a
+-    ///         deduction would decide which enumeration gets the durable identity - inverting the evidence
++    ///         deduction would decide which enumeration gets the serial-shaped identifier - inverting the evidence
+     ///         hierarchy during the one window where the evidence is least trustworthy.
+     ///     </para>
+     ///     <para>
+@@ -300,7 +304,7 @@ private static void MergeSamePidBySerialWithDeduction(
+             .ToList();
+         var orphans = descriptors.Where(d => d.Serial is null).ToList();
+ 
+-        // Contested serials that did not win in this PID group publish standalone: the durable identity,
++        // Contested serials that did not win in this PID group publish standalone: the serial-shaped id,
+         // if awarded at all, belongs to the complete enumeration in another PID group.
+         var eligible = anchored.Where(a => contested.IsWinner(pid, a.Serial)).ToList();
+         foreach (var loser in anchored.Where(a => !contested.IsWinner(pid, a.Serial)))
+@@ -315,8 +319,8 @@ private static void MergeSamePidBySerialWithDeduction(
+         // members) while candidacy is restricted to eligible keys. A contested loser's interfaces are
+         // physically present and unaccounted-for; an orphan in this group could belong to that
+         // mid-transition key rather than to a clean candidate. Counting them makes deduction strictly more
+-        // conservative while a contest is in progress - orphans stay standalone and the next scan
+-        // converges. Pinned by Merge_ContestedSerial_LoserSuppressesOrphanAttributionToCleanKeys.
++        // conservative while a contest is in progress - orphans stay standalone until later evidence
++        // resolves the contest. Pinned by Merge_ContestedSerial_LoserSuppressesOrphanAttributionToCleanKeys.
+         var canAttributeOrphans = eligible.Count > 0
+             && orphans.Count > 0
+             && NoInterfaceTypeOutnumbersCandidateKeys(expected, descriptors, eligible.Count);
+@@ -460,4 +464,4 @@ private static void AddStandaloneDevice(
+         ConnectionType.HidOtp => 2,
+         _ => 3
+     };
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/CompositeMetadataReader.cs b/src/Core/src/Devices/CompositeMetadataReader.cs
+index cd76341ae..0762d7a00 100644
+--- a/src/Core/src/Devices/CompositeMetadataReader.cs
++++ b/src/Core/src/Devices/CompositeMetadataReader.cs
+@@ -22,13 +22,13 @@ namespace Yubico.YubiKit.Core.Devices;
+ ///     Best-effort read of read-only <see cref="DeviceInfo"/> from a merged physical device for metadata only.
+ /// </summary>
+ /// <remarks>
+-///     Distinct from <see cref="DiscoveryIdentityReader"/>: this is decoupled from merge correctness. It makes
+-///     a single pass over the device's available transports in preference order (CCID → OTP HID → FIDO HID)
+-///     with NO retries and a hard total wall-clock budget shared across all transports, so a busy or slow
+-///     interface cannot stall discovery — a read that exceeds the remaining budget is abandoned, not aborted
+-///     (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />), and the reader falls through to the next
+-///     transport if budget remains. Total failure returns <c>null</c>; the merge never depends on the result.
+-///     Transport preference is CCID → OTP HID → FIDO HID, matching the Rust reference.
++///     Runs after grouping, independently of <see cref="DiscoveryIdentityReader"/>. It makes one pass over
++///     available transports in preference order (CCID → OTP HID → FIDO HID), without retrying a failed transport.
++///     Each read receives the remaining caller-wait budget from a shared stopwatch. A read exceeding that
++///     remainder abandons the wait, while dispatched work retains its ownership through cleanup (see
++///     <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync"/>). After a failure the next transport is tried
++///     if budget remains. Total failure returns null; the already-computed grouping stays unchanged.
++///     Caller cancellation propagates rather than falling through to another transport.
+ /// </remarks>
+ internal static class CompositeMetadataReader
+ {
+@@ -52,8 +52,8 @@ internal static class CompositeMetadataReader
+             if (DeviceConnectionRegistry.IsInterfaceInUse(device, connection))
+             {
+                 // Never disturb an interface this process is using (a discovery SELECT on a second shared
+-                // CCID handle would deselect the session's applet). Other interfaces of the same physical
+-                // key are independent USB interfaces and remain safe to read.
++                // CCID handle can change the session's selected applet). The next available interface can
++                // still be attempted under its own discovery admission and remaining wait budget.
+                 logger.LogDebug(
+                     "Metadata read for {DeviceId} over {Connection} skipped: interface has a live connection in this process; trying next transport.",
+                     device.DeviceId,
+@@ -93,4 +93,4 @@ internal static class CompositeMetadataReader
+         return null;
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/ConnectionType.cs b/src/Core/src/Devices/ConnectionType.cs
+index ade6e1c4f..4a7b6920a 100644
+--- a/src/Core/src/Devices/ConnectionType.cs
++++ b/src/Core/src/Devices/ConnectionType.cs
+@@ -14,13 +14,24 @@
+ 
+ namespace Yubico.YubiKit.Core.Devices;
+ 
++/// <summary>Concrete connection interfaces and group filters used by device discovery.</summary>
++/// <remarks>
++///     A discovery scope selects interfaces to enumerate and probe; a result filter matches any selected
++///     concrete interface. Available connections contain only concrete bits, which may occur together.
++/// </remarks>
+ [Flags]
+ public enum ConnectionType
+ {
++    /// <summary>No connection bits; matches no discovered devices.</summary>
+     Unknown = 0,
++    /// <summary>A group filter matching FIDO HID or OTP HID; a separate bit rather than their bitwise union.</summary>
+     Hid = 1,
++    /// <summary>The FIDO HID report interface, shared by CTAP1/U2F and CTAP2.</summary>
+     HidFido = 2,
++    /// <summary>The OTP HID feature-report interface.</summary>
+     HidOtp = 4,
++    /// <summary>A PC/SC smart-card connection, including USB CCID and NFC readers.</summary>
+     SmartCard = 8,
++    /// <summary>All modeled connection filters; use a concrete type to open a connection.</summary>
+     All = Hid | HidFido | HidOtp | SmartCard
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DeviceCapabilities.cs b/src/Core/src/Devices/DeviceCapabilities.cs
+index bd78b6b5e..1ea8afd6d 100644
+--- a/src/Core/src/Devices/DeviceCapabilities.cs
++++ b/src/Core/src/Devices/DeviceCapabilities.cs
+@@ -14,9 +14,12 @@
+ 
+ namespace Yubico.YubiKit.Core.Devices;
+ 
++/// <summary>Application bits carried by device capability and configuration fields.</summary>
++/// <remarks>The containing field determines whether bits mean supported, enabled, or another application status.</remarks>
+ [Flags]
+ public enum DeviceCapabilities
+ {
++    /// <summary>No modeled application bits are set.</summary>
+     None = 0,
+ 
+     /// <summary>
+@@ -55,8 +58,8 @@ public enum DeviceCapabilities
+     Fido2 = 0x02_00,
+ 
+     /// <summary>
+-    ///     Represents a combination of all available device capabilities.
+-    ///     This includes Otp, U2f, OpenPgp, Piv, Oath, HsmAuth, and Fido2.
++    ///     The union of the currently modeled application bits: Otp, U2f, OpenPgp, Piv, Oath, HsmAuth, and Fido2.
++    ///     This mask describes the enum, rather than a particular device's enabled applications or future bits.
+     /// </summary>
+     All = Otp | U2f | OpenPgp | Piv | Oath | HsmAuth | Fido2
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DeviceChange.cs b/src/Core/src/Devices/DeviceChange.cs
+index af8520435..4b3443568 100644
+--- a/src/Core/src/Devices/DeviceChange.cs
++++ b/src/Core/src/Devices/DeviceChange.cs
+@@ -18,7 +18,8 @@ namespace Yubico.YubiKit.Core.Devices;
+ 
+ /// <summary>A notification from a device monitoring subscription.</summary>
+ /// <remarks>The set of derived records is closed: <see cref="DeviceAdded"/>, <see cref="DeviceRemoved"/>,
+-/// <see cref="DeviceUpdated"/> and <see cref="SnapshotComplete"/>. A switch over those four is exhaustive.</remarks>
++/// <see cref="DeviceUpdated"/> and <see cref="SnapshotComplete"/>. A switch over those four covers the record kinds.
++/// Device-bearing records retain the published object; its last-known metadata may change after delivery.</remarks>
+ public abstract record DeviceChange
+ {
+     private protected DeviceChange(long revision) => Revision = revision;
+@@ -46,4 +47,4 @@ public sealed record DeviceUpdated(long Revision, IYubiKey Device) : DeviceChang
+ /// <remarks>Emitted once per subscription that starts while the monitor is running, after the initial replay and
+ /// including when the replay is empty. A subscription started after disposal ends without any notification.</remarks>
+ /// <param name="Revision">The revision of the replayed snapshot.</param>
+-public sealed record SnapshotComplete(long Revision) : DeviceChange(Revision);
+\ No newline at end of file
++public sealed record SnapshotComplete(long Revision) : DeviceChange(Revision);
+diff --git a/src/Core/src/Devices/DeviceFlags.cs b/src/Core/src/Devices/DeviceFlags.cs
+index 61df5c4a0..f26ad7457 100644
+--- a/src/Core/src/Devices/DeviceFlags.cs
++++ b/src/Core/src/Devices/DeviceFlags.cs
+@@ -45,9 +45,9 @@ public enum DeviceFlags
+     ///         must be disabled.
+     ///     </para>
+     ///     <para>
+-    ///         To automatically eject the smart card following a touch, see
++    ///         To automatically eject the smart card after a period of inactivity, see
+     ///         <see cref="DeviceInfo.AutoEjectTimeout" />.
+     ///     </para>
+     /// </remarks>
+     TouchEject = 0x80
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DeviceInfo.cs b/src/Core/src/Devices/DeviceInfo.cs
+index 47c998d5b..01fe8ff80 100644
+--- a/src/Core/src/Devices/DeviceInfo.cs
++++ b/src/Core/src/Devices/DeviceInfo.cs
+@@ -18,6 +18,13 @@
+ 
+ namespace Yubico.YubiKit.Core.Devices;
+ 
++/// <summary>Device metadata observed by discovery or read through a device-information protocol.</summary>
++/// <remarks>
++///     Supported applications describe device capability; enabled applications describe configuration on each
++///     transport. These values describe an observation, not current presence or operation success. Decoding
++///     supplies defaults for absent optional fields, so false, zero, and empty values can also mean unreported.
++///     <see cref="ChallengeResponseTimeout"/> retains its source memory; copying this struct shares that memory.
++/// </remarks>
+ public readonly record struct DeviceInfo
+ {
+     private const int TAG_USB_SUPPORTED = 0x01;
+@@ -41,38 +48,74 @@ public readonly record struct DeviceInfo
+     private const int TAG_FPS_VERSION = 0x20;
+     private const int TAG_STM_VERSION = 0x21;
+ 
++    /// <summary>Whether the reported form-factor byte has the Security Key product flag (0x40).</summary>
+     public required bool IsSky { get; init; }
++    /// <summary>Whether the reported form-factor byte has the FIPS product flag (0x80).</summary>
++    /// <remarks>This manufacturing flag is separate from application approval or operation-specific FIPS requirements.</remarks>
+     public required bool IsFips { get; init; }
++    /// <summary>The reported form-factor byte, including any product flags and unnamed numeric values.</summary>
++    /// <remarks>For example, 0x81 remains an unnamed value rather than <see cref="FormFactor.UsbAKeychain"/>.</remarks>
+     public required FormFactor FormFactor { get; init; }
++    /// <summary>The serial decoded from four big-endian bytes, or null when the response omits it.</summary>
+     public int? SerialNumber { get; init; }
++    /// <summary>Whether the configuration-lock field equals 1; false when absent.</summary>
+     public required bool IsLocked { get; init; }
++    /// <summary>The applications reported enabled over USB; <see cref="DeviceCapabilities.None"/> when absent.</summary>
+     public required DeviceCapabilities UsbEnabled { get; init; }
++    /// <summary>The applications reported supported over USB; <see cref="DeviceCapabilities.None"/> when absent.</summary>
+     public required DeviceCapabilities UsbSupported { get; init; }
++    /// <summary>The applications reported enabled over NFC; <see cref="DeviceCapabilities.None"/> when absent.</summary>
+     public required DeviceCapabilities NfcEnabled { get; init; }
++    /// <summary>The applications reported supported over NFC; <see cref="DeviceCapabilities.None"/> when absent.</summary>
+     public required DeviceCapabilities NfcSupported { get; init; }
++    /// <summary>The decoded reset-blocked application field; <see cref="DeviceCapabilities.None"/> when absent.</summary>
+     public required DeviceCapabilities ResetBlocked { get; init; }
++    /// <summary>The decoded FIPS-capable application field; <see cref="DeviceCapabilities.None"/> when absent.</summary>
++    /// <remarks>Interpretation depends on the response encoding; this value alone establishes no profile conformance.</remarks>
+     public required DeviceCapabilities FipsCapabilities { get; init; }
++    /// <summary>The decoded FIPS-approved application field; <see cref="DeviceCapabilities.None"/> when absent.</summary>
++    /// <remarks>Apply the application's device, configuration, and operation requirements separately.</remarks>
+     public required DeviceCapabilities FipsApproved { get; init; }
++    /// <summary>Whether the PIN-complexity field equals 1; false when absent.</summary>
+     public required bool HasPinComplexity { get; init; }
++    /// <summary>The UTF-8 part number, or null when absent, empty, or invalid UTF-8.</summary>
+     public required string? PartNumber { get; init; }
++    /// <summary>Whether the NFC-restriction field equals 1; false when absent.</summary>
+     public required bool IsNfcRestricted { get; init; }
++    /// <summary>The CCID inactivity timeout in seconds, decoded from two big-endian bytes; zero when absent.</summary>
++    /// <remarks>The timeout is meaningful with <see cref="DeviceFlags.TouchEject"/> enabled.</remarks>
+     public required ushort AutoEjectTimeout { get; init; }
++    /// <summary>The OTP challenge-response timeout as one byte containing seconds, or empty memory when absent.</summary>
++    /// <remarks>
++    ///     Decoding retains a view of the input TLV's value. Keep that TLV storage alive and unchanged while
++    ///     using this value. Caller-supplied memory is likewise shared. The hardware default of 15 seconds
++    ///     is distinct from the decoder's empty-memory default for an omitted field.
++    /// </remarks>
+     public required ReadOnlyMemory<byte> ChallengeResponseTimeout { get; init; }
++    /// <summary>The reported device-wide configuration flags, or <see cref="DeviceFlags.None"/> when absent.</summary>
+     public required DeviceFlags DeviceFlags { get; init; }
++    /// <summary>The effective firmware version used for compatibility checks.</summary>
++    /// <remarks>A non-final qualifier supplies this version; otherwise the supplied default or reported firmware is used.</remarks>
+     public required FirmwareVersion FirmwareVersion { get; init; }
++    /// <summary>The decoded release qualifier, or a final qualifier with iteration zero for the effective default version.</summary>
+     public required VersionQualifier VersionQualifier { get; init; }
++    /// <summary>The reported FPS component version, or null when absent or 0.0.0.</summary>
+     public FirmwareVersion? FpsVersion { get; init; }
++    /// <summary>The reported STM component version, or null when absent or 0.0.0.</summary>
+     public FirmwareVersion? StmVersion { get; init; }
+ 
++    /// <summary>The firmware's three-part version for a final release, otherwise the qualifier's formatted version.</summary>
+     public string VersionName => VersionQualifier.Type == VersionQualifierType.Final
+         ? FirmwareVersion.ToString()
+         : VersionQualifier.ToString();
+ 
+     /// <summary>Compares every field by value, including the bytes of <see cref="ChallengeResponseTimeout"/>.</summary>
+     /// <remarks>
+-    ///     The compiler-generated record equality compares <see cref="ReadOnlyMemory{T}"/> by backing reference, so two
+-    ///     snapshots decoded from separate response buffers would never be equal. Discovery relies on this comparison
++    ///     The compiler-generated record equality compares <see cref="ReadOnlyMemory{T}"/> by storage identity, so equal
++    ///     timeout bytes from separate response buffers would compare unequal. Discovery relies on this comparison
+     ///     to publish <see cref="DeviceUpdated"/> only when metadata actually changed.
++    ///     Equality and hashing read the current timeout bytes; keep their backing storage unchanged while
++    ///     comparing values or using a value as a hash-collection key.
+     /// </remarks>
+     public bool Equals(DeviceInfo other) =>
+         IsSky == other.IsSky &&
+@@ -98,6 +141,7 @@ public bool Equals(DeviceInfo other) =>
+         Equals(FpsVersion, other.FpsVersion) &&
+         Equals(StmVersion, other.StmVersion);
+ 
++    /// <summary>Hashes every field, including the current contents of <see cref="ChallengeResponseTimeout"/>.</summary>
+     public override int GetHashCode()
+     {
+         var hash = new HashCode();
+@@ -128,9 +172,16 @@ public override int GetHashCode()
+ 
+     /// <summary>Decodes device-information TLVs, ignoring unknown tags.</summary>
+     /// <remarks>
+-    ///     Absent optional fields use zero or null defaults. A supplied firmware version takes precedence
++    ///     Absent optional fields use false, zero, null, or empty-memory defaults. A supplied firmware version takes precedence
+     ///     over tag 0x05, but a present firmware field must still have a valid encoding.
++    ///     A qualifier whose type differs from <see cref="VersionQualifierType.Final"/> supplies the effective
++    ///     firmware version, including an unnamed qualifier type. The returned timeout memory borrows its
++    ///     input TLV storage; keep that storage alive and unchanged while using the result.
+     /// </remarks>
++    /// <param name="tlvs">Decoded device-information fields. Unknown tags are ignored; duplicate tags are rejected.</param>
++    /// <param name="defaultVersion">Version used in preference to tag 0x05, or null to use that tag.</param>
++    /// <returns>The decoded metadata, including a borrowed timeout value when present.</returns>
++    /// <exception cref="ArgumentException">The collection contains duplicate tags.</exception>
+     /// <exception cref="BadResponseException">A known field is malformed or no firmware version is available.</exception>
+     public static DeviceInfo CreateFromTlvs(IReadOnlyCollection<Tlv> tlvs, FirmwareVersion? defaultVersion)
+     {
+@@ -233,7 +284,7 @@ private static DeviceCapabilities ReadCapabilities(IDictionary<int, ReadOnlyMemo
+     {
+         if (!data.TryGetValue(tag, out var value))
+             return DeviceCapabilities.None;
+-        // Siblings accept variable-width capability integers; do not impose a two-byte maximum.
++        // Accept nonempty fields here; CapabilityMapper.FromApp determines which bytes are interpreted.
+         if (value.IsEmpty)
+             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length 0; expected a capability value.");
+         return CapabilityMapper.FromApp(value);
+@@ -294,8 +345,7 @@ private static uint ReadQualifierIteration(ReadOnlySpan<byte> value, int tag)
+         if (value.IsEmpty)
+             throw new BadResponseException($"Invalid version qualifier tag 0x{tag:X2} length 0; expected an iteration value.");
+ 
+-        // Python uses an integer, Rust fixtures also encode this in one byte. Accept leading-zero
+-        // extensions while retaining VersionQualifier's existing unsigned 32-bit numeric range.
++        // Accept leading-zero extensions while retaining VersionQualifier's unsigned 32-bit numeric range.
+         uint iteration = 0;
+         foreach (var b in value)
+         {
+@@ -358,4 +408,4 @@ public static DeviceCapabilities FromApp(ReadOnlyMemory<byte> appData)
+             ? (DeviceCapabilities)appData.Span[0]
+             : (DeviceCapabilities)BinaryPrimitives.ReadInt16BigEndian(appData.Span);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DeviceInfoReader.cs b/src/Core/src/Devices/DeviceInfoReader.cs
+index c147cf1d5..c3cb95798 100644
+--- a/src/Core/src/Devices/DeviceInfoReader.cs
++++ b/src/Core/src/Devices/DeviceInfoReader.cs
+@@ -46,8 +46,8 @@ internal static class DeviceInfoReader
+     ///     A Core protocol over SmartCard, FIDO HID, or OTP HID. The reader does not own or dispose it.
+     /// </param>
+     /// <param name="defaultVersion">
+-    ///     Optional fallback firmware version passed to <see cref="DeviceInfo.CreateFromTlvs" />. When
+-    ///     <c>null</c>, the firmware version is derived from the device-info TLVs.
++    ///     Optional firmware version used in preference to the reported firmware tag. When null, that tag
++    ///     supplies the version. A non-final qualifier can replace either with its own effective version.
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The parsed <see cref="DeviceInfo" />.</returns>
+@@ -198,4 +198,4 @@ private static async Task<byte[]> ReadOtpPageAsync(
+         // Return data without CRC: [length][TLV data...].
+         return response[..(response.Span[0] + 1)].ToArray();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DiscoveryBudgets.cs b/src/Core/src/Devices/DiscoveryBudgets.cs
+index c0520b6f3..06f9d38e5 100644
+--- a/src/Core/src/Devices/DiscoveryBudgets.cs
++++ b/src/Core/src/Devices/DiscoveryBudgets.cs
+@@ -26,6 +26,7 @@ internal static class DiscoveryBudgets
+     internal static readonly TimeSpan IdentityRead = TimeSpan.FromSeconds(2);
+     internal static readonly TimeSpan MetadataRead = TimeSpan.FromSeconds(3);
+ 
+-    /// <summary>The combined wait budget for a scan's enumeration, identity, and metadata stages.</summary>
++    /// <summary>The arithmetic sum of the enumeration, one identity-attempt, and metadata wait budgets.</summary>
++    /// <remarks>Retries, backoff, scan-lock queueing, synchronous topology work, and logging lie outside this sum.</remarks>
+     internal static TimeSpan ScanUpperBound => Enumeration + IdentityRead + MetadataRead;
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs b/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs
+index 5c36c52f9..be2d11374 100644
+--- a/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs
++++ b/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs
+@@ -26,7 +26,7 @@ internal static class DiscoveryDeviceInfoReader
+ 
+     /// <summary>
+     ///     Opens a short-lived connection over the given interface and reads <see cref="DeviceInfo" />,
+-    ///     bounded by a hard wall-clock budget.
++    ///     with a budget for the caller's wait.
+     /// </summary>
+     /// <remarks>
+     ///     <para>
+@@ -128,4 +128,4 @@ private static async Task<DeviceInfo> ReadBoundedCoreAsync(
+             throw;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DiscoveryIdentityReader.cs b/src/Core/src/Devices/DiscoveryIdentityReader.cs
+index ce34656d4..d81fb6bd6 100644
+--- a/src/Core/src/Devices/DiscoveryIdentityReader.cs
++++ b/src/Core/src/Devices/DiscoveryIdentityReader.cs
+@@ -21,15 +21,12 @@ namespace Yubico.YubiKit.Core.Devices;
+ ///     device, used to disambiguate multiple same-PID physical keys during composite discovery.
+ /// </summary>
+ /// <remarks>
+-///     This opens a short-lived connection over the interface and reads device info via the Core-owned
+-///     <see cref="DiscoveryDeviceInfoReader" />, with a hard per-attempt wall-clock budget so a card that is busy
+-///     with a long applet operation (e.g. RSA key generation) cannot stall the scan — the attempt is
+-///     abandoned, not aborted (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />). It retries transient
+-///     PC/SC failures (e.g. sharing violations) because, unlike the metadata read, a correct serial here is
+-///     required to tell two same-model keys apart; a budget timeout is NOT retried because it indicates a
+-///     busy card, and retrying would only extend the stall. Any failure is swallowed and reported as
+-///     <c>null</c> so discovery degrades to conservative no-merge rather than aborting. It uses only Core
+-///     primitives and introduces no dependency on Management.
++///     Opens a discovery-owned connection through <see cref="DiscoveryDeviceInfoReader"/>. Each attempt has
++///     a bounded caller wait, including admission and teardown; already-dispatched native work can continue
++///     after that wait ends. Ordinary exceptions are retried up to three attempts, with 150 ms then 300 ms
++///     backoff. A skipped read or timeout returns null immediately; a timeout alone does not identify a busy
++///     card. Other failures return null after the final attempt, leaving grouping to the remaining evidence.
++///     Cancellation propagates. The shared read retains native ownership through actual cleanup.
+ /// </remarks>
+ internal static class DiscoveryIdentityReader
+ {
+@@ -116,4 +113,4 @@ internal static class DiscoveryIdentityReader
+         }
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/DiscoveryReadScope.cs b/src/Core/src/Devices/DiscoveryReadScope.cs
+index e9e8c2458..f7efc694b 100644
+--- a/src/Core/src/Devices/DiscoveryReadScope.cs
++++ b/src/Core/src/Devices/DiscoveryReadScope.cs
+@@ -16,7 +16,7 @@
+ 
+ namespace Yubico.YubiKit.Core.Devices;
+ 
+-// A finder owns one read scope, so its single-flight reads cannot be joined by a replacement manager.
++// A finder owns one read scope, so its single-flight reads cannot be joined by an independent finder.
+ // Within that scope, generation and supersede token live in one immutable transport epoch captured under
+ // a short lock. Transport activity either advances the default direct-call scope or terminally retires a
+ // finder scope; a read admitted after retirement fails before worker admission or hardware open.
+@@ -116,4 +116,4 @@ internal readonly record struct DiscoveryReadKey(string InterfaceId, ConnectionT
+ {
+     internal DiscoveryReadSkippedException Superseded() =>
+         new(InterfaceId, DiscoveryReadSkipCause.SupersededByTransportActivity);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/Feature.cs b/src/Core/src/Devices/Feature.cs
+index 320c26f09..2ca291b98 100644
+--- a/src/Core/src/Devices/Feature.cs
++++ b/src/Core/src/Devices/Feature.cs
+@@ -14,8 +14,14 @@
+ 
+ namespace Yubico.YubiKit.Core.Devices;
+ 
++/// <summary>A named feature and its minimum release-firmware version for SDK compatibility checks.</summary>
+ public readonly record struct Feature
+ {
++    /// <summary>Defines a feature's name and minimum major.minor.revision version.</summary>
++    /// <param name="name">The feature's display name.</param>
++    /// <param name="versionMajor">The nonnegative major component.</param>
++    /// <param name="versionMinor">The minor component.</param>
++    /// <param name="versionRevision">The patch component.</param>
+     public Feature(string name, int versionMajor, int versionMinor, int versionRevision)
+     {
+         ArgumentNullException.ThrowIfNull(name);
+@@ -27,16 +33,27 @@ public Feature(string name, int versionMajor, int versionMinor, int versionRevis
+         VersionRevision = versionRevision;
+     }
+ 
++    /// <summary>The feature's name.</summary>
+     public string Name { get; init; }
++    /// <summary>The minimum major component.</summary>
+     public int VersionMajor { get; init; }
++    /// <summary>The minimum minor component.</summary>
+     public int VersionMinor { get; init; }
++    /// <summary>The minimum patch component.</summary>
+     public int VersionRevision { get; init; }
++    /// <summary>The minimum version, with each component validated to fit one byte when accessed.</summary>
++    /// <exception cref="ArgumentOutOfRangeException">A component is outside 0..255.</exception>
+     public FirmwareVersion Version => new(VersionMajor, VersionMinor, VersionRevision);
+ 
++    /// <summary>Checks the minimum firmware version, accepting major-zero firmware optimistically.</summary>
++    /// <param name="firmwareVersion">The firmware version to check.</param>
++    /// <returns>True for major-zero firmware or firmware at least as new as <see cref="Version"/>.</returns>
++    /// <remarks>Application configuration and actual device support remain prerequisites of the operation.</remarks>
++    /// <exception cref="ArgumentNullException"><paramref name="firmwareVersion"/> is null.</exception>
+     public bool IsSupportedByFirmware(FirmwareVersion firmwareVersion)
+     {
+         ArgumentNullException.ThrowIfNull(firmwareVersion);
+ 
+         return firmwareVersion.IsAlphaOrBeta || firmwareVersion >= Version;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/FindYubiKeys.cs b/src/Core/src/Devices/FindYubiKeys.cs
+index 47252936c..bc0aff201 100644
+--- a/src/Core/src/Devices/FindYubiKeys.cs
++++ b/src/Core/src/Devices/FindYubiKeys.cs
+@@ -83,7 +83,8 @@ internal FindYubiKeys(
+ 
+     // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
+     // Only successful reads are cached, so presence means the interface's identity was read successfully;
+-    // a failed or serial-disabled read is simply absent and is retried on the next scan.
++    // a failed read is absent and can be retried on the next scan. A successful response without a serial
++    // is cached too; learning a serial then requires fresh evidence rather than another unchanged scan.
+     //
+     // A cached identity is evidence about specific hardware in a specific configuration, and it expires
+     // with either:
+@@ -102,7 +103,9 @@ internal FindYubiKeys(
+ 
+     // Best-effort metadata cache, keyed by the published device's stable interface-set key
+     // (YubiKeyDevice.PhysicalIdentityKey, NOT DeviceId, which can flip between pid- and
+-    // serial-forms). Evicted when any member interface disappears.
++    // serial-forms). Evicted when any member interface disappears or the evidence epoch is replaced.
++    // Unlike CachedIdentity, this cache stores no PID: unchanged member IDs can reuse old metadata even
++    // after a PID change when no identity read supersedes it and no activity invalidates the epoch.
+     private sealed class EvidenceEpoch
+     {
+         internal ConcurrentDictionary<string, CachedIdentity> IdentityCache { get; } = new();
+@@ -316,8 +319,9 @@ private List<InterfaceCandidate> BuildInterfaces(
+     }
+ 
+     /// <summary>
+-    ///     Best-effort tier-1 topology read. Never throws and never blocks meaningfully: a failure is a
+-    ///     debug log and a null key, which drops the interface to the unchanged serial/PID tiers.
++    ///     Best-effort tier-1 topology read. Resolver failures are logged and return a null key, leaving
++    ///     serial/PID evidence to group the interface. Windows resolution is synchronous and has no SDK
++    ///     wait budget; fallback on error supplies no completion-time guarantee.
+     /// </summary>
+     private string? ResolveTopologyKey(IDevice device, ConnectionType connection)
+     {
+@@ -537,4 +541,4 @@ public DeviceInterfaceDescriptor ToDescriptor(
+ 
+     // Only successful metadata reads are cached, so Info is always present.
+     private readonly record struct MetadataCacheEntry(DeviceInfo Info, IReadOnlyList<string> InterfaceIds);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/FirmwareVersion.cs b/src/Core/src/Devices/FirmwareVersion.cs
+index b8a2261a1..84ed7c930 100644
+--- a/src/Core/src/Devices/FirmwareVersion.cs
++++ b/src/Core/src/Devices/FirmwareVersion.cs
+@@ -19,6 +19,7 @@
+ 
+ namespace Yubico.YubiKit.Core.Devices;
+ 
++/// <summary>A three-byte major.minor.patch firmware version with the SDK's major-zero compatibility policy.</summary>
+ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquatable<FirmwareVersion>
+ {
+     public FirmwareVersion() { }
+@@ -44,33 +45,19 @@ public FirmwareVersion(int major, int minor = 0, int patch = 0)
+     public byte Patch { get; }
+ 
+     /// <summary>
+-    ///     Gets a value indicating whether this firmware version represents an alpha or beta YubiKey.
+-    ///     Alpha/beta keys report firmware versions with major version 0 but should be treated as the latest version
+-    ///     for feature compatibility checks.
++    ///     Whether the major version is zero, which enables the SDK's optimistic development-firmware policy.
+     /// </summary>
+     /// <remarks>
+     ///     <para>
+-    ///         Treat an alpha or beta version as newer than any released firmware, and as being at least 5.8.0.
+-    ///         Every alpha and beta key is built from a development branch at or ahead of that release, so a
+-    ///         feature gate must not refuse one. <see cref="IsAtLeast(int,int,int)" /> already returns
+-    ///         <see langword="true" /> for these versions, and
+-    ///         <c>Feature.IsSupportedByFirmware</c> short-circuits on this property, so the usual gates need no
+-    ///         special handling. Do not write <c>!IsAlphaOrBeta &amp;&amp; IsAtLeast(...)</c>: that cancels the
+-    ///         built-in allowance and downgrades a development key to legacy behavior.
++    ///         Major-zero versions sort after every nonzero-major version. Among major-zero versions,
++    ///         comparison uses their numeric components. <see cref="IsAtLeast(int,int,int)"/> and
++    ///         <see cref="Feature.IsSupportedByFirmware"/> accept every major-zero version optimistically,
++    ///         including <see cref="Default"/> (0.0.0). Use those checks to preserve the SDK's policy.
+     ///     </para>
+     ///     <para>
+-    ///         The version carries no finer detail. Different development builds report the same placeholder
+-    ///         (typically 0.0.1), so it cannot distinguish one build from another. An individual applet build can
+-    ///         therefore lack a feature this property implies, usually because the applet was cut before the
+-    ///         instruction landed. The device reports that itself, as <c>SW=0x6D00</c> (instruction not supported)
+-    ///         or a comparable rejection.
+-    ///     </para>
+-    ///     <para>
+-    ///         That case is deliberately not handled in code. Detecting it would mean either abandoning the
+-    ///         optimistic assumption, which breaks every correctly built development key, or probing the device
+-    ///         before each gated call, which costs a round trip to accommodate a defective build. A test failing
+-    ///         against a development key with <c>SW=0x6D00</c> is the expected signal: the applet on that specific
+-    ///         key is missing the instruction. Check the key before suspecting the gate or the command encoding.
++    ///         This is a compatibility policy, not evidence that a particular applet build implements a
++    ///         command. Handle device rejection through the operation's error contract. An unsupported-instruction
++    ///         response warrants checking both the build's capabilities and the command sent.
+     ///     </para>
+     /// </remarks>
+     public bool IsAlphaOrBeta => Major == 0;
+@@ -108,8 +95,8 @@ public int CompareTo(object? obj)
+     ///     the same type.
+     /// </summary>
+     /// <remarks>
+-    ///     Alpha/beta keys (version 0.0.0) are treated as the latest version and will compare
+-    ///     greater than any other version.
++    ///     Major-zero versions compare greater than nonzero-major versions. Within either group, comparison
++    ///     uses major, minor, then patch numerically. A non-null version compares greater than null.
+     /// </remarks>
+     /// <returns>
+     ///     An integer that indicates whether the current instance precedes (negative value),
+@@ -142,6 +129,7 @@ public bool Equals(FirmwareVersion? other) =>
+     /// <summary>
+     ///     Parses a firmware version string in format "major.minor.patch".
+     /// </summary>
++    /// <returns>A version with each component in 0..255, or null when the three components cannot be parsed.</returns>
+     public static FirmwareVersion? FromString(string version)
+     {
+         var parts = version.Split('.');
+@@ -200,12 +188,11 @@ private int CompareVersion(int major, int minor, int patch) =>
+         ((Major << 16) | (Minor << 8) | Patch).CompareTo((major << 16) | (minor << 8) | patch);
+ 
+     /// <summary>
+-    ///     Creates a <see cref="FirmwareVersion" /> from a byte array.
+-    ///     The byte array must contain exactly three bytes, representing the major, minor, and patch versions.
++    ///     Creates a <see cref="FirmwareVersion" /> from exactly three bytes representing major, minor, and patch.
+     /// </summary>
+-    /// <param name="bytes">A byte array containing the version information.</param>
++    /// <param name="bytes">A borrowed span containing the version information.</param>
+     /// <returns>A <see cref="FirmwareVersion" /> instance.</returns>
+-    /// <exception cref="ArgumentException">Thrown if the byte array does not contain exactly three bytes.</exception>
++    /// <exception cref="ArgumentException">The span does not contain exactly three bytes.</exception>
+     /// <remarks>
+     ///     The first byte represents the major version, the second byte represents the minor version,
+     ///     and the third byte represents the patch version.
+@@ -274,4 +261,4 @@ public static FirmwareVersion FromBytes(ReadOnlySpan<byte> bytes) => bytes.Lengt
+     public static readonly FirmwareVersion V5_7_2 = new(5, 7, 2);
+     public static readonly FirmwareVersion V5_8_0 = new(5, 8);
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/FormFactor.cs b/src/Core/src/Devices/FormFactor.cs
+index 942584dd4..1acad4767 100644
+--- a/src/Core/src/Devices/FormFactor.cs
++++ b/src/Core/src/Devices/FormFactor.cs
+@@ -14,6 +14,11 @@
+ 
+ namespace Yubico.YubiKit.Core.Devices;
+ 
++/// <summary>Named base form factors for YubiKey hardware.</summary>
++/// <remarks>
++///     <see cref="DeviceInfo.FormFactor"/> retains the complete reported byte, including product flags.
++///     A flagged value such as 0x81 differs from the named base value 0x01; callers should allow unnamed values.
++/// </remarks>
+ public enum FormFactor
+ {
+     /// <summary>
+@@ -55,4 +60,4 @@ public enum FormFactor
+     ///     The YubiKey is a USB-C key-chain device with a biometric (fingerprint) sensor.
+     /// </summary>
+     UsbCBiometricKeychain = 7
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/IDeviceTopologyResolver.cs b/src/Core/src/Devices/IDeviceTopologyResolver.cs
+index 76dec552f..6120954d9 100644
+--- a/src/Core/src/Devices/IDeviceTopologyResolver.cs
++++ b/src/Core/src/Devices/IDeviceTopologyResolver.cs
+@@ -23,8 +23,8 @@ namespace Yubico.YubiKit.Core.Devices;
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///         Topology evidence is optional by contract. It is absent on macOS and Linux (no supported
+-///         reader-name → USB-device mapping exists on either platform), and absent on Windows whenever the
++///         Topology evidence is optional by contract. This SDK supplies no topology keys on macOS or Linux.
++///         On Windows it is absent whenever the
+ ///         topology read fails — a stale devnode mid-hotplug, <c>CR_NO_SUCH_DEVNODE</c>, a missing
+ ///         ContainerId property, or the API being unavailable. A resolver NEVER guesses: it either returns a
+ ///         key it read, or returns <c>false</c>.
+@@ -46,8 +46,8 @@ internal interface IDeviceTopologyResolver
+ }
+ 
+ /// <summary>
+-///     The no-topology resolver used on platforms with no supported reader/interface → USB device mapping
+-///     (macOS, Linux). Always reports "unknown", which is the documented platform bound.
++///     The resolver currently selected on macOS and Linux. It always reports unknown; this describes the
++///     SDK implementation rather than the availability of topology APIs on those operating systems.
+ /// </summary>
+ internal sealed class NullDeviceTopologyResolver : IDeviceTopologyResolver
+ {
+@@ -75,4 +75,4 @@ public static IDeviceTopologyResolver Create() =>
+         SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows
+             ? new WindowsDeviceTopologyResolver(new WindowsTopologyNativeOps())
+             : NullDeviceTopologyResolver.Instance;
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/ProtocolDeviceInfo.cs b/src/Core/src/Devices/ProtocolDeviceInfo.cs
+index 316fe705b..1dc433e32 100644
+--- a/src/Core/src/Devices/ProtocolDeviceInfo.cs
++++ b/src/Core/src/Devices/ProtocolDeviceInfo.cs
+@@ -32,10 +32,8 @@ internal static class ProtocolDeviceInfo
+ {
+     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)
+     {
+-        // Borrows: the caller owns this connection and disposes it (see the type remarks). Upstream
+-        // disposed it here on failure, which was correct only in a model where protocol disposal
+-        // cascaded to the connection. This branch removed that cascade, so disposing here would be a
+-        // premature dispose of a connection the caller still holds and will dispose itself.
++        // The caller owns the connection, including failure cleanup. This method owns only the protocol;
++        // its disposal leaves the borrowed connection available to its owner.
+         var protocol = ProtocolFactory.Create(connection);
+ 
+         try
+@@ -56,4 +54,4 @@ public static async Task<DeviceInfo> ReadAsync(IConnection connection, Cancellat
+             protocol.Dispose();
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/SharedDeviceInfoRead.cs b/src/Core/src/Devices/SharedDeviceInfoRead.cs
+index 17dd2b31d..a98b6b3fa 100644
+--- a/src/Core/src/Devices/SharedDeviceInfoRead.cs
++++ b/src/Core/src/Devices/SharedDeviceInfoRead.cs
+@@ -142,13 +142,10 @@ private static Task<DeviceInfo> StartAdmittedRead(
+     {
+         if (waitForWorkerSlot)
+         {
+-            // Identity reads WAIT for a bounded worker slot instead of skipping: with N same-PID keys, a
+-            // scan legitimately issues more identity reads than there are workers, and skipping the
+-            // excess orphans their interfaces (the Phase-0 "aborted" scan-1 failures were exactly this
+-            // self-contention on the admission gate). The caller's wall-clock budget in DiscoveryDeviceInfoReader.ReadBoundedAsync
+-            // bounds the wait, and the admission bound itself is preserved: at most
+-            // MaximumConcurrentWorkers native reads run concurrently, so a hung native call still cannot
+-            // multiply workers.
++            // Identity reads queue for worker admission: several same-PID keys can require more reads
++            // than there are worker slots. DiscoveryDeviceInfoReader bounds each caller's wait, while
++            // scope retirement cancels queued admission. Already-admitted work retains its slot through
++            // completion, preserving MaximumConcurrentWorkers even when native work is held.
+             return StartQueuedSharedRead(scope, key, epoch, provider, leaseTracker, nativeAdmission);
+         }
+ 
+@@ -352,4 +349,4 @@ public void MarkAbandoned(string interfaceId)
+                 DeviceConnectionRegistry.TryMarkUnrecovered(lease, failure);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/VersionQualifier.cs b/src/Core/src/Devices/VersionQualifier.cs
+index 567b116bb..e60cd9654 100644
+--- a/src/Core/src/Devices/VersionQualifier.cs
++++ b/src/Core/src/Devices/VersionQualifier.cs
+@@ -20,8 +20,11 @@ namespace Yubico.YubiKit.Core.Devices;
+ /// </summary>
+ public enum VersionQualifierType
+ {
++    /// <summary>An alpha release.</summary>
+     Alpha = 0x00,
++    /// <summary>A beta release.</summary>
+     Beta = 0x01,
++    /// <summary>A final release.</summary>
+     Final = 0x02
+ }
+ 
+@@ -35,19 +38,19 @@ public class VersionQualifier
+     /// <summary>
+     ///     Initializes a new instance of the <see cref="VersionQualifier" /> class.
+     ///     This constructor allows you to specify the firmware version, type, and iteration.
+-    ///     The iteration must be a non-negative value and less than or equal to int.MaxValue.
++    ///     The iteration must be a non-negative value and less than or equal to uint.MaxValue.
+     ///     If the firmware version is null, an <see cref="ArgumentNullException" /> will be thrown.
+-    ///     If the iteration is negative or greater than int.MaxValue, an <see cref="ArgumentOutOfRangeException" /> will be
++    ///     If the iteration is negative or greater than uint.MaxValue, an <see cref="ArgumentOutOfRangeException" /> will be
+     ///     thrown.
+     /// </summary>
+     /// <param name="firmwareVersion">The firmware version associated with this qualifier.</param>
+-    /// <param name="type">The type of version qualifier (Alpha, Beta, Final).</param>
++    /// <param name="type">The qualifier type; unnamed numeric values are retained.</param>
+     /// <param name="iteration">
+     ///     The iteration number of the version qualifier, must be a non-negative value and less than or
+-    ///     equal to int.MaxValue.
++    ///     equal to uint.MaxValue.
+     /// </param>
+-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+-    /// <exception cref="ArgumentNullException"></exception>
++    /// <exception cref="ArgumentOutOfRangeException"><paramref name="iteration"/> is outside 0..uint.MaxValue.</exception>
++    /// <exception cref="ArgumentNullException"><paramref name="firmwareVersion"/> is null.</exception>
+     public VersionQualifier(FirmwareVersion firmwareVersion, VersionQualifierType type, long iteration)
+     {
+         if (iteration is < 0 or > uint.MaxValue)
+@@ -79,15 +82,16 @@ public VersionQualifier()
+     /// <summary>
+     ///     Represents the type of version qualifier, such as Alpha, Beta, or Final.
+     /// </summary>
++    /// <remarks>Unnamed values remain representable and are treated as non-final by device-info decoding.</remarks>
+     public VersionQualifierType Type { get; }
+ 
+     /// <summary>
+-    ///     Represents the iteration number of the version qualifier.
++    ///     The iteration number in the inclusive range 0..uint.MaxValue, carried as a long.
+     /// </summary>
+     public long Iteration { get; }
+ 
+     /// <summary>
+-    ///     Returns a string that represents the current <see cref="VersionQualifier" />.
++    ///     Formats this qualifier as major.minor.patch.type.iteration, with the type in lowercase.
+     /// </summary>
+     public override string ToString() => $"{FirmwareVersion}.{Type.ToString().ToLowerInvariant()}.{Iteration}";
+ 
+@@ -98,4 +102,4 @@ obj is VersionQualifier other &&
+         Iteration == other.Iteration;
+ 
+     public override int GetHashCode() => HashCode.Combine(FirmwareVersion, Type, Iteration);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs b/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs
+index 10594f36c..9e8d7b6b0 100644
+--- a/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs
++++ b/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs
+@@ -18,7 +18,7 @@
+ namespace Yubico.YubiKit.Core.Devices;
+ 
+ /// <summary>
+-///     The two scripted-able native operations the Windows topology tier is composed from. Kept as a seam
++///     The scriptable native operations the Windows topology tier is composed from. Kept as a seam
+ ///     (mirroring the <c>LinuxUdevHidEventSource</c> pattern) so all resolver logic is unit-testable keyless
+ ///     on any OS.
+ /// </summary>
+@@ -41,9 +41,8 @@ internal interface IWindowsTopologyNativeOps
+ }
+ 
+ /// <summary>
+-///     Windows topology tier: maps an interface to the Container ID of the physical USB device that owns it.
+-///     The Container ID GUID is identical across every interface of one composite USB device, including its
+-///     HID interfaces, which is exactly the grouping key composite discovery needs.
++///     Windows topology tier: maps an interface to its PnP device container. Interfaces reporting the same
++///     nonempty Container ID supply the grouping key; the resolver relies on that operating-system evidence.
+ /// </summary>
+ /// <remarks>
+ ///     CCID resolves through <c>SCardGetReaderDeviceInstanceIdW</c> → devnode → ContainerId; HID resolves
+@@ -52,6 +51,9 @@ internal interface IWindowsTopologyNativeOps
+ ///     Windows reports for devices with no container and would otherwise fuse unrelated interfaces) — yields
+ ///     "unknown", never a guess. The interface then falls through to the unchanged serial / PID / deduction
+ ///     tiers, degrading Windows to exactly the macOS/Linux semantics.
++///     The CCID reader-instance API requires Windows 8 / Server 2012 or later and is not redirected in a
++///     Remote Desktop session, where SCARD_E_READER_UNAVAILABLE leaves topology unknown. Native calls are
++///     synchronous and have no SDK wait budget.
+ /// </remarks>
+ internal sealed class WindowsDeviceTopologyResolver(IWindowsTopologyNativeOps nativeOps) : IDeviceTopologyResolver
+ {
+@@ -99,4 +101,4 @@ private bool TryResolveSmartCard(string readerName, out Guid containerId)
+             && !string.IsNullOrEmpty(instanceId)
+             && nativeOps.TryGetContainerIdByInstanceId(instanceId, out containerId);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/WindowsTopologyNativeOps.cs b/src/Core/src/Devices/WindowsTopologyNativeOps.cs
+index f84ccbbc5..bbdfbf60a 100644
+--- a/src/Core/src/Devices/WindowsTopologyNativeOps.cs
++++ b/src/Core/src/Devices/WindowsTopologyNativeOps.cs
+@@ -42,7 +42,8 @@ public bool TryGetReaderDeviceInstanceId(string readerName, out string? deviceIn
+ 
+         using (context)
+         {
+-            // Two-call pattern: length probe, then the buffered read.
++            // A null output buffer returns the required character count, including the terminator, with
++            // SCARD_S_SUCCESS. Use that count for the second call's buffer.
+             var lengthInChars = 0;
+             var probeResult = WinSCardNativeMethods.SCardGetReaderDeviceInstanceId(
+                 context,
+@@ -107,4 +108,4 @@ private static bool TryReadContainerId(Func<CmDevice> deviceFactory, out Guid co
+             return false;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/YubiKeyManager.cs b/src/Core/src/Devices/YubiKeyManager.cs
+index 8c1c94709..d292cafd2 100644
+--- a/src/Core/src/Devices/YubiKeyManager.cs
++++ b/src/Core/src/Devices/YubiKeyManager.cs
+@@ -14,12 +14,26 @@ namespace Yubico.YubiKit.Core.Devices;
+ /// </remarks>
+ /// <example>
+ /// <code>
+-/// var key = await YubiKeyManager.FindFirstAsync(
+-///     predicate: key => key.SerialNumber == serial, cancellationToken: ct);
++/// using System;
++/// using System.Threading;
++/// using System.Threading.Tasks;
++/// using Yubico.YubiKit.Core.Devices;
+ ///
+-/// await using var monitor = await YubiKeyManager.CreateMonitorAsync(ct);
+-/// await foreach (var change in monitor.WatchAsync(ct))
+-///     Apply(change); // DeviceAdded replay, SnapshotComplete, then live changes.
++/// static async Task TrackAsync(CancellationToken cancellationToken)
++/// {
++///     await using var monitor = await YubiKeyManager.CreateMonitorAsync(cancellationToken);
++///     await foreach (var change in monitor.WatchAsync(cancellationToken))
++///     {
++///         Console.WriteLine(change switch
++///         {
++///             DeviceAdded added => $"Added: {added.Device.DeviceId}",
++///             DeviceRemoved removed => $"Removed: {removed.Device.DeviceId}",
++///             DeviceUpdated updated => $"Updated: {updated.Device.DeviceId}",
++///             SnapshotComplete complete => $"Snapshot complete at revision {complete.Revision}",
++///             _ => throw new InvalidOperationException("Unknown device change.")
++///         });
++///     }
++/// }
+ /// </code>
+ /// </example>
+ public static class YubiKeyManager
+@@ -43,10 +57,14 @@ public static class YubiKeyManager
+     /// <remarks>
+     /// Each call uses fresh identity and metadata evidence without changing running monitors. Ordering is
+     /// unspecified. Grouping is conservative: ambiguous evidence can split one physical key into several
+-    /// results. Metadata is best-effort last-known data. For full composite keys, discover All and filter
++    /// results. Complementary partial interfaces from same-PID keys can also resemble one complete key
++    /// and group across keys until serial, topology, or fuller enumeration distinguishes them. Metadata
++    /// is best-effort last-known data. For full composite keys, discover All and filter
+     /// locally with <see cref="IYubiKey.SupportsConnection"/>. Coordinate YubiKeys from disjoint scopes before
+     /// opening connections: physical-key exclusion relies on overlapping known interface IDs. Cancellation
+     /// bounds waits, not dispatched native work; returned YubiKeys remain usable after discovery ends.
++    /// Each transport enumeration has a five-second wait budget. A timeout logs a warning and omits that
++    /// transport for this call; repeat discovery after the service recovers if the result is incomplete.
+     /// </remarks>
+     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+         ConnectionType interfaces = ConnectionType.All,
+@@ -130,4 +148,4 @@ internal static async IAsyncEnumerable<DeviceChange> WatchAsync(
+     /// <exception cref="PlatformInteropException">A requested platform API fails during the first scan.</exception>
+     public static Task<YubiKeyMonitor> CreateMonitorAsync(CancellationToken cancellationToken = default) =>
+         YubiKeyMonitor.CreateAsync(cancellationToken);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Devices/YubiKeyMonitor.cs b/src/Core/src/Devices/YubiKeyMonitor.cs
+index be4dbf6dc..b96ece53b 100644
+--- a/src/Core/src/Devices/YubiKeyMonitor.cs
++++ b/src/Core/src/Devices/YubiKeyMonitor.cs
+@@ -29,8 +29,12 @@ namespace Yubico.YubiKit.Core.Devices;
+ /// <para>A monitor has one lifetime: it runs from creation until <see cref="DisposeAsync"/> and cannot be
+ /// paused or restarted. To resume tracking after disposal, create a new monitor. Disposal does not dispose
+ /// caller-owned sessions or connections.</para>
++/// <para>After initialization, discovery failure before publication is logged and retried on the next listener
++/// or interval trigger, retaining the previous publication. A monitored enumeration timeout fails that scan rather than
++/// publishing timeout-induced removals. A terminal loop failure is reported through watch subscriptions.</para>
+ /// <para>Concurrent <see cref="WatchAsync"/> enumerations are safe, and <see cref="DisposeAsync"/> may run while
+-/// enumerations are active: they end normally. Do not call <see cref="DisposeAsync"/> concurrently with
++/// enumerations are active: healthy subscriptions end normally after draining. A previously faulted
++/// subscription retains its error. Do not call <see cref="DisposeAsync"/> concurrently with
+ /// itself.</para>
+ /// </remarks>
+ public sealed class YubiKeyMonitor : IAsyncDisposable
+@@ -70,10 +74,15 @@ private YubiKeyMonitor(
+     /// <param name="cancellationToken">Ends this enumeration only; the monitor keeps running.</param>
+     /// <returns>A lazy stream. Nothing is subscribed until the first <c>MoveNextAsync</c>.</returns>
+     /// <remarks>
+-    /// Each enumeration has its own bounded buffer. Keep consuming it: a subscriber that falls more than
+-    /// 256 changes behind is ended with <see cref="InvalidOperationException"/> instead of silently losing
+-    /// changes; clear the projection and enumerate again to recover. Changes published before disposal may
+-    /// still be delivered; an enumeration started after disposal ends immediately.
++    /// Snapshot capture and subscription registration share the publication boundary on the first move,
++    /// so the replay and its live tail cover the same membership history. Replay occupies no buffer space.
++    /// Each enumeration buffers up to 256 later changes. A write to a full buffer faults only that subscriber;
++    /// replay and buffered changes may drain before <see cref="InvalidOperationException"/> is observed.
++    /// Clear the projection and enumerate this monitor again to recover from overflow. Device records carry
++    /// retained references whose metadata can later change, rather than frozen event-time property values.
++    /// Disposal of the enumeration unregisters only that subscription. Changes published before monitor
++    /// disposal may still drain; an enumeration started after disposal ends immediately. A terminal monitoring
++    /// failure faults subscriptions; dispose that monitor and create a new one to resume tracking.
+     /// </remarks>
+     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
+     /// <exception cref="InvalidOperationException">This subscriber overflowed, or monitoring failed terminally.</exception>
+@@ -91,7 +100,7 @@ internal static Task<YubiKeyMonitor> CreateAsync(CancellationToken cancellationT
+     /// <summary>Starts listeners and the scan loop, then awaits the first published scan.</summary>
+     /// <remarks>
+     /// <paramref name="cancellationToken"/> bounds only this wait. A first-scan failure is terminal and
+-    /// rethrown; either outcome disposes the partially created monitor before returning.
++    /// rethrown; failure or cancellation disposes the partially created monitor before returning.
+     /// </remarks>
+     internal static async Task<YubiKeyMonitor> CreateAsync(
+         IMonitoredDiscovery discovery,
+@@ -135,7 +144,8 @@ private async Task RunAsync(CancellationToken cancellationToken)
+ 
+                 if (trigger.Reason == RescanReason.Initial)
+                 {
+-                    // The first scan must succeed for creation to return; later failures only log and retry.
++                    // The first scan must succeed for creation to return. Later scan failures are handled
++                    // below; scheduler or evidence-invalidation failure still terminates the loop.
+                     await ScanAndPublishAsync(cancellationToken).ConfigureAwait(false);
+                     _ = _firstPublication.TrySetResult(null);
+                     continue;
+@@ -179,12 +189,14 @@ private async Task ScanAndPublishAsync(CancellationToken cancellationToken)
+     }
+ 
+     /// <summary>
+-    /// Stops tracking and ends every <see cref="WatchAsync"/> enumeration normally. Idempotent.
++    /// Stops tracking and completes healthy <see cref="WatchAsync"/> subscriptions normally. Idempotent.
+     /// </summary>
+     /// <remarks>
+-    /// Returns after the scan loop has stopped, which waits for an in-flight scan to finish within its
+-    /// discovery budgets. Active <see cref="WatchAsync"/> enumerations end normally. Not safe to call concurrently
+-    /// with itself.
++    /// Stops listeners, requests cancellation, and awaits the scan loop before retiring discovery and
++    /// completing the feed. There is no separate drain timeout or scan-wide completion bound. Discovery
++    /// budgets bound individual waits, while already-dispatched native work can retain ownership afterward.
++    /// Healthy subscriptions may drain already-published changes; existing subscription errors remain observable.
++    /// Caller-owned connections and sessions retain their own lifetimes. Not safe to call concurrently with itself.
+     /// </remarks>
+     public ValueTask DisposeAsync() => new(_disposal ??= DisposeCoreAsync());
+ 
+@@ -192,7 +204,7 @@ private async Task DisposeCoreAsync()
+     {
+         // Each step removes the only source of concurrency the next step would otherwise have to guard against:
+         // stopped listeners cannot signal, a stopped loop cannot scan or publish, a retired discovery
+-        // cannot open reads, and a completed feed accepts no subscribers.
++        // cannot open reads, and a completed feed ends later subscriptions immediately.
+         _signals.Dispose();
+         _lifetime.Cancel();
+         if (_run is { } run)
+@@ -202,4 +214,4 @@ private async Task DisposeCoreAsync()
+         _feed.Complete();
+         Logger.LogDebug("Device monitoring stopped");
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Transport.cs b/src/Core/src/Transport.cs
+index 97ad15109..2dc51a2f9 100644
+--- a/src/Core/src/Transport.cs
++++ b/src/Core/src/Transport.cs
+@@ -14,11 +14,16 @@
+ 
+ namespace Yubico.YubiKit.Core;
+ 
++/// <summary>Physical transport categories, distinct from connection interfaces or application capabilities.</summary>
+ [Flags]
+ public enum Transport
+ {
++    /// <summary>No transport selected.</summary>
+     None = 0,
++    /// <summary>USB attachment, which can expose smart-card and HID interfaces.</summary>
+     Usb = 1,
++    /// <summary>Contactless access through an NFC reader.</summary>
+     Nfc = 2,
++    /// <summary>Both modeled transport categories.</summary>
+     All = Usb | Nfc
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs
+index 37ee15e99..8b8d52709 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs
+@@ -23,17 +23,17 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
+ 
+ /// <summary>
+ ///     Key-count-agnostic composite-discovery invariants; the guarantees under test are specified in
+-///     docs/architecture/device-discovery-guarantees.md. Requires one or more allow-listed composite USB
+-///     YubiKeys; no touch / user-presence required. The invariants hold for any number of keys, so
++///     docs/architecture/device-discovery-guarantees.md. Requires one or more dedicated composite USB
++///     YubiKeys; no touch / user-presence required. The checks adapt to the enumerated key count, so
+ ///     single-key rigs keep passing while multi-key rigs exercise the same contracts.
+ /// </summary>
+ /// <remarks>
+-///     Expectations are computed from an independent raw USB enumeration (PC/SC reader names + HID
+-///     descriptors) taken by the test itself, so no assertion hard-codes a key count. The rig is assumed
+-///     USB-only (no NFC reader attached) and idle (no other process holding interfaces exclusively).
+-///     Per Phase 0, zero-orphans / completeness / stability are EXPECTED RED on multi-same-PID-key rigs in
+-///     fresh-process single-scan conditions until Phase 2 lands; conservation (interface count) is expected
+-///     to hold today.
++///     Expectations use production PC/SC and HID enumerators with a local copy of PID/name policy. This
++///     oracle is independent of the merger, not an independent hardware census. The rig must be USB-only
++///     (no NFC reader attached), fully enumerated, idle, and free of competing interface owners. Several
++///     tests scan every returned key, and the typed-connect test opens every advertised interface directly;
++///     those paths do not apply the shared fixture allow list. Attach only dedicated authorized test keys.
++///     Serial-correlation cases select expected serials from AuthorizedDevices, after discovery has run.
+ /// </remarks>
+ [Trait(TestCategories.Category, TestCategories.Discovery)]
+ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
+@@ -58,9 +58,8 @@ public Task InitializeAsync()
+     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+     public async Task FindAllAsync_Conservation_EveryEnumeratedUsbInterfaceAppearsExactlyOnce()
+     {
+-        // Conservation: for every concrete interface type, the number of independently enumerated USB
+-        // YubiKey interfaces equals the number of returned physical devices exposing that type — no
+-        // interface is lost and none is double-attributed, regardless of how grouping went.
++        // Compare per-type counts from raw enumeration and merged results. Equal counts can still hide
++        // an equal-count substitution; member-level attribution is covered by managed merger vectors.
+         var raw = await EnumerateRawUsbInterfacesAsync();
+         Assert.NotEmpty(raw);
+ 
+@@ -82,9 +81,8 @@ public async Task FindAllAsync_Conservation_EveryEnumeratedUsbInterfaceAppearsEx
+     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+     public async Task FindAllAsync_ZeroOrphansWhenIdle_DeviceCountEqualsPhysicalKeyCount()
+     {
+-        // Zero orphans when idle: on an idle rig every interface groups into its physical key, so the
+-        // number of returned devices equals the number of physical keys (derived per PID as the maximum
+-        // per-interface-type count, mirroring the USB truth that one key appears once per transport).
++        // On this fully enumerated idle rig, compare result count with the per-PID maximum interface-type
++        // count estimate. The estimate alone cannot identify physical membership under partial visibility.
+         var raw = await EnumerateRawUsbInterfacesAsync();
+         Assert.NotEmpty(raw);
+         var expectedKeyCount = KeyCountPerPid(raw).Values.Sum();
+@@ -310,14 +308,14 @@ public async Task ConnectAsync_TypedTransports_OnEveryReturnedDevice_Succeed()
+     }
+ 
+     // ---------------------------------------------------------------------------------------------
+-    // Independent raw USB enumeration (the oracle the invariants are computed from)
++    // Raw enumeration independent of the merger (using production transport enumerators).
+     // ---------------------------------------------------------------------------------------------
+ 
+     private const short YubicoVendorId = 0x1050;
+ 
+     // Mirror of ReaderNamePidParser.ExpectedConnectionsForPid (internal to Core): the USB Product ID's
+-    // advertised interface set. Kept locally so the integration oracle stays independent of the
+-    // implementation under test.
++    // advertised interface set. Keeping a local copy separates the shape oracle from merger execution,
++    // while retaining a shared PID-policy assumption.
+     private static readonly IReadOnlyDictionary<ushort, ConnectionType> ExpectedConnectionsByPid =
+         new Dictionary<ushort, ConnectionType>
+         {
+@@ -383,8 +381,7 @@ private static async Task<IReadOnlyList<RawUsbInterface>> EnumerateRawUsbInterfa
+         return interfaces;
+     }
+ 
+-    // Mirror of the Rust reference / ReaderNamePidParser: the USB YubiKey PC/SC reader name encodes the
+-    // enabled interface set, which maps deterministically to a PID.
++    // Local mirror of ReaderNamePidParser: infer a PID from the interface names in a USB reader label.
+     private static ushort? PidFromReaderName(string readerName)
+     {
+         var lower = readerName.ToLowerInvariant();
+@@ -431,4 +428,4 @@ private static bool Supports(IYubiKey device, ConnectionType type) =>
+ 
+     private static string Describe(IReadOnlyList<IYubiKey> devices) =>
+         string.Join("; ", devices.Select(d => $"{d.DeviceId}({d.AvailableConnections})"));
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs
+index 8f1479c20..f4c05fd7e 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs
+@@ -19,12 +19,15 @@
+ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
+ 
+ /// <summary>
+-/// Unattended discovery and monitoring checks against whatever keys are attached. Read-only: no applet
+-/// session is opened, so keys outside the allow list may be present.
++/// Unattended discovery and monitoring checks against attached keys. Discovery opens internal metadata
++/// connections and selects Management on PC/SC; these reads can affect selection on a competing shared
++/// handle. No public applet session or configuration write is requested by these test bodies.
+ /// </summary>
+ /// <remarks>
+ /// Run with <c>--filter "Category=Discovery&amp;Category!=RequiresUserPresence"</c>. The attended hotplug
+ /// ceremonies live in <see cref="DeviceEventHotPlugTests"/> and <see cref="HotPlugIdentityContractTests"/>.
++/// Use an idle rig without competing sessions. These direct-discovery tests do not filter through the
++/// shared fixture allow list. Revision-one assertions assume subscription capture precedes a later scan.
+ /// </remarks>
+ [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+ [Trait(TestCategories.Category, TestCategories.Discovery)]
+@@ -35,6 +38,8 @@ public class DiscoveryUnattendedTests(ITestOutputHelper output)
+     [Fact]
+     public async Task FindAllAsync_ReturnsAtLeastOneKey_AndScopedScansAreSubsets()
+     {
++        // The scoped assertions constrain exposed interface bits; they do not compare physical membership
++        // with the independent All scan, whose grouping can differ under a different scope.
+         using var timeout = new CancellationTokenSource(Bound);
+         var all = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync(cancellationToken: timeout.Token));
+         Assert.NotEmpty(all);
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs
+index 90e12a1d7..f6b53a01d 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs
+@@ -31,9 +31,8 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
+ ///     serial to be read), UNPLUG the sole YubiKey, wait roughly five seconds, and PLUG IT BACK IN.
+ ///     The test waits up to 120 s for the removal and up to 120 s for the reinsertion. The windows
+ ///     are deliberately generous: xUnit buffers output until the run ends, so the operator acts on
+-///     elapsed time, not on a prompt. Every failure message carries the full captured timeline so a
+-///     failed ceremony still tells you which layer went quiet (monitor rescan, repository snapshot,
+-///     or event stream).
++///     elapsed time, not on a prompt. Assertion messages include the captured timeline to distinguish
++///     observed snapshot membership from stream delivery; the timeline alone does not establish a native cause.
+ /// </remarks>
+ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLifetime
+ {
+@@ -133,7 +132,7 @@ TaskCompletionSource Arrival(IYubiKey key) => arrivals.GetOrAdd(key,
+         await Arrival(original).Task.WaitAsync(TimeSpan.FromSeconds(10));
+         Note($"BASELINE {original.DeviceId} connections={original.AvailableConnections} serial={originalSerial}");
+ 
+-        // The operator unplugs the key. Poll the repository snapshot alongside the event
++        // The operator unplugs the key. Read a subscription snapshot alongside the event
+         // stream: if the snapshot empties without a Removed event, the event plumbing lost it; if
+         // neither happens, the monitor never observed the removal.
+         var snapshotEmptied = false;
+@@ -203,4 +202,4 @@ TaskCompletionSource Arrival(IYubiKey key) => arrivals.GetOrAdd(key,
+         output.WriteLine(Timeline());
+         output.WriteLine("watcher pump completed normally after owned monitor disposal");
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs
+index c51ccf7a1..6fbb33748 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs
+@@ -17,8 +17,8 @@
+ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
+ 
+ /// <summary>
+-/// Hot-plug behaviour against real hardware. These double as the reference examples for how a
+-/// consumer waits for a YubiKey — no third-party dependency required.
++/// Basic discovery and change-stream checks against hardware. Addition can be satisfied by initial
++/// replay; removal requires a later published change. Attended identity tests exercise a full unplug/replug cycle.
+ /// </summary>
+ public class YubiKeyTests : IAsyncLifetime
+ {
+@@ -56,8 +56,8 @@ public async Task WatchAsync_DetectsRemovedDevice()
+     }
+ 
+     /// <summary>
+-    /// Waits for the next device event of a given kind. This is the canonical "insert your YubiKey"
+-    /// pattern: begin the enumeration first, then prompt the user, and let the token bound the wait.
++    /// Waits up to thirty seconds for a record of the requested kind, including initial DeviceAdded replay.
++    /// To distinguish a later insertion, consume SnapshotComplete before waiting for a new addition.
+     /// </summary>
+     private static async Task<TChange> WaitForChangeAsync<TChange>() where TChange : DeviceChange
+     {
+@@ -83,4 +83,4 @@ private static async Task<TChange> WaitForChangeAsync<TChange>() where TChange :
+ 
+         throw new InvalidOperationException($"Device change stream ended before a {typeof(TChange).Name} arrived.");
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs
+index a0e784c27..dbe464e08 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs
+@@ -64,7 +64,7 @@ public void Merge_DuplicatedCcidInterfaceSameSerial_LeavesEveryInterfaceStandalo
+     [Fact]
+     public void Merge_SkySingleFidoInterface_PublishesFlatOneSlotDeviceWithTransportId()
+     {
+-        // SKY (Security Key): FIDO-HID only, no serial — passes through as one device, keyed by PID alone.
++        // SKY (Security Key): FIDO-HID only, no serial — publishes one slot with its transport-shaped id.
+         var sky = new FakeSlot("hid:fido", ConnectionType.HidFido);
+         var merged = CompositeDeviceMerger.Merge([
+             new DeviceInterfaceDescriptor(sky, ConnectionType.HidFido, IsUsb: true, SkyPid, null, null)
+@@ -80,12 +80,11 @@ public void Merge_SkySingleFidoInterface_PublishesFlatOneSlotDeviceWithTransport
+     [Fact]
+     public void Merge_PartialSeriallessSamePid_TwoHidNoCcid_StaysConservativelySplit()
+     {
+-        // Phase-2 generalized guard (composite-merge remediation PLAN.md, verified premise 4b): two HID
++        // The generalized guard: two HID
+         // interfaces of a full-triple PID with no CCID and no serials are byte-indistinguishable from the
+         // disjoint interfaces of TWO same-model keys, so the merger keeps them conservatively split until
+         // the observed set equals the PID's expected set (or serial/topology evidence arrives). This
+-        // replaces the pre-Phase-2 behavior ("Phase 37.5": merge any same-PID interfaces when the PID
+-        // count is 1), which could fuse two physical keys.
++        // prevents PID count 1 alone from fusing these possibly cross-key interfaces.
+         var merged = CompositeDeviceMerger.Merge([
+             Usb("hid:fido", ConnectionType.HidFido, FullKeyPid),
+             Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid)
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs
+index dfcb78db2..65291817f 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs
+@@ -24,18 +24,16 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///         Vectors are classified per the plan's evidence rule (Owner decisions, item 3):
++///         Method names distinguish two kinds of source-defined expectations:
+ ///     </para>
+ ///     <list type="bullet">
+ ///         <item>
+-///             <b>REGRESSION vectors</b> (names containing <c>Regression</c>) were written RED against the
+-///             pre-Phase-2 merger and went GREEN when the generalized guard and pigeonhole deduction
+-///             landed. They are now regression pins: a failure here is a real defect, not the expected
+-///             state. Each records the behavior it used to exhibit under "WAS", for history.
++///             <b>Regression vectors</b> (names containing <c>Regression</c>) guard the generalized
++///             completeness check and pigeonhole deduction against cross-key merges or avoidable fragments.
+ ///         </item>
+ ///         <item>
+-///             <b>PIN vectors</b> (names containing <c>Pin</c>) assert current expected-conservative or
+-///             documented-bound behavior. They MAY pass today; they pin contracts and are never fix evidence.
++///             <b>Pin vectors</b> (names containing <c>Pin</c>) assert conservative outcomes or the accepted
++///             partial-evidence bound. A passing pin alone establishes no defect repair or hardware result.
+ ///         </item>
+ ///     </list>
+ /// </remarks>
+@@ -147,19 +145,15 @@ public void Merge_TwoSamePidDualKeysAllSerialsKnown_GroupsBySerial_Pin()
+     }
+ 
+     // ---------------------------------------------------------------------------------------------
+-    // 1b. REGRESSION vectors — RED before Phase 2, GREEN since. A failure here is a real regression.
++    // 1b. Regression vectors for completeness checks and orphan attribution.
+     // ---------------------------------------------------------------------------------------------
+ 
+     [Fact]
+     public void Merge_Regression_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone()
+     {
+-        // Verified premise 4(b) of PLAN.md: two 0x0407 keys, key A's FIDO + key B's OTP enumerated, no
+-        // CCID, no serials. observed (FIDO|OTP) != expected (triple), but hasSmartCard == false bypasses
+-        // the bespoke triple guard in CanMergeByPidWithoutSerial — the merger fuses the two keys.
+-        // REQUIRED (Phase 2 generalized guard, now implemented): PID-unique alone is insufficient when
+-        // observed != expected; the descriptors fall back to the serial path and, with null serials, stay
+-        // standalone.
+-        // WAS: a composite spanning both keys existed. A failure here means that has returned.
++        // Key A's FIDO and key B's OTP share PID 0x0407, with no CCID or serial evidence. Their observed
++        // set differs from the expected triple, so the completeness guard refuses PID grouping and the
++        // serial path leaves both standalone.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("fido-keyA", ConnectionType.HidFido, 0x0407),
+@@ -178,12 +172,11 @@ public void Merge_Regression_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSeri
+     [Fact]
+     public void Merge_Regression_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole()
+     {
+-        // Pigeonhole deduction (Solution design tier 4): both 0x0407 keys fully enumerated; serials known
++        // Pigeonhole deduction: both 0x0407 keys fully enumerated; serials known
+         // for 5 of 6 interfaces. The null-serial OTP orphan's connection type exactly fills the single
+         // missing slot of exactly ONE incomplete same-PID composite (key B), and type-count closure holds
+         // (2 OTP interfaces visible, 2 candidate keys).
+-        // REQUIRED (Phase 2, now implemented): the orphan is attributed to key B; two complete physical keys.
+-        // WAS: the merger left the orphan standalone (3 devices, not 2). A failure here means that has returned.
++        // Attribution to key B yields two complete connection sets instead of a separate orphan.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, serial: 111),
+@@ -208,8 +201,7 @@ public void Merge_Regression_TwoDualKeysThreeOfFourSerialsKnown_OrphanIsAttribut
+         // 3 of 4. Key A is complete; key B is anchored by its serial-bearing OTP. The null-serial FIDO
+         // orphan's type exactly fills key B's only missing slot; type-count closure holds (2 FIDO visible,
+         // 2 candidate keys).
+-        // REQUIRED (Phase 2, now implemented): orphan attributed to key B; two complete OTP+FIDO keys.
+-        // WAS: the merger left the orphan standalone (3 devices, not 2). A failure here means that has returned.
++        // Attribution to key B yields two complete OTP+FIDO connection sets.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("otp-a", ConnectionType.HidOtp, 0x0403, serial: 111),
+@@ -232,8 +224,7 @@ public void Merge_TwoTripleKeysBothMissingSameInterfaceTypeSerial_StaysConservat
+     {
+         // Deduction ambiguity (PIN): both 0x0407 keys anchored (CCID+FIDO by serial) but BOTH OTP
+         // identity reads failed — two orphans of one type, two candidate composites. Any attribution
+-        // would be a guess; the plan's tier-4 deduction requires exactly ONE candidate. Conservative
+-        // split is the CURRENT behavior and must REMAIN the behavior after Phase 2.
++        // would be a guess; deduction requires exactly one candidate, so both OTP interfaces stay standalone.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, serial: 111),
+@@ -256,24 +247,21 @@ public void Merge_TwoTripleKeysBothMissingSameInterfaceTypeSerial_StaysConservat
+     }
+ 
+     // ---------------------------------------------------------------------------------------------
+-    // 1c. Epistemic-bound PINS (PLAN.md "Epistemic bound", Solution design).
++    // 1c. Accepted partial-evidence bound.
+     // ---------------------------------------------------------------------------------------------
+ 
+     [Fact]
+     public void Merge_EpistemicBound_ComplementaryPartials_TwoDualKeysOneInterfaceEach_MergeIsRepresentable_Pin()
+     {
+-        // Epistemic bound (PIN — see PLAN.md, Solution design, "Epistemic bound"): two 0x0403 keys, each
++        // Partial-evidence bound: two 0x0403 keys, each
+         // with only ONE complementary interface enumerated (key A's OTP, key B's FIDO), no serials. The
+-        // two descriptors are byte-indistinguishable from ONE fully-visible 0x0403 key: PID count is 1
+-        // and observed == expected, so the merger fuses them — and, because pidCount == 1, no serial
+-        // reads even fire to contradict it. No merge logic can resolve this shape; only serial or
+-        // topology evidence can, and neither exists in this window. This pin asserts the CURRENT (and
+-        // plan-sanctioned) behavior: a cross-key composite is representable while complementary partial
+-        // visibility persists, bounded to that window, and heals conditionally — on the first subsequent
+-        // scan with complete same-PID visibility, serial evidence, or topology evidence.
+-        // Disposition note: the Phase-1 PRD originally listed this shape as a defect vector; the audited
+-        // PLAN's epistemic bound governs, and the orchestrator reclassified it to this pin (recorded in
+-        // the Phase-1 evidence ledger). Not fix evidence.
++        // two descriptors present the same grouping evidence as one fully visible 0x0403 key: PID count is 1
++        // and observed == expected, so the merger takes the PID shortcut and groups across keys.
++        // That result can persist while the implemented tiers make the same grouping decision. Later
++        // regrouping requires evidence those tiers use to distinguish the members. Adding different
++        // serials alone can leave a complete PID-count-one group on the same shortcut, which checks
++        // connection completeness and cross-PID contested serials, not same-PID serial disagreement.
++        // The assertions pin that cross-key member set; this single-scan vector does not test convergence.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0403),
+@@ -289,15 +277,14 @@ public void Merge_EpistemicBound_ComplementaryPartials_TwoDualKeysOneInterfaceEa
+     [Fact]
+     public void Merge_ComplementaryPartialMasquerade_MisattributionIsRepresentableAndBounded_Pin()
+     {
+-        // Epistemic bound (PIN — see PLAN.md, Solution design, "Epistemic bound"): key A is anchored as
++        // Partial-evidence bound: key A is anchored as
+         // {OTP, FIDO} (serial 111) while key B is visible ONLY as an unread CCID (null serial). The three
+-        // descriptors are byte-indistinguishable from ONE fully-visible 0x0407 key: PID count is 1 and
+-        // observed == expected, so the merger fuses them — attributing key B's CCID to key A. NO merge
+-        // logic can resolve this shape; only serial or topology evidence can, and neither exists for the
+-        // unread CCID. This pin asserts the CURRENT documented-bound behavior so the contract is pinned:
+-        // the misattribution is representable, bounded to partial-visibility windows, and heals
+-        // conditionally (first subsequent scan with complete same-PID visibility, serial, or topology
+-        // evidence). This vector is NOT a defect vector and never counts as fix evidence.
++        // descriptors present the same grouping evidence as one fully visible 0x0407 key: PID count is 1 and
++        // observed == expected, so the merger takes the PID shortcut — attributing key B's CCID to key A.
++        // The misattribution can persist while the implemented tiers make the same grouping decision.
++        // Later regrouping requires evidence those tiers use to distinguish the members; a different
++        // serial on this same-PID CCID alone need not bypass the complete PID-count-one shortcut.
++        // The assertions pin the misattributed members in one scan, not a later healing scan.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0407, serial: 111),
+@@ -312,7 +299,7 @@ public void Merge_ComplementaryPartialMasquerade_MisattributionIsRepresentableAn
+     }
+ 
+     // ---------------------------------------------------------------------------------------------
+-    // 1d. Serial-less same-PID pair (PINs) + Phase-3 topology TODO.
++    // 1d. Serial-less same-PID pairs without topology evidence.
+     // ---------------------------------------------------------------------------------------------
+ 
+     [Fact]
+@@ -320,7 +307,7 @@ public void Merge_TwoSamePidTripleKeysNoSerialsFullVisibility_ConservativeSplit_
+     {
+         // Serial-less pair (PIN): two 0x0407 keys fully visible, no serial evidence. PID count is 2, so
+         // the merger routes to the serial path; null serials never collapse. Conservative split (6
+-        // standalone) is the CURRENT and the target macOS/Linux behavior (platform bound, guarantee
++        // standalone) is the current macOS/Linux no-topology behavior (guarantee
+         // matrix row "Serial-less multi-interface pair").
+         var result = CompositeDeviceMerger.Merge(
+         [
+@@ -335,16 +322,8 @@ public void Merge_TwoSamePidTripleKeysNoSerialsFullVisibility_ConservativeSplit_
+         Assert.Equal(6, result.Count);
+         Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
+ 
+-        // TODO(Phase 3 — A′ Windows topology): when the merger accepts optional topology evidence
+-        // (Windows Container ID per interface), add the RED→GREEN vector:
+-        //   Merge_TwoSamePidTripleKeysNoSerials_WithTopologyEvidence_GroupsByContainerId
+-        //   Input: the same six descriptors, each carrying a topology key — container-1 for
+-        //          {ccid-a, fido-a, otp-a}, container-2 for {ccid-b, fido-b, otp-b}.
+-        //   Expected: exactly two composites grouped by container id (topology is evidence tier 1,
+-        //             above serial and PID). RED against the Phase-2 (B-only) merger — it has no
+-        //             topology input and conservatively splits — GREEN once the topology tier lands.
+-        //   Per repo rule, no skipped placeholder test is added here; this pin asserts the current
+-        //   conservative behavior, which remains the correct topology-ABSENT behavior on all platforms.
++        // Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys covers the keyed case.
++        // This vector retains the six-way split when those keys are absent on any platform.
+     }
+ 
+     [Fact]
+@@ -369,10 +348,8 @@ public void Merge_TwoSamePidDualKeysNoSerialsFullVisibility_ConservativeSplit_Pi
+     [Fact]
+     public void Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin()
+     {
+-        // Transport reconfiguration (PLAN.md Scenario analyses): a 0x0407 key had CCID disabled via
+-        // Management and re-enumerated as 0x0403. The merger sees only the new descriptor set (old
+-        // interfaces absent — verified premise 2: reconfiguration changes reader names and HID paths,
+-        // stale identities self-evict). Grouping follows the CURRENT PID truth: one 0x0403 composite.
++        // Model reconfiguration from 0x0407 to 0x0403 by supplying only the new descriptors. This vector
++        // checks grouping of that set; it does not exercise OS re-enumeration or finder cache eviction.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("otp-a-new", ConnectionType.HidOtp, 0x0403),
+@@ -407,18 +384,15 @@ public void Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDisti
+     }
+ 
+     // ---------------------------------------------------------------------------------------------
+-    // Phase 3 — Tier 1 topology evidence (PLAN.md "Solution design", evidence hierarchy tier 1).
++    // Tier 1 topology evidence.
+     // ---------------------------------------------------------------------------------------------
+ 
+     [Fact]
+     public void Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys()
+     {
+-        // Phase-3 headline RED→GREEN (PLAN.md guarantee matrix, "Serial-less multi-interface pair"):
+-        // two same-PID 0x0407 keys, NO serials, full visibility, each interface carrying its physical
+-        // device's topology key (Windows Container ID). Tier 1 groups them into two complete keys with no
+-        // serial read at all — the only complete answer for serial-less hardware.
+-        // WAS (tier-2..5 only, i.e. no topology input): conservative six-way split. Tier 1 now resolves it;
+-        // a six-way split here means topology attribution has regressed.
++        // Two same-PID 0x0407 keys have no serials, but each interface carries a scripted container key.
++        // Topology groups them into two complete keys. This checks supplied-key grouping, not Windows
++        // Container ID acquisition or native interoperability.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
+@@ -444,13 +418,8 @@ public void Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKe
+     [Fact]
+     public void Merge_ComplementaryPartialsWithTopologyKeys_SplitByTopology_NotMergedByPid()
+     {
+-        // Topology CLOSES the epistemic bound (PLAN.md: "on Windows this holds under partial visibility
+-        // too whenever topology evidence is readable"). This is byte-identical to the shape-A
+-        // epistemic-bound pin — two 0x0403 keys, one complementary interface each, no serials, observed
+-        // == expected — which tiers 2..5 must merge. With topology evidence the two interfaces are known
+-        // to belong to different physical devices and MUST stay split.
+-        // WAS (tier-2..5 only): one cross-key composite ykphysical:pid:0403. Tier 1 now separates them;
+-        // a cross-key composite here means topology attribution has regressed.
++        // Complementary partials have the same PID and no serials, but distinct supplied topology keys.
++        // Those keys distinguish the members that the no-topology vector groups across keys.
+         var result = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0403, topologyKey: "container-A"),
+@@ -468,10 +437,9 @@ public void Merge_ComplementaryPartialsWithTopologyKeys_SplitByTopology_NotMerge
+     [Fact]
+     public void Merge_TopologyAbsentForAllInterfaces_IsByteIdenticalToPreTopologyBehavior_Pin()
+     {
+-        // Degradation pin: with no topology evidence anywhere (macOS/Linux always; Windows on topology
+-        // read failure), results must be byte-identical to the tier-2..5 behavior. Same inputs as the
+-        // serial-less pair pin and the shape-A epistemic-bound pin, asserted against the same
+-        // expectations. This is the pinned "degrades to exactly the macOS/Linux semantics" contract.
++        // With no topology keys, assert the six standalone members of a serial-less pair and the single
++        // PID-shaped result for complementary partials. These expected shapes check fallback behavior;
++        // the test does not serialize or compare a second merger implementation.
+         var seriallessPair = CompositeDeviceMerger.Merge(
+         [
+             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407),
+@@ -501,7 +469,7 @@ public void Merge_PartialTopology_KeyedInterfacesGroup_UnkeyedFallThroughUnguess
+         // Mixed/partial topology (the Windows "CCID resolves, HID doesn't" case): interfaces WITH keys
+         // group by topology; interfaces WITHOUT keys must never be guessed into a topology group — they
+         // fall through to the unchanged tiers. Here key A's CCID+FIDO carry a container id while its OTP
+-        // does not; the OTP is the only 0x0403-PID... it is a 0x0407 interface whose PID group is now
++        // does not; the OTP is a 0x0407 interface whose PID group is now
+         // topology-free and observed(OTP) != expected(triple), so it stands alone conservatively.
+         var result = CompositeDeviceMerger.Merge(
+         [
+@@ -525,6 +493,7 @@ public void Merge_MixedTopologyAndSerialEvidence_IsDeterministicAndConserving_Pi
+         // that only serial evidence can separate (tier 2 — PID count is 2, so no PID merge), plus an NFC
+         // interface standing alone. Conservation: every input interface appears exactly once across the
+         // returned devices, and no interface is attributed twice.
++        // Only this input order is exercised; permutation invariance is outside these assertions.
+         var descriptors = new[]
+         {
+             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
+@@ -616,20 +585,19 @@ public void Merge_TopologyGroupWithDuplicateSlots_PreservesBothAsStandalone()
+     // mid-reconfiguration (serial is globally unique per key; PID changes with configuration). The
+     // groups must NOT be merged into one published device: the flat shape has one slot per connection
+     // type, and AvailableConnections' flags-union would hide a duplicate candidate.
+-    // Instead, at most ONE group may carry the durable ykphysical:{serial} id — the group whose
++    // Instead, at most one group may carry the scan's ykphysical:{serial} id — the group whose
+     // anchored census exactly matches its PID's expected interface set — and every other contested
+     // group's interfaces publish standalone. Zero or multiple complete groups is ambiguity, and
+     // ambiguity fragments conservatively rather than guessing.
+     // ---------------------------------------------------------------------------------------------
+ 
+     /// <summary>
+-    ///     One complete group wins the durable id; the stale group's interfaces stand alone.
++    ///     One complete group wins the serial-shaped id; the other group's interfaces stand alone.
+     /// </summary>
+     /// <remarks>
+-    ///     The 0x0403 group (otp+fido) exactly matches its PID's expected set, so it is the live
+-    ///     enumeration; the 0x0407 group (ccid+otp, missing fido against the triple) is the stale one. The
+-    ///     physical key keeps its durable <c>ykphysical:{serial}</c> identity across the transition, and no
+-    ///     composite ever holds two members of one connection type.
++    ///     The 0x0403 group's anchored census matches its expected set; the 0x0407 group lacks FIDO.
++    ///     Completeness selects 0x0403 here as a heuristic, not proof of which enumeration is live.
++    ///     The assertions check the winner's members and the other group's standalone results.
+     /// </remarks>
+     [Fact]
+     public void Merge_ContestedSerial_CompleteGroupWinsTheSerialId_StaleGroupStandsAlone()
+@@ -655,7 +623,7 @@ public void Merge_ContestedSerial_CompleteGroupWinsTheSerialId_StaleGroupStandsA
+     /// <remarks>
+     ///     Neither census matches its PID's expected set (ccid+otp is missing fido against 0x0407's
+     ///     triple, and contains an unexpected ccid against 0x0403's otp+fido). Picking either group would
+-    ///     be a guess, so neither gets the durable id and the next scan converges.
++    ///     be a guess, so neither gets the serial-shaped id. Later convergence requires changed evidence.
+     /// </remarks>
+     [Fact]
+     public void Merge_ContestedSerial_NoCompleteGroup_AllInterfacesStandAlone()
+@@ -703,7 +671,7 @@ public void Merge_ContestedSerial_MultipleCompleteGroups_AllInterfacesStandAlone
+     /// <remarks>
+     ///     Winner determination uses anchored (serial-bearing) members only. If attributed orphans could
+     ///     complete a contested census, orphan attribution — a deduction — would decide which enumeration
+-    ///     gets the durable identity, inverting the evidence hierarchy during the one window where the
++    ///     gets the serial-shaped identifier, inverting the evidence hierarchy during the one window where the
+     ///     evidence is least trustworthy.
+     /// </remarks>
+     [Fact]
+@@ -734,7 +702,7 @@ public void Merge_ContestedSerial_OrphanCannotRescueALosingGroup()
+     /// <remarks>
+     ///     Deliberate conservatism, not a lost optimization. The type-count closure counts all of the
+     ///     group's descriptors while candidacy is restricted to eligible keys, so deduction goes standalone
+-    ///     during a contest and the next scan converges. Without the contested loser present, the same
++    ///     during a contest. Later convergence requires changed evidence. Without the contested loser present, the same
+     ///     orphan attributes normally (covered by the pigeonhole vectors above).
+     /// </remarks>
+     [Fact]
+@@ -767,7 +735,7 @@ public void Merge_ContestedSerial_LoserSuppressesOrphanAttributionToCleanKeys()
+ 
+     /// <summary>
+     ///     Output <c>DeviceId</c>s must be pairwise distinct. Two devices sharing an id would make the id
+-    ///     useless as the durable key the discovery contract tells consumers to rely on.
++    ///     ambiguous within that scan. DeviceId is discovery-scoped; the serial supplies durable correlation.
+     /// </summary>
+     /// <remarks>
+     ///     <para>
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs
+index 699406810..d71e0175e 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs
+@@ -35,7 +35,8 @@ public async Task ProtocolDeviceInfo_ReadAsync_Success_DoesNotDisposeTheBorrowed
+         var info = await ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken);
+ 
+         Assert.Equal(0x01020304, info.SerialNumber);
+-        // Borrows: ProtocolDeviceInfo does not own this connection; the caller disposes it.
++        // The connection is borrowed. This fake's counter observes synchronous Dispose calls only;
++        // its completed no-op DisposeAsync supplies no asynchronous-disposal oracle.
+         Assert.Equal(0, connection.DisposeCount);
+     }
+ 
+@@ -47,7 +48,7 @@ public async Task ProtocolDeviceInfo_ReadAsync_Failure_DoesNotDisposeTheBorrowed
+         await Assert.ThrowsAsync<InvalidOperationException>(() =>
+             ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken));
+ 
+-        // Borrows: ProtocolDeviceInfo does not own this connection; the caller disposes it.
++        // The connection is borrowed. This counter detects synchronous disposal, not the fake's no-op DisposeAsync.
+         Assert.Equal(0, connection.DisposeCount);
+     }
+ 
+@@ -381,4 +382,4 @@ public void Configure(FirmwareVersion version, ProtocolConfiguration? configurat
+ 
+         public void Dispose() { }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs
+index 42bc1f71b..0a5010e15 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs
+@@ -96,7 +96,8 @@ public void CreateFromTlvs_InvalidPartNumberUtf8_ReturnsNullPartNumber()
+     public void Equals_SnapshotsDecodedFromSeparateBuffers_CompareByContent()
+     {
+         // Each decode slices ChallengeResponseTimeout from its own response buffer. Monitoring publishes
+-        // DeviceUpdated on inequality, so reference-based memory equality would report a change on every rescan.
++        // DeviceUpdated on inequality, so storage-based memory equality would treat equal fresh bytes as a change.
++        // All comparisons occur while both input TLV lists are alive; post-disposal stability is outside this oracle.
+         using var firstTlvs = CreateRequiredDeviceInfoTlvs();
+         using var secondTlvs = CreateRequiredDeviceInfoTlvs();
+         var first = DeviceInfo.CreateFromTlvs(firstTlvs, defaultVersion: null);
+@@ -128,4 +129,4 @@ public void Equals_SnapshotsDecodedFromSeparateBuffers_CompareByContent()
+         new(0x02, [0x01, 0x02, 0x03, 0x04]),
+         .. additionalTlvs
+     ]);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs
+index 493455b3b..78d191e39 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs
+@@ -22,9 +22,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
+ public class DiscoveryIdentityReaderTests
+ {
+     /// <summary>
+-    ///     A discovery identity read against a device whose connection open never completes (modeling a card
+-    ///     busy inside a long native operation, e.g. an in-flight RSA-4096 GENERATE ASYMMETRIC APDU that a
+-    ///     CancellationToken cannot abort) must give up within a bounded time and degrade to
++    ///     A discovery identity read against a scripted connection open held past its wait budget returns
+     ///     <c>null</c> ("serial unknown"), instead of stalling the discovery scan indefinitely while it holds
+     ///     the scan lock.
+     /// </summary>
+@@ -60,10 +58,9 @@ public async Task TryReadAsync_ConnectNeverCompletes_ReturnsNullWithinBoundedTim
+     }
+ 
+     /// <summary>
+-    ///     Deliberately ignores the <see cref="CancellationToken" />: the production hang is
+-    ///     <c>Task.Run(() => SCardTransmit(...))</c> / a blocking native connect, which cannot observe
+-    ///     cancellation once in flight. A fix that only signals a token into ConnectAsync would not fix the
+-    ///     real bug; the reader must abandon the wait (e.g. <c>Task.WaitAsync</c>) to stay bounded.
++    ///     Holds the open independently of the caller's token until FailConnect releases it. This models
++    ///     work that outlives a bounded caller wait; the test checks null within ten seconds and drains the
++    ///     fake afterward. It establishes no native cancellation or PC/SC release behavior.
+     /// </summary>
+     private sealed class HangingConnectYubiKey : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
+     {
+@@ -99,4 +96,4 @@ Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+         public void FailConnect() =>
+             _connect.TrySetException(new InvalidOperationException("Released after timeout assertion."));
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs
+index 483f7b804..b234570dd 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs
+@@ -29,8 +29,8 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
+ /// <summary>
+ ///     Fault-injection harness for <see cref="FindYubiKeys" /> (see
+ ///     docs/architecture/device-discovery-guarantees.md): scripted identity-read outcomes per interface via
+-///     constructor fakes, exercising the identity cache (convergence, eviction, reader-rename behavior) and
+-///     deterministically reproducing the Phase-0 scan-1 "aborted" identity-read failures.
++///     constructor fakes, exercising identity-cache convergence, eviction, reader renames, and worker
++///     admission saturation. Scripted failures establish managed behavior rather than a historical native cause.
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+@@ -100,10 +100,8 @@ public async Task InvalidateEvidence_AfterRetire_DoesNotReopenDiscoveryReads()
+     [Fact]
+     public async Task FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin()
+     {
+-        // Phase-2 updated pin (was: "failed read orphans on scan 1" pre-deduction). With the tier-4
+-        // pigeonhole deduction, a failed identity read whose interface uniquely fills the single missing
+-        // slot of exactly one serial-anchored key is attributed there ALREADY on scan 1 — the orphan
+-        // window closes without waiting for the cache. The cache contract is unchanged and still pinned:
++        // Pigeonhole deduction attributes the failed-read interface on scan 1 because it uniquely fills
++        // one serial-anchored key's missing slot. The cache contract remains independently observable:
+         // failures are not cached, so the failed interface is re-read on the next scan (now with serial
+         // evidence), while already-cached interfaces are not re-read.
+         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+@@ -182,7 +180,7 @@ public async Task FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries
+     [Fact]
+     public async Task FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin()
+     {
+-        // Phase 0 finding 4 (rename PIN): pcsc reader-name suffixes are unstable as the reader set
++        // PC/SC reader-name suffixes can change as the reader set
+         // changes. The identity cache is keyed by per-interface DeviceId (reader name), so a rename is a
+         // cache MISS for the new name (the old entry self-evicts as absent). With a successful re-read
+         // under the new name, grouping stays complete — rename costs one re-read, never correctness.
+@@ -207,8 +205,7 @@ public async Task FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuc
+     [Fact]
+     public async Task FindAllAsync_PcscReaderRenameWithFailingReread_RereadsAndDeducesWithoutStaleServe_Pin()
+     {
+-        // Phase 0 finding 4, failure arm (Phase-2 updated pin — was: "orphans conservatively"
+-        // pre-deduction). When the re-read under the renamed reader FAILS, the scan-1 serial cached
++        // When the re-read under the renamed reader fails, the scan-1 serial cached
+         // under the OLD reader name must NOT be served for the new name: the rename is a cache MISS and
+         // the re-read is attempted (proven by the connect-count assertion below). With the tier-4
+         // deduction the null-serial renamed CCID then uniquely fills key A's only missing slot and is
+@@ -246,12 +243,12 @@ public async Task FindAllAsync_PcscReaderRenameWithFailingReread_RereadsAndDeduc
+     ///         unplugged, a same-model key plugged into the same slot — reuses the same PC/SC reader name
+     ///         (slot-derived) and the same HID path, so the interface is never observed absent and
+     ///         scan-time eviction never fires. Without hotplug-driven invalidation, the new key inherits
+-    ///         the old key's serial: key substitution, found independently by two consultation runs.
++    ///         the old key's serial. The scripted swap below checks invalidation's effect on that cache path.
+     ///     </para>
+     ///     <para>
+     ///         Platform removal and arrival notifications are therefore the invalidation signal when they
+     ///         are delivered. <see cref="IMonitoredDiscovery.InvalidateEvidence" /> is what the device monitor
+-    ///         calls at event ingress.
++    ///         calls after coalescing transport hints, immediately before the hotplug-triggered scan.
+     ///     </para>
+     /// </remarks>
+     [Fact]
+@@ -270,7 +267,7 @@ public async Task FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadO
+         factory.SucceedReads(OtpB, serial: 333);
+         var readerBConnectsBeforeScan2 = factory.ConnectCalls(ReaderB);
+ 
+-        // The swap is physically impossible without removal+arrival events; the monitor forwards them.
++        // Supply activity explicitly. Native notification delivery is outside this scripted test.
+         ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.SmartCard);
+         ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.Hid);
+ 
+@@ -502,7 +499,8 @@ await AsyncWait.TryWaitUntilAsync(() => factory.TotalConnectCalls >= 1),
+     ///     On the supported platforms a reconfiguration normally changes the per-interface id too (PC/SC
+     ///     reader names and HID paths embed the interface set), which self-evicts. This pins the invariant
+     ///     for any id scheme where that does not hold: the PID is part of the evidence's validity, not
+-    ///     incidental metadata.
++    ///     incidental metadata. Both OTP instances force identity reads here; this test does not exercise
++    ///     PID validity of the separate best-effort metadata cache.
+     /// </remarks>
+     [Fact]
+     public async Task FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit()
+@@ -937,4 +935,4 @@ Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+             CancellationToken cancellationToken) =>
+             OpenRawConnectionAsync(connectionType, cancellationToken);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs
+index 897a81d01..8d2bce88a 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs
+@@ -211,8 +211,8 @@ public void TryGetTopologyKey_EmptyReaderName_DegradesWithoutCallingNative()
+     [Fact]
+     public void NullResolver_AlwaysReportsUnknown_PinnedPlatformBound()
+     {
+-        // macOS/Linux platform bound: no reader/interface → USB device mapping exists, so topology
+-        // evidence is never available and tiers 2..5 always decide.
++        // This SDK currently selects the null topology resolver on macOS/Linux. These calls pin its
++        // false/null results, rather than the availability of mapping APIs on those operating systems.
+         var resolver = NullDeviceTopologyResolver.Instance;
+ 
+         Assert.False(resolver.TryGetTopologyKey(new FakeDevice("any"), ConnectionType.SmartCard, out var ccid));
+@@ -273,4 +273,4 @@ private sealed class FakeDevice(string readerName) : IDevice
+     {
+         public string ReaderName { get; } = readerName;
+     }
+-}
+\ No newline at end of file
++}

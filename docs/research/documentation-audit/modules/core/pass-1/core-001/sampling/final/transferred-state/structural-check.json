@@ -1,0 +1,28 @@
+{
+  "result": "FINAL ACTUAL-STATE STRUCTURAL CHECKS VERIFIED; SAMPLING ADJUDICATION PENDING REVIEW",
+  "actual_unique_reads": 1134,
+  "actual_current_supported_candidate": 1071,
+  "target": 1071,
+  "shortfall": 0,
+  "roles": 94,
+  "owners": 17,
+  "conservative_population": 9352,
+  "final_product_paths": 363,
+  "EOF_exact_LF_removals": 239,
+  "literal_original_unit_terminal_differences": 0,
+  "additional_actual_units": 151,
+  "newly_lost_supported_additional_units": 0,
+  "logging_retracted_credit": 0,
+  "identity_refresh": "COMPLETE",
+  "Astra_adjudication": "PENDING REVIEW",
+  "independent_adjudication": "PENDING REVIEW",
+  "compiler_complete_claim": false,
+  "sampler_PASS": null,
+  "checks": [
+    "All predecessor candidates, logical joins and seals remain byte-exact. Every bound input/output and reserved product hash is stable.",
+    "All363 final product hashes match the complete8-receipt chain: five prior corrections/nine paths, EOF239 exact one-LF removals, WA body and root bullet. Reviewed patch applications reverse/reconstruct exactly.",
+    "All9352 admitted original unit hashes/ranges and all1134 actual read maps verify against exact final current bytes. Reviewed literal EOF differences are separate from semantic edits; no whole-file exclusion or new unit/read. All151 additional records retained, with no newly lost supported reading.",
+    "All94 roles/17 owners meet1071 target on conservative9352 basis. Root bullet hits one already-excluded unsampled unit; no new population shrink. WA fence2 hashes match the accepted one-body correction; logging sample stays retracted.",
+    "Stable final capture is ready for sampling adjudication only; no false compiler/formatter/full-validation completion or sampling PASS. Prior artifact qualifications remain preserved."
+  ]
+}

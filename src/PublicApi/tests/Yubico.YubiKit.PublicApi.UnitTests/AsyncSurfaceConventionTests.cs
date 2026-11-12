@@ -2,6 +2,10 @@ using System.Reflection;
 
 namespace Yubico.YubiKit.PublicApi.UnitTests;
 
+/// <summary>
+/// Checks reflected method shape for the listed applet types and their device extensions, with
+/// explicit synchronous exceptions. It does not execute operations or prove responsive cancellation.
+/// </summary>
 public sealed class AsyncSurfaceConventionTests
 {
     private static readonly HashSet<string> SynchronousAllowlist =

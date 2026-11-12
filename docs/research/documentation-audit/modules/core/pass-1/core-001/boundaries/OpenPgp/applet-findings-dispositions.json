@@ -1,0 +1,142 @@
+[
+  {
+    "key": "openpgp-001:PGP-IMP-001",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "P2 mode and logical Reset identity still coupled in extended Verify; confirmed historical distinct-salt and retry-identity failures remain.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-002",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Aliased SetKdf transition and equal-old/new cached test retain incomplete high-level transition policy; original failed setup and successful controls remain.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-003",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Current cache aliases, replacement/reset loss and F9 serialization/parse producer copies remain; async-dispatch question alone has a current source answer.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-005",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Unchecked reset statuses/postcondition and new caller-specific retained SCP graph qualification remain; no reset runtime acceptance.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-007",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "X25519 formatter still bypasses EC wrapper; historical same-key vendor agreement comparison remains confirmed engineering evidence.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-009",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Persistent attributes/private operation/refresh sequence remains non-atomic, without whole-method exclusion or rollback.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-010",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "SDK thresholds, incomplete capability/family/subpolicy checks and source/commercial-version qualifications remain.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-011",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "No shipping ROCA guard; old inclusive early-return ranges still overexclude corrected/imported cases.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-013",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "ATT CRT remains malformed; historical failed SDK read and successful correct-CRT public reference remain confirmed.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-014",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "NEO02-with-modulus and destructive attribute-switch delete retain old-family compatibility qualification.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-015",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Tool input/ignored PIN/certificate/string/status/prompt gaps remain; current shared selector is traced without closing other facets.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-016",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Assertion scope, failure cleanup, discarded secret/certificate results and post-test state remain; unverify causal-control weakness extends this group.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-018",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Unknown/parser/format-bit/default/init-required algorithm and signed timestamp policy remains. Core representation evolution settles no applet parser policy.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  },
+  {
+    "key": "openpgp-001:PGP-IMP-019",
+    "status": "DEFERRED-ENGINEERING-ORIGINAL-SCOPE-PRESERVED",
+    "current_source_outcome": "Broad VERIFY typed mapping and current extended retry identity remain; change/recovery retain generic APDU errors.",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "original_authority": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "documentation_reopening": "Original precise trigger preserved in documentation-dependencies.json and original ledger; local refinements in candidates.md.",
+    "documentation_status": "FRESH-CORE-BOUNDARY-REVIEW-PENDING",
+    "hardware_status": "HISTORICAL-ONLY; NO-NEW-EXECUTION"
+  }
+]

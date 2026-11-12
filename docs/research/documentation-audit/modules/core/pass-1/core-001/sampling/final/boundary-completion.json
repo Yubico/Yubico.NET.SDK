@@ -1,0 +1,765 @@
+[
+  {
+    "owner": "Management",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Management.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/unit-dispositions.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/file-dispositions.json",
+      "selected_paths": 47,
+      "candidate_file_population": 55,
+      "primary": 331,
+      "shared": 0,
+      "counts": {
+        "total": 331,
+        "scope": {
+          "external": 331
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 331
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-candidate-context": 127,
+            "read-clean": 204
+          }
+        },
+        "dispositions": {
+          "read-candidate-context": 127,
+          "read-clean": 204
+        },
+        "category": {
+          "narrative-section-with-complete-examples": {
+            "read-candidate-context": 54,
+            "read-clean": 17
+          },
+          "member-contract-and-implementation": {
+            "read-clean": 172,
+            "read-candidate-context": 65
+          },
+          "type-contract": {
+            "read-clean": 9,
+            "read-candidate-context": 8
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 5
+          },
+          "source-context-and-explanations": {
+            "read-clean": 1
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CANDIDATE-CONTEXT": 127,
+        "READ-CLEAN": 204
+      },
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "SDK_runtime_verification": "PENDING",
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE; mandatory B4/B6 follow-ups source-reconciled, qualifications retained",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "5c327d24b29181363295a43fa5f4767b101447641d724f143b28c265868a5788",
+    "sampling_candidate": {
+      "owner": "Management",
+      "conservative_population": 203,
+      "original_minimum": 23,
+      "authorized_expansion": 0,
+      "required_target": 23,
+      "actual_unique_reads": 23,
+      "candidate_counted": 23,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE; mandatory B4/B6 follow-ups source-reconciled, qualifications retained",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "Ctap2",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/unit-dispositions.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/file-dispositions.json",
+      "selected_paths": 180,
+      "candidate_file_population": 181,
+      "primary": 590,
+      "shared": 0,
+      "counts": {
+        "total": 590,
+        "scope": {
+          "external": 590
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 590
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-candidate-context": 492,
+            "read-clean": 91,
+            "read-candidate": 6,
+            "read-exclusion": 1
+          }
+        },
+        "dispositions": {
+          "read-candidate-context": 492,
+          "read-clean": 91,
+          "read-candidate": 6,
+          "read-exclusion": 1
+        },
+        "category": {
+          "source-context-and-explanations": {
+            "read-candidate-context": 123,
+            "read-clean": 46,
+            "read-candidate": 1
+          },
+          "narrative-section-with-complete-examples": {
+            "read-clean": 15,
+            "read-candidate-context": 35,
+            "read-candidate": 2
+          },
+          "member-contract-and-implementation": {
+            "read-candidate-context": 318,
+            "read-clean": 24,
+            "read-candidate": 3
+          },
+          "type-contract": {
+            "read-candidate-context": 16,
+            "read-clean": 2
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 4,
+            "read-exclusion": 1
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CANDIDATE": 6,
+        "READ-CANDIDATE-CONTEXT": 492,
+        "READ-CLEAN": 91,
+        "READ-EXCLUSION": 1
+      },
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "SDK_runtime_verification": "PENDING",
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE; B4/B6/WebAuthn follow-ups source-reconciled; actor-policy/runtime qualifications remain OPEN",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "49a22ea23bd2c6090e67b51e74989d02f330f96f90956126317203e8db6872d5",
+    "sampling_candidate": {
+      "owner": "Ctap2",
+      "conservative_population": 75,
+      "original_minimum": 9,
+      "authorized_expansion": 0,
+      "required_target": 9,
+      "actual_unique_reads": 9,
+      "candidate_counted": 9,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE; B4/B6/WebAuthn follow-ups source-reconciled; actor-policy/runtime qualifications remain OPEN",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "SecurityDomain",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-SecurityDomain.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/unit-dispositions.json",
+      "summary": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/summary.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/file-dispositions.json",
+      "selected_paths": 31,
+      "candidate_file_population": 36,
+      "primary": 193,
+      "shared": 0,
+      "counts": {
+        "total": 193,
+        "scope": {
+          "external": 193
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 193
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 108,
+            "read-candidate": 74,
+            "read-context": 11
+          }
+        },
+        "dispositions": {
+          "read-clean": 108,
+          "read-candidate": 74,
+          "read-context": 11
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "read-clean": 72,
+            "read-candidate": 61
+          },
+          "narrative-section-with-complete-examples": {
+            "read-candidate": 13,
+            "read-clean": 36
+          },
+          "type-contract": {
+            "read-context": 7
+          },
+          "configuration-data-or-support-contract": {
+            "read-context": 4
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CLEAN": 108,
+        "READ-CANDIDATE": 74,
+        "READ-CONTEXT": 11
+      },
+      "provisional_local_groups": 8,
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "compiler_runtime_qualification": "PENDING",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "e7cdb34d90ac1d3c148b75c786f4ea46990f894a1580bab4401a3835f1f0ce02",
+    "sampling_candidate": {
+      "owner": "SecurityDomain",
+      "conservative_population": 106,
+      "original_minimum": 12,
+      "authorized_expansion": 2,
+      "required_target": 14,
+      "actual_unique_reads": 15,
+      "candidate_counted": 14,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "Oath",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Oath.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/unit-dispositions.json",
+      "summary": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/coverage-summary.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/file-dispositions.json",
+      "selected_paths": 42,
+      "candidate_file_population": 56,
+      "primary": 239,
+      "shared": 0,
+      "counts": {
+        "total": 239,
+        "scope": {
+          "external": 239
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 239
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 158,
+            "read-context": 53,
+            "read-candidate": 28
+          }
+        },
+        "dispositions": {
+          "read-clean": 158,
+          "read-context": 53,
+          "read-candidate": 28
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "read-clean": 133,
+            "read-context": 34,
+            "read-candidate": 20
+          },
+          "narrative-section-with-complete-examples": {
+            "read-clean": 22,
+            "read-candidate": 5
+          },
+          "configuration-data-or-support-contract": {
+            "read-context": 4,
+            "read-candidate": 1
+          },
+          "type-contract": {
+            "read-context": 15,
+            "read-clean": 3,
+            "read-candidate": 2
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CLEAN": 158,
+        "READ-CANDIDATE": 28,
+        "READ-CONTEXT": 53
+      },
+      "provisional_local_groups": 6,
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "compiler_runtime_qualification": "PENDING",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "362cb1a1b7481bbf53f0fe08ed0afe24c89f5f1a153a8b25492eb9b15b2c7400",
+    "sampling_candidate": {
+      "owner": "Oath",
+      "conservative_population": 156,
+      "original_minimum": 18,
+      "authorized_expansion": 0,
+      "required_target": 18,
+      "actual_unique_reads": 18,
+      "candidate_counted": 18,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "WebAuthn",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-WebAuthn.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/unit-dispositions.json",
+      "summary": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/verification.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/file-dispositions.json",
+      "selected_paths": 95,
+      "candidate_file_population": 129,
+      "primary": 265,
+      "shared": 0,
+      "counts": {
+        "total": 265,
+        "scope": {
+          "external": 265
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 265
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-related-candidate-context": 80,
+            "read-clean": 177,
+            "read-candidate": 7,
+            "read-exclusion": 1
+          }
+        },
+        "dispositions": {
+          "read-related-candidate-context": 80,
+          "read-clean": 177,
+          "read-candidate": 7,
+          "read-exclusion": 1
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "read-related-candidate-context": 44,
+            "read-clean": 80,
+            "read-candidate": 4
+          },
+          "source-context-and-explanations": {
+            "read-clean": 49,
+            "read-related-candidate-context": 33,
+            "read-candidate": 2
+          },
+          "narrative-section-with-complete-examples": {
+            "read-clean": 39,
+            "read-candidate": 1
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 3,
+            "read-exclusion": 1
+          },
+          "type-contract": {
+            "read-clean": 6,
+            "read-related-candidate-context": 3
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CLEAN": 177,
+        "READ-CANDIDATE": 7,
+        "READ-RELATED-CANDIDATE-CONTEXT": 80,
+        "READ-EXCLUSION": 1
+      },
+      "provisional_local_groups": 12,
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "compiler_runtime_qualification": "PENDING",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "e6b94e16c251fcc08f27b226444584db17115c29b66f63b7f91328a1134c1063",
+    "sampling_candidate": {
+      "owner": "WebAuthn",
+      "conservative_population": 162,
+      "original_minimum": 19,
+      "authorized_expansion": 11,
+      "required_target": 30,
+      "actual_unique_reads": 35,
+      "candidate_counted": 30,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "YubiOtp",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-YubiOtp.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/unit-dispositions.json",
+      "summary": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/coverage-summary.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/file-dispositions.json",
+      "selected_paths": 61,
+      "candidate_file_population": 62,
+      "primary": 324,
+      "shared": 0,
+      "counts": {
+        "total": 324,
+        "scope": {
+          "external": 324
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 324
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 269,
+            "read-candidate": 55
+          }
+        },
+        "dispositions": {
+          "read-clean": 269,
+          "read-candidate": 55
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "read-clean": 180,
+            "read-candidate": 40
+          },
+          "type-contract": {
+            "read-clean": 15,
+            "read-candidate": 1
+          },
+          "source-context-and-explanations": {
+            "read-clean": 49,
+            "read-candidate": 3
+          },
+          "narrative-section-with-complete-examples": {
+            "read-clean": 21,
+            "read-candidate": 10
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 4,
+            "read-candidate": 1
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CLEAN": 269,
+        "READ-CANDIDATE": 55
+      },
+      "provisional_local_groups": 9,
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "compiler_runtime_qualification": "PENDING",
+      "followup_extra_unit_credit": 0,
+      "path_count_qualification": {
+        "selected_paths": 61,
+        "disposition_paths": 62,
+        "declared_file_count": 62,
+        "disposition_only_paths": [
+          "src/YubiOtp/src/PublicAPI.Shipped.txt"
+        ],
+        "assigned_units": 324,
+        "extra_assigned_unit_credit": 0,
+        "explanation": "Directive-only shipped API snapshot receives a file disposition, not an invented semantic unit. Literal original arrays and all 324 IDs preserved."
+      }
+    },
+    "source_disposition_ledger_sha256": "694c3ee51080cbf7f767f13ae4c65fee03c140d3a60e7c20cafda7084de0ca55",
+    "sampling_candidate": {
+      "owner": "YubiOtp",
+      "conservative_population": 256,
+      "original_minimum": 28,
+      "authorized_expansion": 0,
+      "required_target": 28,
+      "actual_unique_reads": 28,
+      "candidate_counted": 28,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "YubiHsm",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-YubiHsm.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/unit-dispositions.json",
+      "summary": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/coverage-summary.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/file-dispositions.json",
+      "selected_paths": 33,
+      "candidate_file_population": 53,
+      "primary": 160,
+      "shared": 0,
+      "counts": {
+        "total": 160,
+        "scope": {
+          "external": 160
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 160
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-context": 73,
+            "read-candidate": 8,
+            "read-clean": 79
+          }
+        },
+        "dispositions": {
+          "read-context": 73,
+          "read-candidate": 8,
+          "read-clean": 79
+        },
+        "category": {
+          "narrative-section-with-complete-examples": {
+            "read-context": 12,
+            "read-candidate": 2,
+            "read-clean": 12
+          },
+          "member-contract-and-implementation": {
+            "read-clean": 67,
+            "read-context": 53,
+            "read-candidate": 3
+          },
+          "configuration-data-or-support-contract": {
+            "read-context": 5
+          },
+          "type-contract": {
+            "read-context": 3,
+            "read-candidate": 3
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CANDIDATE": 8,
+        "READ-CONTEXT": 73,
+        "READ-CLEAN": 79
+      },
+      "provisional_local_groups": 7,
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "compiler_runtime_qualification": "PENDING",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "ef9898627c3eb00aa348b285a7258f68df54004a88d0c704ff46b2bcb03749e8",
+    "sampling_candidate": {
+      "owner": "YubiHsm",
+      "conservative_population": 79,
+      "original_minimum": 10,
+      "authorized_expansion": 0,
+      "required_target": 10,
+      "actual_unique_reads": 10,
+      "candidate_counted": 10,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "OpenPgp",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-OpenPgp.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/unit-dispositions.json",
+      "summary": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/coverage-summary.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json",
+      "selected_paths": 91,
+      "candidate_file_population": 93,
+      "primary": 328,
+      "shared": 0,
+      "counts": {
+        "total": 328,
+        "scope": {
+          "external": 328
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 328
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 209,
+            "read-related-context": 85,
+            "read-candidate": 34
+          }
+        },
+        "dispositions": {
+          "read-clean": 209,
+          "read-related-context": 85,
+          "read-candidate": 34
+        },
+        "category": {
+          "narrative-section-with-complete-examples": {
+            "read-clean": 21,
+            "read-candidate": 5,
+            "read-related-context": 1
+          },
+          "source-context-and-explanations": {
+            "read-related-context": 79,
+            "read-candidate": 2,
+            "read-clean": 2
+          },
+          "member-contract-and-implementation": {
+            "read-clean": 179,
+            "read-candidate": 27
+          },
+          "configuration-data-or-support-contract": {
+            "read-related-context": 5
+          },
+          "type-contract": {
+            "read-clean": 7
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CLEAN": 209,
+        "READ-CANDIDATE": 34,
+        "READ-RELATED-CONTEXT": 85
+      },
+      "provisional_local_groups": 8,
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "compiler_runtime_qualification": "PENDING",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "ecbb1792f9154480c1a06aeaae089c3076d26a770c9587da91ef4f28d10fa78d",
+    "sampling_candidate": {
+      "owner": "OpenPgp",
+      "conservative_population": 198,
+      "original_minimum": 22,
+      "authorized_expansion": 6,
+      "required_target": 28,
+      "actual_unique_reads": 31,
+      "candidate_counted": 28,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  },
+  {
+    "owner": "Piv",
+    "original_coverage_record": {
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Piv.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/unit-dispositions.json",
+      "summary": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/coverage-summary.json",
+      "file_dispositions": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/file-dispositions.json",
+      "selected_paths": 93,
+      "candidate_file_population": 121,
+      "primary": 513,
+      "shared": 0,
+      "counts": {
+        "total": 513,
+        "scope": {
+          "external": 513
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 513
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 384,
+            "read-candidate": 46,
+            "read-context": 83
+          }
+        },
+        "dispositions": {
+          "read-clean": 384,
+          "read-candidate": 46,
+          "read-context": 83
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "read-clean": 346,
+            "read-candidate": 39,
+            "read-context": 70
+          },
+          "type-contract": {
+            "read-candidate": 2,
+            "read-context": 13
+          },
+          "narrative-section-with-complete-examples": {
+            "read-clean": 32,
+            "read-candidate": 5
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 5
+          },
+          "source-context-and-explanations": {
+            "read-clean": 1
+          }
+        }
+      },
+      "original_status_counts": {
+        "READ-CLEAN": 384,
+        "READ-CANDIDATE": 46,
+        "READ-CONTEXT": 83
+      },
+      "provisional_local_groups": 6,
+      "source_boundary_closure": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "compiler_runtime_qualification": "PENDING",
+      "followup_extra_unit_credit": 0
+    },
+    "source_disposition_ledger_sha256": "6d0b5f47c2ea327c464bf9a74ba1cfdc60199561b2cf230621a87dcc3809e9e2",
+    "sampling_candidate": {
+      "owner": "Piv",
+      "conservative_population": 372,
+      "original_minimum": 40,
+      "authorized_expansion": 0,
+      "required_target": 40,
+      "actual_unique_reads": 44,
+      "candidate_counted": 40,
+      "candidate_shortfall": 0,
+      "all_role_targets_met": true,
+      "final_acceptance": "PENDING ASTRA + INDEPENDENT REVIEW + POSTTRANSFER REFRESH"
+    },
+    "source_boundary_completion": "COMPLETE-PINNED-SOURCE-WITH-QUALIFICATIONS",
+    "no_new_boundary_or_whole_module_content_verdict": true,
+    "runtime_native_physical_qualifications": "UNCHANGED; no execution or conformance credit"
+  }
+]

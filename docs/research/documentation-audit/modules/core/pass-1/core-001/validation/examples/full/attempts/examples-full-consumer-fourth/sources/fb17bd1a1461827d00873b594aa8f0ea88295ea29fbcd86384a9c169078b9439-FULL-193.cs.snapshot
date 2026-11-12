@@ -1,0 +1,53 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Piv;
+using Yubico.YubiKit.Oath;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Utilities;
+
+namespace Audit20261111.DocExamples.Full;
+internal static class Body193
+{
+internal static void CompileOnly(ReadOnlyMemory<byte> responseData, ReadOnlyMemory<byte> certificateData)
+{
+// DecodeList returns a disposable collection whose Tlv buffers are cleared on dispose.
+using var tlvs = TlvHelper.DecodeList(responseData);
+var certificateTlv = tlvs.FirstOrDefault(t => t.Tag == 0x53);
+
+// TryFindValue returns a new buffer containing the matching value.
+if (TlvHelper.TryFindValue(0x53, responseData.Span, out var certificate))
+{
+    // Use certificate.Span. Clear certificate when its contents are sensitive.
+}
+
+// EncodeAndDisposeList is convenient for inline Tlv objects.
+Memory<byte> encodedData = TlvHelper.EncodeAndDisposeList(
+    new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 }),
+    new Tlv(0x53, certificateData));
+
+// EncodeList leaves disposal to the caller.
+using var tagList = new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 });
+using var certificateValue = new Tlv(0x53, certificateData);
+Memory<byte> explicitlyOwnedEncoding = TlvHelper.EncodeList([tagList, certificateValue]);
+}
+
+}

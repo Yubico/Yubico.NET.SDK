@@ -18,7 +18,7 @@ using Yubico.YubiKit.Core.Abstractions;
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     The two scripted-able native operations the Windows topology tier is composed from. Kept as a seam
+///     The scriptable native operations the Windows topology tier is composed from. Kept as a seam
 ///     (mirroring the <c>LinuxUdevHidEventSource</c> pattern) so all resolver logic is unit-testable keyless
 ///     on any OS.
 /// </summary>
@@ -41,9 +41,8 @@ internal interface IWindowsTopologyNativeOps
 }
 
 /// <summary>
-///     Windows topology tier: maps an interface to the Container ID of the physical USB device that owns it.
-///     The Container ID GUID is identical across every interface of one composite USB device, including its
-///     HID interfaces, which is exactly the grouping key composite discovery needs.
+///     Windows topology tier: maps an interface to its PnP device container. Interfaces reporting the same
+///     nonempty Container ID supply the grouping key; the resolver relies on that operating-system evidence.
 /// </summary>
 /// <remarks>
 ///     CCID resolves through <c>SCardGetReaderDeviceInstanceIdW</c> → devnode → ContainerId; HID resolves
@@ -52,6 +51,9 @@ internal interface IWindowsTopologyNativeOps
 ///     Windows reports for devices with no container and would otherwise fuse unrelated interfaces) — yields
 ///     "unknown", never a guess. The interface then falls through to the unchanged serial / PID / deduction
 ///     tiers, degrading Windows to exactly the macOS/Linux semantics.
+///     The CCID reader-instance API requires Windows 8 / Server 2012 or later and is not redirected in a
+///     Remote Desktop session, where SCARD_E_READER_UNAVAILABLE leaves topology unknown. Native calls are
+///     synchronous and have no SDK wait budget.
 /// </remarks>
 internal sealed class WindowsDeviceTopologyResolver(IWindowsTopologyNativeOps nativeOps) : IDeviceTopologyResolver
 {

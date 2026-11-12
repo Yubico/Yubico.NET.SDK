@@ -1,0 +1,6 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "files": [],
+  "status": "not-applicable-no-current-native-c-cpp-source",
+  "limits": "Conservative preprocessing-token identity; edited splice/trigraph sources require an assigned compiler proof."
+}

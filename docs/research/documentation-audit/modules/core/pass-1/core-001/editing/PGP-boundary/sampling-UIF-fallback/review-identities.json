@@ -1,0 +1,52 @@
+{
+  "review_date": "2026-11-12",
+  "sample_issue": "SAMPLE-PGP-001",
+  "verdict": "PASS",
+  "scope": "Independent focused content/citation review of two sampled UIF-fallback passages; no broader re-audit or runtime acceptance",
+  "accepted_patch_sha256": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5",
+  "source_pin_for_original_selected_units": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_before_sha256": {
+    "src/OpenPgp/src/OpenPgpSession.cs": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "src/OpenPgp/CLAUDE.md": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba"
+  },
+  "accepted_after_sha256": {
+    "src/OpenPgp/src/OpenPgpSession.cs": "a94cc912faad198fb7adc595cb0a6846d98a53b8bf33a489e0e69637451d550e",
+    "src/OpenPgp/CLAUDE.md": "1d48c7feea15a2ea287841d109d7ad02db24c4f817189cade61d0febf761e422"
+  },
+  "reviewed_record_sha256": {
+    "record-identities.json": "3f9a42f40c2afebd0751102461543ebc9b2e7bdb2c0e5eaf36415457a5e28c08",
+    "prior-record-identities.json": "65416cf7701e3d9a792cfab43085382014cd8490e0ca526392a2aaf224de753f",
+    "source-evidence.md": "ecdff6650a7e11610ea791d57e0cd6186bd417c3abd16c243f2dcec60b265e92",
+    "source-manifest.json": "f9df65e409a3c8683e5fbd2c6616244e577abd0f5a7d9b29798f48f31ce05d2a",
+    "local-source-identities.json": "89eb3e74a3d2632cf66b45df969be3997d3ce8e533cca9ee9c6a693de9d59dfb",
+    "unit-miss-map.json": "d2ea1cc45223ff2f92c84efce1b8d0c86565695c6560bc12e9628b7b1c35681d",
+    "changed-files.json": "01a5b1a5c4535b08f0381abf49e2e0d0337ac17ae3eab3a689e3bbf3dea49a48",
+    "before-identities.json": "23594f513ae03d128348d57dda54f310d0994ead3225256dfab4bdd089bf9709",
+    "report.md": "1a7b76c24668be8c0b36e967dec5dc952eb147b7d7d7e60173372633a8b3a0a0",
+    "static-verification.json": "2815156512dca78daab6f1e9ebeb1fe92986b4daddc0210e244c6a06b071460c"
+  },
+  "fresh_checks": {
+    "focused_patch_reconstructed_exactly": true,
+    "before_matches_reserved_primary_and_accepted_revision_2": true,
+    "current_after_matches_saved_after": true,
+    "noncomment_CSharp_source_lines_exact": true,
+    "selected_successor_unit_range_hashes_verified": 2,
+    "prior_files_hashes_preserved": 99,
+    "focused_indexed_records_hashes_verified": 17,
+    "local_source_identities_verified": 4,
+    "retained_library_source_identities_verified": 2,
+    "other_accepted_product_files_unchanged": 28,
+    "Markdown_bodies_unchanged_from_accepted_revision_2": 36,
+    "XML_bodies_unchanged_from_accepted_revision_2": 28
+  },
+  "Context7": {
+    "library_id": "/dotnet/docs",
+    "topic": "Microsoft.Extensions.Logging ILogger.Log synchronous execution",
+    "use": "orientation only; current-main providers documentation, no immutable revision returned; v10.0.2 retained source supports propagation"
+  },
+  "new_unique_Core_bug_allocation": 0,
+  "remaining_mandatory_corrections": [],
+  "primary_access": "READ-ONLY; reserved compile cycle not disturbed",
+  "coordinator_gates_pending": ["compiler", "independent token/API validation", "cref binding", "example compilation", "runtime qualification"],
+  "engineering_policy_physical_and_future_Windows_holds": "UNCHANGED"
+}

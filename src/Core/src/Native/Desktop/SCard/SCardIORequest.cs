@@ -17,8 +17,14 @@ using System.Runtime.InteropServices;
 namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
 
 /// <summary>
-///     The SCARD_IO_REQUEST
+///     The managed transmit PCI carrier: two four-byte fields, eight bytes in total.
 /// </summary>
+/// <remarks>
+///     The default provider passes this carrier to the native shim. Windows uses two 32-bit DWORDs.
+///     Published NativeShims 1.18.1 forwards the pointer without conversion; a Linux LP64 producer using
+///     pcsc-lite's two-unsigned-long PCI requires a different native layout. Match the deployed producer and
+///     target headers before asserting compatibility. Linux header widths establish no macOS layout claim.
+/// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 internal struct SCARD_IO_REQUEST
 {

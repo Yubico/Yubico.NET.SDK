@@ -1,0 +1,226 @@
+{
+  "result": "RECORDS-ONLY LOGICAL JOIN VERIFIED; NO FINAL PRODUCT SEAL OR SAMPLER PASS",
+  "actual_unique_reads": 1134,
+  "logical_supported_candidate": 1071,
+  "required_target": 1071,
+  "logical_shortfall": 0,
+  "original_logging_credit": 0,
+  "actual_formatter_files_inspected": 0,
+  "live_product_files_read": 0,
+  "final_product_hash_seal": null,
+  "final_accepted_clean_count": null,
+  "sampler_PASS": null,
+  "checks": [
+    "All sealed inputs are sampling/actual-verdict/predecessor records only; no live product, integration manifest or formatter-owner files read or repinned. Predecessors remain exact.",
+    "Exact1134-ID union = 983+151; five explicit supported rows match prior proposals1:1, raw scoped verdicts and CTAP2.3 passage limits preserved, original logging retraction remains zero.",
+    "All94 roles/17 owners meet1071 logical target; WA narrative8/8. Conservative9352, minima983 and expansions88 unchanged; no borrowing, new proposals or denominator shrink.",
+    "Synthetic EOF probes preserve exact original intervals, report literal LF/CRLF and terminal-unit range-hash differences, and reject substantive/whitespace/repeated-terminator changes. Actual formatter files verified:0.",
+    "No final product hash seal or current-product refresh performed; WA/root substantive patches and EOF239 report await explicit Astra handoff. Final clean count/denominator/sampler PASS remain null."
+  ],
+  "synthetic_EOF_probes": [
+    {
+      "synthetic_probe": "terminal-LF",
+      "result": {
+        "state": "STRICT-EOF-ONLY-APPEND",
+        "literal_append_hex": "0a",
+        "literal_append_bytes": 1,
+        "original_file_bytes": 11,
+        "successor_file_bytes": 12,
+        "literal_change_byte_interval": [
+          11,
+          12
+        ],
+        "original_unit_character_interval": [
+          6,
+          11
+        ],
+        "original_interval_bytes_unchanged": true,
+        "original_interval_normalized_text_unchanged": true,
+        "original_interval_sha256": "304b4a90a76a1cbe4c112e074b30e75181f54df43d60f883597457844293b341",
+        "same_interval_successor_sha256": "304b4a90a76a1cbe4c112e074b30e75181f54df43d60f883597457844293b341",
+        "successor_unit_including_EOF_sha256": "3eeb0cea8bf176427633a47a62ee8c813844d574d48554a0d715e12dcbbaeda6",
+        "original_unit_ended_at_EOF": true,
+        "successor_unit_literal_EOF_difference": "\n",
+        "semantic_edit_exclusion": false,
+        "whole_file_exclusion": false,
+        "content_or_sample_credit_granted": false,
+        "qualification": "Literal EOF byte/range difference only. No source correctness, compiler, formatter or final sampling acceptance inferred."
+      }
+    },
+    {
+      "synthetic_probe": "interior-unit",
+      "result": {
+        "state": "STRICT-EOF-ONLY-APPEND",
+        "literal_append_hex": "0a",
+        "literal_append_bytes": 1,
+        "original_file_bytes": 11,
+        "successor_file_bytes": 12,
+        "literal_change_byte_interval": [
+          11,
+          12
+        ],
+        "original_unit_character_interval": [
+          0,
+          5
+        ],
+        "original_interval_bytes_unchanged": true,
+        "original_interval_normalized_text_unchanged": true,
+        "original_interval_sha256": "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8",
+        "same_interval_successor_sha256": "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8",
+        "successor_unit_including_EOF_sha256": "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8",
+        "original_unit_ended_at_EOF": false,
+        "successor_unit_literal_EOF_difference": "",
+        "semantic_edit_exclusion": false,
+        "whole_file_exclusion": false,
+        "content_or_sample_credit_granted": false,
+        "qualification": "Literal EOF byte/range difference only. No source correctness, compiler, formatter or final sampling acceptance inferred."
+      }
+    },
+    {
+      "synthetic_probe": "terminal-CRLF-BOM",
+      "result": {
+        "state": "STRICT-EOF-ONLY-APPEND",
+        "literal_append_hex": "0d0a",
+        "literal_append_bytes": 2,
+        "original_file_bytes": 15,
+        "successor_file_bytes": 17,
+        "literal_change_byte_interval": [
+          15,
+          17
+        ],
+        "original_unit_character_interval": [
+          7,
+          12
+        ],
+        "original_interval_bytes_unchanged": true,
+        "original_interval_normalized_text_unchanged": true,
+        "original_interval_sha256": "304b4a90a76a1cbe4c112e074b30e75181f54df43d60f883597457844293b341",
+        "same_interval_successor_sha256": "304b4a90a76a1cbe4c112e074b30e75181f54df43d60f883597457844293b341",
+        "successor_unit_including_EOF_sha256": "1fb58744b745ff53e5698b33099fb7701e040dfc37f8a731b9b7e29c19d30702",
+        "original_unit_ended_at_EOF": true,
+        "successor_unit_literal_EOF_difference": "\r\n",
+        "semantic_edit_exclusion": false,
+        "whole_file_exclusion": false,
+        "content_or_sample_credit_granted": false,
+        "qualification": "Literal EOF byte/range difference only. No source correctness, compiler, formatter or final sampling acceptance inferred."
+      }
+    },
+    {
+      "synthetic_probe": "semantic-body-change",
+      "result": {
+        "state": "NOT-STRICT-EOF-ONLY-APPEND",
+        "semantic_eligibility_decision": "NO AUTOMATIC CHANGE; use ordinary exact-span reconciliation"
+      }
+    },
+    {
+      "synthetic_probe": "two-newlines",
+      "result": {
+        "state": "NOT-STRICT-EOF-ONLY-APPEND",
+        "semantic_eligibility_decision": "NO AUTOMATIC CHANGE; use ordinary exact-span reconciliation"
+      }
+    },
+    {
+      "synthetic_probe": "already-terminated",
+      "result": {
+        "state": "NOT-STRICT-EOF-ONLY-APPEND",
+        "semantic_eligibility_decision": "NO AUTOMATIC CHANGE; use ordinary exact-span reconciliation"
+      }
+    },
+    {
+      "synthetic_probe": "whitespace-before-EOF",
+      "result": {
+        "state": "NOT-STRICT-EOF-ONLY-APPEND",
+        "semantic_eligibility_decision": "NO AUTOMATIC CHANGE; use ordinary exact-span reconciliation"
+      }
+    },
+    {
+      "synthetic_probe": "normalize-other-lines",
+      "result": {
+        "state": "NOT-STRICT-EOF-ONLY-APPEND",
+        "semantic_eligibility_decision": "NO AUTOMATIC CHANGE; use ordinary exact-span reconciliation"
+      }
+    }
+  ],
+  "sealed_sampling_records_only": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/EOF-interval-policy.json",
+      "sha256": "1777de8842c99e7607229160f213db778f0b8151eecd8e2b6d1c6ab1597d494c",
+      "bytes": 1268
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/actual-read-join.json",
+      "sha256": "71b7612da7acf5fc45e83662c1b1f9dd1b507883b389af1f4fbd458931011633",
+      "bytes": 1865629
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/candidate.md",
+      "sha256": "d63d20bf3ddf045dbcd048c534408ada9b9ce6eb88f15ab27a31747b23da52bb",
+      "bytes": 3158
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/eof_interval_policy.py",
+      "sha256": "d2a04ab3085d33deeaabb9a62598e35266b0db30d62e2233a336f60120af1820",
+      "bytes": 2382
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/new-five-actual-verdicts.json",
+      "sha256": "bc7e70623884d980eeb56206f5b21d52f5a28aba7a025111d8b4578be0b47d4d",
+      "bytes": 7284
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/owner-role-quotas.json",
+      "sha256": "52e8314daca5367c8df2c8ef1f96ea3299f4ca7390f53aced695333c57ba520e",
+      "bytes": 97306
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/owner-totals.json",
+      "sha256": "5b52146371fcef91efcbf6b0b516ad5a997dd86e4285862a449d9e4f70a47f57",
+      "bytes": 3851
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/pending-final-transfers.json",
+      "sha256": "7e57f6a71905ad11a4af85c66e8cce4e6912cae65e1b780c3eb7d336ed4fa357",
+      "bytes": 1073
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/predecessor-record-seal.json",
+      "sha256": "edb4a359ab7d4bed5d86b7641d4d2a6d2000c3946ed8d2ed62d6d94c6984d985",
+      "bytes": 7313
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/preparation-notes.json",
+      "sha256": "abd372fbf2fde68014c8316bc6b79d5a5c3fc6b52421e7c31575a090fe98e863",
+      "bytes": 673
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/preparation.stdout.json",
+      "sha256": "a54f4e5442c8cb700eddc3037156ec6de13e804f1600dd47dc63e7a6447aeaa0",
+      "bytes": 1292
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/prepare.py",
+      "sha256": "84eceefd81cd1aa71315f963c6ce7887a69f252369b7900d2e7c5bd93604e87d",
+      "bytes": 14583
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/retraction-overlay-retained.json",
+      "sha256": "b622c82802ff3f8384a6eebdbb269cc5657d2620ee2ba7cae233e866c6f7c786",
+      "bytes": 5673
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/summary.json",
+      "sha256": "a54f4e5442c8cb700eddc3037156ec6de13e804f1600dd47dc63e7a6447aeaa0",
+      "bytes": 1292
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/verification.json",
+      "sha256": "49f80893ed633e825a91acce6c7eb2b25867209c60721819d384857a307d0d94",
+      "bytes": 16710
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/compiler-WA-read-update/verify.py",
+      "sha256": "f84a49e6206c785c3769b536dc1c45289cbd7f52fd206622029cd3f3cb9d925d",
+      "bytes": 9046
+    }
+  ]
+}

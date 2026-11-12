@@ -1,0 +1,4 @@
+  using (Aes aesObject = CryptographyProviders.AesCreator())
+  {
+      // Use the cipher within this disposal scope.
+  }

@@ -1,0 +1,66 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/record-edit.py",
+    "sha256": "bda442a67317615b5dac746a3b7e396df9fcd8638bc759896d603007f8601721"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/changed-files.json",
+    "sha256": "c60e96270a153e9ed3c0ff58d18f15256e216bb45a373679f2018388ad774b0e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/path-decisions.json",
+    "sha256": "09a3a9ca8016b438e97e5b59deaa88bf9719c854099cd2f2fd98d96af9e458ab"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/outside-owner-handoffs.json",
+    "sha256": "8a959edd158c3c0492ddac07102e7b72a576f9ba3bbda8a0544d47458f6c7bdc"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/example-inventory.json",
+    "sha256": "2cfba94f36d205664f00d93a731c9a2542dd13662876b458658920b5f54b5d6b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/local-links.json",
+    "sha256": "6ca70356df8d8c0ee2877d97845996ebbbb3cfd966ec2c5194ca6c98bfad14c9"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/input-identities.json",
+    "sha256": "50ce357e9a9a14eb03143428aac420a57f4e02a9ee2fb63599d869741febacca"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/preserved-provenance.json",
+    "sha256": "fcba6a43ee285f82d65aa5dbf2ba7ff1173f2bf93281eb0f59184431be18393f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/product.patch",
+    "sha256": "dac49659e9357569fd836922bd2f52fe9622a6f7794fcabe320d84d29933134a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/static-verification.json",
+    "sha256": "b98b8f3571aeb4780b1f9c715eb95a6e9689bb98e1880658535ae8c7134c8715"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/candidate-decisions.md",
+    "sha256": "4786509309c94f23e67bb6d59e542a4dcf926a8fd1b43e7b4693dc862b80f5bf"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/citation-notes.md",
+    "sha256": "e52abc63eec192853abd015d732ef86f1cfe15d69eeaeefc3f0d387b0c8f0e11"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/verification-notes.md",
+    "sha256": "ed7c4f8a553128f4518ba67299e9e6525c7833c36d02a3f0a81f6f04becf9c70"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/review.md",
+    "sha256": "a5a387caaac844d45ef247f80f0a9ee5976aa48b28f01859e7aefb07183cc889"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/review-identities.json",
+    "sha256": "1528f450efe28ac6106754233d3bbb456ca9622394a5093ef986af75f0881e12"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-PGP-boundary.md",
+    "sha256": "8ce092f1e8ba503ae3b94ed69e5fecdc3a28f0f2ed5a8f64856267583bd3650a"
+  }
+]

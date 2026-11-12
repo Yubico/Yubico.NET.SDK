@@ -1,0 +1,20 @@
+{
+  "profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-third.json",
+    "bytes": 72330,
+    "sha256": "ceea8be4c6681c15c51f4611de9546c35f1428f3a6d44de893a434fdab7cd2f1"
+  },
+  "profile_sha256": "ceea8be4c6681c15c51f4611de9546c35f1428f3a6d44de893a434fdab7cd2f1",
+  "environment": {
+    "DirectoryBuildTargetsPath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/hook.targets",
+    "CoreDocCheckCaptureDirectory": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-third",
+    "CoreDocCheckProfile": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-third.json",
+    "CoreDocCheckProfileSha256": "ceea8be4c6681c15c51f4611de9546c35f1428f3a6d44de893a434fdab7cd2f1",
+    "CoreDocCheckGeneratedDirectory": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/generated/checker-bound-build-third",
+    "TMPDIR": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "TEMP": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/tmp",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef"
+}

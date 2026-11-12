@@ -1,0 +1,79 @@
+[
+  {
+    "id": "core-001:unit:1568591f062880de",
+    "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+    "label": "Yubico.YubiKit.YubiOtp.StaticPasswordSlotConfiguration :: private void Initialize(ReadOnlySpan<byte> scanCodes) ",
+    "first_line": 93,
+    "last_line": 143,
+    "source_sha256": "736e70325799845627a56bb4f9a95549356f11f8ee47ffa0bb80c8b55ebc02ed",
+    "range_sha256": "03d729de49266ec7e929fdf2e7334e7fd54ea19b393645959a11c618e6b21c49",
+    "reason": "String translation validates every character before allocating its byte array, then Initialize copies into fixed/uid/key with zeroed and finally-cleared stack scratch; its translated intermediate is cleared even on Initialize failure. Raw input is copied without clearing caller source. Core translator supplies character mapping only; neither overload uses ConsoleCredentialReader. Layout rendering and old-firmware length remain qualified rather than universal guarantees.",
+    "sample_status": "NOMINEE-NOT-INDEPENDENTLY-SAMPLED"
+  },
+  {
+    "id": "core-001:unit:78decc8da84b9010",
+    "path": "src/YubiOtp/src/ConfigState.cs",
+    "label": "Yubico.YubiKit.YubiOtp.ConfigState :: public ConfigState(ReadOnlySpan<byte> statusBytes) ",
+    "first_line": 52,
+    "last_line": 70,
+    "source_sha256": "0e774dc1d8df261096bea16951fd776c90b3715414edaf6926e61701dfab6fb8",
+    "range_sha256": "88b416208ff8ed25d541881331b1cdb6740aad0a9d1339629d70d37693d3f47c",
+    "reason": "The constructor copies version scalars into FirmwareVersion and decodes touch flags little-endian; it retains no status-memory alias. Accessors gate against raw status version with major-zero allowance. Trigger flags describe keyboard activation, not RequireTouch. Default struct construction leaves FirmwareVersion null; callers in reviewed session paths construct from status, and default-value hardening is a separate applet representation question rather than a new boundary acceptance.",
+    "sample_status": "NOMINEE-NOT-INDEPENDENTLY-SAMPLED"
+  },
+  {
+    "id": "core-001:unit:abacae5474828a44",
+    "path": "src/YubiOtp/src/SlotConfiguration.cs",
+    "label": "Yubico.YubiKit.YubiOtp.SlotConfiguration :: protected void SetHmacKey(ReadOnlySpan<byte> hmacKey, ushort initialMovingFactor) ",
+    "first_line": 301,
+    "last_line": 345,
+    "source_sha256": "cb09f583373475151421eba8ddd05381011c503842589af7e83216bce5bba3a0",
+    "range_sha256": "ab71ad13f3975fd5ed93a722143476d9545d81b33f9e7a1aeb913df2105ec330",
+    "reason": "Private fixed/uid/key storage copies source, GetConfig makes an independent 52-byte block and complements CRC, and Dispose clears only the three private arrays. Invalid new-code validation follows secret copying; invalid current-code validation can occur before WriteConfig's try. SetHmacKey stack UID is explicitly initialized and cleared. Flag setters are not all disposed-guarded. Retain OTP-IMP-003/006/007 and distinguish config lifetime from protocol exchange drain.",
+    "sample_status": "NOMINEE-NOT-INDEPENDENTLY-SAMPLED"
+  },
+  {
+    "id": "core-001:unit:e4896d0f9ae33d14",
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+    "label": "Yubico.YubiKit.YubiOtp.UnitTests.SlotConfigurationTests :: [Fact] public void StaticPassword_FromString_CopiesOwnedScanCodesBeforeZeroing() ",
+    "first_line": 669,
+    "last_line": 690,
+    "source_sha256": "1ea72a87c5e4fef816bfe681ec4f8e67c8f4d1e299ac78c7a2f8e320eace848e",
+    "range_sha256": "c22f5f1e98fd9966aa3da14968a0ae431d8e51c52351adebd4c80626d2195201",
+    "reason": "Complete tests check literal offsets, zero filler/RFU, exact key splits, flag defaults/toggles/masks, erroneous current IMF encoding, static scan-code distribution and string/raw equality. The injected translation factory asserts actual intermediate clearing on success/failure; raw source remains unchanged. AssertValidCrc shares production helper and the older Dispose-named test only checks rejection. Preserve existing accurate comments; independent CRC/device and exception cleanup proposals remain separate.",
+    "sample_status": "NOMINEE-NOT-INDEPENDENTLY-SAMPLED"
+  },
+  {
+    "id": "core-001:unit:33a5c377fb3707c8",
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationEncapsulationTests.cs",
+    "label": "Yubico.YubiKit.YubiOtp.UnitTests.SlotConfigurationEncapsulationTests :: [Fact] public void Dispose_ZeroesAllConfigurationBuffers() ",
+    "first_line": 67,
+    "last_line": 86,
+    "source_sha256": "a7928ba0dd8cfaca8c0ddb9ddd2a621796f5e950540afe19fc4bc99b83857b73",
+    "range_sha256": "d90d91dc42accd51b47821b47464ee7580747b78d0187ff61addfdde525550f5",
+    "reason": "Reflection tests retain actual private fixed/UID/key arrays, fill them, dispose and assert all zero. Guard tests check meaningful field-size messages but are not independent memory or firmware oracles. Unlike the older Dispose test this is actual owned-array zero observation by source assertion.",
+    "sample_status": "NOMINEE-NOT-INDEPENDENTLY-SAMPLED"
+  },
+  {
+    "id": "core-001:unit:22bc1100c7f2e1e1",
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+    "label": "Yubico.YubiKit.YubiOtp.UnitTests.IYubiKeyExtensionsTransportTests :: [Fact] public async Task CreateYubiOtpSessionAsync_DefaultBothTransports_PicksSmartCard() ",
+    "first_line": 30,
+    "last_line": 41,
+    "source_sha256": "35767e4255667f55fb88c1949986670f26db167410141a3c5d32ba76e4337663",
+    "range_sha256": "5fb76f4dd3345c81f9709e4107d31e5ffe7f24e28146660c857bfca2b29e28b7",
+    "reason": "SelectionProbe records requested type then throws, so it checks selection only. FallbackProbe holds default/explicit SmartCard and asserts a single attempt/no HID fallback. The FailingOtpConnection helper is not actually opened by those held-SmartCard tests; their no-disposal assertion does not exercise post-open initialization cleanup. Shared Core tests retain that mechanism's ownership.",
+    "sample_status": "NOMINEE-NOT-INDEPENDENTLY-SAMPLED"
+  },
+  {
+    "id": "core-001:unit:f140a1c56dbf5f7d",
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionLinuxCrossLayerTests.cs",
+    "label": "Yubico.YubiKit.YubiOtp.UnitTests.YubiOtpSessionLinuxCrossLayerTests :: [Theory] [InlineData(true)] [InlineData(false)] public async Task PublicHmac_TerminalPresenceOutcomeBelongsToAppletCrcValidation(bool validCrc) ",
+    "first_line": 97,
+    "last_line": 139,
+    "source_sha256": "26ef560adca8c3ab6893d27faed2ef59102fb5d665882121f9abb56219ca155e",
+    "range_sha256": "e8d5b5d9cdaa3256a861eda52a7e0b7e028c99cfa4e27af7eb4cde6b0ace6e58",
+    "reason": "The production Linux slot/device/native owner is used over fake feature seam. Held first GET distinguishes invocation return from completion; sequential borrowed sessions leave close count zero until connection disposal. Touch cancellation remains pending until held dummy SET returns, then serial recovers; CRC literal vectors determine applet Completed/Failed. Sent-frame CRC still uses production ChecksumUtils. Held creation's finally releases a gate but success-only first-session disposal can be skipped by an assertion failure; record this under existing test cleanup concern rather than claim all-path drain.",
+    "sample_status": "NOMINEE-NOT-INDEPENDENTLY-SAMPLED"
+  }
+]

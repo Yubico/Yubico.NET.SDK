@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// <summary>
 /// A class that converts ASN.1 DER encoded X.509 SubjectPublicKeyInfo to instances of IPublicKey.
 /// </summary>
+/// <remarks>
+/// AlgorithmIdentifier exhaustion is checked for supported algorithms. Outer SPKI, top-level, and
+/// nested RSA-reader exhaustion are separate and are not all checked here. Point framing and component
+/// widths do not establish full mathematical validity. Inputs remain borrowed and outputs own copies.
+/// </remarks>
 internal class AsnPublicKeyDecoder
 {
     /// <summary>
@@ -34,7 +39,8 @@ internal class AsnPublicKeyDecoder
     /// A new instance of <see cref="IPublicKey"/>.
     /// </returns>
     /// <exception cref="CryptographicException">Thrown if public key does not match expected format.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if the algorithm is not supported</exception>
+    /// <exception cref="AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
+    /// <exception cref="NotSupportedException">The algorithm or named curve is not modeled.</exception>
     public static IPublicKey CreatePublicKey(ReadOnlyMemory<byte> subjectPublicKeyInfo)
     {
         var reader = new AsnReader(subjectPublicKeyInfo, AsnEncodingRules.DER);

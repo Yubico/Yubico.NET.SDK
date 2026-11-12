@@ -27,6 +27,8 @@ internal static class InfoCommand
         var retries = await session.GetManagementKeyRetriesAsync(cancellationToken);
         var credentials = await session.ListCredentialsAsync(cancellationToken);
 
+        // This is session feature policy (SELECT version/fallback, or an override), not an independent
+        // physical-firmware measurement. The display label does not change that provenance.
         AnsiConsole.MarkupLine($"YubiHSM Auth version: [green]{session.FirmwareVersion}[/]");
         AnsiConsole.MarkupLine($"Management key retries remaining: [green]{retries}[/]");
         AnsiConsole.MarkupLine($"Stored credentials: [green]{credentials.Count}[/]");

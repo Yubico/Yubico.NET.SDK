@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build --project Yubico.YubiKit.Management.IntegrationTests --clean",
+  "started": "2026-11-12T05:24:56.0562384+01:00",
+  "durationSeconds": 6.8,
+  "runDirectory": "artifacts/toolchain/runs/20261112-052456-056-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 6.7,
+      "error": "`dotnet build src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-052456-056-build/02-build-Management.IntegrationTests.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,18 @@
+{
+  "revision": 2,
+  "full_product_files": 13,
+  "revision_2_changed_product_files": 2,
+  "all_CSharp_files_byte_identical_to_reviewed_predecessor": true,
+  "CSharp_noncomment_lines_preserved_against_pin": true,
+  "Markdown_bodies": 19,
+  "XML_bodies": 23,
+  "changed_Markdown_bodies": 2,
+  "unchanged_bodies": 40,
+  "well_formed_XML_blocks_in_changed_source": 124,
+  "local_targets": 20,
+  "predecessor_files_preserved": 15,
+  "full_patch_sha256": "dc35e1032236c9363640a280dc722b9c10c33c8c2567433946d5521da514a8ce",
+  "delta_patch_sha256": "ab97bd5d8df7afaf7d4b9f1e6b591d8c9c701ab7acc1066930cfe03fd0205b72",
+  "independent_review": "PENDING CORRECTION RECHECK; editor static checks are not independent acceptance",
+  "compile_runtime_native_device": "NOT RUN"
+}

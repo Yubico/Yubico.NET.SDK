@@ -159,7 +159,9 @@ public sealed partial class OpenPgpSession
 
         // GET_ATTESTATION generates the attestation cert and writes it to the
         // certificate slot for the key. We then read it back with GetCertificateAsync.
-        // This matches ykman canonical: send_apdu → get_certificate(key_ref).
+        // The Python implementation uses the same send_apdu → get_certificate(key_ref) sequence.
+        // The outer notification helper resolves Completed after this callback returns its certificate.
+        // A resolution failure can abandon that disposable result; it has no local cleanup scope here.
         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(KeyRef.Att, UserPresenceOperations.OpenPgp.AttestKey, cancellationToken).ConfigureAwait(false));

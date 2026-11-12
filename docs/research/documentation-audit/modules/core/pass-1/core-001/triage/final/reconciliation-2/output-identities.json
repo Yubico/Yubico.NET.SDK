@@ -1,0 +1,21 @@
+{
+  "state": "DRAFT-RECONCILIATION-2; final compiler/sampling/evidence/publication gates pending",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "Only owned additive reconciliation records and updated handoff; excludes this manifest itself. No publication/acceptance seal.",
+  "files": {
+    "deferred-findings.md": "a8ccc447dfe049e4c30ca1fbb68ce08160a7e7455d8c9200fb074b3835228072",
+    "triage/final/reconciliation-2/candidate-editor-sampling.json": "74dbc22fffd82417dc4a6afb2f0a2ee5ee1e0169bb9f14fa0ca1dfaa0a4f5d85",
+    "triage/final/reconciliation-2/candidate-map.md": "4204fd8dbe1148b3948681faf4ac72fb502f1ee03ad6e7c152200028e920deee",
+    "triage/final/reconciliation-2/deferred-findings.reconciliation-1.md.snapshot": "99341de7da22254bef9926dc79e8e3e6af809ec91b0b238561184bbf048ceb05",
+    "triage/final/reconciliation-2/editor-integration.json": "0107fd11d9614022fdb9231494162d37fce0e4bf3e7906ec5fa8db70bb44a35b",
+    "triage/final/reconciliation-2/history-preservation.json": "406e74eb5b212ac447f9d8d574572e178e4e511d4d8c05dbf5a9dad226dd41a2",
+    "triage/final/reconciliation-2/record-notes.md": "519f6535bbd062d4a87f25ed9107ad40a3106ba1760105208bae5aa13ebf58b3",
+    "triage/final/reconciliation-2/sampling-expansion-verdicts.json": "262eb04297ad76dd0620e55aa0cc64faa8adfc8b8390ec727618f15223f3e1b9",
+    "triage/final/reconciliation-2/sampling-findings.json": "05784861137ba0ac46d251a66a06f7ad7acc93cb71ae9fc0548cdf133bdf6e43",
+    "triage/final/reconciliation-2/sampling-pending-packets.json": "0436fe79cccff8ac388ea54f6256c7f3dc9782f12a4d089afca4276092a818c9",
+    "triage/final/reconciliation-2/sampling-verdicts.json": "5a61a15bf57d08c7f5e152c23ee630575201eb65d5358b6867f542afd3ff25ab",
+    "triage/final/reconciliation-2/update.py": "c674115b6c347e16bdfdd7d1f32c5fdcad9fec9f4a773e0a01266ade178b76af",
+    "triage/final/reconciliation-2/validation-state.json": "570f9f5d51d9c272f664de24838236c1d244b1a3828c21adc433daecfcc29804",
+    "triage/final/reconciliation-2/verification.json": "70a602edf8de4f0fef14d93b35ef79b4e187ab249b75b63ab94c5dfb4b11d1ec"
+  }
+}

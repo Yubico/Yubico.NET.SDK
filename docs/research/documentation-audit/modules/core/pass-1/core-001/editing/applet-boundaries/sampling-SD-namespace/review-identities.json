@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "scope": "Only SAMPLE-SD-001 focused two-bullet namespace correction",
+  "selected_unit": "core-001:unit:ed3e115f81fd126c",
+  "edited_unit_sampling_credit": 0,
+  "sampling_reconciliation_owner": "sampler",
+  "accepted_focused_diff_sha256": "b1cb5c00f569c94499060cd1539edf2bafa67057763126e3786c3f0e83c8ab65",
+  "review_report_sha256": "220d6ecdf70e94b87bce8b840deb08c19c7c1bea81e22114e8b1a7f4448bf807",
+  "product_path": "src/SecurityDomain/CLAUDE.md",
+  "accepted_before_sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+  "accepted_after_sha256": "dd24dbcc43606abd77888fecdf9368b0c103b74b860fba1c46d3c10ccdab9022",
+  "changed_lines_inclusive": [241, 242],
+  "accepted_39_path_ledger_sha256": "2414b45a57381ee489ffde0843ee9a8e4ec1d040d1c13b8ed26c4ddccb58b067",
+  "focused_artifacts_relative_to_this_directory": [
+    {"path": "before-identities.json", "sha256": "fd496f18bc78fe4b92264bd4d7d9085613d953d373703e28b05c6e7f4e825a81"},
+    {"path": "before.md", "sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a"},
+    {"path": "focused.diff", "sha256": "b1cb5c00f569c94499060cd1539edf2bafa67057763126e3786c3f0e83c8ab65"},
+    {"path": "report.md", "sha256": "f50ef24e2ede03f3e61f57d69ac749e73afd0f45cb097bc20e33b2046da406fa"},
+    {"path": "source-evidence.json", "sha256": "04e5ed3fe7def5a6d49a481ddf92529d77a17185b8971bc8a4add52f9c676a7b"},
+    {"path": "verification.json", "sha256": "f79a9a6b50ae368f604cd5da77196af00626065bb29054f2d6648bf6f7fc79fc"},
+    {"path": "output-identities.json", "sha256": "c62d3bab6855cbb4892ed841f33cd62ac5db35ed8e0339a01badb1fb0134aeed"}
+  ],
+  "namespace_declarations_checked": [
+    {"path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs", "sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68", "namespace_line": 19, "type_line": 24, "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Scp", "type": "StaticKeys"},
+    {"path": "src/Core/src/Cryptography/ECPrivateKey.cs", "sha256": "6a7c5d3ead97b189885e536d0d0a6b7dadfe1a73b4a26c1f13ee4b35d2cc16ab", "namespace_line": 17, "type_line": 27, "namespace": "Yubico.YubiKit.Core.Cryptography", "type": "ECPrivateKey"},
+    {"path": "src/Core/src/Cryptography/ECPublicKey.cs", "sha256": "82c326cbf96868e1b7b9b8490534450b81231794dd96fd64881c85daf39f29e9", "namespace_line": 17, "type_line": 27, "namespace": "Yubico.YubiKit.Core.Cryptography", "type": "ECPublicKey"}
+  ],
+  "fresh_independent_checks": {
+    "before_equals_primary_and_accepted_ledger": true,
+    "actual_unified_diff_equals_accepted_focused_patch": true,
+    "only_two_bullets_changed": true,
+    "other_accepted_source_path_hashes_preserved": 232,
+    "prior_editor_reviewer_record_hashes_preserved": 30,
+    "example_bodies_hashes_and_ranges_preserved": 107,
+    "namespace_source_files_hashes_preserved": 3,
+    "broader_doc_policy_API_or_executable_change": false,
+    "failures": []
+  },
+  "remaining_corrections": [],
+  "prior_coordinator_compiler_example_publication_and_deferred_gates": "UNCHANGED",
+  "SDK_build_tests_formatter_native_device_crypto_connector_Git_commands_mutations_subagents": "NOT-RUN",
+  "reviewer_written_files_only": ["review.md", "review-identities.json"],
+  "self_hash": "intentionally omitted"
+}

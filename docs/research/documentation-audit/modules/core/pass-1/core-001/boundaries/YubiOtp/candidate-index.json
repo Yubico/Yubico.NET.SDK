@@ -1,0 +1,696 @@
+[
+  {
+    "id": "CORE-OTP-X001",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/README.md",
+        "line_ranges": [
+          [
+            322,
+            329
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+        "line_ranges": [
+          [
+            20,
+            32
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "line_ranges": [
+          [
+            96,
+            150
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/YubiOtpSession.cs",
+        "line_ranges": [
+          [
+            124,
+            169
+          ],
+          [
+            248,
+            258
+          ],
+          [
+            529,
+            549
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+        "line_ranges": [
+          [
+            91,
+            122
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:c8a4385a37092350",
+      "core-001:unit:8784b905371e7123",
+      "core-001:unit:755008e6f67dc2d6",
+      "core-001:unit:6d1e93c70b10abb3",
+      "core-001:unit:293b23ebb53aa668",
+      "core-001:unit:aeb9fd1b52871f2e",
+      "core-001:unit:4cfc33f8947a2a06",
+      "core-001:unit:bd969d750819c73a"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/README.md",
+      "src/YubiOtp/src/IYubiOtpSession.cs",
+      "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "src/YubiOtp/src/YubiOtpSession.cs",
+      "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/Core/src/Devices/YubiKeyDevice.cs",
+      "src/Core/src/Devices/HidConnectionSlot.cs",
+      "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "docs/architecture/physical-device-model.md",
+      "docs/architecture/connection-ownership-and-contention.md",
+      "docs/architecture/raw-access-tiers.md"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X001"
+  },
+  {
+    "id": "CORE-OTP-X002",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/CLAUDE.md",
+        "line_ranges": [
+          [
+            36,
+            55
+          ],
+          [
+            159,
+            165
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+        "line_ranges": [
+          [
+            44,
+            53
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/YubiOtpSession.cs",
+        "line_ranges": [
+          [
+            136,
+            169
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionLinuxCrossLayerTests.cs",
+        "line_ranges": [
+          [
+            19,
+            54
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:6de2046b3a168b4b",
+      "core-001:unit:3d453b0ec4639c4d",
+      "core-001:unit:69fe4b6aee0f586b",
+      "core-001:unit:9f7880fea65f528b",
+      "core-001:unit:bd969d750819c73a",
+      "core-001:unit:830c18d1e5cef077",
+      "core-001:unit:b8b5d90cd9c7ea08"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/CLAUDE.md",
+      "src/YubiOtp/src/Backend/HidBackend.cs",
+      "src/YubiOtp/src/YubiOtpSession.cs",
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionLinuxCrossLayerTests.cs",
+      "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X002"
+  },
+  {
+    "id": "CORE-OTP-X003",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+        "line_ranges": [
+          [
+            74,
+            141
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+        "line_ranges": [
+          [
+            124,
+            187
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/README.md",
+        "line_ranges": [
+          [
+            348,
+            361
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+        "line_ranges": [
+          [
+            20,
+            32
+          ],
+          [
+            288,
+            307
+          ],
+          [
+            309,
+            339
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs",
+        "line_ranges": [
+          [
+            230,
+            251
+          ],
+          [
+            286,
+            307
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs",
+        "line_ranges": [
+          [
+            226,
+            251
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:5a31a98486d851ca",
+      "core-001:unit:0a302e6a27529e22",
+      "core-001:unit:755008e6f67dc2d6",
+      "core-001:unit:94461696a8a46224",
+      "core-001:unit:aeb9fd1b52871f2e",
+      "core-001:unit:c15f324c6432db21",
+      "core-001:unit:4a84919b64795d4d",
+      "core-001:unit:823d5ae9d8a87af6",
+      "core-001:unit:15d0cd4df40f8681",
+      "core-001:unit:4132aa05e6462076",
+      "core-001:unit:8805f2581b95799b"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/src/Backend/HidBackend.cs",
+      "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+      "src/YubiOtp/README.md",
+      "src/YubiOtp/src/IYubiOtpSession.cs",
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs",
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs",
+      "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "src/Core/src/Credentials/UserPresenceNotification.cs",
+      "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X003"
+  },
+  {
+    "id": "CORE-OTP-X004",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+        "line_ranges": [
+          [
+            69,
+            94
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/README.md",
+        "line_ranges": [
+          [
+            164,
+            185
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:9f4b52a7d9864273",
+      "core-001:unit:6d1e93c70b10abb3"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "src/YubiOtp/README.md",
+      "src/Core/src/Sessions/ApplicationSession.cs"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X004"
+  },
+  {
+    "id": "CORE-OTP-X005",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/src/SlotConfiguration.cs",
+        "line_ranges": [
+          [
+            140,
+            184
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/YubiOtpSession.cs",
+        "line_ranges": [
+          [
+            529,
+            574
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs",
+        "line_ranges": [
+          [
+            29,
+            53
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs",
+        "line_ranges": [
+          [
+            30,
+            54
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+        "line_ranges": [
+          [
+            35,
+            65
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:3160217fee691dac",
+      "core-001:unit:8105b2b1f22b6ba5",
+      "core-001:unit:b91fa3d05388fa8f",
+      "core-001:unit:89115c172dd5c12f"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/src/SlotConfiguration.cs",
+      "src/YubiOtp/src/YubiOtpSession.cs",
+      "src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs",
+      "src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs",
+      "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+      "src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X005"
+  },
+  {
+    "id": "CORE-OTP-X006",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/src/YubiOtpSession.cs",
+        "line_ranges": [
+          [
+            136,
+            169
+          ],
+          [
+            586,
+            633
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+        "line_ranges": [
+          [
+            53,
+            89
+          ],
+          [
+            205,
+            238
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/ConfigState.cs",
+        "line_ranges": [
+          [
+            19,
+            32
+          ],
+          [
+            81,
+            125
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/README.md",
+        "line_ranges": [
+          [
+            10,
+            37
+          ],
+          [
+            79,
+            82
+          ],
+          [
+            286,
+            320
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:d3f8b83b569afb39",
+      "core-001:unit:23f2516eb238b42b",
+      "core-001:unit:2aad92f526adf742",
+      "core-001:unit:e5bf38d606fcff81",
+      "core-001:unit:8784b905371e7123",
+      "core-001:unit:645c82040e0b90ed",
+      "core-001:unit:c0ca00883cfe6183",
+      "core-001:unit:a90cf6597e85e250",
+      "core-001:unit:bd969d750819c73a",
+      "core-001:unit:a8c9a6e0e871bad4",
+      "core-001:unit:7cbba202e19786ac",
+      "core-001:unit:7f0102204447455e"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/src/YubiOtpSession.cs",
+      "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+      "src/YubiOtp/src/ConfigState.cs",
+      "src/YubiOtp/README.md",
+      "src/Core/src/Devices/Feature.cs",
+      "src/Core/src/Devices/FirmwareVersion.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "docs/usage/user-interaction.md"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X006"
+  },
+  {
+    "id": "CORE-OTP-X007",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+        "line_ranges": [
+          [
+            38,
+            79
+          ],
+          [
+            145,
+            178
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/README.md",
+        "line_ranges": [
+          [
+            241,
+            256
+          ],
+          [
+            365,
+            379
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+        "line_ranges": [
+          [
+            20,
+            32
+          ],
+          [
+            40,
+            84
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/examples/OtpTool/CliOptions.cs",
+        "line_ranges": [
+          [
+            86,
+            102
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:cf2446f26e781bad",
+      "core-001:unit:9e9a59fefbe5b6be",
+      "core-001:unit:f23095713e63de52",
+      "core-001:unit:ca1011ae4b0e6503",
+      "core-001:unit:b91fa3d05388fa8f",
+      "core-001:unit:d3f184d2e88f027c",
+      "core-001:unit:4bf864a35569f565",
+      "core-001:unit:4e407fda4897e951"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "src/YubiOtp/README.md",
+      "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+      "src/YubiOtp/examples/OtpTool/CliOptions.cs",
+      "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+      "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+      "src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/AuditV2/CliStaticPasswordEncodingTests.cs"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X007"
+  },
+  {
+    "id": "CORE-OTP-X008",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+        "line_ranges": [
+          [
+            20,
+            32
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+        "line_ranges": [
+          [
+            1,
+            195
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:aeb9fd1b52871f2e",
+      "core-001:unit:73de73d0945fd38d"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/src/IYubiOtpSession.cs",
+      "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+      "src/Management/src/IManagementSession.cs",
+      "src/Management/src/ManagementSession.cs",
+      "src/Management/src/DeviceConfig.cs",
+      "src/Core/src/Devices/DeviceInfoReader.cs",
+      "docs/migration/v1-to-v2-gaps.md",
+      "docs/migration/v1-to-v2-map.yml",
+      "docs/migration/v1-to-v2.md"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X008"
+  },
+  {
+    "id": "CORE-OTP-X009",
+    "accepted_id": null,
+    "anchors": [
+      {
+        "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionLinuxCrossLayerTests.cs",
+        "line_ranges": [
+          [
+            19,
+            54
+          ],
+          [
+            141,
+            152
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+        "line_ranges": [
+          [
+            36,
+            40
+          ],
+          [
+            1042,
+            1050
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+        "line_ranges": [
+          [
+            121,
+            151
+          ],
+          [
+            202,
+            223
+          ]
+        ]
+      },
+      {
+        "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs",
+        "line_ranges": [
+          [
+            116,
+            129
+          ]
+        ]
+      }
+    ],
+    "exact_unit_ids": [
+      "core-001:unit:6c9d5e8ae69af791",
+      "core-001:unit:617b061e8490a436",
+      "core-001:unit:87cc0217a82f4378",
+      "core-001:unit:c9a666c94f30db60",
+      "core-001:unit:7cf2cb5de32226a7",
+      "core-001:unit:172df361e0ccb0e0",
+      "core-001:unit:dda1274cb46ab4ea",
+      "core-001:unit:830c18d1e5cef077",
+      "core-001:unit:b8b5d90cd9c7ea08",
+      "core-001:unit:8e90786faeb9b9c8",
+      "core-001:unit:fd9453ddba016428"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionLinuxCrossLayerTests.cs",
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs",
+      "src/YubiOtp/tests/CLAUDE.md",
+      "src/YubiOtp/CLAUDE.md",
+      "src/YubiOtp/README.md"
+    ],
+    "facets": {
+      "documentation": "CANDIDATE-FRESH-EDIT-AND-REVIEW",
+      "runtime": "DEFERRED-NO-AUTHORIZATION",
+      "decision": "SEE-CANDIDATE-LOCAL-CONDITION",
+      "qualification": "SOURCE-ONLY-PLUS-EXPLICIT-HISTORICAL-EVIDENCE"
+    },
+    "reopening_record": "candidates.md",
+    "reopening_group": "CORE-OTP-X009"
+  }
+]

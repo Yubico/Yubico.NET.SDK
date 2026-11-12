@@ -1,0 +1,23 @@
+[
+  {
+    "id": "core-001:unit:7dc8f2fc14f0186c",
+    "owner": "B4",
+    "stratum": "implementation-state-and-internal-contracts",
+    "purpose": "PROTECTED-OUTPUT-ELIGIBILITY-REPLACEMENT; NOT A NEW RUNTIME FINDING",
+    "original_rank": 12,
+    "path": "nuget.config",
+    "first_line": 1,
+    "last_line": 20,
+    "start_character": 0,
+    "end_character_exclusive": 782,
+    "source_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+    "range_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+    "category": "configuration-data-or-support-contract",
+    "label": "nuget.config",
+    "known_edited_overlap": false,
+    "read_status": "PROPOSED-UNREAD",
+    "verdict": "UNASSIGNED",
+    "clean_credit": 0,
+    "current_mapping": "DEFERRED to final canonical reconciliation; original pinned unit may be read now"
+  }
+]

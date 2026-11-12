@@ -1,0 +1,1192 @@
+{
+  "schema": "core-001-coverage-progress-v2",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_record_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "measure_definitions": {
+    "total_completed_return": "Distinct IDs with final investigator read dispositions, including explicit scoped/historical exclusions; not accepted clean prose or runtime verification",
+    "remaining": "IDs awaiting a completed investigator return; the historical 8,471 was this remaining quantity"
+  },
+  "completed_families": {
+    "A": {
+      "packet": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/A.json",
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/unit-results.json",
+      "primary": 1630,
+      "shared": 376,
+      "local_candidate_groups": 21,
+      "counts": {
+        "total": 2006,
+        "scope": {
+          "Core": 1639,
+          "external": 367
+        },
+        "category": {
+          "type-contract": {
+            "read-clean": 203,
+            "read-candidate": 7
+          },
+          "member-contract-and-implementation": {
+            "read-clean": 1388,
+            "read-candidate": 100
+          },
+          "narrative-section-with-complete-examples": {
+            "read-candidate": 13,
+            "read-clean": 105
+          },
+          "enum-value": {
+            "read-clean": 37,
+            "read-candidate": 19
+          },
+          "source-context-and-explanations": {
+            "read-clean": 114,
+            "read-candidate": 12
+          },
+          "derived-diagram": {
+            "read-clean": 1
+          },
+          "structured-map-entry": {
+            "read-clean": 6
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 1
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 1501,
+            "read-candidate": 129
+          },
+          "shared": {
+            "read-candidate": 22,
+            "read-clean": 354
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "Core": 1630
+          },
+          "shared": {
+            "external": 367,
+            "Core": 9
+          }
+        },
+        "dispositions": {
+          "read-clean": 1855,
+          "read-candidate": 151
+        }
+      },
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "SDK_runtime_verification": "PENDING"
+    },
+    "B1": {
+      "packet": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B1-portable-lifetimes.json",
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/unit-dispositions.json",
+      "primary": 1078,
+      "shared": 126,
+      "local_candidate_groups": 12,
+      "counts": {
+        "total": 1204,
+        "scope": {
+          "Core": 1084,
+          "external": 120
+        },
+        "category": {
+          "type-contract": {
+            "read-clean": 119,
+            "read-candidate": 7
+          },
+          "member-contract-and-implementation": {
+            "read-clean": 901,
+            "read-candidate": 75
+          },
+          "narrative-section-with-complete-examples": {
+            "read-clean": 18,
+            "read-candidate": 6,
+            "read-exclusion": 1
+          },
+          "source-context-and-explanations": {
+            "read-clean": 50,
+            "read-candidate": 11
+          },
+          "enum-value": {
+            "read-clean": 14
+          },
+          "derived-diagram": {
+            "read-clean": 1
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 1
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 986,
+            "read-candidate": 92
+          },
+          "shared": {
+            "read-clean": 118,
+            "read-candidate": 7,
+            "read-exclusion": 1
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "Core": 1078
+          },
+          "shared": {
+            "external": 120,
+            "Core": 6
+          }
+        },
+        "dispositions": {
+          "read-clean": 1104,
+          "read-candidate": 99,
+          "read-exclusion": 1
+        }
+      },
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "SDK_runtime_verification": "PENDING"
+    },
+    "B2": {
+      "packet": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B2-linux-lifetimes.json",
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/unit-dispositions.json",
+      "primary": 1148,
+      "shared": 71,
+      "local_candidate_groups": 6,
+      "counts": {
+        "total": 1219,
+        "scope": {
+          "external": 198,
+          "Core": 1021
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "read-clean": 932,
+            "read-candidate": 20
+          },
+          "narrative-section-with-complete-examples": {
+            "read-clean": 60,
+            "read-candidate": 10
+          },
+          "type-contract": {
+            "read-clean": 98
+          },
+          "enum-value": {
+            "read-clean": 16
+          },
+          "source-context-and-explanations": {
+            "read-clean": 75,
+            "read-candidate": 1,
+            "read-exclusion": 1
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 6
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 1126,
+            "read-candidate": 21,
+            "read-exclusion": 1
+          },
+          "shared": {
+            "read-clean": 61,
+            "read-candidate": 10
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 132,
+            "Core": 1016
+          },
+          "shared": {
+            "external": 66,
+            "Core": 5
+          }
+        },
+        "dispositions": {
+          "read-clean": 1187,
+          "read-candidate": 31,
+          "read-exclusion": 1
+        }
+      },
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "SDK_runtime_verification": "PENDING"
+    },
+    "B3": {
+      "packet": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B3-macos-lifetimes.json",
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/unit-dispositions.json",
+      "primary": 1139,
+      "shared": 5,
+      "local_candidate_groups": 9,
+      "counts": {
+        "total": 1144,
+        "scope": {
+          "Core": 908,
+          "external": 236
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "read-clean": 890,
+            "read-candidate": 16
+          },
+          "type-contract": {
+            "read-clean": 77
+          },
+          "source-context-and-explanations": {
+            "read-clean": 44,
+            "read-candidate": 3
+          },
+          "enum-value": {
+            "read-clean": 68,
+            "read-candidate": 37
+          },
+          "narrative-section-with-complete-examples": {
+            "read-candidate": 1,
+            "read-clean": 4
+          },
+          "configuration-data-or-support-contract": {
+            "read-clean": 4
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "read-clean": 1083,
+            "read-candidate": 56
+          },
+          "shared": {
+            "read-candidate": 1,
+            "read-clean": 4
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "Core": 907,
+            "external": 232
+          },
+          "shared": {
+            "external": 4,
+            "Core": 1
+          }
+        },
+        "dispositions": {
+          "read-clean": 1087,
+          "read-candidate": 57
+        }
+      },
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "SDK_runtime_verification": "PENDING"
+    },
+    "C": {
+      "packet": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/C.json",
+      "report": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+      "ledger": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/unit-dispositions.json",
+      "primary": 1386,
+      "shared": 176,
+      "local_candidate_groups": 20,
+      "counts": {
+        "total": 1562,
+        "scope": {
+          "external": 169,
+          "Core": 1393
+        },
+        "category": {
+          "source-context-and-explanations": {
+            "read-clean": 64,
+            "read-candidate-context": 55,
+            "read-historical-exclusion": 3,
+            "read-candidate": 12
+          },
+          "member-contract-and-implementation": {
+            "read-candidate-context": 446,
+            "read-clean": 449,
+            "read-candidate": 260
+          },
+          "type-contract": {
+            "read-candidate-context": 70,
+            "read-clean": 68,
+            "read-candidate": 14
+          },
+          "enum-value": {
+            "read-candidate-context": 41,
+            "read-clean": 29,
+            "read-candidate": 13
+          },
+          "narrative-section-with-complete-examples": {
+            "read-historical-context": 4,
+            "read-candidate-context": 22,
+            "read-clean": 1,
+            "read-candidate": 6
+          },
+          "structured-map-entry": {
+            "read-candidate-context": 5
+          }
+        },
+        "primary_shared": {
+          "shared": {
+            "read-clean": 64,
+            "read-candidate-context": 85,
+            "read-historical-context": 4,
+            "read-candidate": 23
+          },
+          "primary": {
+            "read-candidate-context": 554,
+            "read-clean": 547,
+            "read-candidate": 282,
+            "read-historical-exclusion": 3
+          }
+        },
+        "scope_by_assignment": {
+          "shared": {
+            "external": 169,
+            "Core": 7
+          },
+          "primary": {
+            "Core": 1386
+          }
+        },
+        "dispositions": {
+          "read-clean": 611,
+          "read-candidate-context": 639,
+          "read-candidate": 305,
+          "read-historical-context": 4,
+          "read-historical-exclusion": 3
+        }
+      },
+      "independent_review": "PENDING",
+      "editing": "PENDING",
+      "SDK_runtime_verification": "PENDING",
+      "sampling_nominees": {
+        "count": 207,
+        "status": "NOMINATED-ONLY; independent sampling pending",
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/clean-nominees.json"
+      },
+      "candidate_associated_paths": {
+        "unique_paths": 85,
+        "candidate_path_rows": 144,
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/unchanged-paths.json",
+        "future_editor_reviewer": "PENDING"
+      }
+    }
+  },
+  "total_completed_return": {
+    "total": 7135,
+    "scope": {
+      "external": 1090,
+      "Core": 6045
+    },
+    "category": {
+      "member-contract-and-implementation": {
+        "read-clean": 4560,
+        "read-candidate-context": 446,
+        "read-candidate": 471
+      },
+      "type-contract": {
+        "read-clean": 565,
+        "read-candidate": 28,
+        "read-candidate-context": 70
+      },
+      "narrative-section-with-complete-examples": {
+        "read-clean": 188,
+        "read-candidate": 36,
+        "read-historical-context": 4,
+        "read-candidate-context": 22,
+        "read-exclusion": 1
+      },
+      "source-context-and-explanations": {
+        "read-clean": 347,
+        "read-candidate-context": 55,
+        "read-candidate": 39,
+        "read-historical-exclusion": 3,
+        "read-exclusion": 1
+      },
+      "enum-value": {
+        "read-clean": 164,
+        "read-candidate-context": 41,
+        "read-candidate": 69
+      },
+      "derived-diagram": {
+        "read-clean": 2
+      },
+      "configuration-data-or-support-contract": {
+        "read-clean": 12
+      },
+      "structured-map-entry": {
+        "read-candidate-context": 5,
+        "read-clean": 6
+      }
+    },
+    "primary_shared": {
+      "primary": {
+        "read-clean": 5243,
+        "read-candidate": 580,
+        "read-candidate-context": 554,
+        "read-historical-exclusion": 3,
+        "read-exclusion": 1
+      },
+      "shared": {
+        "read-clean": 601,
+        "read-candidate": 63,
+        "read-candidate-context": 85,
+        "read-historical-context": 4,
+        "read-exclusion": 1
+      }
+    },
+    "scope_by_assignment": {
+      "primary": {
+        "external": 364,
+        "Core": 6017
+      },
+      "shared": {
+        "external": 726,
+        "Core": 28
+      }
+    },
+    "dispositions": {
+      "read-clean": 5844,
+      "read-candidate": 643,
+      "read-candidate-context": 639,
+      "read-historical-context": 4,
+      "read-historical-exclusion": 3,
+      "read-exclusion": 2
+    }
+  },
+  "remaining": {
+    "total": 6909,
+    "scope": {
+      "external": 3934,
+      "Core": 2975
+    },
+    "category": {
+      "narrative-section-with-complete-examples": {
+        "pending-completed-return": 838
+      },
+      "member-contract-and-implementation": {
+        "pending-completed-return": 4524
+      },
+      "source-context-and-explanations": {
+        "pending-completed-return": 659
+      },
+      "enum-value": {
+        "pending-completed-return": 286
+      },
+      "type-contract": {
+        "pending-completed-return": 465
+      },
+      "whole-source-context-parser-limit": {
+        "pending-completed-return": 2
+      },
+      "configuration-data-or-support-contract": {
+        "pending-completed-return": 87
+      },
+      "structured-map-entry": {
+        "pending-completed-return": 43
+      },
+      "derived-diagram": {
+        "pending-completed-return": 5
+      }
+    },
+    "primary_shared": {
+      "primary": {
+        "pending-completed-return": 5960
+      },
+      "shared": {
+        "pending-completed-return": 949
+      }
+    },
+    "scope_by_assignment": {
+      "primary": {
+        "external": 3038,
+        "Core": 2922
+      },
+      "shared": {
+        "external": 896,
+        "Core": 53
+      }
+    },
+    "dispositions": {
+      "pending-completed-return": 6909
+    }
+  },
+  "remaining_packets": {
+    "B4-windows-support": {
+      "state": "IN-PROGRESS",
+      "primary": 1456,
+      "shared": 894,
+      "counts": {
+        "total": 2350,
+        "scope": {
+          "Core": 1403,
+          "external": 947
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 1158
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 439
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 166
+          },
+          "enum-value": {
+            "pending-completed-return": 286
+          },
+          "type-contract": {
+            "pending-completed-return": 212
+          },
+          "whole-source-context-parser-limit": {
+            "pending-completed-return": 2
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 42
+          },
+          "structured-map-entry": {
+            "pending-completed-return": 40
+          },
+          "derived-diagram": {
+            "pending-completed-return": 5
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 1456
+          },
+          "shared": {
+            "pending-completed-return": 894
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "Core": 1361,
+            "external": 95
+          },
+          "shared": {
+            "external": 852,
+            "Core": 42
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 2350
+        }
+      }
+    },
+    "B5-session-framing": {
+      "state": "IN-PROGRESS",
+      "primary": 893,
+      "shared": 39,
+      "counts": {
+        "total": 932,
+        "scope": {
+          "Core": 898,
+          "external": 34
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 773
+          },
+          "type-contract": {
+            "pending-completed-return": 83
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 49
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 24
+          },
+          "structured-map-entry": {
+            "pending-completed-return": 3
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 893
+          },
+          "shared": {
+            "pending-completed-return": 39
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "Core": 893
+          },
+          "shared": {
+            "external": 34,
+            "Core": 5
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 932
+        }
+      }
+    },
+    "B6-wire-scp": {
+      "state": "IN-PROGRESS",
+      "primary": 668,
+      "shared": 16,
+      "counts": {
+        "total": 684,
+        "scope": {
+          "Core": 674,
+          "external": 10
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 559
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 53
+          },
+          "type-contract": {
+            "pending-completed-return": 55
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 15
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 2
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 668
+          },
+          "shared": {
+            "pending-completed-return": 16
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "Core": 668
+          },
+          "shared": {
+            "Core": 6,
+            "external": 10
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 684
+        }
+      }
+    },
+    "BOUNDARY-Ctap2": {
+      "state": "UNEXECUTED",
+      "primary": 590,
+      "shared": 0,
+      "counts": {
+        "total": 590,
+        "scope": {
+          "external": 590
+        },
+        "category": {
+          "source-context-and-explanations": {
+            "pending-completed-return": 170
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 52
+          },
+          "member-contract-and-implementation": {
+            "pending-completed-return": 345
+          },
+          "type-contract": {
+            "pending-completed-return": 18
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 5
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 590
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 590
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 590
+        }
+      }
+    },
+    "BOUNDARY-Management": {
+      "state": "UNEXECUTED",
+      "primary": 331,
+      "shared": 0,
+      "counts": {
+        "total": 331,
+        "scope": {
+          "external": 331
+        },
+        "category": {
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 71
+          },
+          "member-contract-and-implementation": {
+            "pending-completed-return": 237
+          },
+          "type-contract": {
+            "pending-completed-return": 17
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 5
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 1
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 331
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 331
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 331
+        }
+      }
+    },
+    "BOUNDARY-Oath": {
+      "state": "UNEXECUTED",
+      "primary": 239,
+      "shared": 0,
+      "counts": {
+        "total": 239,
+        "scope": {
+          "external": 239
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 187
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 27
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 5
+          },
+          "type-contract": {
+            "pending-completed-return": 20
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 239
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 239
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 239
+        }
+      }
+    },
+    "BOUNDARY-OpenPgp": {
+      "state": "UNEXECUTED",
+      "primary": 328,
+      "shared": 0,
+      "counts": {
+        "total": 328,
+        "scope": {
+          "external": 328
+        },
+        "category": {
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 27
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 83
+          },
+          "member-contract-and-implementation": {
+            "pending-completed-return": 206
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 5
+          },
+          "type-contract": {
+            "pending-completed-return": 7
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 328
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 328
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 328
+        }
+      }
+    },
+    "BOUNDARY-Piv": {
+      "state": "UNEXECUTED",
+      "primary": 513,
+      "shared": 0,
+      "counts": {
+        "total": 513,
+        "scope": {
+          "external": 513
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 455
+          },
+          "type-contract": {
+            "pending-completed-return": 15
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 37
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 5
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 1
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 513
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 513
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 513
+        }
+      }
+    },
+    "BOUNDARY-SecurityDomain": {
+      "state": "UNEXECUTED",
+      "primary": 193,
+      "shared": 0,
+      "counts": {
+        "total": 193,
+        "scope": {
+          "external": 193
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 133
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 49
+          },
+          "type-contract": {
+            "pending-completed-return": 7
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 4
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 193
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 193
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 193
+        }
+      }
+    },
+    "BOUNDARY-WebAuthn": {
+      "state": "UNEXECUTED",
+      "primary": 265,
+      "shared": 0,
+      "counts": {
+        "total": 265,
+        "scope": {
+          "external": 265
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 128
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 84
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 40
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 4
+          },
+          "type-contract": {
+            "pending-completed-return": 9
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 265
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 265
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 265
+        }
+      }
+    },
+    "BOUNDARY-YubiHsm": {
+      "state": "UNEXECUTED",
+      "primary": 160,
+      "shared": 0,
+      "counts": {
+        "total": 160,
+        "scope": {
+          "external": 160
+        },
+        "category": {
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 26
+          },
+          "member-contract-and-implementation": {
+            "pending-completed-return": 123
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 5
+          },
+          "type-contract": {
+            "pending-completed-return": 6
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 160
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 160
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 160
+        }
+      }
+    },
+    "BOUNDARY-YubiOtp": {
+      "state": "UNEXECUTED",
+      "primary": 324,
+      "shared": 0,
+      "counts": {
+        "total": 324,
+        "scope": {
+          "external": 324
+        },
+        "category": {
+          "member-contract-and-implementation": {
+            "pending-completed-return": 220
+          },
+          "type-contract": {
+            "pending-completed-return": 16
+          },
+          "source-context-and-explanations": {
+            "pending-completed-return": 52
+          },
+          "narrative-section-with-complete-examples": {
+            "pending-completed-return": 31
+          },
+          "configuration-data-or-support-contract": {
+            "pending-completed-return": 5
+          }
+        },
+        "primary_shared": {
+          "primary": {
+            "pending-completed-return": 324
+          }
+        },
+        "scope_by_assignment": {
+          "primary": {
+            "external": 324
+          }
+        },
+        "dispositions": {
+          "pending-completed-return": 324
+        }
+      }
+    }
+  },
+  "prior_four_family_snapshot": {
+    "receipt": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/receipt.json",
+    "receipt_sha256": "f34acec6643c446dd44ff9206164ba27f06cb7d399d481609225736892846ddb",
+    "progress": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/coverage-progress.json",
+    "progress_sha256": "0ba94491bf1791700e2136c4d0397d627a9572693049c39411aec567939ea974",
+    "completed_units": 5573,
+    "remaining_units": 8471,
+    "original_qualification": "Reused only after exact unchanged ledger/packet/inventory input hash checks"
+  },
+  "original_partition": {
+    "reading_population": 14044,
+    "Core": 9020,
+    "external": 5024,
+    "administrative_context": 4544,
+    "outside_scope": 7140
+  },
+  "qualification": {
+    "semantic_state": "Completed investigator read/dispositions only",
+    "independent_review": "PENDING",
+    "editing": "PENDING",
+    "SDK_runtime_verification": "PENDING",
+    "accepted_bug_count": null,
+    "local_candidate_groups_nonadditive": 68,
+    "final_clean_sampling_denominator": null,
+    "sampling": "PENDING dependency/edited-path reconciliation; type, native, rendering, historical and context strata stay explicit",
+    "C": "COMPLETE final 1,562-ID return only; historical partial checkpoints supply no additional count",
+    "active_investigators": [
+      "B4-windows-support",
+      "B5-session-framing",
+      "B6-wire-scp"
+    ],
+    "partial_progress_credited": 0,
+    "boundary_packets": "All nine UNEXECUTED",
+    "Windows": "Late user handoff pending; no unfinished worktree inspection",
+    "PIV": "Physical/touch/hotplug deferral retained",
+    "read_clean_rendering_units_not_clean_prose": 4,
+    "read_native_CSharp_units_not_platform_acceptance": 356
+  },
+  "exclusions": [
+    {
+      "id": "core-001:unit:9fe6da15d252bcd2",
+      "primary_owner": "B1",
+      "state": "read-exclusion/partial-platform-scope",
+      "portable": "B1 source disposition",
+      "macOS": "B3 secondary source disposition supplied; independent review/native execution pending",
+      "Windows": "B4 PENDING",
+      "increment": 0
+    },
+    {
+      "id": "core-001:unit:a9c5253178fb280d",
+      "primary_owner": "B2",
+      "state": "read-exclusion/historical",
+      "reason": "Complete inactive commented LinuxUdevScan read and preserved; current enumeration is LinuxHidInterface.GetList; no source removed"
+    },
+    {
+      "id": "core-001:unit:5999854c6c283498",
+      "primary_owner": "C",
+      "state": "read-historical-exclusion",
+      "path": "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs",
+      "reason": "Complete inactive historical source read and preserved; no active API/runtime claim or cleanup deletion"
+    },
+    {
+      "id": "core-001:unit:34e72a9ea4b5792c",
+      "primary_owner": "C",
+      "state": "read-historical-exclusion",
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "reason": "Complete inactive historical source read and preserved; no active API/runtime claim or cleanup deletion"
+    },
+    {
+      "id": "core-001:unit:1cac6558fefe73a8",
+      "primary_owner": "C",
+      "state": "read-historical-exclusion",
+      "path": "src/Core/src/Utilities/DisposableTlvDictionary.cs",
+      "reason": "Complete inactive historical source read and preserved; no active API/runtime claim or cleanup deletion"
+    }
+  ],
+  "secondary_handoffs": {
+    "record": "investigation/B3/secondary-handoffs.json",
+    "additional_primary_or_shared_count": 0,
+    "B4_instruction_unit": "core-001:unit:7a72c68ab4742b48; B3 callback-paragraph candidate supplied, B4 parent remains pending"
+  },
+  "candidate_associated_unchanged_path_maps": [
+    "investigation/A/file-dispositions.json",
+    "investigation/A/findings.json",
+    "investigation/B1/candidates.md",
+    "investigation/B2/candidate-index.json",
+    "investigation/B3/candidate-associated-paths.json",
+    "investigation/C/unchanged-paths.json"
+  ],
+  "input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/aggregate.py": "43977eb5724f585a89fa992119ce043df295c43ba096d2545d5262bda6711292",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/receipt.json": "f34acec6643c446dd44ff9206164ba27f06cb7d399d481609225736892846ddb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/coverage-progress.json": "0ba94491bf1791700e2136c4d0397d627a9572693049c39411aec567939ea974",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/coverage-progress.md": "b6cf0723279ed5aa56229d5e6c0a29bea80192d7621e1556a162a0c311b27483",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/progress/history/four-family/aggregate.py.snapshot": "a2b8feea043eb1a75e3afe082e512ba0f354f10c8adc5f0f182e3d5b8414608e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/shared-sections.json": "148a865f7883cd0bde059226553c6cb31b7ea80506bd9669d3e60da0ffabdd0e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/A.json": "427fd5833a9a57057a01b556277caf71f5a043820adbe63b0c37485f52712a0c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B.json": "7c8797fc25c763c9921f09ce084c21b217a8cb148186f7d1f8ba438f6c0ea1fe",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B1-portable-lifetimes.json": "55656e7b59892bf30d766322209b62360d65049eabd258a651661f4367139621",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B2-linux-lifetimes.json": "aa364f6920bfd967cd976327bcf0d836c865e98317652d2402ebbcade28e01ea",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B3-macos-lifetimes.json": "87f2675195fdf101b58055c1353da0d2a8b4e0b57c69293665823a408d7bef2b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B4-windows-support.json": "5591684535811520dc9cf6e62e32614e66a77cac9ea5353c31ca428920021244",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B5-session-framing.json": "a35ef40d4e7057660e4a71d00981d6db7f2c0499ceafb08f4f339283666a3a4e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B6-wire-scp.json": "1efb5b24e8e63bf5e5883e053821e0e065ffc48d8d4d0b1ec9a9aa3642487cb6",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Ctap2.json": "1869ddeaed02256155eb155ea16d9985ced562b6a759388d845de5b3fecefc6a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Management.json": "c688144c377edc718aa530296747c13b17695e52ee0140822fbf0612e4e964d8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Oath.json": "b2fe34eeacfa3afe3930a1093061ab5313832aee8e3db47772a1d0d5b6d0d7a5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-OpenPgp.json": "ff2f148e86a7dc6902ec63ffd20eae955f076d7c775e8b1b8c9770dc3ea1d0f6",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Piv.json": "c1b2ff7c1be8c3129eb5626b48cdeee37f9cef6d209617c7b17931436374b6cb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-SecurityDomain.json": "164948e7c21a85786ce6770c7c550574370b1d9a9fafbb587b460ef68bc1e0d9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-WebAuthn.json": "25e426f06bb8dd19af1053a62644133c45f7e997f2ee7dd6dfc055292de92979",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-YubiHsm.json": "21d6b36b4f0bbc366c8d829dcb057450d71f9bd3e836f896ae6c40e8096a1305",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-YubiOtp.json": "45202ed35f53b78220ab3013ff671d34d044e5de28ce80a9ce0d615867de6691",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/C.json": "9ba1809d37186d462f6c554f85766284702e1382fe1b8e9e1cbd4db88d0860d4",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/EXTERNAL.json": "4bca2f06d453b32c879f194b345f8be0a1a6c7367f1a9e0de824e13ccfc1a546",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/SHARED.json": "aeb36d019cc02df35595eb5f097f1116d3c55894bd3c43a1a7da0c2daefcfd17",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/unit-results.json": "23cd7105b3ca3b63c36cd6f5c3233a2bd12916be199fc5f15524cf8a6c6c5fcf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md": "2dcfa9c987390940ad44e90298d91ebcccd4ad009ccea473a2995c9f67e8bc4d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/unit-dispositions.json": "e32aa192931eea2c19830f60ce54f589f26b481ef0b0e14f6cb07412cab26bae",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/coverage-summary.json": "c24fdb6bb28f6b8cfdfa7c9b4a45690ff4686137337044c9cddb8672799b766e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/unit-dispositions.json": "f66eb0888a76c16e610625dd31c92abe65099d87bc100e02182f4bb71b9d45e7",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/coverage-summary.json": "69e3e0109ba76fa363e1e5c01cb94c0b15b62f4d654771275906eb88d6c9fac2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/unit-dispositions.json": "c4663bd4871568df5e9fd6bace72eb90b62262ed170de9f39c1cff3d78291e8d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/coverage-summary.json": "85b5b29cd188e2c00d09da6e592d68223162ed11263982bd1fce664f981e222f",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/secondary-handoffs.json": "9d9b531366dc54493f0e029221f634bc2765538e24579cb982eab524b184a51e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/file-dispositions.json": "74d638d50e7e7a78caeeff5c924b8ee08b2c1880ebb848099448ec237c71c289",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/findings.json": "881d8c0cc6430bc4ece95991d2559bde4b0247b15139436baa9cd4e022622c4e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/candidates.md": "c3e13a8367c793311d056301b37600c7306e97657968d0bd9e50b04e5890c718",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/candidate-index.json": "7da66fce03ea66db43ea4b9d29a9a2d222ad7ba17add74bc8ff6e7f15c002a8f",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/candidate-associated-paths.json": "e7eefb394ea42eae6a33bc309c30e1f7d6017a1c566c35a39d6e6469349a2f81",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/unit-dispositions.json": "40522cf0ef56757479134d8ddd47396347fb3c9fce31ade3ddda4ce4a63d504b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/final-summary.json": "9313a4a138fde88a79eb5b7770cd1f168c1c9b1766e7fca59acd232881cd436a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/clean-nominees.json": "5593db4f1e12f76b7219a8a89040c0cfe85ffef96ea70c5f4ea72f8330039db4",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/unchanged-paths.json": "e8daf89d8082e5ee2bb45197bc9de2d560a421b885653a40f59d91381c1c872a"
+  },
+  "structural_verification": {
+    "result": "PASS",
+    "completed_IDs_consumed_exactly_once": 7135,
+    "missing_or_extra_assigned_IDs": 0,
+    "original_inventory_files_unchanged": 38,
+    "source_and_range_hashes": "All five ledgers joined exactly to original source/range hashes and coordinates; old four-family qualification reused by exact input hashes; C current raw/range hashing and pinned CRLF/LF identity checked",
+    "current_C_source_paths_checked": 135,
+    "prior_four_family_qualified_source_paths": 336,
+    "overlaps": 0,
+    "no_completed_administrative_or_outside_scope_units": true
+  }
+}

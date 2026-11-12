@@ -1,0 +1,6 @@
+
+        ///   using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
+        ///   {
+        ///       // Use the RNG within this disposal scope.
+        ///   }
+        /// 

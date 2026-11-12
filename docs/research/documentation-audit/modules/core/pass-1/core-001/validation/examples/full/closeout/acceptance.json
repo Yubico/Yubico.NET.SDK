@@ -1,0 +1,60 @@
+{
+  "status": "ALL_ELEVEN_FULL_COMPILER_CONTEXTS_ACCEPTED_FINAL_BODY_ASSOCIATIONS_VERIFIED",
+  "authority_records": 703,
+  "selected_full_unique_body_ids": 302,
+  "full_unique_preparations": 300,
+  "full_consumer_sources": 244,
+  "full_test_injection_sources": 56,
+  "full_alias_count": 2,
+  "aliases": [
+    {
+      "body_id": "EXT-234",
+      "canonical_preparation_id": "EXT-204",
+      "context": "Oath.IntegrationTests"
+    },
+    {
+      "body_id": "FULL-238",
+      "canonical_preparation_id": "FULL-211",
+      "context": "Core.UnitTests"
+    }
+  ],
+  "pilot_unique_compilations": 17,
+  "total_unique_compilations": 317,
+  "not_319_explanation": "302 Full body IDs include two explicitly shared same-context preparations. 300 Full unique preparations plus17 pilot unique compilations =317. 319 is not a unique preparation count.",
+  "accepted_contexts": 11,
+  "zero_warning_contexts": 11,
+  "retained_full_local_copies_verified": 208,
+  "retained_full_bytes": 19352598,
+  "pilot_retained_files_separate": 29,
+  "final_admission_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/reviewed-inputs.json",
+    "bytes": 972734,
+    "sha256": "070b721e14ab9ec4d19705301ab2ac3d103bac0f78b9b157cc13b737493a5daf"
+  },
+  "current_body_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/manifest.json",
+    "bytes": 2315007,
+    "sha256": "84e70ceed63320f4ddcf8210c2cf69ebd0a08259d2f39b16923dcfd657c8206b"
+  },
+  "context_plan": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiled-contexts-runner-fixed.json",
+    "bytes": 12202,
+    "sha256": "bde980ff7ae7d73f3407f769469c0306b12857a8a586c61b237af1dc0da06a67"
+  },
+  "current_product_map": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+    "bytes": 104259,
+    "sha256": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b"
+  },
+  "current_product_paths": 363,
+  "changed_body": "FULL-032",
+  "changed_body_acceptance": "Genuine public LoggerFactory documentation fix, actual accepted WA-second Csc; no Core IVT/helper/context workaround.",
+  "other_299_preparations_unchanged": true,
+  "profile_reuse_scope": "Original accepted checkpoints retain their original profiles; current body/source associations checked against exact original Csc inputs. Final070 profile applies to WA/Oath and explicit source admission, not retroactive resealing of prior contexts.",
+  "binary_equivalence_claim": false,
+  "example_or_injected_test_execution": "not-run",
+  "normal_clean_build_pack_tests": "Coordinator-owned and currently proceeding; not polled or certified by this rollup.",
+  "normative_and_physical_qualifications": "All retained; no build/compile proof closes normative edition/profile, native/provider, physical device, PIV, Windows or other deferred qualifications.",
+  "new_build_capture_requalification_tool": "none",
+  "actions_by_this_worker": "Read-only source/immutable JSON/retained-copy hash reconciliation and new closeout records only; no primary product, Git, SDK, native/device or subagent action."
+}

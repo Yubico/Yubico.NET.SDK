@@ -1,0 +1,426 @@
+{
+  "source_count": 300,
+  "duplicate_import_files": [
+    {
+      "path": "host/src/FULL-017.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2,
+        "System.Text": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Credentials": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Ctap2": 2,
+        "Yubico.YubiKit.Ctap2.Credentials": 2,
+        "Yubico.YubiKit.Ctap2.Extensions": 2,
+        "Yubico.YubiKit.Ctap2.Pin": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-155.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Management": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-185.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-097.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Abstractions": 2
+      }
+    },
+    {
+      "path": "injections/Management.IntegrationTests/EXT-206.cs",
+      "duplicates": {
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Tests.Shared": 2,
+        "Yubico.YubiKit.Tests.Shared.Infrastructure": 2,
+        "Xunit": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-099.cs",
+      "duplicates": {
+        "System": 2,
+        "System.Security.Cryptography": 2,
+        "System.Threading": 2,
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-095.cs",
+      "duplicates": {
+        "System": 2,
+        "System.Runtime.InteropServices": 2,
+        "System.Security.Cryptography": 2,
+        "System.Threading": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-186.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-100.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Microsoft.Extensions.Logging": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-413.cs",
+      "duplicates": {
+        "System.Threading": 2,
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Transports.SmartCard": 2
+      }
+    },
+    {
+      "path": "injections/Management.IntegrationTests/EXT-227.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Scp": 2,
+        "Yubico.YubiKit.Tests.Shared": 2,
+        "Yubico.YubiKit.Tests.Shared.Infrastructure": 2,
+        "Xunit": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-089.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Ctap2": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-196.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Piv": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-351.cs",
+      "duplicates": {
+        "System": 2,
+        "System.Runtime.InteropServices": 2,
+        "System.Security.Cryptography": 2,
+        "System.Security.Cryptography.X509Certificates": 2,
+        "System.Threading": 2,
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Utilities": 2,
+        "Yubico.YubiKit.Core.Cryptography": 2,
+        "Yubico.YubiKit.OpenPgp": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-198.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Credentials": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-296.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Cryptography": 2,
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Scp": 2,
+        "Yubico.YubiKit.SecurityDomain": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-164.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Transports.SmartCard": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-236.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Cryptography": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-094.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core": 2,
+        "Microsoft.Extensions.Logging": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-193.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2,
+        "Yubico.YubiKit.Core.Utilities": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-066.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-287.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Management": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-378.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2,
+        "System.Security.Cryptography.X509Certificates": 2,
+        "System.Text": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Credentials": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Cryptography": 2,
+        "Yubico.YubiKit.Piv": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-087.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-328.cs",
+      "duplicates": {
+        "System": 2,
+        "System.Collections.Generic": 2,
+        "System.Runtime.InteropServices": 2,
+        "System.Security.Cryptography": 2,
+        "System.Text": 2,
+        "System.Threading": 2,
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Credentials": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.YubiOtp": 2,
+        "Yubico.YubiKit.Core.Transports.Hid.Keyboard": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-181.cs",
+      "duplicates": {
+        "System": 2,
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-415.cs",
+      "duplicates": {
+        "System.Threading": 2,
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Transports.SmartCard": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-112.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-310.cs",
+      "duplicates": {
+        "System": 2,
+        "System.Collections.Generic": 2,
+        "System.Linq": 2,
+        "System.Security.Cryptography": 2,
+        "System.Text": 2,
+        "System.Threading": 2,
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Credentials": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Oath": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-341.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Credentials": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.YubiHsm": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-076.cs",
+      "duplicates": {
+        "System": 2,
+        "System.Threading": 2,
+        "System.Threading.Tasks": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Scp": 2
+      }
+    },
+    {
+      "path": "injections/Management.IntegrationTests/FULL-138.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Tests.Shared.Infrastructure": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-187.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-414.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Transports.SmartCard": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-083.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/EXT-081.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-218.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Transports.SmartCard": 2,
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu": 2,
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Scp": 2,
+        "Yubico.YubiKit.Piv": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-202.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core": 2,
+        "Microsoft.Extensions.Logging": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-197.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Credentials": 2,
+        "Yubico.YubiKit.Piv": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-195.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-040.cs",
+      "duplicates": {
+        "System.Buffers": 2,
+        "System.Security.Cryptography": 2,
+        "System.Text": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Credentials": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Core.Utilities": 2,
+        "Yubico.YubiKit.Ctap2.Cose": 2,
+        "Yubico.YubiKit.Ctap2.Credentials": 2,
+        "Yubico.YubiKit.WebAuthn": 2,
+        "Yubico.YubiKit.WebAuthn.Client": 2,
+        "Yubico.YubiKit.WebAuthn.Client.Authentication": 2,
+        "Yubico.YubiKit.WebAuthn.Client.Registration": 2,
+        "Yubico.YubiKit.WebAuthn.Extensions": 2,
+        "Yubico.YubiKit.WebAuthn.Extensions.Inputs": 2,
+        "Yubico.YubiKit.WebAuthn.Preferences": 2
+      }
+    },
+    {
+      "path": "injections/Core.UnitTests/FULL-142.cs",
+      "duplicates": {
+        "Xunit": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Transports.SmartCard": 2
+      }
+    },
+    {
+      "path": "injections/Core.UnitTests/FULL-060.cs",
+      "duplicates": {
+        "Xunit": 2,
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-272.cs",
+      "duplicates": {
+        "System.Security.Cryptography": 2,
+        "Yubico.YubiKit.Core": 2,
+        "Yubico.YubiKit.Core.Abstractions": 2,
+        "Yubico.YubiKit.Core.Devices": 2,
+        "Yubico.YubiKit.Core.Sessions": 2,
+        "Yubico.YubiKit.Management": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-151.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core": 2,
+        "Yubico.YubiKit.Core.Devices": 2
+      }
+    },
+    {
+      "path": "host/src/FULL-153.cs",
+      "duplicates": {
+        "Yubico.YubiKit.Core.Transports.SmartCard": 2,
+        "Yubico.YubiKit.Core.Transports.Hid": 2
+      }
+    }
+  ],
+  "invalid_namespace_counts": {
+    "Yubico.YubiKit.Ctap2.Ctap": 37,
+    "Yubico.YubiKit.Core.Cryptography.CryptographicDefinitions": 1
+  },
+  "source_namespace_count": 223
+}

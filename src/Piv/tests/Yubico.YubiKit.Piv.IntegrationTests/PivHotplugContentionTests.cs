@@ -24,18 +24,15 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         The risk this effort owns is not that the operation fails — of course it fails, the card is gone.
-///         It is that the grouped physical-key lease could be STRANDED. The lease is released in the connection's
-///         disposal path, and there is deliberately no finalizer backstop, so if removal made disposal hang
-///         or throw before the release, the physical key would stay marked in-use for the process lifetime and
-///         every later open would be refused with <c>ConnectionInUseException</c> — on a key the user has
-///         already plugged back in.
+///         Exercises removal failure, connection disposal and a later open. Checked native teardown releases
+///         the grouped physical-key claim only with release proof; uncertain release can retain/quarantine it.
+///         Best-effort native finalization is not deterministic session or connection cleanup.
 ///     </para>
 ///     <para>
-///         The test therefore asserts three things after the operator pulls the key: the in-flight API fails
-///         within a bounded window rather than hanging, disposal still completes, and a subsequent connect
-///         attempt reports something OTHER than <c>ConnectionInUseException</c>. That last assertion is the
-///         real content: it distinguishes "device is gone" from "we stranded our own lease".
+///         The poll accepts any read exception, then awaits disposal and checks that a later open does not
+///         report ConnectionInUseException. It does not independently identify removal as the failure cause
+///         or observe native release. A token is not a native I/O deadline, and the polling window is checked
+///         between awaits. The existing reopening expectation needs separate review for unproven release.
 ///     </para>
 ///     <para>
 ///         Requires a human to remove the key during execution, so it is marked
@@ -68,7 +65,8 @@ public class PivHotplugContentionTests
         }
         finally
         {
-            // Must complete even though the card vanished; this is what releases the physical-key lease.
+            // Await checked teardown. Its outcome is separate from proof of native release;
+            // an uncertain release can retain the original claim rather than permit an unsafe reopen.
             await connection.DisposeAsync();
         }
 
@@ -77,8 +75,8 @@ public class PivHotplugContentionTests
             $"The key was not removed within {RemovalWindow.TotalSeconds:F0}s, so this run proves nothing. " +
             "Re-run and physically unplug the key while it is executing.");
 
-        // The lease must be gone. A second open may fail because the device is absent, but it must never
-        // fail because this process still believes it holds the physical key.
+        // Retain this test's existing no-ConnectionInUse expectation. It does not establish a general
+        // unconditional-release policy; genuinely unproven native release has a different recovery boundary.
         var reopen = await Record.ExceptionAsync(async () =>
         {
             await using var second = await state.Device.ConnectAsync<ISmartCardConnection>();
@@ -91,8 +89,8 @@ public class PivHotplugContentionTests
     }
 
     /// <summary>
-    ///     Calls a cheap PIV read until it fails (the key was pulled) or the window expires. Returns the
-    ///     failure, or <see langword="null" /> if the key was never removed.
+    ///     Calls a PIV serial read until any exception or the between-await window check expires.
+    ///     Returns that exception, or null if no read failed; a failure alone does not identify physical removal.
     /// </summary>
     private static async Task<Exception?> PollUntilRemovedAsync(PivSession session)
     {
@@ -100,7 +98,8 @@ public class PivHotplugContentionTests
 
         while (DateTime.UtcNow < deadline)
         {
-            // Bound each attempt so a wedged native call surfaces as a hang we can see, not an infinite wait.
+            // Expiry can prevent exchange admission; it does not interrupt an admitted native call
+            // or bound its completion. The loop's deadline is checked only after awaited work returns.
             using var attemptTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             var failure = await Record.ExceptionAsync(

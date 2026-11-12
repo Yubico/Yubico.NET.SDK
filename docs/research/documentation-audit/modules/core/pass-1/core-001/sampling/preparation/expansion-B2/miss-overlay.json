@@ -1,0 +1,41 @@
+[
+  {
+    "id": "core-001:unit:2ab3cc1db2ed4269",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "coordinator_finding": "SAMPLE-B2-001",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict": "DOCUMENTATION-MISS",
+    "coordinator_note": "SAMPLE-B2-001: void shutdown signal attempts may no-op or log failed/short writes; indefinite poll wake/loop completion is not acknowledged. Related bounded-exit wording requires scope qualification.",
+    "final_clean_credit": 0,
+    "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+    "range_sha256": "4d95c55a7f81e7e80c8b071e54bb55bfd4a720bcb01b2d28c6b4e8060d8d437f",
+    "correction": "Transport editor verifying/correcting comments only; final accepted correction overlap/review remains pending."
+  },
+  {
+    "id": "core-001:unit:7a90c15f7fb4a767",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "coordinator_finding": "SAMPLE-B2-001",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict": "DOCUMENTATION-MISS",
+    "coordinator_note": "SAMPLE-B2-001: void shutdown signal attempts may no-op or log failed/short writes; indefinite poll wake/loop completion is not acknowledged. Related bounded-exit wording requires scope qualification.",
+    "final_clean_credit": 0,
+    "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+    "range_sha256": "52059f37083dfb05e60717748db08dba1c00c4b64bd0bc812c5db8e508d34e92",
+    "correction": "Transport editor verifying/correcting comments only; final accepted correction overlap/review remains pending."
+  },
+  {
+    "id": "core-001:unit:5c0f333d06ef9126",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "coordinator_finding": "SAMPLE-B2-002",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "coordinator_verdict": "DOCUMENTATION-MISS",
+    "coordinator_note": "SAMPLE-B2-002: event-source factory runs for a new listener-session attempt, not every Start invocation; already-started guard returns first.",
+    "final_clean_credit": 0,
+    "source_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+    "range_sha256": "2207b51f3945973ef6872a1b6489728942394f5e49b8cd1b1aa2156f04ee9513",
+    "correction": "Transport editor verifying/correcting comments only; final accepted correction overlap/review remains pending."
+  }
+]

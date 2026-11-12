@@ -1,0 +1,47 @@
+{
+  "scope": "Static exact package/archive/assets/import/source-admission proof; no capture phase, build or test execution.",
+  "included_contexts": [
+    "Core.IntegrationTests",
+    "Ctap2.IntegrationTests",
+    "Management.IntegrationTests",
+    "Oath.IntegrationTests",
+    "Piv.IntegrationTests",
+    "SecurityDomain.IntegrationTests",
+    "WebAuthn.IntegrationTests"
+  ],
+  "excluded_contexts": [
+    "Core.UnitTests",
+    "Ctap2.UnitTests",
+    "consumer"
+  ],
+  "negative_cases_rejected": [
+    "GenerateProgramFile",
+    "GeneratedProgramFile",
+    "NuGetPackageRoot",
+    "Language",
+    "wrong-package-content-hash",
+    "wrong-package-path",
+    "source-absent-from-assets",
+    "producer-absent-from-assets",
+    "foreign-project-assets",
+    "producer-import-wrong-version",
+    "producer-import-condition-weakened",
+    "excluded-project"
+  ],
+  "source_sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a",
+  "producer_sha256": "93e2c4a4e08fa8db6af3b5907205741ad5184e642181bfdbe949c5109e19aa2f",
+  "archive_sha512": "cfpn4IW0Q+emID8eUocS7xfmwwYgD/JX5S+zCZA2l7gcYzxZ1vvfcdZHcKkuzCH4gMbBYqcZqtBn9uZa0WJRUg==",
+  "package_metadata_content_hash": "WNpu6vI2rA0pXY4r7NKxCN16XRWl5uHu6qjuyVLoDo6oYEggIQefrMjkRuibQHm/NslIUNCcKftvoWAN80MSAg==",
+  "hash_roles_not_conflated": true,
+  "package_source_observed_in_failed_before_items": true,
+  "qualified_kernel_parser_and_exact_csc_membership_unchanged": true,
+  "generated_sources_and_manifest_unchanged": 300,
+  "prior_accepted_compilation_shas": [
+    "e044ba23cd4a0a55caa6cf0679716c6aba98c15f82adc292e05361bdf186c357",
+    "9ff6235c1c8c077d7767f14f2a53f125b9b591a074eca42ace60725652d77e8a",
+    "097d83207ee0bd098cd42fb862b2f91fa318f955ff762e24d1f8880c08d637c8"
+  ],
+  "failed_attempt_identities_preserved": 19,
+  "effective_policy_qualification": "Positive metadata cases use explicit synthetic expected policy; actual effective GenerateProgramFile/GeneratedProgramFile/NuGetPackageRoot/Language are newly observed and required at coordinator retry.",
+  "actual_retry": "Pending focused review and examples-full-ctap-integration-second; no new Csc acceptance or runtime claim."
+}

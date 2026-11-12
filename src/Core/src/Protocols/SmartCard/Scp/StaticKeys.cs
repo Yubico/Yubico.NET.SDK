@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 /// <summary>
 ///     Manages static SCP03 keys and derives session keys from them.
 /// </summary>
+/// <remarks>
+///     Construction clones the supplied key bytes. Dispose zeroes only those owned arrays; the caller clears
+///     source buffers separately. Existing Enc/Mac/Dek views then expose zeroed storage. Derivation produces
+///     AES-128 S-ENC, S-MAC, and S-RMAC from host || card challenge, while the optional DEK is copied unchanged.
+/// </remarks>
 public sealed class StaticKeys : IDisposable
 {
     // Key Derivation Constants
@@ -78,7 +83,7 @@ public sealed class StaticKeys : IDisposable
 
 
     /// <summary>
-    ///     Releases the resources used by this instance and securely zeroes all key material.
+    ///     Zeroes this instance's owned key arrays, leaving caller source storage unchanged.
     /// </summary>
     public void Dispose()
     {
@@ -133,8 +138,7 @@ public sealed class StaticKeys : IDisposable
             DeriveKey(_mac, DerivationTypeSMac, context, SessionKeyLengthBits, smac);
             DeriveKey(_mac, DerivationTypeSRMac, context, SessionKeyLengthBits, srmac);
 
-            // DEK is NOT derived - it's passed through as-is (used for PUTKEY operations)
-            // This matches the Java implementation
+            // SessionKeys copies the unchanged DEK for key-data encryption, independently of the derived keys.
 
             return _dek is not null
                 ? new SessionKeys(senc, smac, srmac, _dek)

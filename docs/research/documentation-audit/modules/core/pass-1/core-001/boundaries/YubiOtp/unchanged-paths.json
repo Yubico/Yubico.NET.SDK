@@ -1,0 +1,1425 @@
+[
+  {
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "candidates": [
+      "CORE-OTP-X001"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      }
+    ],
+    "sha256": "0dba03bde9f77cd59de9dc118f1ab621d0712439fb0e9ddd136492f3ffb97a60"
+  },
+  {
+    "path": "docs/architecture/physical-device-model.md",
+    "candidates": [
+      "CORE-OTP-X001"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      }
+    ],
+    "sha256": "b38d5053935ca3e26cc2821c0487e7dbf43bc764eb6bc1b11cc2156b6911a482"
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "candidates": [
+      "CORE-OTP-X001"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      }
+    ],
+    "sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5"
+  },
+  {
+    "path": "docs/migration/v1-to-v2-gaps.md",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "827ced7b8e4055b98b2cc2b1738086494437c169ba88e92af3ee27488fac177a"
+  },
+  {
+    "path": "docs/migration/v1-to-v2-map.yml",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1"
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "candidates": [
+      "CORE-OTP-X005",
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X005",
+        "condition": "Change to configuration assembly or validation order, source/config/result cleanup, or CLI code-parser exception scopes."
+      },
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280"
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "candidates": [
+      "CORE-OTP-X006"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      }
+    ],
+    "sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831"
+  },
+  {
+    "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "candidates": [
+      "CORE-OTP-X005",
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X005",
+        "condition": "Change to configuration assembly or validation order, source/config/result cleanup, or CLI code-parser exception scopes."
+      },
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "ed6ba5d91314eb226d83fac9724ff2d4b22fcf1caa7332bd516e30d6d1d83bb9"
+  },
+  {
+    "path": "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/AuditV2/CliStaticPasswordEncodingTests.cs",
+    "candidates": [
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "f77133a44338ad83eb48a55289c64dff1d840b4df49f07ed8475c307c06e27ae"
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "candidates": [
+      "CORE-OTP-X002"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      }
+    ],
+    "sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e"
+  },
+  {
+    "path": "src/Core/README.md",
+    "candidates": [
+      "CORE-OTP-X002"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      }
+    ],
+    "sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a"
+  },
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "candidates": [
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "candidates": [
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1"
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "75f07413d79f617a6a4be26081d02840abb6a57caabeb69a25e438718d43fa70"
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "candidates": [
+      "CORE-OTP-X006"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      }
+    ],
+    "sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7"
+  },
+  {
+    "path": "src/Core/src/Devices/FirmwareVersion.cs",
+    "candidates": [
+      "CORE-OTP-X006"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      }
+    ],
+    "sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be"
+  },
+  {
+    "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+    "candidates": [
+      "CORE-OTP-X001"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      }
+    ],
+    "sha256": "29ca3ec49bf3333417b8a1fcb9d967e10bbb4b085c9f0eacc65fce755d1586d7"
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "candidates": [
+      "CORE-OTP-X001"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      }
+    ],
+    "sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f"
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyDevice.cs",
+    "candidates": [
+      "CORE-OTP-X001"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      }
+    ],
+    "sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607"
+  },
+  {
+    "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+    "candidates": [
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "0c877aeab9d9cb6134ce2fbf50197a16efde08c47fcd9ed7c04bd7e4c9e3a1e7"
+  },
+  {
+    "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+    "candidates": [
+      "CORE-OTP-X002",
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      },
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "d7f8d23c30e78350a45267e116672064e8e26c4778b0a268a80d8bbbec047aa4"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "candidates": [
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+    "candidates": [
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+    "candidates": [
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78"
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "candidates": [
+      "CORE-OTP-X006"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      }
+    ],
+    "sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67"
+  },
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "candidates": [
+      "CORE-OTP-X001",
+      "CORE-OTP-X004"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      },
+      {
+        "candidate": "CORE-OTP-X004",
+        "condition": "Change to one-shot result retention/transfer/zeroing when hidden-session teardown fails after successful calculation."
+      }
+    ],
+    "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced"
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+    "candidates": [
+      "CORE-OTP-X002"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      }
+    ],
+    "sha256": "fe9e2e88d6657dd21e15a335fde9f679d1a2f9025e1f65df24d35b06accb78cf"
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+    "candidates": [
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "f31205b72ec5b7591b0fb24a1a499c54b9fa81a9323e8c0d3cebd112247f4006"
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+    "candidates": [
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "f2664b4d2f50d043a45514e3e495c66bd333376e1347e294a4fc3a973def8ca9"
+  },
+  {
+    "path": "src/Management/src/DeviceConfig.cs",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "f0eb2e575ec32fe4ed175a546c137e04aaae954ce081d6f9fc2ab409d923a4b4"
+  },
+  {
+    "path": "src/Management/src/IManagementSession.cs",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "b35858944a645276e2e023bcb971be503ef250e211c85553d4bf77588f11df9f"
+  },
+  {
+    "path": "src/Management/src/ManagementSession.cs",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Retain current product bytes. This is a dependency/reopening path for the exact local candidate, not an accepted full-file clean outcome or edit. Reopen after the candidate-specific behavior/ownership/provenance decision in candidates.md; shared Core mechanisms retain A/B/C ownership and shared prose has one future SHARED editor.",
+    "owner": "Owning Core family, CLI/Management boundary, or future SHARED editor",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "36f879ea7d703e78c69d0f02b97a24c752301eab4dce02b0164fa1d9f5aadfe9"
+  },
+  {
+    "path": "src/YubiOtp/CLAUDE.md",
+    "candidates": [
+      "CORE-OTP-X002",
+      "CORE-OTP-X009"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "The contributor guide preserves backend borrowing, prepare/read/configure/create ordering, raw versus effective firmware, CRC-prefix responsibility, SmartCard trigger heuristic and existing applet limitations. Its initialization discussion needs the two HID reads and NEO refresh qualification from X002; current no-disposable-backend guidance remains useful.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      },
+      {
+        "candidate": "CORE-OTP-X009",
+        "condition": "Change to named test setup/assertions/failure cleanup/independent oracles, or arrival of exact source-bound platform/device execution evidence."
+      }
+    ],
+    "sha256": "e0f34a0379b9a3a1146d85425c5c08a16cf7e6953101b816d15c21e75a590f72"
+  },
+  {
+    "path": "src/YubiOtp/PACKAGE_README.md",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The package page describes the two-slot application, distinguishes stored OATH credentials and links the task guide. It makes no transport parity, cancellation, support-matrix or all-copy erasure promise. Retain the alpha qualification and links.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "2c763883c8590fe486807cde76b967e52596f5b9520aa91375ff66d3a6a427cc"
+  },
+  {
+    "path": "src/YubiOtp/README.md",
+    "candidates": [
+      "CORE-OTP-X001",
+      "CORE-OTP-X003",
+      "CORE-OTP-X004",
+      "CORE-OTP-X006",
+      "CORE-OTP-X007",
+      "CORE-OTP-X009"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Complete examples use separate awaited session scopes, caller-owned keys/results and finally cleanup. Provisioning is explicitly application-dependent. Existing marker, NDEF, scan-map, IMF, update-mask and SmartCard heuristic qualifications remain accurate for their stated scope. Reopen Constraints for known-member/process bounds, per-exchange versus workflow lifetime, and one-shot teardown-failure output ownership; initialization needs the two-report provenance detail. Historical one-key device evidence remains narrower than all firmware/platform support.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      },
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      },
+      {
+        "candidate": "CORE-OTP-X004",
+        "condition": "Change to one-shot result retention/transfer/zeroing when hidden-session teardown fails after successful calculation."
+      },
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      },
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      },
+      {
+        "candidate": "CORE-OTP-X009",
+        "condition": "Change to named test setup/assertions/failure cleanup/independent oracles, or arrival of exact source-bound platform/device execution evidence."
+      }
+    ],
+    "sha256": "5ba4557b704e023e231e09208f584cdf8bbf1dc8753f8d437d8558ef2ff32eba"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/CliOptions.cs",
+    "candidates": [
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "The parser retains immutable option strings; command-specific positional parsing precedes a global switch. Layout is parsed but unused by this standalone static command; calculate requires a challenge despite help. JSON bypasses confirmation, Totp only sets flags, and help literals still promise compatibility. Existing comments disclose these sample-owned limitations; runtime/help changes remain OTP-IMP-010, not a Core reader bug.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "0416f55338f04e565dfdbfa17a8adfad1c77efdb76528ad1b04c44558a8c7137"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The sample owns parsed challenge, awaits default session creation and calculation, prints challenge/response, then clears only challenge. Returned response and generated strings survive. DeviceHelper supplies no explicit HID or prompt. Preserve OTP-IMP-003/010 and the existing warning; successful output cleanup must also consider X003/X004 lower and outer owners.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "b92e64f18935cf39e3bad8b81bfa66f5b50d1581a89712a036ebd6c626430093"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs",
+    "candidates": [
+      "CORE-OTP-X005"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Generated or decoded HMAC key precedes access-code parsing and the try. Invalid access-code text can strand the key; normal finally clears both arrays. The config has a using scope, default session is owned, touch/Totp set flags only and omitted replacement code can remove protection. These are retained applet/sample concerns, not a shared Core encoding defect.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X005",
+        "condition": "Change to configuration assembly or validation order, source/config/result cleanup, or CLI code-parser exception scopes."
+      }
+    ],
+    "sha256": "be1bd6b479af7d14b5c8b10a4928bee1cbc3d8959d98427ef577f8a6302e0122"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/DeleteCommand.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The command parses one current code, confirms except in Force/JSON, awaits an owned session and deletion, then clears the code in finally. It has no new-code retention ambiguity because this operation deletes the slot. Normal resource scope is complete; confirmation and output policy remain sample-owned OTP-IMP-010.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "2eb5facfeab1b0c5e03602ab3997600fe769e6f4e3fb27a1c79b9c79bf5cdb66"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/HotpCommand.cs",
+    "candidates": [
+      "CORE-OTP-X005"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "HMAC key acquisition and human output precede access-code parsing/try; normal finally clears both arrays. The config encodes the supplied IMF and digit flag, and default session selection is explicit through DeviceHelper. Existing comments retain erroneous nonzero IMF scale, verifier ownership and omitted-new-code consequences. Preserve OTP-IMP-001/003/007/010.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X005",
+        "condition": "Change to configuration assembly or validation order, source/config/result cleanup, or CLI code-parser exception scopes."
+      }
+    ],
+    "sha256": "10171edc0c87b73d830fbc12f7a8e0008388775a9ef897a3eaf085b485a714e9"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/InfoCommand.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The command creates one owned session and formats its cached ConfigState. Human mode catches old-firmware accessor exceptions into N/A; JSON preserves unknown values as null subject to omission. It displays raw OTP status version and keyboard-trigger bits, not challenge policy or a live metadata refresh. No secret reader or translator participates.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "83039cd35c4207b9646513b60cd35a00baa9c7e551d53c8d05bcf92b5459631d"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/NdefCommand.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "CLI validates only its URI/TEXT enum selection, parses current code, owns one session, awaits write and clears code. The optional prefix can be null and sends the SDK all-zero disable block. It has no NFC reader or post-write output oracle. Existing hardware/byte-limit/disable qualifications retain OTP-IMP-008 scope.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "d1e090ad356b2283325846fd71292cc8dd923acbf12e95495055a6203c99e900"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/SettingsCommand.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "A fresh UpdateConfiguration sends full masked values; NoEnter leaves AppendCr already false and pacing selects one bit. Current code authenticates but omitted new code can remove protection. Session/config/code cleanup is scoped in try/finally. Preserve OTP-IMP-007/010 rather than recasting this as Core patch semantics.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "f68393918adb0b8f1390acdc9c58d1d2bc54b49bc48b4bfa18deab613f4119b0"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/StaticCommand.cs",
+    "candidates": [
+      "CORE-OTP-X005",
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "The standalone sample generates or accepts an immutable password, encodes UTF-8 bytes and passes the raw scan-code constructor; KeyboardLayout never participates. Access-code parsing occurs before the cleanup try and can strand scanCodes. Normal finally clears scanCodes/code, while generated string, StringBuilder and printed password remain separate. Core's working translator and credential reader do not execute here; preserve OTP-IMP-003/009/010.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X005",
+        "condition": "Change to configuration assembly or validation order, source/config/result cleanup, or CLI code-parser exception scopes."
+      },
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "c1500d389c4c1b6b140d1dabf09e171db3ef6426a852248f0ed0c2e5aaeae3c6"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/SwapCommand.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Swap confirms except Force/JSON, creates one owned session and awaits swap. It ignores a globally parsed code; SDK swap has no code argument. Both slots change and no restoration is attempted. Existing commentary correctly scopes permissions, effects and sample behavior.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "e3a6d1678c8a155943d4699335642e9794222b9687caa32114b3ecb16399768b"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Commands/YubiOtpCommand.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The command parses access code before other secret acquisition; private ID and AES key acquisition are inside try. Finally clears key/private ID/code after session/config disposal. Serial-based public ID is nonsecret and remains independent. Human provisioning output deliberately reveals generated secrets, JSON omits them, and current-code-only programming can remove protection. These facts retain applet/sample ownership.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "8b47933a84381b2ae5a036454cee74a3bf03358344198f9dfe5169cf6d8cb49a"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The selector filters grouped views by SmartCard/HidOtp and prefers the first transport noninteractively, but the eventual factory separately selects the SDK default without copying a selector transport. Those orders currently agree. Selection metadata supplies display information only. The returned session owns its hidden connection; no prompt or credential reader is installed.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "861f44c0cbb9384b812f8ebdd0435d6e538d64c7e1d8e7f43552302ab7444414"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The executable references YubiOtp, Core, Management, Cli.Shared and Cli.Commands plus Hosting/Spectre packages. It is not packable and suppresses only the stated example analyzer. Source membership/compile and Native AOT execution remain unrun; a project reference to the fixed unified CLI does not make standalone StaticCommand call that implementation.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "1085ebedfad2fc0669bab7c600a4ac962cec36d3c237e9f0ff1801ee6f936028"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/OutputHelper.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Formatting escapes markup labels/text but intentionally emits requested hex/JSON values. ParseHex returns independent bytes or throws with the original input embedded in an ArgumentException; immutable text and stderr capture retain secrets. No ConsoleCredentialReader, disposable credential owner, central redactor or prompt integration is supplied.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "824ccca3e2f76bebd0ccc9256dfbfb31a8ab2de4b1964170e8fbe6f126241cca"
+  },
+  {
+    "path": "src/YubiOtp/examples/OtpTool/Program.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "CommandHelper owns the console CTS; the top-level task awaits the dispatched command before disposing it. Argument/InvalidOperation errors go to stderr, OperationCanceledException returns zero, and other exception types propagate. Cancellation of this token supplies no rollback or proof of native release. All resource-bearing command tasks remain awaited.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "e48594ea1cdcb4b25ccd1fb2255afc0d2111e5f996c9c82ce9eb8133e4085081"
+  },
+  {
+    "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+    "candidates": [
+      "CORE-OTP-X002",
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "ReadInitialState awaits Core status then prefers protocol.FirmwareVersion from the earlier initialization report. Data calls pass the same notification, require expected length plus two bytes, validate CRC over that prefix and return a view, accepting excess. Backend resolves Completed before transfer and clears its full response view on validation/terminal-callback failure under ordinary logging. Core incoming report arrays and Windows native-ID staging are separate owners; one-shot teardown is later still. WriteUpdate checks only six-byte minimum because Core handles sequence completion.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      },
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "663e4b8c7496f3fd6074550d689844b854f1640f61fb5f92f9e1abf4ed202a1e"
+  },
+  {
+    "path": "src/YubiOtp/src/Backend/IYubiOtpBackend.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The operational interface has two primitives and no IDisposable; initialization is a record containing a firmware reference and status view. Backends borrow protocols; this means absence of retained disposable state, not absence of temporary response ownership inside an operation. Session owns protocol and connection creation determines connection disposal.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "4f0e5bf874cd54316e73b23e13163de03546b49694551e3385830ab144b8a3fa"
+  },
+  {
+    "path": "src/YubiOtp/src/Backend/SmartCardBackend.cs",
+    "candidates": [
+      "CORE-OTP-X001",
+      "CORE-OTP-X003",
+      "CORE-OTP-X006"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Initialization probes Management on USB and NFC, catches non-cancellation probe failures, requires six OTP SELECT bytes, and chooses Management unless raw OTP major is three and OTP compares higher. Operational APDUs use INS 01/P1 command; a short write starts a separate INS 03 exchange, with permissive sequence rules. Data calls request presence before exchange admission, accept expected prefixes and resolve before transfer. Returned data aliases ApduResponse-owned bytes; raw transport copies/status tails and B6 fragment/SCP temporaries have separate lifetimes.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      },
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      },
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      }
+    ],
+    "sha256": "dcf197b6cd374aa2abe0ff6b0c9cec1b696ebb547ea502f696addd6759a4b62f"
+  },
+  {
+    "path": "src/YubiOtp/src/ConfigFlag.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Mode-dependent aliases share numeric bits. The update mask contains keyboard pacing bits; it does not authorize changing HMAC short/touch policy. Present remarks preserve firmware-specific applicability rather than general support. No Core catalog can validate an applet configuration selected by these bytes.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "fe677ef04a9f9077798d651e66acb82b28b400e0a7dafa99906676b2c0fe0964"
+  },
+  {
+    "path": "src/YubiOtp/src/ConfigSlot.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The enum is command identity, not just slot number: configuration/update/NDEF/serial/map/HMAC/AES values become HID frame command or SmartCard P1. Its absence of device-info/legacy/FIPS operations matters to the typed public-surface relocation inventory, not raw transport capability.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "79d6b7ec6db9f2ce0be957296147c9bf443c360d8d66da3bb22474685089b45d"
+  },
+  {
+    "path": "src/YubiOtp/src/ConfigState.cs",
+    "candidates": [
+      "CORE-OTP-X006"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "The constructor copies version scalars into FirmwareVersion and decodes touch flags little-endian; it retains no status-memory alias. Accessors gate against raw status version with major-zero allowance. Trigger flags describe keyboard activation, not RequireTouch. Default struct construction leaves FirmwareVersion null; callers in reviewed session paths construct from status, and default-value hardening is a separate applet representation question rather than a new boundary acceptance.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      }
+    ],
+    "sha256": "0e774dc1d8df261096bea16951fd776c90b3715414edaf6926e61701dfab6fb8"
+  },
+  {
+    "path": "src/YubiOtp/src/ExtendedFlag.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Flags and complete update mask match local encoding; comments retain serial merge, legacy version applicability and AllowUpdate clearing consequence. These are slot configuration settings, separate from Core DeviceFlags and Management application masks.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "86cd1422423ec1778c9a16cfa92abbdc0c17fe42fcf68cd96c8a1109e1b7118a"
+  },
+  {
+    "path": "src/YubiOtp/src/HmacSha1SlotConfiguration.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "An exact 20-byte key is split by SetHmacKey, mode bits enable short challenges by default, RequireTouch toggles its alias and type minimum is 2.2.0. Minimum-one-byte marker prose retains supplied-vector/target-firmware qualification; no new crypto/device result is inferred. Copies belong to the config until disposal.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "9e6228dd64951a2dc355b52f75527c9c5f8435e559d75d1d3ad2ce4e9d15a8b6"
+  },
+  {
+    "path": "src/YubiOtp/src/HotpSlotConfiguration.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Constructor validates the existing erroneous 0x10000 multiple and stores quotient in UID tail. Type minimum is 2.1.0, TokenId copies fixed bytes and toggles modhex bits. Existing comments truthfully retain OTP-IMP-001/006; tests using this divisor are current-behavior oracles, not vendor correctness.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "390027311d79e5e52cece6656dafa86dae035cd52a891c6577ebf10f1601f2fe"
+  },
+  {
+    "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+    "candidates": [
+      "CORE-OTP-X001",
+      "CORE-OTP-X004"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "All one-shots await an owned hidden session and disposal. Factory selects exactly one exposed SmartCard/HidOtp route, SCP with absent preference forces SmartCard, copies options with concrete assertion, and transfers ownership only after initialization success. CalculateHmac returns its evaluated successful result only after await-using teardown; a disposal failure can strand that result before caller transfer. Caller configuration and input buffers remain borrowed.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      },
+      {
+        "candidate": "CORE-OTP-X004",
+        "condition": "Change to one-shot result retention/transfer/zeroing when hidden-session teardown fails after successful calculation."
+      }
+    ],
+    "sha256": "cdf2f0f475212ad45112adee839fc6fd63811a0d8200aef5ebdd0bc604ddc8e9"
+  },
+  {
+    "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+    "candidates": [
+      "CORE-OTP-X001",
+      "CORE-OTP-X003",
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "XML separates raw cached status from effective firmware, key/config/input/result ownership, full-mask/new-code semantics and command-specific limitations. It needs the local per-exchange versus multi-exchange workflow qualification and one-shot/inner-copy scope; existing minimums are SDK checks, never hardware support guarantees. Keep HMAC marker, AES verifier, NDEF and scan-map qualifications unchanged unless owning findings change.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      },
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      },
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "df8eaef9b2baa09fafbba4afce88d4616719efae9e14d241bb4a9f5564d3f554"
+  },
+  {
+    "path": "src/YubiOtp/src/KeyboardSlotConfiguration.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Defaults add CR and FastTrigger; flags are mechanical bit toggles. InitializeKeys validates all lengths before copying fixed/private/key fields. Legacy delay/keypad/fast-trigger applicability is already qualified. It emits no keyboard event and invokes no host credential reader.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "b3166e4244ae4169ffd5ddb842c10cd20eaf7ea7de9b61bf7ebdefad830fe505"
+  },
+  {
+    "path": "src/YubiOtp/src/NdefType.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "URI and Text are programming-content discriminators, not complete NDEF message carriers. Remarks explicitly retain UTF-8/fixed English constraints and only-defined-value guidance. Runtime encoder admission stays OTP-IMP-008.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "da1d34dd659e899e77658b2945ce3096e1db9460ebbf3aeee4d513f498c9ed1b"
+  },
+  {
+    "path": "src/YubiOtp/src/PublicAPI.Shipped.txt",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The nullable directive is the whole shipped snapshot. It supplies no semantic unit in the exact packet, but remains an explicit unchanged disposition path. No API update is authorized.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+  },
+  {
+    "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+    "candidates": [
+      "CORE-OTP-X008"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Complete snapshot reconciles typed configurations, session operations, extension block/static signatures, slot/flag carriers and protected base members. There is no typed YubiOTP FIPS-mode query, legacy device-config or device-info method. Enum alias spelling in mask output reflects equal numeric bits, not extra update capabilities. Compiler binding remains unrun.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X008",
+        "condition": "A named device-info, FIPS-mode query or legacy configuration API is introduced/removed, or modern/legacy gates and device qualification change."
+      }
+    ],
+    "sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47"
+  },
+  {
+    "path": "src/YubiOtp/src/Slot.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The ten slot/operation tuples map to exact command bytes, with invalid combinations rejected. This pure mapping does not choose transport or establish command availability. The tuple test asserts all ten mappings.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "8acbbe8c6f4613a9fdd3aff3131c7f6da0177b2a9608b692a403ec92307ac103"
+  },
+  {
+    "path": "src/YubiOtp/src/SlotConfiguration.cs",
+    "candidates": [
+      "CORE-OTP-X005"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Private fixed/uid/key storage copies source, GetConfig makes an independent 52-byte block and complements CRC, and Dispose clears only the three private arrays. Invalid new-code validation follows secret copying; invalid current-code validation can occur before WriteConfig's try. SetHmacKey stack UID is explicitly initialized and cleared. Flag setters are not all disposed-guarded. Retain OTP-IMP-003/006/007 and distinguish config lifetime from protocol exchange drain.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X005",
+        "condition": "Change to configuration assembly or validation order, source/config/result cleanup, or CLI code-parser exception scopes."
+      }
+    ],
+    "sha256": "cb09f583373475151421eba8ddd05381011c503842589af7e83216bce5bba3a0"
+  },
+  {
+    "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+    "candidates": [
+      "CORE-OTP-X007"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "String translation validates every character before allocating its byte array, then Initialize copies into fixed/uid/key with zeroed and finally-cleared stack scratch; its translated intermediate is cleared even on Initialize failure. Raw input is copied without clearing caller source. Core translator supplies character mapping only; neither overload uses ConsoleCredentialReader. Layout rendering and old-firmware length remain qualified rather than universal guarantees.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X007",
+        "condition": "Change to keyboard mapping/layout applicability, standalone versus unified CLI routing, generated character alphabet or credential-input policy."
+      }
+    ],
+    "sha256": "736e70325799845627a56bb4f9a95549356f11f8ee47ffa0bb80c8b55ebc02ed"
+  },
+  {
+    "path": "src/YubiOtp/src/StaticTicketSlotConfiguration.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Validates/copies public ID/private ID/AES through InitializeKeys and sets StaticTicket on inherited keyboard defaults. This is a fixed ticket profile, separate from changing OTP, host challenge-response and Core algorithm catalog. Existing wire-format explanation remains scoped.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "e131d39da2e755697e83621f35cd125aea16833506a15130b02595f480c2ec8a"
+  },
+  {
+    "path": "src/YubiOtp/src/TicketFlag.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The explicit 0x80 protection bit and shared 0x40 HOTP/challenge bit preserve mode identity. Update masks omit protection/mode; keyboard flag aliases retain local applicability. Literal-bit tests are useful independent-of-enum checks, not whole device-policy proof.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "e90a09209fd585d289049bd5e916fc8e6b0c928a150c04bdca7b6c1ba1d84bd3"
+  },
+  {
+    "path": "src/YubiOtp/src/UpdateConfiguration.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The type inherits base SerialApiVisible/AllowUpdate defaults rather than keyboard defaults, applies full masks at encoding, and rejects ProtectSlot2 through virtual dispatch. Setters send values rather than patches. Future protection/default/gate decisions stay OTP-IMP-007.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "036ec5e4c92366332517a4f9a3f89ec7aea47d83a56852a0d45cd68d95fdeedf"
+  },
+  {
+    "path": "src/YubiOtp/src/YubiOtpConstants.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Fixed/UID/key areas total 38 static-password bytes, while SetScanMap reuses that constant despite a vendor 45-entry map. Status is six bytes and command response lengths are HMAC 20/AES 16/serial four. Keep these contexts separate from Core eight-byte reports and 64-byte HID payload.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "b36a052feae139091b648b9761c0ec17742ea46c020ad0c6bce7b356bf705b2b"
+  },
+  {
+    "path": "src/YubiOtp/src/YubiOtpSession.cs",
+    "candidates": [
+      "CORE-OTP-X001",
+      "CORE-OTP-X002",
+      "CORE-OTP-X005",
+      "CORE-OTP-X006"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Public orchestration prepares before initial reads, applies override only after discovery, configures protocol then builds backend with SELECT sequence. Status updates after successful writes and ConfigState parses locally. HMAC owns/clears padded 64-byte data; AES borrows six input bytes. WriteConfig assembles before try; NDEF keeps nonsecret encoder temporaries separately. The session has no workflow-wide guard or config ownership transfer, and SmartCard fallback/status/cache work spans separate guard intervals.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X001",
+        "condition": "Change to known-member claims, hidden/borrowed connection ownership, session binding, failure cleanup or whole-operation admission/disposal policy."
+      },
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      },
+      {
+        "candidate": "CORE-OTP-X005",
+        "condition": "Change to configuration assembly or validation order, source/config/result cleanup, or CLI code-parser exception scopes."
+      },
+      {
+        "candidate": "CORE-OTP-X006",
+        "condition": "Change to raw/detected/effective firmware, overrides, slot/config/operation gates, sequence bypass, command capability or notification certainty."
+      }
+    ],
+    "sha256": "273530fed238b68c1b9ada1cdf7541672e591dfb2bcc3919e59d5d02785dcbcd"
+  },
+  {
+    "path": "src/YubiOtp/src/YubiOtpSlotConfiguration.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "InitializeKeys copies raw binary public identity, six-byte private identity and 16-byte AES key; inherited defaults apply. Prose distinguishes emitted modhex characters and verifier responsibility. The configuration performs no transport or crypto operation on construction.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "4540a3cfb64744028068ae0f1ba78f2c8f5f1ff3f7b785d4300208d26b3f6ba0"
+  },
+  {
+    "path": "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Shipping module references Core, marks SDK/AOT analyzer participation, exposes internals only to its unit assembly and supplies descriptive package metadata. No Management dependency or relocated FIPS/legacy surface is hidden in this project. Compilation/publish qualification remains separate.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc"
+  },
+  {
+    "path": "src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Exact AES key validation precedes copy, UID stays zero, challenge mode/touch flags are mechanical and type minimum is 2.2.0. XML correctly assigns decrypted challenge/CRC/replay verification to the application. No AES operation is run by the constructor or this investigation.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "c639995b4058bfdc93f949f3851cd6ec13edb02aed8d5e612ded09549805d500"
+  },
+  {
+    "path": "src/YubiOtp/tests/CLAUDE.md",
+    "candidates": [
+      "CORE-OTP-X009"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "The test instructions distinguish dedicated-key destructive setup, both-slot protection/swap effects, nonuniform finally cleanup, source-byte and physical oracles. Keep these limits and preserve deferred device work; they are not permission to run tests in this packet.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X009",
+        "condition": "Change to named test setup/assertions/failure cleanup/independent oracles, or arrival of exact source-bound platform/device execution evidence."
+      }
+    ],
+    "sha256": "7ff73c817886e7ada48b9b80048ee32bf3303971a5a0a413b7bdd04c7a509547"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpHmacChallengeKnownAnswerTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Eight short-mode and four fixed-mode vectors use an explicit HidOtp preference and compare exact host HMAC with device output. Programming occurs before the cleanup try; finally deletes slot two, not restoration of old secrets. Static fixture/test outputs are not all erased and SequenceEqual is a test comparison. Historical run qualified these twelve vectors on serial 103/raw 0.0.1 only; no new execution occurred.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "ea37eed91d668f350661ffbd46ef12d07fd4f2daa8f3e9f3316261f01837b2d4"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/AuditV2/YubiOtpProtectSlot2Tests.cs",
+    "candidates": [
+      "CORE-OTP-X009"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "First test toggles protection while checking exact HMAC; second deletes slot two, programs slot one protection, accepts any exception for blocked write, checks cached slot-two false, removes protection, writes/calculates then attempts both deletions. If first cleanup deletion throws, the second is skipped. Broad rejection and cached status do not identify a universal native/device rejection cause.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X009",
+        "condition": "Change to named test setup/assertions/failure cleanup/independent oracles, or arrival of exact source-bound platform/device execution evidence."
+      }
+    ],
+    "sha256": "64b8b590c9fdb8b4582ed65e92957821606c75e12a1804872832782c9ab47449"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/UserPresenceProbeTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The read-only inspector prints nonsecret cached status. Touch test requires empty slot two, provisions known touch key, compares fixed-time host HMAC and exact single DeviceWaiting/Completed context, clears local arrays/results in finally and deletes only an unambiguously test-created slot. An ambiguous write deliberately retains the slot for inspection. Historical successful touch is one qualified fixture, not Core native-release proof.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "ac3ba249a2b5b3017a5c61518552ad258dd4c3675a5409181a3335721f8a6846"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSessionIntegrationTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Serial asserts nonnegative, status asserts nonnegative major, configuration checks cached bits, HMAC checks length only, swap invokes twice without finally, and NDEF writes/disable without NFC read-back. HMAC explicitly pins HidOtp; SmartCard-filtered methods rely on default selection. Preserve exact existing oracle descriptions and OTP-IMP-011, plus source-run historical execution limits.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "93cccc93f20c62e5ff276b2eb682fc267460431c4fe749311eade46f5f3da443"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/YubiOtpSlotConfigTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Each test owns typed HidOtp connection then borrowed session and configuration. It programs slot two before entering try, checks configured/cleared bits, and deletes in finally after successful programming. Static/OTP/HOTP/digits descriptions correctly stop at status; no keyboard capture, ticket verifier or digit-count oracle runs. Local source/key/GetConfig/result arrays have separate cleanup scopes.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "0b4a2854dfc855191a19d3d8501972fd8306bdbbed44d9ed2a957077cefaf153"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The xUnit v2/VSTest integration project references module/Core/Tests.Shared and direct SkippableFact for runtime copy. Runner config disables hardware parallelism; attribute filtering still binds one matching fixture and does not pin operation transport by itself. Project read supplies no execution.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "efafa99712b038addecf307481addcd68351dfe9b2822da3f0bf95f6ade52317"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/AuditV2/YubiOtpAuditReproTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "AllowUpdate assertions compare encoded flag toggles, ProtectSlot2 checks rejection and padding vectors compare explicit bytes including empty/63/64 boundaries. They supply no device marker hashing, native I/O or all-path allocation cleanup proof. Existing source-run labels remain historical identities.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "6b0b508921a99cbc594e8de62b3591b7cba475a8bde63cecc4a32c8e1614a128"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/ConfigStateTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Tests assert firmware parsing, low-byte slot/trigger/LED flags and old-firmware guards. The HighByte-named vector actually uses zero high byte; corrected comment is accurate. They never compare keyboard-trigger with RequireTouch or cover default struct's null firmware. Retain scoped clean assertions.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "bcf243423b1ae8a747d66837dd9dad394973b6de9d508e3c21930c1a04fc70ac"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/HidBackendTests.cs",
+    "candidates": [
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "The substitute tests assert CRC-prefix output, malformed/short failures, slot bytes, timeout classification and terminal callback precedence; they observe actual returned arrays zeroed on failures. MakeResponseWithCrc shares production ChecksumUtils. The full scripted Core test retains first touch-completion data and checks synthetic HMAC bytes, but bypasses real native routes and report-ownership cleanup.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "6f3a934f9071fb713d9a57fc5ac5673e5c8cd2659f30c3ac4d75282bb5cf6c60"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+    "candidates": [
+      "CORE-OTP-X009"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "SelectionProbe records requested type then throws, so it checks selection only. FallbackProbe holds default/explicit SmartCard and asserts a single attempt/no HID fallback. The FailingOtpConnection helper is not actually opened by those held-SmartCard tests; their no-disposal assertion does not exercise post-open initialization cleanup. Shared Core tests retain that mechanism's ownership.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X009",
+        "condition": "Change to named test setup/assertions/failure cleanup/independent oracles, or arrival of exact source-bound platform/device execution evidence."
+      }
+    ],
+    "sha256": "35767e4255667f55fb88c1949986670f26db167410141a3c5d32ba76e4337663"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationEncapsulationTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Reflection tests retain actual private fixed/UID/key arrays, fill them, dispose and assert all zero. Guard tests check meaningful field-size messages but are not independent memory or firmware oracles. Unlike the older Dispose test this is actual owned-array zero observation by source assertion.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "a7928ba0dd8cfaca8c0ddb9ddd2a621796f5e950540afe19fc4bc99b83857b73"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+    "candidates": [
+      "CORE-OTP-X009"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Complete tests check literal offsets, zero filler/RFU, exact key splits, flag defaults/toggles/masks, erroneous current IMF encoding, static scan-code distribution and string/raw equality. The injected translation factory asserts actual intermediate clearing on success/failure; raw source remains unchanged. AssertValidCrc shares production helper and the older Dispose-named test only checks rejection. Preserve existing accurate comments; independent CRC/device and exception cleanup proposals remain separate.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X009",
+        "condition": "Change to named test setup/assertions/failure cleanup/independent oracles, or arrival of exact source-bound platform/device execution evidence."
+      }
+    ],
+    "sha256": "1ea72a87c5e4fef816bfe681ec4f8e67c8f4d1e299ac78c7a2f8e320eace848e"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SmartCardBackendTests.cs",
+    "candidates": [
+      "CORE-OTP-X003"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "Substitute protocol tests cover malformed Management version fallback, INS/P1, full/empty status fallback, sequence mismatch, 255-to-zero and one 5.2 bypass sample. They do not prove all-zero predecessors, exact bypass endpoints, short fallback rejection or real USB/NFC challenge support. Callback-failure test observes response.Data zero while caller raw transport clones remain outside that oracle. Key/challenge wire tests assert exact data, not physical command availability.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X003",
+        "condition": "Change to sensitive native/report/raw/APDU/fragment/response storage ownership, result slicing, callback cleanup or logging-failure precedence."
+      }
+    ],
+    "sha256": "78ac079a5225cd351d9ba1171bc24400b7af9bc966dbae4d31d213d9c9bf33e8"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpBackendLifecycleTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Three reflection assertions check absence of IDisposable on backend interface/classes. They establish advertised shape, not exercised protocol teardown, connection release, transient response ownership or workflow drain. The corrected comment retains that distinction.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "41e0d3b0d1998fb31652d482145593ecf75c70e1bd685aceecb86d551b100ddb"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionLinuxCrossLayerTests.cs",
+    "candidates": [
+      "CORE-OTP-X002",
+      "CORE-OTP-X009"
+    ],
+    "disposition": "UNCHANGED",
+    "reason": "The production Linux slot/device/native owner is used over fake feature seam. Held first GET distinguishes invocation return from completion; sequential borrowed sessions leave close count zero until connection disposal. Touch cancellation remains pending until held dummy SET returns, then serial recovers; CRC literal vectors determine applet Completed/Failed. Sent-frame CRC still uses production ChecksumUtils. Held creation's finally releases a gate but success-only first-session disposal can be skipped by an assertion failure; record this under existing test cleanup concern rather than claim all-path drain.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [
+      {
+        "candidate": "CORE-OTP-X002",
+        "condition": "Change to eight-byte report admission, first/second status provenance, NEO rejection classification, local polling or reset/recovery policy."
+      },
+      {
+        "candidate": "CORE-OTP-X009",
+        "condition": "Change to named test setup/assertions/failure cleanup/independent oracles, or arrival of exact source-bound platform/device execution evidence."
+      }
+    ],
+    "sha256": "26ef560adca8c3ab6893d27faed2ef59102fb5d665882121f9abb56219ca155e"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionTests.cs",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "Full fake-connection tests cover SCP-HID pre-I/O rejection and rebind, unsupported construction cleanup, borrowed-init failure, SELECT sequence seeding, SmartCard heuristic notifications and short/failed responses. The cancellation test cancels from the request callback before APDU admission, not during native transmit. HMAC semantics capture exact APDU bytes during use; NDEF tests inspect encoder fields only. Reflection/internal helpers and all scopes were read; no physical parity or all-copy erasure is established.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "1407c923bb859c7942b013a73ef50e86b04c4dc28d6868177c5b71b65afe1e61"
+  },
+  {
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj",
+    "candidates": [],
+    "disposition": "UNCHANGED",
+    "reason": "The net10 executable uses xUnit v3 Microsoft.Testing.Platform, NSubstitute and only the module project reference, with internals granted by shipping project. This is distinct from integration v2 infrastructure. No runner/build command was invoked.",
+    "owner": "YubiOTP future fresh editor; this worker owns records only",
+    "reopening_details": "candidates.md; flow-and-verification.md",
+    "precise_reopening_triggers": [],
+    "sha256": "c80a84f2acd59f0d1c0580fd2c1d597e4a912101da65121b871a3d4584792cc3"
+  }
+]

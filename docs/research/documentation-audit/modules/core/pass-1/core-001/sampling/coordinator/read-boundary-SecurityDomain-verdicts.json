@@ -1,0 +1,115 @@
+{
+  "reader": "Astra",
+  "scope": "Actual complete boundary sample reads; final mapping/eligibility pending",
+  "reading_sha256": "91ec307c6a6cf7f1e32b6fd6821fd4a990b3dee2f482ffc65c76de1dfc34d8c7",
+  "units": [
+    {
+      "id": "core-001:unit:d7528501229916fe",
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "range_sha256": "cb402e3c692c5356cf9f87b2ef303fe29f0e5d3568680c3e3825f7e7328f51ea",
+      "current_file_sha256": "f7668dcadbe1af80f0cc874813e10504717c02f3fe94ca9096b74fefd952d875",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:75d424217a4e94ef",
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "range_sha256": "f3c22f0176c612517bfec56b3f0e4be128208233d8bc2a40e9726d8605e6ef5e",
+      "current_file_sha256": "f7668dcadbe1af80f0cc874813e10504717c02f3fe94ca9096b74fefd952d875",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:394639d39386bc76",
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "range_sha256": "3bcacd5c2b5ac8fde0b80ef5e52267b84fd9fda5876263133044c5de9ed28d37",
+      "current_file_sha256": "f7668dcadbe1af80f0cc874813e10504717c02f3fe94ca9096b74fefd952d875",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:03e44d501350ff8b",
+      "path": "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+      "range_sha256": "04b8d69fb9e73eec34c18f094c1af041487be6984416b7b00e514f72c2ff0a90",
+      "current_file_sha256": "b6b783bf00f399fdeba43c79792fec96232ab8644b9f7475a904596dc1ad39c3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:ed3e115f81fd126c",
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "range_sha256": "34ac08f4e3d402064aefdac1b267410d3abb36e3f796fabcd7a1fc4d665e20ec",
+      "current_file_sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-SD-001: related-module bullets misplace StaticKeys and omit Protocols in SCP namespace; actual StaticKeys namespace verified and bounded correction assigned."
+    },
+    {
+      "id": "core-001:unit:e1121aa69ba90312",
+      "path": "src/SecurityDomain/README.md",
+      "range_sha256": "0a6b506700227443e7ea153df103346b59fe19ceb731832f25dc0fc2c2973829",
+      "current_file_sha256": "b3d46b1fea71882743f393e64bd419bd4698c197770295f565bff132280a7341",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:350a0f3bb0448eae",
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs",
+      "range_sha256": "c0458101a4298cdf42efa0e140e02dfc971cf68b94f4dbdb71f8360026962219",
+      "current_file_sha256": "2719b01755d036e72f724570ed109798f1503c0e67faa353bbdcdf7cb4387a8b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:6ef39b1f61d0b65d",
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "range_sha256": "a327d6c70c7c0cfa64ad83ddad41f67bc6330c187a22be6fb26afb1ad497310f",
+      "current_file_sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Handshake fake explicitly advances short-command chain without verifying command MAC; no complete authenticated-peer oracle inferred."
+    },
+    {
+      "id": "core-001:unit:1c4edc65a24bed3a",
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "range_sha256": "9d0db58fb1d016bae4c4307c641175a82be35bd9f834aaef4d854185cb722d23",
+      "current_file_sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:8ed4d3276ff806e4",
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+      "range_sha256": "262e6748b387ff5b28f6fd63218b1b8b1d3228fca1576f99dafacce282009164",
+      "current_file_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:c7e80dbb3894556d",
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+      "range_sha256": "1b1ca63162eba44e01696c1a7a2be6a3d26f6de50590dc266c9c9e68a9707a4a",
+      "current_file_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    },
+    {
+      "id": "core-001:unit:dcd6c17901ddf340",
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+      "range_sha256": "f5c29f395bcc82c3ec5114ffa93b8850a8e35b083c6f2a3d6bc9417c90b429c1",
+      "current_file_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole selected unit read by Astra; exact API/caller/fixture scope supported with existing profile, runtime and hardware limits."
+    }
+  ]
+}

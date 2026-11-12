@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/home/rupicola/.local/share/mise/dotnet-root/dotnet",
+    "msbuild",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj",
+    "-nologo",
+    "-p:Configuration=Release",
+    "-preprocess:/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-final-edits/preprocessed.xml.snapshot"
+  ],
+  "exit_code": 0
+}

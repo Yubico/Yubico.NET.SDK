@@ -1,0 +1,3224 @@
+[
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C001, CORE-C-C002, CORE-C-C003, CORE-C-C004; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C001",
+      "CORE-C-C002",
+      "CORE-C-C003",
+      "CORE-C-C004"
+    ],
+    "proposals": [
+      "FPT-083",
+      "FPT-084",
+      "FPT-085",
+      "FPT-086"
+    ],
+    "base_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "current_sha256": "7e375afde276858564d7ca7699a9b888096facb62e633ff19e7dbd640b2523d9",
+    "product_pin_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 32,
+        "base_count": 7,
+        "current_start": 32,
+        "current_count": 4
+      },
+      {
+        "base_start": 41,
+        "base_count": 6,
+        "current_start": 38,
+        "current_count": 11
+      },
+      {
+        "base_start": 179,
+        "base_count": 1,
+        "current_start": 181,
+        "current_count": 1
+      },
+      {
+        "base_start": 220,
+        "base_count": 1,
+        "current_start": 222,
+        "current_count": 1
+      },
+      {
+        "base_start": 389,
+        "base_count": 1,
+        "current_start": 391,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialKind.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "31aea8d0c89266ac907f00b187e656e7c67f7556fb155c361b72b214f5c675dd",
+    "current_sha256": "31aea8d0c89266ac907f00b187e656e7c67f7556fb155c361b72b214f5c675dd",
+    "product_pin_sha256": "31aea8d0c89266ac907f00b187e656e7c67f7556fb155c361b72b214f5c675dd",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialPromptContext.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C003; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C003"
+    ],
+    "proposals": [
+      "FPT-085"
+    ],
+    "base_sha256": "aa1eb866acff5887fe426097fc5726e6e1e8a84d1f6fe5065e7c309cfc70bc45",
+    "current_sha256": "6ffb3f8f7700b8fb6736a5af274cb9f646b2d4c68c1e2ecf60cb19a0209303fd",
+    "product_pin_sha256": "aa1eb866acff5887fe426097fc5726e6e1e8a84d1f6fe5065e7c309cfc70bc45",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 23,
+        "base_count": 0,
+        "current_start": 24,
+        "current_count": 3
+      },
+      {
+        "base_start": 69,
+        "base_count": 1,
+        "current_start": 72,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C003; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C003"
+    ],
+    "proposals": [
+      "FPT-085"
+    ],
+    "base_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "current_sha256": "38db90c0798d78426885729202e0095ec1bea05669c2ef1239f2f5acd5f90fa5",
+    "product_pin_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 28,
+        "base_count": 2,
+        "current_start": 28,
+        "current_count": 5
+      },
+      {
+        "base_start": 45,
+        "base_count": 1,
+        "current_start": 48,
+        "current_count": 1
+      },
+      {
+        "base_start": 50,
+        "base_count": 1,
+        "current_start": 53,
+        "current_count": 1
+      },
+      {
+        "base_start": 61,
+        "base_count": 1,
+        "current_start": 64,
+        "current_count": 2
+      },
+      {
+        "base_start": 67,
+        "base_count": 1,
+        "current_start": 71,
+        "current_count": 1
+      },
+      {
+        "base_start": 80,
+        "base_count": 1,
+        "current_start": 84,
+        "current_count": 2
+      },
+      {
+        "base_start": 134,
+        "base_count": 1,
+        "current_start": 139,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/IConsoleInputSource.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "1c5d1758ba6add46dc7f393d1eff07613da7d9a23c446455cf9c3dfe98ab38d2",
+    "current_sha256": "1c5d1758ba6add46dc7f393d1eff07613da7d9a23c446455cf9c3dfe98ab38d2",
+    "product_pin_sha256": "1c5d1758ba6add46dc7f393d1eff07613da7d9a23c446455cf9c3dfe98ab38d2",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C003, CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C003",
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-085",
+      "FPT-099"
+    ],
+    "base_sha256": "948d8513a3853a476323b3263652a8065c4312c02a72910615b259fe93ac2d83",
+    "current_sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee",
+    "product_pin_sha256": "948d8513a3853a476323b3263652a8065c4312c02a72910615b259fe93ac2d83",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 71,
+        "base_count": 1,
+        "current_start": 71,
+        "current_count": 3
+      },
+      {
+        "base_start": 76,
+        "base_count": 5,
+        "current_start": 78,
+        "current_count": 1
+      },
+      {
+        "base_start": 82,
+        "base_count": 0,
+        "current_start": 81,
+        "current_count": 1
+      },
+      {
+        "base_start": 87,
+        "base_count": 0,
+        "current_start": 87,
+        "current_count": 2
+      },
+      {
+        "base_start": 117,
+        "base_count": 1,
+        "current_start": 118,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C001, CORE-C-C002, CORE-C-C004, CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C001",
+      "CORE-C-C002",
+      "CORE-C-C004",
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-083",
+      "FPT-084",
+      "FPT-086",
+      "FPT-099"
+    ],
+    "base_sha256": "64d9cac63c2b0d6c012f761943f2e4ae394340528d29fb875ffb1e1aeb2f39d2",
+    "current_sha256": "f2b6a0687cc3d628a52c65ee27d77df45e0458aa6eab2b3537bd7cb6fe3ee669",
+    "product_pin_sha256": "64d9cac63c2b0d6c012f761943f2e4ae394340528d29fb875ffb1e1aeb2f39d2",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 20,
+        "base_count": 1,
+        "current_start": 20,
+        "current_count": 1
+      },
+      {
+        "base_start": 24,
+        "base_count": 3,
+        "current_start": 24,
+        "current_count": 3
+      },
+      {
+        "base_start": 34,
+        "base_count": 1,
+        "current_start": 34,
+        "current_count": 2
+      },
+      {
+        "base_start": 36,
+        "base_count": 3,
+        "current_start": 37,
+        "current_count": 2
+      },
+      {
+        "base_start": 40,
+        "base_count": 3,
+        "current_start": 40,
+        "current_count": 7
+      },
+      {
+        "base_start": 55,
+        "base_count": 1,
+        "current_start": 59,
+        "current_count": 1
+      },
+      {
+        "base_start": 61,
+        "base_count": 1,
+        "current_start": 65,
+        "current_count": 1
+      },
+      {
+        "base_start": 71,
+        "base_count": 1,
+        "current_start": 75,
+        "current_count": 1
+      },
+      {
+        "base_start": 78,
+        "base_count": 2,
+        "current_start": 82,
+        "current_count": 3
+      },
+      {
+        "base_start": 82,
+        "base_count": 1,
+        "current_start": 87,
+        "current_count": 1
+      },
+      {
+        "base_start": 84,
+        "base_count": 1,
+        "current_start": 89,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/IUserPresencePrompt.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "a569b9dd7c0a0386554ecae71c3de0b5854441c75e16d2bb8e4ba6ea734811c9",
+    "current_sha256": "a569b9dd7c0a0386554ecae71c3de0b5854441c75e16d2bb8e4ba6ea734811c9",
+    "product_pin_sha256": "a569b9dd7c0a0386554ecae71c3de0b5854441c75e16d2bb8e4ba6ea734811c9",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceApplications.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "8bb35f828eadb9e8cbe84a1a0fdbeb96539b8dce9920ce3d41853436cc07fcf7",
+    "current_sha256": "8bb35f828eadb9e8cbe84a1a0fdbeb96539b8dce9920ce3d41853436cc07fcf7",
+    "product_pin_sha256": "8bb35f828eadb9e8cbe84a1a0fdbeb96539b8dce9920ce3d41853436cc07fcf7",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceBasis.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "ed4831a45ec802ad1848b6d53a2eb60c9a664409f9b7ffae450bf629f5f978ff",
+    "current_sha256": "ed4831a45ec802ad1848b6d53a2eb60c9a664409f9b7ffae450bf629f5f978ff",
+    "product_pin_sha256": "ed4831a45ec802ad1848b6d53a2eb60c9a664409f9b7ffae450bf629f5f978ff",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceContext.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "01fd2d3b668e6cde7811eddc27e9cf2dcf83f20097a13d6af3d0d537fb543d1c",
+    "current_sha256": "01fd2d3b668e6cde7811eddc27e9cf2dcf83f20097a13d6af3d0d537fb543d1c",
+    "product_pin_sha256": "01fd2d3b668e6cde7811eddc27e9cf2dcf83f20097a13d6af3d0d537fb543d1c",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C008; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C008"
+    ],
+    "proposals": [
+      "FPT-090"
+    ],
+    "base_sha256": "06e90a09cdd8f6ac45a9dbc0d9072f48f9d2ebcc9c9736bccc48864a4d9b63ed",
+    "current_sha256": "7aaca59de916782b7762b1c6d3f4ff614a31109ff5077c78c8a9c88627310c8f",
+    "product_pin_sha256": "06e90a09cdd8f6ac45a9dbc0d9072f48f9d2ebcc9c9736bccc48864a4d9b63ed",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 68,
+        "base_count": 1,
+        "current_start": 68,
+        "current_count": 2
+      },
+      {
+        "base_start": 118,
+        "base_count": 1,
+        "current_start": 119,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C008; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C008"
+    ],
+    "proposals": [
+      "FPT-090"
+    ],
+    "base_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "current_sha256": "9606437dfc5bb05a71754956cdf8ee962acde15d56aa1e05cd2d2cb7dd2d3baa",
+    "product_pin_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 28,
+        "base_count": 1,
+        "current_start": 28,
+        "current_count": 2
+      },
+      {
+        "base_start": 205,
+        "base_count": 1,
+        "current_start": 206,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceOperations.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+    "current_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+    "product_pin_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceOutcome.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "c6c3184b39fc3c58c631666b1b42a4e61fa34ae4ad9a65a69793526bfa145b2f",
+    "current_sha256": "c6c3184b39fc3c58c631666b1b42a4e61fa34ae4ad9a65a69793526bfa145b2f",
+    "product_pin_sha256": "c6c3184b39fc3c58c631666b1b42a4e61fa34ae4ad9a65a69793526bfa145b2f",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AesUtilities.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C013; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C013"
+    ],
+    "proposals": [
+      "FPT-095"
+    ],
+    "base_sha256": "bba001cd62b3b4444e55ca819012679ba386516d7d989f2698a284a655bf551f",
+    "current_sha256": "697fca9dcdcba3f05bf92ea0af68d2c25d527bb4bec9c4e7a0b2a0eeab133b44",
+    "product_pin_sha256": "bba001cd62b3b4444e55ca819012679ba386516d7d989f2698a284a655bf551f",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 18,
+        "base_count": 0,
+        "current_start": 19,
+        "current_count": 6
+      },
+      {
+        "base_start": 92,
+        "base_count": 1,
+        "current_start": 98,
+        "current_count": 1
+      },
+      {
+        "base_start": 162,
+        "base_count": 1,
+        "current_start": 168,
+        "current_count": 1
+      },
+      {
+        "base_start": 225,
+        "base_count": 1,
+        "current_start": 231,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C015; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C015"
+    ],
+    "proposals": [
+      "FPT-097"
+    ],
+    "base_sha256": "829a5a818364199c93baab4071fd3d3ad6765cbf8f4ea51d0f9cde54eace6d9f",
+    "current_sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+    "product_pin_sha256": "829a5a818364199c93baab4071fd3d3ad6765cbf8f4ea51d0f9cde54eace6d9f",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 108,
+        "base_count": 0,
+        "current_start": 109,
+        "current_count": 2
+      },
+      {
+        "base_start": 157,
+        "base_count": 1,
+        "current_start": 159,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ArkgPrimitives.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C012, CORE-C-C019; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C012",
+      "CORE-C-C019"
+    ],
+    "proposals": [
+      "FPT-094",
+      "FPT-101"
+    ],
+    "base_sha256": "acbc1cb55ca788936b0dd821fbcfcff0236c24df95359a86f2aedf2559526013",
+    "current_sha256": "a01efcdb859522d65147ef3194d255537f9e993a3226a8c2a0c2fc110e7b164a",
+    "product_pin_sha256": "acbc1cb55ca788936b0dd821fbcfcff0236c24df95359a86f2aedf2559526013",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 40,
+        "base_count": 3,
+        "current_start": 40,
+        "current_count": 4
+      },
+      {
+        "base_start": 46,
+        "base_count": 1,
+        "current_start": 47,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C011, CORE-C-C018, CORE-C-C019; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C011",
+      "CORE-C-C018",
+      "CORE-C-C019"
+    ],
+    "proposals": [
+      "FPT-093",
+      "FPT-100",
+      "FPT-101"
+    ],
+    "base_sha256": "41806d866579406ab208d89401e7a8d800a164fe1366b1d3e2b9701f5d61a633",
+    "current_sha256": "82f8d05d60381ff6a793e14c04b392752b0cb4b69fe7f6ed9765c84da225883e",
+    "product_pin_sha256": "41806d866579406ab208d89401e7a8d800a164fe1366b1d3e2b9701f5d61a633",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 32,
+        "base_count": 1,
+        "current_start": 32,
+        "current_count": 3
+      },
+      {
+        "base_start": 34,
+        "base_count": 0,
+        "current_start": 37,
+        "current_count": 5
+      },
+      {
+        "base_start": 76,
+        "base_count": 3,
+        "current_start": 83,
+        "current_count": 1
+      },
+      {
+        "base_start": 108,
+        "base_count": 1,
+        "current_start": 113,
+        "current_count": 1
+      },
+      {
+        "base_start": 729,
+        "base_count": 1,
+        "current_start": 734,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "39dc6cb4e51935d0834e60a947f8ac766e7d1bb2bab32984ad154ecfa6457dde",
+    "current_sha256": "39dc6cb4e51935d0834e60a947f8ac766e7d1bb2bab32984ad154ecfa6457dde",
+    "product_pin_sha256": "39dc6cb4e51935d0834e60a947f8ac766e7d1bb2bab32984ad154ecfa6457dde",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C009, CORE-C-C014, CORE-C-C016; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C009",
+      "CORE-C-C014",
+      "CORE-C-C016"
+    ],
+    "proposals": [
+      "FPT-091",
+      "FPT-096",
+      "FPT-098"
+    ],
+    "base_sha256": "273b427def8b7d7f4a35a1109fb59a4b896f1d20c1661fe669708b851a4d5a1d",
+    "current_sha256": "8ee77d7217e93934f341755d721b9dd2076e84ef6b75e1b14e7ffc0946880e97",
+    "product_pin_sha256": "273b427def8b7d7f4a35a1109fb59a4b896f1d20c1661fe669708b851a4d5a1d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 24,
+        "base_count": 0,
+        "current_start": 25,
+        "current_count": 8
+      },
+      {
+        "base_start": 98,
+        "base_count": 1,
+        "current_start": 106,
+        "current_count": 1
+      },
+      {
+        "base_start": 221,
+        "base_count": 2,
+        "current_start": 229,
+        "current_count": 2
+      },
+      {
+        "base_start": 287,
+        "base_count": 1,
+        "current_start": 295,
+        "current_count": 1
+      },
+      {
+        "base_start": 378,
+        "base_count": 1,
+        "current_start": 386,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C013, CORE-C-C016; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C013",
+      "CORE-C-C016"
+    ],
+    "proposals": [
+      "FPT-095",
+      "FPT-098"
+    ],
+    "base_sha256": "66e491f2ef133e7ef8f23702ced303a3cbb22043a0e47102b33676e521021cd2",
+    "current_sha256": "8504b99a7f51a6f867bd1a101652ba50ee24477ef3799d19e14de63d593f94e8",
+    "product_pin_sha256": "66e491f2ef133e7ef8f23702ced303a3cbb22043a0e47102b33676e521021cd2",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 23,
+        "base_count": 0,
+        "current_start": 24,
+        "current_count": 5
+      },
+      {
+        "base_start": 217,
+        "base_count": 1,
+        "current_start": 222,
+        "current_count": 3
+      },
+      {
+        "base_start": 220,
+        "base_count": 2,
+        "current_start": 227,
+        "current_count": 2
+      },
+      {
+        "base_start": 286,
+        "base_count": 1,
+        "current_start": 293,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C009; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C009"
+    ],
+    "proposals": [
+      "FPT-091"
+    ],
+    "base_sha256": "99e7c28e9a18c4b7bc0d55c0864621b7cd384ba4aa4d9772a0196304cf9bd9ab",
+    "current_sha256": "26b7907b746f9a296d99f66128cae255e38c86a766b66321ed6f9a8c9ab1ca78",
+    "product_pin_sha256": "99e7c28e9a18c4b7bc0d55c0864621b7cd384ba4aa4d9772a0196304cf9bd9ab",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 23,
+        "base_count": 0,
+        "current_start": 24,
+        "current_count": 5
+      },
+      {
+        "base_start": 37,
+        "base_count": 1,
+        "current_start": 42,
+        "current_count": 2
+      },
+      {
+        "base_start": 131,
+        "base_count": 1,
+        "current_start": 137,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "bf4b9b50f28551e6bea8c969a5ca4f7c7cda7da1c71377b579c9e8ee56b05e2e",
+    "current_sha256": "bf4b9b50f28551e6bea8c969a5ca4f7c7cda7da1c71377b579c9e8ee56b05e2e",
+    "product_pin_sha256": "bf4b9b50f28551e6bea8c969a5ca4f7c7cda7da1c71377b579c9e8ee56b05e2e",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnUtilities.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C010, CORE-C-C016; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C010",
+      "CORE-C-C016"
+    ],
+    "proposals": [
+      "FPT-092",
+      "FPT-098"
+    ],
+    "base_sha256": "060bb85d2acc3d19528e4adbb73c7aaa7559b4be311081a5fc045dcf36188bc1",
+    "current_sha256": "15587cfb868ec3d36b5c0d83dff66a823608b4d70ecf59c2c751f3e6b7061707",
+    "product_pin_sha256": "060bb85d2acc3d19528e4adbb73c7aaa7559b4be311081a5fc045dcf36188bc1",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 82,
+        "base_count": 1,
+        "current_start": 82,
+        "current_count": 1
+      },
+      {
+        "base_start": 100,
+        "base_count": 1,
+        "current_start": 100,
+        "current_count": 1
+      },
+      {
+        "base_start": 133,
+        "base_count": 1,
+        "current_start": 133,
+        "current_count": 1
+      },
+      {
+        "base_start": 184,
+        "base_count": 0,
+        "current_start": 185,
+        "current_count": 1
+      },
+      {
+        "base_start": 187,
+        "base_count": 1,
+        "current_start": 188,
+        "current_count": 1
+      },
+      {
+        "base_start": 218,
+        "base_count": 1,
+        "current_start": 219,
+        "current_count": 1
+      },
+      {
+        "base_start": 227,
+        "base_count": 1,
+        "current_start": 228,
+        "current_count": 1
+      },
+      {
+        "base_start": 234,
+        "base_count": 1,
+        "current_start": 235,
+        "current_count": 1
+      },
+      {
+        "base_start": 337,
+        "base_count": 1,
+        "current_start": 338,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CmacPrimitives.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+    "current_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+    "product_pin_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C013, CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C013",
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-095",
+      "FPT-099"
+    ],
+    "base_sha256": "f801f7e4b674e9098e681205da3ebe8307dc272b898a14a1c83d3eb3962081e7",
+    "current_sha256": "a668602bef0417d1a7235da49a8e7c62b97e6ae20455ad007c555816900f5a7a",
+    "product_pin_sha256": "f801f7e4b674e9098e681205da3ebe8307dc272b898a14a1c83d3eb3962081e7",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 101,
+        "base_count": 1,
+        "current_start": 101,
+        "current_count": 1
+      },
+      {
+        "base_start": 162,
+        "base_count": 2,
+        "current_start": 162,
+        "current_count": 1
+      },
+      {
+        "base_start": 164,
+        "base_count": 0,
+        "current_start": 164,
+        "current_count": 5
+      },
+      {
+        "base_start": 293,
+        "base_count": 1,
+        "current_start": 297,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C015; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C015"
+    ],
+    "proposals": [
+      "FPT-097"
+    ],
+    "base_sha256": "070b55e579d6a92bbb171001cf2a50a17e4efb776c100d7ab79667168e01a544",
+    "current_sha256": "5c19d5a3538db6a1f31a663f9f6f707c4e422508fe277e6983a4915c5ffaecf5",
+    "product_pin_sha256": "070b55e579d6a92bbb171001cf2a50a17e4efb776c100d7ab79667168e01a544",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 20,
+        "base_count": 0,
+        "current_start": 21,
+        "current_count": 2
+      },
+      {
+        "base_start": 29,
+        "base_count": 1,
+        "current_start": 31,
+        "current_count": 1
+      },
+      {
+        "base_start": 62,
+        "base_count": 1,
+        "current_start": 64,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C015; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C015"
+    ],
+    "proposals": [
+      "FPT-097"
+    ],
+    "base_sha256": "ddcc5cf946ef8601ff4adbae78c29aff14b5e32cb47583f63364e8ad1cdb2f40",
+    "current_sha256": "6c237d7c9881e20dbbd31be119d012a8214eed6135124f0c7176b35e287c5de4",
+    "product_pin_sha256": "ddcc5cf946ef8601ff4adbae78c29aff14b5e32cb47583f63364e8ad1cdb2f40",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 29,
+        "base_count": 1,
+        "current_start": 29,
+        "current_count": 1
+      },
+      {
+        "base_start": 80,
+        "base_count": 1,
+        "current_start": 80,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "c84aa56f757fda2e5f7597962cf6df740f36cff2275dc9585373b2e0c9f3c22d",
+    "current_sha256": "c84aa56f757fda2e5f7597962cf6df740f36cff2275dc9585373b2e0c9f3c22d",
+    "product_pin_sha256": "c84aa56f757fda2e5f7597962cf6df740f36cff2275dc9585373b2e0c9f3c22d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "fcdef228f4a2bb3d050699194981b33245f865bb755b4bc0303dbfbd2c7233bb",
+    "current_sha256": "fcdef228f4a2bb3d050699194981b33245f865bb755b4bc0303dbfbd2c7233bb",
+    "product_pin_sha256": "fcdef228f4a2bb3d050699194981b33245f865bb755b4bc0303dbfbd2c7233bb",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C015; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C015"
+    ],
+    "proposals": [
+      "FPT-097"
+    ],
+    "base_sha256": "657bf1a5d83f713bf9a9fddbd6a28a0b647c4bf7bf41d87bb9d7c74ce6dc711e",
+    "current_sha256": "299644fa0ce91355c674780157f3528f304e20dd2fdcfc923322d2b13fcdea44",
+    "product_pin_sha256": "657bf1a5d83f713bf9a9fddbd6a28a0b647c4bf7bf41d87bb9d7c74ce6dc711e",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 20,
+        "base_count": 1,
+        "current_start": 20,
+        "current_count": 1
+      },
+      {
+        "base_start": 29,
+        "base_count": 1,
+        "current_start": 29,
+        "current_count": 1
+      },
+      {
+        "base_start": 52,
+        "base_count": 1,
+        "current_start": 52,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+    "action": "RETAIN",
+    "reason": "Retain operation constants, parameterized relationships and structural applicability. No numeric/profile migration is authorized; the complete pairing qualification belongs to AlgorithmInfo and the affected test explanation.",
+    "candidates": [
+      "CORE-C-C015"
+    ],
+    "proposals": [
+      "FPT-097"
+    ],
+    "base_sha256": "e72da0896c4ade8a22eb0ce5699a842edc7b6314465c29b706396c7ee4b58827",
+    "current_sha256": "e72da0896c4ade8a22eb0ce5699a842edc7b6314465c29b706396c7ee4b58827",
+    "product_pin_sha256": "e72da0896c4ade8a22eb0ce5699a842edc7b6314465c29b706396c7ee4b58827",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+    "current_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+    "product_pin_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+    "current_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+    "product_pin_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "9fde6c5422b1f74c68bc987097c5a0e81e55b2af90378038e52c93ff1a37644a",
+    "current_sha256": "9fde6c5422b1f74c68bc987097c5a0e81e55b2af90378038e52c93ff1a37644a",
+    "product_pin_sha256": "9fde6c5422b1f74c68bc987097c5a0e81e55b2af90378038e52c93ff1a37644a",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C012, CORE-C-C018; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C012",
+      "CORE-C-C018"
+    ],
+    "proposals": [
+      "FPT-094",
+      "FPT-100"
+    ],
+    "base_sha256": "25d08bea3f633da73e2d8502fbefe5a054709e5a5efae83bc1f7f6433c88a4d2",
+    "current_sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03",
+    "product_pin_sha256": "25d08bea3f633da73e2d8502fbefe5a054709e5a5efae83bc1f7f6433c88a4d2",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 23,
+        "base_count": 4,
+        "current_start": 23,
+        "current_count": 4
+      },
+      {
+        "base_start": 39,
+        "base_count": 7,
+        "current_start": 39,
+        "current_count": 4
+      },
+      {
+        "base_start": 56,
+        "base_count": 1,
+        "current_start": 53,
+        "current_count": 1
+      },
+      {
+        "base_start": 60,
+        "base_count": 1,
+        "current_start": 57,
+        "current_count": 1
+      },
+      {
+        "base_start": 77,
+        "base_count": 2,
+        "current_start": 74,
+        "current_count": 4
+      },
+      {
+        "base_start": 82,
+        "base_count": 2,
+        "current_start": 81,
+        "current_count": 2
+      },
+      {
+        "base_start": 85,
+        "base_count": 5,
+        "current_start": 84,
+        "current_count": 1
+      },
+      {
+        "base_start": 96,
+        "base_count": 1,
+        "current_start": 91,
+        "current_count": 1
+      },
+      {
+        "base_start": 100,
+        "base_count": 1,
+        "current_start": 95,
+        "current_count": 1
+      },
+      {
+        "base_start": 116,
+        "base_count": 1,
+        "current_start": 111,
+        "current_count": 4
+      },
+      {
+        "base_start": 120,
+        "base_count": 2,
+        "current_start": 118,
+        "current_count": 2
+      },
+      {
+        "base_start": 123,
+        "base_count": 5,
+        "current_start": 121,
+        "current_count": 1
+      },
+      {
+        "base_start": 134,
+        "base_count": 1,
+        "current_start": 128,
+        "current_count": 1
+      },
+      {
+        "base_start": 138,
+        "base_count": 1,
+        "current_start": 132,
+        "current_count": 1
+      },
+      {
+        "base_start": 154,
+        "base_count": 1,
+        "current_start": 148,
+        "current_count": 4
+      },
+      {
+        "base_start": 158,
+        "base_count": 2,
+        "current_start": 155,
+        "current_count": 2
+      },
+      {
+        "base_start": 161,
+        "base_count": 5,
+        "current_start": 158,
+        "current_count": 1
+      },
+      {
+        "base_start": 172,
+        "base_count": 1,
+        "current_start": 165,
+        "current_count": 1
+      },
+      {
+        "base_start": 176,
+        "base_count": 1,
+        "current_start": 169,
+        "current_count": 1
+      },
+      {
+        "base_start": 192,
+        "base_count": 1,
+        "current_start": 185,
+        "current_count": 4
+      },
+      {
+        "base_start": 196,
+        "base_count": 2,
+        "current_start": 192,
+        "current_count": 2
+      },
+      {
+        "base_start": 199,
+        "base_count": 5,
+        "current_start": 195,
+        "current_count": 1
+      },
+      {
+        "base_start": 210,
+        "base_count": 1,
+        "current_start": 202,
+        "current_count": 1
+      },
+      {
+        "base_start": 214,
+        "base_count": 1,
+        "current_start": 206,
+        "current_count": 1
+      },
+      {
+        "base_start": 230,
+        "base_count": 1,
+        "current_start": 222,
+        "current_count": 4
+      },
+      {
+        "base_start": 234,
+        "base_count": 2,
+        "current_start": 229,
+        "current_count": 2
+      },
+      {
+        "base_start": 237,
+        "base_count": 5,
+        "current_start": 232,
+        "current_count": 1
+      },
+      {
+        "base_start": 248,
+        "base_count": 2,
+        "current_start": 239,
+        "current_count": 2
+      },
+      {
+        "base_start": 252,
+        "base_count": 1,
+        "current_start": 243,
+        "current_count": 1
+      },
+      {
+        "base_start": 254,
+        "base_count": 1,
+        "current_start": 245,
+        "current_count": 1
+      },
+      {
+        "base_start": 257,
+        "base_count": 1,
+        "current_start": 248,
+        "current_count": 1
+      },
+      {
+        "base_start": 268,
+        "base_count": 1,
+        "current_start": 259,
+        "current_count": 4
+      },
+      {
+        "base_start": 272,
+        "base_count": 2,
+        "current_start": 266,
+        "current_count": 2
+      },
+      {
+        "base_start": 275,
+        "base_count": 5,
+        "current_start": 269,
+        "current_count": 1
+      },
+      {
+        "base_start": 286,
+        "base_count": 1,
+        "current_start": 276,
+        "current_count": 1
+      },
+      {
+        "base_start": 300,
+        "base_count": 8,
+        "current_start": 290,
+        "current_count": 1
+      },
+      {
+        "base_start": 323,
+        "base_count": 1,
+        "current_start": 306,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C009; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C009"
+    ],
+    "proposals": [
+      "FPT-091"
+    ],
+    "base_sha256": "be37191c048c1b40651e1e7d53a75e0e71f2766e2ba9fce4ca8adf73e50038ad",
+    "current_sha256": "75725ac0e25041a681382cafcd60cdcead480c0c6a700e094e1bb13668fc4b00",
+    "product_pin_sha256": "be37191c048c1b40651e1e7d53a75e0e71f2766e2ba9fce4ca8adf73e50038ad",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 115,
+        "base_count": 4,
+        "current_start": 115,
+        "current_count": 6
+      },
+      {
+        "base_start": 119,
+        "base_count": 0,
+        "current_start": 122,
+        "current_count": 1
+      },
+      {
+        "base_start": 140,
+        "base_count": 1,
+        "current_start": 143,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C010; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C010"
+    ],
+    "proposals": [
+      "FPT-092"
+    ],
+    "base_sha256": "096c16ba91e24d9afc500df29c97ef9a822c22e1478d062da51b68d33731a2b1",
+    "current_sha256": "ffe47de2652fd7dca99d9b3d6141a2725aa03a770712211865fbd272defc6906",
+    "product_pin_sha256": "096c16ba91e24d9afc500df29c97ef9a822c22e1478d062da51b68d33731a2b1",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 48,
+        "base_count": 1,
+        "current_start": 48,
+        "current_count": 2
+      },
+      {
+        "base_start": 82,
+        "base_count": 0,
+        "current_start": 84,
+        "current_count": 2
+      },
+      {
+        "base_start": 115,
+        "base_count": 1,
+        "current_start": 118,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CurveInfo.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+    "current_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+    "product_pin_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECParametersExtensions.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C010; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C010"
+    ],
+    "proposals": [
+      "FPT-092"
+    ],
+    "base_sha256": "b28486df1af31f7a916995e91392a877d3185d50438c30af7ddbc1e12d0f17d4",
+    "current_sha256": "05e16bbbe01261b47a03a96b286c3eb3dfe1c129b9586f7d2c457a3c00c82f96",
+    "product_pin_sha256": "b28486df1af31f7a916995e91392a877d3185d50438c30af7ddbc1e12d0f17d4",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 28,
+        "base_count": 1,
+        "current_start": 28,
+        "current_count": 1
+      },
+      {
+        "base_start": 30,
+        "base_count": 1,
+        "current_start": 30,
+        "current_count": 1
+      },
+      {
+        "base_start": 60,
+        "base_count": 1,
+        "current_start": 60,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C010, CORE-C-C011, CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C010",
+      "CORE-C-C011",
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-092",
+      "FPT-093",
+      "FPT-096"
+    ],
+    "base_sha256": "6a7c5d3ead97b189885e536d0d0a6b7dadfe1a73b4a26c1f13ee4b35d2cc16ab",
+    "current_sha256": "b5da4960c915723491bf70ad610b0652fa722e451a69ce68122a098fdab7e7cb",
+    "product_pin_sha256": "6a7c5d3ead97b189885e536d0d0a6b7dadfe1a73b4a26c1f13ee4b35d2cc16ab",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 118,
+        "base_count": 0,
+        "current_start": 119,
+        "current_count": 6
+      },
+      {
+        "base_start": 122,
+        "base_count": 1,
+        "current_start": 128,
+        "current_count": 1
+      },
+      {
+        "base_start": 155,
+        "base_count": 1,
+        "current_start": 161,
+        "current_count": 1
+      },
+      {
+        "base_start": 178,
+        "base_count": 1,
+        "current_start": 184,
+        "current_count": 1
+      },
+      {
+        "base_start": 207,
+        "base_count": 4,
+        "current_start": 213,
+        "current_count": 5
+      },
+      {
+        "base_start": 227,
+        "base_count": 1,
+        "current_start": 234,
+        "current_count": 1
+      },
+      {
+        "base_start": 288,
+        "base_count": 1,
+        "current_start": 295,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C009, CORE-C-C010; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C009",
+      "CORE-C-C010"
+    ],
+    "proposals": [
+      "FPT-091",
+      "FPT-092"
+    ],
+    "base_sha256": "82c326cbf96868e1b7b9b8490534450b81231794dd96fd64881c85daf39f29e9",
+    "current_sha256": "e9f9d6b291e8b93e310154f3e070fcca11fbfef0f1ec249c033cc4c44c485a13",
+    "product_pin_sha256": "82c326cbf96868e1b7b9b8490534450b81231794dd96fd64881c85daf39f29e9",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 23,
+        "base_count": 3,
+        "current_start": 23,
+        "current_count": 4
+      },
+      {
+        "base_start": 64,
+        "base_count": 0,
+        "current_start": 66,
+        "current_count": 4
+      },
+      {
+        "base_start": 191,
+        "base_count": 1,
+        "current_start": 196,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/EcdhPrimitives.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "212452f774a2b1fe5b440dc08ef3684658e273db19d99fc03c787f24a6c9aa0c",
+    "current_sha256": "212452f774a2b1fe5b440dc08ef3684658e273db19d99fc03c787f24a6c9aa0c",
+    "product_pin_sha256": "212452f774a2b1fe5b440dc08ef3684658e273db19d99fc03c787f24a6c9aa0c",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/IArkgPrimitives.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C011, CORE-C-C018; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C011",
+      "CORE-C-C018"
+    ],
+    "proposals": [
+      "FPT-093",
+      "FPT-100"
+    ],
+    "base_sha256": "de84102c65c5174c3b4992b080b39829beb49ce62029fb8781a0756e7c87df71",
+    "current_sha256": "e2e6a3d3fd2cccc655db0a1a93e3ec1896d43aa0b513dced58e676c36f7dfb6a",
+    "product_pin_sha256": "de84102c65c5174c3b4992b080b39829beb49ce62029fb8781a0756e7c87df71",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 50,
+        "base_count": 2,
+        "current_start": 50,
+        "current_count": 2
+      },
+      {
+        "base_start": 62,
+        "base_count": 3,
+        "current_start": 62,
+        "current_count": 2
+      },
+      {
+        "base_start": 74,
+        "base_count": 1,
+        "current_start": 73,
+        "current_count": 3
+      },
+      {
+        "base_start": 81,
+        "base_count": 1,
+        "current_start": 82,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ICmacPrimitives.cs",
+    "action": "RETAIN",
+    "reason": "Retain the narrow internal operation summaries: they promise neither all-buffer erasure nor public substitution. Alternate OpenSSL helper cleanup is documented at its actual implementation.",
+    "candidates": [
+      "CORE-C-C013"
+    ],
+    "proposals": [
+      "FPT-095"
+    ],
+    "base_sha256": "35e581309105f2e3502121d41453e2ad54a43ff7d8f54aff0085fb987800b9a2",
+    "current_sha256": "35e581309105f2e3502121d41453e2ad54a43ff7d8f54aff0085fb987800b9a2",
+    "product_pin_sha256": "35e581309105f2e3502121d41453e2ad54a43ff7d8f54aff0085fb987800b9a2",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C013; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C013"
+    ],
+    "proposals": [
+      "FPT-095"
+    ],
+    "base_sha256": "a650aa81dc6c555b543a218e671aea61e945deed94f7094cf505c0548359fe4f",
+    "current_sha256": "d18fde691b1a4316a1b0a582a39c76a0a9a5192a099bd36e28e4949df1076493",
+    "product_pin_sha256": "a650aa81dc6c555b543a218e671aea61e945deed94f7094cf505c0548359fe4f",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 31,
+        "base_count": 3,
+        "current_start": 31,
+        "current_count": 4
+      },
+      {
+        "base_start": 36,
+        "base_count": 1,
+        "current_start": 37,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/IKeyBase.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "0df7a9691d6c628cb86bd4a1b899595b86b1a2aa0c8ac92d84b911ba37e90fb9",
+    "current_sha256": "0df7a9691d6c628cb86bd4a1b899595b86b1a2aa0c8ac92d84b911ba37e90fb9",
+    "product_pin_sha256": "0df7a9691d6c628cb86bd4a1b899595b86b1a2aa0c8ac92d84b911ba37e90fb9",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPrivateKey.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "a5e02fcf62680464795ad5b4f323b08cc3676803184086994347fffc31614d2d",
+    "current_sha256": "a5e02fcf62680464795ad5b4f323b08cc3676803184086994347fffc31614d2d",
+    "product_pin_sha256": "a5e02fcf62680464795ad5b4f323b08cc3676803184086994347fffc31614d2d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-099"
+    ],
+    "base_sha256": "f2e9ffb6ec2ebe821e37a32ce5517554948d3f698fe06bbbd8974f3be5256b2c",
+    "current_sha256": "f4d100755cc3130896c3cca87a8a8e9e191aa2478be12ed60ca564f7a36081f6",
+    "product_pin_sha256": "f2e9ffb6ec2ebe821e37a32ce5517554948d3f698fe06bbbd8974f3be5256b2c",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 24,
+        "base_count": 1,
+        "current_start": 24,
+        "current_count": 1
+      },
+      {
+        "base_start": 35,
+        "base_count": 3,
+        "current_start": 35,
+        "current_count": 8
+      },
+      {
+        "base_start": 42,
+        "base_count": 1,
+        "current_start": 47,
+        "current_count": 1
+      },
+      {
+        "base_start": 46,
+        "base_count": 1,
+        "current_start": 51,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPublicKey.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "e67be70749b5ca6cf534d1f3932e718f87e6af834b422e6fb2aa035915990508",
+    "current_sha256": "e67be70749b5ca6cf534d1f3932e718f87e6af834b422e6fb2aa035915990508",
+    "product_pin_sha256": "e67be70749b5ca6cf534d1f3932e718f87e6af834b422e6fb2aa035915990508",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/IPublicKeyExtensions.cs",
+    "action": "RETAIN",
+    "reason": "Retain the ordinary checked-cast summary and body. It has no fake type/helper example or special cryptographic safety promise; the stale private-key example is corrected separately.",
+    "candidates": [
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-099"
+    ],
+    "base_sha256": "22310de0be252b46e787a4cc48fbb68bf6e303a53634cf0d09e3797935753cd9",
+    "current_sha256": "22310de0be252b46e787a4cc48fbb68bf6e303a53634cf0d09e3797935753cd9",
+    "product_pin_sha256": "22310de0be252b46e787a4cc48fbb68bf6e303a53634cf0d09e3797935753cd9",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/KeyInfo.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "9e48f5e0e3cdbd62f9d5c64a6b5fe84f3e3ca629e5865b8750749079507ec465",
+    "current_sha256": "9e48f5e0e3cdbd62f9d5c64a6b5fe84f3e3ca629e5865b8750749079507ec465",
+    "product_pin_sha256": "9e48f5e0e3cdbd62f9d5c64a6b5fe84f3e3ca629e5865b8750749079507ec465",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/KeyType.cs",
+    "action": "RETAIN",
+    "reason": "Retain correct concrete identity/nominal-width descriptions and explicit stable IDs; no provider, device, operation-default or approval claim needs a local rewrite.",
+    "candidates": [
+      "CORE-C-C015"
+    ],
+    "proposals": [
+      "FPT-097"
+    ],
+    "base_sha256": "4ccb9fda8061067084e070c682b4a535bda038a4f3382224c2ade229328c7e8d",
+    "current_sha256": "4ccb9fda8061067084e070c682b4a535bda038a4f3382224c2ade229328c7e8d",
+    "product_pin_sha256": "4ccb9fda8061067084e070c682b4a535bda038a4f3382224c2ade229328c7e8d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "bb760af5e5690885675018e5be005770f9c97f6c4f7497fa502c684135294bdb",
+    "current_sha256": "bb760af5e5690885675018e5be005770f9c97f6c4f7497fa502c684135294bdb",
+    "product_pin_sha256": "bb760af5e5690885675018e5be005770f9c97f6c4f7497fa502c684135294bdb",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Oids.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "31af57e783095af7a7d62939706e81efc6974085577c15699975b472f721c2e2",
+    "current_sha256": "31af57e783095af7a7d62939706e81efc6974085577c15699975b472f721c2e2",
+    "product_pin_sha256": "31af57e783095af7a7d62939706e81efc6974085577c15699975b472f721c2e2",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/PrivateKey.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-099"
+    ],
+    "base_sha256": "0f0750a2111dd64df4a7ea23bd0ad7fe3ab5a2dc39dc4737e35d4a044def753e",
+    "current_sha256": "db8b4268ed403aa80d262c308e99b391124535d05f9503f698fbddadc5e7a8da",
+    "product_pin_sha256": "0f0750a2111dd64df4a7ea23bd0ad7fe3ab5a2dc39dc4737e35d4a044def753e",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 21,
+        "base_count": 2,
+        "current_start": 21,
+        "current_count": 4
+      },
+      {
+        "base_start": 76,
+        "base_count": 1,
+        "current_start": 78,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C010, CORE-C-C011; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C010",
+      "CORE-C-C011"
+    ],
+    "proposals": [
+      "FPT-092",
+      "FPT-093"
+    ],
+    "base_sha256": "33ed0a5a993eb4103a8d1ffb7fe0b5f6deac91b7c6b683293eaea64020ee9452",
+    "current_sha256": "3d6c47f447a20766ea20a3a7e9c7feb661639c02b588a8c60dd32a7121cbbda0",
+    "product_pin_sha256": "33ed0a5a993eb4103a8d1ffb7fe0b5f6deac91b7c6b683293eaea64020ee9452",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 41,
+        "base_count": 1,
+        "current_start": 41,
+        "current_count": 1
+      },
+      {
+        "base_start": 52,
+        "base_count": 3,
+        "current_start": 52,
+        "current_count": 2
+      },
+      {
+        "base_start": 78,
+        "base_count": 3,
+        "current_start": 77,
+        "current_count": 3
+      },
+      {
+        "base_start": 121,
+        "base_count": 1,
+        "current_start": 120,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/PublicKey.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "338ae06b1b5fb64f401a86bc9eed7ac5f2180f6f7c1c7d247c758fddd8a2056d",
+    "current_sha256": "338ae06b1b5fb64f401a86bc9eed7ac5f2180f6f7c1c7d247c758fddd8a2056d",
+    "product_pin_sha256": "338ae06b1b5fb64f401a86bc9eed7ac5f2180f6f7c1c7d247c758fddd8a2056d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C010, CORE-C-C013, CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C010",
+      "CORE-C-C013",
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-092",
+      "FPT-095",
+      "FPT-096"
+    ],
+    "base_sha256": "c854a473d228470fa7741966cfa09476cc85f24871cde14721829449aca106ab",
+    "current_sha256": "45a6c27b898b24aeefc1681b21e561e3566f010244a7283aacc89b9cfd7459c9",
+    "product_pin_sha256": "c854a473d228470fa7741966cfa09476cc85f24871cde14721829449aca106ab",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 25,
+        "base_count": 1,
+        "current_start": 25,
+        "current_count": 1
+      },
+      {
+        "base_start": 44,
+        "base_count": 5,
+        "current_start": 44,
+        "current_count": 4
+      },
+      {
+        "base_start": 55,
+        "base_count": 1,
+        "current_start": 54,
+        "current_count": 1
+      },
+      {
+        "base_start": 138,
+        "base_count": 1,
+        "current_start": 137,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/RSAPrivateKey.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C009, CORE-C-C010, CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C009",
+      "CORE-C-C010",
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-091",
+      "FPT-092",
+      "FPT-096"
+    ],
+    "base_sha256": "822528251bae1f3ede0c755b81bdaaab61496e71a13fd2fea2429740fa4d6bd7",
+    "current_sha256": "f65cd61ee52425ab9e952a2eee5e987ae7ece24f2826493d5a2731334ac50072",
+    "product_pin_sha256": "822528251bae1f3ede0c755b81bdaaab61496e71a13fd2fea2429740fa4d6bd7",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 25,
+        "base_count": 1,
+        "current_start": 25,
+        "current_count": 3
+      },
+      {
+        "base_start": 110,
+        "base_count": 0,
+        "current_start": 113,
+        "current_count": 6
+      },
+      {
+        "base_start": 114,
+        "base_count": 1,
+        "current_start": 122,
+        "current_count": 1
+      },
+      {
+        "base_start": 155,
+        "base_count": 1,
+        "current_start": 163,
+        "current_count": 1
+      },
+      {
+        "base_start": 160,
+        "base_count": 1,
+        "current_start": 168,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/RSAPublicKey.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C009, CORE-C-C010; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C009",
+      "CORE-C-C010"
+    ],
+    "proposals": [
+      "FPT-091",
+      "FPT-092"
+    ],
+    "base_sha256": "733b3dc1f974c000459b18cdc5a4e2589eea55dcebb88c4c91dad509582d6a8d",
+    "current_sha256": "54784fc400d7221094f4111fb69db34ef1bcb959450965f8d0500cdb663eb5f5",
+    "product_pin_sha256": "733b3dc1f974c000459b18cdc5a4e2589eea55dcebb88c4c91dad509582d6a8d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 29,
+        "base_count": 1,
+        "current_start": 29,
+        "current_count": 1
+      },
+      {
+        "base_start": 32,
+        "base_count": 1,
+        "current_start": 32,
+        "current_count": 1
+      },
+      {
+        "base_start": 35,
+        "base_count": 2,
+        "current_start": 35,
+        "current_count": 3
+      },
+      {
+        "base_start": 106,
+        "base_count": 0,
+        "current_start": 108,
+        "current_count": 5
+      },
+      {
+        "base_start": 111,
+        "base_count": 1,
+        "current_start": 117,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/RsaFormat.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53",
+    "current_sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53",
+    "product_pin_sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/X963Kdf.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C013; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C013"
+    ],
+    "proposals": [
+      "FPT-095"
+    ],
+    "base_sha256": "19726ba3b2398fc710a15afd0af7d8202f96713d6ba782ea323b2384c5033a6d",
+    "current_sha256": "99dbc7e0cd8468c2f3febeaf6fdbdfc2aa46b3373d5baad10a8b481541f6abf4",
+    "product_pin_sha256": "19726ba3b2398fc710a15afd0af7d8202f96713d6ba782ea323b2384c5033a6d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 29,
+        "base_count": 0,
+        "current_start": 30,
+        "current_count": 5
+      },
+      {
+        "base_start": 77,
+        "base_count": 1,
+        "current_start": 82,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/Base32.cs",
+    "action": "RETAIN",
+    "reason": "Retain the exact already-correct case/space/padding/empty/pad-bit, overlap admission, failure clear, successful tail and caller-owned output wording. Resolved OATH Base32 source scopes remain resolved, with OATH nonempty policy separate.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+    "current_sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+    "product_pin_sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/BerLength.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C007; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C007"
+    ],
+    "proposals": [
+      "FPT-089"
+    ],
+    "base_sha256": "1bc5304ce9444fe0f0e068748246875e5344453806b5a49f84453cf596cbf920",
+    "current_sha256": "da923dae9ab0248000b149cae26611cd20ef7a84d4eca023bb8f3cec3bd65698",
+    "product_pin_sha256": "1bc5304ce9444fe0f0e068748246875e5344453806b5a49f84453cf596cbf920",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 18,
+        "base_count": 1,
+        "current_start": 18,
+        "current_count": 1
+      },
+      {
+        "base_start": 19,
+        "base_count": 0,
+        "current_start": 20,
+        "current_count": 1
+      },
+      {
+        "base_start": 56,
+        "base_count": 1,
+        "current_start": 57,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/ByteUtils.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "4d79076d1895f41a7d2bf3509902b0e807dfaf66ab4a12591450d65e3a4359b2",
+    "current_sha256": "4d79076d1895f41a7d2bf3509902b0e807dfaf66ab4a12591450d65e3a4359b2",
+    "product_pin_sha256": "4d79076d1895f41a7d2bf3509902b0e807dfaf66ab4a12591450d65e3a4359b2",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/Crc13239.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "5d35425361675fc7ec4e8ee4c21203e17bf9f7af9677fc9c3e7d1c22a0d49619",
+    "current_sha256": "5d35425361675fc7ec4e8ee4c21203e17bf9f7af9677fc9c3e7d1c22a0d49619",
+    "product_pin_sha256": "5d35425361675fc7ec4e8ee4c21203e17bf9f7af9677fc9c3e7d1c22a0d49619",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C005; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C005"
+    ],
+    "proposals": [
+      "FPT-087"
+    ],
+    "base_sha256": "b2199a37a76357c932c61b65d6c214a2e31cc1be94353c239788779bcae554ba",
+    "current_sha256": "6a1a905f9c9b655f5d0c617891a78e0d8dfa7f9e40ff497798d0b2e292495724",
+    "product_pin_sha256": "b2199a37a76357c932c61b65d6c214a2e31cc1be94353c239788779bcae554ba",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 23,
+        "base_count": 0,
+        "current_start": 24,
+        "current_count": 5
+      },
+      {
+        "base_start": 85,
+        "base_count": 1,
+        "current_start": 90,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableBufferHandle.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C005; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C005"
+    ],
+    "proposals": [
+      "FPT-087"
+    ],
+    "base_sha256": "187f5c02860d98ab457dd0dfe2bef57d08b9189bffa0241a69dc68427f51ed03",
+    "current_sha256": "3f2a3b6c5c9b7f8e31fbd16eccf382df7e66fa8663520b8969774a07a708b980",
+    "product_pin_sha256": "187f5c02860d98ab457dd0dfe2bef57d08b9189bffa0241a69dc68427f51ed03",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 27,
+        "base_count": 2,
+        "current_start": 27,
+        "current_count": 3
+      },
+      {
+        "base_start": 56,
+        "base_count": 1,
+        "current_start": 57,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableTlvDictionary.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "8c4d4a149f4eb80f2623f62e0ef043932d66f6502057b6946a9eb231e00e6b2f",
+    "current_sha256": "8c4d4a149f4eb80f2623f62e0ef043932d66f6502057b6946a9eb231e00e6b2f",
+    "product_pin_sha256": "8c4d4a149f4eb80f2623f62e0ef043932d66f6502057b6946a9eb231e00e6b2f",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableTlvList.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C005; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C005"
+    ],
+    "proposals": [
+      "FPT-087"
+    ],
+    "base_sha256": "c56ad000fa7303169ec3aff3c33a1bee0c4ce615784bb2384aad2b33c6e2aa49",
+    "current_sha256": "13aaaf632d7d18748b07d902e705877f199d79e547bb49fe2600fa0f9bb90bdf",
+    "product_pin_sha256": "c56ad000fa7303169ec3aff3c33a1bee0c4ce615784bb2384aad2b33c6e2aa49",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 24,
+        "base_count": 2,
+        "current_start": 24,
+        "current_count": 3
+      },
+      {
+        "base_start": 91,
+        "base_count": 1,
+        "current_start": 92,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/MemoryExtensions.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C005; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C005"
+    ],
+    "proposals": [
+      "FPT-087"
+    ],
+    "base_sha256": "19c1eb8cbd96a137e7e3935ad207e160de20f5e653e1b88cbc5ac7b476a42e2a",
+    "current_sha256": "98505ef4490a1596f9a8a071b70dc60fad435d3f86a75a9ea4b81d4ac1669cf9",
+    "product_pin_sha256": "19c1eb8cbd96a137e7e3935ad207e160de20f5e653e1b88cbc5ac7b476a42e2a",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 16,
+        "base_count": 0,
+        "current_start": 17,
+        "current_count": 1
+      },
+      {
+        "base_start": 18,
+        "base_count": 0,
+        "current_start": 20,
+        "current_count": 1
+      },
+      {
+        "base_start": 23,
+        "base_count": 0,
+        "current_start": 26,
+        "current_count": 1
+      },
+      {
+        "base_start": 26,
+        "base_count": 0,
+        "current_start": 30,
+        "current_count": 1
+      },
+      {
+        "base_start": 39,
+        "base_count": 1,
+        "current_start": 43,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/MultiString.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "45adcedd24700ced17e77bcd758de47b33ad50f1168d5b1c3446009ee7c13735",
+    "current_sha256": "45adcedd24700ced17e77bcd758de47b33ad50f1168d5b1c3446009ee7c13735",
+    "product_pin_sha256": "45adcedd24700ced17e77bcd758de47b33ad50f1168d5b1c3446009ee7c13735",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/Tlv.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C005, CORE-C-C007; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C005",
+      "CORE-C-C007"
+    ],
+    "proposals": [
+      "FPT-087",
+      "FPT-089"
+    ],
+    "base_sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+    "current_sha256": "dfdf9731f0f4521b6749afda8506a9fa2a3a6d0a68fa437383adab1739eef028",
+    "product_pin_sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 22,
+        "base_count": 2,
+        "current_start": 22,
+        "current_count": 1
+      },
+      {
+        "base_start": 24,
+        "base_count": 0,
+        "current_start": 24,
+        "current_count": 6
+      },
+      {
+        "base_start": 40,
+        "base_count": 1,
+        "current_start": 45,
+        "current_count": 1
+      },
+      {
+        "base_start": 63,
+        "base_count": 1,
+        "current_start": 68,
+        "current_count": 1
+      },
+      {
+        "base_start": 64,
+        "base_count": 0,
+        "current_start": 70,
+        "current_count": 1
+      },
+      {
+        "base_start": 79,
+        "base_count": 1,
+        "current_start": 85,
+        "current_count": 1
+      },
+      {
+        "base_start": 154,
+        "base_count": 1,
+        "current_start": 160,
+        "current_count": 1
+      },
+      {
+        "base_start": 157,
+        "base_count": 1,
+        "current_start": 163,
+        "current_count": 1
+      },
+      {
+        "base_start": 160,
+        "base_count": 2,
+        "current_start": 166,
+        "current_count": 2
+      },
+      {
+        "base_start": 181,
+        "base_count": 1,
+        "current_start": 187,
+        "current_count": 1
+      },
+      {
+        "base_start": 205,
+        "base_count": 1,
+        "current_start": 211,
+        "current_count": 1
+      },
+      {
+        "base_start": 275,
+        "base_count": 1,
+        "current_start": 281,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/Utilities/TlvHelper.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C006, CORE-C-C007; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C006",
+      "CORE-C-C007"
+    ],
+    "proposals": [
+      "FPT-088",
+      "FPT-089"
+    ],
+    "base_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+    "current_sha256": "af4e21d6a3913c38bf3c7e3f1afbe8ee1625e3c355facebbb2ab85d696fbe1ab",
+    "product_pin_sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 32,
+        "base_count": 1,
+        "current_start": 32,
+        "current_count": 1
+      },
+      {
+        "base_start": 78,
+        "base_count": 0,
+        "current_start": 79,
+        "current_count": 5
+      },
+      {
+        "base_start": 203,
+        "base_count": 0,
+        "current_start": 209,
+        "current_count": 3
+      },
+      {
+        "base_start": 269,
+        "base_count": 1,
+        "current_start": 277,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/src/YubiKitLogging.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C008; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C008"
+    ],
+    "proposals": [
+      "FPT-090"
+    ],
+    "base_sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "current_sha256": "a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b",
+    "product_pin_sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 19,
+        "base_count": 0,
+        "current_start": 20,
+        "current_count": 7
+      },
+      {
+        "base_start": 23,
+        "base_count": 0,
+        "current_start": 31,
+        "current_count": 1
+      },
+      {
+        "base_start": 50,
+        "base_count": 1,
+        "current_start": 58,
+        "current_count": 1
+      },
+      {
+        "base_start": 51,
+        "base_count": 0,
+        "current_start": 60,
+        "current_count": 5
+      },
+      {
+        "base_start": 69,
+        "base_count": 1,
+        "current_start": 82,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C002, CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C002",
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-084",
+      "FPT-096"
+    ],
+    "base_sha256": "1941f01c541936c018b5b2bab91f870f7d99ced69dc1618fde85e95b6b1347c7",
+    "current_sha256": "4c5cba1c0c827f8a15cb3c545672e183252d9244a647a019ecc723435eb2b537",
+    "product_pin_sha256": "1941f01c541936c018b5b2bab91f870f7d99ced69dc1618fde85e95b6b1347c7",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 47,
+        "base_count": 3,
+        "current_start": 47,
+        "current_count": 3
+      },
+      {
+        "base_start": 55,
+        "base_count": 1,
+        "current_start": 55,
+        "current_count": 1
+      },
+      {
+        "base_start": 200,
+        "base_count": 1,
+        "current_start": 200,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C007, CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C007",
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-089",
+      "FPT-096"
+    ],
+    "base_sha256": "98aad4a9a600347f4aba9fc11a2bebf5706a6e0841c3c9b042de0ffcdfe5b855",
+    "current_sha256": "ecaa0167ed46ba84809f1789d121d0bbba314e6e6e6a3951cf87020e6a910c48",
+    "product_pin_sha256": "98aad4a9a600347f4aba9fc11a2bebf5706a6e0841c3c9b042de0ffcdfe5b855",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 57,
+        "base_count": 2,
+        "current_start": 57,
+        "current_count": 2
+      },
+      {
+        "base_start": 70,
+        "base_count": 2,
+        "current_start": 70,
+        "current_count": 2
+      },
+      {
+        "base_start": 122,
+        "base_count": 2,
+        "current_start": 122,
+        "current_count": 2
+      },
+      {
+        "base_start": 185,
+        "base_count": 1,
+        "current_start": 185,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/ConsoleCredentialReaderTests.cs",
+    "action": "RETAIN",
+    "reason": "Retain the pre-cancelled no-keys fixture: it actually tests waiting-key polling. No queued-key or redirected guarantee is added; responsiveness probes remain unrun.",
+    "candidates": [
+      "CORE-C-C004"
+    ],
+    "proposals": [
+      "FPT-086"
+    ],
+    "base_sha256": "d6e02a1f3fcbee186b6d465db79fd1dff4b744f032a8c5681cae281d103916aa",
+    "current_sha256": "d6e02a1f3fcbee186b6d465db79fd1dff4b744f032a8c5681cae281d103916aa",
+    "product_pin_sha256": "d6e02a1f3fcbee186b6d465db79fd1dff4b744f032a8c5681cae281d103916aa",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/HexParsingTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "88b9e489b25d68f425b6320d36a84a213bb882b8d3a66db4e092e304ae39cea4",
+    "current_sha256": "88b9e489b25d68f425b6320d36a84a213bb882b8d3a66db4e092e304ae39cea4",
+    "product_pin_sha256": "88b9e489b25d68f425b6320d36a84a213bb882b8d3a66db4e092e304ae39cea4",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/UserPresenceIntentTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9",
+    "current_sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9",
+    "product_pin_sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AlgorithmIdentifierParameterTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "1e392325edcc90d627a0dfd65a1f58a912c2fe20f5adacffc536f70352d9f768",
+    "current_sha256": "1e392325edcc90d627a0dfd65a1f58a912c2fe20f5adacffc536f70352d9f768",
+    "product_pin_sha256": "1e392325edcc90d627a0dfd65a1f58a912c2fe20f5adacffc536f70352d9f768",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C018, CORE-C-C019; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C018",
+      "CORE-C-C019"
+    ],
+    "proposals": [
+      "FPT-100",
+      "FPT-101"
+    ],
+    "base_sha256": "7e38f085fe9613495c36593698f272af2f6c1b837c2bb5baa7cc6764e1adc61a",
+    "current_sha256": "de9ee73e9d918441d66e3f71cc0197c1105b4625f30185fa2a987612b7215fc0",
+    "product_pin_sha256": "7e38f085fe9613495c36593698f272af2f6c1b837c2bb5baa7cc6764e1adc61a",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 22,
+        "base_count": 4,
+        "current_start": 22,
+        "current_count": 5
+      },
+      {
+        "base_start": 29,
+        "base_count": 2,
+        "current_start": 30,
+        "current_count": 2
+      },
+      {
+        "base_start": 110,
+        "base_count": 1,
+        "current_start": 111,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C013, CORE-C-C014, CORE-C-C016; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C013",
+      "CORE-C-C014",
+      "CORE-C-C016"
+    ],
+    "proposals": [
+      "FPT-095",
+      "FPT-096",
+      "FPT-098"
+    ],
+    "base_sha256": "96d55cf3bf798ac6aa1abf65e6071929950a12fb854b62efc3a8149e7a00357f",
+    "current_sha256": "375581b5321b6b8c4975d137c17e389d27e2ab7ea7b11c221fb51dbb20bafd44",
+    "product_pin_sha256": "96d55cf3bf798ac6aa1abf65e6071929950a12fb854b62efc3a8149e7a00357f",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 119,
+        "base_count": 0,
+        "current_start": 120,
+        "current_count": 2
+      },
+      {
+        "base_start": 571,
+        "base_count": 1,
+        "current_start": 573,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C013, CORE-C-C014, CORE-C-C016; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C013",
+      "CORE-C-C014",
+      "CORE-C-C016"
+    ],
+    "proposals": [
+      "FPT-095",
+      "FPT-096",
+      "FPT-098"
+    ],
+    "base_sha256": "4d8d414b0d919896747822cf7527511dbe0da6fe08ad7d56965e4720d7734810",
+    "current_sha256": "4051b8ba7c567249aeb6871d2eb5864a52b2c652cb24c93977f960dc6b272145",
+    "product_pin_sha256": "4d8d414b0d919896747822cf7527511dbe0da6fe08ad7d56965e4720d7734810",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 466,
+        "base_count": 0,
+        "current_start": 467,
+        "current_count": 2
+      },
+      {
+        "base_start": 551,
+        "base_count": 1,
+        "current_start": 553,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+    "current_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+    "product_pin_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-099"
+    ],
+    "base_sha256": "8c26a047ed360a4e865ab21a6c44a117afd8e6b42e30b9547db37efb5084bd2a",
+    "current_sha256": "3ba5f002966c4566ff894a214079b9c570167304dd1a7b512a898640febbfaf6",
+    "product_pin_sha256": "8c26a047ed360a4e865ab21a6c44a117afd8e6b42e30b9547db37efb5084bd2a",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 249,
+        "base_count": 1,
+        "current_start": 249,
+        "current_count": 1
+      },
+      {
+        "base_start": 266,
+        "base_count": 1,
+        "current_start": 266,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-099"
+    ],
+    "base_sha256": "c9b43fcff740c1c79fe56585f1b1e7fa798a4493f111f7c075f036a52775974f",
+    "current_sha256": "d66e1e5976ce1090b6545cacefba11e4f66c07f4e060d417e58cd94bfd6a511b",
+    "product_pin_sha256": "c9b43fcff740c1c79fe56585f1b1e7fa798a4493f111f7c075f036a52775974f",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 124,
+        "base_count": 2,
+        "current_start": 124,
+        "current_count": 3
+      },
+      {
+        "base_start": 334,
+        "base_count": 1,
+        "current_start": 335,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C015; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C015"
+    ],
+    "proposals": [
+      "FPT-097"
+    ],
+    "base_sha256": "a3a10aa9f03a9c9c38023c03a8a0518dd36d822273ebf6016f9f9b9de7787001",
+    "current_sha256": "3d176b07a6c9ee5a51c88efbf49e06fb9273d54f6d42bbb96207655a718cad8a",
+    "product_pin_sha256": "a3a10aa9f03a9c9c38023c03a8a0518dd36d822273ebf6016f9f9b9de7787001",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 51,
+        "base_count": 1,
+        "current_start": 51,
+        "current_count": 2
+      },
+      {
+        "base_start": 103,
+        "base_count": 1,
+        "current_start": 104,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicDefinitionsTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "26d450371b0ad0de2af0a23a5f5f4ad36cc2ea1c9c38f964adb272017bb4ce00",
+    "current_sha256": "26d450371b0ad0de2af0a23a5f5f4ad36cc2ea1c9c38f964adb272017bb4ce00",
+    "product_pin_sha256": "26d450371b0ad0de2af0a23a5f5f4ad36cc2ea1c9c38f964adb272017bb4ce00",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs",
+    "action": "RETAIN",
+    "reason": "Retain current internal ECDH/CMAC factory and cleanup assertions. Their internal scope is accurate; public replacement/universal-provider claims are corrected in provider XML.",
+    "candidates": [
+      "CORE-C-C012"
+    ],
+    "proposals": [
+      "FPT-094"
+    ],
+    "base_sha256": "b0d78f740745504de4c6e636f2013fbf95ca070938b2483f2f3c993ef3cfc294",
+    "current_sha256": "b0d78f740745504de4c6e636f2013fbf95ca070938b2483f2f3c993ef3cfc294",
+    "product_pin_sha256": "b0d78f740745504de4c6e636f2013fbf95ca070938b2483f2f3c993ef3cfc294",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/Curve25519PrivateKeyTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "7a41e3311bd2d0e8849584a11264437a688c2b416f6cd238630608b351df1ecc",
+    "current_sha256": "7a41e3311bd2d0e8849584a11264437a688c2b416f6cd238630608b351df1ecc",
+    "product_pin_sha256": "7a41e3311bd2d0e8849584a11264437a688c2b416f6cd238630608b351df1ecc",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C017; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C017"
+    ],
+    "proposals": [
+      "FPT-099"
+    ],
+    "base_sha256": "777a5b752a742ee7e31e8b99d99df2f9bbf32c0a72cfe2a0095f8b4f84361597",
+    "current_sha256": "8c9ecb3fbfc3407945111b012b39c4171961ed9c652e07b5dc7d134a406cf0dd",
+    "product_pin_sha256": "777a5b752a742ee7e31e8b99d99df2f9bbf32c0a72cfe2a0095f8b4f84361597",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 39,
+        "base_count": 1,
+        "current_start": 39,
+        "current_count": 1
+      },
+      {
+        "base_start": 41,
+        "base_count": 1,
+        "current_start": 41,
+        "current_count": 1
+      },
+      {
+        "base_start": 59,
+        "base_count": 1,
+        "current_start": 59,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/KnownPrivateKeyVectors.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814",
+    "current_sha256": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814",
+    "product_pin_sha256": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-096"
+    ],
+    "base_sha256": "2e7ab15dfab3dd56d0315674a89071bf6c88e2b383efc2b1a07e27d2537a4a02",
+    "current_sha256": "b0b0ea4eeec11dd117983b4f1cd854bf6a230ac03514d249e0cb1dfc86c7c5c0",
+    "product_pin_sha256": "2e7ab15dfab3dd56d0315674a89071bf6c88e2b383efc2b1a07e27d2537a4a02",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 22,
+        "base_count": 2,
+        "current_start": 22,
+        "current_count": 3
+      },
+      {
+        "base_start": 79,
+        "base_count": 1,
+        "current_start": 80,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+    "current_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+    "product_pin_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-096"
+    ],
+    "base_sha256": "d8fa24441e36092acdb7b1e7d839cfd841bc3bc33f95546a1a21a5051a561e2d",
+    "current_sha256": "c40f52063e35bbd97a0f1ab60c9a4b1e25a03cc7af20615be4aee6ff5333feff",
+    "product_pin_sha256": "d8fa24441e36092acdb7b1e7d839cfd841bc3bc33f95546a1a21a5051a561e2d",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 295,
+        "base_count": 0,
+        "current_start": 296,
+        "current_count": 2
+      },
+      {
+        "base_start": 454,
+        "base_count": 1,
+        "current_start": 456,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyZeroingFollowupTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "9ed00911dd78fa126730664aebe3e658bac914db05826d1e45b72b03f40b7b99",
+    "current_sha256": "9ed00911dd78fa126730664aebe3e658bac914db05826d1e45b72b03f40b7b99",
+    "product_pin_sha256": "9ed00911dd78fa126730664aebe3e658bac914db05826d1e45b72b03f40b7b99",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+    "current_sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+    "product_pin_sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableArrayPoolBufferTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "c769011cc5fd5a1a1b27cd5d51d345ef5413f7c272c5a31e56fd8d5d6b1cf8ec",
+    "current_sha256": "c769011cc5fd5a1a1b27cd5d51d345ef5413f7c272c5a31e56fd8d5d6b1cf8ec",
+    "product_pin_sha256": "c769011cc5fd5a1a1b27cd5d51d345ef5413f7c272c5a31e56fd8d5d6b1cf8ec",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableTlvListTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3",
+    "current_sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3",
+    "product_pin_sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+    "action": "EDIT",
+    "reason": "Documentation-only edits for CORE-C-C006, CORE-C-C007, CORE-C-C014; see candidate_actions and exact diff. Other correct local context retained.",
+    "candidates": [
+      "CORE-C-C006",
+      "CORE-C-C007",
+      "CORE-C-C014"
+    ],
+    "proposals": [
+      "FPT-088",
+      "FPT-089",
+      "FPT-096"
+    ],
+    "base_sha256": "542c922ed5911320b517d5cfae7f524d276e43af52ac8372b0a102cdb2c4fbd9",
+    "current_sha256": "03cd00c4c169df7f097684c14545575bf3bdcb3e102bba8bd237cc9309645afb",
+    "product_pin_sha256": "542c922ed5911320b517d5cfae7f524d276e43af52ac8372b0a102cdb2c4fbd9",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [
+      {
+        "base_start": 98,
+        "base_count": 1,
+        "current_start": 98,
+        "current_count": 1
+      },
+      {
+        "base_start": 114,
+        "base_count": 1,
+        "current_start": 114,
+        "current_count": 1
+      },
+      {
+        "base_start": 223,
+        "base_count": 1,
+        "current_start": 223,
+        "current_count": 1
+      }
+    ],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvTests.cs",
+    "action": "RETAIN",
+    "reason": "No released local correction requires changing this primary file; retain correct current documentation and executable source without style-only churn.",
+    "candidates": [],
+    "proposals": [],
+    "base_sha256": "0de8bda5324ae6b29f00245df91ddae8a6aa33a34b375f703695f655260de92a",
+    "current_sha256": "0de8bda5324ae6b29f00245df91ddae8a6aa33a34b375f703695f655260de92a",
+    "product_pin_sha256": "0de8bda5324ae6b29f00245df91ddae8a6aa33a34b375f703695f655260de92a",
+    "normalized_pin_matches": true,
+    "changed_documentation_ranges": [],
+    "exact_noncomment_lines_preserved": true,
+    "lexical_tokens_preserved": true
+  }
+]

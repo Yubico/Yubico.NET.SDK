@@ -1,0 +1,35 @@
+[
+  {
+    "scope": "SAMPLE-WA-001 fixture oracle comment",
+    "state": "REVIEWED-PASS; TRANSFER-QUEUED AT HANDOFF",
+    "patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+    "current_accepted_after_captured": false
+  },
+  {
+    "scope": "SAMPLE-PGP-001 UIF fallback implementation/guide comments",
+    "state": "REVIEWED-PASS; TRANSFER-QUEUED AT HANDOFF",
+    "patch_sha256": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5",
+    "paths": [
+      "src/OpenPgp/src/OpenPgpSession.cs",
+      "src/OpenPgp/CLAUDE.md"
+    ],
+    "review_record": "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/review-identities.json"
+  },
+  {
+    "scope": "SAMPLE-A003 two-guide propagation",
+    "state": "CORRECTION ASSIGNED; NO COMPLETED REVIEWED PATCH ADMITTED",
+    "confirmed_units": [
+      "core-001:unit:0b5f8163f489c670",
+      "core-001:unit:c2de2d6f26065229"
+    ],
+    "neighbors": "Final exact patch may affect adjacent ranges; canonical reconciliation required."
+  },
+  {
+    "scope": "SAMPLE-TESTING-001 manual runner table",
+    "state": "CORRECTION ASSIGNED; NO COMPLETED REVIEWED PATCH ADMITTED",
+    "confirmed_units": [
+      "core-001:unit:287e6410db16f0e7"
+    ]
+  }
+]

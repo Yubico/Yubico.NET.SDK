@@ -17,6 +17,10 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 /// <summary>
 ///     The exception that is thrown when an ISO 7816 application has encountered an error.
 /// </summary>
+/// <remarks>
+///     When throwOnError is enabled, the Core exchange API throws for any final status other than 0x9000,
+///     including warnings. With it disabled, inspect the returned response's raw status before clearing it.
+/// </remarks>
 [Serializable]
 public class ApduException : Exception
 {

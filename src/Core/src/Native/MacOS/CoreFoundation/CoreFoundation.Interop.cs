@@ -65,6 +65,9 @@ internal static partial class NativeMethods
 
     [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    // ABI finding: Apple LP64 defines CFNumberType with CFIndex width (64 bits), unlike the 32-bit theType
+    // declaration here and in CFNumberGetValue. Current callers request SInt32 using positive value 3;
+    // four-byte value storage is separate from the parameter-width discrepancy. Native effects are unverified.
     internal static partial nint CFNumberCreate(nint allocator, int theType, ref int valuePtr);
 
     [LibraryImport(Libraries.CoreFoundation)]

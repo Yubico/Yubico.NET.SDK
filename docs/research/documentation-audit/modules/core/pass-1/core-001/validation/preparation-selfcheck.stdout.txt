@@ -1,0 +1,94 @@
+{
+  "status": "static-read-only-ready",
+  "logger_context": "Core run only",
+  "historical_parser_counts": {
+    "targets": [
+      "test-infrastructure-qa",
+      "native-aot-contract-qa",
+      "build",
+      "test",
+      "docs-qa",
+      "docs-architecture",
+      "complexity",
+      "resilience",
+      "pack"
+    ],
+    "projects": 14,
+    "executed": 4639,
+    "skipped": 5,
+    "failed": 0,
+    "warnings": 0
+  },
+  "negative_cases": 23,
+  "parsed_python_files": [
+    "foundation.py",
+    "run-command.py",
+    "qualify-logger.py",
+    "check-records.py",
+    "check-preserved.py",
+    "preflight.py",
+    "source-state.py",
+    "native-tokens.py",
+    "selfcheck.py"
+  ],
+  "historical_process_qualification": {
+    "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/logger-v2-qualification-second/qualification.json",
+    "sha256": "de2cc81def1b9575b6fafc81a584a32233f45580aeda726e3b7580d63d1c1fef",
+    "scope": "Read retained qualification only; Core process cases remain unrun."
+  },
+  "participating": {
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "metadata_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+    "files": [
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+        "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+        "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+      },
+      {
+        "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-records.py",
+        "sha256": "e287c3e35d6fec35d125c870125201816dc4d9822ae78ba94d7c0da167eeb3e4"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+        "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+        "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/qualify-logger.py",
+        "sha256": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records.py",
+        "sha256": "1a7ae634c186c7ff999f91a121de6c239ddbee58b157e611b6f9311ecb9230ec"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-preserved.py",
+        "sha256": "316515879bed950f6d5b4d8424ffa30369395ea9d493cbd3925cfaac1467b525"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preflight.py",
+        "sha256": "bd7bac5cd9a7280bfabb8cb92caf559a2a0145a8de93da4fe956be655283fb80"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/source-state.py",
+        "sha256": "772e9b3f4d22ecd8d94eef59979f0f170b7e00b58aedc9d1fa7db53fd830b29b"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/native-tokens.py",
+        "sha256": "20eed44826d59db87788e6b718d89c235d4b7fc4fa71a0d0a25f1242889962f8"
+      },
+      {
+        "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/selfcheck.py",
+        "sha256": "971415fb72705a779abc7ddd96eaf02e11591513d8352940815cd53588bb6f81"
+      }
+    ]
+  },
+  "limits": "No process qualification, compilation, SDK test, native or device execution."
+}

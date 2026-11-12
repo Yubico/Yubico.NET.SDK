@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build --project Yubico.YubiKit.Audit20261111.DocExamples.Full --clean",
+  "started": "2026-11-12T04:37:59.4477435+01:00",
+  "durationSeconds": 3.1,
+  "runDirectory": "artifacts/toolchain/runs/20261112-043759-447-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 3,
+      "error": "`dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-043759-447-build/02-build-Audit20261111.DocExamples.Full.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

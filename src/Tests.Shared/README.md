@@ -6,7 +6,8 @@ This project provides shared infrastructure for YubiKey integration tests across
 
 The test infrastructure provides:
 
-- **Safety-first allow list** - hard-fails when no device is explicitly authorized.
+- **Allow-list authorization** - exits on empty configuration unless unknown serials are enabled;
+  filters rejected devices and raises `SkipException` at row binding when no authorized fixture remains.
 - **Lazy device discovery** - discovers and binds devices at test execution time, not discovery time.
 - **Declarative device filtering** - filters by firmware, form factor, connection type, capabilities, FIPS state, and custom predicates.
 - **Parameterized testing** - standard xUnit `[Theory]` tests receive `YubiKeyTestState` values from `[WithYubiKey]`.
@@ -57,7 +58,9 @@ session and connection are disposed before the parameters clear their owned key 
 
 ## Safety: Allow List
 
-All integration tests verify the device serial number against an allow list before running any hardware operation.
+The harness checks authorization before exposing a fixture to a test body. Discovery and live Management
+reads can already open interfaces and query devices before this check; the allow list does not prevent
+all communication with an unauthorized device. Connect only dedicated test hardware to the test rig.
 
 Add test device serial numbers to `appsettings.json` in the integration test project:
 
@@ -74,10 +77,14 @@ Add test device serial numbers to `appsettings.json` in the integration test pro
 
 Behavior:
 
-- If no devices are found, tests are skipped.
-- If device serial cannot be read, the process hard-fails with `Environment.Exit(-1)`.
-- If a device serial is not in the allow list, the process hard-fails with `Environment.Exit(-1)`.
-- If the allow list is empty, the process hard-fails before tests can run.
+- An empty serial allow list exits with `Environment.Exit(-1)` unless `AllowUnknownSerials` is enabled.
+- Discovery reads Management information before filtering individual devices. A missing/disallowed
+  serial or failed metadata read normally removes that view from the fixture list, rather than exiting.
+- `AllowUnknownSerials=true` also authorizes serial-less views with readable metadata. Keep it false
+  unless every attached serial-less device is dedicated test hardware.
+- An empty authorized list is cached. Binding a test row then throws `SkipException`; use
+  `[SkippableTheory]` where that exception must become a skipped result. Exhausted transient scan
+  retries instead propagate as an initialization failure.
 
 This prevents accidentally running destructive or stateful tests on production YubiKeys.
 
@@ -85,8 +92,8 @@ This prevents accidentally running destructive or stateful tests on production Y
 
 The keys listed in `AllowedSerialNumbers` are dedicated test hardware, not production keys.
 State mutation, PIV reset, and key generation on them are authorized and need no per-run
-approval. The allow list itself is the safety boundary — a key that is not on it hard-fails
-before any hardware operation runs, so there is no second gate to add.
+approval. The allow list authorizes test-body use, not the discovery/identification reads that precede
+filtering. Keep unauthorized hardware off the rig rather than relying on this filter to prevent I/O.
 
 What still requires a human is timing and presence, not destruction: User Presence and touch
 ceremonies, User Verification, and insert/remove sequences cannot be driven unattended. Mark
@@ -198,22 +205,25 @@ information; it does not demonstrate an SCP11 handshake.
 ### Custom Filter
 
 ```csharp
-public sealed class ProductionKeysOnly : IYubiKeyFilter
+public sealed class SerialRangeFilter : IYubiKeyFilter
 {
     public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;
-    public string GetDescription() => "Production keys";
+    public string GetDescription() => "Dedicated test keys in the selected serial range";
 }
 
-[SkippableTheory]
-[WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
-public async Task RunsOnlyOnProductionKeyRange(YubiKeyTestState state)
+public sealed class SerialRangeTests
 {
-    await state.WithManagementAsync(async (mgmt, info) =>
+    [SkippableTheory]
+    [WithYubiKey(CustomFilter = typeof(SerialRangeFilter))]
+    public async Task RunsOnAuthorizedSerialRange(YubiKeyTestState state)
     {
-        var freshInfo = await mgmt.GetDeviceInfoAsync();
-        Assert.True(freshInfo.SerialNumber > 10_000_000);
-        Assert.Equal(info.SerialNumber, freshInfo.SerialNumber);
-    });
+        await state.WithManagementAsync(async (mgmt, info) =>
+        {
+            var freshInfo = await mgmt.GetDeviceInfoAsync();
+            Assert.True(freshInfo.SerialNumber > 10_000_000);
+            Assert.Equal(info.SerialNumber, freshInfo.SerialNumber);
+        });
+    }
 }
 ```
 
@@ -268,19 +278,22 @@ This is OATH-specific, not a change to other applets' helpers.
 
 ## Byte-Level Unit Test Recorder
 
-Use `RecordingSmartCardConnection` in module unit tests that need to verify exact SmartCard APDU bytes:
+Use `RecordingSmartCardConnection` in module unit tests that need to verify exact SmartCard APDU bytes.
+This composable test fragment requires a test method and the Tests.Shared and xUnit imports:
 
 ```csharp
-var connection = new RecordingSmartCardConnection(
-    [0x90, 0x00],
-    [0x01, 0x02, 0x90, 0x00]);
+await using var connection = new RecordingSmartCardConnection([0x90, 0x00]);
+byte[] command = [0x00, 0xA4, 0x04, 0x00, 0x00]; // Nonsecret synthetic fixture.
+ReadOnlyMemory<byte> response = await connection.TransmitAndReceiveAsync(command);
 
-await using var session = await SomeSession.CreateAsync(connection, cancellationToken: ct);
-
-Assert.Contains(connection.TransmittedCommands, command => command[1] == expectedInstruction);
+Assert.Equal(command, Assert.Single(connection.TransmittedCommands));
+Assert.Equal(new byte[] { 0x90, 0x00 }, response.ToArray());
 ```
 
 This helper is intentionally narrow: queued responses in, transmitted APDUs out. It does not replace `[WithYubiKey]`, allow-list checks, or integration-test hardware coordination.
+The helper copies commands but retains the supplied response arrays. Disposal only increments a counter;
+it does not clear recorded commands or responses. Use nonsecret fixtures, or clear each owned array
+after its last use. These assertions check the recorder, not applet selection or device interoperability.
 
 ## Running Tests
 
@@ -300,9 +313,10 @@ Do not run raw `dotnet test` directly.
 
 Tests that connect two or more keys of the same model should read
 [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md) first. Some
-conservative outcomes are documented platform bounds with pinning tests rather than bugs - notably
-that serial-less multi-interface keys cannot be grouped on macOS or Linux, and that partially
-enumerated same-PID keys can transiently share a composite. Assertions like `Assert.Single` on a
+conservative outcomes follow incomplete grouping evidence: the current macOS/Linux topology resolver
+supplies no topology key, so serial-less views can remain separate. This does not mean those operating
+systems have no topology APIs. Partially enumerated same-PID keys can also transiently share a composite;
+there is no guarantee that one later scan splits every previously merged view. Assertions like `Assert.Single` on a
 discovery result only hold on a single-key rig; prefer key-count-agnostic invariants
 (conservation, completeness per PID, stability across scans).
 
@@ -318,6 +332,8 @@ discovery result only hold on a single-key rig; prefer key-count-agnostic invari
 ## Known Limitations
 
 - Devices must be connected before the test runner starts.
-- Allow-list violations call `Environment.Exit(-1)` by design.
+- An empty configured serial list exits with `Environment.Exit(-1)` unless `AllowUnknownSerials` is
+  enabled. Rejected devices and failed identification reads are filtered; an empty fixture list raises
+  `SkipException` at row binding, rather than exiting the process.
 - Each `[WithYubiKey]` attribute produces one placeholder that binds to the first matching authorized
   device at execution; multiple attributes are not deduplicated by physical key.

@@ -1,0 +1,91 @@
+{
+  "result": "STRUCTURAL-983+86-ACTUAL-VERDICT-JOIN-AND-BOUNDED-QUEUE-CHECKS; NO CONTENT/SAMPLER PASS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_actual_unique_reads": 983,
+  "additional_actual_unique_reads": 86,
+  "total_actual_unique_reads": 1069,
+  "activation_duplicates": 0,
+  "original_known_holds": 41,
+  "original_supported_without_current_known_hold": 942,
+  "additional_known_holds": 14,
+  "additional_supported_without_current_known_hold": 72,
+  "previously_active_pending": 23,
+  "bounded_next_replacements": 30,
+  "total_unique_unread_queue": 53,
+  "retired_SW_in_queue": 0,
+  "original_role_quotas": 983,
+  "already_authorized_expansion_quota": 84,
+  "conservative_target_sum": 1067,
+  "new_full_category_quota": 0,
+  "unfilled_pool_shortfalls": 0,
+  "PGP_new_implementation": 4,
+  "PGP_new_narrative": 2,
+  "PIV_known_qualification_replacements": 2,
+  "PIV_known_edited_example_replacement": 1,
+  "final_denominator": null,
+  "final_clean_credit": null,
+  "sampler_PASS": null,
+  "preparer_content_verdicts": 0,
+  "navigation_links_checked_outside_fences": 55,
+  "original_inventory_and_coverage": "BYTE-UNCHANGED",
+  "authority_inputs": "Exact hashes unchanged during capture; explicit Markdown/JSON IDs only, never source-file presence as read credit.",
+  "corrected_stdout_capture": "Live stdout excluded from generator seal; completed bytes bound here. Pre-fix receipt/source preserved in history/pre-stdout-capture-fix/.",
+  "link_check_scope": "Authored navigation outside fences only; literal original-source links preserve their source context. Initial false-scope failure retained in history/final-check-link-scope-note.json.",
+  "key_outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/verification.json",
+      "sha256": "9b5ce51377e4a797808747e0ca28c441599d831cf313c5c4545d7a0e4d6c4e17",
+      "bytes": 25723
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/preparation.stdout.json",
+      "sha256": "c847d461985df08f6464f7523ab9c1f80847a3b1ca8b8a24e705548ea4fad903",
+      "bytes": 14983
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/summary.json",
+      "sha256": "52249a77e9c01f80eb90193c279a37e4ce32d58483245bc7ee778f41e0435410",
+      "bytes": 34090
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/original-read-tally.json",
+      "sha256": "2dcf70b3f39310c4b972f05ffb7852df832d47e4fadd5c479ce6d58281e0b6ca",
+      "bytes": 1801293
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/additional-read-tally.json",
+      "sha256": "84ed721e47eb4a9f9350e4990c31aebc6d5d27daca4763739176a0c447e305ef",
+      "bytes": 126915
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/unread-required.json",
+      "sha256": "8137fca02e9efbb9b7ff85e134ae94eb068a6843eec77454b2790ed27b8a25e9",
+      "bytes": 75540
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/unread-read-plan.md",
+      "sha256": "6f2ef1304e4eee1b688bab0fd170a65516bd884d19f70670f7b71dfc456ff910",
+      "bytes": 15741
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/next-required-selection.json",
+      "sha256": "4d7db0fabbee8c69262d7ad16fcd3868a5ef578343810e4073f77fe42ce33a48",
+      "bytes": 34444
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/next-required-original-units.md",
+      "sha256": "2182f3b195f37e13d319e541c1cab698d57c9ebeba3b5efecc8dc98785bad240",
+      "bytes": 34949
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-OpenPgp/additional-selection.json",
+      "sha256": "002e81facb221dfea29b160078101683cc43a07548659c2f51d852eb2c96042b",
+      "bytes": 6053
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/replacements-Piv/replacement-selection.json",
+      "sha256": "8b78f4899e9f197874f023888987d89578e9918ff2dc31bea6f1fd4410cf79a3",
+      "bytes": 3225
+    }
+  ]
+}

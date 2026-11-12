@@ -74,6 +74,11 @@ public static class IYubiKeyExtensions
         /// See IYubiOtpSession.CalculateHmacSha1Async for input/payload/slot-mode distinctions. Use one
         /// challenge-length convention per slot. Explicit OTP HID is the USB recipe; default SmartCard
         /// selection does not establish challenge-command parity. Output ownership transfers to the caller.
+        /// Transfer occurs only when this outer task returns successfully, after hidden-session teardown.
+        /// If teardown throws after calculation succeeds, the task faults without exposing the result to
+        /// clear; the current helper does not clear that stranded result. Keep caller input cleanup in
+        /// finally even when creation or teardown fails. Use an explicit session when result ownership
+        /// must be visible before teardown; lower-layer copy cleanup remains a separate limitation.
         /// </remarks>
         /// <returns>A caller-owned 20-byte response; clear its backing memory after use.</returns>
         /// <param name="slot">The challenge-response slot.</param>
@@ -105,6 +110,11 @@ public static class IYubiKeyExtensions
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+        /// <remarks>
+        /// Grouped connection exclusion is process-local and limited to overlapping known member IDs.
+        /// Await complete public operations before disposal; the exchange guard does not own a whole
+        /// configuration/status/notification workflow or the caller's configuration and prompt resources.
+        /// </remarks>
         public async Task<YubiOtpSession> CreateYubiOtpSessionAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)

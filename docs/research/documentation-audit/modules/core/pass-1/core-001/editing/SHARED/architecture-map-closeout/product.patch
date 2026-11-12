@@ -1,0 +1,57 @@
+--- a/docs/architecture/sdk-architecture-map.yml
++++ b/docs/architecture/sdk-architecture-map.yml
+@@ -107,6 +107,9 @@
+       IOtpHidConnection: src/Core/src/Transports/Hid/IOtpHidConnection.cs
+       CtapRequestBuilder: src/Ctap2/src/Cbor/CtapRequestBuilder.cs
+       CtapResponseParser: src/Ctap2/src/Cbor/CtapResponseParser.cs
++      Ctap2SessionRequestEncoding: src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs
++      MakeCredentialResponse: src/Ctap2/src/Credentials/MakeCredentialResponse.cs
++      GetAssertionResponse: src/Ctap2/src/Credentials/GetAssertionResponse.cs
+       ICtap2Backend: src/Ctap2/src/Backend/ICtap2Backend.cs
+       HidBackend: src/Ctap2/src/Backend/HidBackend.cs
+       SmartCardBackend: src/Ctap2/src/Backend/SmartCardBackend.cs
+@@ -141,6 +144,8 @@
+       Ctap2Session: src/Ctap2/src/Ctap2Session.cs
+       CtapRequestBuilder: src/Ctap2/src/Cbor/CtapRequestBuilder.cs
+       CtapResponseParser: src/Ctap2/src/Cbor/CtapResponseParser.cs
++      Ctap2SessionRequestEncoding: src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs
++      MakeCredentialResponse: src/Ctap2/src/Credentials/MakeCredentialResponse.cs
+       ICtap2Backend: src/Ctap2/src/Backend/ICtap2Backend.cs
+       HidBackend: src/Ctap2/src/Backend/HidBackend.cs
+       SmartCardBackend: src/Ctap2/src/Backend/SmartCardBackend.cs
+--- a/docs/architecture/sdk-architecture-diagrams.md
++++ b/docs/architecture/sdk-architecture-diagrams.md
+@@ -232,8 +232,13 @@
+   `ApduTransmitter` (send) wraps `IApduFormatter` (wire serialization). Each layer has one job.
+ - **Short vs Extended APDU** is chosen by firmware + `SupportsExtendedApdu()` at
+   `Configure()` time. Extended = FW ≥ 4.0; short path uses `ChainedApduTransmitter` to split.
+-- **SCP variant:** if `scpKeyParams` were passed, an `ScpProcessor` sits in the chain and
+-  encrypts/MACs every APDU before it hits the wire, decrypts on the way back.
++- **SCP variant:** ordinary protected command traffic passes through `ScpProcessor`, with encryption
++  controlled separately from secure wrapping. The current SCP03 initializer selects security level
++  `0x33` (C-MAC, C-DECRYPTION, R-MAC, R-ENCRYPTION); setup's EXTERNAL AUTHENTICATE is MACed without
++  encrypting its command data. SELECT uses a plain pass-through, and the current empty-response
++  R-MAC exception checks INS `0x82`, not handshake phase. This schematic is not an every-APDU or
++  conformance guarantee; see [Core raw SCP limits](raw-access-tiers.md#raw-smartcard-with-scp) for
++  wrapping, response, recovery, and profile qualifications.
+ - **Buffer ownership:** selected wire buffers are cleared in `finally`. Caller input, response owners,
+   earlier fragments, and decrypted temporaries have separate lifetimes; one cleared buffer supplies
+   no all-copy erasure guarantee. `ApduResponse` is a sealed copied owner with explicit `Clear()`.
+@@ -331,9 +336,14 @@
+ ```
+ 
+ One-shot Find retires its read scope on exit. A monitor has one lifetime: create, run, dispose; there is no
+-pause, restart or manual rescan. Disposal is sequential (stop listeners, cancel and await the loop, retire
+-discovery, complete the feed) and waits for an in-flight scan to finish within its discovery budgets; no
+-drain timeout exists. `YubiKeyManager.WatchAsync` owns a private monitor for one enumeration;
++pause, restart or manual rescan. Disposal attempts listener cleanup before canceling and awaiting the
++loop, retiring discovery, and completing the feed. Later stages depend on preceding calls returning;
++a throwing logger during listener cleanup can prevent cancellation/join, retirement, or feed completion.
++The loop-await stage has no separate drain timeout; discovery budgets bound individual waits, not
++total disposal. If cleanup reaches feed completion, healthy uncanceled tails can drain and end normally,
++existing terminal/overflow errors remain observable, and later enumerations end empty. These diagrams
++are schematic; the [current lifecycle guide](event-driven-device-discovery.md#monitor-lifecycle-and-disposal)
++describes the complete conditions. `YubiKeyManager.WatchAsync` owns a private monitor for one enumeration;
+ `CreateMonitorAsync` returns one monitor to share across subscribers. See
+ [event-driven device discovery](event-driven-device-discovery.md).
+ 

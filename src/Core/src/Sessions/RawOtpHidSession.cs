@@ -39,7 +39,10 @@ public sealed class RawOtpHidSession : ApplicationSession
     }
 
     /// <summary>Creates a raw OTP HID session that borrows <paramref name="connection" />.</summary>
-    /// <remarks>OTP status initialization is deferred until the first operation.</remarks>
+    /// <remarks>
+    ///     Creation attaches the session without wire I/O and sets IsInitialized. The first exchange reads status;
+    ///     the session's inherited FirmwareVersion remains unknown (0.0.0).
+    /// </remarks>
     public static Task<RawOtpHidSession> CreateAsync(
         IOtpHidConnection connection,
         CancellationToken cancellationToken = default)
@@ -63,8 +66,12 @@ public sealed class RawOtpHidSession : ApplicationSession
     /// <remarks>
     ///     For a command with a known response length, the caller can validate inbound CRC with
     ///     <see cref="ChecksumUtils.CheckCrc(ReadOnlySpan{byte},int)" /> over <c>expectedLength + 2</c> bytes.
+    ///     CRC detects corruption rather than authenticating the response. Keep payload storage unchanged until
+    ///     the actual returned task is terminal: lazy initialization precedes the payload copy. Canceling an
+    ///     outer wait does not end this borrow.
     ///     SDK-owned outgoing buffers are cleared after use; caller-owned <paramref name="payload" /> is not
-    ///     modified. Returned memory remains live after return and is caller-owned for sensitive-data handling.
+    ///     modified. Returned memory survives session disposal; the caller must clear its actual backing storage
+    ///     when sensitive bytes are no longer needed. This cleanup does not reach intermediate received reports.
     /// </remarks>
     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         byte command,

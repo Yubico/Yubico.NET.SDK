@@ -1,0 +1,24 @@
+{
+  "scope": "Static finite remaining-context correction only; no compilation, capture replay or execution.",
+  "source_count": 300,
+  "consumer_sources": 244,
+  "test_sources": 56,
+  "changed_sources": [
+    "FULL-036",
+    "FULL-163",
+    "FULL-209",
+    "FULL-232",
+    "FULL-250",
+    "FULL-263",
+    "FULL-268",
+    "FULL-279",
+    "FULL-281",
+    "FULL-329",
+    "FULL-411"
+  ],
+  "original_bodies_directives_and_nonprefix_remainders_exact": true,
+  "emitted_diagnostics": 21,
+  "accepted_body_defects": [],
+  "failed_attempt_records_preserved": 549,
+  "qualification": "No general C# binding proof. Later compiler/body diagnostics remain possible and belong to the coordinator/editor."
+}

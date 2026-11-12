@@ -1,0 +1,39 @@
+{
+  "only_product_delta_from_revision_2": [
+    "docs/architecture/event-driven-device-discovery.md"
+  ],
+  "other_25_product_paths_unchanged": true,
+  "preserved_prior_record_count": 34,
+  "original_patch_preserved": true,
+  "revision_2_full_patch_preserved": true,
+  "before_fences": [
+    {
+      "opening_line": 25,
+      "closing_line": 33,
+      "body_sha256": "63a69f9739206bd38ed7f95780af89d803f8a4408323d7b7870e3abf3cf48fbb"
+    }
+  ],
+  "after_fences": [
+    {
+      "opening_line": 25,
+      "closing_line": 33,
+      "body_sha256": "63a69f9739206bd38ed7f95780af89d803f8a4408323d7b7870e3abf3cf48fbb"
+    }
+  ],
+  "complete_fence_bodies_unchanged": true,
+  "new_missing_local_file_targets": [],
+  "scope": "Local file targets; anchors and external URLs not checked.",
+  "static_checks": {
+    "diff-whitespace": {
+      "exit": 0,
+      "output": ""
+    },
+    "focused-patch": {
+      "exit": 0,
+      "output": ""
+    }
+  },
+  "index_unchanged": true,
+  "build_test_formatter_compiler_native_crypto_device": "NOT RUN",
+  "focused_independent_review": "pending"
+}

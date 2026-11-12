@@ -1,0 +1,126 @@
+{
+  "result": "STRUCTURAL-WA-EXPANSION-AND-SEPARATE-ELIGIBILITY-REPAIRS; NO CONTENT VERDICTS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "Oath_exact_suffix_table_IDs": 18,
+  "WebAuthn_exact_suffix_table_IDs": 19,
+  "Oath_material_misses": 0,
+  "original_test_quota": 11,
+  "additional_test_units": 11,
+  "material_miss_clean_credit": 0,
+  "specific_ineligible_IDs": 3,
+  "test_eligibility_replacements": 2,
+  "narrative_eligibility_replacements": 1,
+  "all_new_proposed_IDs": 14,
+  "duplicate_prior_or_known_edited_new_IDs": 0,
+  "other_owner_role_reductions": 0,
+  "focused_patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+  "primary_focused_fixture_unchanged": true,
+  "focused_transfer": "QUEUED; no preparation source mutation",
+  "PRF": "Astra dated W3C10.1.4 actor/condition/MUST qualification preserved; not reverified here",
+  "final_denominator": null,
+  "current_mapping": "DEFERRED until final canonical reconciliation",
+  "input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/prepare.py": "f44fe26fb7bf84c84ad614ddd41c88c157afed37d7c9052c0349c2bdac58ccd2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/population.json": "48442fdec87f94bf432608b9dd07d9004d8f117e558e3db668f7e346b9c2a75c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/selection.json": "c1cfa09bdee585d72a51729f445706a10e1095bc6bcb7e831f2e6db316216eb2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/additional-selection.json": "f25aba912998b4e64055f736e8e076e9f729d885ddc67f6a695efde97d2fb778",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A-followup/additional-selection.json": "f90f5635877e18150749cb7bb272babc00c29e5a15b7232e400fd94e0798e87f",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/additional-selection.json": "647de2584cb592d348062f4882cb024231e53573efab02e460c024d7dfd42832",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/replacement-selection.json": "5126b750030c9c46bf9b2673e75238ab3b4443d9b46f8fc7ff067f819819c37c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/conditional-history-replacements.json": "8ddb21c0d1f5a9956f1ca0b01517f2ca3b8f643be4cc0ee2867b1e27e2d1dee9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B3/additional-selection.json": "90a14eee05c22fc49eaf5fa4ff8a066fad99e1f80e6d160da05fb1a2d2e3ee4e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/additional-selection.json": "3d8590c62292abb3ce9c780ebfaa797cee06e7ab361f6a375a6c77e29cf57d4e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B4/replacement-selection.json": "ab04802dc36979522cb636bb7f954e224657fd907b6abed1e2051a999fd48530",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/family-replacements/replacement-selection.json": "cabc60baa0a2fa5ef4eff1cee8e4ac33baef20785e8569ed82c9ff8d14fee77c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/family-replacements/revision-2/new-non-SW-selection.json": "4b6845bb961286147105724198073e5e0af024e597194948283d1b19e69345b7",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-SecurityDomain/additional-selection.json": "dc759698b61e2db7ef53986af6b6bdf6c15b81462967d2a32e79112edbfc16d9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/strata.json": "96d2f8237a8195eef7cdbaa8e110c424393450e120e8bd516717cf22c246b1e8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-Oath-verdicts.md": "2c39133a3682c651f604b488dae5f2e9c17377ebbfc679d5022ab41f62c2f2ed",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-boundary-WebAuthn-verdicts.md": "82002499795b048303db19b620ed3a92db049540c4e6076f4c7fbd54fdc571e3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/expand.py": "c89a45930b26b89132c9f8a172acb1d8320507999c57c4caded1f2a692835fc9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/prepare.py": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json": "45ca220e401ba48082e14f138d703df0e29a969dd7ae7d5edc89d2ad805075c2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-A-C.json": "ab02275eeac6cf721239b8965ebb5ac0c841df9e65fffab8fb3f0eafc082daa2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-protocols.json": "3cad8f595449bab9c38fe4e017a0f2b212010639c1bff7862161f535d5a6cab0",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-FIDO.json": "141942e73ebf22918e2cbb03ef24f17fc48e59c959e2faf08c2fc98c0c0ccea3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-transports.json": "8d22ef4cf166ca9b43a21339d745735f1efbfc3bdaefdeedd0881d6c892e2e0a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-SHARED.json": "98a749f7a5853f4da2fd8c3f83a9cbfb5c0112d977fc3641862d65fb441a20ef",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-applets.json": "196b53e3f397b0e241793d4413c4cbf761f3d60550ed4f4d36e4fc97a568164c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-PGP-PIV.json": "9945efaa98a20e502fc9aeb8ac7555faabc9fd8c78aaef9dbc36cd6baeaa85a5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-A.json": "7127792418f5fda0ca4b12e89e9a662d00b30ef37bbb0912240e2e8add80e00b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-SHARED.json": "78ececb0a2687e9c2d42f8d27aef9540e0cca7b428b467849e1aac3d771d1366",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-external.json": "d95731a23966df7564ef056653ca7f235eaa31320dc346a493ccab4b75eae936",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B2.json": "760a2e47df077987f6bac025b4a3f33f914ea17bdfa8e604acb1aa0f0b1f6d94",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B3.json": "e89396e367c6c3efd64e02be0251b19491bbbc1cace99f230a6f972dc449d584",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-B4.json": "f3ca3caaf8957436ace091d4aeaa2abfc9fe73b57fa1e94242a1aa1641d4de7b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-SD.json": "d0998fb931d71ffa990b25a03e5ab31d9c43c14013dd4b4ebbc62720a2a9884e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/accepted-current-WebAuthn-role-scope.diff": "652320ee1058b21f643d11bdb983a0f715e9cda242d8e1920647ac53c84f97f3",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review-identities.json": "dae83e2ddcb167b364433a9defc70b9f3d8a8195ad8db561fc8709b3e310343d",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/focused.patch": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/before.snapshot": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5"
+  },
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/accepted-current-WebAuthn-role-scope.diff",
+      "bytes": 11361,
+      "sha256": "652320ee1058b21f643d11bdb983a0f715e9cda242d8e1920647ac53c84f97f3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/accepted-overlap-inputs.json",
+      "bytes": 5193,
+      "sha256": "9ca00d4fe239e29185a75f01b34cd9dd174ccbeffc48c60c8923c5b3e79f8867"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/additional-selection.json",
+      "bytes": 12108,
+      "sha256": "98443d18753739875de67903adf94a1a6f1c59bfec1b1d4df9e160b7b8e916da"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/citation-qualification.json",
+      "bytes": 751,
+      "sha256": "a192379fb5ae14bfb4cdc504be1a67dbd9ae8c2fff99a0080397706e5c04f198"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/ineligibility-overlay.json",
+      "bytes": 1533,
+      "sha256": "c9c0ea2456857a14fed8406615da28a3ba6a78a671702461f91acfca747a95fb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/miss-overlay.json",
+      "bytes": 879,
+      "sha256": "e131ab6f7686b9df938bfca46b7a42bc48d616ad8e765929f50e099809ec796f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/original-units.md",
+      "bytes": 22904,
+      "sha256": "90a40fdb71a887bec03f3e5bd3a1bedb700fa2b9bc58ab3f05e84d8466dd4d35"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/parsed-coordinator-tables.json",
+      "bytes": 9234,
+      "sha256": "e8d048032bebbeb1861ce634c19902f1a7b5eeeaf2c8608d3ba7d60a0d268be9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/prepare.py",
+      "bytes": 18362,
+      "sha256": "f44fe26fb7bf84c84ad614ddd41c88c157afed37d7c9052c0349c2bdac58ccd2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/quotas.json",
+      "bytes": 1965,
+      "sha256": "00aea18e81b9364222a40b9b1227119725e05f7c03e9f283dd2bcf4cd271e371"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/read-plan.md",
+      "bytes": 5496,
+      "sha256": "c8728f75ce67c87ac58cb10a95662fc8cd0ac18761854f300a948e2b28b7b058"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-WebAuthn/replacement-selection.json",
+      "bytes": 3189,
+      "sha256": "17711ccdc9a6ac7f6eda546ccfbfef90487d76508bc10891acc7ea5fced29a70"
+    }
+  ]
+}

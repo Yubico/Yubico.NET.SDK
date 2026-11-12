@@ -1,0 +1,11 @@
+--- pre-review/FULL-276
++++ current/FULL-276
+@@ -24,7 +24,7 @@
+ namespace Audit20261111.DocExamples.Full;
+ internal static class Body276
+ {
+-internal static async Task CompileOnly(IYubiKey device, ReadOnlyMemory<byte> currentLockCode)
++internal static async Task CompileOnly(IYubiKey device, byte[] currentLockCode)
+ {
+ try
+ {

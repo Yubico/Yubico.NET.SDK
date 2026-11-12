@@ -1,0 +1,39 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "actual_unique_reads": 1122,
+  "previous_actual_reads": 1069,
+  "new_actual_reads": 53,
+  "new_explicit_supported": 46,
+  "new_explicit_zero": 7,
+  "actual_IDs_mapped_once": true,
+  "raw_category_counts": {
+    "supported-pending-final-eligibility": 1068,
+    "documentation-miss": 17,
+    "source-observation": 2,
+    "specific-ineligible": 11,
+    "protected-output-qualification": 2,
+    "source-evidence-qualified": 13,
+    "known-implementation-qualified": 7,
+    "edited-overlap": 2
+  },
+  "supported_without_current_known_hold": 1060,
+  "current_mapping_states": {
+    "CONTIGUOUS-UNCHANGED-LINE-MAPPING": 1108,
+    "ORIGINAL-OVERLAP-CHANGED-OR-MAPPING-RECONCILIATION-REQUIRED": 13,
+    "UNIQUE-EXACT-WHOLE-UNIT-TEXT-MAPPING": 1
+  },
+  "conservative_broad_population": 9352,
+  "conservative_role_target_sum": 1067,
+  "new_full_category_quota": 0,
+  "next_required": 7,
+  "next_selected": 7,
+  "shortfall": 0,
+  "final_denominator": null,
+  "final_clean_credit": null,
+  "sampler_PASS": null,
+  "preparer_content_verdicts": 0,
+  "pending_correction_scopes": 4,
+  "current_mapping_is_not_read_credit": true,
+  "accepted_manifest_paths": 361,
+  "primary_state": "Reserved; no transfer/edit/SDK/Git mutation by preparer"
+}

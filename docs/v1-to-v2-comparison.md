@@ -26,8 +26,10 @@ sits outside that lane and is refreshed by hand.</sub>
 
 These aren't regressions, and it'd be misleading to describe them as such.
 V1 made almost everything public, which meant almost every internal
-improvement became a breaking change. V2 keeps low-level primitives internal
-so the SDK can keep moving.
+improvement became a breaking change. V2 retires selected low-level extension points and keeps
+protocol composition internal, while retaining public raw sessions, raw connections, and selected
+TLV, Base32, and cryptographic helpers. The smaller extension surface lets internal implementations
+evolve without removing every low-level consumer API.
 
 | V1 capability | V2 status | Why |
 |---|---|---|
@@ -54,13 +56,13 @@ or replacements for the other codecs.
 - Discovery models a physical key as one `IYubiKey` when evidence supports
   grouping its interfaces. `SerialNumber` and tri-state `SameDeviceAs`
   (`Same`, `Different`, or `Unknown`) support correlation. Ambiguous evidence
-  conservatively produces separate records rather than a guessed composite;
+  often produces separate records, while PID-completeness grouping retains the complementary-partials bound;
   see [the discovery guarantees](architecture/device-discovery-guarantees.md).
 - Within a process, a grouped physical key permits one live connection across
   its known interfaces, and each connection permits one live session.
   Overlapping acquisition throws `ConnectionInUseException`; sequential reuse
-  remains supported. Cross-process contention is out of scope and still
-  surfaces a platform `SCardException`.
+  remains supported within the known-member scope. Cross-process access follows OS sharing policy;
+  built-in strict-exclusive PC/SC maps a sharing violation to `ConnectionInUseException`.
 
 ### Standard applet session creation
 
@@ -68,7 +70,8 @@ All eight applet sessions now use the same two factory shapes:
 `IYubiKey.CreateXSessionAsync` for an owned connection and
 `XSession.CreateAsync` for a borrowed connection. Both accept
 `SessionCreationOptions`, which carries shared connection, secure-channel,
-protocol-configuration, firmware-version, and user-presence notification policy. Existing one-shot
+protocol-configuration, firmware-version, and user-presence notification policy. Versions are effective
+session policy, not hardware attestation; major-zero feature checks are optimistic. Existing one-shot
 conveniences also accept session options before their cancellation token, so
 callers can apply the same creation policy without opening a session manually.
 
@@ -168,10 +171,14 @@ Not differences at all — v1 never had these:
 
 ## Verified at full parity
 
+This heading preserves the historical analysis's capability classification. It is not current
+all-platform runtime, native ABI, secure-channel conformance, or device qualification. Use each module's
+current limitations and the [Native AOT evidence terms](NATIVE-AOT.md#evidence-terms) when planning deployment.
+
 The 2026-07-21 analysis classified these areas as parity or outright
 improvements over v1. For discovery, that means the capability is present and
 improved, not that every platform can always prove how interfaces group:
-ambiguous evidence deliberately splits rather than guesses. The exact
+ambiguous evidence can split results and PID-completeness can still group complementary partials. The exact
 platform guarantees and bounds are documented in
 [device discovery guarantees](architecture/device-discovery-guarantees.md).
 

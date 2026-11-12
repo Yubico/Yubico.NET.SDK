@@ -117,6 +117,8 @@ public class AsnPrivateKeyDecoderTests
         return writer.Encode();
     }
 
+    // The message classifies the version value. The early version guard does not validate the
+    // following fields or establish that this all-zero private fixture is a valid mathematical key.
     [Fact]
     public void CreateECParameters_Pkcs8VersionOne_ThrowsValidButUnsupportedCryptographicException()
     {

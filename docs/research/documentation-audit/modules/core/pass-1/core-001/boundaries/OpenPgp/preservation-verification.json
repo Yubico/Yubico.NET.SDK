@@ -1,0 +1,16 @@
+{
+  "result": "PASS-STATIC-IDENTITY-AND-ACCOUNTING",
+  "checks": {
+    "exact_packet_unit_ids": true,
+    "no_duplicate_units": true,
+    "all_93_paths_dispositioned": true,
+    "raw_and_range_match_inventory": true,
+    "normalized_source_matches_pin": true,
+    "15_original_keys_preserved": true,
+    "21_documentation_dependencies_zero_new_bugs": true,
+    "8_clean_nominees_actual_assigned_units": true,
+    "candidate_paths_all_have_unchanged_reason": true
+  },
+  "limits": "Static same-investigator check only; not independent content review, compilation, tests, historical archive-wide reverification or native/device qualification. No source was changed.",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef"
+}

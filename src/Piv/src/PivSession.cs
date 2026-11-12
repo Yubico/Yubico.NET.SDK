@@ -97,6 +97,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized PIV session.</returns>
+    /// <remarks>
+    /// The caller retains the connection and disposes it after session teardown. The factory binds before
+    /// SELECT and registers protocol disposal before setup. It reads the PIV version, configures the effective
+    /// override-or-detected version and optional SCP, then resolves the management-key type before publishing
+    /// readiness. Failed initialization disposes/detaches the session without closing this borrowed connection.
+    /// Keep borrowed SCP inputs alive through factory completion. The session owns its protocol; its backend
+    /// borrows that protocol, and its user-presence prompt remains caller-owned.
+    /// </remarks>
     /// <exception cref="ArgumentNullException">If connection is null.</exception>
     /// <exception cref="ApduException">If PIV application selection fails.</exception>
     public static Task<PivSession> CreateAsync(
@@ -126,8 +134,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         try
         {
-            // Production applet versions match firmware. Major zero is development firmware;
-            // Core's feature evaluation deliberately treats it as current.
+            // Read the PIV applet's version before SCP. Core treats major-zero versions optimistically;
+            // that compatibility policy establishes no independently identified physical firmware version.
             var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
             var detectedFirmwareVersion = initialization.FirmwareVersion;
             _detectedFirmwareVersion = detectedFirmwareVersion;
@@ -196,7 +204,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
             throw ApduException.FromStatusWord(response.SW, "PIV reset failed");
         }
 
-        // Reset authentication state
+        // Reset management authentication state. This workflow retains its backend/protocol and performs
+        // no terminal session disposal, applet reselection or fresh SCP handshake.
         SetManagementKeyAuthenticationState(false);
 
         // RESET changed the physical applet even if the metadata refresh below fails. Establish a

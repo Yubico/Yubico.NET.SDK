@@ -20,9 +20,10 @@ namespace Yubico.YubiKit.Core.Cryptography;
 ///     Represents an Elliptic Curve (EC) public key.
 /// </summary>
 /// <remarks>
-///     This class encapsulates EC public key parameters and provides cryptographic operations
-///     for modeled short-Weierstrass curves and provides factory methods for creating instances from EC parameters or DER-encoded
-///     data.
+///     This class stores parameters for modeled short-Weierstrass curves. Parameter and raw-point
+///     factories check coordinate widths and uncompressed-point framing, rather than on-curve validity.
+///     The SubjectPublicKeyInfo factory imports through the runtime provider and checks full input
+///     consumption. Provider acceptance and applet/profile requirements are separate from catalog membership.
 /// </remarks>
 public class ECPublicKey : PublicKey
 {
@@ -62,6 +63,10 @@ public class ECPublicKey : PublicKey
     ///     An <see cref="ECParameters" /> structure containing the curve parameters, key, and other
     ///     cryptographic elements needed for EC operations.
     /// </value>
+    /// <remarks>
+    ///     The coordinate arrays are key-owned mutable aliases. Leave them unchanged: the cached
+    ///     <see cref="PublicPoint"/> is a separate copy and would no longer agree after mutation.
+    /// </remarks>
     public ECParameters Parameters { get; }
 
     /// <summary>

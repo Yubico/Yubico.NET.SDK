@@ -111,7 +111,8 @@ use these fields to identify Bio MPE reset eligibility.
 
 ## YubiKeyTestState - Device Context
 
-`YubiKeyTestState` exposes cached metadata from shared device initialization. These property reads do
+`YubiKeyTestState` exposes a separate initial live Management read from shared device initialization,
+not the Core discovery snapshot. These property reads do
 not refresh it. The first state access can trigger lazy discovery/binding; a later configuration write
 does not update the cache. Use an explicit session read for current persisted configuration.
 
@@ -251,6 +252,8 @@ await mgmt.SetDeviceConfigAsync(
 
 SCP parameters are caller-owned and borrowed for initialization. This example creates them before the
 session so the session is disposed first, then the parameter scope disposes its owned static key arrays.
+It also assumes a caller-supplied `ProtocolConfiguration customProtocolConfig` in addition to the
+`IYubiKey yubiKey` and `CancellationToken cancellationToken` prerequisites above.
 
 ```csharp
 // Requires a SmartCard-capable key configured with the supplied SCP03 keys.
@@ -345,7 +348,7 @@ The difference is **who manages the session lifecycle**:
 - Low-level extension: Caller manages lifecycle (manual)
 
 Direct `ManagementSession.CreateAsync(connection)` validates that `connection` is SmartCard, FIDO
-HID, or OTP HID before the `ApplicationSession` base attaches its one-session guard. It borrows the
+HID, or OTP HID before the shared factory attaches its one-session guard. It borrows the
 connection and never disposes it. The creator must dispose the connection with `await using`; there
 is no session finalizer recovery; a connection's best-effort native finalizer is not a lifetime guarantee.
 One live session per connection is allowed, and sequential reuse after
@@ -639,7 +642,11 @@ await state.WithManagementAsync(async (mgmt, info) =>
 
 `DeviceInfo` is Core's readonly record struct. Optional serials remain nullable and absent optional
 fields can have default values. It is not a mutable session cache. Compare the fields relevant to the
-test rather than assuming two snapshots must match every field during reconfiguration:
+test rather than assuming two snapshots must match every field during reconfiguration.
+
+Content equality does not imply deep storage independence: the current memory-backed timeout value can
+alias across record/result/list copies. Keep its ownership limitation separate from scalar snapshot replacement.
+The following example compares only serial numbers:
 
 ```csharp
 var info1 = await mgmt.GetDeviceInfoAsync();
@@ -764,6 +771,22 @@ The metadata probe occurs before optional SCP establishment; an SCP-authenticate
 that every initialization exchange used SCP. A firmware override does not skip probes. It configures
 the protocol and feature checks, while `_version` retains discovered metadata for subsequent reads.
 Non-cancellation metadata-probe failures fall back to the transport version; cancellation propagates.
+
+Public reads pass captured `_version` as the decoder default: it wins over tag 05, while non-final
+qualifier firmware can win again. Initial probing passes null. Neither public reads nor configuration
+writes publish a discovery snapshot. Keep this provenance beside live-I/O claims.
+
+Creation performs no protected Management command after SCP setup. The inherited authentication flag
+records setup, not lock-code authorization or ongoing channel health. The SCP11 v1.3.0.13 Public Review
+draft (August 2023), §4.3, includes a/c's first correct-MAC command in host authentication; final/vendor-profile
+qualification remains separate. Empty public reads/reset and protected continuations reach Core's
+SCP formatting/response paths, not a Management-specific
+wire policy. Local encoding cleanup does not clear all downstream copies.
+
+Await the entire public workflow before disposal; per-page guard drain leaves parsing and later pages
+outside that boundary. Windows HID's current compatibility calls are synchronous, and direct connection
+disposal during native I/O can release registration before native-reference drain. Correct scope order
+avoids that concurrent use; managed disposal alone is not proof of physical release or recovery.
 
 Management does not forward `SessionCreationOptions.UserPresencePrompt` to its base constructor. The
 service is unused here: this module does not retain, invoke or dispose it. Do not copy the general

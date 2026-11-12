@@ -1,0 +1,55 @@
+{
+  "correction": "EX-R1: explicit coordinator authorization of ordinary primary SDK output trees; no routing mechanism change",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "review": {
+    "path": "validation/examples/review.md",
+    "sha256": "fac2e84d2bb68242f24859d4de2cd9b7bc8813d8d08e7e97c216ad5cafb9185c"
+  },
+  "approval": "Coordinator explicitly approves ordinary primary bin/obj cleanup/rebuild for Core, Piv, Ctap2 and WebAuthn; DocExamples stays dedicated. No /tmp, other-worktree or frozen-archive output; qualified DocCheck sealed outputs remain unchanged.",
+  "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "projects": [
+    {
+      "project": "validation/examples/host/src/Yubico.YubiKit.Audit20261111.DocExamples.csproj",
+      "assembly": "Yubico.YubiKit.Audit20261111.DocExamples",
+      "bin": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin",
+      "obj": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/obj",
+      "ownership": "Existing example-local props route only this host; clean/rebuild authorized."
+    },
+    {
+      "project": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "assembly": "Yubico.YubiKit.Core",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    },
+    {
+      "project": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "assembly": "Yubico.YubiKit.Piv",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    },
+    {
+      "project": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "assembly": "Yubico.YubiKit.Ctap2",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    },
+    {
+      "project": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "assembly": "Yubico.YubiKit.WebAuthn",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    }
+  ],
+  "source_proof": "run.py before/after population excludes bin/obj; it binds source/configuration identity, not preservation of the disposable approved output trees.",
+  "compiler_proof": "The unchanged hook records actual Csc reference/input/output paths and hashes. Original compiler and final host DLL identity must agree. No reference-path substitution or historical equivalence assertion.",
+  "outside_output_scope": [
+    "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck",
+    "Other worktrees, including yubikit-core-docs-integration",
+    "Preserved historical integration/PIV outputs and external copies",
+    "Frozen archives and /tmp copies"
+  ]
+}

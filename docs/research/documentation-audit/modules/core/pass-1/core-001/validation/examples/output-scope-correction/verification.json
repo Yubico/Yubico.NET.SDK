@@ -1,0 +1,81 @@
+{
+  "scope": "Static approved-output ownership and exact predecessor/current preparation delta only; no build or runtime execution.",
+  "original_fixed_rows_unchanged": 183,
+  "added_fixed_inputs": [
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/example-validation-preparation.md",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/output-scope-correction/approved-scope.json"
+  ],
+  "original_descriptor_sha256": "77fdf952861491d35288531a6070d6ff069df155e18d1633c950bdd8f9d7657d",
+  "current_descriptor_sha256": "4fb843caa8e7faf5852382d664d2418e05bd1816753f544fbae1f46b9303213c",
+  "immutable_review_sha256": "fac2e84d2bb68242f24859d4de2cd9b7bc8813d8d08e7e97c216ad5cafb9185c",
+  "scope_approval_sha256": "ac4f388e6c2ad2036ddb83f66cd9dcb6e50f163ca9f2a37d623c35daf6735c79",
+  "source_bodies_wrappers_hooks_and_qualified_tools_unchanged": true,
+  "root_readme_claude_not_descriptor_inputs": true,
+  "five_project_scope": [
+    {
+      "project": "validation/examples/host/src/Yubico.YubiKit.Audit20261111.DocExamples.csproj",
+      "assembly": "Yubico.YubiKit.Audit20261111.DocExamples",
+      "bin": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/bin",
+      "obj": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples/obj",
+      "ownership": "Existing example-local props route only this host; clean/rebuild authorized."
+    },
+    {
+      "project": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "assembly": "Yubico.YubiKit.Core",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    },
+    {
+      "project": "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "assembly": "Yubico.YubiKit.Piv",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    },
+    {
+      "project": "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "assembly": "Yubico.YubiKit.Ctap2",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    },
+    {
+      "project": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "assembly": "Yubico.YubiKit.WebAuthn",
+      "bin": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin",
+      "obj": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj",
+      "ownership": "Ordinary ignored primary output/restore trees; canonical clean/rebuild explicitly authorized."
+    }
+  ],
+  "original_body_manifest_sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60",
+  "pilot": {
+    "scope": "Static preparation only; C# has not been compiled or executed by this worker.",
+    "counts": {
+      "active": 19,
+      "prepared": 17,
+      "internal_qualified": 2,
+      "historical_excluded": 22
+    },
+    "complete_bodies": 4,
+    "contextual_fragments": 13,
+    "extraction_hashes_and_exact_wrapper_reconstruction": true,
+    "root_imports": true,
+    "declared_project_closure": [
+      "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/host/src/Yubico.YubiKit.Audit20261111.DocExamples.csproj",
+      "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj",
+      "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
+      "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj"
+    ],
+    "actual_csc_membership": "Prepared late hook; actual clean compilation required.",
+    "sdk_info_reused": {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/sdk-info-first/stdout.log",
+      "bytes": 2181,
+      "sha256": "d913f0b2eaca6e37408d93b9d50a5dd7c8ca90a27494a7219153176805d15572"
+    },
+    "no_example_execution": true
+  },
+  "current_source_context_files": 682,
+  "pending": "Bounded independent confirmation; then coordinator examples-ac-first canonical clean compile."
+}

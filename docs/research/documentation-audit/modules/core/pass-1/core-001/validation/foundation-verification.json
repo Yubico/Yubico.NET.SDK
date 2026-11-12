@@ -1,0 +1,864 @@
+{
+  "scope": "Final static preparation only; no supervisor qualification, compilation, SDK test, native/device execution or index/ref mutation.",
+  "selfcheck": {
+    "status": "static-read-only-ready",
+    "logger_context": "Core run only",
+    "historical_parser_counts": {
+      "targets": [
+        "test-infrastructure-qa",
+        "native-aot-contract-qa",
+        "build",
+        "test",
+        "docs-qa",
+        "docs-architecture",
+        "complexity",
+        "resilience",
+        "pack"
+      ],
+      "projects": 14,
+      "executed": 4639,
+      "skipped": 5,
+      "failed": 0,
+      "warnings": 0
+    },
+    "negative_cases": 23,
+    "parsed_python_files": [
+      "foundation.py",
+      "run-command.py",
+      "qualify-logger.py",
+      "check-records.py",
+      "check-preserved.py",
+      "preflight.py",
+      "source-state.py",
+      "native-tokens.py",
+      "selfcheck.py"
+    ],
+    "historical_process_qualification": {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/recovery/logger-v2-qualification-second/qualification.json",
+      "sha256": "de2cc81def1b9575b6fafc81a584a32233f45580aeda726e3b7580d63d1c1fef",
+      "scope": "Read retained qualification only; Core process cases remain unrun."
+    },
+    "participating": {
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "metadata_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+      "files": [
+        {
+          "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command.py",
+          "sha256": "61bd7b3f218da8051c44ade033887ddbe598d9d9b2f95cc3fa7a8b8696838640"
+        },
+        {
+          "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/run-command-v2.py",
+          "sha256": "48097a3593e3b71cac83bcc76c6e639608635ece05be2a579f7dc7b0dda3fd15"
+        },
+        {
+          "path": "docs/research/documentation-audit/integrations/core-upstream-20261111/validation/check-records.py",
+          "sha256": "e287c3e35d6fec35d125c870125201816dc4d9822ae78ba94d7c0da167eeb3e4"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+          "sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+          "sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/qualify-logger.py",
+          "sha256": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records.py",
+          "sha256": "e83a736ac1ab8bdb05af92cc3acfee03e518b15414baa1212b3e6450d8209503"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-preserved.py",
+          "sha256": "316515879bed950f6d5b4d8424ffa30369395ea9d493cbd3925cfaac1467b525"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preflight.py",
+          "sha256": "bd7bac5cd9a7280bfabb8cb92caf559a2a0145a8de93da4fe956be655283fb80"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/source-state.py",
+          "sha256": "5a65ff455ba8fe71eecbfd9d8048fb555561829fcc48875e7c15010263910e95"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/native-tokens.py",
+          "sha256": "a8bc00551c07919d2c854183d3bf9379b3d0b8f28c65bb7d01daba411053e11d"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/selfcheck.py",
+          "sha256": "971415fb72705a779abc7ddd96eaf02e11591513d8352940815cd53588bb6f81"
+        }
+      ]
+    },
+    "limits": "No process qualification, compilation, SDK test, native or device execution."
+  },
+  "preflight": {
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "metadata_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+    "canonical_unit_projects": [
+      "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj",
+      "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Yubico.YubiKit.Cli.Shared.UnitTests.csproj",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+      "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+      "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+      "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+      "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj",
+      "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj",
+      "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+      "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj",
+      "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+      "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj"
+    ],
+    "resilience_projects": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+    ],
+    "checker_project": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj",
+    "api_snapshots": [
+      "src/Core/src/PublicAPI.Shipped.txt",
+      "src/Core/src/PublicAPI.Unshipped.txt",
+      "src/Ctap2/src/PublicAPI.Shipped.txt",
+      "src/Ctap2/src/PublicAPI.Unshipped.txt",
+      "src/Management/src/PublicAPI.Shipped.txt",
+      "src/Management/src/PublicAPI.Unshipped.txt",
+      "src/Oath/src/PublicAPI.Shipped.txt",
+      "src/Oath/src/PublicAPI.Unshipped.txt",
+      "src/OpenPgp/src/PublicAPI.Shipped.txt",
+      "src/OpenPgp/src/PublicAPI.Unshipped.txt",
+      "src/Piv/src/PublicAPI.Shipped.txt",
+      "src/Piv/src/PublicAPI.Unshipped.txt",
+      "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+      "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+      "src/WebAuthn/src/PublicAPI.Shipped.txt",
+      "src/WebAuthn/src/PublicAPI.Unshipped.txt",
+      "src/YubiHsm/src/PublicAPI.Shipped.txt",
+      "src/YubiHsm/src/PublicAPI.Unshipped.txt",
+      "src/YubiOtp/src/PublicAPI.Shipped.txt",
+      "src/YubiOtp/src/PublicAPI.Unshipped.txt"
+    ],
+    "api_snapshot_count": 20,
+    "sdk_policy": {
+      "sdk": {
+        "version": "10.0.300",
+        "rollForward": "latestFeature"
+      }
+    },
+    "installed_sdks": [
+      "10.0.401",
+      "10.0.403",
+      "10.0.404",
+      "9.0.320"
+    ],
+    "sdk_root": "/home/rupicola/.local/share/mise/dotnet-root/sdk",
+    "sdk_selection": "10.0.404 observed at integration; actual compiler gate re-observes selection",
+    "scratch": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001",
+    "configuration": [
+      {
+        "path": "global.json",
+        "sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+      },
+      {
+        "path": "Directory.Build.props",
+        "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+      },
+      {
+        "path": "Directory.Build.targets",
+        "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+      },
+      {
+        "path": "Directory.Packages.props",
+        "sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f"
+      },
+      {
+        "path": ".editorconfig",
+        "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+      },
+      {
+        "path": "toolchain.cs",
+        "sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e"
+      },
+      {
+        "path": "scripts/toolchain/Discovery.cs",
+        "sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7"
+      },
+      {
+        "path": "scripts/toolchain/TestTargets.cs",
+        "sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5"
+      },
+      {
+        "path": "scripts/toolchain/BuildTargets.cs",
+        "sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867"
+      },
+      {
+        "path": ".github/workflows/build.yml",
+        "sha256": "a0b482f374f129a994cb343725c42925ba0cf48e1d3971bc2f6f5db14448eb76"
+      },
+      {
+        "path": ".github/workflows/native-aot.yml",
+        "sha256": "dc29a3ae3d83fa326f83189e8af30dabca278cb7f95b925b6745b98628246a01"
+      }
+    ],
+    "limits": "Filesystem/static membership only; no SDK invocation, compilation or device probe."
+  },
+  "native": {
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "files": [],
+    "status": "not-applicable-no-current-native-c-cpp-source",
+    "limits": "Conservative preprocessing-token identity; edited splice/trigraph sources require an assigned compiler proof."
+  },
+  "preservation": {
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "metadata_head": "d9cf31a17c7580ab580917ce201c4855c3cf89b4",
+    "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+    "frozen_manifests": 8,
+    "frozen_artifacts": 5366,
+    "frozen_nontext_artifacts": 9,
+    "integration_records": 8325,
+    "integration_bytes": 226365754,
+    "prior_piv_files": 114,
+    "original_user_files": 4,
+    "protected_git_clean": true,
+    "other_worktrees": "outside this phase; no unchanged-HEAD requirement"
+  },
+  "full_source": {
+    "checkpoint": "validation/source-before-git-clean.json",
+    "scope_sha256": "521f13d5d696744c597b94586e17d2740b48c4e8ce7a954f53285e07d962a1cf",
+    "exact_current_raw_paths": 1608,
+    "git_clean_changes": 0,
+    "newline_only_paths": 57
+  },
+  "checked_owned_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/.gitattributes",
+      "bytes": 170,
+      "raw_sha256": "150b4cdd61e669b48c0d42a602e0e4c4063f0310399c52e0f9f6e5ab4eca89c3",
+      "normalized_sha256": "150b4cdd61e669b48c0d42a602e0e4c4063f0310399c52e0f9f6e5ab4eca89c3",
+      "staged_sha256": "150b4cdd61e669b48c0d42a602e0e4c4063f0310399c52e0f9f6e5ab4eca89c3",
+      "staged_oid": "6a846b1cb9ca719064f4b294cbb9cf279f7e9c52",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/Directory.Build.props",
+      "bytes": 575,
+      "raw_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "normalized_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_sha256": "99c7406428d71fbe01b0e1ef28e594df697846a8b583d20307b742f41ca12f03",
+      "staged_oid": "1c31cf22b5c861ee56a9981ce7aeea8c4e7a6579",
+      "attributes": {
+        "text": "unset",
+        "eol": "crlf",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-preserved.py",
+      "bytes": 5904,
+      "raw_sha256": "316515879bed950f6d5b4d8424ffa30369395ea9d493cbd3925cfaac1467b525",
+      "normalized_sha256": "316515879bed950f6d5b4d8424ffa30369395ea9d493cbd3925cfaac1467b525",
+      "staged_sha256": "316515879bed950f6d5b4d8424ffa30369395ea9d493cbd3925cfaac1467b525",
+      "staged_oid": "2f9c831d231c5f99c96bbaa25a17bd44c2cc14f2",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records.py",
+      "bytes": 2865,
+      "raw_sha256": "e83a736ac1ab8bdb05af92cc3acfee03e518b15414baa1212b3e6450d8209503",
+      "normalized_sha256": "e83a736ac1ab8bdb05af92cc3acfee03e518b15414baa1212b3e6450d8209503",
+      "staged_sha256": "e83a736ac1ab8bdb05af92cc3acfee03e518b15414baa1212b3e6450d8209503",
+      "staged_oid": "cd7c4421f00f9f1e66eff40af1c406c025daced2",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Program.cs",
+      "bytes": 7700,
+      "raw_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "normalized_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_sha256": "7c2d0df344f925ef1fccfe1333f9e40cc6bddc0a86dfa22cfa7e9f413128898b",
+      "staged_oid": "59a67e42e6410aca9320e2eabff10eb148a7008f",
+      "attributes": {
+        "text": "unset",
+        "eol": "lf",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj",
+      "bytes": 516,
+      "raw_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "normalized_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_sha256": "1d9f22b3a7f350b56de2a5dbf309c2c87f6c683d6d27f14f0f7c234711713a1b",
+      "staged_oid": "4b66d7e88896e9288be03d6781c29065700f8b7c",
+      "attributes": {
+        "text": "unset",
+        "eol": "crlf",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/expected-unit-projects.json",
+      "bytes": 376,
+      "raw_sha256": "915cf0b2af60a060461866c821c960adf47c8bcbda0d257e91f7475beec9d0e1",
+      "normalized_sha256": "915cf0b2af60a060461866c821c960adf47c8bcbda0d257e91f7475beec9d0e1",
+      "staged_sha256": "915cf0b2af60a060461866c821c960adf47c8bcbda0d257e91f7475beec9d0e1",
+      "staged_oid": "fa02d6bbb7973edbf6ee5930822d43b1f6b9ffc4",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py",
+      "bytes": 3241,
+      "raw_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "normalized_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_sha256": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+      "staged_oid": "b3acb92f8e827adf40252a9e81f5427157b08d80",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/native-tokens.py",
+      "bytes": 4915,
+      "raw_sha256": "a8bc00551c07919d2c854183d3bf9379b3d0b8f28c65bb7d01daba411053e11d",
+      "normalized_sha256": "a8bc00551c07919d2c854183d3bf9379b3d0b8f28c65bb7d01daba411053e11d",
+      "staged_sha256": "a8bc00551c07919d2c854183d3bf9379b3d0b8f28c65bb7d01daba411053e11d",
+      "staged_oid": "a435a1514746de13005e98eefa155bdd8ccc68e6",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preflight.py",
+      "bytes": 3736,
+      "raw_sha256": "bd7bac5cd9a7280bfabb8cb92caf559a2a0145a8de93da4fe956be655283fb80",
+      "normalized_sha256": "bd7bac5cd9a7280bfabb8cb92caf559a2a0145a8de93da4fe956be655283fb80",
+      "staged_sha256": "bd7bac5cd9a7280bfabb8cb92caf559a2a0145a8de93da4fe956be655283fb80",
+      "staged_oid": "c126f34695fa8ec46fad773af496c4b6756cf5d8",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-native-identity.stderr.txt",
+      "bytes": 899,
+      "raw_sha256": "4ebc775411c7cdc88825cdf1803e2bdf61e2a38b075b86cb69a51f48eff60576",
+      "normalized_sha256": "4ebc775411c7cdc88825cdf1803e2bdf61e2a38b075b86cb69a51f48eff60576",
+      "staged_sha256": "4ebc775411c7cdc88825cdf1803e2bdf61e2a38b075b86cb69a51f48eff60576",
+      "staged_oid": "9065d9862063bd06b03694cae46d00663b3395bf",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-native-identity.stdout.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-preflight.stderr.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-preflight.stdout.txt",
+      "bytes": 4782,
+      "raw_sha256": "61012809ac054b5031a816bd3bb0d607f4f99c27b2ce541bc0b81b5ee4aac533",
+      "normalized_sha256": "61012809ac054b5031a816bd3bb0d607f4f99c27b2ce541bc0b81b5ee4aac533",
+      "staged_sha256": "61012809ac054b5031a816bd3bb0d607f4f99c27b2ce541bc0b81b5ee4aac533",
+      "staged_oid": "e0f692c8074064641d1fc214c7f2969c788c0033",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-selfcheck.stderr.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-selfcheck.stdout.txt",
+      "bytes": 3860,
+      "raw_sha256": "deb2872fa228dea809d7353d072faa6ce8d834f62cc792e1bb635f3ab2b28c8f",
+      "normalized_sha256": "deb2872fa228dea809d7353d072faa6ce8d834f62cc792e1bb635f3ab2b28c8f",
+      "staged_sha256": "deb2872fa228dea809d7353d072faa6ce8d834f62cc792e1bb635f3ab2b28c8f",
+      "staged_oid": "6c6822a22d8781afa648bcaec6f09fcbc142a9f6",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-source-before.stderr.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-source-before.stdout.txt",
+      "bytes": 176,
+      "raw_sha256": "d3e3effc309f24dfc0ec10dcd161d121b9594fa6cfdab06db18e3f59657fee93",
+      "normalized_sha256": "d3e3effc309f24dfc0ec10dcd161d121b9594fa6cfdab06db18e3f59657fee93",
+      "staged_sha256": "d3e3effc309f24dfc0ec10dcd161d121b9594fa6cfdab06db18e3f59657fee93",
+      "staged_oid": "a1e8399e666f2f6c60a26fe819ae0a218a184449",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-static-v2.json",
+      "bytes": 3332,
+      "raw_sha256": "1fda4ad05a85d36f1f86f250f2ad8a7418b57f57e9f9b437d5fd357afbfb71d9",
+      "normalized_sha256": "1fda4ad05a85d36f1f86f250f2ad8a7418b57f57e9f9b437d5fd357afbfb71d9",
+      "staged_sha256": "1fda4ad05a85d36f1f86f250f2ad8a7418b57f57e9f9b437d5fd357afbfb71d9",
+      "staged_oid": "44051b504554964d4254cc1cb351432ec40ac4fc",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-static.json",
+      "bytes": 3298,
+      "raw_sha256": "242984cdb4255baf308cb685a80e59f1bdba3f72ef07bc077b995daab791a970",
+      "normalized_sha256": "242984cdb4255baf308cb685a80e59f1bdba3f72ef07bc077b995daab791a970",
+      "staged_sha256": "242984cdb4255baf308cb685a80e59f1bdba3f72ef07bc077b995daab791a970",
+      "staged_oid": "f786a17e5ef3de951980db9a6889450ef88676e3",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-native-identity.stderr.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-native-identity.stdout.txt",
+      "bytes": 269,
+      "raw_sha256": "5a28c7c3bbe9d9d091189734ef57e345ad8aedf22353d73587711510cc77d71c",
+      "normalized_sha256": "5a28c7c3bbe9d9d091189734ef57e345ad8aedf22353d73587711510cc77d71c",
+      "staged_sha256": "5a28c7c3bbe9d9d091189734ef57e345ad8aedf22353d73587711510cc77d71c",
+      "staged_oid": "c61456ba7814b8ef0b7dce85e009650d48b6ede2",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-preflight.stderr.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-preflight.stdout.txt",
+      "bytes": 4782,
+      "raw_sha256": "61012809ac054b5031a816bd3bb0d607f4f99c27b2ce541bc0b81b5ee4aac533",
+      "normalized_sha256": "61012809ac054b5031a816bd3bb0d607f4f99c27b2ce541bc0b81b5ee4aac533",
+      "staged_sha256": "61012809ac054b5031a816bd3bb0d607f4f99c27b2ce541bc0b81b5ee4aac533",
+      "staged_oid": "e0f692c8074064641d1fc214c7f2969c788c0033",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-selfcheck.stderr.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-selfcheck.stdout.txt",
+      "bytes": 3860,
+      "raw_sha256": "421881bf7e6720458bdd5840b7cb92610038496802eb392f4eab2b63a1757188",
+      "normalized_sha256": "421881bf7e6720458bdd5840b7cb92610038496802eb392f4eab2b63a1757188",
+      "staged_sha256": "421881bf7e6720458bdd5840b7cb92610038496802eb392f4eab2b63a1757188",
+      "staged_oid": "9e16e862ae4944a60bb2d99ad6f5c427cb91c582",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-source-before.stderr.txt",
+      "bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "staged_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-v2-source-before.stdout.txt",
+      "bytes": 185,
+      "raw_sha256": "64c7bbfa09ab81902bb6886410b3a55837d1af58ac8bd1cd2286634a41a794fb",
+      "normalized_sha256": "64c7bbfa09ab81902bb6886410b3a55837d1af58ac8bd1cd2286634a41a794fb",
+      "staged_sha256": "64c7bbfa09ab81902bb6886410b3a55837d1af58ac8bd1cd2286634a41a794fb",
+      "staged_oid": "8a9d3fead85adedd00807fcf885b0a5915f062a3",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preservation-preparation.stdout.txt",
+      "bytes": 498,
+      "raw_sha256": "2987dd5001da70fe48357accb20972228a2c9fc95051abc45c8cfd05d2ba1452",
+      "normalized_sha256": "2987dd5001da70fe48357accb20972228a2c9fc95051abc45c8cfd05d2ba1452",
+      "staged_sha256": "2987dd5001da70fe48357accb20972228a2c9fc95051abc45c8cfd05d2ba1452",
+      "staged_oid": "366c7ae54877b3390c20876098a6699ea188119c",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/qualify-logger.py",
+      "bytes": 1775,
+      "raw_sha256": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6",
+      "normalized_sha256": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6",
+      "staged_sha256": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6",
+      "staged_oid": "801dee935a2e5a9c56af06f9af7e4b28752dbe75",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/reuse-provenance.json",
+      "bytes": 6212,
+      "raw_sha256": "caeacf20664cf857cd0e0358142616e05f46b3cbbea3b656817247f714eac4eb",
+      "normalized_sha256": "caeacf20664cf857cd0e0358142616e05f46b3cbbea3b656817247f714eac4eb",
+      "staged_sha256": "caeacf20664cf857cd0e0358142616e05f46b3cbbea3b656817247f714eac4eb",
+      "staged_oid": "8db6dfbfaa338230f22e689b685937b1977a46c0",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/run-command.py",
+      "bytes": 1670,
+      "raw_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "normalized_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_sha256": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+      "staged_oid": "a2885f46fb75c62f6a7bfe9f0160ae490153355d",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/selfcheck.py",
+      "bytes": 5905,
+      "raw_sha256": "971415fb72705a779abc7ddd96eaf02e11591513d8352940815cd53588bb6f81",
+      "normalized_sha256": "971415fb72705a779abc7ddd96eaf02e11591513d8352940815cd53588bb6f81",
+      "staged_sha256": "971415fb72705a779abc7ddd96eaf02e11591513d8352940815cd53588bb6f81",
+      "staged_oid": "98c0b684bb4a8c485bbbdb0294ced37cd501523a",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/source-before-git-clean.json",
+      "bytes": 901533,
+      "raw_sha256": "e3d5211d7bb61ada49736fe4ec9b63e22830958504b37a0bc873d5ae2b380e58",
+      "normalized_sha256": "e3d5211d7bb61ada49736fe4ec9b63e22830958504b37a0bc873d5ae2b380e58",
+      "staged_sha256": "e3d5211d7bb61ada49736fe4ec9b63e22830958504b37a0bc873d5ae2b380e58",
+      "staged_oid": "9a1c894c036155088fa7eb57775e1108bd481f2f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/source-before.json",
+      "bytes": 684822,
+      "raw_sha256": "4c94a20d7351275ede1d31afd0a38773cf2fd48ba5ad7deb46c25a8d277387d2",
+      "normalized_sha256": "4c94a20d7351275ede1d31afd0a38773cf2fd48ba5ad7deb46c25a8d277387d2",
+      "staged_sha256": "4c94a20d7351275ede1d31afd0a38773cf2fd48ba5ad7deb46c25a8d277387d2",
+      "staged_oid": "2f4a23bcc56b17db74bbef515b569ad9333a2555",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/source-state.py",
+      "bytes": 3162,
+      "raw_sha256": "5a65ff455ba8fe71eecbfd9d8048fb555561829fcc48875e7c15010263910e95",
+      "normalized_sha256": "5a65ff455ba8fe71eecbfd9d8048fb555561829fcc48875e7c15010263910e95",
+      "staged_sha256": "5a65ff455ba8fe71eecbfd9d8048fb555561829fcc48875e7c15010263910e95",
+      "staged_oid": "abf5e147505db08c6e90181ffc407eefc8a3da28",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation-preparation.md",
+      "bytes": 15786,
+      "raw_sha256": "105c6c428f26ccac5363f1408143f5861fc65fbdace0f11d0d07a2db07bf048b",
+      "normalized_sha256": "105c6c428f26ccac5363f1408143f5861fc65fbdace0f11d0d07a2db07bf048b",
+      "staged_sha256": "105c6c428f26ccac5363f1408143f5861fc65fbdace0f11d0d07a2db07bf048b",
+      "staged_oid": "de79081da172f5faa0f199bb81cf6cad1926e8f8",
+      "attributes": {
+        "text": "set",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    }
+  ],
+  "record_population_scope": "Existing owned files before this additive report; complete-run freeze/staged checks await all writers."
+}

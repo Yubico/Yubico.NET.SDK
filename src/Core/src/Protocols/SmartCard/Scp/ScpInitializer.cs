@@ -128,9 +128,10 @@ internal static class ScpInitializer
         try
         {
             // Construct the SCP processor, send EXTERNAL AUTHENTICATE with the host cryptogram, then
-            // request the data encryptor. Dispose state (and its session keys) on ANY failure in this
-            // block — including SCP processor construction, EXTERNAL AUTHENTICATE, or a missing-DEK
-            // failure from GetDataEncryptor() — otherwise session keys leak to the GC finalizer (T10).
+            // request the data encryptor. Dispose returned state on failure in this block, including
+            // processor construction, EXTERNAL AUTHENTICATE, or missing DEK. State and SessionKeys have
+            // no finalizer; deterministic disposal owns their cleanup. Earlier Scp03InitAsync failures
+            // have their own narrower cleanup scope.
             // Disposing state directly (rather than a possibly-not-yet-constructed scpProcessor) mirrors
             // InitScp11Async and stays correct even if the guarded block's first statement throws.
             try
@@ -186,9 +187,8 @@ internal static class ScpInitializer
                 cancellationToken)
             .ConfigureAwait(false);
 
-        // Dispose state (and its live session keys) on any post-init failure — otherwise
-        // session keys leak to the GC finalizer, mirroring the SCP03 EXTERNAL AUTHENTICATE
-        // failure-cleanup discipline above (T10).
+        // Dispose returned state on post-init failure. State and SessionKeys have no finalizer;
+        // this guard owns cleanup until the secure processor takes over the returned state.
         try
         {
             var scpProcessor = CreateSecureProcessor(

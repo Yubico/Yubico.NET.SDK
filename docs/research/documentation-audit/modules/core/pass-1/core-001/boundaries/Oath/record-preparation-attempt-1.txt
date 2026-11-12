@@ -1,0 +1,5 @@
+Static record preparation attempt 1 (no SDK execution):
+python3 -B docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/prepare_records.py
+Exit 1: SyntaxError: unmatched ')' at line85, future_editor_review serialization.
+The Python parser rejected the script before any generated record write. Corrected the extra closing
+parenthesis; this is a record-tool correction, not product or test behavior evidence.

@@ -1,0 +1,18 @@
+{
+  "owner": "B3",
+  "stratum": "XML-contracts",
+  "original_population": 14,
+  "original_full_quota": 2,
+  "original_selected_ids": [
+    "core-001:unit:663f44912ef5c3b2",
+    "core-001:unit:f8412d69f0903d78"
+  ],
+  "additional_full_quota": 2,
+  "additional_selected_ids": [
+    "core-001:unit:e3d8ada85fd182e2",
+    "core-001:unit:76b664da02352c87"
+  ],
+  "proposed_total": 4,
+  "original_misses_with_zero_final_credit": 1,
+  "exact_accepted_overlap_skips": []
+}

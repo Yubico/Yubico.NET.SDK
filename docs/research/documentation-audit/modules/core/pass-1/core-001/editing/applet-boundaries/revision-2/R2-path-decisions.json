@@ -1,0 +1,113 @@
+[
+  {
+    "module": "SecurityDomain",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+    "candidate_ids_from_original_file_ledger": [
+      "CORE-SD-X008"
+    ],
+    "decision": "EDIT",
+    "reason": "R2 / CORE-SD-X008 (related X004): describe an attempted default-key precondition, not asserted factory restoration. Rotation replaces the earlier custom set. Calls, assertions, tokens and independent Track cleanup unchanged.",
+    "original_boundary_context": "Read complete seven-session import/delete and four-session rotation. Inner APDU wrapper assertions, retained/deleted version listing, fresh rotated nonnull factory checked. Scoped static clones; wrappers/inline defaults/source bytes not all disposed/cleared. Local finally same possibly canceled token plus Track independent base cleanup; no final factory-state assertion.",
+    "original_boundary_disposition": {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+      "pinned_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+      "git_blob": "742ce23d8a260b0c547d3f283670cb8cc449432b",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": true,
+      "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+      "note": "Read complete seven-session import/delete and four-session rotation. Inner APDU wrapper assertions, retained/deleted version listing, fresh rotated nonnull factory checked. Scoped static clones; wrappers/inline defaults/source bytes not all disposed/cleared. Local finally same possibly canceled token plus Track independent base cleanup; no final factory-state assertion.",
+      "candidates": [
+        "CORE-SD-X008"
+      ],
+      "assigned_unit_ids": [
+        "core-001:unit:d5e6888410468242",
+        "core-001:unit:87a4fdb35e367783"
+      ],
+      "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+      "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+      "supplemental": false
+    },
+    "before_git_HEAD_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+    "after_worktree_sha256": "632e76c517481656194b4f8cbd51b05d165ac8c98c7bef2cff2835bc652fc36e",
+    "changed_ranges_1_based_inclusive": [
+      {
+        "kind": "replace",
+        "before": [
+          211,
+          212
+        ],
+        "after": [
+          211,
+          213
+        ],
+        "before_line_count": 2,
+        "after_line_count": 3,
+        "insertion_or_deletion_anchor_before_line": 211
+      }
+    ],
+    "terminal_newline_before": false,
+    "terminal_newline_after": true,
+    "previous_review_decision": "RETAIN",
+    "previous_review_after_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5"
+  },
+  {
+    "module": "SecurityDomain",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+    "candidate_ids_from_original_file_ledger": [
+      "CORE-SD-X008"
+    ],
+    "decision": "EDIT",
+    "reason": "R2 / CORE-SD-X008 (related X004): describe an attempted default-key precondition, not asserted factory restoration. Rotation replaces the earlier custom set. Calls, assertions, tokens and independent Track cleanup unchanged.",
+    "original_boundary_context": "Read full factory/list/plain reset/import/recognition/GET/CA tests. Count3/4+FF is factory expectation, not universal; reset test plain only; fresh import factory nonnull and old reference APDU inner. CA wire regression constrains KID11/13/15 and nonempty identifier. Cleanup/inline defaults/tokens and Track vary per method; see test-oracles.",
+    "original_boundary_disposition": {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+      "pinned_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+      "git_blob": "f86d67273f039d854d923626f15aeb1b4a19002b",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": true,
+      "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+      "note": "Read full factory/list/plain reset/import/recognition/GET/CA tests. Count3/4+FF is factory expectation, not universal; reset test plain only; fresh import factory nonnull and old reference APDU inner. CA wire regression constrains KID11/13/15 and nonempty identifier. Cleanup/inline defaults/tokens and Track vary per method; see test-oracles.",
+      "candidates": [
+        "CORE-SD-X008"
+      ],
+      "assigned_unit_ids": [
+        "core-001:unit:98b89636718cd9a3",
+        "core-001:unit:a7219dfa0bd19379",
+        "core-001:unit:82a8a43a3422cddf",
+        "core-001:unit:be143f94e8d9f03b",
+        "core-001:unit:04336a18c61d42bd",
+        "core-001:unit:f530e58c9df8141c",
+        "core-001:unit:5346c2b3860e5f98",
+        "core-001:unit:474a3cdcd35ff811",
+        "core-001:unit:784200f7518e35ce"
+      ],
+      "candidate_associated_unchanged_reason": "Records-only assignment. Preserve all product bytes; fresh editor rechecks exact mapped XML/comment/task, separately scoped implementation/test owner handles behavior.",
+      "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+      "supplemental": false
+    },
+    "before_git_HEAD_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+    "after_worktree_sha256": "515fcf13aca4968f21635c6172d0c5a4cfd8caadf8254b60408c5a66f1620d5f",
+    "changed_ranges_1_based_inclusive": [
+      {
+        "kind": "replace",
+        "before": [
+          114,
+          116
+        ],
+        "after": [
+          114,
+          116
+        ],
+        "before_line_count": 3,
+        "after_line_count": 3,
+        "insertion_or_deletion_anchor_before_line": 114
+      }
+    ],
+    "terminal_newline_before": false,
+    "terminal_newline_after": true,
+    "previous_review_decision": "RETAIN",
+    "previous_review_after_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8"
+  }
+]

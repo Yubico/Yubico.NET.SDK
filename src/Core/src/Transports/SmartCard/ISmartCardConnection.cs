@@ -48,6 +48,12 @@ public interface ISmartCardConnection : IConnection
     ///     disposal can block without a bound on native acquisition/end; prefer async begin and, for built-in
     ///     scopes, async disposal.
     /// </summary>
+    /// <remarks>
+    ///     A transaction coordinates resource-manager clients, not concurrent callers using this same
+    ///     connection. Serialize a complete multi-command workflow in the application. Built-in scope disposal
+    ///     waits for native end; an end failure closes ordinary admission and is reported by later connection
+    ///     disposal. The built-in scope's diagnostic callback logs that failure instead of throwing it here.
+    /// </remarks>
     IDisposable BeginTransaction(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -60,6 +66,8 @@ public interface ISmartCardConnection : IConnection
     ///     block the caller; override it for nonblocking acquisition. Built-in connections reject cancellation
     ///     before native dispatch; afterward the transaction may begin successfully, and completion waits for
     ///     native work. Do not assume cancellation releases the connection or ends the transaction.
+    ///     The same-connection workflow and end-failure reporting rules of <see cref="BeginTransaction" />
+    ///     also apply to this scope. A borrowed session's disposal does not dispose its connection.
     /// </remarks>
     Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {

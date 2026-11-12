@@ -121,8 +121,8 @@ internal static partial class NativeMethods
     public static partial IntPtr udev_list_entry_get_next(IntPtr previousEntry);
 
     // Get the name associated with this entry. It is the path.
-    // The return value is a string, but in the form of a pointer to ASCII
-    // bytes. Hence, to convert the result into a C# string object, use
+    // The return value is borrowed NUL-terminated native text. On Unix, the conversion below copies
+    // UTF-8 bytes into a managed string while the owning enumerate object remains alive. Use
     //   Marshal.PtrToStringAnsi
     // The return is a reference to an object that belongs to the
     // enumerateObject. We don't destroy it. Hence, it is an IntPtr, not a
@@ -163,8 +163,8 @@ internal static partial class NativeMethods
 
     // Get the devnode from the device.
     // This is what will be used by the HIDRAW library.
-    // The return value is a string, but in the form of a pointer to ASCII
-    // bytes. Hence, to convert the result into a C# string object, use
+    // The return value is borrowed NUL-terminated native text. On Unix, the conversion below copies
+    // UTF-8 bytes into a managed string while the owning device remains alive. Use
     //   Marshal.PtrToStringAnsi
     // The return is a reference to an object that belongs to the
     // deviceObject. We don't destroy it. Hence, it is an IntPtr, not a
@@ -179,7 +179,7 @@ internal static partial class NativeMethods
     // Get the parent device from the current device.
     // The return value is another UDEV device handle which, while refcounted,
     // is owned by the original (child) udev device. Do not call unref on this
-    // pointer.
+    // pointer. Keep the child alive while reading the parent or copying its fields.
     // The C signature is
     //   struct udev_device *udev_device_get_parent(struct udev_device *udev_device);
     [LibraryImport(Libraries.LinuxUdevLib, EntryPoint = "udev_device_get_parent")]
@@ -191,8 +191,8 @@ internal static partial class NativeMethods
 
     // Get the path from the device.
     // This is what will be used by the HIDRAW library.
-    // The return value is a string, but in the form of a pointer to ASCII
-    // bytes. Hence, to convert the result into a C# string object, use
+    // The return value is borrowed NUL-terminated native text. On Unix, the conversion below copies
+    // UTF-8 bytes into a managed string while the owning device remains alive. Use
     //   Marshal.PtrToStringAnsi
     // The return is a reference to an object that belongs to the
     // deviceObject. We don't destroy it. Hence, it is an IntPtr, not a
@@ -239,7 +239,8 @@ internal static partial class NativeMethods
     // This will be called from within the SafeHandle class, but should be
     // called by no one else.
     // The C signature is
-    //   void udev_monitor_unref(struct udev_monitor *udev_monitor);
+    //   struct udev_monitor *udev_monitor_unref(struct udev_monitor *udev_monitor);
+    // The native API returns NULL; this managed declaration intentionally discards the return value.
     [LibraryImport(Libraries.LinuxUdevLib, EntryPoint = "udev_monitor_unref",
         SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

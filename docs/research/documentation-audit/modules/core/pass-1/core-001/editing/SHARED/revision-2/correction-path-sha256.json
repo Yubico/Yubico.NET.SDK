@@ -1,0 +1,897 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C002",
+        "proposal_id": "FPT-068",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C015",
+        "proposal_id": "FPT-081",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C017",
+        "proposal_id": "FPT-099",
+        "facets": [
+          "D",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "product_pin_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "current_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+    "base_equals_product_pin": true,
+    "reviewed_subject_sha256": "87abcc9ba6eff172ac2b64e791258c0707b01011cee31427481e0ed24b7261ff",
+    "revision_2": "R1–R5 correction; focused review pending"
+  },
+  {
+    "path": "docs/LOGGING.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B4-C007",
+        "proposal_id": "FPT-054",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C014",
+        "proposal_id": "FPT-080",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C008",
+        "proposal_id": "FPT-090",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f",
+    "product_pin_sha256": "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f",
+    "current_sha256": "f7deba4e7bc6624b4fc3262d49f565960fe9c4fe7da452a129f229df97cd3027",
+    "base_equals_product_pin": true,
+    "reviewed_subject_sha256": "a3e9f6c20f08c76316c059bdf8cfb7fcec3f0d66a9c9a59cb7d4650ffccb2c60",
+    "revision_2": "R1–R5 correction; focused review pending"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C018",
+        "proposal_id": "FPT-018",
+        "facets": [
+          "D",
+          "E",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "product_pin_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "current_sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe",
+    "base_equals_product_pin": true,
+    "reviewed_subject_sha256": "1e6ec7b28c9b3482718217fdb14746a19cb9f57b56b1e19ea8857b42c1059907",
+    "revision_2": "R1–R5 correction; focused review pending"
+  },
+  {
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B1-C002",
+        "proposal_id": "FPT-023",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C005",
+        "proposal_id": "FPT-026",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C006",
+        "proposal_id": "FPT-027",
+        "facets": [
+          "D",
+          "E",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C007",
+        "proposal_id": "FPT-028",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C008",
+        "proposal_id": "FPT-029",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C012",
+        "proposal_id": "FPT-033",
+        "facets": [
+          "D",
+          "E",
+          "M"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C002",
+        "proposal_id": "FPT-035",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C001",
+        "proposal_id": "FPT-040",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C001",
+        "proposal_id": "FPT-048",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C004",
+        "proposal_id": "FPT-051",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "0dba03bde9f77cd59de9dc118f1ab621d0712439fb0e9ddd136492f3ffb97a60",
+    "product_pin_sha256": "0dba03bde9f77cd59de9dc118f1ab621d0712439fb0e9ddd136492f3ffb97a60",
+    "current_sha256": "c4e33e77acd4e1727750a8d458a0a282f356757dc00e23094c1fe8c3897ce5dd",
+    "base_equals_product_pin": true,
+    "reviewed_subject_sha256": "46375a7a74209148352fb1e32db1657caaab9d15bbfe935fc4b6bb99c6e07123",
+    "revision_2": "R1–R5 correction; focused review pending"
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-B1-C005",
+        "proposal_id": "FPT-026",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C006",
+        "proposal_id": "FPT-027",
+        "facets": [
+          "D",
+          "E",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C007",
+        "proposal_id": "FPT-028",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C002",
+        "proposal_id": "FPT-035",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C006",
+        "proposal_id": "FPT-039",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C007",
+        "proposal_id": "FPT-045",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C008",
+        "proposal_id": "FPT-046",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C001",
+        "proposal_id": "FPT-048",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C002",
+        "proposal_id": "FPT-059",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C003",
+        "proposal_id": "FPT-060",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C004",
+        "proposal_id": "FPT-061",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C006",
+        "proposal_id": "FPT-063",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C007",
+        "proposal_id": "FPT-064",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C008",
+        "proposal_id": "FPT-065",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C001",
+        "proposal_id": "FPT-067",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C003",
+        "proposal_id": "FPT-069",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C007",
+        "proposal_id": "FPT-073",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C015",
+        "proposal_id": "FPT-081",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "product_pin_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "current_sha256": "7ecaf86bafda5516a810a34ac5b09b170bf774d487421b2d34c2ce2a2ba91fc1",
+    "base_equals_product_pin": true,
+    "reviewed_subject_sha256": "3b9e91852853284dc3c8959fe327616d145fd2d344f3723eb47bb81bbbcd668b",
+    "revision_2": "R1–R5 correction; focused review pending"
+  },
+  {
+    "path": "docs/usage/device-discovery.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C002",
+        "proposal_id": "FPT-002",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C003",
+        "proposal_id": "FPT-003",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C009",
+        "proposal_id": "FPT-009",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C011",
+        "proposal_id": "FPT-011",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C012",
+        "proposal_id": "FPT-012",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C016",
+        "proposal_id": "FPT-016",
+        "facets": [
+          "M",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C017",
+        "proposal_id": "FPT-017",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C021",
+        "proposal_id": "FPT-021",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C002",
+        "proposal_id": "FPT-023",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C003",
+        "proposal_id": "FPT-024",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C002",
+        "proposal_id": "FPT-041",
+        "facets": [
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "360a2a8be9ccdd6b5f30dc015c6ae9ef90c0ebee56842003e832c182436b6a7f",
+    "product_pin_sha256": "360a2a8be9ccdd6b5f30dc015c6ae9ef90c0ebee56842003e832c182436b6a7f",
+    "current_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+    "base_equals_product_pin": true,
+    "reviewed_subject_sha256": "ea91eea91b9a82319420c20e386f1807762b09da1a84716d39e0e3f0571aeb4d",
+    "revision_2": "R1–R5 correction; focused review pending"
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "decision": "edit",
+    "reason": "Edit source-supported task/contract facets; detailed rationale in decisions.md. Remaining E/M/P/Q/B facets and caller qualification remain held.",
+    "candidate_associations": [
+      {
+        "local_id": "CORE-A-C002",
+        "proposal_id": "FPT-002",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-A-C015",
+        "proposal_id": "FPT-015",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C001",
+        "proposal_id": "FPT-022",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C002",
+        "proposal_id": "FPT-023",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C003",
+        "proposal_id": "FPT-024",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C004",
+        "proposal_id": "FPT-025",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C007",
+        "proposal_id": "FPT-028",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B1-C011",
+        "proposal_id": "FPT-032",
+        "facets": [
+          "D"
+        ]
+      },
+      {
+        "local_id": "CORE-B2-C002",
+        "proposal_id": "FPT-035",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C004",
+        "proposal_id": "FPT-043",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C005",
+        "proposal_id": "FPT-044",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B3-C008",
+        "proposal_id": "FPT-046",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C001",
+        "proposal_id": "FPT-048",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C002",
+        "proposal_id": "FPT-049",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C003",
+        "proposal_id": "FPT-050",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C005",
+        "proposal_id": "FPT-052",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q"
+        ]
+      },
+      {
+        "local_id": "CORE-B4-C010",
+        "proposal_id": "FPT-057",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C001",
+        "proposal_id": "FPT-058",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C002",
+        "proposal_id": "FPT-059",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C004",
+        "proposal_id": "FPT-061",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C006",
+        "proposal_id": "FPT-063",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B5-C008",
+        "proposal_id": "FPT-065",
+        "facets": [
+          "D",
+          "P",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C001",
+        "proposal_id": "FPT-067",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C002",
+        "proposal_id": "FPT-068",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C007",
+        "proposal_id": "FPT-073",
+        "facets": [
+          "D",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C009",
+        "proposal_id": "FPT-075",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C012",
+        "proposal_id": "FPT-078",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-B6-C015",
+        "proposal_id": "FPT-081",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C005",
+        "proposal_id": "FPT-087",
+        "facets": [
+          "D",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C008",
+        "proposal_id": "FPT-090",
+        "facets": [
+          "D",
+          "M",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C009",
+        "proposal_id": "FPT-091",
+        "facets": [
+          "D",
+          "E",
+          "P",
+          "M",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C015",
+        "proposal_id": "FPT-097",
+        "facets": [
+          "D",
+          "Q",
+          "B"
+        ]
+      },
+      {
+        "local_id": "CORE-C-C020",
+        "proposal_id": "FPT-102",
+        "facets": [
+          "D",
+          "P",
+          "M",
+          "Q",
+          "B"
+        ]
+      }
+    ],
+    "base_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "product_pin_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "current_sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd",
+    "base_equals_product_pin": true,
+    "reviewed_subject_sha256": "bc8000f655ebe9a44f5af41d1848058d067accd4a6d10c6bfed57abd613bf3ad",
+    "revision_2": "R1–R5 correction; focused review pending"
+  }
+]

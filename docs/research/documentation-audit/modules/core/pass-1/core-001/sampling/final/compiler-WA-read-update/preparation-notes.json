@@ -1,0 +1,12 @@
+{
+  "scope": "Records-only checker diagnostic; no product/content/sampler acceptance.",
+  "attempts": [
+    {
+      "attempt": "structural check 1",
+      "error": "Input-scope assertion rejected the generator's absolute __file__ path",
+      "cause": "The scope checker initially compared a relative sampling prefix against an absolute self-source path. Both point inside the sampling records directory.",
+      "correction": "Compare absolute lexical paths with is_relative_to; do not broaden the permitted input scope or inspect products.",
+      "impact": "No final product hashes or sampler pass issued; no source, verdict, quota, or predecessor changes."
+    }
+  ]
+}

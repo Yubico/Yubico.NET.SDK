@@ -1,0 +1,139 @@
+"""Prepare literal documentation test bodies for their real existing assemblies; compile only."""
+import json
+from pathlib import Path
+import re
+import sys
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0,str(HERE))
+from compiler_imports import correct_prefix
+ROOT = HERE.parents[9]
+GROUPS = {
+ 'Core.UnitTests': [60,142,204,205,206,211,238],
+ 'Ctap2.UnitTests': [10,11,30],
+ 'Ctap2.IntegrationTests': [12,26,27],
+ 'Management.IntegrationTests': [61,133,134,135,137,138,241,242,243,244,252,253,254,255,256,257,258,259,260,261,262,288,289],
+ 'SecurityDomain.IntegrationTests': [302,303,306],
+ 'Piv.IntegrationTests': [375],
+ 'Core.IntegrationTests': [212,239],
+ 'WebAuthn.IntegrationTests': [32,37]
+}
+
+
+def import_prefix(body):
+    return re.match(r'((?:[ \t]*using (?:static )?[A-Za-z0-9_.]+;\n)+)\n', body)
+
+
+def main():
+    rows = {int(row['id'].split('-')[1]): row for row in json.loads((HERE / 'current-inventory.json').read_bytes())['entries']}
+    results = []
+    for group, numbers in GROUPS.items():
+        module = group.split('.')[0]
+        project = ROOT / f'src/{module}/tests/Yubico.YubiKit.{group}/Yubico.YubiKit.{group}.csproj'
+        assert project.is_file()
+        directory = HERE / 'injections' / group
+        directory.mkdir(parents=True, exist_ok=True)
+        bodies = []
+        compiled = {}
+        for number in numbers:
+            row = rows[number]
+            body = row['decoded_body']
+            imports = ('using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\n'
+                       'using System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\n'
+                       'using Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\n'
+                       'using Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\n'
+                       'using Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n')
+            if group.endswith('IntegrationTests'):
+                imports += ('using Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\n'
+                            'using Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\n')
+            if module == 'Ctap2':
+                imports += ('using System.Formats.Cbor;\nusing Yubico.YubiKit.Ctap2;\n'
+                            'using Yubico.YubiKit.Ctap2.Credentials;\n'
+                            'using Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Ctap2.Extensions;\n')
+                imports += ('using NSubstitute;\n' if group.endswith('UnitTests') else
+                            'using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;\n')
+            elif module in ('Piv','SecurityDomain'):
+                imports += 'using Yubico.YubiKit.' + module + ';\n'
+            if module == 'WebAuthn':
+                imports += ('using Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.WebAuthn;\n'
+                            'using Yubico.YubiKit.WebAuthn.Client;\nusing Yubico.YubiKit.WebAuthn.IntegrationTests;\n')
+            if module == 'Core' and group.endswith('IntegrationTests'):
+                imports += 'using Yubico.YubiKit.Core.IntegrationTests;\n'
+            if number in (204,205,206,211,238):
+                imports += ('using Yubico.YubiKit.Core.Native;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\n'
+                            'using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\n')
+            if number == 206:
+                imports += 'using System.Runtime.InteropServices;\n'
+                body = body[body.index('// ✅ RIGHT'):]
+            if number == 32:
+                imports += ('using Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Ctap2.Cose;\n'
+                            'using Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;\n')
+            # Keep original file imports outside the wrapper without changing their text.
+            match = import_prefix(body)
+            if match:
+                imports += body[:match.end()]
+                body = body[match.end():]
+            namespace = 'namespace Audit20261111.DocExamples.Test' + str(number) + ';\n'
+            if 'public class ' in body:
+                prefix, suffix = imports + namespace, '\n'
+            else:
+                prefix, suffix = imports + namespace + 'public sealed ' + ('partial ' if number == 206 else '') + 'class DocumentationBody' + str(number) + '\n{\n', '\n}\n'
+                if number in (244,252,260,261):
+                    prefix += ('public void' if number == 244 else 'public async Task') + ' CompileOnly(YubiKeyTestState state)\n{\n'
+                    suffix = '\n}\n}\n'
+                elif number == 262:
+                    prefix += 'public async Task CompileOnly(ManagementSession mgmt)\n{\n'
+                    suffix = '\n}\n}\n'
+                elif number == 27:
+                    prefix += 'public async Task CompileOnly(ICtap2Session session)\n{\n'
+                    suffix = '\n}\n}\n'
+                elif number == 142:
+                    pass  # The accepted complete static method is a member, not a test invocation.
+                elif number in (204,205,211,238):
+                    parameters = {204:'PcscProtocol protocol, FirmwareVersion firmwareVersion',205:'string libraryPath',211:'',238:''}[number]
+                    prefix += 'internal ' + ('async Task' if number in (211,238) else 'void') + ' CompileOnly(' + parameters + ')\n{\n'
+                    suffix = '\n}\n}\n'
+                elif number == 32:
+                    declaration, statement = body.split('\n\n', 1)
+                    prefix += declaration + '\ninternal void CompileOnly(CoseAlgorithm selectedAlgorithm)\n{\n'
+                    body = statement
+                    suffix = '\n}\n}\n'
+            if number == 27:
+                prefix = 'using System.Text;\n' + prefix
+            prefix=correct_prefix(prefix,match.group(0) if match else '')
+            raw = (prefix + body + suffix).encode()
+            path = directory / (row['id'] + '.cs')
+            alias = compiled.get(row['decoded_sha256'])
+            if alias is None:
+                compiled[row['decoded_sha256']] = row['id']
+                if path.exists():
+                    assert path.read_bytes() == raw
+                else:
+                    with path.open('xb') as output:
+                        output.write(raw)
+            if number == 238 and alias is not None:
+                canonical = next(row for row in bodies if row['id'] == alias)
+                path = HERE / canonical['path']
+                prefix, suffix = canonical['prefix'], canonical['suffix']
+                raw = path.read_bytes()
+            bodies.append(dict(id=row['id'], path=path.relative_to(HERE).as_posix(),
+                               compilation_alias_of=alias,
+                               source_document=row['document'], review=row['review'],
+                               body_layout=('Current RIGHT LibraryImport declaration only; explicit DllImport antipattern remains excluded' if number == 206 else
+                                            'Exact source field in containing class; exact log statement in typed method' if number == 32 else 'literal complete body with separate imports/containing class'),
+                               body_sha256=row['decoded_sha256'], preserved_import_prefix=match.group(0) if match else '',
+                               prefix=prefix, suffix=suffix,
+                               generated_sha256=__import__('hashlib').sha256(raw).hexdigest(),
+                               compilation_status='prepared-existing-project-injection', execution_status='not-run'))
+        results.append(dict(context=group, project=str(project.relative_to(ROOT)), bodies=bodies,
+                            access='Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.',
+                            operation='Canonical build only with run-owned Compile injection; no product project edit and no test execution.',
+                            qualification='Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane.'))
+    with (HERE / 'test-context-dispositions-corrected.json').open('x') as output:
+        json.dump(dict(contexts=results, source_projects_unchanged=True, final_descriptor='unsealed; pending remaining contexts/external final source'), output, indent=2)
+        output.write('\n')
+    print('Prepared literal bodies in real existing test contexts:', sum(len(row['bodies']) for row in results))
+
+
+if __name__ == '__main__':
+    main()

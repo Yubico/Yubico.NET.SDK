@@ -1,0 +1,11 @@
+--- pre-review/FULL-200
++++ current/FULL-200
+@@ -18,7 +18,7 @@
+ using Yubico.YubiKit.Core.Utilities;
+ 
+ namespace Audit20261111.DocExamples.Full;
+-internal static class Body200
++internal sealed class Body200 : IUserPresencePrompt
+ {
+ public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken)
+ {

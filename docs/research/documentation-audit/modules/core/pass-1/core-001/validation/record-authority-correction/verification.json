@@ -1,0 +1,428 @@
+{
+  "scope": "Read-only exact original source admission and in-memory negative mutations; no archive freeze/staged check.",
+  "original_failure": "Primary source has no unique author-manifest entry",
+  "registered_sources": 8,
+  "accepted_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/pcsc5-v2.01.01.pdf",
+      "bytes": 401060,
+      "raw_sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+      "normalized_sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+      "staged_sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+      "staged_oid": "e703957d3b15e6e2da88c4f30222afd6dbd25e70",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 1812,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/B1/sources/pcsc5-v2.01.01.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 401060,
+        "sha256": "524c59e88e50ec0bb2171a7d4ad6369a80d9ab46eb31a77ba603d6d2fe7cb0ff",
+        "url": "https://pcscworkgroup.com/Download/Specifications/pcsc5_v2.01.01.pdf",
+        "access_utc": "2026-11-11T22:35:02.208132+00:00",
+        "authority": "investigation/B1/sources/manifest.json",
+        "applicability": "Exact revision, actor and claim applicability are recorded in investigation/B1/sources/register.md; retaining the PDF supplies no general conformance claim."
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/sec2-v2.pdf",
+      "bytes": 306784,
+      "raw_sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+      "normalized_sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+      "staged_sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+      "staged_oid": "c5c9bda0cd8b362a4669b58999b677bc9a7d4f37",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 4,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/C/sources/sec2-v2.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 306784,
+        "sha256": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+        "url": "https://www.secg.org/sec2-v2.pdf",
+        "access_utc": "2026-11-11T22:51:41.002846+00:00",
+        "authority": "investigation/C/sources/completion-fetch-manifest.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/x690-202102.pdf",
+      "bytes": 840764,
+      "raw_sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+      "normalized_sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+      "staged_sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+      "staged_oid": "70b575cdb8ca5205c4d03a3464551611663fb444",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 4966,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/C/sources/x690-202102.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 840764,
+        "sha256": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+        "url": "https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-X.690-202102-I!!PDF-E&type=items",
+        "access_utc": "2026-11-11T22:56:23.583516+00:00",
+        "authority": "investigation/C/sources/ber-source-attempts.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/x690-202102-metadata.html",
+      "bytes": 11512,
+      "raw_sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+      "normalized_sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+      "staged_sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+      "staged_oid": "7c84d683b093750fe1bcb2dc7d48367e75f69d48",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 178,
+      "raw_preserved_in_git": true,
+      "kind": "original-source-html",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/C/sources/x690-202102-metadata.html",
+        "kind": "original-source-html",
+        "encoding": "iso-8859-1",
+        "encoding_evidence": "Original HTML declares <META http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">.",
+        "bytes": 11512,
+        "sha256": "334e9444d754ab465f282ca79da45d233273e537020186850adda29261ccb1e9",
+        "url": "https://www.itu.int/rec/T-REC-X.690-202102-I/en",
+        "access_utc": "2026-11-11T22:56:23.143991+00:00",
+        "authority": "investigation/C/sources/ber-source-attempts.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/hid-1.11.pdf",
+      "bytes": 1031484,
+      "raw_sha256": "206272dacaf01ff34beda038b8ed59abbb02f028394896345c393bc026795d36",
+      "normalized_sha256": "206272dacaf01ff34beda038b8ed59abbb02f028394896345c393bc026795d36",
+      "staged_sha256": "206272dacaf01ff34beda038b8ed59abbb02f028394896345c393bc026795d36",
+      "staged_oid": "88c3edc60f1c8c6127ebc42c66529c1f30106019",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 7948,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/B4/sources/hid-1.11.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 1031484,
+        "sha256": "206272dacaf01ff34beda038b8ed59abbb02f028394896345c393bc026795d36",
+        "url": "https://www.usb.org/sites/default/files/hid1_11.pdf",
+        "access_utc": "2026-11-11T23:40:14.698041+00:00",
+        "authority": "investigation/B4/sources/captures.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/hut-1.5.pdf",
+      "bytes": 4452110,
+      "raw_sha256": "f4ead217b01134f89199155ed616d4eeae9ad40a5f73dad9544002b592c07db3",
+      "normalized_sha256": "f4ead217b01134f89199155ed616d4eeae9ad40a5f73dad9544002b592c07db3",
+      "staged_sha256": "f4ead217b01134f89199155ed616d4eeae9ad40a5f73dad9544002b592c07db3",
+      "staged_oid": "eccb46d5c37cd44a509cf12a2e016962aba67522",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 46,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/B4/sources/hut-1.5.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 4452110,
+        "sha256": "f4ead217b01134f89199155ed616d4eeae9ad40a5f73dad9544002b592c07db3",
+        "url": "https://usb.org/sites/default/files/hut1_5.pdf",
+        "access_utc": "2026-11-11T23:40:14.889957+00:00",
+        "authority": "investigation/B4/sources/captures.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf",
+      "bytes": 487598,
+      "raw_sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "normalized_sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "staged_sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "staged_oid": "b336ab85e291b6209fba5e19d636bc27d94511aa",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 291,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/B6/sources/scp03-1.1.2.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 487598,
+        "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+        "url": "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+        "access_utc": "2026-11-11T23:28:58.587395+00:00",
+        "authority": "investigation/B6/sources/final-manifest.json"
+      }
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+      "bytes": 799930,
+      "raw_sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "normalized_sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "staged_sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "staged_oid": "605691908744ee2c064b6f9280fb4876a21b9f56",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 510,
+      "raw_preserved_in_git": true,
+      "kind": "original-specification-pdf",
+      "normalization": "byte-exact-original-source",
+      "source_registration": {
+        "path": "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+        "kind": "original-specification-pdf",
+        "bytes": 799930,
+        "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+        "url": "https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf",
+        "access_utc": "2026-11-11T23:28:59.790398+00:00",
+        "authority": "investigation/B6/sources/final-manifest.json",
+        "applicability": "Public-review edition; final SCP11 and vendor-profile clauses remain separately qualified."
+      }
+    }
+  ],
+  "negative_cases": 56,
+  "rejected": [
+    "investigation/B1/sources/pcsc5-v2.01.01.pdf:url",
+    "investigation/B1/sources/pcsc5-v2.01.01.pdf:access_utc",
+    "investigation/B1/sources/pcsc5-v2.01.01.pdf:bytes",
+    "investigation/B1/sources/pcsc5-v2.01.01.pdf:sha256",
+    "investigation/C/sources/sec2-v2.pdf:url",
+    "investigation/C/sources/sec2-v2.pdf:access_utc",
+    "investigation/C/sources/sec2-v2.pdf:bytes",
+    "investigation/C/sources/sec2-v2.pdf:sha256",
+    "investigation/C/sources/x690-202102.pdf:url",
+    "investigation/C/sources/x690-202102.pdf:access_utc",
+    "investigation/C/sources/x690-202102.pdf:bytes",
+    "investigation/C/sources/x690-202102.pdf:sha256",
+    "investigation/C/sources/x690-202102-metadata.html:url",
+    "investigation/C/sources/x690-202102-metadata.html:access_utc",
+    "investigation/C/sources/x690-202102-metadata.html:bytes",
+    "investigation/C/sources/x690-202102-metadata.html:sha256",
+    "investigation/B4/sources/hid-1.11.pdf:url",
+    "investigation/B4/sources/hid-1.11.pdf:access_utc",
+    "investigation/B4/sources/hid-1.11.pdf:bytes",
+    "investigation/B4/sources/hid-1.11.pdf:sha256",
+    "investigation/B4/sources/hut-1.5.pdf:url",
+    "investigation/B4/sources/hut-1.5.pdf:access_utc",
+    "investigation/B4/sources/hut-1.5.pdf:bytes",
+    "investigation/B4/sources/hut-1.5.pdf:sha256",
+    "investigation/B6/sources/scp03-1.1.2.pdf:url",
+    "investigation/B6/sources/scp03-1.1.2.pdf:access_utc",
+    "investigation/B6/sources/scp03-1.1.2.pdf:bytes",
+    "investigation/B6/sources/scp03-1.1.2.pdf:sha256",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf:url",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf:access_utc",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf:bytes",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf:sha256",
+    "status404",
+    "string200",
+    "bool200",
+    "missing-retained",
+    "wrong-retained",
+    "escape-retained",
+    "absolute-retained",
+    "escape-name",
+    "failed-fetch",
+    "not-original",
+    "wrong-media-type",
+    "ambiguous-author",
+    "b4-status404",
+    "b4-string200",
+    "b4-failed-fetch",
+    "b4-byte-type",
+    "b4-name-mismatch",
+    "name-schema-at-unrecognized-authority",
+    "registered-source-missing",
+    "registered-source-changed",
+    "registered-source-symlink",
+    "unregistered.pdf",
+    "runtime.dll",
+    "nonutf8.html"
+  ],
+  "original_checker_unchanged": true,
+  "pilot_files_unchanged": 145,
+  "adapter": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records-v2.py",
+    "bytes": 6791,
+    "raw_sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa",
+    "normalized_sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa",
+    "staged_sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa",
+    "staged_oid": "cdd8fc2c4198362421590d2b8320795a4d4f9498",
+    "attributes": {
+      "text": "unset",
+      "eol": "unspecified",
+      "filter": "unspecified",
+      "working-tree-encoding": "unspecified"
+    },
+    "crlf_count": 0,
+    "raw_preserved_in_git": true,
+    "kind": "utf8-text"
+  },
+  "checked_owned_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/record-authority-correction/current-run-scan.json",
+      "bytes": 468,
+      "raw_sha256": "fe6ac89776fbf12b211bb070ca9c4e2afd8fce0ce321bc5f5c79ae7dd835cea2",
+      "normalized_sha256": "fe6ac89776fbf12b211bb070ca9c4e2afd8fce0ce321bc5f5c79ae7dd835cea2",
+      "staged_sha256": "fe6ac89776fbf12b211bb070ca9c4e2afd8fce0ce321bc5f5c79ae7dd835cea2",
+      "staged_oid": "171aecef078f7bc8511d1d3e2d3b872c2519f715",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/record-authority-correction/handoff.md",
+      "bytes": 4901,
+      "raw_sha256": "2feca4969b08adbd1172424d0d7cd8a43f4e5518f84edcadeaaab51aa1381f8d",
+      "normalized_sha256": "2feca4969b08adbd1172424d0d7cd8a43f4e5518f84edcadeaaab51aa1381f8d",
+      "staged_sha256": "2feca4969b08adbd1172424d0d7cd8a43f4e5518f84edcadeaaab51aa1381f8d",
+      "staged_oid": "96207b7b90dde96a2d0b7be5314f4b97c94d85d7",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/record-authority-correction/original-failure.stderr.txt",
+      "bytes": 665,
+      "raw_sha256": "66d2cedac8dc64bf87a3c751b3d1350fdeeebc8cf62600503b3833ed25bbd2f2",
+      "normalized_sha256": "66d2cedac8dc64bf87a3c751b3d1350fdeeebc8cf62600503b3833ed25bbd2f2",
+      "staged_sha256": "66d2cedac8dc64bf87a3c751b3d1350fdeeebc8cf62600503b3833ed25bbd2f2",
+      "staged_oid": "f32c943b468fcd4fb9c26a91f521d4cdeae93167",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/record-authority-correction/preservation-before.json",
+      "bytes": 34726,
+      "raw_sha256": "1a54b3b5c0503dd19871ae78e5d5de0f7b4a25a978cca4093ab9d9a9b8b5c39d",
+      "normalized_sha256": "1a54b3b5c0503dd19871ae78e5d5de0f7b4a25a978cca4093ab9d9a9b8b5c39d",
+      "staged_sha256": "1a54b3b5c0503dd19871ae78e5d5de0f7b4a25a978cca4093ab9d9a9b8b5c39d",
+      "staged_oid": "792130a45053de8ca924c8631f0e011388f08c5f",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/record-authority-correction/provenance.json",
+      "bytes": 2437,
+      "raw_sha256": "c4085fccd4daaf38ede2ac4c9c02a0a5d3486f67f54b4a82c8085414b111668d",
+      "normalized_sha256": "c4085fccd4daaf38ede2ac4c9c02a0a5d3486f67f54b4a82c8085414b111668d",
+      "staged_sha256": "c4085fccd4daaf38ede2ac4c9c02a0a5d3486f67f54b4a82c8085414b111668d",
+      "staged_oid": "aa19d6cf0ac9a34bee5518f5f81e06cb614a9e98",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/record-authority-correction/verify.py",
+      "bytes": 6547,
+      "raw_sha256": "65637303e484df95183df41f76f02e3cd8601fb9e01b4bbc5664f4763c866545",
+      "normalized_sha256": "65637303e484df95183df41f76f02e3cd8601fb9e01b4bbc5664f4763c866545",
+      "staged_sha256": "65637303e484df95183df41f76f02e3cd8601fb9e01b4bbc5664f4763c866545",
+      "staged_oid": "c104726bfcd37ada3b5516d1af96eb60ba958584",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records-v2.py",
+      "bytes": 6791,
+      "raw_sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa",
+      "normalized_sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa",
+      "staged_sha256": "ec0f7c5c10f980f95227de98898b8c4a34b6f5784777c0c835f725540c18a7aa",
+      "staged_oid": "cdd8fc2c4198362421590d2b8320795a4d4f9498",
+      "attributes": {
+        "text": "unset",
+        "eol": "unspecified",
+        "filter": "unspecified",
+        "working-tree-encoding": "unspecified"
+      },
+      "crlf_count": 0,
+      "raw_preserved_in_git": true,
+      "kind": "utf8-text"
+    }
+  ],
+  "current_run_scan": "current-run-scan.json; point-in-time 1990/1990 classification pass, no freeze",
+  "pending": "Independent final record-tool review; actual final snapshot/check/staged after writer release."
+}

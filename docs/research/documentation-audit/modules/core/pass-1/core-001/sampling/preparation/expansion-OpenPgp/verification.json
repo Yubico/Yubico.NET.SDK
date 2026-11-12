@@ -1,0 +1,10 @@
+{
+  "result": "STRUCTURAL-PROPOSAL-VERIFIED; NO CONTENT VERDICTS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "PGP separate implementation/narrative expansions",
+  "additional_IDs": 6,
+  "clean_credit": 0,
+  "shared_preparation_receipt": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/verification.json",
+  "shared_preparation_receipt_sha256": "9b5ce51377e4a797808747e0ca28c441599d831cf313c5c4545d7a0e4d6c4e17",
+  "final_denominator": null
+}

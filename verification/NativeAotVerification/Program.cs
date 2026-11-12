@@ -17,10 +17,11 @@ using Yubico.YubiKit.YubiOtp;
 
 Console.WriteLine("Native AOT verification host starting...");
 
-// Force the linker/ILC to keep and process each module's public entry-point type. Management is
+// Reference ten public entry-point types to exercise selected linker/ILC reachability. This does
+// not root or execute every public method. Management is
 // anchored explicitly here because Core does not reference Management (the dependency flows
 // Management -> Core), so device discovery alone would let ILC trim the Management assembly out
-// of this host's whole-program closure — defeating the point of exercising every in-scope module.
+// of this host's whole-program closure.
 Type[] linkedModuleEntryTypes =
 [
     typeof(YubiKeyManager),
@@ -40,8 +41,9 @@ foreach (Type type in linkedModuleEntryTypes)
     Console.WriteLine($"  Linked module entry type: {type.FullName}");
 }
 
-// Real device discovery through Core's PC/SC + platform interop path — safe with zero attached
-// YubiKeys (returns an empty list rather than throwing).
+// Discover across Core's enabled interface routes. An empty successful scan returns no devices;
+// discovery can still open interfaces for metadata and propagate failures. This is not a full API,
+// applet-ceremony or all-platform native qualification run.
 IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync(cancellationToken: CancellationToken.None);
 Console.WriteLine($"Found {devices.Count} YubiKey(s).");
 foreach (IYubiKey device in devices)
@@ -65,8 +67,9 @@ Console.WriteLine("Native AOT verification host completed without crashing.");
 return 0;
 
 /// <summary>
-/// Interactive device-monitoring protocol. Attaches every consumer surface simultaneously so one
-/// physical action validates all of them, then checks cross-sink consistency at the end.
+/// Interactive diagnostic with three WatchAsync subscribers on one owned monitor. Checks selected
+/// membership events, subscription stop and monitor shutdown/recreation. Cross-sink snapshots are
+/// compared while pumps are running, not after a barrier establishing an identical complete prefix.
 /// </summary>
 internal static class MonitorVerification
 {
@@ -123,6 +126,7 @@ internal static class MonitorVerification
         Step(6, "Remove key B and wait for Removed output, then reinsert it and wait for Added "
               + "output. Repeat three times.", sinkA, expected: -1, failures);
         var rapidActivity = sinkA.Snapshot().Skip(rapidActivityStart).ToList();
+        // Despite the three-cycle instruction, this oracle requires only one Added and one Removed.
         if (!rapidActivity.Any(e => e.StartsWith("Added|", StringComparison.Ordinal))
             || !rapidActivity.Any(e => e.StartsWith("Removed|", StringComparison.Ordinal)))
         {
@@ -159,7 +163,8 @@ internal static class MonitorVerification
             Console.WriteLine("  ok    watcher-transient silent since it stopped");
         }
 
-        // --- cross-sink consistency: the primary invariant ---
+        // Compare independently sampled sequences while the two pumps are still active. A mismatch
+        // can reflect snapshot timing; this is not a post-shutdown equal-prefix or full-race proof.
         Console.WriteLine();
         Console.WriteLine("--- Cross-sink consistency ---");
         var reference = sinkA.Snapshot().Skip(baselineA).ToList();

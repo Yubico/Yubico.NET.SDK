@@ -1,0 +1,28 @@
+{
+  "sample_ids": [
+    "SAMPLE-A001",
+    "SAMPLE-A002"
+  ],
+  "paths": [
+    "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "src/Core/src/Devices/HotplugSignals.cs"
+  ],
+  "selected_original_units": 3,
+  "affected_xml_blocks": 5,
+  "patch_sha256": "c00893c28c7b215f129b6b68e36a8240b2b34d5eec511da7fc4df8a082e29651",
+  "patch_scope": "TWO-FILE-DELTA-FROM-EXACT-CURRENT-PRIMARY-BEFORE",
+  "local_before_primary_bytes_equal": true,
+  "primary_current_equals_captured_before": true,
+  "original_selected_and_adjacent_unit_range_hashes_rechecked": 7,
+  "exact_noncomment_lines_preserved": true,
+  "xml_blocks_parsed": 11,
+  "git_diff_check_exit_code": 0,
+  "accepted_revision_2_source_paths_unchanged": 37,
+  "predecessor_editor_review_files_preserved": 25,
+  "accepted_full_patches_regenerated": false,
+  "existing_examples_tests_runtime_code_edited": false,
+  "coverage_sampling_records_modified": false,
+  "SDK_build_tests_formatter_compiler_native_device_crypto_Git_mutations_subagents": "NOT-RUN",
+  "FPX-01_A-E01_and_A-E02_through_A-E06": "NOT-RUN",
+  "review": "FOCUSED-REVIEW-PENDING"
+}

@@ -1,0 +1,133 @@
+{
+  "result": "STRUCTURAL-POPULATION-AND-PROPOSED-SELECTION-CHECKS-PASSED; CURRENT-MAPPING-FREEZE-PENDING; NO CONTENT VERDICT",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head_at_population_capture": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "assigned_IDs": 14044,
+  "original_READ_CLEAN": 9763,
+  "candidate_eligible_after_accepted_edits_only": 9464,
+  "candidate_eligible_after_known_pending_edit_overlaps": 9352,
+  "final_denominator": null,
+  "candidate_global_minimum": 936,
+  "proposed_selected": 983,
+  "owners_with_minimums_and_role_quota_checks": 17,
+  "nonempty_owner_role_strata": 94,
+  "duplicate_or_ineligible_selected_IDs": 0,
+  "known_accepted_clean_edit_overlaps": 111,
+  "provisional_pending_clean_edit_overlaps": 112,
+  "known_fixed_patch_paths": 337,
+  "candidate_code_only_contract_units_retained": 6218,
+  "selected_enum_units": 45,
+  "selected_native_units": 58,
+  "selected_lifetime_protocol_units": 124,
+  "selected_tests_helpers": 472,
+  "selected_narrative_examples_maps": 43,
+  "selected_XML_contracts": 123,
+  "selected_source_paths": 456,
+  "selected_current_primary_mappings": "983 captured contiguous unchanged-line mappings; live-current verification FAILED after ongoing transfers on 14 paths. Exact observations in current-mapping-state.json; helper rejects changed hashes. Refresh after final integration freeze.",
+  "nominee_annotation": "341 IDs mechanically matched; 338 eligible, 36 selected by ordinary hash rank; 302 optional supplements. Nominees never control the denominator.",
+  "completed_pending_batches": [
+    "transports",
+    "SHARED",
+    "five-applets",
+    "OpenPgp",
+    "Piv",
+    "external"
+  ],
+  "original_38_inventory_files_and_original_coverage": "BYTE-UNCHANGED",
+  "progress_and_final_ledgers": "Hash-bound read-only inputs unchanged during preparation",
+  "helper_demonstration": "Exact one-unit text extraction and current-line display only; no semantic sample read or verdict.",
+  "verdicts_recorded": 0,
+  "preserved_initial_mapping_history": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/receipt.json",
+  "preserved_failures": [
+    "First current-source final check failed after eight guide paths changed; exact first selection/summary/read-plan and observed hashes preserved.",
+    "One mapping refresh retained all983 IDs and population bytes; second current-source check failed after 14 five-applet paths changed. Stop chasing active transfers and retain freeze dependency; no live-current pass claimed."
+  ],
+  "finalization": "Coordinator adjudication; accepted combined diff; all candidate associated unchanged-path dispositions and correction reviews; successor overlap/mapping reconciliation; actual Astra reads and miss-triggered expansion.",
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/current-mapping-state.json",
+      "bytes": 5250,
+      "sha256": "647b990b576659d5d6d1b7a422b3065ed81dceb1c9731a785f7370879bdae759"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/edit-overlaps.json",
+      "bytes": 668534,
+      "sha256": "989b5e5187f82c5ff2b060b3f598f4a970a6d4c29000cb97d90dcdd4b3677f8c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/helper-demonstration.txt",
+      "bytes": 961,
+      "sha256": "e29f9f05b9288fa7e663272060a64ddbd5e99b21b46a6730f099809ee39f4823"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/read-plan.md",
+      "bytes": 168593,
+      "sha256": "56cee1cad164b82e0e18c91cf72742078dea112af816b70c15cdd8be70936444"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/receipt.json",
+      "bytes": 3697,
+      "sha256": "9f54602f844c35711085287e34d1f73ee8a13c9cad55d7798fdc000acc3e9f0c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/selection.json",
+      "bytes": 1127828,
+      "sha256": "d92473cdafa9db0473c078c348ac2eaa20c05ab2f10ae554c3e2e82c2645a415"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/summary.json",
+      "bytes": 45577,
+      "sha256": "9b4bf23d09195097035e117e1ec96524b6b3b5b8e265fe7cd9e94c379414d008"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/nominee-supplement.json",
+      "bytes": 159625,
+      "sha256": "8d138c8ff70968b5006e913e294f276387daf0fd65b4c2d8950f4ec69a6b78f9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/population.json",
+      "bytes": 3664573,
+      "sha256": "48442fdec87f94bf432608b9dd07d9004d8f117e558e3db668f7e346b9c2a75c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/preparation.md",
+      "bytes": 12824,
+      "sha256": "963a8dee9244482ac9e206c8f02adbe69ce6374c65d5343304f1cc8f3502a13a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/preparation.stdout.json",
+      "bytes": 2555,
+      "sha256": "b57938d1949d573e1f7e93fe1709623612654f5e523ea70ff1bb7253b420c05d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/prepare.py",
+      "bytes": 28347,
+      "sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/read-plan.md",
+      "bytes": 168935,
+      "sha256": "8ee83c62a172917d103ef113c51aa16f3710348bb84508c0b8177f4b80eedbb2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/read-unit.py",
+      "bytes": 2690,
+      "sha256": "c4bb30678b3801c2615acf3365f4f9ec693d9150cebde87017eb4803417a7019"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/selection.json",
+      "bytes": 1127828,
+      "sha256": "c1cfa09bdee585d72a51729f445706a10e1095bc6bcb7e831f2e6db316216eb2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/strata.json",
+      "bytes": 56039,
+      "sha256": "96d2f8237a8195eef7cdbaa8e110c424393450e120e8bd516717cf22c246b1e8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/summary.json",
+      "bytes": 45577,
+      "sha256": "f3f83fedcb88a8acae885357297e5d5415f86b5bf2533e4d77bbbfbdd0244230"
+    }
+  ]
+}

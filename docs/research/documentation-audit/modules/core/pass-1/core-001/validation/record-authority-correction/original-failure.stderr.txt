@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/check-records.py", line 55, in primary_sources
+    require(len(matches) == 1, 'Primary source has no unique author-manifest entry')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/foundation.py", line 28, in require
+    raise ValueError(message)
+ValueError: Primary source has no unique author-manifest entry

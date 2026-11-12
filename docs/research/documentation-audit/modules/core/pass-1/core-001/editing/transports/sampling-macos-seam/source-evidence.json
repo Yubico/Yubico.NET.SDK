@@ -1,0 +1,59 @@
+{
+  "sample_finding": "SAMPLE-B3-001",
+  "verification": "SUPPORTED; no contradiction found",
+  "source_read_scope": "Complete IIOKitDeviceLifetime.cs; narrow owner worker/shutdown/close and bridge-forwarding context only. Source inspection, no runtime or native execution.",
+  "complete_file_before_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+  "evidence": [
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "before_lines": [
+        131,
+        152
+      ],
+      "conclusion": "CreateDevice composes IORegistryEntryIDMatching, IOServiceGetMatchingService and IOHIDDeviceCreate; it throws PlatformApiException on missing service/device and releases the temporary service in finally. This is not a one-call forwarding operation."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "before_lines": [
+        154,
+        173
+      ],
+      "conclusion": "OpenDevice delegates to status-returning OpenDeviceResult and translates nonzero status to PlatformApiException; CloseDeviceChecked compares native status with zero. Existing option values/signatures and status interpretation are unchanged."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "before_lines": [
+        175,
+        197
+      ],
+      "conclusion": "Feature reports/callback registrations forward native operations; ReleaseCFObject forwards CFRelease, while run-loop mode creation and integer-property lookup use managed helpers. Native boundaries remain visible and interceptable."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8",
+      "read_lines": [
+        [
+          128,
+          167
+        ],
+        [
+          345,
+          393
+        ]
+      ],
+      "conclusion": "The owner worker invokes admitted work before Close, shutdown sets stopping and returns its shared close task, and checked close/CF release precede registration release. Failed unproven release retains the rooted owner/claim. Scheduling, drain and release ordering belong to that owner, not to the seam interface."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "read_lines": [
+        [
+          101,
+          107
+        ]
+      ],
+      "conclusion": "The separate FIDO bridge forwards creation/open/metadata/release helpers to the production lifetime implementation; its report/native-input boundary remains separate. No claim that substituting this interface alone exercises every FIDO route."
+    }
+  ],
+  "testability_limit": "Injected implementations let tests intercept native-lifetime and feature-report operations and inspect owner ordering. This return claims no fresh test execution, native drain proof, deployed-library qualification or hardware behavior."
+}

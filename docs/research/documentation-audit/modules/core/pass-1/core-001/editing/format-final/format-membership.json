@@ -1,0 +1,2476 @@
+{
+  "requested_cs": 310,
+  "accepted_products": 363,
+  "solution_projects": 42,
+  "logged_changed_files": 241,
+  "logged_workspace_files": 1426,
+  "absent_cs_paths": [
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "scripts/toolchain/Process.cs",
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "verification/MacOSHidBoundaryComparison/Program.cs",
+    "verification/MacOSHidInputVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "verification/MacOSHidRouteVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "verification/NativeAotVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs"
+  ],
+  "files": [
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "scripts/toolchain/Process.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "scripts/toolchain/Results.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "static_solution_project_candidates": [
+        "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "static_solution_project_candidates": [
+        "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "static_solution_project_candidates": [
+        "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+      "static_solution_project_candidates": [
+        "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Cli.Shared/src/Output/PinPrompt.cs",
+      "static_solution_project_candidates": [
+        "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Cli.Shared/src/Output/SecureCredential.cs",
+      "static_solution_project_candidates": [
+        "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "src/Core/src/Abstractions/IApplicationSession.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Abstractions/IProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Abstractions/IYubiKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Credentials/CredentialPromptContext.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AesUtilities.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ArkgPrimitives.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnUtilities.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECParametersExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/IArkgPrimitives.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/PrivateKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAPublicKey.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Cryptography/X963Kdf.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/CompositeMetadataReader.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/ConnectionType.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceChange.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceFlags.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceInfo.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryBudgets.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryReadScope.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/Feature.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/FindYubiKeys.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/FirmwareVersion.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/FormFactor.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/HotplugSignals.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/PcscConnectionSlot.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/RegisteredConnections.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/VersionQualifier.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyManager.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Exceptions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCard.Interop.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardException.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardIORequest.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardScope.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardShare.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardStatus.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Libraries.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Linux.Libraries.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/NativeMethods.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/PlatformApiException.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/SdkPlatformInfo.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/UnmanagedDynamicLibrary.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/ServiceLocator.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Sessions/ApplicationSession.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Sessions/ConnectionSessionGuard.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transport.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/IHidInterface.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/IDeviceChangeListener.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/BerLength.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableBufferHandle.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableTlvList.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/MemoryExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/Tlv.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/Utilities/TlvHelper.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/src/YubiKitLogging.cs",
+      "static_solution_project_candidates": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+      "static_solution_project_candidates": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "static_solution_project_candidates": [
+        "src/Ctap2/examples/FidoTool/FidoTool.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "static_solution_project_candidates": [
+        "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "static_solution_project_candidates": [
+        "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Ctap2/src/Ctap2Session.cs",
+      "static_solution_project_candidates": [
+        "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Ctap2/src/ICtap2Session.cs",
+      "static_solution_project_candidates": [
+        "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+      "static_solution_project_candidates": [
+        "src/Management/examples/ManagementTool/ManagementTool.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+      "static_solution_project_candidates": [
+        "src/Management/examples/ManagementTool/ManagementTool.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/src/IManagementSession.cs",
+      "static_solution_project_candidates": [
+        "src/Management/src/Yubico.YubiKit.Management.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/src/ManagementSession.cs",
+      "static_solution_project_candidates": [
+        "src/Management/src/Yubico.YubiKit.Management.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+      "static_solution_project_candidates": [
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "static_solution_project_candidates": [
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs",
+      "static_solution_project_candidates": [
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "static_solution_project_candidates": [
+        "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Oath/src/Credentials/OathCredentialOptions.cs",
+      "static_solution_project_candidates": [
+        "src/Oath/src/Yubico.YubiKit.Oath.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Oath/src/IOathSession.cs",
+      "static_solution_project_candidates": [
+        "src/Oath/src/Yubico.YubiKit.Oath.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Oath/src/IYubiKeyExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/Oath/src/Yubico.YubiKit.Oath.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+      "static_solution_project_candidates": [
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+      "static_solution_project_candidates": [
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "static_solution_project_candidates": [
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/Kdf.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/OpenPgpSession.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/src/IPivSession.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/src/Keys/KeyProtocol.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/src/PivSession.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/src/Yubico.YubiKit.Piv.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "static_solution_project_candidates": [
+        "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+      "static_solution_project_candidates": [
+        "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+      "static_solution_project_candidates": [
+        "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "static_solution_project_candidates": [
+        "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "static_solution_project_candidates": [
+        "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "static_solution_project_candidates": [
+        "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "static_solution_project_candidates": [
+        "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "static_solution_project_candidates": [
+        "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/IYubiKeyFilter.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "static_solution_project_candidates": [
+        "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "static_solution_project_candidates": [
+        "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "static_solution_project_candidates": [
+        "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "static_solution_project_candidates": [
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "static_solution_project_candidates": [
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+      "static_solution_project_candidates": [
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "static_solution_project_candidates": [
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+      "static_solution_project_candidates": [
+        "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthRetryException.cs",
+      "static_solution_project_candidates": [
+        "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiHsm/src/HsmAuthSession.cs",
+      "static_solution_project_candidates": [
+        "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiHsm/src/IHsmAuthSession.cs",
+      "static_solution_project_candidates": [
+        "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "static_solution_project_candidates": [
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+      "static_solution_project_candidates": [
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiOtp/src/IYubiOtpSession.cs",
+      "static_solution_project_candidates": [
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+      "static_solution_project_candidates": [
+        "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+      "static_solution_project_candidates": [
+        "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj"
+      ],
+      "formatted_entry_in_verify_only_log": true,
+      "qualification": "static candidate, not runtime processing proof"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/MacOSHidInputVerification/Program.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/Program.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/NativeAotVerification/Program.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/Program.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+      "static_solution_project_candidates": [],
+      "formatted_entry_in_verify_only_log": false,
+      "qualification": "absent from solution project roots and literal linked Compile includes"
+    }
+  ],
+  "qualification": "241 is changed-file count in a verify-only run, not all included/processed files; no runtime membership evaluation performed."
+}

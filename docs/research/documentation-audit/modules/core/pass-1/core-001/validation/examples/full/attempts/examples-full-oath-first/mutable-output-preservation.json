@@ -1,0 +1,233 @@
+{
+  "files": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0000-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0001-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0002-Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.deps.json",
+        "bytes": 37519,
+        "sha256": "b98e70d6c729feea32ff39db4b7142cbff04b7627a22fc7d3b0d50a14c61c1ee"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0003-Yubico.YubiKit.Oath.IntegrationTests.deps.json",
+        "bytes": 37519,
+        "sha256": "b98e70d6c729feea32ff39db4b7142cbff04b7627a22fc7d3b0d50a14c61c1ee"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0004-Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0005-Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0006-Yubico.YubiKit.Oath.IntegrationTests.runtimeconfig.json",
+        "bytes": 377,
+        "sha256": "0443d3d0ff16be6ca053c0b2601beab25dd91c2c12e6865d289d6a272207081a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0007-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1234,
+        "sha256": "e29c7868e0f61043d421c9b86b2f3a61bd4e00227708618268068d771dd4c25a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0008-Yubico.YubiKit.Oath.IntegrationTests.AssemblyInfo.cs",
+        "bytes": 1234,
+        "sha256": "e29c7868e0f61043d421c9b86b2f3a61bd4e00227708618268068d771dd4c25a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 747,
+        "sha256": "75eb2497ad6d2fe13cb07c3ce31cf29ab2d0423a91d29e145e8b239781b250d0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0009-Yubico.YubiKit.Oath.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 747,
+        "sha256": "75eb2497ad6d2fe13cb07c3ce31cf29ab2d0423a91d29e145e8b239781b250d0"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0010-Yubico.YubiKit.Oath.IntegrationTests.GlobalUsings.g.cs",
+        "bytes": 251,
+        "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0011-Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 126976,
+        "sha256": "8c1980732d051a30dfb8e1a8a28d3797c84f504c95b635b8b6d2eef046dfe48a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0012-Yubico.YubiKit.Oath.IntegrationTests.pdb",
+        "bytes": 35580,
+        "sha256": "2ce425cf83283464a92cf92348a9cf5636d05d6373ad21b5dc22111277673f1f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0013-Yubico.YubiKit.Oath.IntegrationTests.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Release/net10.0/refint/Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 41472,
+        "sha256": "383bf2c1fc026507020f474f9992a04a197e1587052eaafc9d560e8ccbff3e4f"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0014-Yubico.YubiKit.Oath.IntegrationTests.dll",
+        "bytes": 41472,
+        "sha256": "383bf2c1fc026507020f474f9992a04a197e1587052eaafc9d560e8ccbff3e4f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0015-Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.props",
+        "bytes": 3100,
+        "sha256": "ff3edc1632e42e305b255525dbe982b0c8de034f5aff3a7d3800bbdf786a821e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0016-Yubico.YubiKit.Oath.IntegrationTests.csproj.nuget.g.targets",
+        "bytes": 2863,
+        "sha256": "032d8f6d3c6ee0faaac1f2e6b290ea4659a3e2dc88e6eee06e0c0027467a9b0a"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/project.assets.json",
+        "bytes": 191995,
+        "sha256": "3bcb3c57799b5c5b67f51ed2d5c1fa8e4577d752ba43dc57095c72a2a3b877f0"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0017-project.assets.json",
+        "bytes": 191995,
+        "sha256": "3bcb3c57799b5c5b67f51ed2d5c1fa8e4577d752ba43dc57095c72a2a3b877f0"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/obj/Release/net10.0/ref/Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-oath-first/0018-Yubico.YubiKit.Tests.Shared.dll",
+        "bytes": 24064,
+        "sha256": "91e1b2f820fea4f3b7af20507b07b26350d13ff0508ac329d24b60dbcc1134ea"
+      }
+    }
+  ],
+  "scope": "Only mutable local outputs/refs/generated compiler inputs. SDK/framework/NuGet caches and reconstructible source corpus are excluded."
+}

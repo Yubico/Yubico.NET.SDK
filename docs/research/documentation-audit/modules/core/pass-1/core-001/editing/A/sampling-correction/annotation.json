@@ -1,0 +1,224 @@
+{
+  "sample_ids": [
+    "SAMPLE-A001",
+    "SAMPLE-A002"
+  ],
+  "selected_original_units": 3,
+  "samples": [
+    {
+      "sample_id": "SAMPLE-A001",
+      "selected_unit_ids": [
+        "core-001:unit:711e47d18bab0742"
+      ],
+      "adjacent_context_unit_ids": [
+        "core-001:unit:f9c6bf50db8d00e7",
+        "core-001:unit:5f278ed63d2f57d0",
+        "core-001:unit:9edad7f2794d3e49"
+      ],
+      "path": "src/Core/src/Devices/HotplugSignals.cs",
+      "current_disposition": "EDIT-DOCUMENTATION-ONLY",
+      "original_dispositions_preserved": "READ-CLEAN; original candidate_ids empty",
+      "original_units": {
+        "core-001:unit:711e47d18bab0742": {
+          "path": "src/Core/src/Devices/HotplugSignals.cs",
+          "first_line": 80,
+          "last_line": 98,
+          "start_character": 3153,
+          "end_character_exclusive": 3900,
+          "label": "Yubico.YubiKit.Core.Devices.HotplugSignals :: public void Dispose() ",
+          "range_sha256": "3cb67fa588270fbe5d81dcabdbc82618a31a0dac0cb4081a923d14b909298c97",
+          "inventory_source_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+          "ownership": "primary",
+          "read": true,
+          "status": "READ-CLEAN",
+          "candidate_ids": [],
+          "exclusion_justification": null,
+          "rationale": "Full HotplugSignals lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered.",
+          "review_status": "FRESH-INDEPENDENT-REVIEW-PENDING",
+          "sample_status": "ELIGIBLE-AFTER-DEPENDENCY-RECONCILIATION",
+          "file_identity_key": "src/Core/src/Devices/HotplugSignals.cs",
+          "original_range_hash_rechecked": true
+        },
+        "core-001:unit:f9c6bf50db8d00e7": {
+          "path": "src/Core/src/Devices/HotplugSignals.cs",
+          "first_line": 33,
+          "last_line": 46,
+          "start_character": 1343,
+          "end_character_exclusive": 1868,
+          "label": "Yubico.YubiKit.Core.Devices.HotplugSignals :: internal HotplugSignals( IReadOnlyList<ListenerSource> listeners, ILogger logger) ",
+          "range_sha256": "36280ee2298edd999a3291105b73dada64ceb032e5f998812dc855f55eeec3a5",
+          "inventory_source_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+          "ownership": "primary",
+          "read": true,
+          "status": "READ-CLEAN",
+          "candidate_ids": [],
+          "exclusion_justification": null,
+          "rationale": "Full HotplugSignals lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered.",
+          "review_status": "FRESH-INDEPENDENT-REVIEW-PENDING",
+          "sample_status": "ELIGIBLE-AFTER-DEPENDENCY-RECONCILIATION",
+          "file_identity_key": "src/Core/src/Devices/HotplugSignals.cs",
+          "original_range_hash_rechecked": true
+        },
+        "core-001:unit:5f278ed63d2f57d0": {
+          "path": "src/Core/src/Devices/HotplugSignals.cs",
+          "first_line": 48,
+          "last_line": 80,
+          "start_character": 1940,
+          "end_character_exclusive": 3153,
+          "label": "Yubico.YubiKit.Core.Devices.HotplugSignals :: private void TryStart(ConnectionType transport, Func<IDeviceChangeListener> create) ",
+          "range_sha256": "97e6fe11960f3b90b64941c7301edad07ed502018cd5c421e2ff2d2ae1362f5d",
+          "inventory_source_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+          "ownership": "primary",
+          "read": true,
+          "status": "READ-CLEAN",
+          "candidate_ids": [],
+          "exclusion_justification": null,
+          "rationale": "Full HotplugSignals lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered.",
+          "review_status": "FRESH-INDEPENDENT-REVIEW-PENDING",
+          "sample_status": "ELIGIBLE-AFTER-DEPENDENCY-RECONCILIATION",
+          "file_identity_key": "src/Core/src/Devices/HotplugSignals.cs",
+          "original_range_hash_rechecked": true
+        },
+        "core-001:unit:9edad7f2794d3e49": {
+          "path": "src/Core/src/Devices/HotplugSignals.cs",
+          "first_line": 98,
+          "last_line": 110,
+          "start_character": 3900,
+          "end_character_exclusive": 4182,
+          "label": "Yubico.YubiKit.Core.Devices.HotplugSignals :: private void BestEffort(Action cleanup, string operation) ",
+          "range_sha256": "303d3063292a5ab776e32d0946aa25ae3980d4458d6cdd8729b59dd0fa4f16d6",
+          "inventory_source_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+          "ownership": "primary",
+          "read": true,
+          "status": "READ-CLEAN",
+          "candidate_ids": [],
+          "exclusion_justification": null,
+          "rationale": "Full HotplugSignals lifetime/state/publication code read against feed, monitor, scheduler, and watcher assertions: lazy subscription, replay, loaded-empty, scan revision, isolated overflow, retries, and teardown considered.",
+          "review_status": "FRESH-INDEPENDENT-REVIEW-PENDING",
+          "sample_status": "ELIGIBLE-AFTER-DEPENDENCY-RECONCILIATION",
+          "file_identity_key": "src/Core/src/Devices/HotplugSignals.cs",
+          "original_range_hash_rechecked": true
+        }
+      },
+      "review_status": "FOCUSED-REVIEW-PENDING"
+    },
+    {
+      "sample_id": "SAMPLE-A002",
+      "selected_unit_ids": [
+        "core-001:unit:c085f1cd3632e7c2",
+        "core-001:unit:076b4d4328825902"
+      ],
+      "adjacent_context_unit_ids": [
+        "core-001:unit:79340850e7d0f3c2"
+      ],
+      "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+      "current_disposition": "EDIT-DOCUMENTATION-ONLY",
+      "original_dispositions_preserved": "READ-CLEAN; original candidate_ids empty",
+      "original_units": {
+        "core-001:unit:c085f1cd3632e7c2": {
+          "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "first_line": 26,
+          "last_line": 31,
+          "start_character": 1120,
+          "end_character_exclusive": 1294,
+          "label": "Yubico.YubiKit.Core.Devices.DiscoveryReadSkipCause :: InterfaceLeaseHeld,",
+          "range_sha256": "272daa5efb4dab19eb9a45a55f37d6e4e1371a2ca8e9ba1034e50b5362943a04",
+          "inventory_source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+          "ownership": "primary",
+          "read": true,
+          "status": "READ-CLEAN",
+          "candidate_ids": [],
+          "exclusion_justification": null,
+          "rationale": "Full DiscoveryReadSkippedException source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable.",
+          "review_status": "FRESH-INDEPENDENT-REVIEW-PENDING",
+          "sample_status": "ELIGIBLE-AFTER-DEPENDENCY-RECONCILIATION",
+          "file_identity_key": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "original_range_hash_rechecked": true
+        },
+        "core-001:unit:076b4d4328825902": {
+          "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "first_line": 1,
+          "last_line": 22,
+          "start_character": 0,
+          "end_character_exclusive": 958,
+          "label": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "range_sha256": "23290cb532f8ad35c9edc33f382085b9e00f55247a3ce3dc95d5e35cdfa2ca65",
+          "inventory_source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+          "ownership": "primary",
+          "read": true,
+          "status": "READ-CLEAN",
+          "candidate_ids": [],
+          "exclusion_justification": null,
+          "rationale": "Full DiscoveryReadSkippedException source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable.",
+          "review_status": "FRESH-INDEPENDENT-REVIEW-PENDING",
+          "sample_status": "ELIGIBLE-AFTER-DEPENDENCY-RECONCILIATION",
+          "file_identity_key": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "original_range_hash_rechecked": true
+        },
+        "core-001:unit:79340850e7d0f3c2": {
+          "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "first_line": 45,
+          "last_line": 54,
+          "start_character": 1923,
+          "end_character_exclusive": 2556,
+          "label": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "range_sha256": "3a5d46534e01107b8f3efbfa5cbd8db6f926346d447f522dc92d4dcf6506e728",
+          "inventory_source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+          "ownership": "primary",
+          "read": true,
+          "status": "READ-CLEAN",
+          "candidate_ids": [],
+          "exclusion_justification": null,
+          "rationale": "Full DiscoveryReadSkippedException source read: immutable scope/result filtering, admission/worker/caller wait, retirement, borrowed protocol/connection cleanup, cache epoch/PID/absence, and late completion considered as applicable.",
+          "review_status": "FRESH-INDEPENDENT-REVIEW-PENDING",
+          "sample_status": "ELIGIBLE-AFTER-DEPENDENCY-RECONCILIATION",
+          "file_identity_key": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "original_range_hash_rechecked": true
+        }
+      },
+      "review_status": "FOCUSED-REVIEW-PENDING"
+    }
+  ],
+  "related_existing_facets": [
+    {
+      "local_id": "CORE-A-C008",
+      "proposal_id": "FPT-008",
+      "relation": "monitor/lifetime/logging and discovery admission qualifications; A-E03 remains unexecuted"
+    },
+    {
+      "local_id": "CORE-C-C008",
+      "proposal_id": "FPT-090",
+      "relation": "SAMPLE-A001 logging callback/exception containment context"
+    },
+    {
+      "local_id": "CORE-B1-C004",
+      "proposal_id": "FPT-025",
+      "relation": "SAMPLE-A001 listener partial-startup/native-lifetime dependency, distinct mechanism"
+    },
+    {
+      "local_id": "CORE-B4-C002",
+      "proposal_id": "FPT-049",
+      "relation": "SAMPLE-A001 unregister/drain/native-lifetime dependency, distinct mechanism"
+    },
+    {
+      "local_id": "CORE-B1-C012",
+      "proposal_id": "FPT-033",
+      "relation": "SAMPLE-A002 connection precedence/rollback context; no implementation or experiment closure"
+    }
+  ],
+  "unchanged_call_path_source_identities": [
+    {
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "sha256": "aa7bdd0872f1558de3fe53ed7a92d92e1420b2816a3a15c38f0566f624412838"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "sha256": "bd90a8023444a8a5ad3d31b7986a74cb2b2b3b6736ffc611fa3310913f5ccb96"
+    }
+  ],
+  "new_runtime_findings": 0,
+  "new_candidate_ids_allocated": 0,
+  "experiments": "NOT-RUN",
+  "coverage_and_sampling_records_modified": false,
+  "review_status": "FOCUSED-REVIEW-PENDING"
+}

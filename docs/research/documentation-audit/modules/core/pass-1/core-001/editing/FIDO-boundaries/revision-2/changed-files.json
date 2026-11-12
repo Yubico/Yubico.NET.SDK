@@ -1,0 +1,487 @@
+{
+  "revision_only": [
+    {
+      "path": "src/Ctap2/README.md",
+      "reviewed_before_sha256": "24db84d846cc06b4c4a1b18694c210d368d169e37bb6b8c1afb4a9f316bd433e",
+      "current_sha256": "78da8838a98ddb4110d82b5f07a7188adb90cc4a932236f64738d0c766230891",
+      "changed_ranges": [
+        {
+          "before": [
+            301,
+            302
+          ],
+          "after": [
+            301,
+            305
+          ],
+          "operation": "replace"
+        }
+      ],
+      "non_comment_code_unchanged": null
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "reviewed_before_sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc",
+      "current_sha256": "78f359a17f9743cda2fd9ab11e599219241a36ac10e414354c5d903ea04915e7",
+      "changed_ranges": [
+        {
+          "before": [
+            160,
+            163
+          ],
+          "after": [
+            160,
+            163
+          ],
+          "operation": "replace"
+        }
+      ],
+      "non_comment_code_unchanged": true
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "reviewed_before_sha256": "7d866ccce2cd3db28dd022cf132f7eb53b9e378167b6909f734c3ade9c5c2c8b",
+      "current_sha256": "543741db31d0b1aad86a96012f6d9a75cde6c613e33425242a6868f5022fff7a",
+      "changed_ranges": [
+        {
+          "before": [
+            407,
+            408
+          ],
+          "after": [
+            407,
+            409
+          ],
+          "operation": "replace"
+        }
+      ],
+      "non_comment_code_unchanged": true
+    }
+  ],
+  "full_successor_changed_paths": [
+    {
+      "path": "src/Ctap2/CLAUDE.md",
+      "base_sha256": "869a983d27287cbbf1bb4524877264e2587bf1ea1eb7b234b773643114e962fc",
+      "current_sha256": "00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17",
+      "changed_ranges": [
+        {
+          "before": [
+            46,
+            50
+          ],
+          "after": [
+            46,
+            51
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            139,
+            138
+          ],
+          "after": [
+            140,
+            152
+          ],
+          "operation": "insert"
+        },
+        {
+          "before": [
+            344,
+            345
+          ],
+          "after": [
+            358,
+            369
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/Ctap2/README.md",
+      "base_sha256": "f205d336cb04fe6eb8776c665a98f24b48485a0e3df5ff7f1aa25a497e5bf72a",
+      "current_sha256": "78da8838a98ddb4110d82b5f07a7188adb90cc4a932236f64738d0c766230891",
+      "changed_ranges": [
+        {
+          "before": [
+            289,
+            288
+          ],
+          "after": [
+            289,
+            294
+          ],
+          "operation": "insert"
+        },
+        {
+          "before": [
+            295,
+            296
+          ],
+          "after": [
+            301,
+            305
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            300,
+            299
+          ],
+          "after": [
+            309,
+            315
+          ],
+          "operation": "insert"
+        },
+        {
+          "before": [
+            306,
+            307
+          ],
+          "after": [
+            322,
+            324
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            310,
+            309
+          ],
+          "after": [
+            327,
+            335
+          ],
+          "operation": "insert"
+        }
+      ]
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "base_sha256": "bd0e712ac1deb0475d344ebb2274991a1792366bc969235dbdba89c074d0130a",
+      "current_sha256": "6e59a89acffe19912d0a8432fd313deba0ac0fcb18f43eb3189f767c07f8f29b",
+      "changed_ranges": [
+        {
+          "before": [
+            17,
+            18
+          ],
+          "after": [
+            17,
+            20
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "base_sha256": "14941f940c60035457b0d3edf6b6f87b2422aba25ad62f28fe900ec4e6ef6c55",
+      "current_sha256": "149367792f1fe0fb5b9c1389cd77dcc5dfc709daeee14e9c581df0bee7444f50",
+      "changed_ranges": [
+        {
+          "before": [
+            30,
+            30
+          ],
+          "after": [
+            30,
+            33
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "base_sha256": "d684c8aaedfc9c407f6e0830ee088af490b7ea06ab5c3cf597b54bdf88a602fa",
+      "current_sha256": "447797997e8f407d97bc30bec29c428d80c4c5f20370c23bcdc53a02b622a7df",
+      "changed_ranges": [
+        {
+          "before": [
+            30,
+            30
+          ],
+          "after": [
+            30,
+            34
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            98,
+            98
+          ],
+          "after": [
+            102,
+            102
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/Ctap2/src/Ctap2Session.cs",
+      "base_sha256": "870046812fe2802a82ef3c84ab1af7bd118e283a0e2f3ce21934e8c5c8087729",
+      "current_sha256": "d2bf4fe2344bb17b49892fc97dbd824c1381f570ec882ba6a4f1ef16e4f14ff9",
+      "changed_ranges": [
+        {
+          "before": [
+            117,
+            116
+          ],
+          "after": [
+            117,
+            124
+          ],
+          "operation": "insert"
+        }
+      ]
+    },
+    {
+      "path": "src/Ctap2/src/ICtap2Session.cs",
+      "base_sha256": "1d463a8b64228b2193778ca0f575925aebd79b30ed83801d78ded8235220131b",
+      "current_sha256": "30640a8723290b03020cf3448fe3e54d331510975854b79258974282d0c99dc3",
+      "changed_ranges": [
+        {
+          "before": [
+            33,
+            32
+          ],
+          "after": [
+            33,
+            36
+          ],
+          "operation": "insert"
+        },
+        {
+          "before": [
+            38,
+            37
+          ],
+          "after": [
+            42,
+            44
+          ],
+          "operation": "insert"
+        }
+      ]
+    },
+    {
+      "path": "src/Ctap2/tests/CLAUDE.md",
+      "base_sha256": "b93c7a963573e93380ef82181baebce2b106b62ea4237d16efad1b0de602d266",
+      "current_sha256": "2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8",
+      "changed_ranges": [
+        {
+          "before": [
+            36,
+            36
+          ],
+          "after": [
+            36,
+            36
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/WebAuthn/CLAUDE.md",
+      "base_sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+      "current_sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a",
+      "changed_ranges": [
+        {
+          "before": [
+            173,
+            172
+          ],
+          "after": [
+            173,
+            180
+          ],
+          "operation": "insert"
+        },
+        {
+          "before": [
+            284,
+            283
+          ],
+          "after": [
+            292,
+            296
+          ],
+          "operation": "insert"
+        }
+      ]
+    },
+    {
+      "path": "src/WebAuthn/README.md",
+      "base_sha256": "cf64612066288c5845cd5d9892038abae2ac0cc17e746ab4fbc7e401069208f7",
+      "current_sha256": "fbfe9912165f654cedc40e72ab5a868d7b5c6b171de63d5a7fb9bb29e4dc7a5a",
+      "changed_ranges": [
+        {
+          "before": [
+            196,
+            197
+          ],
+          "after": [
+            196,
+            201
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            242,
+            241
+          ],
+          "after": [
+            246,
+            250
+          ],
+          "operation": "insert"
+        },
+        {
+          "before": [
+            454,
+            455
+          ],
+          "after": [
+            463,
+            470
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "base_sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc",
+      "current_sha256": "78f359a17f9743cda2fd9ab11e599219241a36ac10e414354c5d903ea04915e7",
+      "changed_ranges": [
+        {
+          "before": [
+            160,
+            163
+          ],
+          "after": [
+            160,
+            163
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "base_sha256": "ce590e3e646f32b56f42377840139ba651270d66ad402bc9a0eb86b36facae5f",
+      "current_sha256": "50e087309ced66d0fba57b6e9fb924e5995d0155c2f71082104672c45f4750ca",
+      "changed_ranges": [
+        {
+          "before": [
+            34,
+            33
+          ],
+          "after": [
+            34,
+            41
+          ],
+          "operation": "insert"
+        }
+      ]
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "base_sha256": "b4efebf82c2d4d54b7c5a91d4c344bd7855d8228badfc52fc0079dd955a72975",
+      "current_sha256": "6e7831adf4b8e067d1f08687f0d0ca00ba848d05bbd11232935a710bca822e3f",
+      "changed_ranges": [
+        {
+          "before": [
+            31,
+            32
+          ],
+          "after": [
+            31,
+            33
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "base_sha256": "d787616f384a7c78f16e400298e091c50651bcb881f7f378ed9976c1b24d5576",
+      "current_sha256": "543741db31d0b1aad86a96012f6d9a75cde6c613e33425242a6868f5022fff7a",
+      "changed_ranges": [
+        {
+          "before": [
+            283,
+            283
+          ],
+          "after": [
+            283,
+            285
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            405,
+            406
+          ],
+          "after": [
+            407,
+            409
+          ],
+          "operation": "replace"
+        }
+      ]
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "base_sha256": "f87b4e6f8e39695b2b9d5cbc9b989e92b6da50f02e1adcddaf8f2561d0ecc50f",
+      "current_sha256": "11d3038d26597aac1a85b5ee9bec85cd8d34b1f7d64e9131626e92a24441c187",
+      "changed_ranges": [
+        {
+          "before": [
+            27,
+            28
+          ],
+          "after": [
+            27,
+            28
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            69,
+            69
+          ],
+          "after": [
+            69,
+            69
+          ],
+          "operation": "replace"
+        },
+        {
+          "before": [
+            81,
+            81
+          ],
+          "after": [
+            81,
+            81
+          ],
+          "operation": "replace"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "result": "PASS",
+  "kind": "FRESH-SEPARATE-STATIC-RECORD-CHECK-SAME-INVESTIGATOR",
+  "failure_count": 0,
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "assigned_units": 328,
+  "disposition_paths": 93,
+  "unit_states": {
+    "READ-CLEAN": 209,
+    "READ-CANDIDATE": 34,
+    "READ-RELATED-CONTEXT": 85
+  },
+  "candidate_groups": 8,
+  "run_qualified_inherited_rows": 15,
+  "documentation_dependency_labels": 21,
+  "engineering_groups_preserved": 14,
+  "clean_nominees": 8,
+  "candidate_associated_unchanged_paths": 91,
+  "example_blocks": 17,
+  "raw_pin_representation_differences": [
+    "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+    "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj"
+  ],
+  "limits": "Static identity/accounting/link checks only. No independent semantic review, SDK build/test/native/device/crypto execution or archive-wide reverification. Product files unchanged.",
+  "owned_artifacts": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-OpenPgp.md",
+      "sha256": "c0e9a4cef2a1d60f6105e19d6c415b2d6c8186e1878f24480378fb0b997b68b4",
+      "bytes": 12038
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/applet-findings-dispositions.json",
+      "sha256": "b0532da72355a9b68bb8a1c3b45fb0e7c175c9f329838b73df02352d72e17a56",
+      "bytes": 10324
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/candidate-index.json",
+      "sha256": "6bc36562bd79504b82b40dab94699856734be35a4a205f9d948dd269846d8c15",
+      "bytes": 17058
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/candidates.md",
+      "sha256": "4fc47cbd52a27b7c193ea2b149e071f5a5c3048a43218e0b75b88382798cdce0",
+      "bytes": 16416
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/clean-nominees.json",
+      "sha256": "e223b1ff0aa9468156b5a687394a0ec7c06b4891da3e72c0febebc3dffd07213",
+      "bytes": 9554
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/coverage-summary.json",
+      "sha256": "913dc916b5fce011e0043ea6655efa2977f303466b1719c827c316ecd6825898",
+      "bytes": 1569
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/dependency-reads.json",
+      "sha256": "169e3326e58b988588f686bb32a555cddc6b8f3edc0424c8df1764734faf4b2b",
+      "bytes": 16964
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/documentation-dependencies.json",
+      "sha256": "c209a52145ba59195c8db5739c3f082ad625b668e1b2bc161afff5fe27f17a14",
+      "bytes": 45571
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/example-dispositions.json",
+      "sha256": "9acc128cd22f22846cb013f32ee9d5e4477a9d9bbaccd49a9647ae044b88911f",
+      "bytes": 18825
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json",
+      "sha256": "cc83410c4a8405b5f1b99d743ab2430f13b6b43a2ca4f7ce35ff6660ce166e44",
+      "bytes": 169889
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-identities.json",
+      "sha256": "270018074072e92a2b5a8465fc492ac627c176fdbfa28db8e8c1633d6bb9cee0",
+      "bytes": 66256
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/flow-and-verification.md",
+      "sha256": "2e1dc2b851d9f56e5a0f44e417e0fcc26924a3f07c0c4fa1d48f1ed899374030",
+      "bytes": 14980
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/inherited-dispositions.json",
+      "sha256": "e8620822e827edab1cbdd698f4e628604aaf14bd09dc9ce3ed3feae8c3e9f60c",
+      "bytes": 40515
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/preservation-verification.json",
+      "sha256": "1646da616c03c5d7597459b6052bb85614f9d114838f7bd9c65ce0459c853a25",
+      "bytes": 732
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/semantic-notes.json",
+      "sha256": "0f1b774f69f3f5b0a85f5423739a83063348f60df1d73b03477ecd418bce214b",
+      "bytes": 34163
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/source-identities.json",
+      "sha256": "9114923258e034dd08cd681ac01f775f5b8f93ea95b45244127c5f500f7bfde8",
+      "bytes": 4630
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/sources.md",
+      "sha256": "685a8ee90035cfd845d47df1e08b28e5066cbd42292f013f11792dd4b9ffe26b",
+      "bytes": 5919
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/unchanged-paths.json",
+      "sha256": "a29531c35d09dfd9a8a74411db67578e0e3f0c1bcf0a0e7ff9035e187eb75505",
+      "bytes": 95898
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/unit-dispositions.json",
+      "sha256": "ecbb1792f9154480c1a06aeaae089c3076d26a770c9587da91ef4f28d10fa78d",
+      "bytes": 639758
+    }
+  ]
+}

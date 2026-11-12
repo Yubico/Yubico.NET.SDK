@@ -83,7 +83,8 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
 
     // Serial-disambiguation identity cache (PID-count>1 / force-serial path), keyed by per-interface DeviceId.
     // Only successful reads are cached, so presence means the interface's identity was read successfully;
-    // a failed or serial-disabled read is simply absent and is retried on the next scan.
+    // a failed read is absent and can be retried on the next scan. A successful response without a serial
+    // is cached too; learning a serial then requires fresh evidence rather than another unchanged scan.
     //
     // A cached identity is evidence about specific hardware in a specific configuration, and it expires
     // with either:
@@ -102,7 +103,9 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
 
     // Best-effort metadata cache, keyed by the published device's stable interface-set key
     // (YubiKeyDevice.PhysicalIdentityKey, NOT DeviceId, which can flip between pid- and
-    // serial-forms). Evicted when any member interface disappears.
+    // serial-forms). Evicted when any member interface disappears or the evidence epoch is replaced.
+    // Unlike CachedIdentity, this cache stores no PID: unchanged member IDs can reuse old metadata even
+    // after a PID change when no identity read supersedes it and no activity invalidates the epoch.
     private sealed class EvidenceEpoch
     {
         internal ConcurrentDictionary<string, CachedIdentity> IdentityCache { get; } = new();
@@ -316,8 +319,9 @@ public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
     }
 
     /// <summary>
-    ///     Best-effort tier-1 topology read. Never throws and never blocks meaningfully: a failure is a
-    ///     debug log and a null key, which drops the interface to the unchanged serial/PID tiers.
+    ///     Best-effort tier-1 topology read. Resolver failures are logged and return a null key, leaving
+    ///     serial/PID evidence to group the interface. Windows resolution is synchronous and has no SDK
+    ///     wait budget; fallback on error supplies no completion-time guarantee.
     /// </summary>
     private string? ResolveTopologyKey(IDevice device, ConnectionType connection)
     {

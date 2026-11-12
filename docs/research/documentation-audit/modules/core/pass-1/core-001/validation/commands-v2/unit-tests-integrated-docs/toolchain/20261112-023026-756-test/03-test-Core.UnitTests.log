@@ -1,0 +1,50 @@
+$ dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.15)
+
+skipped Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp.Scp11Tests.Scp11a_WithAllowList_FullFlow_Succeeds (0ms)
+  Requires SecurityDomain session and YubiKey hardware
+skipped Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp.Scp11Tests.Scp11b_FullAuthentication_WithRealDevice_Succeeds (0ms)
+  Requires actual YubiKey hardware with firmware >= 5.7.2
+skipped Yubico.YubiKit.Core.UnitTests.Native.Windows.CfgMgr32InteropTests.WindowsHidDeviceListener_Start_RegistersNotification (0ms)
+  Windows-only
+[+1665/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - 6 tests running (3s)
+
+[+1698/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - 2 tests running (6s)
+
+[+1706/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.BoundaryInventory.BoundaryInventoryTests.Actual_core_source_has_a_reviewed_inventory_with_nonzero_counts (9s)
+
+[+1738/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.PcscConnectionLifetimeTests.BuiltInPcscConnection_SynchronousBegin_WaitsForBlockedNativeBegin (12s)
+
+[+1794/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Transports.Hid.Linux.LinuxDiscoveryAdmissionTests.FidoDirect_TimeoutKeepsPidAdmissionThroughOpenAndClose (15s)
+
+[+1811/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DeviceConnectionRegistryTests.RegisteredSmartCardConnection_SyncDisposeLoser_WaitsForAsyncWinnerTeardown (18s)
+
+[+1826/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings(cancel: False) (21s)
+
+[+1826/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.ScanAsync_ExitKeepsNativeAdmissionAndRetiresQueuedSiblings(cancel: False) (24s)
+
+[+1828/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoveryReadSchedulingTests.FindAllAsync_PotentialSiblingReads_WaitForNativeDisposal(unparsedCcid: False) (27s)
+
+[+1838/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.DiscoverySingleFlightTests.ReadBoundedAsync_ManyUniqueBlockedProviders_AdmitsAtMostFourWorkersWithoutQueueing (30s)
+
+[+1852/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_PcscReaderRenameWithFailingReread_RereadsAndDeducesWithoutStaleServe_Pin (33s)
+
+[+1856/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysFaultInjectionTests.FindAllAsync_PersistentIdentityFailureAcrossScans_PerScanAttemptsStayConstant (36s)
+
+[+1864/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.FindYubiKeysPidMergeTests.FindAllAsync_DuplicatePidBlockedIdentityReads_AreBoundedAsOneGroup (39s)
+
+[+1921/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.LinuxHidRoutingTests.DiscoveryTimeout_DirectAndCompositeRetainClaimThroughLateOpenAndCleanup(otp: False, composite: False) (42s)
+
+[+1934/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.PcscDiscoveryLifetimeTests.PublishedDevicePcscDiscovery_UnprovenContextReleaseRetainsOriginalClaimAndNativeRoot (45s)
+
+[+1964/x0/?3] Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64) - Yubico.YubiKit.Core.UnitTests.Devices.YubiKeyMonitorTests.WatchAsync_CancelingDuringInitialReplay_UnsubscribesOnlyThatEnumeration (48s)
+
+skipped Yubico.YubiKit.Core.UnitTests.AuditV2.CoreScpAuditReproTests.YESDK1631_ChildBody_OneToFiveByteResponse_ThrowsBadResponse (0ms)
+  Child-process body; executed only via ChildProcessTestRunner.
+
+Test run summary: Passed! - /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64)
+  total: 2069
+  failed: 0
+  succeeded: 2065
+  skipped: 4
+  duration: 50s 769ms

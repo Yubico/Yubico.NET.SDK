@@ -1,0 +1,63 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "authorities": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/path-dispositions.json",
+      "sha256": "7a94167e7b3830b9686fb79eed04f70e87bd5045634e68cfd65bd17caca0af4e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json",
+      "sha256": "2906c9a9754a167e8019712c3c9ecae052ff41fd45c9c44eeee30f6f7c762402"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "accepted_sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee",
+      "current_sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "accepted_sha256": "f2b6a0687cc3d628a52c65ee27d77df45e0458aa6eab2b3537bd7cb6fe3ee669",
+      "current_sha256": "f2b6a0687cc3d628a52c65ee27d77df45e0458aa6eab2b3537bd7cb6fe3ee669",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json"
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "accepted_sha256": "7aaca59de916782b7762b1c6d3f4ff614a31109ff5077c78c8a9c88627310c8f",
+      "current_sha256": "7aaca59de916782b7762b1c6d3f4ff614a31109ff5077c78c8a9c88627310c8f",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "accepted_sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03",
+      "current_sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "accepted_sha256": "f4d100755cc3130896c3cca87a8a8e9e191aa2478be12ed60ca564f7a36081f6",
+      "current_sha256": "f4d100755cc3130896c3cca87a8a8e9e191aa2478be12ed60ca564f7a36081f6",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json"
+    },
+    {
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "accepted_sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53",
+      "current_sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json"
+    },
+    {
+      "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+      "accepted_sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737",
+      "current_sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/path-dispositions.json"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyManager.cs",
+      "accepted_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+      "current_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+      "authority": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/path-dispositions.json"
+    }
+  ]
+}

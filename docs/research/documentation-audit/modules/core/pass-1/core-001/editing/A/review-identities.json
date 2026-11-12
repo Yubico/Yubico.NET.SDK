@@ -1,0 +1,98 @@
+{
+  "schema": "core-001-packet-A-independent-review-v1",
+  "decision": "REQUIRED-CORRECTIONS",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-discovery",
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "review_subject_patch_sha256": "28cfedee32cba340d041a90edadd79afff3d65ced04317a8863d43854890a517",
+  "identity_acceptance_is_not_batch_content_acceptance": true,
+  "review_outputs": ["editing/A/review.md", "editing/A/review-identities.json"],
+  "self_and_review_text_hashes_excluded": true,
+  "accepted_documentation": {
+    "edited_path_manifest": "editing/A/changed-path-sha256.json",
+    "edited_path_manifest_sha256": "ee78a04250d30f520a39790dfed3b2e546340d3247aad1e05d879cc475900c13",
+    "accepted_exact_current_hashes": "All 34 other edited path hashes in that immutable manifest, excluding the two R1 paths below; source/content acceptance only, not compiler/runtime acceptance.",
+    "candidate_associated_retained_paths_reviewed": 13,
+    "candidate_associated_retained_paths_accepted": 12,
+    "other_retained_paths": "41 inventory paths identity/preservation checked, not freshly content-audited here",
+    "batch_acceptance": false
+  },
+  "required_corrections": [
+    {
+      "id": "R1",
+      "candidates": ["CORE-A-C010", "CORE-A-C011"],
+      "proposals": ["FPT-010", "FPT-011"],
+      "paths": [
+        {"path": "src/Core/src/Devices/CompositeDeviceMerger.cs", "lines": "224-235, especially 230-232", "current_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e"},
+        {"path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs", "lines": "256-265; 281-289", "current_sha256": "09cb1d140127384964aa370f69c97279e7c1e07d742533d897567ebb8e4a7315"}
+      ],
+      "requirement": "Remove one-scan stale-membership bound and qualify first-subsequent-scan healing by evidence actually consulted by grouping; preserve all executable code and assertions.",
+      "evidence": "ResolveContestedSerials 252-279 has no age/expiry state; Merge 108-114 and CanMergeByPidWithoutSerial 192-198 permit PID-count-one complete groups independently of same-PID serial disagreement. Static source trace only."
+    },
+    {
+      "id": "R2",
+      "candidates": ["CORE-A-C009"],
+      "proposals": ["FPT-009"],
+      "paths": [
+        {"path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs", "lines": "214-219", "current_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8"}
+      ],
+      "requirement": "Narrow platform-wide no-mapping claim to this SDK's selected null resolver; successor disposition must no longer call this an accurate unchanged retain. Preserve assertions and test name."
+    }
+  ],
+  "editor_artifact_identities": {
+    "edit-A.md": "32854eda75d59d643bd7e951a148e6a15d09b285d8d6be14c81caeca8acc8f6a",
+    "editing/A/path-dispositions.json": "2b10d73d25dfbf30ee325919c19ae9f1af59df115f6c2be7362fba0c1030b2c8",
+    "editing/A/candidate-dispositions.json": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+    "editing/A/example-bodies.json": "4088b11eb2dc2c872c99ea7f06a4421e1edd981bfe855b2aa04ecc20010b290f",
+    "editing/A/verification.json": "5f91b5c04df09867e4050aafb558bda9c2dc4aaa01bd9108b5fc97c767f163af",
+    "editing/A/output-identities.json": "f895a0be53057fe2cab6608e0411c59663ca788a5e1088596ef06a5891dbb67a"
+  },
+  "authority_inputs": {
+    "CLAUDE.md": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "src/Core/CLAUDE.md": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "src/Core/tests/CLAUDE.md": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "docs/research/documentation-audit/records/style.md": "2b8882adb75b18d67adcd71d38a6c70fb4aa7c44ec3211c0d45455ab94e9ca15",
+    "triage/editing-release.md": "3b01360cf7e973b51e076ef02c3683228d007e96c783915e62a046e34bc8cc71",
+    "investigation-A.md": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256",
+    "triage/full-family/map.json": "ee023021f2fd2586b4d75fc0a488cba2e3bdbb1ea7fdb91a793dbbd8bb4a7dd8",
+    "triage/full-family/relationships.json": "6ed02ffb72d3b29857b8fea693598ecb165132c05b4ea42e9c190baced362e90",
+    "triage/full-family/inherited-links.json": "c6d1e7fae0e33dca904cf9953e20a2e4aafc378b940a325a2eaf71be81042bd2"
+  },
+  "retained_originals": [
+    {"path": "investigation/A/sources/vendor-config.html", "sha256": "b707e6b2874a1de53149285a9567ff7262b8e6714839658ca42312b4def41538", "status": "unversioned manufacturer reference, captured 2026-11-11", "sections": "Concepts/Form Factor, Auto-Eject Timeout, Challenge-Response Timeout, Device Flags; Reading Information/Device Information; timeout encoding", "strength": "descriptive vendor response/configuration evidence, not FIPS-mask or profile-conformance authority"},
+    {"path": "investigation/A/sources/vendor-fips-form-factor.html", "sha256": "5d5ef94f7ba2cd9fbc232c4e922b9c6d638179c8a88290503de3f45e1dbce5b0", "status": "unversioned manufacturer manual, captured 2026-11-11", "sections": "FIPS Form Factors and byte table", "strength": "manufacturing byte values for firmware 5.4+, not operation approval"},
+    {"path": "investigation/A/sources/windows-container.html", "sha256": "a11a8c3ad8bbf1fab20d93ef237b0a42a93b2ef2e051614e4655ab7d5a827fa8", "status": "content updated 2023-02-28", "sections": "Remarks; Requirements", "strength": "Windows 7+ PnP property/caller contract, not measured SDK native evidence"},
+    {"path": "investigation/A/sources/windows-reader-instance.html", "sha256": "586a3696a59bee30045ac891aeb72b83c584de337ed48feba2550a1f243b2673", "status": "content updated 2024-11-20", "sections": "Parameters; Return value; Remarks; Requirements", "strength": "WinSCard caller contract; Windows 8 desktop/Server 2012 desktop, RDP fallback, no time bound"},
+    {"path": "investigation/A/sources/dotnet10-bounded-channel.cs.txt", "sha256": "4798673d97ee37741287c70b7f017b5f962b956b1a9e214b9089e0940a4ee406", "status": "dotnet/runtime v10.0.0", "sections": "BoundedChannelWriter.TryComplete 305-361; TryWrite 363-442", "strength": "runtime implementation, not device normative authority or fresh execution"}
+  ],
+  "example_body_hashes": [
+    "9ff8535b320dc909b8670d626b05c18dc8e362ec80c1c1c5237b6a631c46811e",
+    "a6daf07849fb4729187f4c98a5d3b471a34ed7216a69276cd8f0350ec448fb20",
+    "d1620db72041e4a0b935b9fe662bca97261788f471db337171739bd7c66870bf"
+  ],
+  "fresh_static_checks": {
+    "paths": 90,
+    "edited_paths": 36,
+    "retained_paths": 54,
+    "candidate_rows": 21,
+    "original_unique_cited_units_and_range_hashes": 151,
+    "base_product_equals_source_pin": true,
+    "manifest_hash_errors": 0,
+    "filtered_noncomment_line_differences": 0,
+    "actual_patch_with_explicit_ab_prefixes_equals_record": true,
+    "edited_xml_blocks_parsed": 186,
+    "example_body_matches": 3,
+    "git_diff_check_exit_code": 0,
+    "executable_change_found_by_diff_and_full_unit_read": false,
+    "compiler_token_or_api_proof": "NOT-RUN; coordinator existing bound-checker gate remains"
+  },
+  "pending_qualification": {
+    "examples": "VALID-NOT-CHECKED / NOT-RUN",
+    "FPX-01_A-E01": "NOT-RUN",
+    "A-E02_through_A-E06": "NOT-RUN",
+    "SDK_builds_tests_formatter_native_device_crypto": "NOT-RUN",
+    "Git_index_ref_commit_push_subagents": "NOT-RUN",
+    "whole_Core_publication_and_boundaries": "Coordinator-owned and pending",
+    "next_step": "Bounded R1/R2 successor revision and focused re-review; then existing final validation, Core Pass-1 handoff and stop"
+  }
+}

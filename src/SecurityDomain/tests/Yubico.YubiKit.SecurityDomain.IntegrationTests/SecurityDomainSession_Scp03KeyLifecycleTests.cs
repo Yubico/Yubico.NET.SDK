@@ -208,8 +208,9 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
         }
         finally
         {
-            // The rotated key set replaced the defaults. Restore factory defaults so later tests and
-            // suites can still authenticate with Scp03KeyParameters.Default.
+            // Session 2 replaces the original custom key set imported in Session 1, not the defaults.
+            // Request reset to attempt the default-key precondition for later tests and suites using
+            // Scp03KeyParameters.Default; this cleanup does not assert restored factory contents.
             await state.ResetSecurityDomainAsync(ct);
         }
     }

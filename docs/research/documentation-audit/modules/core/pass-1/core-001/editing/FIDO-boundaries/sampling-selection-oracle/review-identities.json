@@ -1,0 +1,43 @@
+{
+  "outcome": "PASS",
+  "sample": "SAMPLE-WA-001",
+  "selected_unit": "e29522f04d40349a",
+  "scope": "Only the selection-test oracle comment and EOF newline; no broader fixture/module or engineering acceptance.",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries",
+  "primary": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "focused_patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+  "product": {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+    "before_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+    "accepted_after_sha256": "9223a2299f63cd2f8ceb5479cf5cc56ed5fb99463c084db60590cf3123f4cff1",
+    "complete_fixture_read": [1,534],
+    "selected_method_read": [132,164],
+    "changed_comment_lines": [155,156],
+    "actual_oracles": "Equal CredentialId and Signature byte arrays; one backend GetAssertion call in total. No Assert.Same or whole-response comparison."
+  },
+  "implementation_inputs": [
+    {"path":"src/WebAuthn/src/Client/Authentication/MatchedCredential.cs","sha256":"d04cb09b436eda097f5e7f642ca265d9252e50b1705aeb9f2a426838bf836673","read_lines":[1,96]},
+    {"path":"src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs","sha256":"6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51","focused_caller_lines":[118,135]}
+  ],
+  "reviewed_record_sha256": {
+    "focused.patch":"d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+    "before.snapshot":"9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+    "handoff.md":"b194f1d5e2f88839f48d344cef6e08f587327c4081d5de44647c9d1482d0217b",
+    "verification.json":"8edccea5c860717efafcaa8746fc9cdccd68ba637e5026fe6770de5388966567",
+    "preserved-inputs.json":"4bc20f811930bbed393cdbd1916a0cf3bdd017c4a8d97fc094ca3cabb6196613"
+  },
+  "independent_static_checks": {
+    "snapshot_equals_current_accepted_primary":true,
+    "actual_bytes_equal_only_exact_comment_replacement_plus_eof_newline":true,
+    "test_name_code_and_assertions_unchanged":true,
+    "historical_records_preserved":27,
+    "other_product_paths_preserved":309,
+    "actual_fence_bodies_hashes_and_classifications_unchanged":47
+  },
+  "remaining_gates":["coordinator compiler/token/API preservation","compiler/analyzer and XML-cref binding","full consumer/example and actual test-project-context compilation","existing coordinator validation/publication"],
+  "sampling_credit_and_expansion":"sampler-owned; no edited-unit credit allocated by this review",
+  "primary_reservation":"Read-only; no transfer/integration until the coordinator's full consumer/test-context compilation cycle ends.",
+  "not_run":["SDK build/tests","formatter","crypto","native","device","Git commands or mutations","subagents","broader audit"],
+  "owned_writes":["sampling-selection-oracle/review.md","sampling-selection-oracle/review-identities.json"],
+  "unchanged_holds":"All prior engineering, native-output policy, descriptor recovery and physical/profile/Windows qualification holds remain unchanged."
+}

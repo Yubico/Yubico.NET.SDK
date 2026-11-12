@@ -1,0 +1,229 @@
+# Core validation foundation and gate plan
+
+## Handoff
+
+**Both bound builds remain failed; the complete compiler-file-input correction awaits review.**
+Neither attempt has a successful seal or checker invocation. The first
+[scope correction](validation/checker-binding/correction-csc-scope/handoff.md) exposed actual arguments;
+the second [file-input correction](validation/checker-binding/correction-file-inputs/handoff.md) orders
+SDK Source Link generation before capture and preserves quoted comma filenames. The read-only complete
+compile predicate was checked before proposing the third attempt. Checker C# remains unchanged.
+Sol owns this file and the assigned validation paths only. Astra reports that the separately assigned
+disposable Python logger qualification passed, with 38 raw text records retained under
+`validation/logger-qualification-first/`. That is coordinator evidence, separate from this worker's
+static preparation. The accepted logger/foundation/qualifier sources remain unchanged. The new
+[checker-binding handoff](validation/checker-binding/handoff.md) supersedes the earlier unbound checker
+commands. The original preparation is preserved at
+`validation/checker-binding/pre-r1-validation-preparation.md.snapshot`.
+
+Astra assigns and serializes compilation, SDK gates and any later platform or device work. Final
+examples and consumer hosts wait for accepted content. The inventory is complete (515 Core files /
+498 C# files / 160 families / 1,442 API entries); semantic investigators own its body-review outcomes.
+
+The source/API baseline is `fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef`. Original campaign
+`f0ba9687e9532e0a08b3ea17cacd9c52a6ba6ffa` and incoming
+`5746e72ed9a848d08b5782ddde025aa4a4b522ef` retain their ancestry. The observed metadata HEAD during
+preparation was records-only startup `d9cf31a17c7580ab580917ce201c4855c3cf89b4`; later authorized phase
+commits may advance HEAD. Each new receipt separates that observation from the fixed source baseline.
+`baseline.json` and `user-work-baseline.json` remain the current authority for protected inputs.
+
+## Small tools and evidence
+
+Paths below are relative to this run.
+
+| Tool | Purpose and execution boundary |
+| --- | --- |
+| `validation/foundation.py` | Core-specific contexts, pinned frozen-source loading, home-backed environment and fixed participating-file identities. |
+| `validation/run-command.py` | Adapter for the reviewed integration v2 process/session/subreaper supervisor. Retains complete stdout/stderr and actual newly created toolchain records before rotation. Atomic primary/fallback receipts retain failures and actual quiescence. |
+| `validation/qualify-logger.py` | Existing four disposable Python process/failure cases and atomic receipt checks; coordinator reports actual qualification passed. |
+| `validation/checker-binding/bind.py` | Additive reviewed-input profile, actual Csc/finish capture, successful clean-build seal and pre/post invocation admission. Uses the accepted logger without changing its receipts. Prepared, unbuilt. |
+| `validation/check-preserved.py` | Current Core receipt-driven raw-byte, actual Git-clean/index and ancestry checks. Optional historical live-binary prerequisites require every registered original byte. |
+| `validation/check-records.py` | Reuses the original raw/LF/Git-clean/attributes/staged-byte algorithm in the Core context. Adds actual text/JSON kinds and direct payload classification. |
+| `validation/preflight.py` | Actual recursive project/selector membership, root import/output paths, configuration hashes and installed SDK availability; invokes no SDK command. |
+| `validation/source-state.py` | Full source/document hash checkpoint, including HTML, with raw and actual Git-clean identities separated. New source membership requires review. |
+| `validation/checker/src/Program.cs` | Prepared Roslyn C#14 whole-source token/directive/disabled/skipped-text and all-module API snapshot guard; preserves import order, attributes, signatures, modifiers and defaults. |
+| `validation/native-tokens.py` | Conservative C/C++ preprocessing-token/literal/directive guard. Current native C/C++ source set is empty outside frozen archives. A new source or ambiguous edited source requires explicit compiler-proof assignment. Managed native interfaces remain in the whole-C# guard. |
+| `validation/selfcheck.py` | Pure/read-only context, classifier, token-algorithm and historical RESULT-parser checks. Executes neither the supervisor nor SDK/native code. |
+
+`validation/reuse-provenance.json` records original source hashes, algorithm boundaries and explicit
+adaptations. Frozen integration/PIV tools are read-only inputs. Both logger modules' `HERE`/`ROOT`
+globals are rebound explicitly because Core's run is two levels deeper. The v2 supervisor itself is
+unchanged. New receipts stay in this run's `validation/commands-v2/`; temporary files, compiler jobs,
+leases, qualification work and durable fallback journals use
+`/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/`. `TMPDIR`, `TMP` and `TEMP` all select its
+`tmp/` directory. Old tmpfs/home copies remain intact.
+
+Each command receipt binds only the actual participating fixed files. A later unrelated helper leaves
+earlier proof valid; changing a participant requires review and a fresh proof. Runtime/compiler binaries
+stay external. The new record classifier admits textual compound metadata names by content and records
+their kind; binary payload extensions, magic, NUL, invalid UTF-8, symlinks, generated directories and
+unmodeled clean transformations remain failures. JSON records receive an actual parse check.
+
+**Registered-source addendum:** [exact original-format admission](validation/primary-source-addendum/handoff.md)
+supports the coordinator's three registered PDFs and one encoding-qualified ISO-8859-1 HTML source.
+It verifies original source role, authority metadata, bytes, format/encoding evidence and actual byte-exact
+Git-clean identity. Unregistered non-UTF8 inputs remain rejected. The run-local `* -text -whitespace`
+research attribute scope is recorded in fresh manifests; shipping/frozen-archive attributes stay unchanged.
+This classifier is outside the checker profile and requires no compiler rebuild.
+
+### Observed static results
+
+- `validation/preservation-preparation.stdout.txt`: eight manifests / **5,366** earlier artifacts,
+  including **nine non-text artifacts**, **8,325** integration records / **226,365,754** payload bytes,
+  **114** prior PIV integration files and **four** original user files preserved. Actual expected
+  Git-clean/index identities passed. Other worktrees retain their owners and have no artificial
+  unchanged-HEAD requirement in this Core phase.
+- `validation/preparation-static-v2.json` and its streams: Python AST/context checks and **23** negative
+  boundaries passed. Historical parser replay observed **4,639 executions / five skips** across the
+  integration's 14 target/project rows: **4,442 unit + 197 separate resilience** executions. These are
+  retained integration outcomes, with resilience repeating a subset of the unit suite.
+- `validation/preparation-v2-preflight.stdout.txt`: exactly **13 canonical unit projects**, one canonical
+  Core resilience project and one collision-free `Audit20261111.DocCheck` host. The API snapshot set is
+  freshly derived: **20 files** today, with no fixed-count acceptance rule. Installed SDK directories
+  include **10.0.404**. Root policy remains `10.0.300` / `latestFeature`; assigned compilation records
+  the SDK/compiler actually selected, rather than inheriting the older PIV `10.0.403` identity.
+- `validation/source-before-git-clean.json`: **1,608** complete source/document paths, including
+  `scripts/alpha/index.html`, with **zero Git-clean changes** against `fe342`. The **57 raw differences**
+  are all checkout newline differences; their exact raw identities remain explicit. Scope hash:
+  `521f13d5d696744c597b94586e17d2740b48c4e8ce7a954f53285e07d962a1cf`.
+
+The first static attempt remains in `validation/preparation-static.json` and its streams. Its native
+guard rejected an empty source set. Inspection found only two historical C/C++ evidence files inside
+frozen archives. The corrected guard reports this lane as **not applicable**, while retaining strict
+membership comparison. `validation/source-before.json` preserves the first raw-only source checkpoint;
+the additive Git-clean-aware checkpoint explains the 57 newline differences. Earlier failed/partial
+results remain unchanged.
+
+The parallel inventory owner supplies the exact Core/external semantic population, example candidates
+and coverage schema. No whole-Core body audit or duplicate inherited-finding review was performed here.
+Current root/Core instructions, approved planning/workflow/style, actual discovery/test targets,
+integration closeout/final-review follow-up and qualified external Core handoff were read. Context7's
+`/dotnet/docs` Roslyn syntax documentation confirms full-fidelity tokens/trivia; implementation and
+compiler evidence still bind the actual selected Roslyn version.
+
+## Coordinator release and exact first commands
+
+Run from the primary checkout root after accepting these tools and assigning exclusive execution.
+Load the current build/test skills again. `V` and `R` below abbreviate paths only.
+
+```bash
+V=docs/research/documentation-audit/modules/core/pass-1/core-001/validation
+R=/home/rupicola/Code/y/.core-docs-audit-runtime/core-001
+python3 -B "$V/preflight.py"
+python3 -B "$V/check-preserved.py"
+python3 -B "$V/selfcheck.py"
+```
+
+**Logger qualification has passed under its separate coordinator assignment.** The following command records
+only the reviewed disposable Python cases; choose a fresh attempt and retain its stdout/stderr plus
+the external `qualification.json` and case receipts as new Core records. The completed
+`core-foundation-first` attempt remains immutable; this historical command is not a request to repeat it.
+The coordinator reports all four expected failed child-wrapper cases quiescent, owned orphan cleanup,
+atomic overwrite rejection and retained failed-fsync partial evidence.
+
+```bash
+python3 -B "$V/qualify-logger.py" --attempt core-foundation-first
+```
+
+After R1 independent review and explicit SDK release, record SDK availability and use the bounded
+binding workflow. It surrounds the canonical clean checker build and admits each following checker
+result against its exact reviewed inputs and sealed original outputs. A DLL path or timestamp alone
+supplies no checker admission. See the handoff for the profile SHA and exact seal steps.
+
+```bash
+python3 -B "$V/run-command.py" --label sdk-info-first -- dotnet --info
+python3 -B "$V/checker-binding/bind.py" build --label checker-bound-build-third \
+  --profile "$V/checker-binding/reviewed-inputs-third.json" \
+  --profile-sha256 ceea8be4c6681c15c51f4611de9546c35f1428f3a6d44de893a434fdab7cd2f1
+# Accept the emitted build seal, then invoke bind.py run as specified in the handoff.
+```
+
+The checker is a non-packable validation host outside the solution. Its filename contains neither
+`Core` nor `.UnitTests`; recursive build discovery can find it for its explicit selector while the
+canonical unit/resilience sets stay unchanged. `Directory.Build.props` imports the actual root policy
+at Core's depth and routes compiler intermediates/outputs to the run's home-backed jobs workspace.
+Keep zero compiler/analyzer warnings; preserve any first failure and correct it in a fresh attempt.
+Do not label the prepared C# synthetic cases passed before actual compilation/execution.
+
+## Final source and repository gates
+
+After content review, example corrections, candidate-associated unchanged dispositions and inventory
+reconciliation, capture a fresh source state, then run the checker/API/native guards against the same
+accepted files. Re-run preflight whenever a project is added. Reconcile all source/configuration drift,
+including raw-only changes, with the accepted source-state checkpoint and fixed baseline.
+
+```bash
+python3 -B "$V/source-state.py" --output "$V/source-final-first.json"
+python3 -B "$V/native-tokens.py"
+# Use bind.py run with the accepted profile/seal hashes for final tokens and api, as in the handoff.
+python3 -B "$V/run-command.py" --label main-final-first --toolchain \
+  --expect-target build --expect-target test --expect-target docs-qa \
+  --expect-target docs-architecture --expect-target complexity --expect-target pack \
+  --expect-projects-file "$V/expected-unit-projects.json" -- \
+  dotnet toolchain.cs -- build test docs-qa docs-architecture complexity pack --clean \
+  --package-version 2.0.0-alpha.2 \
+  --complexity-args "--base fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef"
+python3 -B "$V/run-command.py" --label docs-patch-final-first -- \
+  python3 -B scripts/docs/test-docs-patches.py
+```
+
+Require successful actual exits, complete streams/retention, quiescence, zero warnings/errors and exact
+target/project membership. Inspect every actual RESULT and step log. The integration observed
+**4,442 unit / five skips**, **74 active docs / ten package pages**, **six architecture map entries /
+seven images**, **six patch guards** and **ten packages**. Fresh counts are observations to reconcile,
+rather than hardwired success thresholds. Complexity compares the audit delta with `fe342`; new/worse
+items need source-backed dispositions. Formatting belongs to the coordinator after accepted edits,
+scoped to real project documents; an unmatched solution path establishes no formatting result.
+
+If native/lifetime/loop boundary claims or an authorized runtime delta require fresh resilience evidence,
+add `resilience --fast` to the **same main invocation**, together with `--expect-target resilience` and
+`--expect-project resilience:Core.UnitTests` on the logger. Preflight must still select exactly the one
+canonical Core unit project. The integration's 197 resilience executions remain a separate row.
+
+## Examples, platform lanes and final records
+
+Final example extraction/hosts await stable content and family triage. Classify complete source,
+fenced bodies, output, composable/application-dependent fragments and historical material explicitly.
+Start with one representative complete current body and real typed prerequisites before scaling.
+Use the final integration/PIV algorithms through a minimal context adapter when those proofs are
+needed; avoid copying their versioned frameworks. Capture actual Csc sources, reference/analyzer/config
+sets, generated inputs, effective per-project policy, imports, selected TFM/RID assets and direct/transitive
+project graphs immediately after the genuine build. Preserve original outputs externally before a later
+build can replace them. Distinguish current-source/exact-retained-output from strict current-path equality.
+
+Carry these compiler lessons into that assignment: namespace-aware MSBuild XML; actual source-backed
+AdditionalFiles multiplicities; selected restore-target assets versus global catalogs; consumed reference
+assets versus unconsumed potential duplicates/ResolveReference ties; HintPath copy owners, equivalent
+content and package-hash domains; aligned restore/build environment properties recorded without secrets;
+and Python helper names that preserve stdlib import resolution. Use `source-inspect.py`, never `inspect.py`.
+The explicit canonical analyzer package may disable duplicate SDK analyzer selection; prove actual
+participation and effective policy rather than imposing a historical label.
+
+Linux external-host publishing/native execution is a separately assigned transaction:
+`dotnet toolchain.cs -- linux-hid-verification-publish`, then
+`python3 -B verification/LinuxHidRouteVerification/capture.py --native-only`, then
+`python3 -B verification/LinuxHidRouteVerification/test_evidence_gates.py <actual-emitted-capture-directory>`.
+Use the new logger, retain publish/input/evidence text immediately and preserve the publish-to-capture
+binding. The integration's 38 native checks per runtime/four expected-failure controls/31 evidence tests
+remain historical qualifications. All-module Native AOT publish/startup, Linux/Windows/macOS execution,
+physical operations and secure-channel/device lanes retain separate assignments and missing-platform
+cells. Windows concurrency work still awaits the user's readiness handoff. PIV physical deferral and
+routine-key authorization retain their existing bounds; preparation accessed no device.
+
+Run preservation before/after meaningful gate phases. If a historical live prerequisite is requested,
+use `check-preserved.py --historical-binary-manifest <registered-manifest>`; every original external byte
+must exist and match. Keep binaries external and preserve every old copy. At a coordinated phase/final
+checkpoint, after all relevant writers stop, use a fresh manifest name:
+
+```bash
+python3 -B "$V/check-records.py" snapshot --manifest "$V/final-record-manifest-first.json"
+python3 -B "$V/check-records.py" check --manifest "$V/final-record-manifest-first.json"
+# Astra stages only the exact reviewed run paths and manifest.
+python3 -B "$V/check-records.py" staged --manifest "$V/final-record-manifest-first.json"
+```
+
+The manifest covers this complete run, including inventory/registry owners' records. Snapshotting waits
+for their release; subsequent changes receive a fresh checkpoint. Keep checker output outside the
+manifest population to avoid self-changing proofs. Astra owns phase commits, final review, publication
+and remote verification. No SDK/native/hardware completion or semantic coverage follows from this
+static foundation.

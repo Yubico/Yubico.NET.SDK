@@ -20,15 +20,15 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 ///     Represents an abstract keyboard's HID code map. Able to convert to and
 ///     from characters and their corresponding HID code.
 /// </summary>
+/// <remarks>
+///     These are SDK lookup tables, not host keyboard-layout detection. Use a table matching the receiving
+///     host's layout and modifier state. Aliased usage codes can decode to the same character, so a reverse
+///     then forward lookup need not return the original byte. Locale names do not prove complete locale coverage.
+/// </remarks>
 public sealed partial class HidCodeTranslator
 {
-    // HID doesn't distinguish upper and lower case letters. The way the OS
-    // determines this is by the state of the shift, or shift-lock keys,
-    // which are separate HID codes. However, the top bit of the byte we use
-    // for HID codes is not used for the actual code, so the YubiKey uses
-    // it to indicate an upper-case character. So when the YubiKey sees
-    // this bit set, it simulates a shift keystroke before, then a release
-    // afterwards.
+    // The top bit in this YubiKey encoding requests a shifted keystroke. It is not part of the HID
+    // usage and does not universally mean uppercase: layout, punctuation and host modifier state matter.
     private const byte _shift = 0x80;
 
 
@@ -64,7 +64,7 @@ public sealed partial class HidCodeTranslator
 
 
     /// <summary>
-    ///     Gets the HID code that corresponds to the given HID code.
+    ///     Gets the encoded keyboard usage and shift marker for the given character in this table.
     /// </summary>
     /// <param name="ch">The character to look-up the HID code for.</param>
     /// <returns>
@@ -92,7 +92,7 @@ public sealed partial class HidCodeTranslator
     /// <summary>
     ///     Gets the character that corresponds to the given HID code.
     /// </summary>
-    /// <param name="hidCode"></param>
+    /// <param name="hidCode">The encoded keyboard usage, including the optional shift marker.</param>
     /// <returns>The character that would be rendered for this HID code.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     ///     A character was requested from a HID code not in this <see cref="HidCodeTranslator" />.
@@ -136,7 +136,7 @@ public sealed partial class HidCodeTranslator
     public string SupportedCharactersString => new(_byChar.Keys.ToArray());
 
     /// <summary>
-    ///     An array of chars respresenting all of the characters supported
+    ///     An enumerable of characters supported
     ///     by this <see cref="HidCodeTranslator" /> instance.
     /// </summary>
     public IEnumerable<char> SupportedCharacters => _byChar.Keys;

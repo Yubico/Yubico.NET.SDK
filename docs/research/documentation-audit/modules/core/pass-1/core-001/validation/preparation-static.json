@@ -1,0 +1,87 @@
+{
+  "scope": "Read-only/static preparation; no command logger/process qualification, compilation, SDK test, native or hardware execution.",
+  "commands": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/selfcheck.py"
+      ],
+      "exit_code": 0,
+      "streams": [
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-selfcheck.stdout.txt",
+          "bytes": 3860,
+          "sha256": "deb2872fa228dea809d7353d072faa6ce8d834f62cc792e1bb635f3ab2b28c8f"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-selfcheck.stderr.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preflight.py"
+      ],
+      "exit_code": 0,
+      "streams": [
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-preflight.stdout.txt",
+          "bytes": 4782,
+          "sha256": "61012809ac054b5031a816bd3bb0d607f4f99c27b2ce541bc0b81b5ee4aac533"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-preflight.stderr.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/native-tokens.py"
+      ],
+      "exit_code": 1,
+      "streams": [
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-native-identity.stdout.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-native-identity.stderr.txt",
+          "bytes": 899,
+          "sha256": "4ebc775411c7cdc88825cdf1803e2bdf61e2a38b075b86cb69a51f48eff60576"
+        }
+      ]
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/source-state.py",
+        "--output",
+        "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/source-before.json"
+      ],
+      "exit_code": 0,
+      "streams": [
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-source-before.stdout.txt",
+          "bytes": 176,
+          "sha256": "d3e3effc309f24dfc0ec10dcd161d121b9594fa6cfdab06db18e3f59657fee93"
+        },
+        {
+          "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/preparation-source-before.stderr.txt",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ]
+}

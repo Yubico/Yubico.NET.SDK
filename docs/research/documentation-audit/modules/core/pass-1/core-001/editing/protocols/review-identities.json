@@ -1,0 +1,101 @@
+{
+  "schema": "core-protocol-independent-content-review-v1",
+  "verdict": "REQUIRED-CORRECTIONS",
+  "review_date": "2026-11-12",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols",
+  "base_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_identity_not_content_approval": true,
+  "run_relative_inputs_sha256": {
+    "edit-protocols.md": "5084a4637a0005d1f8053e2ddb41fb102227d41aad570b12d77fd9b92a95683c",
+    "editing/protocols/full-product.diff": "4a89837083fd34826639a55d1bd988574565bc8a4da508975820e0acfa3755d1",
+    "editing/protocols/path-decisions.json": "691127ced67913859f5ddc2a469dbbda17a6b4f22f602777094d46128671fda0",
+    "editing/protocols/candidate-decisions.json": "3f67aade37e54e741e44461a2480d610542b89c91ed9d949f9a9ef0276cf4fb6",
+    "editing/protocols/examples.json": "03f6a50201591bcdd0df192e2ee544764ec206a5afec9760861bf792594a9366",
+    "editing/protocols/citations.md": "3e5a693f3905b4a7fa1f2cd4b88221045aa47dad67a089e7a5a17f9a46c0b626",
+    "editing/protocols/outside-owner-handoffs.json": "4888d6f64b07a2b7d3f84301decb1e54fc92c5c2b14307748219386a06eb08af",
+    "editing/protocols/receipt.json": "1dee31f152c73c6b6dd806cc93751308823909e135e7e59e6c54e3d13259d1ce",
+    "editing/protocols/artifact-manifest.json": "f8cfe65e3725c2d73bc72480f33b2bb990ee080440fedba4ad34cedb9f3b96a4",
+    "investigation/B5/sources/register.md": "64fd3a505c69cf88f12481f4afe02c0bd52d170087d7f8e716d5db4d82b53ccc",
+    "investigation/B6/sources/final-source-register.md": "6f3edcfba098920dd43e3e2a6db59c03108e39bfbb4ab81373e87d2c74731727",
+    "investigation/B6/sources/scp03-1.1.2.pdf": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0"
+  },
+  "population": {
+    "eligible_cs_paths": 91,
+    "edited": 56,
+    "retained": 23,
+    "held": 12,
+    "path_raw_hash_mismatches": 0,
+    "direct_index_path_omissions": 0,
+    "direct_outside_owner_paths": 21,
+    "inherited_b5_records": 15,
+    "inherited_b6_records": 8,
+    "identities": "All individual before/after raw and Git identities remain in the hash-bound path-decisions.json; raw SHA-256 values independently matched base HEAD and current worktree."
+  },
+  "required_corrections": [
+    {
+      "id": "R1",
+      "local_ids": ["CORE-B6-C006", "CORE-B6-C009", "CORE-B6-C010", "CORE-B6-C013"],
+      "proposal_ids": ["FPT-072", "FPT-075", "FPT-076", "FPT-079"],
+      "anchors": [
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs:36,42,103,130",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs:34",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs:124,141",
+        "editing/protocols/citations.md:16"
+      ],
+      "correction": "Use exact inspected-edition command/response/initial-chain locators and variant applicability; qualify 29 bytes as the mandatory parsed prefix, not universal exact response size."
+    },
+    {
+      "id": "R2",
+      "local_ids": ["CORE-B6-C013"],
+      "proposal_ids": ["FPT-079"],
+      "anchors": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs:163-181,201-221",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs:57-59"
+      ],
+      "correction": "Correct retained unknown-firmware test explanation and retain rationale: null firmware rejects initialization-processor admission before protocol-specific support/handshake. Preserve names/assertions."
+    },
+    {
+      "id": "R3",
+      "local_ids": ["CORE-B6-C005", "CORE-B6-C010", "CORE-B6-C011", "CORE-B6-C013"],
+      "proposal_ids": ["FPT-071", "FPT-076", "FPT-077", "FPT-079"],
+      "anchors": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs:9-13",
+        "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs:46,166-169",
+        "editing/protocols/citations.md:14-15"
+      ],
+      "correction": "Restore selected-R-MAC condition and explicitly scope the counter/encryption rule to C-DECRYPTION plus C-MAC. Core selects those protections; SCP03 does not universally require every level."
+    },
+    {
+      "id": "R4",
+      "local_ids": ["CORE-B6-C009", "CORE-B6-C010"],
+      "proposal_ids": ["FPT-075", "FPT-076"],
+      "anchors": ["src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs:21-23,47-58,154-155"],
+      "correction": "Separate 64-byte P-256 ka1||ka2 from the subsequent 80-byte X9.63 KDF output."
+    }
+  ],
+  "example": {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+    "body_sha256": "3e0457b3fedca0f971d59cfbff209e3cd61308f507e8b9283a066f79c5a201aa",
+    "classification": "complete composable helper with explicit borrowed-open-connection and applet-specific header/payload prerequisites",
+    "compilation": "NOT-RUN",
+    "runtime": "NOT-RUN"
+  },
+  "static_checks": {
+    "live_full_index_diff_equals_editor_diff": true,
+    "all_91_base_and_current_raw_sha256_match_path_records": true,
+    "direct_candidate_index_paths_all_have_primary_or_outside_decision": true,
+    "git_diff_check_product_exit_code": 0,
+    "compiler_bound_executable_token_api_preservation": "NOT-RUN; coordinator gate remains required"
+  },
+  "execution_limits": [
+    "No SDK compilation/tests/formatter",
+    "No cryptographic computation or provider/native/device execution",
+    "No physical release/reopen or applet authorization qualification",
+    "No Git index/ref/commit/push mutation",
+    "No product/editor-record mutation or subagents",
+    "Only review.md and review-identities.json written"
+  ],
+  "next_gate": "Localized documentation corrections, regenerated editor identities and corrected-delta review, then existing coordinator compiler/token/API/example gates; finish Pass 1 publication and deferred handoff, then stop."
+}

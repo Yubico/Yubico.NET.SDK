@@ -1,0 +1,38 @@
+{
+  "candidate_map": {
+    "path": "../candidate-map.json",
+    "sha256": "c8016fdf7c264a3ae5130dd6a6889f85bb4f38499ae8a2c2427b5deb0e10ad61",
+    "rows": 20,
+    "interpretation": "All local/proposal IDs, decisions, primary mappings and inherited aliases retained; C013 adds C-REVIEW-001 correction only."
+  },
+  "candidate_path_map": {
+    "path": "../path-decisions.json",
+    "sha256": "6c2019708d284479d51c4b78493dd0b391304d56c7e558380f024293ec2fd044",
+    "rows": 144,
+    "identity_overrides": [
+      {
+        "row_zero_based": 80,
+        "candidate": "CORE-C-C013",
+        "proposal": "FPT-095",
+        "path": "src/Core/src/Cryptography/AesUtilities.cs",
+        "reviewed_sha256": "697fca9dcdcba3f05bf92ea0af68d2c25d527bb4bec9c4e7a0b2a0eeab133b44",
+        "current_sha256": "17f3932d55346e8e4d11c27b9137135e5d9283c93be9926f1af59d3979659425",
+        "action": "EDIT-DOCUMENTATION-QUALIFICATION",
+        "reason": "C-REVIEW-001: finally-protected clearing, preceding CBC IV-allocation failure limit, separate plaintext/MemoryStream lifetimes; BlockCipher single-allocation scope kept distinct."
+      }
+    ]
+  },
+  "examples": {
+    "path": "../examples.json",
+    "sha256": "bf5164b1c6184ce01971ba8d74904c1a5de9a1dbb3c83f294d85f91e6646d4da",
+    "base_and_current_rows": 77,
+    "current_active": 16,
+    "current_historical": 22,
+    "identity_and_boundary_changes": [],
+    "reason": "AesUtilities contains no XML code body; every recorded current example body and boundary is unchanged. Compiler/execution remains NOT-RUN."
+  },
+  "holds": {
+    "CORE-C-C019/FPT-101": "HOLD-FACET, unchanged; no D facet",
+    "CORE-C-C020/FPT-102": "RETAIN-REFER-OWNER, unchanged; no C primary SCP parameter path"
+  }
+}

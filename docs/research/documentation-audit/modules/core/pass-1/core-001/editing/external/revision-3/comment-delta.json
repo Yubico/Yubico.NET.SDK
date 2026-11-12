@@ -1,0 +1,758 @@
+[
+  {
+    "path": "scripts/toolchain/Process.cs",
+    "ids": [
+      "CORE-B4-C007",
+      "CORE-B4-C008",
+      "FPT-054",
+      "FPT-055"
+    ],
+    "reason": "EDIT released D facet: scope Exec summary to processes dispatched through it and condition full step logging on availability. Mask covers supplied secrets in shown commands, not process output or RunLog.Start stored argv. Dotnet.Capture and RunLog.Git launch directly. No process/masking/logging/drain implementation or credential value changed.",
+    "source_anchors": [
+      "Exec.Run/Mask at base lines29-85,114-115; Dotnet.Capture130-150",
+      "scripts/toolchain/RunLog.cs:55-64,451-467",
+      "investigation/B4/file-evidence.md:177-191; investigation-B4.md:125-138"
+    ],
+    "current_comment": "Exec type summary and remarks",
+    "base_git_blob": "dd2f180babd46710f135e10ac885ec384082526f",
+    "base_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+    "current_raw_sha256": "84fe870fabdf44a6033c514722bcc256f73a5cf7ef9268c6b0e5c433be4cf133",
+    "base_full_line_comments": [
+      {
+        "line": 1,
+        "text": "// Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md."
+      },
+      {
+        "line": 8,
+        "text": "/// <summary>What a finished process printed, and where its full output was saved.</summary>"
+      },
+      {
+        "line": 11,
+        "text": "/// <summary>"
+      },
+      {
+        "line": 12,
+        "text": "/// Every process the toolchain starts goes through here, so each one is announced with \"▶ RUN\", its"
+      },
+      {
+        "line": 13,
+        "text": "/// output reaches the run log, and in the default (non --verbose) mode only the lines that matter"
+      },
+      {
+        "line": 14,
+        "text": "/// reach the console. The full output of a step is always in its own log file."
+      },
+      {
+        "line": 15,
+        "text": "/// </summary>"
+      },
+      {
+        "line": 18,
+        "text": "    // MSBuild/compiler diagnostics (\"file(1,2): error CS0029: ...\" and \"error MSB1009: ...\")."
+      },
+      {
+        "line": 21,
+        "text": "    // \"file(1,2): warning CS0168: ... [project.csproj]\"; the code is captured for the summary."
+      },
+      {
+        "line": 26,
+        "text": "    /// <summary>Show the whole output live (reports such as crap/complexity), or only error lines.</summary>"
+      },
+      {
+        "line": 88,
+        "text": "    /// <summary>Like <see cref=\"Run\"/>, but a non-zero exit code fails the target.</summary>"
+      },
+      {
+        "line": 101,
+        "text": "        // Without --verbose the console saw only error lines. When there were none (a crash, a failed"
+      },
+      {
+        "line": 102,
+        "text": "        // restore, a script error) show the end of the output, which is where the cause usually is."
+      },
+      {
+        "line": 118,
+        "text": "/// <summary>Shorthands for the dotnet commands the targets run.</summary>"
+      },
+      {
+        "line": 121,
+        "text": "    /// <summary>Runs `dotnet {arguments}`, showing only error lines unless --verbose; fails on a non-zero exit.</summary>"
+      },
+      {
+        "line": 125,
+        "text": "    /// <summary>Runs `dotnet {arguments}` with its output shown live (the output is the result, e.g. a report).</summary>"
+      },
+      {
+        "line": 129,
+        "text": "    /// <summary>Runs `dotnet` silently and returns its exit code and combined stdout + stderr.</summary>"
+      },
+      {
+        "line": 156,
+        "text": "    /// <summary>Runs a repo script with bash from the repo root; fails clearly when the script is missing.</summary>"
+      }
+    ],
+    "current_full_line_comments": [
+      {
+        "line": 1,
+        "text": "// Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md."
+      },
+      {
+        "line": 8,
+        "text": "/// <summary>What a finished process printed, and where its full output was saved.</summary>"
+      },
+      {
+        "line": 11,
+        "text": "/// <summary>"
+      },
+      {
+        "line": 12,
+        "text": "/// Runs processes dispatched through this helper, announces the command and captures output."
+      },
+      {
+        "line": 13,
+        "text": "/// ErrorsOnly mode shows compiler/MSBuild error lines live unless verbose output is enabled;"
+      },
+      {
+        "line": 14,
+        "text": "/// a step log, when available, receives the full output. Other launch sites, including"
+      },
+      {
+        "line": 15,
+        "text": "/// Dotnet.Capture and RunLog.Git, do not use this helper."
+      },
+      {
+        "line": 16,
+        "text": "/// </summary>"
+      },
+      {
+        "line": 17,
+        "text": "/// <remarks>"
+      },
+      {
+        "line": 18,
+        "text": "/// Supplied secrets are masked in the displayed command, not in captured process output or the"
+      },
+      {
+        "line": 19,
+        "text": "/// complete toolchain argument list separately retained by RunLog.Start. This is not end-to-end redaction."
+      },
+      {
+        "line": 20,
+        "text": "/// </remarks>"
+      },
+      {
+        "line": 23,
+        "text": "    // MSBuild/compiler diagnostics (\"file(1,2): error CS0029: ...\" and \"error MSB1009: ...\")."
+      },
+      {
+        "line": 26,
+        "text": "    // \"file(1,2): warning CS0168: ... [project.csproj]\"; the code is captured for the summary."
+      },
+      {
+        "line": 31,
+        "text": "    /// <summary>Show the whole output live (reports such as crap/complexity), or only error lines.</summary>"
+      },
+      {
+        "line": 93,
+        "text": "    /// <summary>Like <see cref=\"Run\"/>, but a non-zero exit code fails the target.</summary>"
+      },
+      {
+        "line": 106,
+        "text": "        // Without --verbose the console saw only error lines. When there were none (a crash, a failed"
+      },
+      {
+        "line": 107,
+        "text": "        // restore, a script error) show the end of the output, which is where the cause usually is."
+      },
+      {
+        "line": 123,
+        "text": "/// <summary>Shorthands for the dotnet commands the targets run.</summary>"
+      },
+      {
+        "line": 126,
+        "text": "    /// <summary>Runs `dotnet {arguments}`, showing only error lines unless --verbose; fails on a non-zero exit.</summary>"
+      },
+      {
+        "line": 130,
+        "text": "    /// <summary>Runs `dotnet {arguments}` with its output shown live (the output is the result, e.g. a report).</summary>"
+      },
+      {
+        "line": 134,
+        "text": "    /// <summary>Runs `dotnet` silently and returns its exit code and combined stdout + stderr.</summary>"
+      },
+      {
+        "line": 161,
+        "text": "    /// <summary>Runs a repo script with bash from the repo root; fails clearly when the script is missing.</summary>"
+      }
+    ]
+  },
+  {
+    "path": "scripts/toolchain/Results.cs",
+    "ids": [
+      "CORE-B4-C008",
+      "FPT-055"
+    ],
+    "reason": "EDIT released D facet: EnsureTestsRan checks classified failed/all-NoTestsExecuted outcomes, not actual nonzero parsed execution counts. Document empty/mixed/unknown-count limits without strengthening the gate or endorsing them as a new policy.",
+    "source_anchors": [
+      "Gates.EnsureTestsRan at base lines97-109; actual predicates103-108",
+      "scripts/toolchain/TestTargets.cs at base lines97-117, classifier",
+      "investigation/B4/file-evidence.md:177-191; investigation-B4.md:131-138"
+    ],
+    "current_comment": "Gates.EnsureTestsRan summary and remarks",
+    "base_git_blob": "a8d9ac1d73dd64f893f8f1583320629e2d506cfc",
+    "base_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+    "current_raw_sha256": "90a595695e19a88a1f0e55a60708ffebcae8ee12a2753662b5444b3fecf48abe",
+    "base_full_line_comments": [
+      {
+        "line": 1,
+        "text": "// Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md."
+      },
+      {
+        "line": 6,
+        "text": "/// <summary>"
+      },
+      {
+        "line": 7,
+        "text": "/// An expected failure: bad usage, a failed gate, failed tests. Reported as its message alone; any other"
+      },
+      {
+        "line": 8,
+        "text": "/// exception is a toolchain bug and keeps its stack trace."
+      },
+      {
+        "line": 9,
+        "text": "/// </summary>"
+      },
+      {
+        "line": 17,
+        "text": "    /// <summary>The project ran but executed no test: the filter matched nothing, or every test was skipped.</summary>"
+      },
+      {
+        "line": 21,
+        "text": "/// <summary>What happened to one test project in a test or coverage run.</summary>"
+      },
+      {
+        "line": 27,
+        "text": "    /// <summary>The project's full runner output, when it was saved.</summary>"
+      },
+      {
+        "line": 31,
+        "text": "/// <summary>A failed test and the first lines of its failure message.</summary>"
+      },
+      {
+        "line": 34,
+        "text": "    /// <summary>The fully qualified method name, without theory arguments: usable in --filter.</summary>"
+      },
+      {
+        "line": 37,
+        "text": "    // xUnit v3 on MTP:   \"failed Ns.Class.Method(x: 3) (0ms)\" (or \"(1s 20ms)\") then 2-space-indented message lines, then \"    at ...\" frames."
+      },
+      {
+        "line": 40,
+        "text": "    // xUnit v2 on VSTest: \"  Failed Ns.Class.Method [2 ms]\", \"  Error Message:\", message lines, \"  Stack Trace:\"."
+      },
+      {
+        "line": 74,
+        "text": "    // The runner wraps exceptions in its own type; the inner type and message are what matter."
+      },
+      {
+        "line": 85,
+        "text": "    /// <summary>Prints each failure and fails the target when there is at least one.</summary>"
+      },
+      {
+        "line": 97,
+        "text": "    /// <summary>"
+      },
+      {
+        "line": 98,
+        "text": "    /// Fails the target when a project failed, or when <paramref name=\"requireExecution\"/> is set and"
+      },
+      {
+        "line": 99,
+        "text": "    /// no project executed a test. A run that executed nothing is not a pass."
+      },
+      {
+        "line": 100,
+        "text": "    /// </summary>"
+      },
+      {
+        "line": 112,
+        "text": "/// <summary>Per-test totals from a runner summary. Executed is passed + failed.</summary>"
+      },
+      {
+        "line": 115,
+        "text": "    // VSTest: \"Passed!  - Failed:     0, Passed:    83, Skipped:    12, Total:    95, Duration: ...\""
+      },
+      {
+        "line": 120,
+        "text": "    // VSTest console logger at verbosity=normal: \"Total tests: 95\" then indented \"Passed: 83\" / \"Failed: 0\" / \"Skipped: 12\""
+      },
+      {
+        "line": 121,
+        "text": "    // (a zero line is omitted). Microsoft.Testing.Platform (xUnit v3): \"total:\", \"failed:\", \"succeeded:\", \"skipped:\" lines."
+      }
+    ],
+    "current_full_line_comments": [
+      {
+        "line": 1,
+        "text": "// Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md."
+      },
+      {
+        "line": 6,
+        "text": "/// <summary>"
+      },
+      {
+        "line": 7,
+        "text": "/// An expected failure: bad usage, a failed gate, failed tests. Reported as its message alone; any other"
+      },
+      {
+        "line": 8,
+        "text": "/// exception is a toolchain bug and keeps its stack trace."
+      },
+      {
+        "line": 9,
+        "text": "/// </summary>"
+      },
+      {
+        "line": 17,
+        "text": "    /// <summary>The project ran but executed no test: the filter matched nothing, or every test was skipped.</summary>"
+      },
+      {
+        "line": 21,
+        "text": "/// <summary>What happened to one test project in a test or coverage run.</summary>"
+      },
+      {
+        "line": 27,
+        "text": "    /// <summary>The project's full runner output, when it was saved.</summary>"
+      },
+      {
+        "line": 31,
+        "text": "/// <summary>A failed test and the first lines of its failure message.</summary>"
+      },
+      {
+        "line": 34,
+        "text": "    /// <summary>The fully qualified method name, without theory arguments: usable in --filter.</summary>"
+      },
+      {
+        "line": 37,
+        "text": "    // xUnit v3 on MTP:   \"failed Ns.Class.Method(x: 3) (0ms)\" (or \"(1s 20ms)\") then 2-space-indented message lines, then \"    at ...\" frames."
+      },
+      {
+        "line": 40,
+        "text": "    // xUnit v2 on VSTest: \"  Failed Ns.Class.Method [2 ms]\", \"  Error Message:\", message lines, \"  Stack Trace:\"."
+      },
+      {
+        "line": 74,
+        "text": "    // The runner wraps exceptions in its own type; the inner type and message are what matter."
+      },
+      {
+        "line": 85,
+        "text": "    /// <summary>Prints each failure and fails the target when there is at least one.</summary>"
+      },
+      {
+        "line": 97,
+        "text": "    /// <summary>"
+      },
+      {
+        "line": 98,
+        "text": "    /// Rejects a failed project outcome and, when <paramref name=\"requireExecution\"/> is set,"
+      },
+      {
+        "line": 99,
+        "text": "    /// a nonempty result list whose outcomes are all <c>NoTestsExecuted</c>."
+      },
+      {
+        "line": 100,
+        "text": "    /// </summary>"
+      },
+      {
+        "line": 101,
+        "text": "    /// <remarks>"
+      },
+      {
+        "line": 102,
+        "text": "    /// This gate checks classified outcomes, not parsed execution counts. It does not reject an empty"
+      },
+      {
+        "line": 103,
+        "text": "    /// list or a mixed list merely because some projects executed no tests. A passed outcome with"
+      },
+      {
+        "line": 104,
+        "text": "    /// unknown counts is not proof that tests ran; inspect each project's counts and runner output."
+      },
+      {
+        "line": 105,
+        "text": "    /// </remarks>"
+      },
+      {
+        "line": 117,
+        "text": "/// <summary>Per-test totals from a runner summary. Executed is passed + failed.</summary>"
+      },
+      {
+        "line": 120,
+        "text": "    // VSTest: \"Passed!  - Failed:     0, Passed:    83, Skipped:    12, Total:    95, Duration: ...\""
+      },
+      {
+        "line": 125,
+        "text": "    // VSTest console logger at verbosity=normal: \"Total tests: 95\" then indented \"Passed: 83\" / \"Failed: 0\" / \"Skipped: 12\""
+      },
+      {
+        "line": 126,
+        "text": "    // (a zero line is omitted). Microsoft.Testing.Platform (xUnit v3): \"total:\", \"failed:\", \"succeeded:\", \"skipped:\" lines."
+      }
+    ]
+  },
+  {
+    "path": "scripts/toolchain/TestTargets.cs",
+    "ids": [
+      "CORE-A-C018",
+      "FPT-018"
+    ],
+    "reason": "EDIT released D facet: describe actual per-term native arguments and same-kind positive flag restriction; remove duplicate/stale wildcard-combination and unqualified runner boolean claims. Pinned repeated-switch execution remains unrun. No filter code, help/error text, expression, assertion or policy changed.",
+    "source_anchors": [
+      "TranslateToMtpFilter at base lines158-256; branches171-187,190-220,224-256",
+      "investigation-A.md:320-331, CORE-A-C018"
+    ],
+    "current_comment": "TranslateToMtpFilter explanatory block immediately before the method",
+    "base_git_blob": "1cff20cb5edcf5943f3640c883a3070f45337120",
+    "base_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+    "current_raw_sha256": "b257b57172bbd9967b7ec46754deffdaa3f044f2288ea7d22ed3f3b3c7593337",
+    "base_full_line_comments": [
+      {
+        "line": 1,
+        "text": "// Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md."
+      },
+      {
+        "line": 13,
+        "text": "            // --integration requires --project to prevent accidentally running all integration tests"
+      },
+      {
+        "line": 72,
+        "text": "            // A bad --filter, or test discovery that failed: say what was wrong."
+      },
+      {
+        "line": 107,
+        "text": "        // A run where every test was skipped (typically [SkippableTheory] + no matching YubiKey) exits 0."
+      },
+      {
+        "line": 108,
+        "text": "        // That is not a pass: report it like a filter that matched nothing."
+      },
+      {
+        "line": 120,
+        "text": "    /// <summary>"
+      },
+      {
+        "line": 121,
+        "text": "    /// The dotnet arguments that run <paramref name=\"project\"/> with <paramref name=\"testFilter\"/> translated"
+      },
+      {
+        "line": 122,
+        "text": "    /// for its runner, or null when the filter selects no test in it (checked by discovery, without running)."
+      },
+      {
+        "line": 123,
+        "text": "    /// </summary>"
+      },
+      {
+        "line": 128,
+        "text": "            // xUnit v3 MTP runner uses native filter options (--filter-method, --filter-trait, etc.)"
+      },
+      {
+        "line": 129,
+        "text": "            // not VSTest's --filter syntax"
+      },
+      {
+        "line": 135,
+        "text": "            // Preflight only the inclusion filter. Exclusions still apply to the real run."
+      },
+      {
+        "line": 142,
+        "text": "        // xUnit v2 runs under VSTest, which takes --filter directly."
+      },
+      {
+        "line": 149,
+        "text": "        // Same preflight the MTP path gets. Without it a filter matching nothing makes"
+      },
+      {
+        "line": 150,
+        "text": "        // VSTest print \"No test matches...\" and still exit 0, which would be reported"
+      },
+      {
+        "line": 151,
+        "text": "        // as \"All tests passed\" — a green result from a run that never happened."
+      },
+      {
+        "line": 158,
+        "text": "    // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments."
+      },
+      {
+        "line": 159,
+        "text": "    // Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds."
+      },
+      {
+        "line": 160,
+        "text": "    // Returns (filter args string, whether any positive/inclusion filters are present)."
+      },
+      {
+        "line": 161,
+        "text": "    // Translates a VSTest-style --filter expression to xUnit v3 Microsoft.Testing.Platform options."
+      },
+      {
+        "line": 162,
+        "text": "    //"
+      },
+      {
+        "line": 163,
+        "text": "    // Supported shapes: `A&B&C` (every term must match) and `A|B|C` (any term matches). MTP has no"
+      },
+      {
+        "line": 164,
+        "text": "    // grouping operator, so an expression that mixes `&` and `|` is rejected with a clear message"
+      },
+      {
+        "line": 165,
+        "text": "    // instead of silently matching the wrong set. Repeated options of one kind are ORed by xUnit"
+      },
+      {
+        "line": 166,
+        "text": "    // (`--filter-method X --filter-method Y`), which is what `|` maps onto; `&` maps onto options of"
+      },
+      {
+        "line": 167,
+        "text": "    // different kinds, or onto a single `--filter-method` with both wildcards when both terms are"
+      },
+      {
+        "line": 168,
+        "text": "    // method patterns (xUnit ANDs distinct option kinds, so two method terms cannot be ANDed)."
+      },
+      {
+        "line": 199,
+        "text": "            // Category!=Value → --filter-not-trait \"Category=Value\""
+      },
+      {
+        "line": 205,
+        "text": "            // FullyQualifiedName~Value or Name~Value or Method~Value → --filter-method \"*Value*\""
+      },
+      {
+        "line": 224,
+        "text": "            // Category=Value → --filter-trait \"Category=Value\""
+      },
+      {
+        "line": 248,
+        "text": "                // Unrecognized pattern — pass as-is to --filter-method with wildcards"
+      },
+      {
+        "line": 259,
+        "text": "    // Normalises a --filter expression for VSTest (xUnit v2, the integration projects)."
+      },
+      {
+        "line": 260,
+        "text": "    //"
+      },
+      {
+        "line": 261,
+        "text": "    // VSTest only understands FullyQualifiedName, DisplayName and trait properties. `Method` is an"
+      },
+      {
+        "line": 262,
+        "text": "    // MSTest/NUnit property, so `Method~Sign` silently matches nothing here even though the MTP path"
+      },
+      {
+        "line": 263,
+        "text": "    // translates it happily — the exact asymmetry that made documented commands no-op on the hardware"
+      },
+      {
+        "line": 264,
+        "text": "    // lanes. Map it onto the closest portable equivalent so one documented syntax works everywhere."
+      },
+      {
+        "line": 265,
+        "text": "    //"
+      },
+      {
+        "line": 266,
+        "text": "    // FullyQualifiedName covers namespace.class.method, so the rewrite is slightly wider than a"
+      },
+      {
+        "line": 267,
+        "text": "    // method-only match: `Method~Sign` will also match a class named SignatureTests. That fails safe"
+      },
+      {
+        "line": 268,
+        "text": "    // (more tests, never fewer), and VsTestFilterHasMatches still catches a filter that matches none."
+      },
+      {
+        "line": 284,
+        "text": "    // True when the filter selects at least one test in the project. Discovery-only, so it never runs a"
+      },
+      {
+        "line": 285,
+        "text": "    // ceremony or touches hardware. Both runners exit 0 when nothing matches, so the marker text decides."
+      }
+    ],
+    "current_full_line_comments": [
+      {
+        "line": 1,
+        "text": "// Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md."
+      },
+      {
+        "line": 13,
+        "text": "            // --integration requires --project to prevent accidentally running all integration tests"
+      },
+      {
+        "line": 72,
+        "text": "            // A bad --filter, or test discovery that failed: say what was wrong."
+      },
+      {
+        "line": 107,
+        "text": "        // A run where every test was skipped (typically [SkippableTheory] + no matching YubiKey) exits 0."
+      },
+      {
+        "line": 108,
+        "text": "        // That is not a pass: report it like a filter that matched nothing."
+      },
+      {
+        "line": 120,
+        "text": "    /// <summary>"
+      },
+      {
+        "line": 121,
+        "text": "    /// The dotnet arguments that run <paramref name=\"project\"/> with <paramref name=\"testFilter\"/> translated"
+      },
+      {
+        "line": 122,
+        "text": "    /// for its runner, or null when the filter selects no test in it (checked by discovery, without running)."
+      },
+      {
+        "line": 123,
+        "text": "    /// </summary>"
+      },
+      {
+        "line": 128,
+        "text": "            // xUnit v3 MTP runner uses native filter options (--filter-method, --filter-trait, etc.)"
+      },
+      {
+        "line": 129,
+        "text": "            // not VSTest's --filter syntax"
+      },
+      {
+        "line": 135,
+        "text": "            // Preflight only the inclusion filter. Exclusions still apply to the real run."
+      },
+      {
+        "line": 142,
+        "text": "        // xUnit v2 runs under VSTest, which takes --filter directly."
+      },
+      {
+        "line": 149,
+        "text": "        // Same preflight the MTP path gets. Without it a filter matching nothing makes"
+      },
+      {
+        "line": 150,
+        "text": "        // VSTest print \"No test matches...\" and still exit 0, which would be reported"
+      },
+      {
+        "line": 151,
+        "text": "        // as \"All tests passed\" — a green result from a run that never happened."
+      },
+      {
+        "line": 158,
+        "text": "    // Translates a VSTest-style --filter expression to xUnit v3 Microsoft.Testing.Platform options."
+      },
+      {
+        "line": 159,
+        "text": "    // Returns generated arguments, whether inclusion filters exist, and their separate arguments."
+      },
+      {
+        "line": 160,
+        "text": "    //"
+      },
+      {
+        "line": 161,
+        "text": "    // Mixed '&'/'|' expressions are rejected. For '|' alternatives, positive inclusion flags must"
+      },
+      {
+        "line": 162,
+        "text": "    // be of one kind. Each translated term appends its own native flag, including repeated method"
+      },
+      {
+        "line": 163,
+        "text": "    // patterns split by '&'; two such patterns are not combined into one wildcard."
+      },
+      {
+        "line": 164,
+        "text": "    // Emitted arguments alone do not establish the pinned runner's same-kind boolean selection."
+      },
+      {
+        "line": 165,
+        "text": "    // Check actual discovery and execution before treating compound filters as coverage evidence."
+      },
+      {
+        "line": 196,
+        "text": "            // Category!=Value → --filter-not-trait \"Category=Value\""
+      },
+      {
+        "line": 202,
+        "text": "            // FullyQualifiedName~Value or Name~Value or Method~Value → --filter-method \"*Value*\""
+      },
+      {
+        "line": 221,
+        "text": "            // Category=Value → --filter-trait \"Category=Value\""
+      },
+      {
+        "line": 245,
+        "text": "                // Unrecognized pattern — pass as-is to --filter-method with wildcards"
+      },
+      {
+        "line": 256,
+        "text": "    // Normalises a --filter expression for VSTest (xUnit v2, the integration projects)."
+      },
+      {
+        "line": 257,
+        "text": "    //"
+      },
+      {
+        "line": 258,
+        "text": "    // VSTest only understands FullyQualifiedName, DisplayName and trait properties. `Method` is an"
+      },
+      {
+        "line": 259,
+        "text": "    // MSTest/NUnit property, so `Method~Sign` silently matches nothing here even though the MTP path"
+      },
+      {
+        "line": 260,
+        "text": "    // translates it happily — the exact asymmetry that made documented commands no-op on the hardware"
+      },
+      {
+        "line": 261,
+        "text": "    // lanes. Map it onto the closest portable equivalent so one documented syntax works everywhere."
+      },
+      {
+        "line": 262,
+        "text": "    //"
+      },
+      {
+        "line": 263,
+        "text": "    // FullyQualifiedName covers namespace.class.method, so the rewrite is slightly wider than a"
+      },
+      {
+        "line": 264,
+        "text": "    // method-only match: `Method~Sign` will also match a class named SignatureTests. That fails safe"
+      },
+      {
+        "line": 265,
+        "text": "    // (more tests, never fewer), and VsTestFilterHasMatches still catches a filter that matches none."
+      },
+      {
+        "line": 281,
+        "text": "    // True when the filter selects at least one test in the project. Discovery-only, so it never runs a"
+      },
+      {
+        "line": 282,
+        "text": "    // ceremony or touches hardware. Both runners exit 0 when nothing matches, so the marker text decides."
+      }
+    ]
+  }
+]

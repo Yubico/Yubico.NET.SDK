@@ -1,0 +1,420 @@
+[
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "pinned_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "scope": "B5:1–135,203–569 binding/prepare/configure/ready/disposal; caller context only",
+    "owner": "B5",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f",
+    "pinned_sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f",
+    "scope": "B5/C:complete options value/reference and shallow copy contracts",
+    "owner": "B5/C",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "pinned_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "scope": "B1/B5:170–305 actual resolver/single-open/failure cleanup",
+    "owner": "B1/B5",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/ProtocolFactory.cs",
+    "sha256": "4a45f172706a618b4126289aa7f2fcd55f826362fffabd2bb64423910b087757",
+    "pinned_sha256": "4a45f172706a618b4126289aa7f2fcd55f826362fffabd2bb64423910b087757",
+    "scope": "B5:complete SmartCard protocol route, no external injection",
+    "owner": "B5",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "pinned_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "scope": "A/B5:complete major-zero compatibility policy",
+    "owner": "A/B5",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "pinned_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "scope": "B6:complete selected plain graph/config/status/recovery route",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs",
+    "sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "pinned_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "scope": "B6:complete guarded SCP initialization capability",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+    "sha256": "2a1561c92c2b9a8c7b23df18c7ffd4d66332b5fd919f005ca26e6252d35ecfe0",
+    "pinned_sha256": "2a1561c92c2b9a8c7b23df18c7ffd4d66332b5fd919f005ca26e6252d35ecfe0",
+    "scope": "B6:complete readonly struct flags/value-copy",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+    "sha256": "53f5b7ec2f80657d1fbf50f9ee8f1b1fdf6874f49e1b9bac4915d0136899521b",
+    "pinned_sha256": "53f5b7ec2f80657d1fbf50f9ee8f1b1fdf6874f49e1b9bac4915d0136899521b",
+    "scope": "B6:complete0..255/always Le",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+    "sha256": "ff39ab5e3a4bdf57971c60a66b76cd27041b2ce4139d2a6e17bfee06b0efcf9b",
+    "pinned_sha256": "ff39ab5e3a4bdf57971c60a66b76cd27041b2ce4139d2a6e17bfee06b0efcf9b",
+    "scope": "B6:complete0..65536/always Le and max length",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "pinned_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "scope": "B6:complete copied owner/status/Data/Clear",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+    "sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78",
+    "pinned_sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78",
+    "scope": "B6:complete fixed follow-up/accumulation/error path",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+    "sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3",
+    "pinned_sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3",
+    "scope": "B6:complete effective graph/shared guard/disposal/status",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67",
+    "pinned_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67",
+    "scope": "B6:complete feature/setup/outer cleanup and selected translation",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+    "sha256": "7f1a6dc602033053506fc1daf1f72beb4adceb3271b65be72d370f639e55fe0e",
+    "pinned_sha256": "7f1a6dc602033053506fc1daf1f72beb4adceb3271b65be72d370f639e55fe0e",
+    "scope": "B6:complete partial-derivation owner transfer and failure scope",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+    "sha256": "99f937de3413a0072eb0171a13eab0a9612eaa99c3c58aab55f8620f71009302",
+    "pinned_sha256": "99f937de3413a0072eb0171a13eab0a9612eaa99c3c58aab55f8620f71009302",
+    "scope": "B6:complete cert PSO/receipt/first-command gap/parameter use",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "sha256": "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1",
+    "pinned_sha256": "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1",
+    "scope": "B6:complete encrypt/MAC/response cleanup/INS82 exception",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "sha256": "9e03845d5e0c87e951eb8879cd51fbb5014a009e8f4c537015599d1512bb2039",
+    "pinned_sha256": "9e03845d5e0c87e951eb8879cd51fbb5014a009e8f4c537015599d1512bb2039",
+    "scope": "B6:1–220 Encrypt counter mutation/DEK/copies; remaining mechanics B6 report reused",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+    "sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+    "pinned_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+    "scope": "B6:complete exact contained StaticKeys owner",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+    "pinned_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+    "scope": "B6/C:complete reference/list/contained private and cert disposal",
+    "owner": "B6/C",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68",
+    "pinned_sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68",
+    "scope": "B6:complete clone/derive/DEK/session scopes",
+    "owner": "B6",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+    "sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "pinned_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "scope": "B5:complete entry cancellation, admitted None, close/drain",
+    "owner": "B5",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "src/Core/src/YubiKitLogging.cs",
+    "sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "pinned_sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "scope": "C:complete static factory/temporary selection; no redaction",
+    "owner": "C",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "pinned_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "scope": "SHARED:119–120 and822–826 SD dependency only",
+    "owner": "SHARED",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "docs/migration/v1-to-v2-map.yml",
+    "sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+    "pinned_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+    "scope": "SHARED:securitydomain-exception unchanged dependency, original DOC-002 preserved",
+    "owner": "SHARED",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "docs/AI-DOCS-GUIDE.md",
+    "sha256": "54ff0bf0a5c57143e73094f0b7f2bd67d4175e358c4ae2e554bdaa05616b9a93",
+    "pinned_sha256": "54ff0bf0a5c57143e73094f0b7f2bd67d4175e358c4ae2e554bdaa05616b9a93",
+    "scope": "SHARED:484–509 complete SD sketch, already correct destructive qualification",
+    "owner": "SHARED",
+    "unchanged_reason": "Dependency-only referral; exact mechanism/shared-document owner retains full edit/review. No boundary write authorization."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-source-register.md",
+    "sha256": "6f3edcfba098920dd43e3e2a6db59c03108e39bfbb4ab81373e87d2c74731727",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-manifest.json",
+    "sha256": "45e64aebedf728bb3f91553e301a7eb75a736876470fbbb3bd0ee1cfd8bbe16c",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf",
+    "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+    "sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+    "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.txt",
+    "sha256": "59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-catalogue.html",
+    "sha256": "86fa3f52729c26bcb3aa35eb9ecd50473ef074c56cb3dca0c2ce63d47b1434b8",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-catalogue.html",
+    "sha256": "6219c1139a5c4f41f39ed27a6c95633ffdb55d1a9824ef877de6b087fb2b61a5",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/yubico-profile.html",
+    "sha256": "4314cfaa8c56f27c684d5323f386f830da95897bc678c0b96209a9245460b0c0",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+    "sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/context.md",
+    "sha256": "68694ce44329e1d16d56f048cfe4f1c1ad6c7d12152f92f703e1c8b3671d9ba7",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/patch-manifest.json",
+    "sha256": "38a6f513dc86bddcfc21a0826c3834bf3953d678cdeec8d1f00e260323f4e1de",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/focused-followup-manifest.json",
+    "sha256": "f206d027181dce6e4fb9b31c88b446aebf0bc7222306af16d7d9602b86061e3c",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/yubikit/core/smartcard/scp.py",
+    "sha256": "e1bbcae2b85b459d1801feb0630c83a00f96cb0dd7513087545b837464c70d1e",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/yubikit/core/smartcard/__init__.py",
+    "sha256": "595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+    "sha256": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+    "sha256": "2dcfa9c987390940ad44e90298d91ebcccd4ad009ccea473a2995c9f67e8bc4d",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+    "sha256": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+    "sha256": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B4.md",
+    "sha256": "a6743e926ffdedd3157c80097736048f7ab287b7f5c60a904b804d4f23bf098b",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+    "sha256": "5c9b80dcf2351d22bf179584c9fd8a105f897a33efeebfff34e1cfd72e7ab186",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B6.md",
+    "sha256": "146bd5a53f6f1ca3971c8ea8151b6aaee980295e730f5ebfb5c723e55817fdc9",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+    "sha256": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/plan.md",
+    "sha256": "25e7fe9daf55fd02d1d7278c0571bb25590c4f32d7d60899c350cf44b16e0de1",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+    "sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-packet-inputs.json",
+    "sha256": "8b4d36bda7feddb24af4df42f0160d79e300cd945421abc9515686dba6c4d881",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "AGENTS.md",
+    "sha256": "376725cad2bac57cfb02e202d7b227359c6b581f174ef461d7c60644087ba59c",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "CLAUDE.md",
+    "sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "src/Core/tests/CLAUDE.md",
+    "sha256": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/TESTING.md",
+    "sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/SDK-HOUSE-STYLE.md",
+    "sha256": "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/workflow.md",
+    "sha256": "2b17428a08cc10046142bfc4866eeaf36fdf0698de8b8d1433b022e827aaf881",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/records/style.md",
+    "sha256": "2b8882adb75b18d67adcd71d38a6c70fb4aa7c44ec3211c0d45455ab94e9ca15",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+    "sha256": "d29d4c6614eb1896f4189f623d1804477b8fa81e4a49e0e9ed4eacf9d5a7f9a6",
+    "scope": "REUSED-IMMUTABLE-EVIDENCE; exact independently read clauses/ranges versus contextual history identified in sources.md",
+    "owner": "B6/C/shared source cache"
+  }
+]

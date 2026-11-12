@@ -1,0 +1,30 @@
+{
+  "sample": "SAMPLE-SD-001",
+  "selected_unit": "core-001:unit:ed3e115f81fd126c",
+  "path": "src/SecurityDomain/CLAUDE.md",
+  "before_sha256": "76408f4a4ce1995712731ca7201b390836b9d4ded236268c619424a460d3915a",
+  "after_sha256": "dd24dbcc43606abd77888fecdf9368b0c103b74b860fba1c46d3c10ccdab9022",
+  "focused_patch_sha256": "b1cb5c00f569c94499060cd1539edf2bafa67057763126e3786c3f0e83c8ab65",
+  "before_matches_primary_and_accepted_39_file_ledger": true,
+  "changed_ranges": [
+    {
+      "before": [
+        241,
+        242
+      ],
+      "after": [
+        241,
+        242
+      ]
+    }
+  ],
+  "only_two_bullets_changed": true,
+  "other_232_accepted_source_path_hashes_unchanged": true,
+  "prior_record_hashes_preserved": 30,
+  "example_bodies_ranges_hashes_unchanged": 107,
+  "namespace_source_files_unchanged": 3,
+  "git_diff_check": "PASS",
+  "review_status": "FOCUSED-REVIEW-PENDING",
+  "edited_credit_and_sampling_expansion_owner": "Astra/sampler",
+  "build_test_formatter_native_device_crypto_Git_mutation_subagents": "NOT-RUN"
+}

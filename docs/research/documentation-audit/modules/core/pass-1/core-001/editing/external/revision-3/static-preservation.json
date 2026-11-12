@@ -1,0 +1,72 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "actual_previous_product_count": 32,
+  "actual_revision3_delta_count": 3,
+  "actual_final_product_count": 35,
+  "final_product_paths": [
+    "TOOLCHAIN.md",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "docs/migration/v1-to-v2.md",
+    "scripts/toolchain/Process.cs",
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+    "src/Cli.Shared/src/Output/PinPrompt.cs",
+    "src/Cli.Shared/src/Output/SecureCredential.cs",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    "src/Tests.Shared/CLAUDE.md",
+    "src/Tests.Shared/IYubiKeyFilter.cs",
+    "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    "src/Tests.Shared/Infrastructure/TestCategories.cs",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/README.md",
+    "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "src/Tests.Shared/YubiKeyTestState.cs",
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "verification/MacOSHidBoundaryComparison/Program.cs",
+    "verification/MacOSHidInputVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "verification/MacOSHidRouteVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "verification/NativeAotVerification/Program.cs",
+    "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+    "verification/NativeCompatibilityVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs"
+  ],
+  "path_manifest_count": 164,
+  "full_patch_sha256": "76244276822b64598a78ab11b2db94d116da4bf021b555a73d4e02acaca836db",
+  "comment_delta_sha256": "a969db4b8204501fa8e5ec2a07f1fb6191e7807672c6b3168703373b68b3bc7a",
+  "checks": [
+    {
+      "path": "scripts/toolchain/Process.cs",
+      "protected_lines": "exactly equal including blanks, inline comments, directives, imports, declarations, string literals, guards and assertions",
+      "xml_blocks_well_formed": 9,
+      "semantic_binding": "NOT-RUN"
+    },
+    {
+      "path": "scripts/toolchain/Results.cs",
+      "protected_lines": "exactly equal including blanks, inline comments, directives, imports, declarations, string literals, guards and assertions",
+      "xml_blocks_well_formed": 9,
+      "semantic_binding": "NOT-RUN"
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "protected_lines": "exactly equal including blanks, inline comments, directives, imports, declarations, string literals, guards and assertions",
+      "xml_blocks_well_formed": 1,
+      "semantic_binding": "NOT-RUN"
+    }
+  ],
+  "earlier_32_raw_product_hashes_and_all_history": "unchanged",
+  "git_diff_check": "PASS",
+  "no_validation_tooling_or_profiles_changed": true,
+  "limits": "Exact non-full-line-comment comparison and XML well-formedness, not a Roslyn semantic binding/build/test/formatter/native/device/crypto/provider run or independent content review. No other worktree product-base comparison."
+}

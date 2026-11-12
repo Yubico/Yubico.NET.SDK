@@ -1,0 +1,533 @@
+{
+  "revision": 2,
+  "facets": "Documentation only; original engineering/policy/qualification states held. See correction-review.md and preserved-provenance.json.",
+  "candidates": {
+    "CORE-PIV-X001": [
+      {
+        "path": "src/Piv/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain flat facade, borrowed-input, reset and transferred-output instructions; reopen gotcha 2's disposal-based PIN lifetime and add the actual whole-workflow bound. Editing is separately assigned."
+      },
+      {
+        "path": "src/Piv/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain the reviewed source-supported factory/auth/version/workflow documentation. Correct both documentation fences: initialize result holders before PIN acquisition, enter try immediately after acquisition, and perform later hashing/known-plaintext allocation inside try. Finally clears only locally owned PIN and successfully assigned digest/signature/known-plaintext/output buffers. Caller/provider/independent source copies retain separate owners. No allocation-failure execution, compilation, SDK source change or policy resolution."
+      },
+      {
+        "path": "src/Piv/src/IPivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain algorithm/ownership/prerequisite/partial-reset contracts; fresh editor should localize whole-workflow admission and borrowed direct-factory lifetime without changing declarations."
+      },
+      {
+        "path": "src/Piv/src/IYubiKeyExtensions.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain one-transport selection and hidden ownership transfer after successful creation; add usable borrowed/owned/failure lifecycle XML in separate editing gate."
+      },
+      {
+        "path": "src/Piv/src/PinPolicy.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain card-controlled verification-state lifetime for Once/MatchOnce; per-handle/disposal guarantees must not be added."
+      },
+      {
+        "path": "src/Piv/src/PivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Facade controls management state, gates and multi-command workflows. Complete source trace confirms inherited resolved scopes and remaining workflow/physical/profile limits; no product edit authorized."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen historical Today-signs and cross-process language for pinned policy. Sequential same-process handles and rejection type are narrower than two-process/shared/exclusive/power evidence; OpenSSL oracle is a distinct executed boundary when run."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen no-finalizer/unconditional-release narrative and token-as-time-bound claim. Loop checks time between calls; built-in admitted exchange has no token deadline. Physical test remains deferred."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain refusal before competing SELECT and sequential borrowed PIV/Management/PIV serial checks. Known-member process guard is narrower than all hardware interfaces or cross-process PIN isolation."
+      }
+    ],
+    "CORE-PIV-X002": [
+      {
+        "path": "src/Piv/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain flat facade, borrowed-input, reset and transferred-output instructions; reopen gotcha 2's disposal-based PIN lifetime and add the actual whole-workflow bound. Editing is separately assigned."
+      },
+      {
+        "path": "src/Piv/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain the reviewed source-supported factory/auth/version/workflow documentation. Correct both documentation fences: initialize result holders before PIN acquisition, enter try immediately after acquisition, and perform later hashing/known-plaintext allocation inside try. Finally clears only locally owned PIN and successfully assigned digest/signature/known-plaintext/output buffers. Caller/provider/independent source copies retain separate owners. No allocation-failure execution, compilation, SDK source change or policy resolution."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain current tool limitations and direct SDK alternative; direct readers to acquisition-protected task-guide examples without claiming all-copy/provider erasure. No tool behavior changes."
+      },
+      {
+        "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain explicit witness/challenge, fixed-time comparison, pool cleanup and borrowed-key semantics. Two sends are separate exchanges; native/provider copies remain different owners."
+      },
+      {
+        "path": "src/Piv/src/Authentication/PinOnlyProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain ownership-taking PRINTED decoder, scoped nested TLVs and legacy SHA1/10000 compatibility derivation. Session owns multi-command state and clears extracted key."
+      },
+      {
+        "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain actual cleared command/response/parsed owners and pre-transfer resolution. Reopen Curve25519-point return comment; parser width admission and BigInteger residue stay PIVIMP-007."
+      },
+      {
+        "path": "src/Piv/src/IPivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain algorithm/ownership/prerequisite/partial-reset contracts; fresh editor should localize whole-workflow admission and borrowed direct-factory lifetime without changing declarations."
+      },
+      {
+        "path": "src/Piv/src/IYubiKeyExtensions.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain one-transport selection and hidden ownership transfer after successful creation; add usable borrowed/owned/failure lifecycle XML in separate editing gate."
+      },
+      {
+        "path": "src/Piv/src/PivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Facade controls management state, gates and multi-command workflows. Complete source trace confirms inherited resolved scopes and remaining workflow/physical/profile limits; no product edit authorized."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen whole-session concurrency summary: actual intended overlap is one object-read exchange. Immediate timing is probabilistic; assertion failure can bypass readTask await before session teardown."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain random active-key enable/close/recover/disable and fresh cleanup scope. Token budget is cooperative, not native deadline; raw PRINTED deletion assertion occurs under existing verified state."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain request/resolution/key verification and slot-specific cleanup design. Three physical-lane methods across packet remain deferred; 30s token is explicitly cooperative and actual operator scope stays separate."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain exact enable/disable order, default alias preservation and selected failure stopping. WorkflowBackend accepts witness traffic without checking submitted witness; mixed connection supplies stronger complementary oracle."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain command-count pairing, intent, metadata reuse and callback failure outcomes. Cancellation from request callback occurs before guarded APDU admission; no physical timeout/native cancellation proof."
+      }
+    ],
+    "CORE-PIV-X003": [
+      {
+        "path": "src/Piv/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain flat facade, borrowed-input, reset and transferred-output instructions; reopen gotcha 2's disposal-based PIN lifetime and add the actual whole-workflow bound. Editing is separately assigned."
+      },
+      {
+        "path": "src/Piv/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain the reviewed source-supported factory/auth/version/workflow documentation. Correct both documentation fences: initialize result holders before PIN acquisition, enter try immediately after acquisition, and perform later hashing/known-plaintext allocation inside try. Finally clears only locally owned PIN and successfully assigned digest/signature/known-plaintext/output buffers. Caller/provider/independent source copies retain separate owners. No allocation-failure execution, compilation, SDK source change or policy resolution."
+      },
+      {
+        "path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain explicit witness/challenge, fixed-time comparison, pool cleanup and borrowed-key semantics. Two sends are separate exchanges; native/provider copies remain different owners."
+      },
+      {
+        "path": "src/Piv/src/Authentication/PinOnlyProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain ownership-taking PRINTED decoder, scoped nested TLVs and legacy SHA1/10000 compatibility derivation. Session owns multi-command state and clears extracted key."
+      },
+      {
+        "path": "src/Piv/src/Bio/BioProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain tagged metadata/mode bytes, temporary-PIN copy/Clear and encoded-input finally. Fake metadata capability is separate from fingerprint enrollment/hardware qualification."
+      },
+      {
+        "path": "src/Piv/src/Certificates/CertificateProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain certificate/result ownership and exact retired-slot arithmetic. GZip decode is unbounded and CertInfo handling narrower than Python; existing PIVIMP-007 owns interoperability/enforcement work."
+      },
+      {
+        "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain actual cleared command/response/parsed owners and pre-transfer resolution. Reopen Curve25519-point return comment; parser width admission and BigInteger residue stay PIVIMP-007."
+      },
+      {
+        "path": "src/Piv/src/DataObjects/DataObjectProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain owned GET result, raw response Clear and PUT encoded finally. Invalid arbitrary IDs still reach truncating encoder under existing PIVIMP-010."
+      },
+      {
+        "path": "src/Piv/src/IPivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain algorithm/ownership/prerequisite/partial-reset contracts; fresh editor should localize whole-workflow admission and borrowed direct-factory lifetime without changing declarations."
+      },
+      {
+        "path": "src/Piv/src/Keys/KeyProtocol.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain private-component cleanup and public-key parse representation. Reopen attestation Case1/no-Le comment for actual formatter vocabulary; no ISO conformance inference."
+      },
+      {
+        "path": "src/Piv/src/PivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Facade controls management state, gates and multi-command workflows. Complete source trace confirms inherited resolved scopes and remaining workflow/physical/profile limits; no product edit authorized."
+      },
+      {
+        "path": "src/Piv/src/SlotMetadataExtensions.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain public-only RSA/ECDsa extraction, point dimensions and disposable host-object examples; provider availability and trust remain separate."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain exact enable/disable order, default alias preservation and selected failure stopping. WorkflowBackend accepts witness traffic without checking submitted witness; mixed connection supplies stronger complementary oracle."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain actual owned response/command array checks and direct parsed-result zeroing on callback failure. These oracles exclude native staging/provider copies and real crypto result correctness."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain actual encoded write owner observer and independent GET result survival. Reopen SW-not-required wording to distinguish asserted Data-only scope from Clear's full raw buffer."
+      }
+    ],
+    "CORE-PIV-X004": [
+      {
+        "path": "src/Piv/CLAUDE.md",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain flat facade, borrowed-input, reset and transferred-output instructions; reopen gotcha 2's disposal-based PIN lifetime and add the actual whole-workflow bound. Editing is separately assigned."
+      },
+      {
+        "path": "src/Piv/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain the reviewed source-supported factory/auth/version/workflow documentation. Correct both documentation fences: initialize result holders before PIN acquisition, enter try immediately after acquisition, and perform later hashing/known-plaintext allocation inside try. Finally clears only locally owned PIN and successfully assigned digest/signature/known-plaintext/output buffers. Caller/provider/independent source copies retain separate owners. No allocation-failure execution, compilation, SDK source change or policy resolution."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/DeviceInfoMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Live Management read finishes before PIV session opens. Displayed metadata/FIPS/form-factor semantics depend on A; no extra native or certification claim is accepted."
+      },
+      {
+        "path": "src/Piv/src/Backends/SmartCardBackend.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain SELECT/FD ordering and first-three-byte parser; version response is raw applet evidence, with effective override applied later by facade."
+      },
+      {
+        "path": "src/Piv/src/Features.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain actual SDK version floors and generation-only ROCA interval. Device/profile qualification remains separate from Feature compatibility query."
+      },
+      {
+        "path": "src/Piv/src/IPivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain algorithm/ownership/prerequisite/partial-reset contracts; fresh editor should localize whole-workflow admission and borrowed direct-factory lifetime without changing declarations."
+      },
+      {
+        "path": "src/Piv/src/Keys/KeyProtocol.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Retain private-component cleanup and public-key parse representation. Reopen attestation Case1/no-Le comment for actual formatter vocabulary; no ISO conformance inference."
+      },
+      {
+        "path": "src/Piv/src/Metadata/MetadataProtocol.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain required-field checks, unknown-algorithm preservation and exact status fallbacks. Public metadata copies do not imply management-key byte disclosure."
+      },
+      {
+        "path": "src/Piv/src/PivSession.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Facade controls management state, gates and multi-command workflows. Complete source trace confirms inherited resolved scopes and remaining workflow/physical/profile limits; no product edit authorized."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain exact SPKI comparison from generated and metadata keys. NonBio case has no negative-Bio product filter; metadata/default expectations use fixture firmware rather than raw applet version."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen major-zero physically-at-least5.8 prose and order claims exceeding Contains assertions. Retain borrowed-failure disposal count, management-state/reset fallback and disposed no-I/O checks."
+      }
+    ],
+    "CORE-PIV-X006": [
+      {
+        "path": "src/Piv/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain the reviewed source-supported factory/auth/version/workflow documentation. Correct both documentation fences: initialize result holders before PIN acquisition, enter try immediately after acquisition, and perform later hashing/known-plaintext allocation inside try. Finally clears only locally owned PIN and successfully assigned digest/signature/known-plaintext/output buffers. Caller/provider/independent source copies retain separate owners. No allocation-failure execution, compilation, SDK source change or policy resolution."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. All handlers await their convenience session; credentials parsed before discovery/file reads can escape later finally on failure. Preserve executable output; future fixes reopen handler comments and tool limits."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain shared SmartCard-eligible RequireChoice selection with interaction disabled and stderr diagnostics. UTF-8/hex conversion returns separate caller-owned arrays; immutable argument strings remain outside zeroing."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain actual lower-camel result fields and Success/IsValid distinction. Serialization deliberately materializes plaintext/signature output and certificate PEM; it does not dispose payload owners."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/AttestationMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Session scope encloses awaited retrieval/export; repeated retrieval and returned certificate disposal remain applet sample ownership work, not Core connection leaks."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/CertificatesMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain source for future applet fixes: export reads CsrPem although helper returns Certificate; CSR omits PIN verify; certificate results require their own disposal scopes."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/CryptoMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Menu borrows disposable credential owners and configures presence. Sign delegates hash-first helper; decrypted read-only result and file copies retain separate application cleanup duties."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/DeviceInfoMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Live Management read finishes before PIV session opens. Displayed metadata/FIPS/form-factor semantics depend on A; no extra native or certification claim is accepted."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Awaited status callback stays inside session/key-owner scopes. Generated key result contains SPKI; policies are passed separately and device enforcement remains required."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/PinManagementMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Credential owners enclose awaited operations. Key-change menu uses helper's default TripleDes/type/length assumptions; future algorithm-aware UX belongs to existing PIVIMP-006."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/ResetMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Preserve runtime warning text unchanged; all-data wording omits retained F9 and fixed retry narration exceeds general retry counts. Existing tool/reset handoff owns these behavior/UI corrections."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Menus/SlotOverviewMenu.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Session owns connection, while result certificates survive until callers dispose them. HasKey is metadata presence, not a physical empty-slot proof on unsupported firmware."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Output/OutputHelpers.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain static shared prompt reference in options and escaped ordinary display strings. Output helpers do not own/dispose prompt service or result certificates."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Reader option lengths and ASCII filters are UI policy. CreateFromSpan copies borrowed input; generated/KDF arrays and immutable displayed hex need independent handling under PIVIMP-006/C."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain corrected F9 result-field example and caller certificate disposal. Retrieval catches errors into results, while trust and key binding remain application tasks."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain public-key-only extractors, external signature generators and DER CSR explanation. Generators borrow session/key, block on SDK calls and omit token propagation; failed store can strand newCert."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain direct-SDK recommendation for mutable plaintext. Helper converts cancellation to timeout text and returns a read-only view without clearing API; existing PIVIMP-006 remains open."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Partial retry helper swallows PIN/PUK errors including cancellation and can return Success with unknown counts. Keep this result-level behavior distinct from Core cancellation."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain caller-owned buffer fragments and retry-aware result mapping. Broad catches convert cancellation into Failed results; session/key lifetime remains caller-owned."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Reset.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain F9/partial-mutation/Bio qualification. InvalidOperationException is mapped to possible biometrics without proving cause; future reset error policy belongs to existing applet findings."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Results/AttestationResult.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain corrected caller-owned AttestationCertificate/F9 field description and separate optional IntermediateCertificate; record itself owns no disposal protocol."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Results/CertificateResult.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain transfer of caller-owned certificate and independent CSR field; result has no Dispose and callers must enclose each certificate lifetime."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Results/DecryptionResult.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain explicit read-only plaintext limitation and direct mutable SDK route; result view aliasing is existing sample design debt."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Results/SigningResult.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain read-only signature view and elapsed milliseconds; helper success supplies no independent algorithm/message verification."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Results/SlotInfoResult.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain corrected metadata-presence HasKey and caller-owned Certificate. List/result aliases need caller disposal, not Core session ownership."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Signing.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain explicit RSA/Ed25519 framing limitation and P256/P384 scope. Runtime hash-first behavior confirms existing PIVIMP-005; no generic Core signing defect is added."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain complete example disposing every returned certificate. Partial aggregate failure can lose previously obtained certificate owners; old-firmware metadata absence stays qualified."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/PivExamples/Verification.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain host RSA/DER ECDSA verification against stored certificate and Success/IsValid distinction; host key objects are scoped, retrieved certificate itself remains undisposed."
+      },
+      {
+        "path": "src/Piv/examples/PivTool/README.md",
+        "decision": "EDIT",
+        "reason": "EDIT: retain current tool limitations and direct SDK alternative; direct readers to acquisition-protected task-guide examples without claiming all-copy/provider erasure. No tool behavior changes."
+      }
+    ],
+    "CORE-PIV-X005": [
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen historical Today-signs and cross-process language for pinned policy. Sequential same-process handles and rejection type are narrower than two-process/shared/exclusive/power evidence; OpenSSL oracle is a distinct executed boundary when run."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivAuthenticationTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain actual reset/default-auth/retry assertions. Default credentials and observed retry range do not prove cross-handle isolation; non-finally cases can leave persistent setup."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCertificateTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain certificate-thumbprint round trip with separate software key; it proves storage, not binding. Returned software/retrieved certificates need deterministic cleanup in future test work."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCompressedCertTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain explicit GZip round-trip field equality. Generated software certificate differs from slot key and retrieved certificate remains a distinct owner."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen whole-session concurrency summary: actual intended overlap is one object-read exchange. Immediate timing is probabilistic; assertion failure can bypass readTask await before session teardown."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCryptoTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain independent DER ECDSA/RSA and raw ECDH equality oracles. Ed25519 differential checks and X25519 generation-only case remain narrower; secret/test cleanup is separate existing debt."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDecryptTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain exact plaintext equality and metadata-before-type/size conditions; fixture floors below5.3 remain existing mismatch. No new hardware run or padding claim is inferred."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDiscoveryContentionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain cold finder/busy key and nonempty signature evidence; 4s is test expectation, not Core universal bound. Keygen drains in finally; native/fresh-discovery semantics retain A/B1 scope."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivFullWorkflowTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain corrected raw-vs-hashed secret and attestation-presence qualifications. Several host/certificate/output owners and persistent-state cleanup remain test work."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen no-finalizer/unconditional-release narrative and token-as-time-bound claim. Loop checks time between calls; built-in admitted exchange has no token deadline. Physical test remains deferred."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivImportTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain independent RSA verification and explicit weaker Ed25519/X25519 metadata checks. PKCS8 helper clears its source; imported private owners are scoped, other test/output cleanup remains distinct."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivKeyOperationsTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain moved-key ECDSA verification and explicit metadata occupancy. EC import leaves exported PKCS8/private owner uncleared and PRINTED cleanup suppresses failure; existing test-hygiene handoff owns repairs."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain fresh-session replacement authentication and same-session privileged generation after SET. Only final state-track test clears replacement bytes; physical reset expectations retain observed fixture version."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain exact SPKI comparison from generated and metadata keys. NonBio case has no negative-Bio product filter; metadata/default expectations use fixture firmware rather than raw applet version."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain real selected two-key loops and both liveness directions. Nonempty output lacks key binding; responsive WaitAsync task can outlive timeout while keygen alone drains; cleanup preserves primary failure in strongest case."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain random active-key enable/close/recover/disable and fresh cleanup scope. Token budget is cooperative, not native deadline; raw PRINTED deletion assertion occurs under existing verified state."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinRetryTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain exact retry decrements and same-limit reset-of-both-credentials evidence. Each finally reset remains an operation with its own possible failure/partial-state outcome."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPolicyTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain independently verified signatures and explicit Always one-use limitation. Historical supplemental repeated-use evidence stays a separate method/record, not these assertions."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPukTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain real unblock/change/retry metadata assertions with finally reset; custom-limit case checks metadata rather than actual exhausted PUK enforcement."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain reset default-key/PIN metadata and 9A-only occupancy assertions. Test name ClearsAllSlots supplies no additional F9 or complete-slot coverage."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain refusal before competing SELECT and sequential borrowed PIV/Management/PIV serial checks. Known-member process guard is narrower than all hardware interfaces or cross-process PIN isolation."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSigningAlgorithmTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain independent host RSA/ECDSA verification and OAEP equality. Actual suite omits PSS and has4.3.5 fixture floors for metadata-dependent decrypt; no token/native acceptance follows."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSlotOverwriteTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain two algorithm-switch metadata checks and independent new-key signature verification. Key overwrite changes persistent state and does not establish certificate replacement."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs",
+        "decision": "RETAIN",
+        "reason": "Retain existing accurate source contract/context, or ineligible frozen configuration/snapshot. Retain request/resolution/key verification and slot-specific cleanup design. Three physical-lane methods across packet remain deferred; 30s token is explicitly cooperative and actual operator scope stays separate."
+      },
+      {
+        "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+        "decision": "EDIT",
+        "reason": "Apply the source-supported documentation facet only; see decisions.md and changed-files.json. Existing engineering/status gates remain. Reopen major-zero physically-at-least5.8 prose and order claims exceeding Contains assertions. Retain borrowed-failure disposal count, management-state/reset fallback and disposed no-I/O checks."
+      }
+    ]
+  }
+}

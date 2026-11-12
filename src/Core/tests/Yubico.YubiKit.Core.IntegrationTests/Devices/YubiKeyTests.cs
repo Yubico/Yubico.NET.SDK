@@ -17,8 +17,8 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
-/// Hot-plug behaviour against real hardware. These double as the reference examples for how a
-/// consumer waits for a YubiKey — no third-party dependency required.
+/// Basic discovery and change-stream checks against hardware. Addition can be satisfied by initial
+/// replay; removal requires a later published change. Attended identity tests exercise a full unplug/replug cycle.
 /// </summary>
 public class YubiKeyTests : IAsyncLifetime
 {
@@ -56,8 +56,8 @@ public class YubiKeyTests : IAsyncLifetime
     }
 
     /// <summary>
-    /// Waits for the next device event of a given kind. This is the canonical "insert your YubiKey"
-    /// pattern: begin the enumeration first, then prompt the user, and let the token bound the wait.
+    /// Waits up to thirty seconds for a record of the requested kind, including initial DeviceAdded replay.
+    /// To distinguish a later insertion, consume SnapshotComplete before waiting for a new addition.
     /// </summary>
     private static async Task<TChange> WaitForChangeAsync<TChange>() where TChange : DeviceChange
     {

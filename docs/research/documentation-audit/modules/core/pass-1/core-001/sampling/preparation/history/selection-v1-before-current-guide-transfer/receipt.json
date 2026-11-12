@@ -1,0 +1,68 @@
+{
+  "reason": "Final structural verification detected current-primary guide transfers after mapping capture; bound final ledgers/patch inputs remained unchanged. Preserve original proposed ID selection and mappings before read-only refresh.",
+  "candidate_population": 9352,
+  "proposed_selected": 983,
+  "files": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/selection.json",
+      "bytes": 1127828,
+      "sha256": "d92473cdafa9db0473c078c348ac2eaa20c05ab2f10ae554c3e2e82c2645a415"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/summary.json",
+      "bytes": 45577,
+      "sha256": "9b4bf23d09195097035e117e1ec96524b6b3b5b8e265fe7cd9e94c379414d008"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/history/selection-v1-before-current-guide-transfer/read-plan.md",
+      "bytes": 168593,
+      "sha256": "56cee1cad164b82e0e18c91cf72742078dea112af816b70c15cdd8be70936444"
+    }
+  ],
+  "population_record": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/population.json",
+  "population_sha256": "48442fdec87f94bf432608b9dd07d9004d8f117e558e3db668f7e346b9c2a75c",
+  "changed_primary_paths": [
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "recorded_sha256": "0dba03bde9f77cd59de9dc118f1ab621d0712439fb0e9ddd136492f3ffb97a60",
+      "current_sha256": "c4e33e77acd4e1727750a8d458a0a282f356757dc00e23094c1fe8c3897ce5dd"
+    },
+    {
+      "path": "docs/architecture/event-driven-device-discovery.md",
+      "recorded_sha256": "fb3e8538fa9a4bc5809cc71d552e1041a004d5d89e574280dd06bd87ce0c3643",
+      "current_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60"
+    },
+    {
+      "path": "docs/usage/device-discovery.md",
+      "recorded_sha256": "360a2a8be9ccdd6b5f30dc015c6ae9ef90c0ebee56842003e832c182436b6a7f",
+      "current_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "recorded_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+      "current_sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd"
+    },
+    {
+      "path": "CLAUDE.md",
+      "recorded_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+      "current_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "recorded_sha256": "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2",
+      "current_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1"
+    },
+    {
+      "path": "src/Core/README.md",
+      "recorded_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+      "current_sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "recorded_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+      "current_sha256": "7ecaf86bafda5516a810a34ac5b09b170bf774d487421b2d34c2ce2a2ba91fc1"
+    }
+  ],
+  "final_verification_attempt": "Initial verification failed current-source hash assertion. No sampling verdict or final denominator was issued.",
+  "next": "Recompute current line mappings against primary; preserve original IDs and immutable source ranges. Combined accepted-diff freeze remains pending."
+}

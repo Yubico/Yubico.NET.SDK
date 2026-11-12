@@ -1,0 +1,66 @@
+[
+  {
+    "path": "after/Core-README.md",
+    "sha256": "61fc9fa641b9a2bd7210a6837fb09194331d47b46326187b3feb2ab0b24c830e"
+  },
+  {
+    "path": "after/TESTING.md",
+    "sha256": "fe78686fa966a951ebd4134c3e9144cdecbd24ce2118378cb72b75d772a65339"
+  },
+  {
+    "path": "after/device-discovery.md",
+    "sha256": "fb4a7e2f3c6ebb50e404d2d9c41a3004e576b8956610054e3733d9e23e9d5d09"
+  },
+  {
+    "path": "before/Core-README.md",
+    "sha256": "bc9d8b0155fcdd813eea1111fe1ae4710814de654f3d3ed7d2dc46d9d0873e7c"
+  },
+  {
+    "path": "before/TESTING.md",
+    "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+  },
+  {
+    "path": "before/device-discovery.md",
+    "sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f"
+  },
+  {
+    "path": "before-identities.json",
+    "sha256": "09fd1e295230cd272ba60371b9e881d1307a58d60f122cbd9efb8b049385b424"
+  },
+  {
+    "path": "changed-path-sha256.json",
+    "sha256": "f98a9fd3b5b04683032e5040bc3b2af7d2cd99794262013da4c143800173e18e"
+  },
+  {
+    "path": "example-bodies.json",
+    "sha256": "971f1cccd1943d2bd9f5eae4f69cabba86bd65e60ea6d2d26f6fe198e6c2d64e"
+  },
+  {
+    "path": "preserved-record-identities.json",
+    "sha256": "e807d4fa24991bf3becceebb55a5e07ec45302bc96aa695c464f5da8c66b7955"
+  },
+  {
+    "path": "product-before-identities.json",
+    "sha256": "3534469d6dd41761a055e7a45887ac6649a8e5ff31abdaaf66b507f599ebf1e0"
+  },
+  {
+    "path": "product.patch",
+    "sha256": "2e5a12d5c057f999a67c46a89836b899f29615943b278ee09a1d120d4eda30f9"
+  },
+  {
+    "path": "report.md",
+    "sha256": "f4774bb2054f77631e1c5c558669d0ce80b38535669852cc4bc8cc80163c47fa"
+  },
+  {
+    "path": "source-evidence.json",
+    "sha256": "2351256c396ec5b1d7132816704ffa4a775a816224db7b4f32d5451bd9bef121"
+  },
+  {
+    "path": "sources/xunit-mtp.html",
+    "sha256": "1e494eb05263cc5318be134a321f9474aff7820ca200c2a3f4429dcd55bfafd8"
+  },
+  {
+    "path": "verification.json",
+    "sha256": "850f66fe73a1da7c7f7b96cd4ff3367ad032c6d7f8140f69c81d8a1a6ff804d9"
+  }
+]

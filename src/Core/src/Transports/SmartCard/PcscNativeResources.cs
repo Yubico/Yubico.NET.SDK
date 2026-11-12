@@ -115,7 +115,8 @@ internal sealed class PcscNativeResources
             uint result;
             try
             {
-                // Power the card off so card-wide security state cannot outlive this connection (see SmartCardSharing).
+                // Request power-off and check the returned status. This is native release evidence,
+                // not an observation of physical power or PIN-state clearing (see SmartCardSharing).
                 result = _api.Disconnect(cardHandle, SCARD_DISPOSITION.UNPOWER_CARD);
             }
             catch (Exception ex)

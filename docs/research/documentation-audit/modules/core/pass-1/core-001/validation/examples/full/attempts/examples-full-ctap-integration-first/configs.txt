@@ -1,0 +1,3 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig
+/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig
+/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig

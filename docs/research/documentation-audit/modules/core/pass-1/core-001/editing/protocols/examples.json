@@ -1,0 +1,31 @@
+{
+  "xml_code_bodies": [
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "version": "base",
+      "ordinal": 1,
+      "classification": "context-dependent documentation fragment",
+      "compilation": "NOT-RUN; coordinator compilation/token/API checks pending",
+      "runtime": "NOT-RUN; command validity/authorization is caller/profile-specific",
+      "body_sha256": "e6ddbe5698979b304ffafa8061e4d3433fc05ce18f9995d0bfe04eeef012a402",
+      "complete_body": "    // \u2705 Correct \u2014 caller zeroes the source buffer after transmission\n    var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));\n    await protocol.TransmitAndReceiveAsync(command, ct);\n    CryptographicOperations.ZeroMemory(pinnedPin); // zeroes the buffer command.Data referenced\n\n    // \u2705 Non-sensitive commands need no special handling\n    var command = new ApduCommand(0x00, InsSelect, 0x04, 0x00, appId);\n    var response = await protocol.TransmitAndReceiveAsync(command, ct);\n    "
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "version": "current",
+      "ordinal": 1,
+      "classification": "complete composable helper; borrowed open connection and applet-specific header/payload are explicit prerequisites",
+      "compilation": "NOT-RUN; coordinator compilation/token/API checks pending",
+      "runtime": "NOT-RUN; command validity/authorization is caller/profile-specific",
+      "body_sha256": "3e0457b3fedca0f971d59cfbff209e3cd61308f507e8b9283a066f79c5a201aa",
+      "complete_body": "    // The caller supplies an open connection, an applet-specific header, and owned payload bytes.\n    // This helper borrows the connection and consumes the payload, clearing it even if creation fails.\n    static async Task<short> SendAndClearAsync(\n        Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection connection,\n        byte cla, byte ins, byte p1, byte p2, byte[] payload, CancellationToken ct)\n    {\n        try\n        {\n            await using var session = await Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(connection, ct);\n            var command = new ApduCommand(cla, ins, p1, p2, payload);\n            var response = await session.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken: ct);\n            try\n            {\n                return response.SW; // Inspect status before clearing the response owner.\n            }\n            finally\n            {\n                response.Clear();\n            }\n        }\n        finally\n        {\n            System.Security.Cryptography.CryptographicOperations.ZeroMemory(payload);\n        }\n    }\n    "
+    }
+  ],
+  "removed_internal_prototype": {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+    "classification": "obsolete commented-out provider experiment fragment removed; complete original bytes retained in full-product.diff/base Git object",
+    "compilation": "NOT-RUN; never executable in source"
+  },
+  "other_primary_paths": "No other XML <code> bodies in either complete primary C# population; unchanged executable test bodies and runtime fixture strings are not documentation examples.",
+  "shared_and_prepared_examples": "B5/B6 prepared examples and shared-guide bodies remain unchanged, UNCOMPILED/context-dependent as recorded by their original owners; later guide owner must classify and compile complete bodies."
+}

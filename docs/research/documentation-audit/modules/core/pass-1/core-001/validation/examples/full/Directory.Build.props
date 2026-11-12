@@ -1,0 +1,8 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)../../../../../../../../../../Directory.Build.props" />
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/$(MSBuildProjectName)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

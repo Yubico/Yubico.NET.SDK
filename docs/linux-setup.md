@@ -18,6 +18,12 @@ Install the runtime packages for your distribution:
 The PC/SC package supplies or depends on the client library. The CCID package supports the YubiKey's USB
 reader interface; an external NFC reader may require its own driver.
 
+HID discovery also uses libudev. The current import requests the unversioned `libudev.so`, while some
+runtime-only installations provide only `libudev.so.1`. For example, Ubuntu noble's amd64 package lists
+place the unversioned name in `libudev-dev`, not `libudev1`. Verify the actual loader names in your
+deployment image; installing only the runtime package need not satisfy this SDK import. Do not treat
+an empty best-effort discovery result as proof that both HID and PC/SC loaded successfully.
+
 On systemd-based installations that provide `pcscd.socket`, enable on-demand startup:
 
 ```bash
@@ -39,7 +45,10 @@ References: [Yubico's Smart Card access guidance](https://github.com/Yubico/yubi
 
 ## udev Rules for HID Device Access
 
-On Linux, HID devices (`/dev/hidraw*`) are typically only accessible by root. To allow non-root users to access YubiKey HID interfaces, you need to install udev rules.
+Check your distribution's existing YubiKey/FIDO rules before adding local rules. Desktop session ACLs
+may already grant the active user access. Headless services need a policy for their service account;
+an active-desktop ACL is not a service-account permission grant. Scope access to the intended users
+instead of granting every local account read/write access.
 
 ### Why This Is Needed
 
@@ -51,17 +60,13 @@ Without proper udev rules, you'll see `EACCES (Permission denied)` errors when t
 
 ### Installing udev Rules
 
-Create a file `/etc/udev/rules.d/70-yubikey.rules` with the following content:
+If the distribution policy does not cover the required HID interface, an administrator can use a
+dedicated group. In this example `yubikey` must already exist, and only authorized user/service accounts
+should belong to it. Create `/etc/udev/rules.d/70-yubikey.rules`:
 
 ```udev
-# YubiKey HID devices - allow user access for OTP and FIDO interfaces
-# Vendor ID 1050 = Yubico
-
-# All YubiKey HID interfaces (OTP keyboard + FIDO)
-KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", MODE="0666"
-
-# USB device rules for non-HID access (smartcard, etc)
-SUBSYSTEM=="usb", ATTR{idVendor}=="1050", MODE="0666"
+# Scope Yubico hidraw access to authorized members of the local yubikey group.
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", MODE="0660", GROUP="yubikey"
 ```
 
 Then reload and trigger the rules:
@@ -84,22 +89,22 @@ for f in /dev/hidraw*; do
 done
 ```
 
-You should see permissions like `crw-rw-rw-` (mode 0666) for YubiKey devices.
+Check the node's group and effective ACL as the account that will run the application. This example
+expects group `yubikey` and mode `0660`; distribution/session ACLs can add further access. Metadata
+enumeration alone does not establish that the account can open or exchange reports.
 
-### Alternative: Using Groups
+### Granting account access
 
-For tighter security, you can grant access to a specific group instead of all users:
-
-```udev
-# Grant access to 'plugdev' group (user must be a member)
-KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", MODE="0660", GROUP="plugdev"
-```
-
-Add your user to the group:
+After the administrator creates the group, add the intended account:
 ```bash
-sudo usermod -aG plugdev $USER
+sudo usermod -aG yubikey "$USER"
 # Log out and back in for group membership to take effect
 ```
+
+For a service, configure its actual account/group membership and restart that service instead. Broad
+USB-device permissions are not required merely to use PC/SC: access goes through its client library,
+resource manager, and reader driver. Review those permissions separately. Avoid world-writable
+`MODE="0666"` rules as a general deployment recipe.
 
 ## Troubleshooting
 

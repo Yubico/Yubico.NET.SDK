@@ -1,0 +1,280 @@
+"""Last bounded handoff snapshot: records and byte identities only; no Git/SDK."""
+import hashlib
+import json
+import re
+from collections import Counter
+from pathlib import Path
+
+OUT = Path(__file__).resolve().parent
+FINAL = OUT.parent
+RUN = FINAL.parents[1]
+ROOT = RUN.parents[6]
+PIN = 'fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef'
+inputs = {}
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def read(path):
+    p = Path(path)
+    p = p if p.is_absolute() else RUN / p
+    raw = p.read_bytes()
+    inputs[str(p.relative_to(RUN)) if p.is_relative_to(RUN) else str(p)] = sha(raw)
+    return raw.decode('utf-8-sig')
+
+
+def load(path):
+    return json.loads(read(path))
+
+
+def save(name, value):
+    (OUT / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+
+
+snapshot = OUT / 'deferred-findings.reconciliation-3.md.snapshot'
+if not snapshot.exists():
+    snapshot.write_bytes((RUN / 'deferred-findings.md').read_bytes())
+prior_paths = sorted(p for p in (RUN / 'triage').rglob('*') if p.is_file() and not p.is_relative_to(OUT))
+prior_paths += [RUN / 'triage-preliminary.md', RUN / 'triage-full-family.md',
+                RUN / 'validation/closeout-review/preflight.md', RUN / 'validation/closeout-review/input-identities.json']
+prior = {str(p.relative_to(RUN)): sha(p.read_bytes()) for p in prior_paths}
+if (OUT / 'history-preservation.json').exists():
+    previous = json.loads((OUT / 'history-preservation.json').read_text())
+    assert previous['unchanged_prior_records'] == prior
+    assert previous['predecessor_handoff_sha256'] == sha(snapshot.read_bytes())
+else:
+    save('history-preservation.json', {'unchanged_prior_records': prior, 'predecessor_handoff': snapshot.name,
+        'predecessor_handoff_sha256': sha(snapshot.read_bytes()),
+        'rule': 'Prior source/editor/triage/preflight snapshots retain their historical states; only new additive records and the current handoff are writable.'})
+old = load('triage/final/candidate-reconciliation.json')
+inherited = load('triage/final/inherited-reconciliation.json')
+protected = load('triage/final/protected-dispositions.json')
+assert len(old['candidates']) == 185 and len(inherited['rows']) == 100
+assert len(inherited['groups_preserved']) == 70 and len(inherited['pgp_documentation_dependencies_preserved']) == 21
+assert protected['hsm_retry_message']['state'] == 'RETRACTED-NOT-AN-OPEN-BUG'
+current = load('editing/integration/current-products.json')
+products = {x['path']: x for x in current['product_files']}
+assert len(products) == len(current['product_files']) == 363
+current_hashes = {path: {'accepted_sha256': x['sha256'], 'current_sha256': sha((ROOT / path).read_bytes())}
+                  for path, x in products.items()}
+assert all(x['accepted_sha256'] == x['current_sha256'] for x in current_hashes.values())
+chain = {}
+receipts = {}
+for name in current['receipt_order']:
+    receipt = load('editing/integration/' + name)
+    receipts[name] = receipt
+    for row in receipt['product_files']:
+        if 'previous_sha256' in row and row['path'] in chain:
+            assert row['previous_sha256'] == chain[row['path']]['sha256'], ('transfer predecessor', name, row['path'])
+        chain[row['path']] = dict(row, accepted_receipt=name)
+assert set(chain) == set(products)
+assert all(chain[path]['sha256'] == row['sha256'] and chain[path]['accepted_receipt'] == row['accepted_receipt'] for path, row in products.items())
+five_names = ['accepted-closeout-WA.json', 'accepted-closeout-PGP.json', 'accepted-closeout-B2-receive.json',
+              'accepted-closeout-final-guides.json', 'accepted-closeout-architecture-map.json']
+five_paths = [row['path'] for name in five_names for row in receipts[name]['product_files']]
+assert len(five_paths) == len(set(five_paths)) == 9
+adjudication = read('triage/final/reconciliation-3/coordinator-adjudication.md')
+assert 'accept retain/referral decisions for eight surfaces' in adjudication
+assert receipts['accepted-closeout-architecture-map.json']['patch_sha256'] in adjudication
+map_review = read('editing/SHARED/architecture-map-closeout/review.md')
+assert 'PASS' in map_review
+save('transfers-and-PF02.json', {'source_baseline': PIN, 'current_products': current,
+    'current_raw_hash_checks': current_hashes, 'ordered_receipts': receipts,
+    'five_formerly_queued': {name: receipts[name] for name in five_names},
+    'five_patch_path_count': 9, 'five_patch_state': 'TRANSFERRED; exact accepted before/after chain retained',
+    'PF02': {'original_nine_disposition_records': '../reconciliation-3/pf02-dispositions.json',
+        'coordinator_adjudication': adjudication,
+        'architecture_independent_review': map_review,
+        'current_state': '9/9 ADJUDICATED: eight retain/referrals accepted; architecture five-symbol/prose correction independently PASS and actually transferred',
+        'architecture_receipt': 'editing/integration/accepted-closeout-architecture-map.json',
+        'limit': 'Current review accepts the specified metadata/prose disposition, not general native/runtime/profile or release validation.'}})
+
+wa_review_path = 'editing/FIDO-boundaries/compiler-logging-correction/review.md'
+root_review_path = 'editing/SHARED/compiler-logging-access/review.md'
+wa_review = read(wa_review_path)
+root_review = read(root_review_path)
+wa_patch = 'fb137a493fb4eac7b02b6592a9fc9d2abf74e1ef69d23f43015d7f76c5e4ad57'
+root_patch = 'b43c9a1da1416b45971f25e81b25bc46705158066e474d214e506f7909b452bd'
+assert wa_patch == receipts['accepted-WA-logging.json']['patch_sha256'] and wa_patch in wa_review
+assert root_patch == receipts['accepted-root-logging.json']['patch_sha256'] and root_patch in root_review
+retraction = read('sampling/coordinator/compiler-WA-logging-retraction.md')
+wa_expansion = read('sampling/coordinator/compiler-WA-expansion-verdicts.md')
+save('logging-body-retraction.json', {'sample': 'SAMPLE-WA-002 / FULL-032',
+    'original_unit': 'core-001:unit:4886f819fa316d28', 'path': 'src/WebAuthn/CLAUDE.md',
+    'original_supported_verdict': 'sampling/coordinator/read-boundary-WebAuthn-verdicts.md; preserved, superseded for this unit',
+    'coordinator_retraction': retraction, 'effective_credit': 0,
+    'source_evidence': 'Completed independent review: Core CreateLogger<T> is internal; Core friend lists omit WebAuthn and its integration tests. A CTAP2 reference supplies no transitive friendship.',
+    'WA_patch_sha256': wa_patch, 'WA_content_review': wa_review, 'WA_transfer_receipt': 'editing/integration/accepted-WA-logging.json',
+    'root_patch_sha256': root_patch, 'root_content_review': root_review, 'root_transfer_receipt': 'editing/integration/accepted-root-logging.json',
+    'before_body_sha256': '84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba',
+    'accepted_corrected_body_sha256': '692631d7b90528c64bbbe5d5b8b0f626bdfac9f49a1d3caab29414102fb6b860',
+    'state': 'Both documentation patches review PASS and TRANSFERRED; corrected WA body not yet compiled',
+    'runtime_API_IVT_change': False,
+    'candidate_links': ['CORE-C-C008', 'CORE-WA-X012'],
+    'limit': 'Genuine compiler-body accessibility error, not merely a wrapper defect; not an observed runtime logging failure or new unique Core implementation bug.',
+    'five_actual_WA_expansion_reads': wa_expansion})
+
+logical = load('sampling/final/compiler-WA-read-update/summary.json')
+transferred = load('sampling/final/transferred-state/summary.json')
+sampler_adjudication = load('sampling/final/transferred-state/adjudication.json')
+actual = load('sampling/final/transferred-state/actual-current-read-verdicts.json')
+assert len(actual) == len({x['id'] for x in actual}) == 1134
+assert logical['actual_unique_reads'] == transferred['actual_unique_reads'] == 1134
+assert logical['required_target_sum'] == transferred['required_target_sum'] == 1071
+assert logical['historical_broad_population'] == transferred['historical_broad_population'] == 9352
+assert logical['new_explicit_supported_readings'] == 5
+assert sum(bool(x['final_candidate_credit']) for x in actual) == 1071
+assert all(x['accepted_clean_credit'] is None for x in actual)
+logging_unit = next(x for x in actual if x['id'] == 'core-001:unit:4886f819fa316d28')
+assert logging_unit['final_candidate_credit'] == 0 and logging_unit['mandatory_retraction_overlay']
+assert transferred['verified_EOF_only_LF_removals'] == 239
+save('sampling-state.json', {'logical_summary': logical, 'transferred_identity_candidate': transferred,
+    'transferred_candidate_adjudication': sampler_adjudication, 'actual_read_verdicts': actual,
+    'current_status': '1134 actual distinct reads; logical/current candidate 1071 against conservative 9352 basis. Final clean count, denominator and sampler PASS not accepted.',
+    'identity_checkpoint_limit': 'Transferred-state candidate records a complete 363-path/239-EOF/logging refresh at its own capture. Two later EOF-only corrections are still review/transfer pending, so a last actual hash/range/quota acceptance remains pending.',
+    'remaining_refresh': ['verification/LinuxHidRouteVerification/Evidence.cs', 'verification/LinuxHidRouteVerification/OperatorScenarios.cs'],
+    'original_candidates_preserved': 185, 'new_reading_by_this_reconciliation': 0})
+
+
+def command_record(lane):
+    base = 'validation/commands-v2/' + lane
+    receipt = load(base + '/receipt.json')
+    stdout = read(base + '/stdout.log')
+    stderr = read(base + '/stderr.log')
+    return {'receipt': receipt, 'stdout_sha256': inputs[base + '/stdout.log'],
+            'stderr_sha256': inputs[base + '/stderr.log'], 'stdout_tail': stdout.splitlines()[-25:],
+            'stderr_tail': stderr.splitlines()[-16:]}
+
+
+contexts = []
+all_body_ids = []
+for path in sorted((RUN / 'validation/examples/full/attempts').glob('*/accepted-compilation.json')):
+    relative = str(path.relative_to(RUN))
+    accepted = load(relative)
+    command = load(accepted['command_receipt']['path'])
+    assert sha(Path(accepted['command_receipt']['path']).read_bytes()) == accepted['command_receipt']['sha256']
+    assert command['status'] == 'passed' and command['exit_code'] == 0
+    result_paths = list((RUN / 'validation/commands-v2' / path.parent.name / 'toolchain').glob('*/result.json'))
+    assert len(result_paths) == 1
+    result = load(result_paths[0])
+    assert result['status'] == 'passed' and result['warningCount'] == 0
+    body_ids = accepted['context']['body_ids']
+    all_body_ids += body_ids
+    contexts.append({'label': path.parent.name, 'accepted_record': relative, 'accepted_compilation': accepted,
+        'context': accepted['context']['name'], 'body_count': len(body_ids), 'body_ids': body_ids,
+        'original_command_receipt': command, 'toolchain_result': result,
+        'scope': 'Actual zero-warning compile checkpoint at retained profile/source/output identities; no DLL/example/test execution or final-tree simultaneous output equality implied.'})
+assert len(contexts) == 9 and len(all_body_ids) == len(set(all_body_ids)) == 298
+wa_failed = command_record('examples-full-webauthn-first')
+assert wa_failed['receipt']['status'] == 'failed' and wa_failed['receipt']['exit_code'] != 0
+assert 'CS1929' in '\n'.join(wa_failed['stdout_tail'])
+tokens = command_record('source-tokens-final-tree')
+apis = command_record('api-final-tree')
+docs_patch = command_record('docs-patch-final-first')
+assert tokens['receipt']['status'] == apis['receipt']['status'] == docs_patch['receipt']['status'] == 'passed'
+assert 'files=1320, failures=0' in '\n'.join(tokens['stdout_tail'])
+assert 'files=20, failures=0' in '\n'.join(apis['stdout_tail'])
+assert 'Ran 6 tests' in '\n'.join(docs_patch['stderr_tail']) and docs_patch['stderr_tail'][-1] == 'OK'
+save('compilation-and-checkpoints.json', {'accepted_context_count': 9, 'accepted_additional_body_count': 298,
+    'contexts': contexts, 'WA_failed_body_checkpoint': wa_failed,
+    'corrected_WA_body': {'state': 'REVIEW-PASS-TRANSFERRED; CURRENT BODY UNCOMPILED', 'body': 'FULL-032', 'retraction': 'logging-body-retraction.json'},
+    'OATH_context': {'state': 'NOT RUN', 'accepted_compilation': None},
+    'pilot': '17-body pilot remains accepted at its original retained profile/output checkpoint; no execution or fresh final-tree compiler credit.',
+    'latest_preservation': {'tokens1320': tokens, 'API20': apis,
+        'scope': 'PASS after 239 EOF removals and both logging transfers; pending two further EOF transfers need final identity impact reconciliation.'},
+    'docs_patch_six': docs_patch,
+    'failure_history': 'Original failed restore/generated-import/context/CS1929 attempts and original schemas/types remain at their paths; successful retained contexts supersede only the matching failed lane, never erase it.',
+    'full_final_compilation_or_validation_complete': False})
+
+full_fmt = command_record('format-final-source-check')
+folder_fmt = command_record('format-whitespace-final-tree')
+assert full_fmt['receipt']['status'] == folder_fmt['receipt']['status'] == 'failed'
+runtime = Path('/home/rupicola/Code/y/.core-docs-audit-runtime/core-001')
+full_report = load(runtime / 'format-final-source-check.json')
+folder_report = load(runtime / 'format-whitespace-final-tree.json')
+full_changes = [c for row in full_report for c in row['FileChanges']]
+folder_changes = [c for row in folder_report for c in row['FileChanges']]
+assert len(full_changes) == 249
+assert Counter(x['DiagnosticId'] for x in full_changes)['FINALNEWLINE'] == 239
+assert len(folder_changes) == 89
+assert Counter(x['DiagnosticId'] for x in folder_changes) == {'WHITESPACE': 73, 'FINALNEWLINE': 16}
+baseline = load('editing/format-final/baseline-findings.json')
+eof = load('editing/format-final/eof-identities.json')
+assert len(baseline['findings']) == 10 and eof['count'] == len(eof['files']) == 239
+assert len(receipts['accepted-format-EOF.json']['product_files']) == 239
+eof_rows = {x['path']: x for x in eof['files']}
+for row in receipts['accepted-format-EOF.json']['product_files']:
+    proof = eof_rows[row['path']]
+    assert proof['removed_hex'] == '0a' and proof['before_bytes'] == proof['after_bytes'] + 1 and proof['all_nontrailing_bytes_identical']
+    assert row['previous_sha256'] == proof['before_sha256'] and row['sha256'] == proof['after_sha256']
+    assert products[row['path']]['sha256'] == proof['after_sha256']
+fmt_review = read('editing/format-final/review.md')
+packaging_review = read('editing/format-final/packaging-review.md')
+assert 'PASS' in fmt_review and 'PASS' in packaging_review
+pending_eof = ['verification/LinuxHidRouteVerification/Evidence.cs', 'verification/LinuxHidRouteVerification/OperatorScenarios.cs']
+pending_rows = []
+for path in pending_eof:
+    rows = [x for x in folder_report if str(Path(x['FilePath']).relative_to(ROOT)) == path]
+    assert any(c['DiagnosticId'] == 'FINALNEWLINE' for x in rows for c in x['FileChanges'])
+    pending_rows.append({'path': path, 'current_accepted_sha256': products[path]['sha256'],
+        'formatter_records': rows, 'classification': 'Two introduced terminal LF corrections, per coordinator steering; independent review and transfer pending.',
+        'product_write_authorized_here': False})
+save('formatter-state.json', {'full_verify': {'command': full_fmt, 'diagnostic_records': 249,
+        '239_introduced_EOF': 'Independently reviewed and actually removed exactly one terminal LF each; accepted-format-EOF.json',
+        'ten_baseline_import_declaration': baseline, 'review': fmt_review, 'packaging_review': packaging_review},
+    'folder_whitespace': {'command': folder_fmt, 'requested_CSharp_paths': 310,
+        'diagnostic_count': 89, 'diagnostic_counts': dict(Counter(x['DiagnosticId'] for x in folder_changes)),
+        'coordinator_classification': {'baseline_code_whitespace_held': 73, 'existing_EOF_baseline_held': 14, 'introduced_EOF_review_pending': 2},
+        'classification_authority': 'Current user/coordinator steering plus retained actual formatter report. This ledger verifies report counts and pending paths, not a new source-pin formatter replay or semantic audit.',
+        'pending_two': pending_rows},
+    'policy': 'No blanket formatter-clean PASS. Explicit user preservation keeps code whitespace/import/declaration and existing EOF baselines held; no code/import/decl/policy changes or suppressions are authorized here.',
+    'membership_scope': 'Original full verify requested 310 includes but solution-scoped coverage retained its 294 static candidates / 16 unmatched qualification. Folder mode requested all 310; the failed output is not final clean acceptance.',
+    'final_formatter_clean': False, 'new_formatter_or_source_fix_execution': 0})
+
+prior_runtime = load('triage/final/reconciliation-2/sampling-findings.json')
+save('deferred-finding-continuity.json', {'original_count': 185,
+    'original_candidate_ids': sorted(old['candidates']), 'inherited_rows': 100, 'inherited_groups': 70, 'PGP_labels': 21,
+    'runtime_sample_sites_preserved': {k: prior_runtime['findings'][k] for k in ('SAMPLE-A004', 'PIV-pretry-known-qualification', 'OTP-expansion-pretry-qualification')},
+    'compiler_documentation_finding': {'sample': 'SAMPLE-WA-002 / FULL-032', 'record': 'logging-body-retraction.json',
+        'existing_candidate_facets': ['CORE-C-C008', 'CORE-WA-X012'], 'no_new_unique_Core_implementation_bug': True},
+    'PF02_state': '9/9 coordinator-adjudicated; architecture content PASS and transferred; final gate acceptance remains separate',
+    'protected_disposition_authority': '../protected-dispositions.json',
+    'qualification_authority': '../deferred-facets.json; predecessor handoff source/revision/actor conditions retained',
+    'limits': 'Missing deterministic certificate disposal is not permanent leakage or native failure. OTP/PIV pre-try sites retain caller-specific existing groups. HSM retry-message observation stays RETRACTED; OATH resolutions, PIVIMP-005/OpenPGP/HSM uncertainties and all physical/source/producer/Rust gaps remain.'})
+
+gates = {
+    'WA_corrected_body_context': {'status': 'UNCOMPILED', 'actual_result': None},
+    'OATH_context': {'status': 'NOT RUN', 'actual_result': None},
+    'two_additional_EOF_review_transfer': {'status': 'REVIEW/TRANSFER PENDING', 'actual_result': None},
+    'final_sampling_hash_range_quota_adjudication': {'status': 'PENDING AFTER LAST TWO EOF TRANSFERS; 1134/1071/9352 remain candidate/read/basis numbers', 'actual_result': None},
+    'ordinary_uninjected_clean_solution_build': {'status': 'NOT YET DONE; restore ordinary outputs before SDK tests', 'actual_result': None},
+    'final_tree_unit_lane': {'status': 'NOT YET DONE; old 4442/13/0/5 checkpoint remains historical', 'actual_result': None},
+    'final_docs_QA_architecture': {'status': 'NOT YET DONE; six docs-patch tests are a separate retained PASS', 'actual_result': None},
+    'docs_inclusive_pack': {'status': 'NOT YET DONE', 'actual_result': None},
+    'final_complexity': {'status': 'NOT YET DONE', 'actual_result': None},
+    'final_formatter_disposition': {'status': 'QUALIFIED/FAILED RECEIPTS; no blanket clean claim; baseline holds explicit', 'actual_result': None},
+    'final_preservation_record_admission_evidence_review': {'status': 'PENDING FINAL IDENTITIES/FREEZE', 'actual_result': None},
+    'publication_remote_identity_external_core_index': {'status': 'ASTRA AFTER FREEZE ONLY', 'actual_result': None},
+}
+save('closing-results-placeholders.json', {'state': 'UNFILLED CLOSING-RESULT PLACEHOLDERS; no finished claim',
+    'gates': gates, 'rule': 'Fill only through additive actual coordinator result/adjudication records at exact final identities, preserving these drafts and all failures. No invented PASS/counts.',
+    'stop': 'Finish Core Pass-1 publication plus deferred handoff, then stop. No Pass-2 plan/project or new implementation tests.'})
+for path, digest in prior.items():
+    assert sha((RUN / path).read_bytes()) == digest
+save('verification.json', {'status': 'PASS bounded records-only joins; final gates remain open',
+    'source_baseline': PIN, 'original_candidates': 185, 'inherited_rows': 100, 'inherited_groups': 70, 'PGP_labels': 21,
+    'current_product_paths': 363, 'current_raw_hash_matches': 363, 'former_queued_patch_count': 5,
+    'former_queued_path_count': 9, 'former_queue_current_state': 'TRANSFERRED', 'PF02_adjudicated_surfaces': 9,
+    'additional_logging_patches': 'WA fb137 and root b43 both content PASS and TRANSFERRED; WA corrected body uncompiled',
+    'actual_reads': 1134, 'logical_candidate_target': 1071, 'conservative_sampling_basis': 9352,
+    'final_sampler_PASS': None, 'accepted_compile_contexts': len(contexts), 'accepted_additional_bodies': len(all_body_ids),
+    'uncompiled_WA_bodies': 1, 'unrun_OATH_bodies': 1, 'introduced_EOF_removed': 239,
+    'baseline_formatter_conflicts_held': 10, 'folder_code_whitespace_held': 73, 'folder_existing_EOF_held': 14,
+    'folder_introduced_EOF_review_pending': 2, 'formatter_clean_claim': False,
+    'token_API_checkpoint': '1320/20 PASS after EOF/logging transfer, before pending final two EOF transfers',
+    'docs_patch_tests': '6 PASS, separate from final docs QA', 'prior_records_preserved_count': len(prior),
+    'predecessor_handoff_sha256': sha(snapshot.read_bytes()), 'input_hashes': inputs,
+    'new_product_Git_SDK_native_device_crypto_subagent_actions': 0, 'Core_Pass1_complete': False})
+print(json.dumps({k: v for k, v in json.loads((OUT / 'verification.json').read_text()).items() if k != 'input_hashes'}))

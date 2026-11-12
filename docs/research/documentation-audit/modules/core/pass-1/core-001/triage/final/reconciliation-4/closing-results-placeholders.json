@@ -1,0 +1,73 @@
+{
+  "state": "VERIFICATION COMPLETE; only fresh final review/freeze/publication acceptance remains pending",
+  "gates": {
+    "WA_corrected_body_context": {
+      "status": "ACTUAL PASS ZERO WARNINGS",
+      "actual_result": {
+        "path": "validation/examples/full/attempts/examples-full-webauthn-second/accepted-compilation.json",
+        "sha256": "14bb63b6209d76f081e611fc7ff7df1c3d621ae6408a05c5e66d7d0543605278"
+      }
+    },
+    "OATH_context": {
+      "status": "ACTUAL PASS ZERO WARNINGS",
+      "actual_result": {
+        "path": "validation/examples/full/attempts/examples-full-oath-first/accepted-compilation.json",
+        "sha256": "f86fdfc9dbcdc85c3ca0fa6c37b95016f5b04018f881265ca247d51031787c2f"
+      }
+    },
+    "two_additional_EOF_review_transfer": {
+      "status": "REVIEW PASS AND TRANSFERRED",
+      "actual_result": "editing/integration/accepted-format-external-EOF.json"
+    },
+    "final_sampling_hash_range_quota_adjudication": {
+      "status": "PASS SOURCE-CONTENT ONLY:1134 reads/1071 counted/63 withheld/9352 basis;94 roles/17 owners;241 LF removals/no eligibility loss",
+      "actual_result": {
+        "coordinator": "sampling/final/coordinator-acceptance.md",
+        "independent": "validation/closeout-review/sampling-final-review.md",
+        "seal_sha256": "9ac3da81963e9fdca7561afe8fa36145725f27c1f43ed4b3888e1b27300ce6f9"
+      }
+    },
+    "ordinary_uninjected_clean_solution_build": {
+      "status": "ACTUAL PASS 42-PROJECT RELEASE CLEAN BUILD; ZERO WARNINGS/ERRORS",
+      "actual_result": "validation/commands-v2/build-pack-final/receipt.json"
+    },
+    "normal_output_restoration": {
+      "status": "ACTUAL RECORDED PASS BEFORE SDK TESTS:10 DLL MARKERS ABSENT/10 POSITIVE CONTROLS PRESENT; CAPTURE OVERRIDES UNSET",
+      "actual_result": "validation/normal-output-restoration.md"
+    },
+    "final_tree_unit_lane": {
+      "status": "ACTUAL FINAL-TREE PASS:4442 executed/13 projects/5 skips/0 failures/0 warnings",
+      "actual_result": "validation/commands-v2/unit-tests-final-tree/receipt.json"
+    },
+    "final_docs_QA_architecture": {
+      "status": "ACTUAL PASS:74 active docs/10 package README/6 map/7 fresh images; zero warnings",
+      "actual_result": "validation/commands-v2/docs-complexity-final/receipt.json"
+    },
+    "docs_inclusive_pack": {
+      "status": "ACTUAL PASS:10 EXACT alpha.2 PACKAGES; README/DLL/XML/ARCHIVE VALIDATED AND EXTERNALLY PRESERVED;20 DIRECTORY TOTAL INCLUDES OLD10",
+      "actual_result": "validation/final-packages.md"
+    },
+    "final_complexity": {
+      "status": "ACTUAL PASS:211 files/63 methods/9 unchanged debt/0 new or worse; zero warnings",
+      "actual_result": "validation/commands-v2/docs-complexity-final/receipt.json"
+    },
+    "final_formatter_disposition": {
+      "status": "QUALIFIED/FAILED HISTORICAL RECEIPTS;241 introduced LF removals resolved;14 EOF/73 whitespace/10 import-name baseline holds; no blanket clean claim",
+      "actual_result": "triage/final/reconciliation-4/formatter-state.json"
+    },
+    "final_source_preservation_and_compiler_admission": {
+      "status": "ACTUAL PASS AT RECORDED SCOPES:1320 token/20 API;11 compiler contexts/300 additional unique preparations+17 pilot; final363 map",
+      "actual_result": "triage/final/reconciliation-4/compilation-and-checkpoints.json"
+    },
+    "final_preservation_record_admission_evidence_review": {
+      "status": "VERIFICATION COMPLETE; FRESH WHOLE-CAMPAIGN EVIDENCE REVIEW AND RECORD/STAGED-BYTE FREEZE PENDING",
+      "actual_result": null
+    },
+    "publication_remote_identity_external_core_index": {
+      "status": "ASTRA AFTER FREEZE ONLY",
+      "actual_result": null
+    }
+  },
+  "rule": "Fill only through additive actual coordinator result/adjudication records at exact final identities, preserving these drafts and all failures. No invented PASS/counts.",
+  "stop": "Finish Core Pass-1 publication plus deferred handoff, then stop. No Pass-2 plan/project or new implementation tests."
+}

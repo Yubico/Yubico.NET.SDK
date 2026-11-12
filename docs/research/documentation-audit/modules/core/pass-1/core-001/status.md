@@ -1,5 +1,83 @@
 # Core core-001 status
 
+## Release decision
+
+**Final evidence review PASS; accepted for freeze and publication.** See
+[release-readiness.md](release-readiness.md) and
+[the independent final review](validation/closeout-review/final-review.md).
+The coordinator's remaining work is record/staged-byte verification, commit/push and the external
+published handoff. Older pending-review statements below are preserved checkpoint history.
+
+## Latest verification closeout
+
+See [closeout.md](closeout.md) for the authoritative current gate summary. All 317 unique example
+preparations compiled, the final clean solution build and ten docs-inclusive packages passed, and the
+final hardware-free unit run passed 4,442 executions across 13 projects with five existing skips and zero
+warnings. Source sampling and final token/API/documentation/architecture/complexity checks are accepted
+at their recorded scopes. Formatting's explicit baseline qualifications remain, not a blanket clean claim.
+Fresh whole-campaign review, freeze, commit/push and external handoff publication remain pending.
+The older checkpoints below preserve the chronology and are superseded by this closeout summary.
+
+## Current checkpoint — final validation and sampling
+
+### Consumer retry and sample closeout progression
+
+`examples-full-consumer-fourth` is accepted: **244 consumer bodies compiled with zero warnings**,
+with exact source/compiler/output evidence and 26 preserved mutable files. Acceptance receipt SHA-256:
+`e044ba23cd4a0a55caa6cf0679716c6aba98c15f82adc292e05361bdf186c357`.
+The nine remaining compile-only test contexts are now running serially for 56 prepared bodies;
+execution stops on the first failed context. No example or injected test assembly is executed.
+
+The fourth full-consumer attempt is now running with independently accepted profile
+`3e40cb440ddd872de8bfba3ae3c0e45166ff5dbcb3a44aad890b968c97885228`. The third attempt's 21
+diagnostics were traced to generated contexts; its 11 prefix/signature corrections preserve all
+accepted bodies and 56 test preparations. All three earlier failed attempts remain retained. No
+full-consumer acceptance is implied until the actual compiler/capture/output checks return.
+
+The full consumer's second attempt passed the earlier restore blocker and reached Csc, then failed
+on invalid/duplicate imports in generated compilation contexts. Both attempts remain preserved under
+their original labels. The validation owner is tracing the complete diagnostic set and correcting
+wrapper inputs; accepted documentation bodies and executable product code remain unchanged. The
+fresh restore-fixed profile `54170dee…` and its independent review are retained as that attempt's inputs.
+
+Astra has now read all **983 original proposed selections**, including every boundary packet, and has
+begun recording the expansion/replacement reads. This is not 983 final clean credits: administrative,
+historical, unresolved-source and edited overlaps retain zero-credit dispositions. The exact PRF
+passage in WebAuthn Level3 §10.1.4 was read; its client requirement and the SDK's limitation remain
+distinct. The queued WebAuthn test-oracle patch remains outside primary during the compile reservation.
+An additional OpenPGP advisory-UIF logging qualification and a udev receive-frequency clarification
+are being handled as bounded isolated documentation corrections.
+
+The deferred handoff is being reconciled with all accepted editor batches and sampling observations.
+Source-only missing deterministic certificate disposal and known pre-try CLI secret cleanup remain
+engineering findings; no permanent-leak or new physical-failure claim is made.
+
+**Core Pass 1 remains active; publication is pending.** All main documentation batches have passed
+independent content/citation review and are integrated. The current accepted-product map contains
+361 paths, including reviewed sampling corrections. Original and successor patches/reviews remain
+preserved in `editing/`; `editing/integration/current-products.json` identifies the current bytes.
+
+- All eight Core families and nine boundary packets reconcile 14,044 source dispositions, with
+  historical/context and B4 API-snapshot qualifications retained.
+- The hardware-free unit run passed 4,442 executions across 13 projects, five existing skips and zero
+  warnings. Core's clean build, documentation QA and architecture checks have passed at their retained
+  integration checkpoints; later comment-only transfers still require the final combined checks.
+- The accepted A/C example pilot compiled 17 bodies with zero warnings and bound source/compiler/output
+  evidence. No example was executed. Remaining accepted examples are being prepared in the same pattern.
+- Astra has read the original A/B1/B2/B3 selections (517 units). Verdicts, misses and exclusions are in
+  `sampling/coordinator/`; expanded and remaining selections are still pending. Read counts are not final
+  clean-credit counts. The reviewed A/lifecycle and Linux wake/factory corrections are integrated; the
+  sampled IOKit seam description is receiving a bounded correction.
+- Three accepted toolchain-comment edits change recorded validator inputs. A fresh profile using the
+  existing binder/checker is being prepared, preserving prior source/output evidence. No new validation
+  framework or runtime implementation is authorized.
+
+Finish example compilation, the stratified sample, final combined validation/evidence reconciliation,
+then publish Core Pass 1 with its deferred-findings handoff and stop. Windows readiness remains a future
+user-provided handoff; PIV physical deferrals remain unchanged.
+
+## Preserved chronological phase history
+
 **Active: baseline inventory and inherited-finding preparation.** The user approved execution;
 the prerequisite upstream integration is complete and published as
 `fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef`. The actual audit checkout has been fast-forwarded to that
@@ -277,3 +355,206 @@ the primary source remains unchanged while boundary investigators finish.
 
 The user clarified the stopping point: finish and publish Core Pass 1 with its deferred-finding
 handoff, then stop. No separate Pass-2 planning or implementation work will start in this cycle.
+
+## Fresh Core editing active
+
+- Discovery/metadata/monitoring editor `ses_e32ceb84effev4y7oOf5POD6dm` owns packet-A primary Core
+  C# documentation in `/home/rupicola/Code/y/yubikit-core-docs-edit-discovery`.
+- Crypto/credentials/utilities editor `ses_e32ce437cffej5lyXcHVdxiKHc` owns packet-C primary Core
+  C# documentation in `/home/rupicola/Code/y/yubikit-core-docs-edit-crypto`.
+
+Both fresh editors start from record checkpoint `da66f5d…`, whose product source matches `fe342fb0`.
+Their file sets are disjoint; shared narratives, applet documentation and the primary checkout remain
+outside their edit scope. They preserve executable code/assertions/APIs and return exact patches and
+candidate dispositions for independent review before integration.
+
+OATH's boundary source pass completed all 239 assigned units and preserved its historical resolutions
+and SCP/device gaps. Security Domain is also source-complete. YubiOTP, WebAuthn and YubiHSM Auth
+(`ses_e32cdc859ffeM4vkgkPIAA3mPo`) are the active boundary investigations; OpenPGP and PIV remain queued.
+
+## WebAuthn and YubiOTP returns
+
+Editing-release checkpoint `da66f5d01ba594993974ddd26723e8c300c0a454` is pushed and its remote
+identity verified. The user reiterated the focus on completing Core Pass 1 and the existing stopping point.
+
+WebAuthn returned 265 assigned units, 12 provisional concerns and 31 inherited keys. The CTAP2 owner
+is reconciling its named WebAuthn dependency in an additive follow-up; that follow-up remains pending.
+YubiOTP returned 324 assigned units (269 clean, 55 candidate), nine local concerns and 62 disposition
+paths. Its report explicitly records the 61-primary-path discrepancy for final accounting.
+
+OpenPGP/Core is now assigned to `ses_e32c87b35ffeLssgQMT1XVzTJf`, owning only its boundary records.
+The other source assignments are YubiHSM Auth and CTAP2's bounded follow-up. PIV remains queued.
+The existing discovery and crypto editors continue in their isolated worktrees. These source returns
+do not complete independent content review, documentation editing or runtime qualification.
+
+## Final boundary dispatched; remaining Core C# editing active
+
+CTAP2's WebAuthn follow-up returned source-reconciled with qualifications. All its named B4/B6/
+WebAuthn source dependencies have dispositions; independent review and the preserved recovery,
+disclosure, runtime and future Windows-delta questions remain open.
+
+PIV, the final queued boundary, is assigned to `ses_e32c65dcfffewTznVh2rvAJz8v`. OpenPGP and
+YubiHSM Auth are the other active source investigators. PIV's physical deferrals remain in force.
+
+Two more isolated editors cover the remaining primary Core C# documentation: B1–B4 transports
+(`ses_e32c5d493ffe1DFjUNaIkhXiDe`) and B5–B6 protocols (`ses_e32c5867effeFBPTcF9rJ8dRnQ`). Their
+exact worktrees and ownership are recorded in `triage/editing-release.md`. Existing A/C editors
+continue their disjoint assignments. All edits require independent review and preservation checks.
+
+## Discovery edits returned; shared guide editing active
+
+The discovery editor returned 36 edited and 54 retained Core C# paths, covering all 21 candidates and
+three current example bodies. The uncommitted patch remains in its isolated worktree. Fresh reviewer
+`ses_e32c3943cffepFxv8SAczMQUSz` owns independent content/citation review; integration is pending.
+
+SHARED editor `ses_e32c2d340ffekCDq2zeCLqbxMJ` now owns the explicit active Core/shared Markdown scope
+in `/home/rupicola/Code/y/yubikit-core-docs-edit-guides`. It consumes source-supported family findings
+and completed editor/boundary recommendations. Other editors continue their disjoint C# work.
+
+## Crypto edits returned for review
+
+The C editor returned 54 edited and 50 retained primary C# paths, with all 20 candidates and 144
+candidate/path decisions recorded. Sixteen active XML examples/fragments and 22 historical exclusions
+have exact classifications. C019 remains held; C020 remains referred to B6/shared/applet ownership.
+
+Fresh reviewer `ses_e32c0b707ffeC4tyJpmukdKivj` owns the independent content/citation review in the
+crypto worktree. The SHARED editor received its completed guide recommendations. Both A and C edit
+batches remain uncommitted and unintegrated pending review and coordinator preservation checks.
+
+## HSM return and boundary editing release
+
+YubiHSM Auth returned all 160 units across 53 files: 79 clean, eight candidate and 73 context. Seven
+local concerns and 15 inherited keys retain their qualifications. The preliminary retry-message
+mismatch was retracted because helper and test agree; HSM-IMP-008 remains an applet/profile question.
+OpenPGP and PIV are the remaining source investigations.
+
+Fresh editors now own completed boundary documentation: Ctap2/WebAuthn
+(`ses_e32be5944ffefeOZlCfKBaj92v`) and Management/SD/OATH/OTP/HSM
+(`ses_e32bdec56ffeqNnv1B5IIoPmkT`). Exact isolated worktrees and path restrictions are in the editing
+release. Core/shared files stay with their existing owners.
+
+Discovery review requires two bounded corrections: remove unsupported one-scan convergence promises
+and narrow a retained topology-test comment to the SDK's null resolver. The editor is verifying and
+correcting those claims in a successor revision, preserving the first patch and review. The other
+34 edited paths and 12 candidate-associated retained paths received content acceptance at their hashes.
+
+Crypto review requires one documentation correction, C-REVIEW-001: qualify AES local-copy cleanup
+because CBC key/IV copies are allocated before entry to `try`. Astra verified both control flows;
+the editor is preparing a bounded successor revision. The allocation-failure runtime concern remains
+deferred. C019/C020 dispositions and the final BER/supplied-Q/AsnWriter qualifications were supported.
+
+## Corrected discovery and protocol reviews; OpenPGP return
+
+Discovery revision 2 contains a full 37-file transfer patch with the three R1/R2 comment corrections.
+Original editor/reviewer records and the other accepted hashes are preserved. Its focused re-review
+is underway with the original independent reviewer.
+
+The protocol editor returned 56 edited, 23 retained and 12 held C# paths. Fresh reviewer
+`ses_e32ba5167ffe5tH4IIvbI6idOa` owns its independent content/citation review. SHARED received the
+completed protocol recommendations.
+
+OpenPGP returned all 328 units and 93 paths with eight local proposals and preserved inherited
+engineering/documentation identities. Editor `ses_e32b9574dffeX8rKjOrBYJOEav` now owns its bounded
+documentation corrections in the explicitly recorded isolated worktree. PIV is the only remaining
+source investigation; its physical deferrals remain unchanged.
+
+## Discovery successor accepted
+
+Focused independent review passed discovery revision 2 at patch SHA-256
+`028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228`: all 37 edited files are
+content-accepted with no further corrections required. Astra verified that exact patch applies cleanly
+to the primary checkout and that primary `src/` still matches `fe342fb0`. Transfer waits for the last
+pinned PIV source read; final bound preservation, compiler/cref and example checks remain pending.
+
+Crypto revision 2 corrects the AES cleanup scope and preserves all other 103 product identities.
+Its original independent reviewer is checking the bounded successor; acceptance remains pending.
+
+External commentary editor `ses_e32b75d32ffe5qNAM7mKRvkLx9` now owns the remaining explicit shared
+CLI/test/verification/benchmark `.cs`/`.md` scope in an isolated worktree. Existing Core, applet and
+guide ownership is excluded. This completes editing assignment coverage for the known active surfaces;
+PIV documentation release still waits for its source return.
+
+## Accepted crypto successor and additional reviews
+
+Crypto revision 2 passed focused independent review at full-patch SHA-256
+`159a59af1d631f1199e60510f0f85319c3ff58230c168d2a842058096d7b2047`. Astra verified clean patch
+applicability to primary without modifying source. Discovery and crypto are ready for transfer after
+PIV's pinned read, followed by final compiler/preservation/example validation.
+
+The transport editor returned 62 edited, 135 retained and 16 held C# paths. Fresh reviewer
+`ses_e32b6d0d1ffeYESAuTlotgwEdA` owns its content/citation review. The FIDO boundary editor returned
+14 edited product files, 35 candidate decisions and 47 unchanged fenced bodies; reviewer
+`ses_e32b67871ffeRgyTkAh16dfOTm` owns that review. Their completed external/shared referrals were
+passed to the existing guide and external commentary owners.
+
+## All boundary source passes returned; first edits integrated
+
+PIV returned all 513 units across 121 files, six local proposals and preserved historical findings.
+All nine boundary source investigations and named CTAP/Management follow-ups have now returned.
+The PGP/PIV editor received the final PIV documentation scope; physical deferrals remain unchanged.
+
+Astra transferred the exact accepted discovery/crypto successor patches: 91 Core C# files and 48
+byte-preserved editor/review records. `editing/integration/accepted-A-C.json` records the transfer.
+Bound token verification passed all 1,320 C# files and all 20 API snapshots matched. The Core library,
+Core integration-test project and Core unit-test project then compiled cleanly with zero warnings.
+No test or device operation was executed by that build. Full examples and final combined validation
+remain pending later edits.
+
+Protocol review requires four bounded corrections (GP locators/variant roles, null-firmware test
+admission, selected-security-level conditions, and 64-byte agreement versus 80-byte KDF output).
+FIDO review requires correcting a PIN-peer validation overclaim and two token-acceptance comments.
+Their original editors are verifying/correcting these in successor revisions. Shared-guide review
+is active with `ses_e32b230ccffeC5HPEWU31O48Oy` and has received the relevant cross-owner limits.
+
+The existing coverage and triage owners are reconciling all final source returns and the deferred
+finding handoff. They preserve original IDs, retractions, qualified read depth and pending edit/review
+states; this is closeout accounting, not a separate implementation plan.
+
+Protocol revision 2 corrects all four review items in eight comment-only files, yielding a full
+57-file edit patch. Its original independent reviewer is performing focused re-review. Transport
+review found three bounded wording corrections (pre-open IOKit queries, Windows metadata fallback,
+and listener cleanup attempts); that editor is verifying and correcting them in a successor batch.
+
+## Core C# editing integrated; remaining document reviews
+
+All four Core C# batches have passed independent content/citation review and transferred byte-exactly:
+A 37, C 54, protocols 57 and transports 62 changed files, totaling **210 Core C# paths**. The accepted
+15-path FIDO boundary batch is also integrated. Each transfer retains original and successor reviews,
+patches and identities. Combined bound token/API checks and the next clean Core build are running.
+
+All 14,044 source IDs (9,020 Core / 5,024 external) have exact final dispositions, with zero missing,
+extra or overlapping IDs. This keeps qualified/context/history outcomes separate from clean sampling.
+YubiOTP's 61 selected paths / 62 dispositions discrepancy is resolved as an extra directive-only API
+snapshot with no additional semantic unit.
+
+Shared-guide review requires six bounded corrections, including outdated API examples, incremental
+group acquisition, PIN-peer validation limits, late logging-provider lifetime, CBOR-byte conditions
+and example classification. Its editor is preparing a successor. Five-applet review requires corrected
+GP citation ranges and two SD reset-attempt comments; its editor is likewise preparing a successor.
+OpenPGP/PIV edits are complete and under independent review with `ses_e32ad058dffe8hrStIBfAS5Y55`.
+
+The external editor is completing the explicitly assigned primary verification/benchmark commentary
+and reconciling comment-only referrals after its initial shared-ledger batch. Example compilation
+preparation now uses the accepted integrated batches; the original qualified checker/logger is reused.
+
+The combined Core edit checks passed: all 1,320 C# executable structures/imports/directives and all
+20 API snapshots match the source baseline. The clean build of Core and both Core test projects
+passed with zero warnings after all 210 Core C# documentation edits were integrated. This build
+executed no tests or device operations; final examples, remaining documentation and publication gates
+are still pending.
+
+## Final handoff draft and guide/example progression
+
+The final source-finding draft reconciles 185 original candidates (103 Core / 82 boundary), all
+14,044 unit IDs and 859 associated paths. It preserves inherited resolutions, retractions and
+qualifications, and remains explicitly pending final edit/review reconciliation and publication.
+
+Shared-guide revision 2 has corrected the six required items and is in focused independent review.
+OpenPGP/PIV review returned bounded reset/member-name/example-inventory and cleanup-scope corrections
+to their editor. PIV documentation example setup may be minimally moved inside its protective scope;
+any changed fenced body receives fresh identity and compilation classification.
+
+The accepted A/C example pilot is prepared (17 bodies in typed compile contexts); its narrow readiness
+review is active before coordinator compilation. The existing record checker's inability to read the
+registered B4/B6 authority schemas is a demonstrated final-freeze blocker. A bounded additive schema
+correction is being prepared separately; it changes no qualified checker/logger or example participant.

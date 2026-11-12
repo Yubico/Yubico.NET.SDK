@@ -1,0 +1,308 @@
+{
+  "rows": [
+    {
+      "key": "oath-pilot-and-fixes-wave-002:DEC-007",
+      "original_id": "DEC-007",
+      "dedup_group": "scp-effective-version",
+      "registry_status_unchanged": "policy-known-rationale-gap",
+      "registry_conclusion_unchanged": "OATH's effective 5.6.3 policy has pinned Python corroboration for 5.0.0 <= version < 5.6.3. Core's SCP03 5.3.0 and SCP11 5.7.2 gates are separate. Earliest physical support/workaround rationale remains bounded evidence debt.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "security-domain-001:SD-DEP-003",
+      "original_id": "SD-DEP-003",
+      "dedup_group": "scp-effective-version",
+      "registry_status_unchanged": "changed-source-review-pending",
+      "registry_conclusion_unchanged": "The current readiness completion boundary is centralized. SD's omitted reset configuration/explicit version was a local SD-IMP-005 question; compare reset callback arguments separately before calling options preserved.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "security-domain-001:SD-DEP-004",
+      "original_id": "SD-DEP-004",
+      "dedup_group": "shared-exchange-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "A direct factory borrows its connection; protocol exchange admission/drain is distinct from a whole multi-command workflow. APDU response copies and Le formatting need the SD GetData call-site trace.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-001",
+      "original_id": "OTP-DEP-001",
+      "dedup_group": "shared-exchange-ownership",
+      "registry_status_unchanged": "changed-source-review-pending",
+      "registry_conclusion_unchanged": "Owned Linux typed HID opens now transfer grouped claims before native acquisition. Current ApplicationSession owns protocol disposal and only convenience factories own hidden connections. Recheck YubiOTP selection/failure cleanup with these routes.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/yubiotp.md",
+        "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+        "source_run": "yubiotp-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-003",
+      "original_id": "OTP-DEP-003",
+      "dedup_group": "shared-exchange-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "SmartCard admitted exchange uses uncancellable constituent work. UserPresence fallback cannot reclaim a sensitive result after transfer if resolution throws; applet producer owns resolution-before-transfer and cleanup.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/yubiotp.md",
+        "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+        "source_run": "yubiotp-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-004",
+      "original_id": "OTP-DEP-004",
+      "dedup_group": "scp-effective-version",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Feature admits major-zero development firmware; applet raw status, metadata and effective override remain separate. Initial OTP protocol indexes report bytes before returning status; exact route invariants require review.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/yubiotp.md",
+        "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+        "source_run": "yubiotp-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-001",
+      "original_id": "HSM-DEP-001",
+      "dedup_group": "scp-effective-version",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Core Feature major-zero acceptance explains a compatibility query, not raw applet/metadata identity. Recheck HSM SELECT fallback, override and reset version retention locally.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/yubihsm.md",
+        "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+        "source_run": "yubihsm-001"
+      },
+      "boundary_outcome": "Completed actual HSM SELECT/override/major-zero/reset retention trace; source mechanism answered. Documentation clarification/independent review and old-firmware/NFC/OS qualification remain separate. X001/X004; preserve metadata/raw/display distinctions.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-002",
+      "original_id": "HSM-DEP-002",
+      "dedup_group": "shared-exchange-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Connection/prompt borrowing and admitted native drain need the CALCULATE path. Historical 6982/Failed plus fresh-session recovery is measured outcome, not proof of native cancellation or timeout causality.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/yubihsm.md",
+        "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+        "source_run": "yubihsm-001"
+      },
+      "boundary_outcome": "Completed owned/borrowed creation/disposal, uncancellable admitted exchange, LIST/prompt/CALCULATE/result resolution and whole-workflow gaps. Historical6982/Failed plus fresh recovery retained without native-interruption/timeout cause. X001/X003; no whole-method lease or physical closure.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-003",
+      "original_id": "HSM-DEP-003",
+      "dedup_group": "apdu-tlv-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "ApduResponse is a sealed copied owner with Clear invalidating its views. Tlv and serialized intermediates have independent storage/lifetimes; HSM ZeroApduResponse and SessionKeys copies need full reachable-path tracing.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/yubihsm.md",
+        "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+        "source_run": "yubihsm-001"
+      },
+      "boundary_outcome": "Completed caller/TLV/request/formatter/native-result/APDU/fragment/decrypted/result-copy graph. Current helper reaches actual response array; lower copies remain independent. X002 and B6/C aliases; no end-to-end erasure closure.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-002",
+      "original_id": "PGP-CORE-002",
+      "dedup_group": "shared-exchange-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Core async session disposal dispatches DisposeAsyncCore then derived Dispose(bool) in finally; connection ownership remains borrowed unless transferred. OpenPGP KDF cache alias/disposal and SCP applicability need separate applet verification.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/openpgp.md",
+        "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+        "source_run": "openpgp-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-003",
+      "original_id": "PGP-CORE-003",
+      "dedup_group": "scp-effective-version",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Keep raw 0.0.1, device metadata 5.8 beta and effective override distinct; Feature major-zero bypass is a host compatibility policy, not physical-firmware proof.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/openpgp.md",
+        "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+        "source_run": "openpgp-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-004",
+      "original_id": "PGP-CORE-004",
+      "dedup_group": "shared-exchange-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Exchange serialization and session disposal do not alone prove whole PIN/key/reset workflow atomicity. Preserve 6600/Failed and fresh-session recovery without native-interruption claims.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/openpgp.md",
+        "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+        "source_run": "openpgp-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "piv-001:PIVCORE-002",
+      "original_id": "PIVCORE-002",
+      "dedup_group": "shared-exchange-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Check multi-APDU authentication/recovery/reset overlap beyond individual protocol exchange guards. The session has no in-flight operation admission lease; disposal may race a larger workflow between exchanges.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/piv.md",
+        "ledger": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-closeout.md",
+        "source_run": "piv-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "piv-001:PIVCORE-003",
+      "original_id": "PIVCORE-003",
+      "dedup_group": "apdu-tlv-ownership",
+      "registry_status_unchanged": "source-mapped-review-pending",
+      "registry_conclusion_unchanged": "Owned response Clear and Tlv disposal remain separate from borrowed connection and caller-transferred crypto result lifetimes. Check PIV copy/clear/transfer paths before expanding cleanup claims.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/piv.md",
+        "ledger": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-closeout.md",
+        "source_run": "piv-001"
+      },
+      "boundary_outcome": "Shared mechanism comparison only: HSM actual call sites are traced in analysis.md; applet-specific version/reset/key/cache/workflow/native behavior retains its own boundary owner. No cross-applet closure or new bug count.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-008",
+      "original_id": "HSM-IMP-008",
+      "dedup_group": "hsm-supplied-cryptogram-shape",
+      "registry_status_unchanged": "still-candidate-applet-profile",
+      "registry_conclusion_unchanged": "Historical valid supplied cryptogram yielded 56 bytes while SessionKeys.Parse expected 48. Core AES/CMAC/derivation helpers may inform the oracle, while response-region layout/version and key/receipt API remain HSM applet/profile questions. Omission-only three-key equality leaves this mismatch open.",
+      "authority": {
+        "handoff": "docs/research/documentation-audit/yubihsm.md",
+        "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+        "source_run": "yubihsm-001"
+      },
+      "boundary_outcome": "Still applet/profile parser candidate; strict48 versus supplied-cryptogram56 failure retained. Raw regions, firmware range, result/receipt contract and live HSM/connector remain open. No duplicate Core cryptographic defect. X005.",
+      "implementation": "NO-CHANGE",
+      "documentation": "COORDINATOR-TRIAGE-AND-FRESH-REVIEW-PENDING",
+      "qualification": "NO-NEW-EXECUTION"
+    }
+  ],
+  "groups": [
+    "apdu-tlv-ownership",
+    "hsm-supplied-cryptogram-shape",
+    "scp-effective-version",
+    "shared-exchange-ownership"
+  ],
+  "registry_sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+  "module_engineering_aliases": [
+    {
+      "key": "yubihsm-001:HSM-IMP-001",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "GET_CHALLENGE still uses backend general APDU errors; nine other paths use typed retry translation. Desired consistency remains a decision. X006."
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-002",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "Sample acquisition/second-allocation/early-exit cleanup gaps remain. SessionKeys and final response clearing have separate actual owners; lower pipeline copies are not erased by final-owner clear. X002/X007."
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-003",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "LIST still skips short recognized records, uses permissive UTF-8 decode and preserves unknown algorithm/touch metadata. Parser/raw-preservation policy remains deferred. X006."
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-004",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "Interactive calculation still lists all algorithms, always calls symmetric CALCULATE and configures no presence prompt. X007."
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-005",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "Visible/argv strings and generated/session key output remain diagnostic product-policy choices. Current warning retained; no input/output changes authorized. X007."
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-006",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "Actual assertion/CTS/secret-input/persistent-state scopes retained; byte/prompt oracles are fake-backed. Asymmetric retry-message assertion matches source; an investigator misreading was corrected and supplies no new finding. X007."
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-007",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "HSM CALCULATE performs no generic Core EC point validation. Context widths and public-key response width checks are narrower than profile/trust validation. Challenge returns unchecked shape. X005/X006."
+    },
+    {
+      "key": "yubihsm-001:HSM-IMP-008",
+      "state": "DEFERRED-PASS-2-UNCHANGED",
+      "outcome": "Supplied cryptogram 56-versus-48 parser remains applet/profile uncertainty; raw regions/firmware/result grammar/live HSM authentication are open. X005; no duplicate Core crypto finding."
+    }
+  ]
+}

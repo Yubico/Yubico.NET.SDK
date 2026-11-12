@@ -1,0 +1,299 @@
+{
+  "pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "contexts": [
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "diagnostic_id": "IMPORTS",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Piv;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Piv;"
+      ],
+      "context_start_line": 1,
+      "current_context": [
+        "// Copyright 2024 Yubico AB",
+        "//",
+        "// Licensed under the Apache License, Version 2.0 (the \"License\").",
+        "// You may not use this file except in compliance with the License."
+      ],
+      "pinned_context_same_line_range": [
+        "// Copyright 2024 Yubico AB",
+        "//",
+        "// Licensed under the Apache License, Version 2.0 (the \"License\").",
+        "// You may not use this file except in compliance with the License."
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "diagnostic_id": "IDE1006",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;"
+      ],
+      "context_start_line": 16,
+      "current_context": [
+        "",
+        "namespace Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;",
+        "",
+        "internal enum kern_return_t",
+        "{",
+        "    KERN_SUCCESS = 0,",
+        "    KERN_INVALID_ADDRESS = 1,"
+      ],
+      "pinned_context_same_line_range": [
+        "",
+        "namespace Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;",
+        "",
+        "internal enum kern_return_t",
+        "{",
+        "    KERN_SUCCESS = 0,",
+        "    KERN_INVALID_ADDRESS = 1,"
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "diagnostic_id": "IDE1006",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Core.Native.Linux.Udev;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Core.Native.Linux.Udev;"
+      ],
+      "context_start_line": 186,
+      "current_context": [
+        "    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]",
+        "    public static partial IntPtr udev_device_get_parent(IntPtr deviceObject);",
+        "",
+        "    public static IntPtr udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject) =>",
+        "        udev_device_get_parent(deviceObject.DangerousGetHandle());",
+        "",
+        "    // Get the path from the device."
+      ],
+      "pinned_context_same_line_range": [
+        "    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]",
+        "    public static partial IntPtr udev_device_get_parent(IntPtr deviceObject);",
+        "",
+        "    public static IntPtr udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject) =>",
+        "        udev_device_get_parent(deviceObject.DangerousGetHandle());",
+        "",
+        "    // Get the path from the device."
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "diagnostic_id": "IDE1006",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Core.Native.Linux.Udev;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Core.Native.Linux.Udev;"
+      ],
+      "context_start_line": 208,
+      "current_context": [
+        "    public static partial IntPtr udev_device_get_syspath(IntPtr deviceObject);",
+        "",
+        "    // This overload is for refcounted udev devices.",
+        "    public static IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject) =>",
+        "        udev_device_get_syspath(deviceObject.DangerousGetHandle());",
+        "",
+        "    // Gets a string specifying what the latest action was: \"add\", \"remove\","
+      ],
+      "pinned_context_same_line_range": [
+        "    public static partial IntPtr udev_device_get_syspath(IntPtr deviceObject);",
+        "",
+        "    // This overload is for refcounted udev devices.",
+        "    public static IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject) =>",
+        "        udev_device_get_syspath(deviceObject.DangerousGetHandle());",
+        "",
+        "    // Gets a string specifying what the latest action was: \"add\", \"remove\","
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "diagnostic_id": "IDE0005",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Core.Devices;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Core.Devices;"
+      ],
+      "context_start_line": 12,
+      "current_context": [
+        "// See the License for the specific language governing permissions and",
+        "// limitations under the License.",
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "",
+        "namespace Yubico.YubiKit.Core.Devices;",
+        ""
+      ],
+      "pinned_context_same_line_range": [
+        "// See the License for the specific language governing permissions and",
+        "// limitations under the License.",
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "",
+        "namespace Yubico.YubiKit.Core.Devices;",
+        ""
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "diagnostic_id": "IDE0005",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;"
+      ],
+      "context_start_line": 16,
+      "current_context": [
+        "using System.Diagnostics;",
+        "using System.Globalization;",
+        "using System.Runtime.InteropServices;",
+        "using Yubico.YubiKit.Core.Native;",
+        "using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;",
+        "using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;",
+        ""
+      ],
+      "pinned_context_same_line_range": [
+        "using System.Diagnostics;",
+        "using System.Globalization;",
+        "using System.Runtime.InteropServices;",
+        "using Yubico.YubiKit.Core.Native;",
+        "using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;",
+        "using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;",
+        ""
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "diagnostic_id": "IDE0005",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Core.UnitTests.Devices;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Core.UnitTests.Devices;"
+      ],
+      "context_start_line": 14,
+      "current_context": [
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.UnitTests.Infrastructure;",
+        "",
+        "namespace Yubico.YubiKit.Core.UnitTests.Devices;",
+        ""
+      ],
+      "pinned_context_same_line_range": [
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.UnitTests.Infrastructure;",
+        "",
+        "namespace Yubico.YubiKit.Core.UnitTests.Devices;",
+        ""
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "diagnostic_id": "IDE0005",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Core.UnitTests.Protocols;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Core.UnitTests.Protocols;"
+      ],
+      "context_start_line": 12,
+      "current_context": [
+        "// See the License for the specific language governing permissions and",
+        "// limitations under the License.",
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Protocols.Otp.Hid;"
+      ],
+      "pinned_context_same_line_range": [
+        "// See the License for the specific language governing permissions and",
+        "// limitations under the License.",
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Protocols.Otp.Hid;"
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "diagnostic_id": "IDE0005",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.Piv;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.Piv;"
+      ],
+      "context_start_line": 14,
+      "current_context": [
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "pinned_context_same_line_range": [
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "site_at_same_line_exact": true
+    },
+    {
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "diagnostic_id": "IDE0005",
+      "namespace_current": [
+        "namespace Yubico.YubiKit.OpenPgp;"
+      ],
+      "namespace_at_pin": [
+        "namespace Yubico.YubiKit.OpenPgp;"
+      ],
+      "context_start_line": 14,
+      "current_context": [
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "pinned_context_same_line_range": [
+        "",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "site_at_same_line_exact": true
+    }
+  ]
+}

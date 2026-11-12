@@ -1,0 +1,129 @@
+{
+  "result": "PASS",
+  "completed": {
+    "total": 14044,
+    "scope": {
+      "external": 5024,
+      "Core": 9020
+    },
+    "scope_by_assignment": {
+      "primary": {
+        "external": 3402,
+        "Core": 8939
+      },
+      "shared": {
+        "external": 1622,
+        "Core": 81
+      }
+    },
+    "primary_shared": {
+      "primary": {
+        "read-candidate-context": 1173,
+        "read-clean": 8943,
+        "read-candidate": 1561,
+        "read-context": 487,
+        "read-related-context": 90,
+        "read-related-candidate-context": 80,
+        "read-historical-exclusion": 3,
+        "read-exclusion": 3,
+        "read-source-qualified": 1
+      },
+      "shared": {
+        "read-candidate": 263,
+        "read-clean": 820,
+        "read-related-context": 366,
+        "read-historical-qualified": 158,
+        "read-candidate-context": 85,
+        "read-historical-context": 6,
+        "read-exclusion": 5
+      }
+    },
+    "dispositions": {
+      "read-candidate-context": 1258,
+      "read-clean": 9763,
+      "read-candidate": 1824,
+      "read-related-context": 456,
+      "read-context": 487,
+      "read-historical-qualified": 158,
+      "read-related-candidate-context": 80,
+      "read-historical-context": 6,
+      "read-historical-exclusion": 3,
+      "read-exclusion": 8,
+      "read-source-qualified": 1
+    },
+    "category": {
+      "narrative-section-with-complete-examples": {
+        "read-candidate-context": 111,
+        "read-clean": 470,
+        "read-candidate": 189,
+        "read-historical-qualified": 158,
+        "read-context": 12,
+        "read-related-context": 139,
+        "read-historical-context": 6,
+        "read-exclusion": 4
+      },
+      "member-contract-and-implementation": {
+        "read-clean": 7342,
+        "read-candidate": 1303,
+        "read-related-context": 132,
+        "read-candidate-context": 829,
+        "read-context": 350,
+        "read-related-candidate-context": 44,
+        "read-source-qualified": 1
+      },
+      "type-contract": {
+        "read-clean": 798,
+        "read-candidate": 103,
+        "read-candidate-context": 94,
+        "read-related-context": 37,
+        "read-context": 93,
+        "read-related-candidate-context": 3
+      },
+      "source-context-and-explanations": {
+        "read-candidate-context": 178,
+        "read-clean": 650,
+        "read-related-context": 102,
+        "read-candidate": 119,
+        "read-context": 18,
+        "read-related-candidate-context": 33,
+        "read-historical-exclusion": 3,
+        "read-exclusion": 1
+      },
+      "enum-value": {
+        "read-clean": 429,
+        "read-candidate-context": 41,
+        "read-candidate": 88,
+        "read-related-context": 2
+      },
+      "derived-diagram": {
+        "read-clean": 7
+      },
+      "whole-source-context-parser-limit": {
+        "read-candidate": 2
+      },
+      "configuration-data-or-support-contract": {
+        "read-clean": 60,
+        "read-context": 14,
+        "read-candidate": 13,
+        "read-related-context": 10,
+        "read-exclusion": 2
+      },
+      "structured-map-entry": {
+        "read-related-context": 34,
+        "read-candidate": 7,
+        "read-candidate-context": 5,
+        "read-clean": 7,
+        "read-exclusion": 1
+      }
+    }
+  },
+  "remaining": {
+    "total": 0,
+    "scope": {},
+    "scope_by_assignment": {},
+    "primary_shared": {},
+    "dispositions": {},
+    "category": {}
+  },
+  "current_source_paths_checked": 1511
+}

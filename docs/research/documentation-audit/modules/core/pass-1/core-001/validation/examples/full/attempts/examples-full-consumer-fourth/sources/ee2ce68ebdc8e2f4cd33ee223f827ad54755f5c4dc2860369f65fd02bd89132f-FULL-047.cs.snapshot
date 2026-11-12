@@ -1,0 +1,53 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cbor;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.CredentialManagement;
+using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.Ctap2.Pin;
+using Yubico.YubiKit.WebAuthn;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+
+namespace Audit20261111.DocExamples.Full;
+internal static class Body47
+{
+internal static WebAuthnClient CompileOnly(ICtap2Session ctap2Session, WebAuthnOrigin origin)
+{
+return // After
+new WebAuthnClient(
+    ctap2Session,
+    origin,
+    new WebAuthnClientOptions
+    {
+        RpIdValidator = (requestOrigin, rpId) =>
+            requestOrigin.StringValue == "https://example.com" && rpId == "example.com"
+    });
+}
+
+}

@@ -1,0 +1,234 @@
+{
+  "qualification_root": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first",
+  "files": [
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/immutable-receipt.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/immutable-receipt.json",
+      "bytes": 32,
+      "sha256": "87c313f2da801b95c285a872249c60360a4695aef188c9c77783dcc7c2f02543"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/injected-fsync-receipt.json.partial-3336133",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/injected-fsync-receipt.json.partial-3336133",
+      "bytes": 46,
+      "sha256": "ede7d3d1767e458fe2e77f3bbf9c12f46eb7c57c16de45e4e4a057d21c63373d"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/nonzero.stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/nonzero.stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/nonzero.stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/nonzero.stdout.log",
+      "bytes": 341,
+      "sha256": "b22513e87ccf0e0eac0aeb53412cce52be4723275bb573b1dcc5123c376f8f27"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/orphan.stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/orphan.stderr.log",
+      "bytes": 14,
+      "sha256": "3025edbb0f8eed1690aa1bbe911f59fbfa8705c117f10ff81b620f1db8b83b5b"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/orphan.stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/orphan.stdout.log",
+      "bytes": 365,
+      "sha256": "e6aa386ab167b52d6046a77f1509c8f088f0bcd8ce0b85f952ccc24a7627d7f2"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/qualification.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/qualification.json",
+      "bytes": 2232,
+      "sha256": "8d12e538ed587cdbb4d63f767f4d5b8dcb97bf8f21c85f83e65cd881748b37ac"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/receipt.stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/receipt.stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/receipt.stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/receipt.stdout.log",
+      "bytes": 341,
+      "sha256": "c23e81004dfee05796b43fe8672b1f98bd4b51f354137e4db6e03569bc8786f6"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/nonzero/final.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/nonzero/final.json",
+      "bytes": 3397,
+      "sha256": "e68c0b791cad942ef015b5f6856c76586243b95a9067cd61395762b2588f85d5"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/nonzero/spawn.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/nonzero/spawn.json",
+      "bytes": 106,
+      "sha256": "b3daf462738135fb9b2cb8dd1e4c99c9c1a5a37faf2d1d4a387b107b8f236f69"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/nonzero/started.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/nonzero/started.json",
+      "bytes": 2324,
+      "sha256": "77dc6a799fd44736006f946e1fef0d670fe51ce36c589fcc6383061043c898af"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/orphan/final.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/orphan/final.json",
+      "bytes": 4375,
+      "sha256": "c8b397b8093170416b595d0542f69e4cd34026ee9962fae641923e5e72ddbd86"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/orphan/spawn.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/orphan/spawn.json",
+      "bytes": 106,
+      "sha256": "92ed8430afc5e91d8d16953e7c23b077bcc1990ffb16c22e4ca0ffa62f8c57b9"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/orphan/started.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/orphan/started.json",
+      "bytes": 2541,
+      "sha256": "04d5adfbdbbe43e54e408fd782cf7b13ff6eabc8980a655baa1a5b7fe94cf3fd"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/receipt/final.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/receipt/final.json",
+      "bytes": 3478,
+      "sha256": "0b9f83bb67e7332be04c0df5b063a2d2169ecc9b8484812a3f5bf1c90a486de5"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/receipt/spawn.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/receipt/spawn.json",
+      "bytes": 106,
+      "sha256": "a6559a7289d0f72458774a05d3896cde17e09c6bf5ddf3494dc3bd0319ccf259"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/receipt/started.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/receipt/started.json",
+      "bytes": 2341,
+      "sha256": "4070d75d4c790d0e22a478057db331588bd3886a0b12cfc09cf113869d9af397"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/retention/final.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/retention/final.json",
+      "bytes": 3477,
+      "sha256": "c04ac01a2eef2d759f3b4b50705e3b6bf9c6c425447ca26cac8999bf65ab5f32"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/retention/spawn.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/retention/spawn.json",
+      "bytes": 106,
+      "sha256": "600ab956d55b5e2f5e9a05bcd1ee95a1980f6e112adc01945f720a1cf2aeb0f6"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/journals/retention/started.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/journals/retention/started.json",
+      "bytes": 2347,
+      "sha256": "31eae24093ca70b80cde28254d1f599189e6aaf2a666854b67228597c76119ec"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/nonzero/invocation.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/nonzero/invocation.json",
+      "bytes": 2324,
+      "sha256": "77dc6a799fd44736006f946e1fef0d670fe51ce36c589fcc6383061043c898af"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/nonzero/receipt.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/nonzero/receipt.json",
+      "bytes": 3397,
+      "sha256": "e68c0b791cad942ef015b5f6856c76586243b95a9067cd61395762b2588f85d5"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/nonzero/stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/nonzero/stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/nonzero/stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/nonzero/stdout.log",
+      "bytes": 13,
+      "sha256": "706e77e9d3a867b7ffb87aee2ee301e5f392e6e6c24b27f71e3a107d06dfe39b"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/orphan/invocation.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/orphan/invocation.json",
+      "bytes": 2541,
+      "sha256": "04d5adfbdbbe43e54e408fd782cf7b13ff6eabc8980a655baa1a5b7fe94cf3fd"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/orphan/receipt.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/orphan/receipt.json",
+      "bytes": 4375,
+      "sha256": "c8b397b8093170416b595d0542f69e4cd34026ee9962fae641923e5e72ddbd86"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/orphan/stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/orphan/stderr.log",
+      "bytes": 14,
+      "sha256": "3025edbb0f8eed1690aa1bbe911f59fbfa8705c117f10ff81b620f1db8b83b5b"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/orphan/stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/orphan/stdout.log",
+      "bytes": 39,
+      "sha256": "91539b3966dabf318ea469d6cb61d384b9a5995e0c269f6f8dbd9c5d0e09733c"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/receipt/invocation.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/receipt/invocation.json",
+      "bytes": 2341,
+      "sha256": "4070d75d4c790d0e22a478057db331588bd3886a0b12cfc09cf113869d9af397"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/receipt/stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/receipt/stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/receipt/stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/receipt/stdout.log",
+      "bytes": 13,
+      "sha256": "706e77e9d3a867b7ffb87aee2ee301e5f392e6e6c24b27f71e3a107d06dfe39b"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/retention/invocation.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/retention/invocation.json",
+      "bytes": 2347,
+      "sha256": "31eae24093ca70b80cde28254d1f599189e6aaf2a666854b67228597c76119ec"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/retention/receipt.json",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/retention/receipt.json",
+      "bytes": 3477,
+      "sha256": "c04ac01a2eef2d759f3b4b50705e3b6bf9c6c425447ca26cac8999bf65ab5f32"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/retention/stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/retention/stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/records/retention/stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/records/retention/stdout.log",
+      "bytes": 13,
+      "sha256": "706e77e9d3a867b7ffb87aee2ee301e5f392e6e6c24b27f71e3a107d06dfe39b"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/retention.stderr.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/retention.stderr.log",
+      "bytes": 13,
+      "sha256": "866a5c36801c723fcd1f155ceb343ad743f764bfec926e1440be5814a6b91ea0"
+    },
+    {
+      "original": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/qualification/logger-v2-core-foundation-first/retention.stdout.log",
+      "retained": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/logger-qualification-first/retained/retention.stdout.log",
+      "bytes": 345,
+      "sha256": "3b6144168180af1c0ddfc4cc1418debbe23059fd7cb55a3e659f88496b6a14be"
+    }
+  ],
+  "scope": "Disposable Python process/I/O and historical parser qualification only; no new SDK test execution"
+}

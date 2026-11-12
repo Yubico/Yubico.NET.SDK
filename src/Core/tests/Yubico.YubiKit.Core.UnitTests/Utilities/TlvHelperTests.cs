@@ -95,7 +95,7 @@ public class TlvHelperTests
     {
         // Arrange: Tag 0x5A, length 0x80 (indefinite - unsupported), no content
         var input = new byte[] { 0x5A, 0x80 };
-        // Act + Assert: slicing should fail due to insufficient data
+        // The parser explicitly rejects indefinite length before value slicing; this assertion accepts any exception.
         Assert.ThrowsAny<Exception>(() => ParseDataOrThrow(input));
     }
 
@@ -111,7 +111,7 @@ public class TlvHelperTests
     [Fact]
     public void Create_WithNonMinimalLongFormLength_ParsesSuccessfully()
     {
-        // Arrange: Tag 0x5A, length 0x81 0x7F (127, but should be short-form)
+        // Arrange: Tag 0x5A, length 0x81 0x7F (127 in redundant long form, permitted by BER).
         var value = new byte[127];
         for (var i = 0; i < value.Length; i++) value[i] = (byte)i;
         var input = new byte[3 + value.Length];

@@ -1,0 +1,280 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "central_registry_changed": false,
+  "registry_sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+  "rows": [
+    {
+      "key": "fixes-wave-001:CORE-001",
+      "group": "discovery-abandonment",
+      "original_state": "changed-unresolved-physical",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/runs/fixes-wave-001/discovery-blocker.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "fixes-wave-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/runs/fixes-wave-001/discovery-blocker.md",
+        "start_line": null,
+        "end_line": null,
+        "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+      },
+      "boundary_outcome": "Changed architecture; original serial 9681620 two-key abandoned HID read remains unexplained. OATH factory uses SmartCard but default sample/fixture discovery uses All. A/B1/B2/B4 own cause/native-release qualification; no closure.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:IMP-004",
+      "group": "base32-failure-cleanup",
+      "original_state": "resolved-source-for-exact-scope",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/implementation-followups.md",
+        "start_line": 82,
+        "end_line": 91,
+        "text": "## IMP-004 — Clear decoded secret arrays on parsing failure\n\n- **Source:** OATH-002-F03.\n- **State:** closed within the identified paths by upstream correction plus `8503fe2d`, integrated in `eba72a81`. New shared decoder tests observe actual destination clearing on failures, including a sensitivity RED. Private abandoned array/ParseUri storage is supported by delegation/finally inspection rather than direct storage observation.\n- **Proposed owner:** OATH credential/parser maintainer.\n- **Observation:** URI parsing decodes before later algorithm/integer/period validation; exceptions leave the decoded array without explicit cleanup. Base32 can also throw after partially writing its result.\n- **Resolution in source:** non-secret validation runs before decoding; decoded temporary output is cleared after cloning into the object; partial output is cleared when SDK/OathTool/Cli.Commands decoding throws.\n- **Verification:** meaningful partial-output clearing regressions and unchanged-overlap-admission checks passed; separate decoder admission and failure-cleanup ownership is documented. No claim that private abandoned URI arrays were directly observed.\n- **Documentation:** current cleanup descriptions match source. This status distinguishes code correction from observed failure-buffer cleanup; it does not imply callers can dispose an instance that parsing never returned.\n"
+      },
+      "boundary_outcome": "Resolved source exact parser/Core decode path: nonsecret checks precede decode, failure clears admitted disjoint destination, temporary finally clears after clone. Actual destination observers differ from source-only private abandoned-URI-array cleanup.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:IMP-005",
+      "group": "base32-shape",
+      "original_state": "resolved-source-for-exact-scope",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/implementation-followups.md",
+        "start_line": 92,
+        "end_line": 101,
+        "text": "## IMP-005 — Validate Base32 encoding shape in all decoder paths\n\n- **Source:** OATH-002-F05.\n- **State:** closed in `8503fe2d` / `eba72a81`; shared Core decoder validates terminal shapes across all three callers, with explicit overlap/cleanup contracts and independent re-review. Permissive unused pad bits are preserved.\n- **Proposed owner:** OATH and OathTool parser maintainer.\n- **Observation:** SDK, OathTool, and `src/Cli.Commands/src/Oath/OathHelpers.cs` decoders omit terminal-quantum validation; input `A` reaches an empty decoded result, and subsequent SDK padding can produce an all-zero processed key. This is a source-derived path, not a hardware observation. Upstream cleanup changes do not reject this input.\n- **Needed work:** reject invalid encoding shapes consistently across all three paths; decide optional canonical pad-bit rejection separately from invalid-length rejection. Avoid separate fixes drifting between SDK and CLI decoders.\n- **Verification:** exact RFC vectors, padded/unpadded cases, impossible terminal lengths, embedded invalid characters, and failure cleanup coordinated with IMP-004.\n- **Documentation dependency:** Base32 support/conformance statements and URI examples. The narrow claim about accepting literal spaces is corrected in the docs batch without blessing malformed input.\n"
+      },
+      "boundary_outcome": "Resolved source exact shared Base32 length/padding/three-caller delegation; permissive pad bits preserved. OATH rejects decoded empty; generic decoder accepts empty. No broader canonical-decoder policy reopened.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:IMP-010",
+      "group": "oath-terminal-reset",
+      "original_state": "resolved-source-physical-gap",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/implementation-followups.md",
+        "start_line": 160,
+        "end_line": 169,
+        "text": "## IMP-010 — Handle reset's post-command refresh failure\n\n- **Source:** OATH-003-F07.\n- **State:** closed by the user-approved terminal-reset contract in `d74cdd44`, integrated in `57e0fa4d`. Successful RESET ends plain/SCP sessions without SELECT or recovery; caller closes/reopens. Required caller/helper migrations and documentation passed fresh independent reviews. Live plain-channel terminal reset passed on125; live SCP remains unverified because initialization returns6A88 beforeRESET.\n- **Proposed owner:** OATH session maintainer.\n- **Observation:** destructive RESET can succeed before a separate SELECT is cancelled or fails, leaving device data erased while session salt/identity/state remain stale.\n- **Needed work:** decide session invalidation/recovery and error reporting after refresh failure. Investigate reset under SCP from primary/vendor/device evidence; another SDK's re-establishment is a lead, not proof of failure here.\n- **Verification:** cancellation between exchanges, SELECT failure/malformed initialization after reset, subsequent session use, and supported secure-channel reset behavior.\n- **Documentation dependency:** reset failure is not rollback; a short factual partial-success note is permissible now. Re-review reset/session recovery guidance and CLI failure output after implementation.\n"
+      },
+      "boundary_outcome": "Resolved source terminal success both plain/SCP: await disposal; owned closes/borrowed remains caller-owned; fresh close/reopen required. Actual fake state observers support cleanup. Serial1256A88 never reached EXAUTH/RESET; live SCP qualification remains open.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:DEC-001",
+      "group": "oath-auth-failure-state",
+      "original_state": "needs-decision",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/implementation-followups.md",
+        "start_line": 48,
+        "end_line": 60,
+        "text": "## DEC-001 — Authentication-failure provenance and session state\n\n- **Source:** OATH-001-F08 / E2.\n- **State:** provenance correction implemented in `d74cdd44` / `57e0fa4d`, with documentation reconciliation in `76a8ae52`. Device-HMAC mismatch is `BadResponseException`; device-reported rejection retains status and neutral wording. Broader post-verification-failure session policy remains deferred; this is not a complete closure of DEC-001.\n- **Priority:** consequential error-contract accuracy.\n- **Proposed owner:** SDK maintainer with protocol/firmware evidence.\n- **Locations:** `OathFailureReason.WrongPassword`, `OathException.GetMessage`, `OathSession.ValidateAsync`.\n- **Observation:** device-HMAC mismatch and status words `0x6984`/`0x6A80` map to an error asserting the user's password is incorrect. The published VALIDATE table describes those status words as authentication not enabled and wrong syntax. Source/test inspection alone does not establish actual mappings across firmware.\n- **Decisions:** distinguish confirmed user-key rejection, failed device authentication, and malformed/protocol responses; decide session usability after failed device verification.\n- **Needed evidence:** authoritative vendor clarification or applicable firmware observations, existing rationale if any, and targeted failure-path tests. Do not treat fakes encoding the current assumption as independent firmware proof.\n- **Documentation dependency:** the existing narrow WrongPassword explanation remains an open release-documentation issue. After deciding behavior, update exception documentation/messages, authentication method contracts, examples, and relevant migration guidance together.\n- **Scope boundary:** the audit has not established that the current behavior is a deliberate deviation or that changing the mapping alone is sufficient.\n"
+      },
+      "boundary_outcome": "Host mismatch/missing response provenance corrected to BadResponse; device6984/6A80 retains neutral WrongPassword raw status. Broader post-verification-failure session-usability policy remains open; Core secure-wire recovery latch is separate.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:DEC-002",
+      "group": "oath-raw-access-key",
+      "original_state": "needs-decision",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/implementation-followups.md",
+        "start_line": 61,
+        "end_line": 71,
+        "text": "## DEC-002 — Accepted raw access-key contract\n\n- **Source:** OATH-001-F01 / E1.\n- **State:** unresolved public-contract question; decision deferred to pilot closeout.\n- **Priority:** ordinary API precision.\n- **Proposed owner:** SDK maintainer.\n- **Locations:** `IOathSession.ValidateAsync` and `SetKeyAsync`.\n- **Observation:** implementation checks only nonempty keys, while the normal password workflow derives a 16-byte key. Lack of a length check does not prove broad device support.\n- **Decision:** whether the public contract promises only standard password-derived keys or intentionally supports a broader raw-key interface, and under which device constraints.\n- **Documentation dependency:** the current docs batch can explain the normal DeriveKey workflow and ownership now. Avoid unsupported arbitrary-length promises or new input restrictions. Re-review these members after the decision.\n"
+      },
+      "boundary_outcome": "Nonempty raw-key admission still differs from standard PBKDF2 16-byte workflow. No arbitrary-size device support claimed and no new restriction authorized. Preserve this source-run key, unrelated to CTAP native-selected-user decision.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:DEC-007",
+      "group": "scp-effective-version",
+      "original_state": "policy-known-rationale-gap",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/implementation-followups.md",
+        "start_line": 228,
+        "end_line": 239,
+        "text": "## DEC-007 — Establish OATH secure-channel gate provenance\n\n- **Source:** OATH-004-F12.\n- **State:** actual source gate confirmed; hardware/policy rationale unresolved; deferred to closeout.\n- **Proposed owner:** SDK maintainer with vendor/firmware input.\n- **Observation:** OATH enforces effective firmware5.6.3 for any SCP parameters. Core gates SCP03at5.3.0 and SCP11at5.7.2. Published vendor material gives generic5.3.0 SCP03 support without explaining an OATH-specific5.6.3 floor.\n- **Evidence:** [technical manual](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html), [legacy SDK SCP guide](https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/secure-channel-protocol.html), OathSession/ScpInitializer source. Legacy example syntax is not v2 API authority.\n- **Decision:** hardware minimum, workaround, or inherited SDK policy; define supported compatibility before changing the gate. Do not lower it based on generic support prose alone.\n- **Documentation dependency:** distinguish device requirements from SDK/effective-version gates now; update factory/version guidance if the policy later changes. Remove unnecessary NEO physical-firmware shorthand rather than inventing a supported NEO contract.\n\n**New direction/evidence:** The user authorizes Python sibling-SDK firmware checks as the policy reference. At local revision `4ca60f706af930459138d8dc0f0f953480e1c7a4`, `yubikit/oath.py:279–282` rejects SCP for `5.0.0 <= version < 5.6.3`, and rename requires5.3.1 at438. This establishes the reference policy for supported YubiKey5 devices. The shallow clone does not establish historical hardware rationale, and this policy is not proof of earliest physical support. Implementation review will preserve the distinction and Core's separate SCP gates.\n"
+      },
+      "boundary_outcome": "Effective OATH5.6.3 any-SCP gate confirmed, Core5.3.0/5.7.2 separate; major-zero optimistic policy/override observed. Python4ca60f7 and floor-introduction1b87964 support source policy, not hardware rationale/earliest support.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "security-domain-001:SD-DEP-003",
+      "group": "scp-effective-version",
+      "original_state": "changed-source-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "start_line": 52,
+        "end_line": 52,
+        "text": "| SD-DEP-003 | ApplicationSession/Feature effective firmware/configuration after reset; local omitted arguments and explicit-version flag | Feature/reset/version contracts, SD-IMP-005 |"
+      },
+      "boundary_outcome": "OATH terminal reset retains no parameters/options and reopens explicitly; SD reinitialization-argument issue is a different local policy. Dedicated SD boundary retains complete disposition, no OATH-based closure.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-004",
+      "group": "scp-effective-version",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/yubiotp.md",
+        "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+        "source_run": "yubiotp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "start_line": 63,
+        "end_line": 63,
+        "text": "| OTP-DEP-004 / D004 | FirmwareVersion alpha/beta/override, HID status normalization and raw/effective mismatch | Firmware/status/presence docs and IMP004/006 |"
+      },
+      "boundary_outcome": "OATH SmartCard selected/raw/effective trace supplies comparison only. OTP HID status normalization/provenance remains YubiOTP/B5 ownership; no OATH HID branch or cross-applet policy acceptance.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-001",
+      "group": "scp-effective-version",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/yubihsm.md",
+        "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+        "source_run": "yubihsm-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "start_line": 55,
+        "end_line": 55,
+        "text": "| HSM-DEP-001 | ApplicationSession/Feature/FirmwareVersion effective development/override semantics versus metadata filtering and applet SELECT | Feature table/XML, reset version policy, old-firmware and development qualification |"
+      },
+      "boundary_outcome": "OATH selected version requires three bytes even with override; HSM fallback/reset retention remain HSM boundary. Shared Feature compatibility policy applies, but no HSM caller review credit.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-003",
+      "group": "scp-effective-version",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/openpgp.md",
+        "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+        "source_run": "openpgp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "start_line": 90,
+        "end_line": 90,
+        "text": "| PGP-CORE-003 | Effective firmware/development/override policy, raw applet 0.0.1 versus metadata5.8beta and protocol framing (C010/C021). | Firmware constants/factory/requirements and old-family qualifications |"
+      },
+      "boundary_outcome": "OATH contributes exact selected/raw versus override/effective gate trace only. OpenPGP raw0.0.1/metadata/KDF/factory behavior stays its dedicated boundary; no secondary credit or closure.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "audit-v2-20261022-20261031:multi-key-exclusions",
+      "group": "discovery-abandonment",
+      "original_state": "changed-unresolved-physical",
+      "original_authority": {
+        "source_run": "audit-v2-20261022-20261031",
+        "handoff": "docs/research/audit-v2-close-out.md",
+        "ledger": "docs/research/audit-v2-execution.md",
+        "review": "docs/research/audit-v2-execution.md"
+      },
+      "original_definition": {
+        "path": "docs/research/audit-v2-execution.md",
+        "start_line": null,
+        "end_line": null,
+        "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+      },
+      "boundary_outcome": "Retain separate historical provenance in same nonadditive discovery group. All/SmartCard-scope distinction changes which probes run, not diagnosis of old excluded125/9681620.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    },
+    {
+      "key": "oath-pilot-and-fixes-wave-002:DOC-002",
+      "group": "migration-yaml",
+      "original_state": "reproducible-record-check",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/oath.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/oath.md",
+        "start_line": 46,
+        "end_line": 46,
+        "text": "- Migration YAML issue `DOC-002` remains outside the completed OATH correction scope."
+      },
+      "boundary_outcome": "Inherited/B4 read-only YAML ScannerError274:488 remains preexisting shared-map issue; no new parser execution or YAML edit. OATH migration fragments have separate resource/prerequisite handoff X006.",
+      "implementation": "scoped recommendation; authority unchanged",
+      "independent_review": "PENDING",
+      "new_execution": false
+    }
+  ]
+}

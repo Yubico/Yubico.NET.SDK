@@ -1,0 +1,61 @@
+{
+  "revision": 2,
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "predecessor_full_patch_sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+  "successor_full_patch_sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+  "successor_full_patch_bytes": 98254,
+  "focused_delta_sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2",
+  "source_paths_changed_since_review": [
+    "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+    "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+    "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+    "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs"
+  ],
+  "eligible_path_count": 213,
+  "dispositions": {
+    "EDIT": 62,
+    "RETAIN": 135,
+    "HOLD": 16
+  },
+  "all_16_hold_objects_unchanged": true,
+  "all_209_other_source_files_byte_unchanged": true,
+  "example_bodies_unchanged": true,
+  "four_file_xml_syntax": "PASS",
+  "old_editor_and_review_records_byte_exact": true,
+  "compiler_runtime_native_device_crypto_tests": "NOT-RUN",
+  "independent_review": "PENDING-FOCUSED-SUCCESSOR-REVIEW",
+  "final_fresh_reconciliation": {
+    "result": "PASS",
+    "errors": [],
+    "eligible_paths": 213,
+    "source_paths_changed_since_review": [
+      "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+      "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs"
+    ],
+    "other_source_paths_byte_unchanged": 209,
+    "all_16_hold_decision_objects_unchanged": true,
+    "proposal_updates": [
+      "FPT-042",
+      "FPT-049",
+      "FPT-051"
+    ],
+    "other_proposals_unchanged": 33,
+    "original_records_byte_exact": 10,
+    "unchanged_xml_example_bodies": 3,
+    "four_file_xml_blocks_well_formed": 21,
+    "noncomment_lines_equal_to_reviewed_and_base": true,
+    "comment_only_changed_hunks": true,
+    "git_diff_check": "PASS; fresh command exit 0",
+    "full_patch_reverse_apply_check": "PASS; fresh read-only command exit 0",
+    "focused_delta_reverse_apply_check": "PASS; fresh read-only command exit 0",
+    "cached_diff_empty": true,
+    "head_unchanged": "da66f5d01ba594993974ddd26723e8c300c0a454",
+    "index_bytes_unchanged_during_fresh_verification": true,
+    "successor_full_patch_sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+    "focused_delta_sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2",
+    "limits": "Static source/text/hash/XML/JSON/Git inspection only. No compiler/analyzer/SDK test, native, device or SDK crypto execution; focused independent content acceptance pending."
+  }
+}

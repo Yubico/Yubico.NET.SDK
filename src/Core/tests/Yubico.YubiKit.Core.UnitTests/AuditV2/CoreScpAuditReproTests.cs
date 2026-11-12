@@ -30,8 +30,8 @@ namespace Yubico.YubiKit.Core.UnitTests.AuditV2;
 public class CoreScpAuditReproTests
 {
     /// <summary>
-    ///     Data lengths 1..5 make <c>msgLength = data.Length - 8 + 2</c> negative, which reaches
-    ///     <c>stackalloc</c> and terminates the process. Runs in a child process.
+    ///     Guards against the former negative-stack-length failure for response lengths 1..5. The child
+    ///     asserts typed rejection; the parent checks normal exit and its success marker.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1631")]
@@ -61,8 +61,8 @@ public class CoreScpAuditReproTests
     }
 
     /// <summary>
-    ///     Data lengths 6 and 7 do not crash, but are reported as a cryptography-provider problem
-    ///     (NotSupportedException "does not support AESCMAC") instead of a bad device response.
+    ///     Checks that response lengths 6 and 7 are rejected as BadResponseException, rather than the
+    ///     former cryptography-provider error classification.
     /// </summary>
     [Theory]
     [Trait("Audit", "YESDK-1631")]
@@ -121,7 +121,9 @@ public class CoreScpAuditReproTests
     // --- N2 (no Jira key): SCP initialization and response parsing must fail with BadResponseException ---
 
     /// <summary>
-    ///     GP Amd D §7.1.1.3: INITIALIZE UPDATE returns 10 + 3 + 8 + 8 = 29 bytes. Anything shorter is malformed.
+    ///     Checks rejection below the implementation's 29-byte INITIALIZE UPDATE minimum prefix. SCP03 1.1.2
+    ///     Public Release (March 2019), §7.1.1.6/Table 7-3 lists 10 + 3 + 8 + 8 mandatory bytes plus a three-byte
+    ///     sequence counter for pseudo-random challenge generation; 29 is not a universal exact response size.
     /// </summary>
     [Theory]
     [Trait("Audit", "N2")]
@@ -138,7 +140,8 @@ public class CoreScpAuditReproTests
     }
 
     /// <summary>
-    ///     GP Amd F §7.1.3: the SCP11 authenticate response is ePK.SD.ECKA (5F49) followed by the receipt (86).
+    ///     Checks the SCP11b response's first two tags: ePK.SD.ECKA (5F49), then receipt (86), as listed in
+    ///     SCP11 1.3.0.13 Public Review (August 2023), §7.7.3.1/Table 7-22. These cases do not exercise a/c setup.
     /// </summary>
     [Theory]
     [Trait("Audit", "N2")]

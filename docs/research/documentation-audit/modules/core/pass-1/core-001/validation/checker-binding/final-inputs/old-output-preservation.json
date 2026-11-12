@@ -1,0 +1,556 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "old_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/reviewed-inputs-third.json",
+    "bytes": 72330,
+    "sha256": "ceea8be4c6681c15c51f4611de9546c35f1428f3a6d44de893a434fdab7cd2f1"
+  },
+  "old_seal": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker-binding/attempts/checker-bound-build-third/sealed.json",
+    "bytes": 150350,
+    "sha256": "4618133ddeccbc07b1b8ab583611775bd29e8f93b97a806c98b146d8ba1e3101"
+  },
+  "scope": "Only original DocCheck mutable local outputs, references and generated compiler inputs; framework/SDK/NuGet caches and reconstructible source corpus are excluded.",
+  "files": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Microsoft.CodeAnalysis.CSharp.dll",
+        "bytes": 19761448,
+        "sha256": "a64522b3578106b2c426df3b4e80e03523a4b97dda4b05151be24a22ad88f308"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/000-Microsoft.CodeAnalysis.CSharp.dll",
+        "bytes": 19761448,
+        "sha256": "a64522b3578106b2c426df3b4e80e03523a4b97dda4b05151be24a22ad88f308"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Microsoft.CodeAnalysis.dll",
+        "bytes": 8467752,
+        "sha256": "d650a8c8f2555bbe0b344740d1470911c9e352556847807029fbbe68613c5686"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/001-Microsoft.CodeAnalysis.dll",
+        "bytes": 8467752,
+        "sha256": "d650a8c8f2555bbe0b344740d1470911c9e352556847807029fbbe68613c5686"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck",
+        "bytes": 78192,
+        "sha256": "fbbb2b63b552285ff501115f810a93b7612ae0c2947bd2f4614c4c1550c3f6da"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/002-Yubico.YubiKit.Audit20261111.DocCheck",
+        "bytes": 78192,
+        "sha256": "fbbb2b63b552285ff501115f810a93b7612ae0c2947bd2f4614c4c1550c3f6da"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.deps.json",
+        "bytes": 4006,
+        "sha256": "0377554ae7f2a8b45b056a437d35d4c58840537514440d87d3e2624a554a41ff"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/003-Yubico.YubiKit.Audit20261111.DocCheck.deps.json",
+        "bytes": 4006,
+        "sha256": "0377554ae7f2a8b45b056a437d35d4c58840537514440d87d3e2624a554a41ff"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 21504,
+        "sha256": "10b567239ad09e145fb7e1eb44b8ec43af2e741f54f1d82be0ed665b76bd1c1c"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/004-Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 21504,
+        "sha256": "10b567239ad09e145fb7e1eb44b8ec43af2e741f54f1d82be0ed665b76bd1c1c"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.pdb",
+        "bytes": 14708,
+        "sha256": "c5fe27fcfb8703c63298b7182474ac9b03250eaa158d78482aaed9740d6c32d4"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/005-Yubico.YubiKit.Audit20261111.DocCheck.pdb",
+        "bytes": 14708,
+        "sha256": "c5fe27fcfb8703c63298b7182474ac9b03250eaa158d78482aaed9740d6c32d4"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/006-Yubico.YubiKit.Audit20261111.DocCheck.runtimeconfig.json",
+        "bytes": 330,
+        "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.xml",
+        "bytes": 154,
+        "sha256": "5e73399ed8001acb3b68f1d70b59fb1d28cc2c8b8669b6af29e912927d4b265d"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/007-Yubico.YubiKit.Audit20261111.DocCheck.xml",
+        "bytes": 154,
+        "sha256": "5e73399ed8001acb3b68f1d70b59fb1d28cc2c8b8669b6af29e912927d4b265d"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/cs/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 453456,
+        "sha256": "4785ace64dbdb9bf3e5ee408b173efa5658c6d5117566094921b51f0fbc43117"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/008-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 453456,
+        "sha256": "4785ace64dbdb9bf3e5ee408b173efa5658c6d5117566094921b51f0fbc43117"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/cs/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 41296,
+        "sha256": "b0b9ed271a37ef1cded8a9a5bd926b9c08ed9363d1c975488d46097c552da5ac"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/009-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 41296,
+        "sha256": "b0b9ed271a37ef1cded8a9a5bd926b9c08ed9363d1c975488d46097c552da5ac"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/de/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 485712,
+        "sha256": "84c8de372e4c35888954480ded3ee6e2db933d816c61595bc3411496c4d342ad"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/010-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 485712,
+        "sha256": "84c8de372e4c35888954480ded3ee6e2db933d816c61595bc3411496c4d342ad"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/de/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "351170781347f8d83813a1254e903bf7526de6bf3555d7137b65e2fd3e44e36d"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/011-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "351170781347f8d83813a1254e903bf7526de6bf3555d7137b65e2fd3e44e36d"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/es/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 474448,
+        "sha256": "b311429b96a6b18ff4c16b3357bced9db2aad6dc0f1c822e6fba78e4db26dca0"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/012-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 474448,
+        "sha256": "b311429b96a6b18ff4c16b3357bced9db2aad6dc0f1c822e6fba78e4db26dca0"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/es/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42280,
+        "sha256": "86268aa69f7125a16ff56be376b5fe8f5fe7cd161a0b5040a17df0806db03530"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/013-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42280,
+        "sha256": "86268aa69f7125a16ff56be376b5fe8f5fe7cd161a0b5040a17df0806db03530"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/fr/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 488744,
+        "sha256": "ae30958accd80c8f8cb1d14e03a44464ba06cb524b96beca5b98b77fe1bee177"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/014-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 488744,
+        "sha256": "ae30958accd80c8f8cb1d14e03a44464ba06cb524b96beca5b98b77fe1bee177"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/fr/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "22c352be055bd2bdac467f82a9e625b3583a754133830318aa532af64d91ef76"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/015-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "22c352be055bd2bdac467f82a9e625b3583a754133830318aa532af64d91ef76"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/it/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 480552,
+        "sha256": "c9af3133a0eb47a5c77127cd347721df5669bf4e66dbbdd45246a6e6a3a89228"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/016-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 480552,
+        "sha256": "c9af3133a0eb47a5c77127cd347721df5669bf4e66dbbdd45246a6e6a3a89228"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/it/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "20fa81460fd8fc7301afd2f3ee3b1bd8bd1e066192f744ae0d114fd1174b7644"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/017-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "20fa81460fd8fc7301afd2f3ee3b1bd8bd1e066192f744ae0d114fd1174b7644"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/ja/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 530216,
+        "sha256": "12ced50a5fd2f48216b1aefb7414cd1fa2814b02b8b52e8bc0f2b5857b46e2a1"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/018-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 530216,
+        "sha256": "12ced50a5fd2f48216b1aefb7414cd1fa2814b02b8b52e8bc0f2b5857b46e2a1"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/ja/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 45392,
+        "sha256": "da4427f7c917e38d39109ab7cd4824d94d17cb4410ef7675fa4cf012b6e6d2eb"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/019-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 45392,
+        "sha256": "da4427f7c917e38d39109ab7cd4824d94d17cb4410ef7675fa4cf012b6e6d2eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/ko/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 486184,
+        "sha256": "f327612c14299ffd99f4c96d10cda30add7bc64f952fb9c6ae1e75e0397d92e3"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/020-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 486184,
+        "sha256": "f327612c14299ffd99f4c96d10cda30add7bc64f952fb9c6ae1e75e0397d92e3"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/ko/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42832,
+        "sha256": "d6afec9173f6f303c14e54e95c00fd98e727cb8ed6f00e8c1a314f7cd6f735a0"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/021-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42832,
+        "sha256": "d6afec9173f6f303c14e54e95c00fd98e727cb8ed6f00e8c1a314f7cd6f735a0"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/pl/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 487720,
+        "sha256": "4d7e8400b8549f1e21e3cb49354ba604f2f225bf615cf7245dc2313400fcfa04"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/022-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 487720,
+        "sha256": "4d7e8400b8549f1e21e3cb49354ba604f2f225bf615cf7245dc2313400fcfa04"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/pl/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "f9aa315f44ae0b45c8652b7ca94c7f09ca9095e5af481c0c049fc69364c79c34"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/023-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 42792,
+        "sha256": "f9aa315f44ae0b45c8652b7ca94c7f09ca9095e5af481c0c049fc69364c79c34"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/pt-BR/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 466256,
+        "sha256": "030f1ccd52583abb5b8ef7190dd091933da53c6504264073e6c4b4225601163b"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/024-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 466256,
+        "sha256": "030f1ccd52583abb5b8ef7190dd091933da53c6504264073e6c4b4225601163b"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/pt-BR/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 41768,
+        "sha256": "4f2050d01270f391127233910e2ccb206f090cf8d000613643421cc6c9fcabba"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/025-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 41768,
+        "sha256": "4f2050d01270f391127233910e2ccb206f090cf8d000613643421cc6c9fcabba"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/ru/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 640296,
+        "sha256": "5daeb2623bf2c94db47aa96ab6cda9b1d5f27d5d5da2e660ddd2ffc1fdce4aca"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/026-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 640296,
+        "sha256": "5daeb2623bf2c94db47aa96ab6cda9b1d5f27d5d5da2e660ddd2ffc1fdce4aca"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/ru/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 51496,
+        "sha256": "913389d235d033edfb48f3f7935482eba160c3449965eb9846d632520e0caee5"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/027-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 51496,
+        "sha256": "913389d235d033edfb48f3f7935482eba160c3449965eb9846d632520e0caee5"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/tr/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 461648,
+        "sha256": "8af5a934762f41d1dbb56f74b6c40b07eb5ddece606d4573358e649864d40493"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/028-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 461648,
+        "sha256": "8af5a934762f41d1dbb56f74b6c40b07eb5ddece606d4573358e649864d40493"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/tr/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 41256,
+        "sha256": "90faa2240255bd14fb63f8b009acb06612fd4be4c097ade47befdc582e08dcb2"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/029-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 41256,
+        "sha256": "90faa2240255bd14fb63f8b009acb06612fd4be4c097ade47befdc582e08dcb2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/zh-Hans/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 410920,
+        "sha256": "df287a98354382fd3168ad2a1368d814cf149b1e048e29cf8e8dbd9beb518ffb"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/030-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 410920,
+        "sha256": "df287a98354382fd3168ad2a1368d814cf149b1e048e29cf8e8dbd9beb518ffb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/zh-Hans/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 38696,
+        "sha256": "5f4cfded9c7f2ecc67abc19b46b5fc15100cb6b7f6023abf3ad2a15867e19092"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/031-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 38696,
+        "sha256": "5f4cfded9c7f2ecc67abc19b46b5fc15100cb6b7f6023abf3ad2a15867e19092"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/zh-Hant/Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 410408,
+        "sha256": "dcdac0d1719c72601665df48759d967046521c63f1f1d6fe46602fcc0650e289"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/032-Microsoft.CodeAnalysis.CSharp.resources.dll",
+        "bytes": 410408,
+        "sha256": "dcdac0d1719c72601665df48759d967046521c63f1f1d6fe46602fcc0650e289"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/bin/Release/net10.0/zh-Hant/Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 38696,
+        "sha256": "a70003857f656f34af01be976a81f3d1afa5b0a96deebf96370a473928674eba"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/033-Microsoft.CodeAnalysis.resources.dll",
+        "bytes": 38696,
+        "sha256": "a70003857f656f34af01be976a81f3d1afa5b0a96deebf96370a473928674eba"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/034-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs",
+        "bytes": 1660,
+        "sha256": "d1cfcb23b4cea2151edcb55e619a09b3dc4d52c21e5211ef368d172d6ec83b87"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/035-Yubico.YubiKit.Audit20261111.DocCheck.AssemblyInfo.cs",
+        "bytes": 1660,
+        "sha256": "d1cfcb23b4cea2151edcb55e619a09b3dc4d52c21e5211ef368d172d6ec83b87"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 782,
+        "sha256": "e12b6035ccd44a05cf1f1595b34eb04898b058512c547d138e95fc01e9c408a7"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/036-Yubico.YubiKit.Audit20261111.DocCheck.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 782,
+        "sha256": "e12b6035ccd44a05cf1f1595b34eb04898b058512c547d138e95fc01e9c408a7"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/037-Yubico.YubiKit.Audit20261111.DocCheck.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 21504,
+        "sha256": "10b567239ad09e145fb7e1eb44b8ec43af2e741f54f1d82be0ed665b76bd1c1c"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/038-Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 21504,
+        "sha256": "10b567239ad09e145fb7e1eb44b8ec43af2e741f54f1d82be0ed665b76bd1c1c"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.pdb",
+        "bytes": 14708,
+        "sha256": "c5fe27fcfb8703c63298b7182474ac9b03250eaa158d78482aaed9740d6c32d4"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/039-Yubico.YubiKit.Audit20261111.DocCheck.pdb",
+        "bytes": 14708,
+        "sha256": "c5fe27fcfb8703c63298b7182474ac9b03250eaa158d78482aaed9740d6c32d4"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json",
+        "bytes": 161,
+        "sha256": "0a81b5647bdcb8994320cb80ec6837a4f4f2c8dcb80be40b7265952eef3aaa6d"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/040-Yubico.YubiKit.Audit20261111.DocCheck.sourcelink.json",
+        "bytes": 161,
+        "sha256": "0a81b5647bdcb8994320cb80ec6837a4f4f2c8dcb80be40b7265952eef3aaa6d"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Release/net10.0/refint/Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 10240,
+        "sha256": "6c5af1b4e658dd676781c15136d273b3123075b5e1b91fe1d02a01dde6849298"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/041-Yubico.YubiKit.Audit20261111.DocCheck.dll",
+        "bytes": 10240,
+        "sha256": "6c5af1b4e658dd676781c15136d273b3123075b5e1b91fe1d02a01dde6849298"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.props",
+        "bytes": 1814,
+        "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/042-Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.props",
+        "bytes": 1814,
+        "sha256": "859d296461930d6ec7a55e07960b3d3e426cb1af2612eb07c5aaa03ba70d774f"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.targets",
+        "bytes": 538,
+        "sha256": "56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/043-Yubico.YubiKit.Audit20261111.DocCheck.csproj.nuget.g.targets",
+        "bytes": 538,
+        "sha256": "56b2afc3694f98da94e5f5a3ec6c32c46911340f027f44666cca046b6d50ee43"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocCheck/obj/project.assets.json",
+        "bytes": 86634,
+        "sha256": "290c31810dbed0cef90fbc1586d654460c13fbef748cc2871abf91c93cd4e67e"
+      },
+      "preserved": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/checker-output-preservation/checker-bound-build-third-final-transition/044-project.assets.json",
+        "bytes": 86634,
+        "sha256": "290c31810dbed0cef90fbc1586d654460c13fbef748cc2871abf91c93cd4e67e"
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+[
+  {
+    "path": "editing/SHARED/candidate-map.json",
+    "sha256": "361841d1d322976d8f00529d4da6788b37a15a74d664148fcadef632c3e63eef"
+  },
+  {
+    "path": "editing/SHARED/capture-static.py",
+    "sha256": "8e9cb533cc764f4be356a297ad0f1d28261f5b2ffbcd2917afb08b95d72e43aa"
+  },
+  {
+    "path": "editing/SHARED/changed-path-sha256.json",
+    "sha256": "21f8415b09e7b19ea0ee5a38e0cf89a536c98dbddfe4a5d8c2795f6de1aa5f59"
+  },
+  {
+    "path": "editing/SHARED/decisions.md",
+    "sha256": "0633cacdf41d3d2ad406fba089fd0cab448f23e627ba4ee03197132e60cb574b"
+  },
+  {
+    "path": "editing/SHARED/example-bodies.json",
+    "sha256": "ed10ecdb8750123e8823a4e983856148208cdc8316f379631615856c1f6dceca"
+  },
+  {
+    "path": "editing/SHARED/external-input-identities.json",
+    "sha256": "f7ac5a205e5f53e48528842fa6c0f489ec3157c9baca8a25a0f36229968ec98a"
+  },
+  {
+    "path": "editing/SHARED/input-identities.json",
+    "sha256": "bb920b7b43005c67c789b8903838cfd8a4e30c1cd499700b0a201e458ffc540d"
+  },
+  {
+    "path": "editing/SHARED/markdown-checks.json",
+    "sha256": "1cee8b052988acb131fa4802e708dcb2c079c27487a660317b03272f948a2c51"
+  },
+  {
+    "path": "editing/SHARED/output-identities.json",
+    "sha256": "67ef6346a75b917fe5e2327efd0308b47522263a6ba68221bd7bfc988900d1eb"
+  },
+  {
+    "path": "editing/SHARED/outside-scope-followups.json",
+    "sha256": "88d57881b2f045993b53bb6ce39a194ec0265ce7afd78a4ef26a0f1f55c05086"
+  },
+  {
+    "path": "editing/SHARED/path-dispositions.json",
+    "sha256": "5ad8399bb11f4bddfb3cbf6ad020cf7521c3b59ea93002fb3358388650217b7c"
+  },
+  {
+    "path": "editing/SHARED/product.patch",
+    "sha256": "3267ab5d547b281f19c28b3b709ef509a7cd54ee82439b6386b33a842030b937"
+  },
+  {
+    "path": "editing/SHARED/review-identities.json",
+    "sha256": "314701cdca44a48847b31a66377a304053d6e0503aafbd66d381906fce78d7e2"
+  },
+  {
+    "path": "editing/SHARED/review.md",
+    "sha256": "4f8da309466c71b34b4512ef5c4c5321c79ab926605489a149978b0ad43306ad"
+  },
+  {
+    "path": "editing/SHARED/source-review.md",
+    "sha256": "1df947606e362e42cbc278aed2c6be6fb0771682d44191e1ebbf43fb90e21ac8"
+  },
+  {
+    "path": "editing/SHARED/verification.json",
+    "sha256": "0d6c4a878415b2abe6727e7113512cea7a2407670bbbb2f8c92c7a7e6d5385da"
+  },
+  {
+    "path": "edit-SHARED.md",
+    "sha256": "f247868be3b11fe0e1bc007fdbfe035718ee51c267ee320643a0c875e0f08a33"
+  }
+]

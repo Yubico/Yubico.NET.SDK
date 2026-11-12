@@ -16,6 +16,15 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Cryptography
 {
+    /// <summary>Internal raw AES helpers; callers supply protocol-specific integrity protection.</summary>
+    /// <remarks>
+    /// Inputs remain borrowed and returned arrays are independent. The finally blocks clear local
+    /// key copies and, in the CBC paths, IV copies once their protected scopes are entered. In either
+    /// CBC path, failure while allocating the IV copy can leave the preceding key copy uncleared.
+    /// BlockCipher has one key-copy allocation before try, followed directly by its protected scope.
+    /// Plaintext input copies and MemoryStream storage have separate lifetimes and are not explicitly
+    /// cleared here. Disposing the crypto objects therefore does not establish all-buffer erasure.
+    /// </remarks>
     internal static class AesUtilities
     {
         public const int BlockSizeBytes = 16;
@@ -89,7 +98,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </remarks>
         /// <param name="encryptionKey">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>
-        /// <param name="plaintext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
+        /// <param name="plaintext">Empty input or complete 16-byte blocks.</param>
         /// <returns>Ciphertext of the same length as the plaintext</returns>
         public static ReadOnlyMemory<byte> AesCbcEncrypt(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> plaintext)
         {
@@ -159,7 +168,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </remarks>
         /// <param name="decryptionKey">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>
-        /// <param name="ciphertext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
+        /// <param name="ciphertext">Empty input or complete 16-byte blocks.</param>
         /// <returns>Plaintext of the same length as the ciphertext</returns>
         public static ReadOnlyMemory<byte> AesCbcDecrypt(ReadOnlySpan<byte> decryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> ciphertext)
         {

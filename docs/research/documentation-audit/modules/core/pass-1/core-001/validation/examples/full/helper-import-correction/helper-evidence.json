@@ -1,0 +1,258 @@
+{
+  "providers": [
+    {
+      "context": "Ctap2.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+        "bytes": 1704,
+        "sha256": "b01ad512410118f525cc5ed42093ca9400fb4e0dd46d6daeb4dd9b3e4bebbb93"
+      },
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs",
+        "bytes": 8260,
+        "sha256": "597ac645acd5a6bde8d9b92f807fa0bd321e4b8487f78ba06a4157818924f29d"
+      },
+      "namespace": "Yubico.YubiKit.Ctap2.IntegrationTests",
+      "kind": "static-helper",
+      "classes": [
+        "Ctap2TestHelpers"
+      ],
+      "methods": [
+        "ComputeGetAssertionAuthParam",
+        "ComputeMakeCredentialAuthParam",
+        "DeleteAllCredentialsForRpAsync",
+        "SetOrVerifyPinAsync"
+      ],
+      "source_text": "// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing System.Security.Cryptography;\nusing Yubico.YubiKit.Ctap2.Pin;\n\nusing CredentialManagementClass = Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement;\n\nnamespace Yubico.YubiKit.Ctap2.IntegrationTests;\n\n/// <summary>\n/// Helper methods for CTAP2 integration tests.\n/// </summary>\n/// <remarks>These are approved known-PIN device utilities, not production PIN collection or\n/// transaction-safe cleanup examples. PIN/token requests can mutate state or consume retries.</remarks>\npublic static class Ctap2TestHelpers\n{\n    /// <summary>\n    /// Sets the PIN if not already configured, or validates the PIN is correct.\n    /// </summary>\n    /// <remarks>Verification requests a token even if the known PIN already matches. The returned\n    /// helper owns its supplied protocol but borrows the session; dispose it when done. A failure\n    /// before return has no disposal guard here, and the discarded verification token is not cleared.</remarks>\n    /// <param name=\"session\">The CTAP2 session.</param>\n    /// <param name=\"pin\">The PIN as UTF-8 bytes to set or verify.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <returns>A caller-disposed ClientPin instance, which also disposes the selected protocol.</returns>\n    public static async Task<ClientPin> SetOrVerifyPinAsync(\n        ICtap2Session session,\n        ReadOnlyMemory<byte> pin,\n        CancellationToken cancellationToken = default)\n    {\n        var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);\n\n        // Check if PIN is configured\n        var pinConfigured = info.Options.TryGetValue(\"clientPin\", out var clientPinValue)\n            && clientPinValue;\n\n        // Determine which protocol to use (prefer v2 if available)\n        var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;\n        IPinUvAuthProtocol protocol = protocolVersion == 2\n            ? new PinUvAuthProtocolV2()\n            : new PinUvAuthProtocolV1();\n\n        var clientPin = new ClientPin(session, protocol);\n\n        if (!pinConfigured)\n        {\n            await clientPin.SetPinAsync(pin, cancellationToken).ConfigureAwait(false);\n        }\n        else\n        {\n            // Verify by getting a PIN token\n            _ = await clientPin.GetPinTokenAsync(pin, cancellationToken).ConfigureAwait(false);\n        }\n\n        return clientPin;\n    }\n\n    /// <summary>\n    /// Requests a credential-management token, or a legacy token according to the version-string heuristic.\n    /// </summary>\n    /// <remarks>The heuristic recognizes FIDO_2_1/PRE, not every later version. ClientPin can also\n    /// fall back based on token capability. A legacy request carries no explicit CM permission, so\n    /// this tuple does not guarantee administrative authorization. The caller owns and must clear\n    /// the token; disposing ClientPin disposes its protocol, not the returned token or session.</remarks>\n    /// <param name=\"session\">The CTAP2 session.</param>\n    /// <param name=\"pin\">The PIN as UTF-8 bytes.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    /// <returns>The PIN token, ClientPin instance, and protocol for credential management.</returns>\n    public static async Task<(byte[] PinToken, ClientPin ClientPin, IPinUvAuthProtocol Protocol)>\n        GetCredManTokenAsync(\n            ICtap2Session session,\n            ReadOnlyMemory<byte> pin,\n            CancellationToken cancellationToken = default)\n    {\n        var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);\n\n        // Determine which protocol to use\n        var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;\n        IPinUvAuthProtocol protocol = protocolVersion == 2\n            ? new PinUvAuthProtocolV2()\n            : new PinUvAuthProtocolV1();\n\n        var clientPin = new ClientPin(session, protocol);\n\n        // Get token with credential management permission\n        byte[] pinToken;\n\n        // Version-string heuristic only; actual token capability and authorization are separate.\n        var supportsPermissions = info.Versions.Contains(\"FIDO_2_1\") ||\n                                   info.Versions.Contains(\"FIDO_2_1_PRE\");\n\n        if (supportsPermissions)\n        {\n            pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(\n                pin,\n                PinUvAuthTokenPermissions.CredentialManagement,\n                cancellationToken: cancellationToken).ConfigureAwait(false);\n        }\n        else\n        {\n            // Fallback to basic PIN token\n            pinToken = await clientPin.GetPinTokenAsync(pin, cancellationToken).ConfigureAwait(false);\n        }\n\n        return (pinToken, clientPin, protocol);\n    }\n\n    /// <summary>\n    /// Deletes all credentials for the specified relying party.\n    /// </summary>\n    /// <remarks>Deletes all enumerated credentials for the RP, not only a credential created by\n    /// this test. Earlier deletions are not rolled back on failure. The result and helpers are\n    /// disposed, but the acquired token is not cleared here. Only NoCredentials is ignored.</remarks>\n    /// <param name=\"session\">The CTAP2 session.</param>\n    /// <param name=\"rpId\">The relying party ID.</param>\n    /// <param name=\"pin\">The PIN.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    public static async Task DeleteAllCredentialsForRpAsync(\n        Ctap2Session session,\n        string rpId,\n        ReadOnlyMemory<byte> pin,\n        CancellationToken cancellationToken = default)\n    {\n        try\n        {\n            var (pinToken, clientPin, protocol) = await GetCredManTokenAsync(\n                session, pin, cancellationToken).ConfigureAwait(false);\n\n            using (clientPin)\n            {\n                using var credMan = new CredentialManagementClass(session, protocol, pinToken);\n\n                // Get RP ID hash\n                var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rpId));\n\n                // Enumerate and delete credentials\n                using var result = await credMan.EnumerateCredentialsAsync(rpIdHash, cancellationToken)\n                    .ConfigureAwait(false);\n\n                foreach (var cred in result.Credentials)\n                {\n                    await credMan.DeleteCredentialAsync(cred.CredentialId, cancellationToken)\n                        .ConfigureAwait(false);\n                }\n            }\n        }\n        catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)\n        {\n            // No credentials to delete - that's fine\n        }\n    }\n\n    /// <summary>\n    /// Computes PIN/UV auth param for MakeCredential.\n    /// </summary>\n    /// <remarks>Authenticates the supplied hash bytes only; no RP scope or token permission is\n    /// verified locally. The returned auth-param array is caller-owned and must be cleared.</remarks>\n    public static byte[] ComputeMakeCredentialAuthParam(\n        IPinUvAuthProtocol protocol,\n        byte[] pinToken,\n        byte[] clientDataHash)\n    {\n        return protocol.Authenticate(pinToken, clientDataHash);\n    }\n\n    /// <summary>\n    /// Computes PIN/UV auth param for GetAssertion.\n    /// </summary>\n    /// <remarks>Authenticates the supplied hash bytes only; no RP scope or token permission is\n    /// verified locally. The returned auth-param array is caller-owned and must be cleared.</remarks>\n    public static byte[] ComputeGetAssertionAuthParam(\n        IPinUvAuthProtocol protocol,\n        byte[] pinToken,\n        byte[] clientDataHash)\n    {\n        return protocol.Authenticate(pinToken, clientDataHash);\n    }\n}"
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+        "bytes": 1704,
+        "sha256": "b01ad512410118f525cc5ed42093ca9400fb4e0dd46d6daeb4dd9b3e4bebbb93"
+      },
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs",
+        "bytes": 13088,
+        "sha256": "5484a5fb10f15f6e60cfb9c3d0f0ce57a6545cdbde153f5dadaac3794aefbe45"
+      },
+      "namespace": "Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions",
+      "kind": "extension",
+      "classes": [
+        "Ctap2TestStateExtensions"
+      ],
+      "methods": [
+        "WithCtap2SessionAsync"
+      ],
+      "source_text": "// Copyright 2026 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing System.Security.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Tests.Shared;\n\nnamespace Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;\n\n/// <summary>\n///     Extensions that help integration tests acquire <see cref=\"Ctap2Session\" />\n///     instances while ensuring connections are disposed correctly.\n/// </summary>\n/// <remarks>\n///     <para>\n///     After session creation, each helper call defaults to <see cref=\"NormalizePinAsync\" />\n///     before invoking the action. Normalization can set a PIN, change it twice for forcePinChange\n///     recovery or request a token to verify it. These paths require approved PIN work and known\n///     state on a dedicated device, even when the action only reads GetInfo. Pass normalizePin:false\n///     only when the test deliberately needs no normalization; touch filtering does not disable it.\n///     </para>\n///     <para>\n///     A matching PIN still triggers a token exchange. A mismatch can consume a retry before a skip.\n///     A skip or cancellation does not roll back PIN changes. Force-change recovery can leave the\n///     temporary reversed PIN if its second change fails; that temporary buffer is cleared only on\n///     success. The verification token is discarded without clearing. Reset advice in diagnostic\n///     strings is not a coordinated product reset procedure, and temporary PinAuthBlocked differs\n///     from exhausted PinBlocked.\n///     </para>\n/// </remarks>\npublic static class Ctap2TestStateExtensions\n{\n    /// <summary>\n    ///     The known test PIN used across all CTAP2 integration tests: <c>\"11234567\"</c>.\n    /// </summary>\n    /// <remarks>\n    ///     This known 8-digit test value is not a universal product/firmware complexity guarantee.\n    ///     The device's configured PIN policy still applies; it is not production secret input.\n    ///     UTF-8 bytes: <c>[0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37]</c>.\n    /// </remarks>\n    public static readonly byte[] KnownTestPin = [0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37];\n\n    /// <summary>\n    ///     The known test PIN as a string: <c>\"11234567\"</c>.\n    /// </summary>\n    public const string KnownTestPinString = \"11234567\";\n\n    /// <summary>\n    ///     Attempts to set, recover or verify the known test PIN before the action.\n    /// </summary>\n    /// <remarks>\n    ///     <list type=\"bullet\">\n    ///         <item>If no PIN is set, calls <c>SetPinAsync</c> with the known PIN.</item>\n    ///         <item>If a PIN is set, verifies it matches the known PIN by requesting a PIN token.</item>\n    ///         <item>If the PIN is wrong, skips the test with a diagnostic message.</item>\n    ///         <item>If forcePinChange is reported, attempts known\u2192temporary\u2192known PIN changes.</item>\n    ///         <item>If PIN authentication is blocked, skips with a diagnostic; recovery depends on the status.</item>\n    ///     </list>\n    /// </remarks>\n    private static async Task NormalizePinAsync(\n        Ctap2Session session,\n        CancellationToken cancellationToken)\n    {\n        var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);\n\n        // Determine if a PIN is currently configured.\n        // clientPin option: true = PIN is set, false = PIN not set, absent = not supported.\n        var pinIsSet = info.Options.TryGetValue(\"clientPin\", out var clientPinValue)\n            && clientPinValue;\n\n        // Select the best available PIN/UV auth protocol (prefer V2).\n        var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;\n        IPinUvAuthProtocol protocol = protocolVersion == 2\n            ? new PinUvAuthProtocolV2()\n            : new PinUvAuthProtocolV1();\n\n        using var clientPin = new ClientPin(session, protocol);\n\n        if (!pinIsSet)\n        {\n            // No PIN configured yet -- set the known test PIN.\n            await clientPin.SetPinAsync(KnownTestPin, cancellationToken)\n                .ConfigureAwait(false);\n            return;\n        }\n\n        // If a prior test left forcePinChange set, clear it via PIN change.\n        // ChangePinAsync uses direct PIN hash encryption (not PIN tokens), so it\n        // works even when forcePinChange blocks token requests.\n        // A reversed temporary value avoids a same-PIN change where device policy rejects it.\n        // This is not transactional: a failed second change can leave the temporary PIN configured.\n        if (info.ForcePinChange == true)\n        {\n            try\n            {\n                byte[] tempPin = KnownTestPin.Reverse().ToArray();\n                await clientPin.ChangePinAsync(KnownTestPin, tempPin, cancellationToken)\n                    .ConfigureAwait(false);\n                await clientPin.ChangePinAsync(tempPin, KnownTestPin, cancellationToken)\n                    .ConfigureAwait(false);\n                // This success-path clearing does not cover failed changes.\n                CryptographicOperations.ZeroMemory(tempPin);\n            }\n            catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid\n                                               or CtapStatus.PinPolicyViolation)\n            {\n                Skip.If(true,\n                    $\"CTAP2 forcePinChange recovery failed ({ex.Status}). PIN differs from \" +\n                    \"known test PIN '11234567' or policy rejects it. Reset: ykman fido reset\");\n            }\n        }\n\n        // A token request verifies the PIN even when it already matches; a mismatch can consume a retry.\n        // The returned secret is currently discarded without clearing.\n        try\n        {\n            _ = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken)\n                .ConfigureAwait(false);\n        }\n        catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid)\n        {\n            Skip.If(true,\n                \"FIDO2 PIN differs from known test PIN '11234567'. \" +\n                \"Set it manually: ykman fido access change-pin\");\n        }\n        catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)\n        {\n            Skip.If(true,\n                \"FIDO2 PIN is blocked. Manual reset required: ykman fido access reset\");\n        }\n    }\n\n    private static string GetWindowsHidAccessDeniedTestMessage(ConnectionType? preferredConnection) =>\n        $\"Windows denied access while opening a CTAP2 session over {preferredConnection ?? ConnectionType.HidFido}. \" +\n        \"If this test targets HID FIDO, run the test host elevated as Administrator or close software that may hold the HID interface exclusively.\";\n\n    extension(YubiKeyTestState state)\n    {\n        /// <summary>\n        ///     Executes an action with a CTAP2 session.\n        ///     Automatically handles connection and session lifecycle.\n        /// </summary>\n        /// <param name=\"action\">The async action to execute with the session.</param>\n        /// <param name=\"normalizePin\">\n        ///     When true (the default), attempts known-PIN setup/recovery/token verification after\n        ///     creation and before the action. Requires approved PIN work, including for GetInfo tests.\n        /// </param>\n        /// <param name=\"configuration\">Optional protocol configuration.</param>\n        /// <param name=\"scpKeyParams\">Optional SCP key parameters for secure channel.</param>\n        /// <param name=\"preferredConnection\">\n        ///     Optional explicit CTAP2 transport override. Left <c>null</c> here so the shared default path\n        ///     keeps exercising the CTAP2 default order (HID FIDO first); SmartCard-tagged tests pass\n        ///     <see cref=\"ConnectionType.SmartCard\" /> to pin the SmartCard transport (so they do not silently\n        ///     pass over HID FIDO on a merged composite device).\n        /// </param>\n        /// <param name=\"cancellationToken\">Cancellation token.</param>\n        public async Task WithCtap2SessionAsync(\n            Func<Ctap2Session, Task> action,\n            bool normalizePin = true,\n            ProtocolConfiguration? configuration = null,\n            ScpKeyParameters? scpKeyParams = null,\n            ConnectionType? preferredConnection = null,\n            CancellationToken cancellationToken = default)\n        {\n            Ctap2Session session;\n            try\n            {\n                session = await state.Device\n                    .CreateCtap2SessionAsync(\n                        new SessionCreationOptions\n                        {\n                            ScpKeyParameters = scpKeyParams,\n                            ProtocolConfiguration = configuration,\n                            PreferredConnectionType = preferredConnection\n                        },\n                        cancellationToken)\n                    .ConfigureAwait(false);\n            }\n            catch (UnauthorizedAccessException ex) when (OperatingSystem.IsWindows())\n            {\n                throw new UnauthorizedAccessException(GetWindowsHidAccessDeniedTestMessage(preferredConnection), ex);\n            }\n\n            await using (session.ConfigureAwait(false))\n            {\n                if (normalizePin)\n                {\n                    await NormalizePinAsync(session, cancellationToken)\n                        .ConfigureAwait(false);\n                }\n\n                await action(session).ConfigureAwait(false);\n            }\n        }\n\n        /// <summary>\n        ///     Executes an action with a CTAP2 session and a fresh authenticator-info snapshot.\n        ///     Automatically handles connection and session lifecycle.\n        /// </summary>\n        /// <param name=\"action\">The async action to execute with the session and info.</param>\n        /// <param name=\"normalizePin\">\n        ///     When true (the default), attempts known-PIN setup/recovery/token verification after\n        ///     creation and before the fresh info read/action. Requires approved PIN work.\n        /// </param>\n        /// <param name=\"configuration\">Optional protocol configuration.</param>\n        /// <param name=\"scpKeyParams\">Optional SCP key parameters for secure channel.</param>\n        /// <param name=\"preferredConnection\">\n        ///     Optional explicit CTAP2 transport override. Left <c>null</c> here so the shared default path\n        ///     keeps exercising the CTAP2 default order (HID FIDO first); SmartCard-tagged tests pass\n        ///     <see cref=\"ConnectionType.SmartCard\" /> to pin the SmartCard transport (so they do not silently\n        ///     pass over HID FIDO on a merged composite device).\n        /// </param>\n        /// <param name=\"cancellationToken\">Cancellation token.</param>\n        public async Task WithCtap2SessionAsync(\n            Func<Ctap2Session, AuthenticatorInfo, Task> action,\n            bool normalizePin = true,\n            ProtocolConfiguration? configuration = null,\n            ScpKeyParameters? scpKeyParams = null,\n            ConnectionType? preferredConnection = null,\n            CancellationToken cancellationToken = default)\n        {\n            Ctap2Session session;\n            try\n            {\n                session = await state.Device\n                    .CreateCtap2SessionAsync(\n                        new SessionCreationOptions\n                        {\n                            ScpKeyParameters = scpKeyParams,\n                            ProtocolConfiguration = configuration,\n                            PreferredConnectionType = preferredConnection\n                        },\n                        cancellationToken)\n                    .ConfigureAwait(false);\n            }\n            catch (UnauthorizedAccessException ex) when (OperatingSystem.IsWindows())\n            {\n                throw new UnauthorizedAccessException(GetWindowsHidAccessDeniedTestMessage(preferredConnection), ex);\n            }\n\n            await using (session.ConfigureAwait(false))\n            {\n                if (normalizePin)\n                {\n                    await NormalizePinAsync(session, cancellationToken)\n                        .ConfigureAwait(false);\n                }\n\n                var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);\n                await action(session, info).ConfigureAwait(false);\n            }\n        }\n    }\n}"
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj",
+        "bytes": 1401,
+        "sha256": "71ed2e0f5e017827aca5b40767dfd56cf5b0a40d5c0c681bde064380675eea31"
+      },
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs",
+        "bytes": 5692,
+        "sha256": "6cc1ea3f6243313fe4f184c24ad770963ff9e8074c69f6c68dd68770b3c772fe"
+      },
+      "namespace": "Yubico.YubiKit.WebAuthn.IntegrationTests",
+      "kind": "static-helper",
+      "classes": [
+        "WebAuthnTestHelpers"
+      ],
+      "methods": [
+        "CreateClient",
+        "DeleteAllCredentialsForRpAsync",
+        "NormalizePinAsync",
+        "SupportsPreviewSignAsync"
+      ],
+      "source_text": "// Copyright 2026 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing System.Security.Cryptography;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.WebAuthn.Client;\n\nusing CredentialManagementClass = Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement;\n\nnamespace Yubico.YubiKit.WebAuthn.IntegrationTests;\n\n// Test-only PIN constant. Not zeroed because it is reused across tests.\ninternal static class WebAuthnTestHelpers\n{\n    internal const string TestRpId = \"example.com\";\n    internal const string TestOriginUrl = \"https://example.com\";\n    internal static readonly byte[] KnownTestPin = [0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37];\n\n    internal static WebAuthnClient CreateClient(Ctap2Session session)\n    {\n        WebAuthnOrigin.TryParse(TestOriginUrl, out var origin);\n\n        return new WebAuthnClient(\n            session,\n            origin!,\n            new WebAuthnClientOptions\n            {\n                RpIdValidator = (requestOrigin, rpId) => requestOrigin.StringValue == TestOriginUrl && rpId == TestRpId\n            });\n    }\n\n    internal static async Task NormalizePinAsync(Ctap2Session session)\n    {\n        var info = await session.GetInfoAsync();\n        var pinIsSet = info.Options.TryGetValue(\"clientPin\", out var v) && v;\n\n        var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;\n        IPinUvAuthProtocol protocol = protocolVersion == 2\n            ? new PinUvAuthProtocolV2()\n            : new PinUvAuthProtocolV1();\n\n        using var clientPin = new ClientPin(session, protocol);\n\n        if (!pinIsSet)\n        {\n            await clientPin.SetPinAsync(KnownTestPin);\n            return;\n        }\n\n        if (info.ForcePinChange == true)\n        {\n            byte[] tempPin = KnownTestPin.Reverse().ToArray();\n            await clientPin.ChangePinAsync(KnownTestPin, tempPin);\n            await clientPin.ChangePinAsync(tempPin, KnownTestPin);\n            CryptographicOperations.ZeroMemory(tempPin);\n        }\n\n        try\n        {\n            _ = await clientPin.GetPinTokenAsync(KnownTestPin);\n        }\n        catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid)\n        {\n            Skip.If(true, \"FIDO2 PIN differs from known test PIN '11234567'.\");\n        }\n        catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)\n        {\n            Skip.If(true, \"FIDO2 PIN is blocked. Reset required: ykman fido reset\");\n        }\n    }\n\n    internal static async Task<bool> SupportsPreviewSignAsync(Ctap2Session session)\n    {\n        var info = await session.GetInfoAsync();\n        return info.Extensions?.Contains(\"previewSign\") == true;\n    }\n\n    /// <summary>\n    /// Deletes all credentials for the specified relying party.\n    /// Gracefully ignores \"no credentials\" error.\n    /// </summary>\n    /// <param name=\"session\">The CTAP2 session.</param>\n    /// <param name=\"rpId\">The relying party ID.</param>\n    /// <param name=\"cancellationToken\">Cancellation token.</param>\n    internal static async Task DeleteAllCredentialsForRpAsync(\n        Ctap2Session session,\n        string rpId,\n        CancellationToken cancellationToken = default)\n    {\n        try\n        {\n            var info = await session.GetInfoAsync(cancellationToken);\n\n            // Determine which protocol to use\n            var protocolVersion = info.PinUvAuthProtocols.Contains(2) ? 2 : 1;\n            IPinUvAuthProtocol protocol = protocolVersion == 2\n                ? new PinUvAuthProtocolV2()\n                : new PinUvAuthProtocolV1();\n\n            using var clientPin = new ClientPin(session, protocol);\n\n            // Get token with credential management permission\n            byte[] pinToken;\n\n            // Check if device supports CTAP 2.1 permissions\n            var supportsPermissions = info.Versions.Contains(\"FIDO_2_1\") ||\n                                       info.Versions.Contains(\"FIDO_2_1_PRE\");\n\n            if (supportsPermissions)\n            {\n                pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(\n                    KnownTestPin,\n                    PinUvAuthTokenPermissions.CredentialManagement,\n                    cancellationToken: cancellationToken);\n            }\n            else\n            {\n                // Fallback to basic PIN token\n                pinToken = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken);\n            }\n\n            using var credMan = new CredentialManagementClass(session, protocol, pinToken);\n\n            // Get RP ID hash\n            var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rpId));\n\n            // Enumerate and delete credentials\n            using var result = await credMan.EnumerateCredentialsAsync(rpIdHash, cancellationToken);\n\n            foreach (var cred in result.Credentials)\n            {\n                await credMan.DeleteCredentialAsync(cred.CredentialId, cancellationToken);\n            }\n        }\n        catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)\n        {\n            // No credentials to delete - that's fine\n        }\n    }\n}"
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+        "bytes": 1894,
+        "sha256": "793083dd180e464019bb614187ba24a6b71332265bff8bc06586e594fed8a608"
+      },
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+        "bytes": 890,
+        "sha256": "bb7f9ca65d4e78bcc1a0bf9464ace85ab2ddfa4eecc71bf6269c8c6268f597c0"
+      },
+      "namespace": "Yubico.YubiKit.Core.IntegrationTests",
+      "kind": "base-class",
+      "classes": [
+        "IntegrationTestBase"
+      ],
+      "methods": [
+        "DisposeAsync"
+      ],
+      "source_text": "// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nnamespace Yubico.YubiKit.Core.IntegrationTests;\n\n/// <summary>\n/// Base for one-shot applet integration tests. Tracking tests explicitly own their own monitor.\n/// </summary>\npublic abstract class IntegrationTestBase : IAsyncDisposable\n{\n    public ValueTask DisposeAsync() => ValueTask.CompletedTask;\n}"
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+        "bytes": 1722,
+        "sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909"
+      },
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+        "bytes": 4017,
+        "sha256": "fe661501a0a2b0a52e0bfa37ca6c7c10320537a3a3014fb9897e2f4fad625b5e"
+      },
+      "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+      "kind": "extension",
+      "classes": [
+        "TestStateExtensions"
+      ],
+      "methods": [
+        "ResetSecurityDomainAsync",
+        "WithSecurityDomainSessionAsync"
+      ],
+      "source_text": "// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Tests.Shared;\n\nnamespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n\n/// <summary>\n///     Extensions that help integration tests acquire <see cref=\"SecurityDomainSession\" />\n///     instances while ensuring connections are disposed correctly.\n/// </summary>\npublic static class TestStateExtensions\n{\n\n    extension(YubiKeyTestState state)\n    {\n        public Task WithSecurityDomainSessionAsync(\n            bool resetBeforeUse,\n            Func<SecurityDomainSession, Task> action,\n            ProtocolConfiguration? configuration = null,\n            ScpKeyParameters? scpKeyParams = null,\n            CancellationToken cancellationToken = default) =>\n            state.WithConnectionAsync(async connection =>\n            {\n                if (resetBeforeUse)\n                {\n                    using var resetSession = await SecurityDomainSession.CreateAsync(\n                            connection,\n                            new SessionCreationOptions\n                            {\n                                ProtocolConfiguration = configuration,\n                                FirmwareVersionOverride = state.FirmwareVersion\n                            },\n                            cancellationToken: cancellationToken)\n                        .ConfigureAwait(false);\n\n                    await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);\n                }\n\n                using var session = await SecurityDomainSession.CreateAsync(\n                        connection,\n                        new SessionCreationOptions\n                        {\n                            ScpKeyParameters = scpKeyParams,\n                            ProtocolConfiguration = configuration,\n                            FirmwareVersionOverride = state.FirmwareVersion\n                        },\n                        cancellationToken: cancellationToken)\n                    .ConfigureAwait(false);\n\n                await action(session).ConfigureAwait(false);\n            }, cancellationToken);\n\n        /// <summary>\n        ///     Requests a destructive Security Domain reset through an unauthenticated session.\n        /// </summary>\n        /// <remarks>\n        ///     Tests that mutate SD state use this cleanup so later tests can request factory SCP03 keys.\n        ///     First custom import replaces the factory set; deletion of the last SCP03 set is documented\n        ///     by Yubico as restoring defaults, not leaving no keys. ResetAsync itself does not verify\n        ///     factory contents, so successful cleanup is not proof of every device's restored state.\n        /// </remarks>\n        public Task ResetSecurityDomainAsync(CancellationToken cancellationToken = default) =>\n            state.WithConnectionAsync(async connection =>\n            {\n                using var session = await SecurityDomainSession.CreateAsync(\n                        connection,\n                        new SessionCreationOptions { FirmwareVersionOverride = state.FirmwareVersion },\n                        cancellationToken: cancellationToken)\n                    .ConfigureAwait(false);\n\n                await session.ResetAsync(cancellationToken).ConfigureAwait(false);\n            }, cancellationToken);\n    }\n\n}"
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj",
+        "bytes": 1702,
+        "sha256": "2091f6c788f5b741309f917925dd73a6955beeed60e3745197b1d80678046556"
+      },
+      "source": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs",
+        "bytes": 3840,
+        "sha256": "d1de4e14913b4c07f7d052d58e4f8549e8f4fc58e5eaee103107192f50e7262a"
+      },
+      "namespace": "Yubico.YubiKit.Oath.IntegrationTests.TestExtensions",
+      "kind": "extension",
+      "classes": [
+        "OathTestStateExtensions"
+      ],
+      "methods": [
+        "WithOathSessionAsync"
+      ],
+      "source_text": "// Copyright 2026 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Tests.Shared;\n\nnamespace Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;\n\n/// <summary>\n///     Extensions that help integration tests acquire <see cref=\"OathSession\" />\n///     instances while ensuring connections are disposed correctly.\n/// </summary>\npublic static class OathTestStateExtensions\n{\n    extension(YubiKeyTestState state)\n    {\n        /// <summary>\n        ///     Executes an action with an OATH session.\n        ///     Optionally resets the OATH application before running the action.\n        /// </summary>\n        /// <param name=\"action\">The async action to execute with the session.</param>\n        /// <param name=\"resetBeforeUse\">\n        ///     When <c>true</c>, resets the OATH application before running the test action.\n        ///     Defaults to <c>true</c>.\n        /// </param>\n        /// <param name=\"configuration\">Optional protocol configuration.</param>\n        /// <param name=\"scpKeyParams\">Optional SCP key parameters for secure channel.</param>\n        /// <param name=\"cancellationToken\">Cancellation token.</param>\n        public async Task WithOathSessionAsync(\n            Func<OathSession, Task> action,\n            bool resetBeforeUse = true,\n            ProtocolConfiguration? configuration = null,\n            ScpKeyParameters? scpKeyParams = null,\n            CancellationToken cancellationToken = default)\n        {\n            if (resetBeforeUse)\n            {\n                // RESET ends its session and owned connection. The test body must open afresh.\n                var resetSession = await state.Device.CreateOathSessionAsync(\n                    new SessionCreationOptions { ScpKeyParameters = scpKeyParams, ProtocolConfiguration = configuration },\n                    cancellationToken).ConfigureAwait(false);\n                await WithSessionLifetimeAsync(resetSession, session => session.ResetAsync(cancellationToken)).ConfigureAwait(false);\n            }\n\n            var session = await state.Device\n                .CreateOathSessionAsync(\n                    new SessionCreationOptions\n                    {\n                        ScpKeyParameters = scpKeyParams,\n                        ProtocolConfiguration = configuration\n                    },\n                    cancellationToken)\n                .ConfigureAwait(false);\n\n            await WithSessionLifetimeAsync(session, action).ConfigureAwait(false);\n        }\n    }\n\n    private static async Task WithSessionLifetimeAsync(OathSession session, Func<OathSession, Task> action)\n    {\n        Exception? primaryFailure = null;\n        try { await action(session).ConfigureAwait(false); }\n        catch (Exception exception)\n        {\n            primaryFailure = exception;\n            throw;\n        }\n        finally\n        {\n            // RESET already disposes after success. Also close after a send/body failure,\n            // without a second implicit owner replaying teardown over the original failure.\n            try { await session.DisposeAsync().ConfigureAwait(false); }\n            catch when (primaryFailure is not null) { }\n        }\n    }\n}"
+    }
+  ],
+  "projects": [
+    {
+      "context": "Ctap2.UnitTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+        "bytes": 1134,
+        "sha256": "88a60d3cb57b3bb05ebe4de301d4bdd0236c771f900c1667793958bb7c3ccf7f"
+      },
+      "ordinary_project_source_count": 48,
+      "provider_sources": []
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+        "bytes": 1704,
+        "sha256": "b01ad512410118f525cc5ed42093ca9400fb4e0dd46d6daeb4dd9b3e4bebbb93"
+      },
+      "ordinary_project_source_count": 30,
+      "provider_sources": [
+        "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TestHelpers.cs",
+        "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs"
+      ]
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj",
+        "bytes": 1401,
+        "sha256": "71ed2e0f5e017827aca5b40767dfd56cf5b0a40d5c0c681bde064380675eea31"
+      },
+      "ordinary_project_source_count": 7,
+      "provider_sources": [
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs"
+      ]
+    },
+    {
+      "context": "Core.UnitTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+        "bytes": 1402,
+        "sha256": "a778d4fe2a7ba5e3da251972f9d142b6e3e3e0a7aa782fbb0e2ee3065ab3a6ad"
+      },
+      "ordinary_project_source_count": 173,
+      "provider_sources": []
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+        "bytes": 1714,
+        "sha256": "625b84748e3f82754db5567822d71e7a313dd6ab0403b8439d30412ddfd177cb"
+      },
+      "ordinary_project_source_count": 11,
+      "provider_sources": []
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+        "bytes": 1894,
+        "sha256": "793083dd180e464019bb614187ba24a6b71332265bff8bc06586e594fed8a608"
+      },
+      "ordinary_project_source_count": 13,
+      "provider_sources": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs"
+      ]
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+        "bytes": 1722,
+        "sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909"
+      },
+      "ordinary_project_source_count": 9,
+      "provider_sources": [
+        "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs"
+      ]
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj",
+        "bytes": 1836,
+        "sha256": "e0f6adebe2ca56036347347c97a3cb1b92ff13ade217ade82c103080020ed3e7"
+      },
+      "ordinary_project_source_count": 24,
+      "provider_sources": []
+    },
+    {
+      "context": "Oath.IntegrationTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj",
+        "bytes": 1702,
+        "sha256": "2091f6c788f5b741309f917925dd73a6955beeed60e3745197b1d80678046556"
+      },
+      "ordinary_project_source_count": 7,
+      "provider_sources": [
+        "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs"
+      ]
+    },
+    {
+      "context": "Management.UnitTests",
+      "project": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+        "bytes": 1012,
+        "sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156"
+      },
+      "ordinary_project_source_count": 6,
+      "provider_sources": []
+    }
+  ],
+  "discovery": "Finite anchored declarations in actual owning project source: modern extension blocks, static Helpers classes, plus the explicitly used Core IntegrationTestBase. No language compiler or arbitrary namespace inference.",
+  "scope": "Only module-local test-helper availability/imports used by the 56 selected preparations; shared/shipping APIs remain under original exact source/project/Csc gates."
+}

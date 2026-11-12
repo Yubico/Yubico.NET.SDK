@@ -1,0 +1,41 @@
+{
+  "batch": "PGP-boundary",
+  "revision": 2,
+  "review_date": "2026-11-12",
+  "verdict": "PASS",
+  "scope": "Full documentation batch acceptance through predecessor independent content/citation review plus focused successor correction recheck; not compiler/runtime acceptance",
+  "metadata_checkpoint": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_patch_sha256": "7766e7411dd9847aaaf57b86937a61c720fe0c1a02a8ba7c790f711b61ce47b4",
+  "accepted_product_manifest": {
+    "path": "changed-files.json",
+    "sha256": "e657d32b3c9bdf1af2452c76a56958710ac190e7659bc2770ed9fbefe28ed2a1",
+    "all_after_hashes_independently_verified": 17
+  },
+  "correction_delta_sha256": "ea4ada3491c1f89d366aceee13c1421f3ce87bfeceaff2c4b75874355095b210",
+  "successor_record_index_sha256": "3f6999cf651281a9ff824e8b25bd20e21009476fd0a0a5f29bbd06dd4e552617",
+  "successor_indexed_records_verified": 16,
+  "predecessor_identity_manifest_sha256": "b30879d7ed07ddbd2cccd1638dc22d77264686f4f0cfcd143c0f15f04bcb5fd7",
+  "predecessor_files_verified_unchanged": 16,
+  "predecessor_review_sha256": "a5a387caaac844d45ef247f80f0a9ee5976aa48b28f01859e7aefb07183cc889",
+  "predecessor_review_identities_sha256": "1528f450efe28ac6106754233d3bbb456ca9622394a5093ef986af75f0881e12",
+  "accepted_correction_product_after_sha256": {
+    "src/OpenPgp/CLAUDE.md": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "src/OpenPgp/README.md": "d2035cf8a57f16dd5ba4f895b90c408d384c67e7b6f3535d75a60ba92a0b5762"
+  },
+  "example_inventory_sha256": "ea82ddf1f05b936ec25229052ca07a43a3e39854c48c900a92e485c730ba86a3",
+  "current_path_decisions_sha256": "a86e942e564779c2764ae11eb85e9b1bd0edb6f83344e7dbde3b0114fd00851b",
+  "fresh_checks": {
+    "full_patch_equals_current_product_diff": true,
+    "saved_predecessor_products_match_original_review": 17,
+    "CSharp_files_byte_identical_to_reviewed_predecessors": 14,
+    "current_path_hashes_verified": 93,
+    "Markdown_bodies_unchanged": 17,
+    "XML_bodies_unchanged": 5,
+    "provenance_and_referrals_byte_identical_to_predecessor": true,
+    "git_diff_check": "PASS"
+  },
+  "remaining_mandatory_corrections": [],
+  "coordinator_gates_pending": ["compiler", "independent token/API validation", "cref binding", "example compilation", "runtime qualification"],
+  "engineering_policy_physical_and_future_Windows_holds": "UNCHANGED; no closure or stronger evidence claimed"
+}

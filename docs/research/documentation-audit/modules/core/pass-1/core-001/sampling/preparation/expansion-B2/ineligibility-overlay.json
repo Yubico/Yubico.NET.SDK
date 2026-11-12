@@ -1,0 +1,32 @@
+[
+  {
+    "id": "core-001:unit:9715fd23161cbcd7",
+    "owner": "B1",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "coordinator_verdict": "INELIGIBLE-ADMINISTRATIVE",
+    "reason": "Only license/imports/namespace and blank lines; actual class begins after this unit. Exclude from clean quota and replace if required.",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "final_clean_credit": 0,
+    "kind": "ELIGIBILITY-ADJUDICATION; NOT A MATERIAL DOCUMENTATION MISS"
+  },
+  {
+    "id": "core-001:unit:e7b21994e1483471",
+    "owner": "B1",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "coordinator_verdict": "INELIGIBLE-DORMANT-ILLUSTRATION",
+    "reason": "Only commented-out getAtr prototype; no active API or meaningful current contract. Preserve historical text, exclude clean quota.",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "final_clean_credit": 0,
+    "kind": "ELIGIBILITY-ADJUDICATION; NOT A MATERIAL DOCUMENTATION MISS"
+  },
+  {
+    "id": "core-001:unit:c7edeed9fe6d2e6c",
+    "owner": "B2",
+    "stratum": "native-interop-contracts",
+    "coordinator_verdict": "INELIGIBLE-ADMINISTRATIVE",
+    "reason": "License, warning directive and namespace only; no substantive declaration/explanation. Preserve bytes, exclude clean quota.",
+    "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+    "final_clean_credit": 0,
+    "kind": "ELIGIBILITY-ADJUDICATION; NOT A MATERIAL DOCUMENTATION MISS"
+  }
+]

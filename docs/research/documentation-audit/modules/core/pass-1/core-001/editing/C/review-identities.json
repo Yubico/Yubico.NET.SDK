@@ -1,0 +1,103 @@
+{
+  "schema": "core-packet-c-independent-content-review-v1",
+  "verdict": "MANDATORY_CORRECTIONS",
+  "review_date": "2026-11-12",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-crypto",
+  "base_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": {
+    "primary_paths": 104,
+    "edited_primary_paths": 54,
+    "retained_primary_paths": 50,
+    "local_groups": 20,
+    "original_candidate_path_rows": 144,
+    "active_current_xml_bodies_or_fragments": 16,
+    "historical_current_exclusions": 22,
+    "candidate_path_set_matches_investigation": true,
+    "raw_base_current_pin_hashes_match_editor_ledger": true,
+    "exact_noncomment_lines_preserved_after_bom_newline_normalization": true,
+    "compiler_api_binding": "NOT-RUN; coordinator existing bound gate remains required",
+    "runtime_native_device_crypto_execution": "NOT-RUN"
+  },
+  "identity_binding": {
+    "algorithm": "SHA-256",
+    "primary_ledger": "files.json",
+    "primary_ledger_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+    "primary_identity_set_sha256": "0824e656d5a6eddd8f36b24c03ded42914d43881ae327564581cbec7e9a0cc44",
+    "identity_set_serialization": "UTF-8 concatenation of path + NUL + current raw SHA-256 + LF, sorted by path, all 104 ledger rows",
+    "acceptance_rule": "The exact current hashes of the other 53 edited files in the bound ledger are accepted for this content/citation gate. All 50 retain dispositions are accepted for this bounded review, not credited as a new independent full clean-unit investigation. The AesUtilities.cs clearing passage below requires correction. No batch integration/publication or compiler/runtime acceptance is granted."
+  },
+  "mandatory_corrections": [
+    {
+      "id": "C-REVIEW-001",
+      "candidate": "CORE-C-C013",
+      "proposal": "FPT-095",
+      "path": "src/Core/src/Cryptography/AesUtilities.cs",
+      "lines": "21-23",
+      "reviewed_current_sha256": "697fca9dcdcba3f05bf92ea0af68d2c25d527bb4bec9c4e7a0b2a0eeab133b44",
+      "status": "NOT-ACCEPTED-PENDING-DOCUMENTATION-QUALIFICATION",
+      "implementation_anchors": ["127-130", "149-153", "197-200", "220-224"],
+      "required_action": "Qualify finally-scope key/IV clearing and the preceding key-copy lifetime if CBC IV allocation fails; preserve deferred runtime fix. Refresh editor receipts after change."
+    }
+  ],
+  "accepted_critical_product_identities": [
+    {
+      "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+      "sha256": "b5da4960c915723491bf70ad610b0652fa722e451a69ce68122a098fdab7e7cb",
+      "scope": "Content/citation only; absent-Q/supplied-Q distinction at inspected .NET v10.0.0, not installed-runtime/native erasure"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "sha256": "8504b99a7f51a6f867bd1a101652ba50ee24477ef3799d19e14de63d593f94e8",
+      "scope": "Content/citation only; RFC5915 requirement and Encode/Reset source qualification, not runtime cleanup acceptance"
+    }
+  ],
+  "accepted_hold_dispositions": [
+    {"candidate": "CORE-C-C019", "proposal": "FPT-101", "rows_zero_based": [131, 132, 133], "decision": "HOLD-FACET correct; P/E/Q/B, no D released"},
+    {"candidate": "CORE-C-C020", "proposal": "FPT-102", "rows_zero_based": [134, 135, 136, 137, 138, 139, 140, 141, 142, 143], "decision": "RETAIN-REFER-OWNER correct; B6/shared/applet ownership, no C primary SCP parameter path"}
+  ],
+  "reviewed_editor_inputs_relative_to_run": {
+    "edit-C.md": "2066715093ac99d4c5dacfc7d4f3d679d0035dfb23de29ce7652c1b7744bd2c2",
+    "editing/C/files.json": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+    "editing/C/candidate-map.json": "c8016fdf7c264a3ae5130dd6a6889f85bb4f38499ae8a2c2427b5deb0e10ad61",
+    "editing/C/path-decisions.json": "6c2019708d284479d51c4b78493dd0b391304d56c7e558380f024293ec2fd044",
+    "editing/C/examples.json": "bf5164b1c6184ce01971ba8d74904c1a5de9a1dbb3c83f294d85f91e6646d4da",
+    "editing/C/source-review.md": "e0f2895c77c2bb721e27b8c89d8d2d7e05a4c5791c06836bbc9f5ea315bc2fac",
+    "editing/C/shared-followups.md": "dc8dbe835e399656b945607d5ac735b2a70600d2f66c55baca983f46a74f7379",
+    "editing/C/output-identities.json": "93c60a55efe4409a1d83448cd1a127baab36c20365d38e64da32400657ab224e"
+  },
+  "reviewed_authority_inputs_relative_to_run": {
+    "triage/editing-release.md": "3b01360cf7e973b51e076ef02c3683228d007e96c783915e62a046e34bc8cc71",
+    "triage/full-family/map.json": "ee023021f2fd2586b4d75fc0a488cba2e3bdbb1ea7fdb91a793dbbd8bb4a7dd8",
+    "investigation-C.md": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "investigation/C/sources/final-source-register.md": "6078fe5116d94de6ae580797220f0e190bc322a6a4b0b8c6817626e5630fb23e",
+    "investigation/C/triage-clarifications.md": "4bcd52b1ca6b31ec5176fcc4896246061d18fea52ee62ae91cbfc04530c3f228"
+  },
+  "accepted_source_identities_relative_to_investigation_C_sources": {
+    "x690-202102.pdf": "6ac799a2d1ebed36abe39c9eac3586185bfb7db679f801e737189d6fdb1bbd6c",
+    "x690-202102.txt": "1678a1fb52b9f3919d54203e174f3c13114e425019518f096914cf3aeb515d54",
+    "rfc5915.txt": "5c7b3b2eb449618a581a0ac89209d5d6acc7c375689b2e91304b5dcd866151dc",
+    "rfc5958.txt": "82778b9ce7b34f02b5ae9777bfb9e42579744aebd2e1479f476513864525af67",
+    "draft-arkg-09.txt": "a4815596bc860c87f1a4f5e234d66f1fb48e5d5e81741957a06b826ea5c3a3be",
+    "dotnet-v10.0.0-AsnWriter.cs": "f487cee63409d58310e3ae7d170dd429f52266299b490432c439a85e0cd3d62d",
+    "dotnet-v10.0.0-EccSecurityTransforms.cs": "1eacea397d385fc86cabb3d524cbac72644330cc8832f4dcc53dcfe51c063658",
+    "dotnet-v10.0.0-EccSecurityTransforms.macOS.cs": "b3f0009ee308c307f2e6f260cf6b8889429c672ce0e09fa265fe51532b794faa",
+    "dotnet-v10.0.0-ECDsaSecurityTransforms.cs": "0f417ba18b0be376d064baa1089136c807292a78570a454c863577c88f1666cd",
+    "dotnet-v10.0.0-UTF8Encoding.cs": "47f5e4c98751367a86329ab1e0a76d86b39fd076a5b019284694f39d40fd9011",
+    "cose.xml": "765e0cbff5385b3bf3477689af3e82ee870910abbd74ea002513f0f5941cfdb6",
+    "sec2-v2.pdf": "87b8f3703364ed5b21ba8582e411cc0cbf477bcaa3f4f45e0d6580d1c00d9952",
+    "sec2-v2.txt": "93d6a91157c802de1226c08fcf36ecd78d292ac814d12bb4deb54e77362f3300",
+    "rfc5639.txt": "d19949766009ac82b69e46b09f3a08d712908381300a340d3fa3b1478f4b215e",
+    "rfc9053.txt": "3d470615875620375f8453ba25b8dce7e4d0271e76b0b79a46df34ccb2d56ab0",
+    "rfc9459.txt": "d9a1cca5518895228f2838ea8bc9316adf352646b37bd45f4ec6751c5f39cc36",
+    "openssl-3.0.0-EC_POINT_new.pod": "cc565ed5ca6c3e1b765ff57a77b98bf5035dfc0c17646c34febf1ed84ba234ed"
+  },
+  "limits": [
+    "PDF text files are existing reading derivatives; original PDF identities are separately bound.",
+    "Source tags and manuals are explanatory references, not installed-provider, NativeShims producer, hardware or full profile conformance evidence.",
+    "Only review.md and review-identities.json were created; existing editor/evidence/product bytes were not modified.",
+    "No build/tests/formatter/native/device/crypto execution, git index/ref changes, commits/pushes or subagents.",
+    "Four original user files are intentionally absent in this checkout; separately checked original-location evidence remains with the coordinator.",
+    "Finish Core Pass 1 publication and deferred handoff after correction/review and coordinator gates, then stop."
+  ]
+}

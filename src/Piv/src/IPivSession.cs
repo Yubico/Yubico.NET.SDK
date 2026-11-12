@@ -33,6 +33,16 @@ namespace Yubico.YubiKit.Piv;
 /// <para>Credential inputs are caller-owned buffers. PIN/PUK inputs are UTF-8 bytes; byte-length
 /// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
 /// transferred to the caller, who must clear plaintext, shared secrets, and temporary PINs after use.</para>
+/// <para>
+/// Await and serialize complete public tasks before another operation or disposal. Core guards one logical
+/// APDU exchange, including chaining/SCP, rather than a complete management-authentication, PIN-only or reset
+/// workflow. Parsing, presence callbacks and local RSA unpadding can continue after that exchange leaves the
+/// guard. Keep borrowed inputs, keys and prompt services alive through actual public-task completion.
+/// Cancellation is checked before each exchange is admitted; admitted constituent traffic uses
+/// CancellationToken.None and may succeed after the caller cancels. An outer canceled wait is not operation
+/// completion or permission to clear inputs. Await actual completion/teardown before inspecting or retrying
+/// a possibly persistent change.
+/// </para>
 /// </remarks>
 public interface IPivSession : IApplicationSession
 {
@@ -45,6 +55,8 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     ///     This is distinct from the inherited <see cref="IApplicationSession.IsAuthenticated"/>, which
     ///     represents application-protocol authentication such as SCP. Returns <c>false</c> once disposal begins.
+    ///     It is a local observation; the card owns current administration and PIN state. SCP setup grants
+    ///     neither PIN verification nor management-key authorization.
     /// </remarks>
     bool IsManagementKeyAuthenticated { get; }
 
@@ -75,6 +87,8 @@ public interface IPivSession : IApplicationSession
     /// session uses detected firmware (not a compatibility override): AES-192 for 5.7+ and development
     /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate,
     /// including after the physical reset has succeeded. Inspect fresh device state before retrying.
+    /// The method retains the existing backend/protocol, without reselection or a new SCP handshake;
+    /// its authentication flag alone establishes no post-reset secure-channel restoration.
     /// </para>
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -91,6 +105,8 @@ public interface IPivSession : IApplicationSession
     /// The caller retains ownership of the management-key buffer and clears it after use.
     /// Authentication enables key generation, import, certificate storage, and management operations.
     /// A failed authentication attempt clears any previously recorded management authentication state.
+    /// The witness/challenge exchange uses two separately guarded sends. Keep this buffer valid and
+    /// serialize the full method, rather than interleaving another session operation between them.
     /// </para>
     /// </remarks>
     /// <param name="managementKey">Management key bytes (24 bytes for 3DES, 16/24/32 for AES).</param>
@@ -106,6 +122,8 @@ public interface IPivSession : IApplicationSession
     /// Supply 6–8 encoded bytes. SDK validation checks length; the device/product profile governs
     /// credential content. The caller retains the input buffer and clears it after use. The referenced
     /// SP 800-73-4 Part 2 §2.4.3 profile specifies ASCII decimal PINs; UTF-8 byte acceptance is an SDK mechanism.
+    /// PIN verification is card-controlled state, not a managed session flag. Disposing a session that
+    /// borrows a connection does not close that connection or explicitly clear the card's PIN state.
     /// </para>
     /// </remarks>
     /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>

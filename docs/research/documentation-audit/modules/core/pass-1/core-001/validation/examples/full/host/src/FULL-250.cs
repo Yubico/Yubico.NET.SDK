@@ -1,0 +1,48 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+
+namespace Audit20261111.DocExamples.Full;
+internal static class Body250
+{
+internal static async Task CompileOnly(IYubiKey yubiKey, ProtocolConfiguration customProtocolConfig, CancellationToken cancellationToken)
+{
+// Requires a SmartCard-capable key configured with the supplied SCP03 keys.
+using var scpParameters = Scp03KeyParameters.Default;
+await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
+    new SessionCreationOptions
+    {
+        ProtocolConfiguration = customProtocolConfig,
+        ScpKeyParameters = scpParameters
+    },
+    cancellationToken: cancellationToken);
+
+// Multiple operations in same session
+var info1 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+// Session stays open for both calls
+
+// At scope end, the session is disposed before the caller-owned SCP parameters.
+}
+
+}

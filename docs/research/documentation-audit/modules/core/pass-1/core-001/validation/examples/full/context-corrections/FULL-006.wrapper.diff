@@ -1,0 +1,11 @@
+--- pre-review/FULL-006
++++ current/FULL-006
+@@ -29,7 +29,7 @@
+ namespace Audit20261111.DocExamples.Full;
+ internal static class Body6
+ {
+-internal static async Task CompileOnly(ICtap2Session session, IPinUvAuthProtocol protocol, ReadOnlyMemory<byte> pinToken, ReadOnlyMemory<byte> rpIdHash, PublicKeyCredentialDescriptor credentialId)
++internal static async Task CompileOnly(Ctap2Session session, IPinUvAuthProtocol protocol, ReadOnlyMemory<byte> pinToken, ReadOnlyMemory<byte> rpIdHash, PublicKeyCredentialDescriptor credentialId)
+ {
+ // With live session/protocol, authorized borrowed pinToken, returned RP hash and descriptor credentialId.
+ using var credMgmt = new CredentialManagement(session, protocol, pinToken);

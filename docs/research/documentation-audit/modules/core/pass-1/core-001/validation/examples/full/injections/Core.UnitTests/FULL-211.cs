@@ -1,0 +1,37 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Native;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
+namespace Audit20261111.DocExamples.Test211;
+public sealed class DocumentationBody211
+{
+internal async Task CompileOnly()
+{
+using var fakeConnection = new FakeSmartCardConnection();
+
+// Queue expected responses
+fakeConnection.EnqueueResponse(new byte[] { 0x90, 0x00 }); // Success
+
+// Create protocol with fake
+using var protocol = new PcscProtocol(fakeConnection);
+
+// Test
+var result = await protocol.SelectAsync(ApplicationIds.Piv, CancellationToken.None);
+
+// Verify commands sent
+Assert.Single(fakeConnection.TransmittedCommands);
+}
+}

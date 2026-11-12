@@ -1,0 +1,20 @@
+diff --git a/verification/LinuxHidRouteVerification/Evidence.cs b/verification/LinuxHidRouteVerification/Evidence.cs
+--- a/verification/LinuxHidRouteVerification/Evidence.cs
++++ b/verification/LinuxHidRouteVerification/Evidence.cs
+@@ -62,4 +62,4 @@
+ 
+ [JsonSerializable(typeof(Evidence))]
+ [JsonSourceGenerationOptions(WriteIndented = true)]
+-internal sealed partial class EvidenceJson : JsonSerializerContext;
++internal sealed partial class EvidenceJson : JsonSerializerContext;
+\ No newline at end of file
+diff --git a/verification/LinuxHidRouteVerification/OperatorScenarios.cs b/verification/LinuxHidRouteVerification/OperatorScenarios.cs
+--- a/verification/LinuxHidRouteVerification/OperatorScenarios.cs
++++ b/verification/LinuxHidRouteVerification/OperatorScenarios.cs
+@@ -131,4 +131,4 @@
+             return ValueTask.CompletedTask;
+         }
+     }
+-}
++}
+\ No newline at end of file

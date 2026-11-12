@@ -1,0 +1,124 @@
+{
+  "result": "RECORDS-ONLY STRUCTURAL CHECKS; NOT CONTENT/SAMPLER PASS",
+  "actual_unique_reads": 1122,
+  "new_actual_reads": 53,
+  "supported_list": 46,
+  "zero_table": 7,
+  "current_mapping_records": 1122,
+  "unchanged_exact_current_slices": 1109,
+  "changed_range_holds": 13,
+  "proposed_unread": 7,
+  "conservative_broad_population": 9352,
+  "conservative_target": 1067,
+  "supported_without_known_hold": 1060,
+  "new_full_category_quota": 0,
+  "final_denominator": null,
+  "final_clean_credit": null,
+  "sampler_PASS": null,
+  "checks": [
+    "All current input/output seals and predecessor receipt seals match exact bytes.",
+    "Exact 983+86+53 ID union; 46 explicit supported IDs and seven zero rows; every prior actual payload preserved and matched to its authority format.",
+    "All 1,122 completed mappings and seven proposed mappings are bound to exact current hashes; 1,109 completed original units match exact normalized current slices; 13 changed-range holds remain explicit.",
+    "All owner/role targets preserved: 983+84=1,067, 1,060 supported without known holds, exactly seven next-ranked shortfall replacements, no repeated/retired IDs or pool shortfall.",
+    "Whole-unit pure preamble and three substantive XML-summary/reference probes preserved; known credential/X25519 paths excluded from the new pool only.",
+    "Reviewed queued PGP original-scope diff reconstructs exact after snapshots, including pinned unterminated EOF; queued-only spans are distinct from accepted-plus-queued scope. Four pending work scopes remain flagged.",
+    "Original inventory and coverage remain byte-unchanged; no final denominator, clean credit, or sampler PASS issued."
+  ],
+  "sealed_outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/accepted-products-at-capture.json",
+      "sha256": "45ca220e401ba48082e14f138d703df0e29a969dd7ae7d5edc89d2ad805075c2",
+      "bytes": 79693
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/completed-read-tally.json",
+      "sha256": "1f9df37e4ace67af6a13374a2a487686577713a3efe5da5b92325b8e51009287",
+      "bytes": 2086550
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/current-mapping.json",
+      "sha256": "a61d48c5ecba731bf55e920a562eb3ac0309d5983bbca97f22cfca9972292163",
+      "bytes": 1067555
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/known-edit-overlap-inputs.json",
+      "sha256": "affeca74afa645bf4a8e4e2f0db7029959b108de3fe406283a2f647da625601c",
+      "bytes": 225876
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/next-required-current-mapping.json",
+      "sha256": "bf057d52d4af6104795fa09cce482ef1fd7a29d5bf3ff9c5d54e00c32d6ade05",
+      "bytes": 6463
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/next-required-original-units.md",
+      "sha256": "b474d411a0e0f49648f6cf56aa1fc3089306bf2c0aa77b3e95d6f58e4073195b",
+      "bytes": 6296
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/next-required-selection.json",
+      "sha256": "940815a14c0f97327af87ff1845201294947380775c7e32be1dfed10f7ad51b3",
+      "bytes": 6843
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/pending-corrections.json",
+      "sha256": "92ea779c0416e7d3d8921034e04dd2e0825b44e47300cf080da051a836556272",
+      "bytes": 1447
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/preamble-screen-evidence.json",
+      "sha256": "72b88981ec8b5db0ea07f719a4fa9a85d1708c04fc3d1543abc4d43e9b6bd1ea",
+      "bytes": 12836
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/preparation-notes.json",
+      "sha256": "f406d1b4cea8a088ebf7744bddcf8c6947fa084dc706651e81d99f674883c391",
+      "bytes": 3947
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/preparation.stdout.json",
+      "sha256": "7671ce7b06bc3369687beaabdc5a2bcb8809b2a8736fcdbbd84e074c21f5e0e2",
+      "bytes": 1295
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/prepare.py",
+      "sha256": "858c5dfd0138d467a2748be2d1dc15131af15a7e3c07fbdef92f7ad79122f20f",
+      "bytes": 33014
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/read-plan.md",
+      "sha256": "3b36050f9a9b9d8862b0812bbe3fc353903089ccaaf78ec037e398def276f8ed",
+      "bytes": 4369
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/replacement-pool-exclusions.json",
+      "sha256": "fcb737f30fba2547b6f05fd9fc0ac60aaf174e244ab9e57f8eac9bac3c6b8ca4",
+      "bytes": 18105
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/reviewed-queued-PGP-original-scope.diff",
+      "sha256": "e50885303530c59987567a7d0cfc3cddcf25678b37cd292711041929af280927",
+      "bytes": 8028
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/role-quota-status.json",
+      "sha256": "36b1216b2f50d2003d4f93f92988a868531959024016dfbad5aae2c60d5254ad",
+      "bytes": 38950
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/summary.json",
+      "sha256": "09c8e8d1b03cd5ef5d7fd671a430a8f216e5a9e2588d592aa88abad10354b69f",
+      "bytes": 14390
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/verification.json",
+      "sha256": "7bd9c4443b02d7ac11ff8e1f448fa51ad7364d1288f3e0b51650a9a44375137e",
+      "bytes": 18350
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/verify.py",
+      "sha256": "5698b40607751313242a448007108fe8e1714f96f96c20a7791f46b9774154a9",
+      "bytes": 14038
+    }
+  ]
+}

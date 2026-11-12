@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Core.Cryptography;
 public static class IPrivateKeyExtensions
 {
     /// <summary>
-    /// Safely casts an <see cref="IPrivateKey"/> instance to a specific derived type.
+    /// Casts an <see cref="IPrivateKey"/> instance to a specific derived type with a contextual error.
     /// </summary>
     /// <typeparam name="T">The target type that implements <see cref="IPrivateKey"/>.</typeparam>
     /// <param name="key">The private key instance to cast.</param>
@@ -32,14 +32,19 @@ public static class IPrivateKeyExtensions
     /// </exception>
     /// <example>
     /// <code>
-    /// IPrivateKey genericKey = GetPrivateKey();
-    /// RsaPrivateKey rsaKey = genericKey.Cast&lt;RsaPrivateKey&gt;();
-    /// // throws InvalidCastException if genericKey is not an RsaPrivateKey
+    /// static void InspectRsaKey(ReadOnlyMemory&lt;byte&gt; encodedKey)
+    /// {
+    ///     // encodedKey is borrowed; its caller remains responsible for clearing it.
+    ///     using var owner = RSAPrivateKey.CreateFromPkcs8(encodedKey);
+    ///     IPrivateKey genericKey = owner;
+    ///     RSAPrivateKey rsaKey = genericKey.Cast&lt;RSAPrivateKey&gt;();
+    ///     // rsaKey and genericKey alias owner; only owner manages disposal.
+    /// }
     /// </code>
     /// </example>
     /// <remarks>
     /// This method provides a more explicit alternative to direct casting with clearer error messages.
-    /// Prefer this over unsafe casting operations when type safety is critical for cryptographic operations.
+    /// Like an ordinary checked reference cast, this neither converts the key nor creates a new owner.
     /// </remarks>
     public static T Cast<T>(this IPrivateKey key) where T : class, IPrivateKey =>
         key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");

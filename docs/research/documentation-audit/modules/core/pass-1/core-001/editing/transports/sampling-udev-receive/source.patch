@@ -1,0 +1,21 @@
+--- a/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs
++++ b/src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs
+@@ -80,10 +80,14 @@
+     LinuxHidPollOutcome WaitForEvent();
+ 
+     /// <summary>
+-    /// Receives one pending udev event. Returns null when the receive fails — which is most
+-    /// likely during event storms (for example ENOBUFS after the kernel dropped notifications),
+-    /// exactly when a removal may have been lost.
+-    /// </summary>
++    /// Receives one pending udev event, or returns null when the source has no event to return.
++    /// </summary>
++    /// <remarks>
++    /// The built-in source returns null for a missing or invalid monitor or a native no-device result.
++    /// The native result can mean no event is available or reception failed. Receive failures can coincide
++    /// with lost notifications, so the listener requests a rescan on null to reconcile potentially missed
++    /// changes, including removals.
++    /// </remarks>
+     LinuxHidUdevEvent? ReceiveEvent();
+ 
+     /// <summary>

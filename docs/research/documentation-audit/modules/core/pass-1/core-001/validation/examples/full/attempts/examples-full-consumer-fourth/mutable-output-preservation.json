@@ -1,0 +1,317 @@
+{
+  "files": [
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.deps.json",
+        "bytes": 13964,
+        "sha256": "9604db23baa7c5ff71b26049e7b022818ea8a2255851723b8d7d08ae0845f864"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0000-Yubico.YubiKit.Audit20261111.DocExamples.Full.deps.json",
+        "bytes": 13964,
+        "sha256": "9604db23baa7c5ff71b26049e7b022818ea8a2255851723b8d7d08ae0845f864"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0001-Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/bin/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0002-Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0003-.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+        "bytes": 196,
+        "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.AssemblyInfo.cs",
+        "bytes": 1692,
+        "sha256": "07e9fe5ab5123372e33f0aae07d6a6485c6ec64d72a732ac268510fe75825f09"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0004-Yubico.YubiKit.Audit20261111.DocExamples.Full.AssemblyInfo.cs",
+        "bytes": 1692,
+        "sha256": "07e9fe5ab5123372e33f0aae07d6a6485c6ec64d72a732ac268510fe75825f09"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 801,
+        "sha256": "a4ccff2c9ec1d045f49cbcaeb5471f12b4f10af0df11e856908ccf84dfae6083"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0005-Yubico.YubiKit.Audit20261111.DocExamples.Full.GeneratedMSBuildEditorConfig.editorconfig",
+        "bytes": 801,
+        "sha256": "a4ccff2c9ec1d045f49cbcaeb5471f12b4f10af0df11e856908ccf84dfae6083"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0006-Yubico.YubiKit.Audit20261111.DocExamples.Full.GlobalUsings.g.cs",
+        "bytes": 231,
+        "sha256": "8f86a2cbf00ff3eee0bda2bc0eb5e1fc19c8544d5dc650c53d0132325956b592"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0007-Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 286208,
+        "sha256": "7c1cecbed47a4577c54dca68e5c53be14f33838b803f5b80773f83d6b854c0a6"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0008-Yubico.YubiKit.Audit20261111.DocExamples.Full.pdb",
+        "bytes": 100012,
+        "sha256": "e565c55fbb16d6a0b27e6dcc0bd84a0a2d0c33bac5ca413a6cbf48e8f3f28c97"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/Yubico.YubiKit.Audit20261111.DocExamples.Full.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0009-Yubico.YubiKit.Audit20261111.DocExamples.Full.sourcelink.json",
+        "bytes": 161,
+        "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/Release/net10.0/refint/Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 83968,
+        "sha256": "3102d815af56eb4694ac85e4ea84f12bc254485034bfef1849b8b98ec7a4272e"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0010-Yubico.YubiKit.Audit20261111.DocExamples.Full.dll",
+        "bytes": 83968,
+        "sha256": "3102d815af56eb4694ac85e4ea84f12bc254485034bfef1849b8b98ec7a4272e"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/jobs/Yubico.YubiKit.Audit20261111.DocExamples.Full/obj/project.assets.json",
+        "bytes": 123987,
+        "sha256": "b85d625bda317b01ff6377c422e5708d6586d5c1ffb01aef86bfee415001c11c"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0011-project.assets.json",
+        "bytes": 123987,
+        "sha256": "b85d625bda317b01ff6377c422e5708d6586d5c1ffb01aef86bfee415001c11c"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Commands.dll",
+        "bytes": 74240,
+        "sha256": "3ffc45835cce4f898d0f899b21d5f7c429ad750a0129cdeac95861510b9e6023"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0012-Yubico.YubiKit.Cli.Commands.dll",
+        "bytes": 74240,
+        "sha256": "3ffc45835cce4f898d0f899b21d5f7c429ad750a0129cdeac95861510b9e6023"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/obj/Release/net10.0/ref/Yubico.YubiKit.Cli.Shared.dll",
+        "bytes": 20480,
+        "sha256": "4f17a86ff096446344249eeca5d81caed9f88957632e1f8a50c3771f9d5f92a1"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0013-Yubico.YubiKit.Cli.Shared.dll",
+        "bytes": 20480,
+        "sha256": "4f17a86ff096446344249eeca5d81caed9f88957632e1f8a50c3771f9d5f92a1"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0014-Yubico.YubiKit.Core.dll",
+        "bytes": 289280,
+        "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0015-Yubico.YubiKit.Ctap2.dll",
+        "bytes": 78336,
+        "sha256": "80c39d8c640a2e4103a8334694ecba6a6853dcd31c413fbda727d1ff2343f3e7"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/examples/ManagementTool/obj/Release/net10.0/ref/ManagementTool.dll",
+        "bytes": 19968,
+        "sha256": "ab7539778759d56f0a508cc12fbc1d8b6baf4cbacdf0c202aeb25326b6e2fd17"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0016-ManagementTool.dll",
+        "bytes": 19968,
+        "sha256": "ab7539778759d56f0a508cc12fbc1d8b6baf4cbacdf0c202aeb25326b6e2fd17"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0017-Yubico.YubiKit.Management.dll",
+        "bytes": 16384,
+        "sha256": "3de9731d9c83d22b090dcb158e13e774f12288797395c57806d173201f59bab2"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/obj/Release/net10.0/ref/Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0018-Yubico.YubiKit.Oath.dll",
+        "bytes": 27648,
+        "sha256": "6e94ae2f739648c8392efecb2e0eb7ae9c75f862b1d13632e4d20caf5e939bc3"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/obj/Release/net10.0/ref/Yubico.YubiKit.OpenPgp.dll",
+        "bytes": 49664,
+        "sha256": "401ed5a14e54b35d5818af87e2d60a954d5f8f950cc5413eab58f6a163cb7bbc"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0019-Yubico.YubiKit.OpenPgp.dll",
+        "bytes": 49664,
+        "sha256": "401ed5a14e54b35d5818af87e2d60a954d5f8f950cc5413eab58f6a163cb7bbc"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/obj/Release/net10.0/ref/PivTool.dll",
+        "bytes": 51200,
+        "sha256": "73a76d365d11547769b56850bbab1f0e5fbbbd3815bec50649721d04f5a3f709"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0020-PivTool.dll",
+        "bytes": 51200,
+        "sha256": "73a76d365d11547769b56850bbab1f0e5fbbbd3815bec50649721d04f5a3f709"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/obj/Release/net10.0/ref/Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0021-Yubico.YubiKit.Piv.dll",
+        "bytes": 51200,
+        "sha256": "c60539990c4f01a192582c95abffc85b76f0ada5a56c7cc4358681c5da5259d4"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/obj/Release/net10.0/ref/Yubico.YubiKit.SecurityDomain.dll",
+        "bytes": 22016,
+        "sha256": "71892b04fab30cd467245a5ee15db3d0829aca351aec1a64e617c8afe4a6b6a4"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0022-Yubico.YubiKit.SecurityDomain.dll",
+        "bytes": 22016,
+        "sha256": "71892b04fab30cd467245a5ee15db3d0829aca351aec1a64e617c8afe4a6b6a4"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/obj/Release/net10.0/ref/Yubico.YubiKit.WebAuthn.dll",
+        "bytes": 65536,
+        "sha256": "7462615bbd034ce974686139a584237699fdb8084451a1feefebf4b42f1fc0e5"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0023-Yubico.YubiKit.WebAuthn.dll",
+        "bytes": 65536,
+        "sha256": "7462615bbd034ce974686139a584237699fdb8084451a1feefebf4b42f1fc0e5"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiHsm.dll",
+        "bytes": 23552,
+        "sha256": "0fa064cffa70b9ffc04a1f86f646b3bd77024a0442d52c77ec8fe61c1d41c6c9"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0024-Yubico.YubiKit.YubiHsm.dll",
+        "bytes": 23552,
+        "sha256": "0fa064cffa70b9ffc04a1f86f646b3bd77024a0442d52c77ec8fe61c1d41c6c9"
+      }
+    },
+    {
+      "original": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/obj/Release/net10.0/ref/Yubico.YubiKit.YubiOtp.dll",
+        "bytes": 24064,
+        "sha256": "e445ed8be0c9d81abf72d950ea3b703e5c4b2e9b00b0cecdc0ba5266ed152866"
+      },
+      "retained": {
+        "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/full-example-preservation/examples-full-consumer-fourth/0025-Yubico.YubiKit.YubiOtp.dll",
+        "bytes": 24064,
+        "sha256": "e445ed8be0c9d81abf72d950ea3b703e5c4b2e9b00b0cecdc0ba5266ed152866"
+      }
+    }
+  ],
+  "scope": "Only mutable local outputs/refs/generated compiler inputs. SDK/framework/NuGet caches and reconstructible source corpus are excluded."
+}

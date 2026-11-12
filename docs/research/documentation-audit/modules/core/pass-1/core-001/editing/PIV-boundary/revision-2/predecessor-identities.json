@@ -1,0 +1,62 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/decisions.md",
+    "sha256": "3bcea6901ef4e96cb09a230ccfaf283289c1a930f9b392a571e305c0c7333c0c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/citation-notes.md",
+    "sha256": "704734523df979502366ec889f46d2a3e674ed86aa5a17a5a5861b0a3ffe94cc"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/changed-files.json",
+    "sha256": "d301576e6a8f1bdcb3a32062df3e9e7c35a98ae3e0854c497b8b5a78deb813f7"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/path-decisions.json",
+    "sha256": "8a8bbad3c73fb6b198f5e9894ab15cc81cdb8178b28e94a907b3a466f00b5041"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/example-inventory.json",
+    "sha256": "dbfa4577695f64849ca9d1d801e4eb510eb4fb644b08903129aed49209ce8d76"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/outside-owner-handoffs.json",
+    "sha256": "8ebb35bbcda9f87c2145da18419d9a9a9ae2b0acc1e80c0a64182dd0621e680e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/local-links.json",
+    "sha256": "5a772d7376b93bc4d774910e661bc268e89237b52d7ee012c19354293b71ee2c"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/preserved-provenance.json",
+    "sha256": "aed3a5bb95de5d95867dd58945814cb77e5d1cdaaf231fb0da2511633f9c3552"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/input-identities.json",
+    "sha256": "9d8e5308a4673b7665c59023c377c2cef8495c1f0f3799717bfb63cb2d87340d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/product.patch",
+    "sha256": "5a442195caab2674e3162a35bdffe9d4ab58e54ad72d7f33f6beeb20ab1ae3dd"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/static-verification.json",
+    "sha256": "a756ece203e2ab7699b0477b48ab56558e472e4286c1751dbec135b70896c617"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/final-delivery-verification.json",
+    "sha256": "a0ab70eae774b66c37dfe1a28282aa8cb38574bff47aa6f0f4deafaaab942f34"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/review.md",
+    "sha256": "75970798b1c55c11fea87c21b04b1a73597c0f0d0ebefe534270bdb63567c40f"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/review-identities.json",
+    "sha256": "af59fdfd92cc2a011cc58759371c94a18d71fa2e350fdac401df20692f6b706d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-PIV-boundary.md",
+    "sha256": "9a32edd729f65619cbd00651ad8662fe44cc6b14da541072c5ff49bb3fc9a3ef"
+  }
+]

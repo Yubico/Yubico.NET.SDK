@@ -1,0 +1,1537 @@
+[
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "source_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+    "pinned_git_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+    "pinned_git_blob": "66547c936005ca27305f50ddb1b45faf08c0460a",
+    "lf_normalized_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 202,
+    "bytes": 12973,
+    "unit_ids": [
+      "core-001:unit:626a614634d3d3b4",
+      "core-001:unit:4264b15d39c60d99",
+      "core-001:unit:d427beb3a739480f",
+      "core-001:unit:05df3298e65aae44",
+      "core-001:unit:56ca6d471d2eae29",
+      "core-001:unit:5b8f4e403125ac75",
+      "core-001:unit:a6c6ce50a382a608",
+      "core-001:unit:004fef7213f1a264",
+      "core-001:unit:3b2bd5747e8912bf",
+      "core-001:unit:e97bc2279954a518",
+      "core-001:unit:a051105b9148b2cb",
+      "core-001:unit:34a53c78634226c0",
+      "core-001:unit:710814862611f595"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/PACKAGE_README.md",
+    "source_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+    "pinned_git_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+    "pinned_git_blob": "9882b5fd1205384744d1fd6d1a10a18549f3ee15",
+    "lf_normalized_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 24,
+    "bytes": 1136,
+    "unit_ids": [
+      "core-001:unit:3f79f975e26f3c6c"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "pinned_git_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "pinned_git_blob": "8eae8259d1a6ab18e5da057ee37682224c4f1418",
+    "lf_normalized_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 527,
+    "bytes": 32056,
+    "unit_ids": [
+      "core-001:unit:996d3737aa71f587",
+      "core-001:unit:5fab2dd447b49782",
+      "core-001:unit:1fb0d71b4430795c",
+      "core-001:unit:0056773b96bce2a5",
+      "core-001:unit:4d90d221c84d0d15",
+      "core-001:unit:b401b9375e40cc81",
+      "core-001:unit:46fd54b54dd9871b",
+      "core-001:unit:33e76ca38aabdeb3",
+      "core-001:unit:89ce289860876d3a",
+      "core-001:unit:549ab28eb8ea7b45",
+      "core-001:unit:cf6e0c62fd64aa67",
+      "core-001:unit:3ef39bdd96327565",
+      "core-001:unit:15611fb8dbaa0ab5"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangeAdminPinCommand.cs",
+    "source_sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+    "pinned_git_sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+    "pinned_git_blob": "3e830321a666a349ed739a5c2554657ab11182ac",
+    "lf_normalized_sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 49,
+    "bytes": 1596,
+    "unit_ids": [
+      "core-001:unit:821166a91ebb6775"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+    "source_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+    "pinned_git_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+    "pinned_git_blob": "8c8cad182af4e5e049bfc82d496e3a9568b62bbd",
+    "lf_normalized_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 49,
+    "bytes": 1530,
+    "unit_ids": [
+      "core-001:unit:ae3bb9a77c2955b7"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetResetCodeCommand.cs",
+    "source_sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+    "pinned_git_sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+    "pinned_git_blob": "fa4317bff482c1122bf055bb737ec4b70f3b49c9",
+    "lf_normalized_sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 50,
+    "bytes": 1606,
+    "unit_ids": [
+      "core-001:unit:b088b12cae3cd345"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetRetriesCommand.cs",
+    "source_sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+    "pinned_git_sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+    "pinned_git_blob": "5410d40beb863c8dee0869125d5254994dbcfafa",
+    "lf_normalized_sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 57,
+    "bytes": 1852,
+    "unit_ids": [
+      "core-001:unit:82a38f57d64af1d7"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessUnblockPinCommand.cs",
+    "source_sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+    "pinned_git_sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+    "pinned_git_blob": "4b1c349214d14a98c8c01a45058ceea1beb0e845",
+    "lf_normalized_sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 49,
+    "bytes": 1579,
+    "unit_ids": [
+      "core-001:unit:cad806d5599cd3d4"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesDeleteCommand.cs",
+    "source_sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+    "pinned_git_sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+    "pinned_git_blob": "0f49efcae07f2acf022a74001f543fcb7a90a2a0",
+    "lf_normalized_sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 58,
+    "bytes": 1859,
+    "unit_ids": [
+      "core-001:unit:45405797db3a315f"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+    "source_sha256": "d84b95f30ee4efcf484ce3dcf94562c5aab121b0ac5ce506fb9c2e1687864efc",
+    "pinned_git_sha256": "d84b95f30ee4efcf484ce3dcf94562c5aab121b0ac5ce506fb9c2e1687864efc",
+    "pinned_git_blob": "085da4b7490159fd19e659689a391d01bdbce3c7",
+    "lf_normalized_sha256": "d84b95f30ee4efcf484ce3dcf94562c5aab121b0ac5ce506fb9c2e1687864efc",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 72,
+    "bytes": 2333,
+    "unit_ids": [
+      "core-001:unit:6eccadd3a6763630"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+    "source_sha256": "539ea85c4c9e9e328fabb9254ab89f77500a75137526434d890e09126f542f5c",
+    "pinned_git_sha256": "539ea85c4c9e9e328fabb9254ab89f77500a75137526434d890e09126f542f5c",
+    "pinned_git_blob": "19dddd19ea35eaf3f4d7830ec0755ef424d26753",
+    "lf_normalized_sha256": "539ea85c4c9e9e328fabb9254ab89f77500a75137526434d890e09126f542f5c",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 77,
+    "bytes": 2615,
+    "unit_ids": [
+      "core-001:unit:bfdf6dc4327d3dd7"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+    "source_sha256": "7b29ad094e5b1d9ce7f49ecddbda67edf8cf4a2d8a466c3a81ce2874c20f3d55",
+    "pinned_git_sha256": "7b29ad094e5b1d9ce7f49ecddbda67edf8cf4a2d8a466c3a81ce2874c20f3d55",
+    "pinned_git_blob": "7cc527cf17f3c3ddc9d530d262d2c250405d1667",
+    "lf_normalized_sha256": "7b29ad094e5b1d9ce7f49ecddbda67edf8cf4a2d8a466c3a81ce2874c20f3d55",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 171,
+    "bytes": 6075,
+    "unit_ids": [
+      "core-001:unit:05f097f0f2275382"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+    "source_sha256": "11f44d7298fc86e2c6b41565b2a85811c64f0d4e423f24625a110a0b821f1b05",
+    "pinned_git_sha256": "11f44d7298fc86e2c6b41565b2a85811c64f0d4e423f24625a110a0b821f1b05",
+    "pinned_git_blob": "865eab76d21f5d0b28e732395ef450fd1f7c023c",
+    "lf_normalized_sha256": "11f44d7298fc86e2c6b41565b2a85811c64f0d4e423f24625a110a0b821f1b05",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 65,
+    "bytes": 2427,
+    "unit_ids": [
+      "core-001:unit:013f8577a6a0abc7",
+      "core-001:unit:ef0d6aaf7649e06c"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+    "source_sha256": "b0a620a78453cf9a1bec5e2966e2538559e6b772aec6fa21cd4cf3a971c8b235",
+    "pinned_git_sha256": "b0a620a78453cf9a1bec5e2966e2538559e6b772aec6fa21cd4cf3a971c8b235",
+    "pinned_git_blob": "e483c59e98a812ae16e3af73182767973e184ed4",
+    "lf_normalized_sha256": "b0a620a78453cf9a1bec5e2966e2538559e6b772aec6fa21cd4cf3a971c8b235",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 96,
+    "bytes": 3968,
+    "unit_ids": [
+      "core-001:unit:eb0f39e52132db12",
+      "core-001:unit:62a3572e9cb219f9"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+    "source_sha256": "5f909d54a5d3f3619fc70151baab4424bca2459e4ee518eab8ed5eefe88f4624",
+    "pinned_git_sha256": "5f909d54a5d3f3619fc70151baab4424bca2459e4ee518eab8ed5eefe88f4624",
+    "pinned_git_blob": "1cfcf4ac280bae8e834ae69999706679ede943ec",
+    "lf_normalized_sha256": "5f909d54a5d3f3619fc70151baab4424bca2459e4ee518eab8ed5eefe88f4624",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 142,
+    "bytes": 4922,
+    "unit_ids": [
+      "core-001:unit:459dcc13b6694520",
+      "core-001:unit:b82a955147e60284",
+      "core-001:unit:3f14c63e0c786d7c"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+    "source_sha256": "721fa97551f978fb894ef67d0d811d2a76b3797e5a0070076e6b1fcc77e60cbb",
+    "pinned_git_sha256": "721fa97551f978fb894ef67d0d811d2a76b3797e5a0070076e6b1fcc77e60cbb",
+    "pinned_git_blob": "a274f3fd17540872aa787c62f62778cdf406c75d",
+    "lf_normalized_sha256": "721fa97551f978fb894ef67d0d811d2a76b3797e5a0070076e6b1fcc77e60cbb",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 84,
+    "bytes": 3042,
+    "unit_ids": [
+      "core-001:unit:0ac5d6bdce6d439a"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "source_sha256": "145fafcbddd198dfbb694d085b856100dbd7ec71d740cf1c8e277222de3c2d67",
+    "pinned_git_sha256": "145fafcbddd198dfbb694d085b856100dbd7ec71d740cf1c8e277222de3c2d67",
+    "pinned_git_blob": "dedf1326410650217b9770d0a77e49eacb3849ad",
+    "lf_normalized_sha256": "145fafcbddd198dfbb694d085b856100dbd7ec71d740cf1c8e277222de3c2d67",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 137,
+    "bytes": 5180,
+    "unit_ids": [
+      "core-001:unit:ec6405a7342c6a74",
+      "core-001:unit:c7086050193e168d",
+      "core-001:unit:2e99122411586bad",
+      "core-001:unit:ef65fd7ff47bf416"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+    "source_sha256": "e1ac6a3b5917e1002061166dfb8fdaccb244cef3463e345ab89762ec6680839e",
+    "pinned_git_sha256": "e1ac6a3b5917e1002061166dfb8fdaccb244cef3463e345ab89762ec6680839e",
+    "pinned_git_blob": "7996c872422643456714049fa38c80931036c78d",
+    "lf_normalized_sha256": "e1ac6a3b5917e1002061166dfb8fdaccb244cef3463e345ab89762ec6680839e",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 61,
+    "bytes": 2348,
+    "unit_ids": [
+      "core-001:unit:74dbf6d3122d8ae4"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Output/OutputHelpers.cs",
+    "source_sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+    "pinned_git_sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+    "pinned_git_blob": "66130b565b49bd813246334275f60da9b91c3a42",
+    "lf_normalized_sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 65,
+    "bytes": 2983,
+    "unit_ids": [
+      "core-001:unit:78f0262d5c6aca9c"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/DeviceSelector.cs",
+    "source_sha256": "4e664848be8690ab0d9b880dd1e345c1d291402bffecacad7524a9aee555c89c",
+    "pinned_git_sha256": "4e664848be8690ab0d9b880dd1e345c1d291402bffecacad7524a9aee555c89c",
+    "pinned_git_blob": "1a73cf07f378cb4cd484cca4b03455c3db81b350",
+    "lf_normalized_sha256": "4e664848be8690ab0d9b880dd1e345c1d291402bffecacad7524a9aee555c89c",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 20,
+    "bytes": 978,
+    "unit_ids": [
+      "core-001:unit:24ddf2cd1a995bf9",
+      "core-001:unit:35b83af42c1b3943"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+    "source_sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b",
+    "pinned_git_sha256": "2baa72e241543d1d55a251d4b5d89ae6cfab979144731e1625c26818d8e629f9",
+    "pinned_git_blob": "6a37389a5955621102d65776d5991cb133fbeea5",
+    "lf_normalized_sha256": "2baa72e241543d1d55a251d4b5d89ae6cfab979144731e1625c26818d8e629f9",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": false,
+    "lines": 27,
+    "bytes": 1083,
+    "unit_ids": [
+      "core-001:unit:13d05e63fe18012b"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+    "source_sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75",
+    "pinned_git_sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75",
+    "pinned_git_blob": "17df8ed53d156e55435c2fac44a44b8cf47ea8bb",
+    "lf_normalized_sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 72,
+    "bytes": 2438,
+    "unit_ids": [
+      "core-001:unit:4d7db817e1239e57"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/AlgorithmAttributes.cs",
+    "source_sha256": "0acb91684e3f6c9d88ea4fb5fbf84593a65f7b8776641bbd9513f144dd9cdeb1",
+    "pinned_git_sha256": "0acb91684e3f6c9d88ea4fb5fbf84593a65f7b8776641bbd9513f144dd9cdeb1",
+    "pinned_git_blob": "cb53c2a033427d35245fed0ce06d70798293a5b7",
+    "lf_normalized_sha256": "0acb91684e3f6c9d88ea4fb5fbf84593a65f7b8776641bbd9513f144dd9cdeb1",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 222,
+    "bytes": 8370,
+    "unit_ids": [
+      "core-001:unit:d267f466d40e4b49",
+      "core-001:unit:0d2f41d93c94c767",
+      "core-001:unit:869f7f727a2bacd9",
+      "core-001:unit:5e44f4477db15e39",
+      "core-001:unit:752cb6b0c897bd4c"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/ApplicationRelatedData.cs",
+    "source_sha256": "0cc21c1c01d0d2178186108ffcb0ab224cca84ebe47a90e89f5b8d58b62f1e5e",
+    "pinned_git_sha256": "0cc21c1c01d0d2178186108ffcb0ab224cca84ebe47a90e89f5b8d58b62f1e5e",
+    "pinned_git_blob": "419a48db9a5b750342cbfc1aacfde3be702cd7b2",
+    "lf_normalized_sha256": "0cc21c1c01d0d2178186108ffcb0ab224cca84ebe47a90e89f5b8d58b62f1e5e",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 114,
+    "bytes": 4674,
+    "unit_ids": [
+      "core-001:unit:9ad21a6b835942c6",
+      "core-001:unit:04cc0e6c1a7d3391"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Backend/IOpenPgpBackend.cs",
+    "source_sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+    "pinned_git_sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+    "pinned_git_blob": "a85ddca1fcf113a1266cd5eed6ed5319ce2c2330",
+    "lf_normalized_sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 27,
+    "bytes": 977,
+    "unit_ids": [
+      "core-001:unit:f78b8d390b1729ca",
+      "core-001:unit:b25d749eb01e4f11"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+    "source_sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+    "pinned_git_sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+    "pinned_git_blob": "7db280f3b40c4c316f6ebda1ac729aeb508df881",
+    "lf_normalized_sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 93,
+    "bytes": 3511,
+    "unit_ids": [
+      "core-001:unit:fbbe95d47895cb79",
+      "core-001:unit:4f97cfb7fd8e494c",
+      "core-001:unit:707f336552a33be1",
+      "core-001:unit:269e09ec9b9d8b0f",
+      "core-001:unit:61cff44c52af3274",
+      "core-001:unit:8f341f2d9ed91af4",
+      "core-001:unit:337cdd82ba1822ef",
+      "core-001:unit:81f233bdbddceba1",
+      "core-001:unit:8386cb5e6e981363"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/BcdHelper.cs",
+    "source_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+    "pinned_git_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+    "pinned_git_blob": "54a8d560448ae036689b415cfdb1c66ef2700c72",
+    "lf_normalized_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 56,
+    "bytes": 1826,
+    "unit_ids": [
+      "core-001:unit:6fa2572a151408e1"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+    "source_sha256": "d893613409896ba63a52e2826dbfb129dd624410b8e85cd7b620bef7f51614d8",
+    "pinned_git_sha256": "d893613409896ba63a52e2826dbfb129dd624410b8e85cd7b620bef7f51614d8",
+    "pinned_git_blob": "d61c4bb0ca5589146291f62ee702451fc6b47305",
+    "lf_normalized_sha256": "d893613409896ba63a52e2826dbfb129dd624410b8e85cd7b620bef7f51614d8",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 61,
+    "bytes": 2126,
+    "unit_ids": [
+      "core-001:unit:79be0b9d818a8d2b",
+      "core-001:unit:c5a51089a077dba4",
+      "core-001:unit:cc48b8e7cdd5bcb9",
+      "core-001:unit:fda639e5328ecd8d"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Crt.cs",
+    "source_sha256": "273b4df438ba81f96033c688b1ccc10a9817d5879ca49198a83ae3cb8a774bda",
+    "pinned_git_sha256": "273b4df438ba81f96033c688b1ccc10a9817d5879ca49198a83ae3cb8a774bda",
+    "pinned_git_blob": "036f1b6f9227c497fc6c9ab5c6779ea920ebc1b9",
+    "lf_normalized_sha256": "273b4df438ba81f96033c688b1ccc10a9817d5879ca49198a83ae3cb8a774bda",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 61,
+    "bytes": 2150,
+    "unit_ids": [
+      "core-001:unit:493aa9ad37d04009"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/DataObject.cs",
+    "source_sha256": "39f3c960032e0142745d6657d66f705a58ae19680e0221963e955e21f744047c",
+    "pinned_git_sha256": "39f3c960032e0142745d6657d66f705a58ae19680e0221963e955e21f744047c",
+    "pinned_git_blob": "f94fb8fc4df08f84185902c0b3aeac97cd4f1b03",
+    "lf_normalized_sha256": "39f3c960032e0142745d6657d66f705a58ae19680e0221963e955e21f744047c",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 93,
+    "bytes": 2836,
+    "unit_ids": [
+      "core-001:unit:175125dc067bc4ae"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/DigestInfo.cs",
+    "source_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+    "pinned_git_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+    "pinned_git_blob": "87646f3e53aebdc1f0e6849efaa000163910792c",
+    "lf_normalized_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 69,
+    "bytes": 3010,
+    "unit_ids": [
+      "core-001:unit:1400c8047e564b3c"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/DiscretionaryDataObjects.cs",
+    "source_sha256": "c90fd5003c306f39ba32ec0d4db63a7c660a1e10c3ca3d818ec52956ad19f042",
+    "pinned_git_sha256": "c90fd5003c306f39ba32ec0d4db63a7c660a1e10c3ca3d818ec52956ad19f042",
+    "pinned_git_blob": "11653674a15bd4635687fdf3d26a7044561428ee",
+    "lf_normalized_sha256": "c90fd5003c306f39ba32ec0d4db63a7c660a1e10c3ca3d818ec52956ad19f042",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 189,
+    "bytes": 8130,
+    "unit_ids": [
+      "core-001:unit:058d7ac59269bd9e",
+      "core-001:unit:30edd3fe6aaf7a75"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/EcImportFormat.cs",
+    "source_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+    "pinned_git_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+    "pinned_git_blob": "f2fc80c01fa37dc2d9f26f66ada80055176732ba",
+    "lf_normalized_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 31,
+    "bytes": 983,
+    "unit_ids": [
+      "core-001:unit:be43f2b4c0d0c854"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/ExtendedCapabilities.cs",
+    "source_sha256": "a586a6949514d62c9774380bc73a8a41253929e8852e3daf88a4249ff6cc07fd",
+    "pinned_git_sha256": "a586a6949514d62c9774380bc73a8a41253929e8852e3daf88a4249ff6cc07fd",
+    "pinned_git_blob": "24d9165891bf911203b1fc8a2a1b3595971012bf",
+    "lf_normalized_sha256": "a586a6949514d62c9774380bc73a8a41253929e8852e3daf88a4249ff6cc07fd",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 92,
+    "bytes": 3212,
+    "unit_ids": [
+      "core-001:unit:a906ae4b65759171"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/ExtendedCapabilityFlags.cs",
+    "source_sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+    "pinned_git_sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+    "pinned_git_blob": "92e51e75d18ba5f21365f4d0e5c0058afdaf8f33",
+    "lf_normalized_sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 32,
+    "bytes": 1021,
+    "unit_ids": [
+      "core-001:unit:180cffc4f79bc389"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/ExtendedLengthInfo.cs",
+    "source_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+    "pinned_git_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+    "pinned_git_blob": "6323d5426ee2b6a09781bbbcf57a7072ebb6ab3e",
+    "lf_normalized_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 73,
+    "bytes": 2167,
+    "unit_ids": [
+      "core-001:unit:3a918fe2c9b8a7b3",
+      "core-001:unit:fbb029bc80f7e5af"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/GeneralFeatureManagement.cs",
+    "source_sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+    "pinned_git_sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+    "pinned_git_blob": "45d0abcca4af16fd89626c01229a5ac0c3ec2806",
+    "lf_normalized_sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 32,
+    "bytes": 975,
+    "unit_ids": [
+      "core-001:unit:20f7a5c24ebce31a"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/GenerationTimes.cs",
+    "source_sha256": "fa6cd5981fc6f12bdc6987b87bb4012eb3dbb83d133b5eb7b0cf0e09355ffd4a",
+    "pinned_git_sha256": "fa6cd5981fc6f12bdc6987b87bb4012eb3dbb83d133b5eb7b0cf0e09355ffd4a",
+    "pinned_git_blob": "814cea71e5dfc784547b02b4d01798bb7b6b363d",
+    "lf_normalized_sha256": "fa6cd5981fc6f12bdc6987b87bb4012eb3dbb83d133b5eb7b0cf0e09355ffd4a",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 60,
+    "bytes": 2380,
+    "unit_ids": [
+      "core-001:unit:f456b3dd707f4730"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+    "source_sha256": "c80eca42c1b5c5d18d867af94d7c625413e2fce7d26253d24ee73237c8daa9ca",
+    "pinned_git_sha256": "c80eca42c1b5c5d18d867af94d7c625413e2fce7d26253d24ee73237c8daa9ca",
+    "pinned_git_blob": "c43e25e56cdac7282bb51f8f2b37f348bf61a7f3",
+    "lf_normalized_sha256": "c80eca42c1b5c5d18d867af94d7c625413e2fce7d26253d24ee73237c8daa9ca",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 674,
+    "bytes": 37538,
+    "unit_ids": [
+      "core-001:unit:3aa9b0e2b3fa4ed4",
+      "core-001:unit:7ad9dd6d6d1845d6",
+      "core-001:unit:2c0639d2ac386d86"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+    "source_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+    "pinned_git_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+    "pinned_git_blob": "be5a6c167416d8cfb3cf91e30011e8a5e8ff70e7",
+    "lf_normalized_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 78,
+    "bytes": 3295,
+    "unit_ids": [
+      "core-001:unit:c9158043f45f7fd6",
+      "core-001:unit:13b45e775af12c71"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Ins.cs",
+    "source_sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+    "pinned_git_sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+    "pinned_git_blob": "6c1d00a4bf952418bc8007b610d4ac8469cc75cb",
+    "lf_normalized_sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 38,
+    "bytes": 1107,
+    "unit_ids": [
+      "core-001:unit:c5815e920fced30d"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Kdf.cs",
+    "source_sha256": "c801bcb46603c91a89c08bdb68e895e1a3f5b0c5f2fa73221ec2748fcb85a0fe",
+    "pinned_git_sha256": "c801bcb46603c91a89c08bdb68e895e1a3f5b0c5f2fa73221ec2748fcb85a0fe",
+    "pinned_git_blob": "47d34bc7b48011dbfc55d32cc440fec2b723dc25",
+    "lf_normalized_sha256": "c801bcb46603c91a89c08bdb68e895e1a3f5b0c5f2fa73221ec2748fcb85a0fe",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 354,
+    "bytes": 13177,
+    "unit_ids": [
+      "core-001:unit:d3e147feeacb8728",
+      "core-001:unit:fa021f7ca5de319f",
+      "core-001:unit:c7f6e1d2ceeaf478",
+      "core-001:unit:b6d14c8627896276"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/KeyFingerprints.cs",
+    "source_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+    "pinned_git_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+    "pinned_git_blob": "62ef66c11210e2418b501bb3c9f2f88fa0599c76",
+    "lf_normalized_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 51,
+    "bytes": 1777,
+    "unit_ids": [
+      "core-001:unit:22a93ff480327c28"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/KeyInformation.cs",
+    "source_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+    "pinned_git_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+    "pinned_git_blob": "aa6a2bf0e0e29ee9004b938637260c6bdf3eab44",
+    "lf_normalized_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 51,
+    "bytes": 1721,
+    "unit_ids": [
+      "core-001:unit:5824aa23cdb26f12"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/KeyRef.cs",
+    "source_sha256": "89c55bec16ab698482d8e9b0fe54ef1564f12f94aa44de57236737ba1288383b",
+    "pinned_git_sha256": "89c55bec16ab698482d8e9b0fe54ef1564f12f94aa44de57236737ba1288383b",
+    "pinned_git_blob": "46ba30f1d999c167f8ba8428ba5f0d1664c89f2e",
+    "lf_normalized_sha256": "89c55bec16ab698482d8e9b0fe54ef1564f12f94aa44de57236737ba1288383b",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 96,
+    "bytes": 3880,
+    "unit_ids": [
+      "core-001:unit:81484e281ad49553"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/KeyStatus.cs",
+    "source_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+    "pinned_git_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+    "pinned_git_blob": "939c49834f6d15ce69e020ae4ea692dcdf5a2f36",
+    "lf_normalized_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 36,
+    "bytes": 1040,
+    "unit_ids": [
+      "core-001:unit:04fd7cbfc9bde833"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpAid.cs",
+    "source_sha256": "ef109e699a27fc4e2993de7b6aed9643e484ea45af16f9d5b9480d9779ed5f02",
+    "pinned_git_sha256": "ef109e699a27fc4e2993de7b6aed9643e484ea45af16f9d5b9480d9779ed5f02",
+    "pinned_git_blob": "ed223f6a809f986a46c80506eadef58f6e60f16f",
+    "lf_normalized_sha256": "ef109e699a27fc4e2993de7b6aed9643e484ea45af16f9d5b9480d9779ed5f02",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 93,
+    "bytes": 3314,
+    "unit_ids": [
+      "core-001:unit:fcba5fead7d206ce"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+    "source_sha256": "3fa2b9e1f36c4cf10e452e4a895a3d37e16565e3c5a71d7ac7909a5cba882b99",
+    "pinned_git_sha256": "3fa2b9e1f36c4cf10e452e4a895a3d37e16565e3c5a71d7ac7909a5cba882b99",
+    "pinned_git_blob": "70b63293be07b0c283313c3ffac7023678487842",
+    "lf_normalized_sha256": "3fa2b9e1f36c4cf10e452e4a895a3d37e16565e3c5a71d7ac7909a5cba882b99",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 71,
+    "bytes": 3504,
+    "unit_ids": [
+      "core-001:unit:f64c2eca88ef6dc5",
+      "core-001:unit:675ac7402a131a07"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpKeyInfo.cs",
+    "source_sha256": "a50c3139ab90563318a1cf641e827cfe745770b1c326c03026d62856f8c4b3f1",
+    "pinned_git_sha256": "a50c3139ab90563318a1cf641e827cfe745770b1c326c03026d62856f8c4b3f1",
+    "pinned_git_blob": "36e713170cc5b396669d6bc2725ed400dd658aa6",
+    "lf_normalized_sha256": "a50c3139ab90563318a1cf641e827cfe745770b1c326c03026d62856f8c4b3f1",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 100,
+    "bytes": 5123,
+    "unit_ids": [
+      "core-001:unit:3d0926b10507ae29",
+      "core-001:unit:5b350f49d56d25ed",
+      "core-001:unit:5758ac1057d4736c",
+      "core-001:unit:ca8a97029f051b13",
+      "core-001:unit:1e7147390552d014",
+      "core-001:unit:8b75928c412c2705",
+      "core-001:unit:0eacf3795b84d3f8",
+      "core-001:unit:7bda35f19ef25788",
+      "core-001:unit:ccf424f41f88a6d0",
+      "core-001:unit:bcb85f9e4e5ea743",
+      "core-001:unit:51a15fae854e431d"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+    "source_sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449",
+    "pinned_git_sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449",
+    "pinned_git_blob": "41732176baac63aa0bf13c2212dc954bf305bd88",
+    "lf_normalized_sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 144,
+    "bytes": 5177,
+    "unit_ids": [
+      "core-001:unit:db8d5fe7d90007f7",
+      "core-001:unit:2dad1157169ce7bf",
+      "core-001:unit:7f310388c1ce9ef7"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+    "source_sha256": "f0d3c11cdd8b7c2c5c6b0f2f05bff6acc0d27b1d007a865ae40025aea1c54760",
+    "pinned_git_sha256": "f0d3c11cdd8b7c2c5c6b0f2f05bff6acc0d27b1d007a865ae40025aea1c54760",
+    "pinned_git_blob": "f7b742b9dfa8cf6e1f0125deea9ed235c93fa861",
+    "lf_normalized_sha256": "f0d3c11cdd8b7c2c5c6b0f2f05bff6acc0d27b1d007a865ae40025aea1c54760",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 253,
+    "bytes": 9216,
+    "unit_ids": [
+      "core-001:unit:6f2a6530c99e9f1a",
+      "core-001:unit:7cb5f1d174129329",
+      "core-001:unit:a8051b26dbc56b08",
+      "core-001:unit:5de1ebcd2ff6c2a6"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+    "source_sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+    "pinned_git_sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+    "pinned_git_blob": "01a8374188a42eb5e89d5faf7a7ed5fefe9197f7",
+    "lf_normalized_sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 405,
+    "bytes": 15481,
+    "unit_ids": [
+      "core-001:unit:4d0129bd031618f6",
+      "core-001:unit:b9ccb934a556e940",
+      "core-001:unit:a8bc9fbc3897465b",
+      "core-001:unit:410695b7ea0a3016",
+      "core-001:unit:cba7bcd0f565de7d",
+      "core-001:unit:4cbcf10b2f326631"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+    "source_sha256": "a56b8eb0ebf35588d53239c981f190b29c6872976c283552a9ee677dd39c6163",
+    "pinned_git_sha256": "a56b8eb0ebf35588d53239c981f190b29c6872976c283552a9ee677dd39c6163",
+    "pinned_git_blob": "96f969e3906f390d2d475fc2ef4b98139347af02",
+    "lf_normalized_sha256": "a56b8eb0ebf35588d53239c981f190b29c6872976c283552a9ee677dd39c6163",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 275,
+    "bytes": 9878,
+    "unit_ids": [
+      "core-001:unit:6078351fd8f6b460",
+      "core-001:unit:0a8e8d66f64f19e2",
+      "core-001:unit:d5e9bd9e80ac58c8",
+      "core-001:unit:873ce41195e42542",
+      "core-001:unit:160ed412a3675094",
+      "core-001:unit:2a6fbb9688935175"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+    "source_sha256": "6fc6942f305ffaa58482b46900531164d61bf005897cbf2028ea8cb5b3f91d56",
+    "pinned_git_sha256": "6fc6942f305ffaa58482b46900531164d61bf005897cbf2028ea8cb5b3f91d56",
+    "pinned_git_blob": "8723f0c9418e2f16ca149a4124429193a8878048",
+    "lf_normalized_sha256": "6fc6942f305ffaa58482b46900531164d61bf005897cbf2028ea8cb5b3f91d56",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 364,
+    "bytes": 13088,
+    "unit_ids": [
+      "core-001:unit:bb0d8c9740905a12",
+      "core-001:unit:96117ce5cd478eb8",
+      "core-001:unit:8490dabf2e2bd6ea",
+      "core-001:unit:cf69ba70ce0c22d9",
+      "core-001:unit:f8736f94dc5acbbe",
+      "core-001:unit:8a258631e223db8f",
+      "core-001:unit:e7c7d7a6f45dc979"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+    "source_sha256": "a3e816b6d82a4da3a87603cfd062637f889e4c42ed147be34bea2dd9781f3377",
+    "pinned_git_sha256": "a3e816b6d82a4da3a87603cfd062637f889e4c42ed147be34bea2dd9781f3377",
+    "pinned_git_blob": "c749f36a888dacb0c327a7228e82bdbc74858718",
+    "lf_normalized_sha256": "a3e816b6d82a4da3a87603cfd062637f889e4c42ed147be34bea2dd9781f3377",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 98,
+    "bytes": 4164,
+    "unit_ids": [
+      "core-001:unit:823420c468050d0d",
+      "core-001:unit:cf477a3b3eaee17f",
+      "core-001:unit:1621a94fe21797c6"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.cs",
+    "source_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+    "pinned_git_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+    "pinned_git_blob": "28d8d539c1989b334b63448c808f5576999acfb1",
+    "lf_normalized_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 416,
+    "bytes": 16035,
+    "unit_ids": [
+      "core-001:unit:aed3004c7d974640",
+      "core-001:unit:f5fdc5137c76d998",
+      "core-001:unit:b143586b1520de24",
+      "core-001:unit:c125348e222f5069",
+      "core-001:unit:c64fba3aa84ef309",
+      "core-001:unit:d5f681c06cd331f9",
+      "core-001:unit:97072b9240c38b57",
+      "core-001:unit:73eb4dacfd34f20b",
+      "core-001:unit:c5ff3236b8eb0f2f",
+      "core-001:unit:e9ab99b2615270e5",
+      "core-001:unit:4dbf70904bbff16f",
+      "core-001:unit:199b3ecd714c1291",
+      "core-001:unit:775e815e6b94ea67",
+      "core-001:unit:5f7c9732d9e58e73",
+      "core-001:unit:aeb95fb7f62fc095",
+      "core-001:unit:758748a063d82837",
+      "core-001:unit:0c27fcfbe45d9806",
+      "core-001:unit:29cfc5bc03edfb45",
+      "core-001:unit:6c3657e5a79d6c44",
+      "core-001:unit:07646967ae70ba5d",
+      "core-001:unit:8b2a95f01db9bf2c",
+      "core-001:unit:a962b1d6b791c4ef",
+      "core-001:unit:1ad5fb54424fe6c1"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/PinPolicy.cs",
+    "source_sha256": "797223515b16746e8fc61d7fdb28c0972aa7c60f00b40999518a6e90769470d1",
+    "pinned_git_sha256": "797223515b16746e8fc61d7fdb28c0972aa7c60f00b40999518a6e90769470d1",
+    "pinned_git_blob": "4acdf3b67987bd54d1e89e0028ffab5e6f746c8c",
+    "lf_normalized_sha256": "797223515b16746e8fc61d7fdb28c0972aa7c60f00b40999518a6e90769470d1",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 32,
+    "bytes": 1131,
+    "unit_ids": [
+      "core-001:unit:41de4e34511d41ff"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+    "source_sha256": "1d98b567de4df25c42b74947f7ba100148d9c76a01d188ab2110644a882bf393",
+    "pinned_git_sha256": "1d98b567de4df25c42b74947f7ba100148d9c76a01d188ab2110644a882bf393",
+    "pinned_git_blob": "98e9e1d5f60e53bd842593ea0822553d1cd7bdcf",
+    "lf_normalized_sha256": "1d98b567de4df25c42b74947f7ba100148d9c76a01d188ab2110644a882bf393",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 190,
+    "bytes": 7297,
+    "unit_ids": [
+      "core-001:unit:fd8a312a271d3745",
+      "core-001:unit:8c4cbc41f5eccfe1",
+      "core-001:unit:42bcaa7753fb63f2",
+      "core-001:unit:f266412cbf666ee5",
+      "core-001:unit:c695a3c8180b434c",
+      "core-001:unit:de5eb9dc2f8b8f4f",
+      "core-001:unit:606c7462df485c41"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+    "source_sha256": "bf994242ce0c9a0529bc1c9037cc4ede1c83bbb41ffa90aba2b5dfdf4780764f",
+    "pinned_git_sha256": "bf994242ce0c9a0529bc1c9037cc4ede1c83bbb41ffa90aba2b5dfdf4780764f",
+    "pinned_git_blob": "c552d93b0d0a2ca211a67bc3cb6ea1f1c2e5532c",
+    "lf_normalized_sha256": "bf994242ce0c9a0529bc1c9037cc4ede1c83bbb41ffa90aba2b5dfdf4780764f",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 243,
+    "bytes": 7394,
+    "unit_ids": [
+      "core-001:unit:b0acc102142a08e2",
+      "core-001:unit:b006c1235deb7ec0",
+      "core-001:unit:a2fffebf308970cc",
+      "core-001:unit:0fb941206a7b2182",
+      "core-001:unit:38604c1b83af47b1",
+      "core-001:unit:2142f1b77b1c9109"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/PublicAPI.Shipped.txt",
+    "source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_git_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+    "lf_normalized_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 1,
+    "bytes": 17,
+    "unit_ids": []
+  },
+  {
+    "path": "src/OpenPgp/src/PublicAPI.Unshipped.txt",
+    "source_sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf",
+    "pinned_git_sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf",
+    "pinned_git_blob": "da595aecd69881f324912c9e9b23003c088fc1e0",
+    "lf_normalized_sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 422,
+    "bytes": 49980,
+    "unit_ids": [
+      "core-001:unit:e53ce51cb5c2a6ae"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Pw.cs",
+    "source_sha256": "9d6a58143ad43251e5d48eae541d2d5776b9f99ddac2d989d8db0566f45756c8",
+    "pinned_git_sha256": "9d6a58143ad43251e5d48eae541d2d5776b9f99ddac2d989d8db0566f45756c8",
+    "pinned_git_blob": "ab7a556b9a1a8e7c39ef449fa86f2b9a52e87118",
+    "lf_normalized_sha256": "9d6a58143ad43251e5d48eae541d2d5776b9f99ddac2d989d8db0566f45756c8",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 38,
+    "bytes": 1312,
+    "unit_ids": [
+      "core-001:unit:955adbc1173be46a"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/PwStatus.cs",
+    "source_sha256": "6363c56e80aad022fa327a4130385608b0bcf891e3540a17b6878462647ca723",
+    "pinned_git_sha256": "6363c56e80aad022fa327a4130385608b0bcf891e3540a17b6878462647ca723",
+    "pinned_git_blob": "ec06befe684047e3f447add21784e3a3e9afc5f1",
+    "lf_normalized_sha256": "6363c56e80aad022fa327a4130385608b0bcf891e3540a17b6878462647ca723",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 125,
+    "bytes": 4329,
+    "unit_ids": [
+      "core-001:unit:576a78b69c3126f3"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/RsaImportFormat.cs",
+    "source_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+    "pinned_git_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+    "pinned_git_blob": "2672dd73079d517e72b018c563557ee5da2430da",
+    "lf_normalized_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 41,
+    "bytes": 1233,
+    "unit_ids": [
+      "core-001:unit:2d36d2220ee9c7f5"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/RsaSize.cs",
+    "source_sha256": "ec8c027e1e482d74a33d5dcf27c386ff28db5d38a7ee67f7382a1d36a8728a41",
+    "pinned_git_sha256": "ec8c027e1e482d74a33d5dcf27c386ff28db5d38a7ee67f7382a1d36a8728a41",
+    "pinned_git_blob": "7fd15919243287906271c68f32ae215c5588748d",
+    "lf_normalized_sha256": "ec8c027e1e482d74a33d5dcf27c386ff28db5d38a7ee67f7382a1d36a8728a41",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 25,
+    "bytes": 844,
+    "unit_ids": [
+      "core-001:unit:3ffd5c0526728496"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/SecuritySupportTemplate.cs",
+    "source_sha256": "87e75603f7177bb63d24d2c65652b32a18a4d691f22956b21c6995de21192765",
+    "pinned_git_sha256": "87e75603f7177bb63d24d2c65652b32a18a4d691f22956b21c6995de21192765",
+    "pinned_git_blob": "184445aef7025eeb90c2c050886fffbc9eda0777",
+    "lf_normalized_sha256": "87e75603f7177bb63d24d2c65652b32a18a4d691f22956b21c6995de21192765",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 56,
+    "bytes": 2138,
+    "unit_ids": [
+      "core-001:unit:d260c9d373cd1640",
+      "core-001:unit:5dc9bb2ba16bc1b5"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/SupportedAlgorithm.cs",
+    "source_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+    "pinned_git_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+    "pinned_git_blob": "63115d322d967ec33f6afc7d03e5a59cef0d21ab",
+    "lf_normalized_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 37,
+    "bytes": 1166,
+    "unit_ids": [
+      "core-001:unit:436b7055e69ed4b1"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Uif.cs",
+    "source_sha256": "53528c10dc014e49c3c5f24f98975ca82f5843a86487c351ff4aa2341c4c60d5",
+    "pinned_git_sha256": "53528c10dc014e49c3c5f24f98975ca82f5843a86487c351ff4aa2341c4c60d5",
+    "pinned_git_blob": "4836837f3797858cedf332a94d051d53139aa1f0",
+    "lf_normalized_sha256": "53528c10dc014e49c3c5f24f98975ca82f5843a86487c351ff4aa2341c4c60d5",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 81,
+    "bytes": 2768,
+    "unit_ids": [
+      "core-001:unit:853f53c1a05c0352"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+    "source_sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af",
+    "pinned_git_sha256": "95796651ce74b03ad736c901cc4dfbe993bccbd45528d97ffd83f96674f94540",
+    "pinned_git_blob": "f6b833111578609e1fe7b82c4e6fe84f081b0ce0",
+    "lf_normalized_sha256": "95796651ce74b03ad736c901cc4dfbe993bccbd45528d97ffd83f96674f94540",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": false,
+    "lines": 20,
+    "bytes": 864,
+    "unit_ids": [
+      "core-001:unit:fd5bdc346474945f"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/CLAUDE.md",
+    "source_sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+    "pinned_git_sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+    "pinned_git_blob": "088025c37fcfb5f40dc1933394ebf21832709f36",
+    "lf_normalized_sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 12,
+    "bytes": 485,
+    "unit_ids": []
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+    "source_sha256": "6ec572967563350d6a613495117a46dc458cd28d366b000cf4fdfd3c2a2c6861",
+    "pinned_git_sha256": "6ec572967563350d6a613495117a46dc458cd28d366b000cf4fdfd3c2a2c6861",
+    "pinned_git_blob": "b8eedfe08722897cf08a7fda6945ee6c07f5cfb1",
+    "lf_normalized_sha256": "6ec572967563350d6a613495117a46dc458cd28d366b000cf4fdfd3c2a2c6861",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 175,
+    "bytes": 8292,
+    "unit_ids": [
+      "core-001:unit:b56d81475f22e87b",
+      "core-001:unit:daf9b70635d4dbed",
+      "core-001:unit:f5dc9bface0051d9",
+      "core-001:unit:971672f347fe20ea",
+      "core-001:unit:14baa3192f491ff3",
+      "core-001:unit:02059a2a0a70b9ff"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+    "source_sha256": "5885993d692f88631bc7816a37c95aefe53dcaa1a73c77888bc531bc3ebb33b7",
+    "pinned_git_sha256": "5885993d692f88631bc7816a37c95aefe53dcaa1a73c77888bc531bc3ebb33b7",
+    "pinned_git_blob": "99c84cd564a08ac9b6698a1dad6c49510714e6bd",
+    "lf_normalized_sha256": "5885993d692f88631bc7816a37c95aefe53dcaa1a73c77888bc531bc3ebb33b7",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 85,
+    "bytes": 4151,
+    "unit_ids": [
+      "core-001:unit:70ef14a6e814b328",
+      "core-001:unit:ffb921fa3510b386",
+      "core-001:unit:66f775a70597a5db"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+    "source_sha256": "bacf4048602661e4abfcf4f7e2a5b70ffa699b3dfc4fd39b588e895bf6e8e277",
+    "pinned_git_sha256": "bacf4048602661e4abfcf4f7e2a5b70ffa699b3dfc4fd39b588e895bf6e8e277",
+    "pinned_git_blob": "dbbdc13f594fb10663a30b1609fe3d7ec5caea9c",
+    "lf_normalized_sha256": "bacf4048602661e4abfcf4f7e2a5b70ffa699b3dfc4fd39b588e895bf6e8e277",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 193,
+    "bytes": 10211,
+    "unit_ids": [
+      "core-001:unit:e25c99b4f6325c82",
+      "core-001:unit:bcd76cbbf10600f2",
+      "core-001:unit:bcceb2b23e2e1829",
+      "core-001:unit:3ce3ae2a1a7b254f",
+      "core-001:unit:b158779647ab2b79",
+      "core-001:unit:670d102c68d26608",
+      "core-001:unit:4f8c400bcd8cc78e",
+      "core-001:unit:8e5ccbcf7874b07a"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpMultiCurveTests.cs",
+    "source_sha256": "7ae9bca9085debd3c2d499431f53ddd11dcde65f24c8115f61fab762628cf1d2",
+    "pinned_git_sha256": "7ae9bca9085debd3c2d499431f53ddd11dcde65f24c8115f61fab762628cf1d2",
+    "pinned_git_blob": "ee5c143484346d0ee06b91cf71d7737444e33d9a",
+    "lf_normalized_sha256": "7ae9bca9085debd3c2d499431f53ddd11dcde65f24c8115f61fab762628cf1d2",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 95,
+    "bytes": 4354,
+    "unit_ids": [
+      "core-001:unit:cdc1f63f51a6cabf",
+      "core-001:unit:a4e81c084fc0a746",
+      "core-001:unit:3bdc871767e383f3",
+      "core-001:unit:eba5b4c792bdc543"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+    "source_sha256": "1552a15e3e7fc35e3d6acaf173ae1e6fd9319876c80db3de14df4aafde99a71e",
+    "pinned_git_sha256": "1552a15e3e7fc35e3d6acaf173ae1e6fd9319876c80db3de14df4aafde99a71e",
+    "pinned_git_blob": "81b56f5cb4f3159def57141e4ab3ca46d52f00be",
+    "lf_normalized_sha256": "1552a15e3e7fc35e3d6acaf173ae1e6fd9319876c80db3de14df4aafde99a71e",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 171,
+    "bytes": 7813,
+    "unit_ids": [
+      "core-001:unit:ee9241fa9ca58301",
+      "core-001:unit:f9df6d50704b1007",
+      "core-001:unit:b5de721234b80137",
+      "core-001:unit:7107add80611d002",
+      "core-001:unit:11392a8990a865ef",
+      "core-001:unit:d0c167268da48748"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+    "source_sha256": "89e2afda5a93f492982335f640b79144a73646ee523fffcac6cdd12b06b47fac",
+    "pinned_git_sha256": "89e2afda5a93f492982335f640b79144a73646ee523fffcac6cdd12b06b47fac",
+    "pinned_git_blob": "c659100f7b3526a26686c8ae8758774cafd15847",
+    "lf_normalized_sha256": "89e2afda5a93f492982335f640b79144a73646ee523fffcac6cdd12b06b47fac",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 582,
+    "bytes": 27611,
+    "unit_ids": [
+      "core-001:unit:f4467400bab7e91c",
+      "core-001:unit:dfd03a4a34b5d8a9",
+      "core-001:unit:7500042eb848b1b3",
+      "core-001:unit:676fd09fafaa8dfb",
+      "core-001:unit:dfa009a1f831bbba",
+      "core-001:unit:6e3e65db3aecf89b",
+      "core-001:unit:62fb7fa48b9550d8",
+      "core-001:unit:7e6ed1b272db6228",
+      "core-001:unit:ab0da3c258d98433",
+      "core-001:unit:4c891b8446e36fa3",
+      "core-001:unit:818bdb5167039f1f",
+      "core-001:unit:c0131e55ff3747f1",
+      "core-001:unit:f6f04a505d71b946",
+      "core-001:unit:980e2c3fd802642d",
+      "core-001:unit:3db9ae2ca448bd0b",
+      "core-001:unit:8fb616000a27ccc5",
+      "core-001:unit:43b0f7f68c551b47",
+      "core-001:unit:a6351a667cff91ef",
+      "core-001:unit:b01ebbd3894e252c",
+      "core-001:unit:658c6503c8f29284",
+      "core-001:unit:a34ad02d620d91da",
+      "core-001:unit:75a14aa971c06c04",
+      "core-001:unit:c194ef996753f8c2",
+      "core-001:unit:71091274290ec2db",
+      "core-001:unit:e660212096864c03",
+      "core-001:unit:a7af1410420c43b4",
+      "core-001:unit:d9312c1e13e8bb25",
+      "core-001:unit:f65a056c126227a0",
+      "core-001:unit:3dd6695fe2611413"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+    "source_sha256": "90b087ce7568b52cb0c8a945d2379928fe9b07f32f1d7aa6422ef1404df57d12",
+    "pinned_git_sha256": "90b087ce7568b52cb0c8a945d2379928fe9b07f32f1d7aa6422ef1404df57d12",
+    "pinned_git_blob": "b059bc7e3b5caf9e92db498f3bafd39dad8a3796",
+    "lf_normalized_sha256": "90b087ce7568b52cb0c8a945d2379928fe9b07f32f1d7aa6422ef1404df57d12",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 77,
+    "bytes": 3460,
+    "unit_ids": [
+      "core-001:unit:c09e03fe58057274",
+      "core-001:unit:7bfdc3d4dfca9bcb"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+    "source_sha256": "6744bd61272f01d8a9af9050b0aa4e1463eece747ebbb354252515d96b698846",
+    "pinned_git_sha256": "a0a02203ba907cdb03ce76ef6c6789d159d23ff0eb81df14fd98d93905f44ea0",
+    "pinned_git_blob": "37910f0a771ab3f779f2ae8fe490a3b37dd73b39",
+    "lf_normalized_sha256": "a0a02203ba907cdb03ce76ef6c6789d159d23ff0eb81df14fd98d93905f44ea0",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": false,
+    "lines": 43,
+    "bytes": 1844,
+    "unit_ids": [
+      "core-001:unit:cab9226391e5e95a"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+    "source_sha256": "cf9ba41f61564f69291c3b068d5fd1577af000d6eec6b4f62cd507730d0fd0b4",
+    "pinned_git_sha256": "cf9ba41f61564f69291c3b068d5fd1577af000d6eec6b4f62cd507730d0fd0b4",
+    "pinned_git_blob": "9a1599fbc33fc167a97c6ebf4948c013ecf9373e",
+    "lf_normalized_sha256": "cf9ba41f61564f69291c3b068d5fd1577af000d6eec6b4f62cd507730d0fd0b4",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 153,
+    "bytes": 5530,
+    "unit_ids": [
+      "core-001:unit:cda64d5a95912dbb",
+      "core-001:unit:39474b2233cc6992",
+      "core-001:unit:f58314a8d9e2e7b3",
+      "core-001:unit:31bfecd584a31ae8",
+      "core-001:unit:1691897ea7ce1ee1",
+      "core-001:unit:7a69cf17d73a1a94"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+    "source_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+    "pinned_git_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+    "pinned_git_blob": "143772396ed8d7e3621540603b3c99bda31cd5cf",
+    "lf_normalized_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 245,
+    "bytes": 9084,
+    "unit_ids": [
+      "core-001:unit:37bd04a5969e0edd",
+      "core-001:unit:1485b757f53a82d6",
+      "core-001:unit:fd0299966af8c878"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+    "source_sha256": "46ed843b7cba4e2b77521c071e27f96e6feb58b47a67bd2f7b8eadf7c3588919",
+    "pinned_git_sha256": "46ed843b7cba4e2b77521c071e27f96e6feb58b47a67bd2f7b8eadf7c3588919",
+    "pinned_git_blob": "b2a77858a03211f8ce10f883a7d427f5d2e43e1d",
+    "lf_normalized_sha256": "46ed843b7cba4e2b77521c071e27f96e6feb58b47a67bd2f7b8eadf7c3588919",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 142,
+    "bytes": 6289,
+    "unit_ids": [
+      "core-001:unit:0a19b305ca7b22a6",
+      "core-001:unit:a2c2949845a0d21a",
+      "core-001:unit:07360a094eb86b7a"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+    "source_sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+    "pinned_git_sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+    "pinned_git_blob": "06d9893fc4d72bb78f86c6473b3e01674beb231c",
+    "lf_normalized_sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 68,
+    "bytes": 2068,
+    "unit_ids": [
+      "core-001:unit:84dc40f68210d942"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+    "source_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+    "pinned_git_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+    "pinned_git_blob": "f5e4e951e39fbf8b8909f87a7656f8f6ccd5553f",
+    "lf_normalized_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 92,
+    "bytes": 2886,
+    "unit_ids": [
+      "core-001:unit:2d472a37a90606da"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+    "source_sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+    "pinned_git_sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+    "pinned_git_blob": "fc6851ee1963f135548462179df713d74de2f8a8",
+    "lf_normalized_sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 236,
+    "bytes": 7608,
+    "unit_ids": [
+      "core-001:unit:00ff743850864e74"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpAidTests.cs",
+    "source_sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+    "pinned_git_sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+    "pinned_git_blob": "7e96191780f030a944e56d4a4cda6ed3fae4bd54",
+    "lf_normalized_sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 111,
+    "bytes": 3177,
+    "unit_ids": [
+      "core-001:unit:3d6b9a085e998a12"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+    "source_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+    "pinned_git_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+    "pinned_git_blob": "cc72ecab6c3ae2cb3f9363725ef7bb6d27362e49",
+    "lf_normalized_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 35,
+    "bytes": 1554,
+    "unit_ids": [
+      "core-001:unit:aea74a05c9ba5150"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+    "source_sha256": "ad67b4ff9c4445f7d18a9dc67de7ac36af8035152ef1660024b57003e2a46d89",
+    "pinned_git_sha256": "ad67b4ff9c4445f7d18a9dc67de7ac36af8035152ef1660024b57003e2a46d89",
+    "pinned_git_blob": "f1f21d3c1b17c84bf91e3f38e7c231c7c7d6b9eb",
+    "lf_normalized_sha256": "ad67b4ff9c4445f7d18a9dc67de7ac36af8035152ef1660024b57003e2a46d89",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 325,
+    "bytes": 13970,
+    "unit_ids": [
+      "core-001:unit:8c557c6648546080",
+      "core-001:unit:05c92939197a2210",
+      "core-001:unit:e293f88107a92ffa",
+      "core-001:unit:16ca72d9aded69cc",
+      "core-001:unit:1ccab24a8e2e1b8a",
+      "core-001:unit:1cb5326fab8fb821",
+      "core-001:unit:bc0742f71437790e",
+      "core-001:unit:8defb588a8d8fec9",
+      "core-001:unit:641defd0212940a5"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+    "source_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "pinned_git_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "pinned_git_blob": "5f4124ed7981fad8058e6efd21db94373cf928bf",
+    "lf_normalized_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 76,
+    "bytes": 4014,
+    "unit_ids": [
+      "core-001:unit:1f0603189df1d77c",
+      "core-001:unit:944cf663eab9a67d",
+      "core-001:unit:c2ed5409e1843765",
+      "core-001:unit:e7e83c4b5175ed90",
+      "core-001:unit:d50333b34ee95a20"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+    "source_sha256": "7c6efd3849e17bae1e82c6b2e553898b04913c34dee71737036ad9a43da948fa",
+    "pinned_git_sha256": "7c6efd3849e17bae1e82c6b2e553898b04913c34dee71737036ad9a43da948fa",
+    "pinned_git_blob": "4ca71aba3265042becbd25c234b3b3f531c2efbf",
+    "lf_normalized_sha256": "7c6efd3849e17bae1e82c6b2e553898b04913c34dee71737036ad9a43da948fa",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 290,
+    "bytes": 16031,
+    "unit_ids": [
+      "core-001:unit:4de862e17ea427f1",
+      "core-001:unit:96cdc4000da95b65",
+      "core-001:unit:30f5f48e56cea94b",
+      "core-001:unit:20d9ad283af27e02",
+      "core-001:unit:2a864b48811ddb2a",
+      "core-001:unit:3fe11919ebeb7f19",
+      "core-001:unit:cdce4d22b067b916",
+      "core-001:unit:210f359f013c97df",
+      "core-001:unit:c1edfc286bc5f451",
+      "core-001:unit:6295ba49ce88cf2b",
+      "core-001:unit:c8d2b18f767cdae2"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+    "source_sha256": "3dcdc1931cdcf47673e14f63a71745b38c30abf77f86bdc685e16a978c8e3501",
+    "pinned_git_sha256": "3dcdc1931cdcf47673e14f63a71745b38c30abf77f86bdc685e16a978c8e3501",
+    "pinned_git_blob": "f428e24ea62eed522d906bb7d43f334007baf426",
+    "lf_normalized_sha256": "3dcdc1931cdcf47673e14f63a71745b38c30abf77f86bdc685e16a978c8e3501",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 1058,
+    "bytes": 43009,
+    "unit_ids": [
+      "core-001:unit:d75daa45e8905e78",
+      "core-001:unit:9a2795debe7eb7e0",
+      "core-001:unit:6189d3cc119b1291",
+      "core-001:unit:8d3e100e77293f01",
+      "core-001:unit:8a438c950ba16617",
+      "core-001:unit:32c9ea02ec97a20e",
+      "core-001:unit:3541840a7026217f",
+      "core-001:unit:cf6cadbe62cedd11",
+      "core-001:unit:d40403d3651aa929",
+      "core-001:unit:15b19a2931c6434a",
+      "core-001:unit:e12c21f9388188c5",
+      "core-001:unit:24e90797dbd9ae65",
+      "core-001:unit:1a3c56dae938a95a",
+      "core-001:unit:cb721f4c35c7fa03",
+      "core-001:unit:683eb679b38bf0b7",
+      "core-001:unit:cb0806b475a7d77f",
+      "core-001:unit:7114546f4933fd2e",
+      "core-001:unit:0601bb2b8b39bb14",
+      "core-001:unit:a4b9e5320ca25efb",
+      "core-001:unit:3b10207d07a64d49",
+      "core-001:unit:ca146e5b601019ed",
+      "core-001:unit:1c71c3cdd2b37304",
+      "core-001:unit:9f276b1581677a84",
+      "core-001:unit:38a98a177995d00f",
+      "core-001:unit:a68f1636a87dd928",
+      "core-001:unit:f654c14528cd489f"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+    "source_sha256": "6dc53913bcb7e721ea0378e8d3198caea428def944cdef6b354c40bde502b8a9",
+    "pinned_git_sha256": "6dc53913bcb7e721ea0378e8d3198caea428def944cdef6b354c40bde502b8a9",
+    "pinned_git_blob": "02f3706d978c878f3d9a7d635c906ac86cc12cbb",
+    "lf_normalized_sha256": "6dc53913bcb7e721ea0378e8d3198caea428def944cdef6b354c40bde502b8a9",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 190,
+    "bytes": 6767,
+    "unit_ids": [
+      "core-001:unit:92912004f70dcca1",
+      "core-001:unit:95b2c5065ac8b2f7",
+      "core-001:unit:aceb51379b5ee76b",
+      "core-001:unit:98c108ce3d27d787",
+      "core-001:unit:72436994c8d3785b",
+      "core-001:unit:7f311180e27eac84"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PwStatusTests.cs",
+    "source_sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df",
+    "pinned_git_sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df",
+    "pinned_git_blob": "ac9d9ea0b962895282e7bce55956f0a86c837a9b",
+    "lf_normalized_sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": true,
+    "lines": 75,
+    "bytes": 2486,
+    "unit_ids": [
+      "core-001:unit:c7288c699b19db5a"
+    ]
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+    "source_sha256": "eec7d8b986d4cfba471ee689d8d83347d6bd41bd6b40eba9500e7e6bfbf576f0",
+    "pinned_git_sha256": "29f79c403700f2336ff048d292b4b99f47655a6da8e76fcfb8b3611472c53163",
+    "pinned_git_blob": "7b654ad75c643b7281d30f5e5a4f2cbf931c0f37",
+    "lf_normalized_sha256": "29f79c403700f2336ff048d292b4b99f47655a6da8e76fcfb8b3611472c53163",
+    "pinned_equal_after_utf8_bom_crlf_normalization": true,
+    "raw_equal_to_pin": false,
+    "lines": 31,
+    "bytes": 1012,
+    "unit_ids": [
+      "core-001:unit:610978382fa470cb"
+    ]
+  }
+]

@@ -1,0 +1,542 @@
+[
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "before_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+    "after_sha256": "252b78ee37ae59fb2edfc9e9cafdff2f5d757874a782c3d93bcd235760cf57ba",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 37,
+        "before_count": 2,
+        "after_start": 37,
+        "after_count": 3
+      },
+      {
+        "before_start": 54,
+        "before_count": 2,
+        "after_start": 55,
+        "after_count": 4
+      },
+      {
+        "before_start": 58,
+        "before_count": 1,
+        "after_start": 61,
+        "after_count": 10
+      },
+      {
+        "before_start": 86,
+        "before_count": 0,
+        "after_start": 98,
+        "after_count": 6
+      },
+      {
+        "before_start": 191,
+        "before_count": 0,
+        "after_start": 209,
+        "after_count": 2
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "7e7b584bfe6ef745f19b5d4adc10768b1b0826c9811a91b25bb4662980e43745",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 37,
+        "before_count": 2,
+        "after_start": 37,
+        "after_count": 3
+      }
+    ]
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "before_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "after_sha256": "d2035cf8a57f16dd5ba4f895b90c408d384c67e7b6f3535d75a60ba92a0b5762",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 32,
+        "before_count": 2,
+        "after_start": 32,
+        "after_count": 4
+      },
+      {
+        "before_start": 75,
+        "before_count": 3,
+        "after_start": 77,
+        "after_count": 23
+      },
+      {
+        "before_start": 88,
+        "before_count": 0,
+        "after_start": 110,
+        "after_count": 2
+      },
+      {
+        "before_start": 221,
+        "before_count": 0,
+        "after_start": 245,
+        "after_count": 10
+      },
+      {
+        "before_start": 396,
+        "before_count": 0,
+        "after_start": 430,
+        "after_count": 2
+      },
+      {
+        "before_start": 473,
+        "before_count": 4,
+        "after_start": 509,
+        "after_count": 10
+      },
+      {
+        "before_start": 487,
+        "before_count": 2,
+        "after_start": 529,
+        "after_count": 9
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X002",
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "4f6f671e61970d04c7fb06d2e6c5ba08f78208c4e18fca30d739e39692123229",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 529,
+        "before_count": 2,
+        "after_start": 529,
+        "after_count": 3
+      }
+    ]
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "before_sha256": "145fafcbddd198dfbb694d085b856100dbd7ec71d740cf1c8e277222de3c2d67",
+    "after_sha256": "23c3985a3fd1b9fa344917db33b8186ec2c350718e11c765f91edb1074bc57e9",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 92,
+        "before_count": 0,
+        "after_start": 92,
+        "after_count": 2
+      },
+      {
+        "before_start": 108,
+        "before_count": 1,
+        "after_start": 110,
+        "after_count": 1
+      },
+      {
+        "before_start": 114,
+        "before_count": 1,
+        "after_start": 116,
+        "after_count": 1
+      },
+      {
+        "before_start": 120,
+        "before_count": 1,
+        "after_start": 122,
+        "after_count": 1
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X002",
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "23c3985a3fd1b9fa344917db33b8186ec2c350718e11c765f91edb1074bc57e9",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+    "before_sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+    "after_sha256": "0a652dbd773cdd634a357e5cd9f7adddb654761404babf34a768517614502b15",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 88,
+        "before_count": 1,
+        "after_start": 88,
+        "after_count": 1
+      },
+      {
+        "before_start": 91,
+        "before_count": 0,
+        "after_start": 91,
+        "after_count": 2
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "predecessor_sha256": "0a652dbd773cdd634a357e5cd9f7adddb654761404babf34a768517614502b15",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+    "before_sha256": "d893613409896ba63a52e2826dbfb129dd624410b8e85cd7b620bef7f51614d8",
+    "after_sha256": "4127df8af0efee371c0dbe851cb061e17571e2a182c853d0c883162855c024d9",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 23,
+        "before_count": 3,
+        "after_start": 23,
+        "after_count": 4
+      },
+      {
+        "before_start": 30,
+        "before_count": 1,
+        "after_start": 31,
+        "after_count": 1
+      },
+      {
+        "before_start": 41,
+        "before_count": 1,
+        "after_start": 42,
+        "after_count": 1
+      },
+      {
+        "before_start": 52,
+        "before_count": 1,
+        "after_start": 53,
+        "after_count": 1
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X002"
+    ],
+    "predecessor_sha256": "4127df8af0efee371c0dbe851cb061e17571e2a182c853d0c883162855c024d9",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+    "before_sha256": "c80eca42c1b5c5d18d867af94d7c625413e2fce7d26253d24ee73237c8daa9ca",
+    "after_sha256": "0869eb6ee872f520132e4856cfe492cdb3fb6e06f6c69d185b03e2cecd6a6988",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 31,
+        "before_count": 2,
+        "after_start": 31,
+        "after_count": 8
+      },
+      {
+        "before_start": 307,
+        "before_count": 3,
+        "after_start": 313,
+        "after_count": 5
+      },
+      {
+        "before_start": 575,
+        "before_count": 0,
+        "after_start": 583,
+        "after_count": 2
+      },
+      {
+        "before_start": 671,
+        "before_count": 0,
+        "after_start": 681,
+        "after_count": 4
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X002",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007"
+    ],
+    "predecessor_sha256": "0869eb6ee872f520132e4856cfe492cdb3fb6e06f6c69d185b03e2cecd6a6988",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+    "before_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+    "after_sha256": "3e2cc825ab4bd1227f7b19bf26e37504c0f2f4dba0704929f9e0a099c9069e83",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 37,
+        "before_count": 0,
+        "after_start": 37,
+        "after_count": 7
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X006"
+    ],
+    "predecessor_sha256": "3e2cc825ab4bd1227f7b19bf26e37504c0f2f4dba0704929f9e0a099c9069e83",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/Kdf.cs",
+    "before_sha256": "c801bcb46603c91a89c08bdb68e895e1a3f5b0c5f2fa73221ec2748fcb85a0fe",
+    "after_sha256": "899a908e9b7a0a14979ab68225533128855aa50b6462cf24a069b7dfd9c65d15",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 38,
+        "before_count": 0,
+        "after_start": 38,
+        "after_count": 2
+      },
+      {
+        "before_start": 75,
+        "before_count": 0,
+        "after_start": 77,
+        "after_count": 3
+      },
+      {
+        "before_start": 319,
+        "before_count": 0,
+        "after_start": 324,
+        "after_count": 2
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X002",
+      "CORE-PGP-X003"
+    ],
+    "predecessor_sha256": "899a908e9b7a0a14979ab68225533128855aa50b6462cf24a069b7dfd9c65d15",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+    "before_sha256": "f0d3c11cdd8b7c2c5c6b0f2f05bff6acc0d27b1d007a865ae40025aea1c54760",
+    "after_sha256": "ab35501aff68ffe955c16f210b031abfa1302653e28c9451651ff5889472f807",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 199,
+        "before_count": 0,
+        "after_start": 199,
+        "after_count": 2
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X006"
+    ],
+    "predecessor_sha256": "ab35501aff68ffe955c16f210b031abfa1302653e28c9451651ff5889472f807",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+    "before_sha256": "a56b8eb0ebf35588d53239c981f190b29c6872976c283552a9ee677dd39c6163",
+    "after_sha256": "56c1ec91bf7e5e230866432662d38ba407ab42494c25684881007eae616ffc19",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 162,
+        "before_count": 1,
+        "after_start": 162,
+        "after_count": 3
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X004"
+    ],
+    "predecessor_sha256": "56c1ec91bf7e5e230866432662d38ba407ab42494c25684881007eae616ffc19",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+    "before_sha256": "a3e816b6d82a4da3a87603cfd062637f889e4c42ed147be34bea2dd9781f3377",
+    "after_sha256": "1509f0e864ab5424dbc5d9482978ad020951304545c9732212c5e375d33e4663",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 57,
+        "before_count": 1,
+        "after_start": 57,
+        "after_count": 3
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X005"
+    ],
+    "predecessor_sha256": "1509f0e864ab5424dbc5d9482978ad020951304545c9732212c5e375d33e4663",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.cs",
+    "before_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+    "after_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 100,
+        "before_count": 0,
+        "after_start": 100,
+        "after_count": 5
+      },
+      {
+        "before_start": 399,
+        "before_count": 0,
+        "after_start": 404,
+        "after_count": 3
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X006"
+    ],
+    "predecessor_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+    "before_sha256": "1d98b567de4df25c42b74947f7ba100148d9c76a01d188ab2110644a882bf393",
+    "after_sha256": "2281e630a43346e33376365cfaaf5bd578add06e8c8f26876c5caf1c4571c0f7",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 26,
+        "before_count": 0,
+        "after_start": 26,
+        "after_count": 6
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007"
+    ],
+    "predecessor_sha256": "2281e630a43346e33376365cfaaf5bd578add06e8c8f26876c5caf1c4571c0f7",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+    "before_sha256": "bf994242ce0c9a0529bc1c9037cc4ede1c83bbb41ffa90aba2b5dfdf4780764f",
+    "after_sha256": "8143bdcf68b605697757b386fe31c37017bd9e54fa30012aa0a9d6042ccf0701",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 46,
+        "before_count": 0,
+        "after_start": 46,
+        "after_count": 5
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X003"
+    ],
+    "predecessor_sha256": "8143bdcf68b605697757b386fe31c37017bd9e54fa30012aa0a9d6042ccf0701",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/tests/CLAUDE.md",
+    "before_sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+    "after_sha256": "4d5017e2de94d53b1c215ff755f81c1ac534f2a6b3383b62b9b5e6509f7b901e",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 13,
+        "before_count": 0,
+        "after_start": 13,
+        "after_count": 26
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "4d5017e2de94d53b1c215ff755f81c1ac534f2a6b3383b62b9b5e6509f7b901e",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+    "before_sha256": "1552a15e3e7fc35e3d6acaf173ae1e6fd9319876c80db3de14df4aafde99a71e",
+    "after_sha256": "7d4338b27a41d8516806f62466b3276464f1560c82fd18f64c7487dc62e1f7bd",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 79,
+        "before_count": 1,
+        "after_start": 79,
+        "after_count": 2
+      },
+      {
+        "before_start": 82,
+        "before_count": 1,
+        "after_start": 83,
+        "after_count": 1
+      },
+      {
+        "before_start": 126,
+        "before_count": 2,
+        "after_start": 127,
+        "after_count": 2
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "7d4338b27a41d8516806f62466b3276464f1560c82fd18f64c7487dc62e1f7bd",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+    "before_sha256": "90b087ce7568b52cb0c8a945d2379928fe9b07f32f1d7aa6422ef1404df57d12",
+    "after_sha256": "8fd707acf4c1f4db33393908dcbe6d009096c94bb6fa7ea4256c76b09d9cc931",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "changed_ranges": [
+      {
+        "before_start": 41,
+        "before_count": 1,
+        "after_start": 41,
+        "after_count": 4
+      },
+      {
+        "before_start": 43,
+        "before_count": 0,
+        "after_start": 46,
+        "after_count": 4
+      }
+    ],
+    "candidates": [
+      "CORE-PGP-X005",
+      "CORE-PGP-X008"
+    ],
+    "predecessor_sha256": "8fd707acf4c1f4db33393908dcbe6d009096c94bb6fa7ea4256c76b09d9cc931",
+    "predecessor_to_revision_2_ranges": []
+  }
+]

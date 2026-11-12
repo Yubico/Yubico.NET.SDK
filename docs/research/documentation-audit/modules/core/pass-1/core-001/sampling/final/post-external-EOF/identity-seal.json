@@ -1,0 +1,129 @@
+{
+  "state": "IMMUTABLE TWO-FILE EOF FINAL CANDIDATE SUCCESSOR",
+  "predecessor_seal_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/identity-seal.json",
+  "predecessor_seal_sha256": "b93a2584b10dc6ee35c264417b452cc3c80d93d5b4183451bdc121cc67ab61fb",
+  "verified_new_input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/prepare.py": "d8bd08ee97f280a4cd6b7fea9897b5e8f84aca81c0e654a9beb3a91a8bc87846",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/verify.py": "2131898fd4b158d71dc243efdc32ea32518faf4caae891b188514f29e9a3a9e7",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/identity-seal.json": "b93a2584b10dc6ee35c264417b452cc3c80d93d5b4183451bdc121cc67ab61fb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/EOF-file-byte-proofs.json": "f34b60726dd4c1093e3f957720cbe9ec43fb78c2c26bc085dc6b61a2fb90a073",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/EOF-original-unit-range-deltas.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/EOF-scope.json": "412cbff083ca750284ef0715c8af06b6d7b2a531c8fa4a5ccfce2801797109ff",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/accepted-transfer-chain.json": "5d1830a8b9ae4a605142296f3c3c073c4bcfd877d8cf835e5435f4eebbfebe63",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/actual-current-read-verdicts.json": "0aa39733937bf87170917e8cb8bf62f0bf2d0a6116769e0826900d72dabf60d3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/additional-read-preservation.json": "c729a4d4fb3706aecc5f6ae79b5d54ec8891a9f151983ce3acafd46932083d80",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/adjudication.json": "375de1a4d493f6b67a21a56fc5b0b8666866f37104da4283ad410d7f17a91a34",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/candidate.md": "e64cec98978904cec55215082230628cd5da428ccbba9f41b52d58e8fb240662",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/current-products-at-final-capture.json": "224d22f7d6be130abf950ef291177b0d0ee85de2605dfc4b5879c0edd3b3b3fc",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/input-identities.json": "5cc0981fc75f91df2cf9903f539a317b5e676ba9e44fde13d31a98aef93adb67",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/latest-reviewed-prose-byte-proofs.json": "0f35b376993e9e4a32a1c82d8ca510ff0f869361f47e05e58a92e07be30a1476",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/owner-role-quotas.json": "07d39596b52001d5ed97e3e4cde1f115f067ddad5fa51a3c2168dc40bd579d24",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/owner-totals.json": "1c951da015cd22e0c1eac4c5c1c86e805f195a3892edc86a29db1cca19fedcfb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/population-current-range-overlay.json": "dedb6b612cf5d444912cc34b2fd1d402f18424c4456e2804d33c1051461a00be",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/predecessor-record-seal.json": "692766ea9482f8b77167ee782ff84eae5d4bd4f63156d6874d676735e329e1f8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/preparation-notes.json": "a0b75b8a149cf80702f257f28052ff19e45125922118256357331a959fa2afeb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/preparation.stdout.json": "62aa4c0aff307bbbff00329f45b089300f3aad561006b7b5e6091966b8a2d146",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/prepare.py": "e38c1ffdaeca857aaf9454c91fcb8aa8ebb6f7935b174d65d3d803cbfe4b5c08",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/root-bullet-population-overlay.json": "71284254070d5b775125a841cf39dc68e2394640ec73b580c1b22ebbd58a50bc",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/structural-check.json": "01bf88aa2a3ca043f3bba5d68ff63a25feefd82d82ed11938d3253a84837376a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/summary.json": "62aa4c0aff307bbbff00329f45b089300f3aad561006b7b5e6091966b8a2d146",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/verification.json": "4334d8f2d7b00c8acecac576bf4a50d1b21fd9bd9fdef2d580b8eb374c693284",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/transferred-state/verify.py": "817e3ef625a368b8fa9f4941c6e9a79016ec5146e461275980aa9678ef294adf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-format-external-EOF.json": "6e67a839602dfd789667c5102d4da163e1d02119b1488da20336369177ba7276",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/review-identities.json": "d865acbe220e19873b66726aaf8693c8e174843d62380f47db3d2bb84e28e8ed",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/source-snapshots.json": "fb60b98283f685a1b30e9d0d1262942855b2ea667fc710adf14bed72e4a36cd9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/eof-identities.json": "79404e587f1360b9d3c4209a1f719086b63addb912e70465423164e89ae6c864",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/eof-only.patch": "f5c82111cb86e52a8c5a0de620f487efff3f934d28e529389243aa5c5105e818",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/format-final/external-scope/review.md": "263f0e43da638dd5b815a2058dca659e9b9d4f10444b3dde96374e1597ba8916",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/prepare.py": "ae9ca1d75499252cb658bca96c6fcb1a50cfbc1192aaafe4d7631cc81e6b00ff",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/known-accepted-selected-role-scope.diff": "3471a9c203599b649fd6ee2ad6078485a4a6b8f42923fa7f0596bf6f3bd38293",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "verification/LinuxHidRouteVerification/Evidence.cs": "faba33e119d3ea2361dd390943adc57fbb36ae1741a31283c817c56658d476a1",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs": "194b29775d29323ae1ce2d94ccc35abbf162ac15de858ca58a63295c90e4652d"
+  },
+  "composed_input_identities_sha256": "3e024d520e566f77a5aeeb09dceb98d37f366fbaacf809377703f6e3726cfc47",
+  "current_manifest_sha256": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b",
+  "output_identities": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/adjudication.json",
+      "sha256": "ea8eb365af7f877248652fab7dcb1086f452e7a113c0bec7e85adc16bebbeb3c",
+      "bytes": 397
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/affected-actual-read-map-overlay.json",
+      "sha256": "a0b4f66b16317c121c7969f4a64430c58ed89b1768cd25cbeaa8de48c898c0dd",
+      "bytes": 19270
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/affected-population-range-overlay.json",
+      "sha256": "7abd1413b304d5429f392e86d2436794675a6762d6619d62797f5eab24ab96a1",
+      "bytes": 93544
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/candidate-composition.json",
+      "sha256": "da307995774b0c1f51eaf52484745dbe864276061bd20a203219379f6d0acbce",
+      "bytes": 1220
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/candidate.md",
+      "sha256": "27a7ed0cef18ee589e495af09f442bc89e8e445e34c36ae758b1385284b9a211",
+      "bytes": 1743
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/composed-input-identities.json",
+      "sha256": "3e024d520e566f77a5aeeb09dceb98d37f366fbaacf809377703f6e3726cfc47",
+      "bytes": 194039
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/current-products-at-successor-capture.json",
+      "sha256": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b",
+      "bytes": 104259
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/literal-unit-range-deltas.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "bytes": 3
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/new-input-identities.json",
+      "sha256": "4f7a28a03f91d6a38a3f216c7f8f56dc9b6fd8263e77504158ced3cc8662dd05",
+      "bytes": 7323
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/prepare.py",
+      "sha256": "d8bd08ee97f280a4cd6b7fea9897b5e8f84aca81c0e654a9beb3a91a8bc87846",
+      "bytes": 15119
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/structural-check.json",
+      "sha256": "398dd146bfe8889669d4ea66f1b7d4634a910ac0caecd712ec7d59a804e2f10f",
+      "bytes": 709
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/summary.json",
+      "sha256": "22c65843d1947f768a62eca9b6354597926e521640f245982e01d4d7b81433d9",
+      "bytes": 1589
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/two-file-byte-proofs.json",
+      "sha256": "cc7d2597a37c9822c70d4b75ae2136e80656d86eabce1b4859e5cba684aa713a",
+      "bytes": 1300
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/verification.json",
+      "sha256": "76f0c5593b47c3fb62eb8de9e5bc56ec1d1b77964941bb273cc6c952ad7d85b2",
+      "bytes": 10851
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/final/post-external-EOF/verify.py",
+      "sha256": "2131898fd4b158d71dc243efdc32ea32518faf4caae891b188514f29e9a3a9e7",
+      "bytes": 7026
+    }
+  ],
+  "Astra_adjudication": "PENDING REVIEW",
+  "fresh_independent_adjudication": "PENDING REVIEW",
+  "sampler_PASS": null,
+  "immutability": "Append a hash-bound review/adjudication or successor; do not mutate predecessor or successor records."
+}

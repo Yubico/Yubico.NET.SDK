@@ -9,7 +9,7 @@ comes with it.
 > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
 > constraints.
 
-## Preview session feature-query migration
+## Session feature queries
 
 `IApplicationSession.IsSupported(feature)` remains public for optional compatibility/UI queries. It evaluates
 known firmware support, not runtime authentication, device configuration, or guaranteed command success.
@@ -21,9 +21,13 @@ reported errors rather than calling an enforcement method first.
 
 `ApduResponse` is a sealed reference-type owner, not a value-type record. Its constructors copy their
 input; `RawData` and `Data` are read-only views of the owned copy. Call `Clear()` after consuming sensitive
-response material. It zeroes the complete owned response (including status bytes) and all previously
+response material, preferably in `finally`. It zeroes the complete owned response (including status bytes) and all previously
 obtained views, without changing constructor input. Read/check status before clearing. Aliasing a response
 shares its owner; there is no default empty response or synthesized value equality.
+
+Clearing this owner leaves constructor inputs, transport staging, earlier response fragments, and any
+separate decrypted temporary outside its reach. Clear caller-owned copies separately; this API is not
+an end-to-end erasure guarantee.
 
 ## Requirements
 
@@ -63,9 +67,14 @@ foreach (var each in await YubiKeyManager.FindAllAsync())
 }
 ```
 
-One `IYubiKey` is one physical YubiKey, even when it exposes several interfaces at once. `SerialNumber` is
-the durable identity; it is `null` on devices that do not report one, such as the Security Key series.
-Discovery needs no PIN, touch, or open session. Later snippets assume these directives and a `device` obtained the same way;
+An `IYubiKey` groups the observed interfaces of a physical key when discovery evidence permits.
+Partial observations can split one key or combine complementary slots from same-PID keys; see the
+[grouping bound](../../docs/architecture/device-discovery-guarantees.md#g2-the-epistemic-bound).
+`SerialNumber` is durable identity when reported; it is `null` on devices such as the Security Key series.
+Discovery needs no PIN or touch, but can open short-lived connections and select applets to read metadata.
+Coordinate direct connections and disjoint scoped views before scanning the same key. Later snippets are
+composable fragments: they assume these directives, a `device` obtained the same way, and the typed inputs
+named in each task; they are not one concatenated program.
 `Yubico.YubiKit.Piv` is referenced only to show an application session.
 
 ## Common operations
@@ -76,19 +85,24 @@ manager watch creates a producer; monitor watch subscribes to an existing one.
 
 `YubiKeyMonitor` owns one continuous tracking lifetime: `WatchAsync` replays `DeviceAdded`, emits
 `SnapshotComplete` (including empty discovery), then streams `DeviceAdded`, `DeviceRemoved`, and
-`DeviceUpdated` changes. Maintain a consumer projection for cached membership; disposal ends tracking
-without disposing application-owned sessions/connections, and later enumerations complete empty.
+`DeviceUpdated` changes. Maintain a consumer projection for cached membership. Application-owned
+sessions/connections retain their own lifetimes; reaching feed completion makes later enumerations
+end empty. The cleanup conditions below apply to this tracking lifetime.
 
 Create it with `await YubiKeyManager.CreateMonitorAsync(cancellationToken)` and dispose with `await using`.
 Initialization registers listeners before the loop's single initial scan and waits for publication,
-including successful empty discovery. Startup failure/cancellation cleans up the partial lifetime; the
-creation token does not control the monitor after successful creation. The monitor performs all
+including successful empty discovery. If the first-publication wait fails or is canceled, the factory
+awaits constructed-monitor disposal before rethrowing; cleanup failure can replace the earlier error
+or prevent later cleanup stages. The creation token does not control the monitor after successful
+creation. The monitor performs all
 initial, listener-triggered, and five-second fallback scans sequentially. There is no manual refresh or
 stop/restart mode: dispose the monitor and create a new one to recover from terminal failure. There is no
 process-global monitoring lifetime or device cache.
 
 Transport listeners share payload-less `IDeviceChangeListener.Changed` hints, not physical-device truth.
-The monitor reconciles scans; listener failure falls back to interval discovery. An enumeration timeout is
+The monitor reconciles scans. Listener startup failure leads to logging and cleanup attempts; later
+listener attempts depend on logging returning. If construction completes without listeners, interval
+discovery remains available. An enumeration timeout is
 handled per path: one-shot `Find…Async` logs a warning and returns the other transport's results for that
 call; a monitor never publishes a partial scan, so the timeout fails `CreateMonitorAsync` on the first scan
 and, after initialization, keeps the previous snapshot until a later scan succeeds.
@@ -102,15 +116,21 @@ enumeration's first `MoveNextAsync`, it captures membership and subscribes at th
 completed publication, so there is no snapshot/subscription gap. Initial replay does not occupy the
 independent 256-change delta buffer; changes arriving while replay is consumed can still overflow it.
 Overflow faults only that watcher: **clear its device projection and re-enumerate the same monitor's
-`WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. Disposal allows already
-captured replay and published deltas to drain, but new enumerations complete empty.
+`WatchAsync`** to rebuild it safely. Canceling a watcher does not stop monitoring. If disposal reaches
+feed completion, healthy uncanceled streams can drain captured replay and published deltas; existing
+terminal/overflow errors remain observable, and later enumerations end empty.
 
 Use the replaying stream to initialize a UI projection, or independent `FindAllAsync` for a one-shot lookup.
-Disposal sequentially stops listeners, cancels and awaits the loop with no drain timeout, retires discovery,
-and completes `DeviceChangeFeed`; native discovery budgets bound waits, while already-open native work
-retains its leases until actual teardown. Already-published replay and changes may still drain.
-Concurrent watch enumerations are safe, and disposal may overlap them: they end normally. Disposal must
-not be called concurrently with itself. See the
+Disposal caches one task and follows an ordered path: attempt listener callback-clear/stop/dispose,
+cancel and await the loop, retire discovery, then complete `DeviceChangeFeed`. Later stages depend on
+earlier calls returning. A throwing logger during listener cleanup can interrupt its loops or
+signal-channel completion before loop cancellation/join, retirement, and feed completion. Final
+diagnostic logging can also fault disposal after feed completion. The loop-await stage has no separate
+drain timeout; discovery budgets bound individual waits, while already-open native work retains leases
+until actual teardown. Concurrent watch enumerations are safe, and disposal may overlap them. When
+cleanup reaches feed completion, healthy uncanceled streams can drain and end normally; previously
+faulted subscriptions keep their terminal/overflow errors, and later enumerations end empty. Disposal
+must not be called concurrently with itself. See the
 [usage guide](../../docs/usage/device-discovery.md#device-monitoring) for picker and generic-host samples.
 
 ### Discover selected interfaces once
@@ -152,6 +172,14 @@ does not clear the last successful snapshot. Use `ManagementSession.GetDeviceInf
 it does not promise to update discovery metadata. Continue using `device.SerialNumber` for durable
 identity: its independent contract can retain a known serial even when the latest snapshot omits it.
 See [cached device metadata](../../docs/usage/device-discovery.md#cached-device-metadata) for details.
+
+`DeviceInfo` copies scalar fields when returned, but `ChallengeResponseTimeout` currently retains read-only
+memory backed by the input TLV. A read-only view prevents writes through that view; it does not create
+independent storage or guarantee stability after the backing owner is cleared. Avoid treating the
+whole value as an immutable cache key. Firmware, enabled-capability fields, and transport presence also
+answer different questions: use the applet operation's prerequisites rather than inferring success
+from any one of them. Major-zero firmware versions, including `0.0.0`, pass optimistic SDK feature
+checks; that is compatibility policy, not evidence that hardware implements every feature.
 
 ### PC/SC sharing policy and migration
 
@@ -206,10 +234,12 @@ another handle can select a different applet and disturb the active session. Pre
 policy still determines whether other processes can open the card.
 
 Factories snapshot `DefaultSharing` when constructed; changing it does not reconfigure existing factories
-or connections. Shared and fallback policies permit other PC/SC handles to use card-wide security state,
-including verified PIV PIN state. `connection.IsExclusive` reports the acquired mode. All built-in modes
-still request `SCARD_UNPOWER_CARD` on release. PC/SC exclusivity is not an isolation guarantee for HID or
-custom transports; no-hardware policy tests do not independently prove physical card isolation.
+or connections. Shared and fallback policies allow other PC/SC handles to interact with card-wide applet
+and security state. `connection.IsExclusive` reports the acquired PC/SC sharing mode, not a process-local
+PIN authorization. All built-in modes request `SCARD_UNPOWER_CARD` on release; the request alone proves
+neither an observed power cycle nor cleared PIN state. PC/SC exclusivity is not an isolation guarantee
+for HID or custom transports. Actual cross-process PIV state and physical release need their own
+device/platform evidence.
 
 ### Open an application session
 
@@ -296,7 +326,15 @@ ApduResponse response = await raw.TransmitAndReceiveAsync(
     new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, requestData),
     throwOnError: false);
 
-Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
+try
+{
+    Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
+    // Consume response.Data here before clearing its owner.
+}
+finally
+{
+    response.Clear();
+}
 ```
 
 `RawCtapHidSession` and `RawOtpHidSession` are the HID equivalents, created with
@@ -355,6 +393,11 @@ using the interface's default `BeginTransactionAsync` executes synchronous `Begi
 the default; the override's responsiveness and native drain depend on its implementation, and neither
 the override nor the returned scope automatically inherits the built-in
 connection's native drain guarantees. End the scope before disposing its connection.
+
+The built-in transaction-end failure path currently logs the failure and closes admission; a later
+connection disposal reports the stored error. Scope-disposal completion alone is therefore not a
+universal transaction-success signal. Keep scope end, native completion, disconnect/context release,
+and the final connection disposal outcome distinct when deciding whether to reopen.
 
 `IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
 `IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
@@ -494,14 +537,29 @@ These tests do not attest Linux drivers, native AOT, hardware timing or whole-pl
 Core owns the SCP key-parameter types; session factories establish the channel from them.
 
 ```csharp
-using var keys = new StaticKeys(encKey, macKey, dekKey);
-using var scp = new Scp03KeyParameters(KeyReference.Default, keys);
+using var scp = new Scp03KeyParameters(
+    KeyReference.Default, new StaticKeys(encKey, macKey, dekKey));
 
-await using var raw = await device.CreateRawSmartCardSessionAsync(scp, firmwareVersion);
+await using var session = await device.CreatePivSessionAsync(
+    new SessionCreationOptions { ScpKeyParameters = scp });
+// Perform supported PIV operations here. Session disposal precedes parameter disposal.
 ```
 
 `Scp03KeyParameters.Default` carries the well-known factory keys for test devices. Manage the keys on the
 device with `Yubico.YubiKit.SecurityDomain`.
+
+The snippet assumes three application-supplied 16-byte source key buffers. `StaticKeys` clones them;
+clear those source buffers separately when no longer needed, including on failure. `Scp03KeyParameters`
+retains and disposes that exact `StaticKeys` object. `Scp11KeyParameters` retains its supplied keys and
+certificate objects, disposing the OCE private key and certificates but not the SD public key. Record
+`with` copies share these contained owners; they are not independent credential lifetimes. Keep one
+clear disposal owner and keep parameters alive through every operation that may reuse them.
+
+SCP protects channel traffic; it supplies no applet PIN, UV, or management authorization. In particular,
+SCP11b authenticates the card to the host. Session `IsAuthenticated` describes protocol setup and should
+not be used as evidence of host authorization or of a later device-side authentication phase. Use
+applet factories for selection before SCP. Raw `SelectAsync` after SCP uses a plain SELECT while retaining
+the existing processor graph; it is not a secure-channel recovery or reauthentication procedure.
 
 ### Decode Base32 text
 
@@ -601,7 +659,8 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 - Whoever creates a connection disposes it; use `await using`. A session from a `device.Create...` factory
   owns the hidden connection it opened. Built-in SmartCard connections request safe shutdown from their
   finalizer, but finalization is nondeterministic and is not a substitute for disposal.
-- Sessions refuse overlapping operations. Caller cancellation does not interrupt constituent I/O
+- Protocols refuse overlapping logical exchanges, not complete multi-exchange applet workflows. Await
+  each public operation before starting another or disposing the session. Caller cancellation does not interrupt constituent I/O
   after admission; FIDO keep-alive or OTP touch-wait cancellation can still end an exchange after
   protocol-specific cancel or reset handling. A failed partial exchange may require reopening the
   connection. Native work may not have a bounded completion time.
@@ -631,14 +690,17 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 
 ## Security notes
 
-- SCP key material is caller-owned. `StaticKeys` and the `Scp*KeyParameters` types are `IDisposable` and
-  zero their contents on disposal; zero any source buffers you supplied.
-- Never embed or log real SCP keys, and disable trace logging in production; APDU traces can contain
-  sensitive payloads.
+- Dispose SCP parameters and their contained owners as described above; clear source buffers separately.
+- Keep keys and credentials out of diagnostics. Ordinary APDU trace templates record headers and lengths,
+  while SELECT records caller-supplied identifier bytes and exception text has its own provenance.
+  Review providers and output destinations before enabling diagnostics; see [logging](../../docs/LOGGING.md).
 - `Tlv` and the collection from `TlvHelper.DecodeList` own buffers and must be disposed. The encode helpers
   do not clear your source buffers or their own returned encodings; for sensitive data, zero both in a
   `finally`. Full examples: [TLV processing](../../docs/usage/tlv-processing.md).
-- `ApduCommand` stores a reference to your data, not a copy. Zero the source after transmission.
+- `ApduCommand` stores a reference to your data, not a copy. Keep it unchanged until the original exchange
+  task is terminal, then clear sensitive source bytes. Canceling an outer `WaitAsync` wait does not end
+  the underlying borrow. Dispose outside callbacks and only after the complete workflow has finished;
+  disposing from a callback that the operation awaits can deadlock its own drain.
 
 ## Related
 

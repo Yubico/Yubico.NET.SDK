@@ -1,0 +1,6 @@
+
+//         ///    DigestInfo ::= SEQUENCE {
+//         ///        digestAlgorithm   DigestAlgorithm,
+//         ///        digest            OCTET STRING
+//         ///    }
+//         /// 

@@ -1,0 +1,61 @@
+{
+  "status": "unapplied EOF-only proposal; independent review required",
+  "all_363_primary_bytes_unchanged": true,
+  "accepted_map_sha256": "691a8fbb3666b8c78c87cca7af63cf4d29766a8f972043a5c3a6ee72207374bf",
+  "inputs": [
+    {
+      "path": "CLAUDE.md",
+      "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383"
+    },
+    {
+      "path": ".editorconfig",
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "Yubico.YubiKit.sln",
+      "sha256": "01dcb2ec2d4d70915803a4dc8c60868dfe578418e42f599ee26af821efa8bcc6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+      "sha256": "691a8fbb3666b8c78c87cca7af63cf4d29766a8f972043a5c3a6ee72207374bf"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-final-source-check/invocation.json",
+      "sha256": "558705daf56b1f17f8ff50d42f17e16b126840f2c0ee4ffd02552b1d0053986b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-final-source-check/receipt.json",
+      "sha256": "12f9e7a03172e200d2600c5a30982ef933a9a7e7179e32dbf41bd5107cef5169"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-final-source-check/stdout.log",
+      "sha256": "0f7771bd91d6e6db0adfd44f8810c22cac6c89525b09b1c1824d7a147bad905b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-final-source-check/stderr.log",
+      "sha256": "607ca72bc362dc4475411037e6a89c09c442d26b7f814a47549212d495a23a22"
+    },
+    {
+      "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/format-final-source-check.json",
+      "sha256": "1a1415940cddfb5bc17f6048eb309533f3a23b665ccbde8911e9dfea0d8c7d6a"
+    }
+  ],
+  "diagnostics": {
+    "FINALNEWLINE": 239,
+    "IMPORTS": 1,
+    "IDE1006": 3,
+    "IDE0005": 6
+  },
+  "primary_source_writes": 0,
+  "formatter_build_test_native_device_crypto_runs": 0,
+  "patch_sha256": "ee6f3b9e8198dcdcaea69c3016ba7de9352dc4788fe1a6058bb40d616220d516",
+  "snapshot_sha256": "0f2bbee75e18f18e6ac46262c18a5e93fc3d01bef0c81080ab0ef5e9c774db14"
+}

@@ -15,7 +15,7 @@
 namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
 
 /// <summary>
-///     Smart card function return values
+///     Windows-oriented smart-card return-value catalog, not a normalized cross-backend status model.
 /// </summary>
 internal class ErrorCode
 {
@@ -23,6 +23,8 @@ internal class ErrorCode
     ///     The client attempted a smart card operation in a remote session, such as a client
     ///     session running on a terminal server, and the operating system in use does not support
     ///     smart card redirection.
+    ///     The retained literal below differs from Win32 ERROR_BROKEN_PIPE (109 decimal, 0x6D);
+    ///     correcting that value is a separate implementation change.
     /// </summary>
     public const uint ERROR_BROKEN_PIPE = 0x00000109;
 

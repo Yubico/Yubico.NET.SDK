@@ -1,0 +1,13 @@
+PROPOSED SAMPLE — no verdict: core-001:unit:d75a3dbb4ec57c42 / A / XML-contracts
+Original fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef:scripts/toolchain/Conventions.cs:32–35
+Full exact original unit; enclosing owner/helper/assertion/cleanup context remains required:
+
+
+    /// <summary>--smoke: skip slow and user-presence tests.</summary>
+    public static readonly string SmokeFilter = $"{IsNot(Slow)}&{IsNot(RequiresUserPresence)}";
+Current primary mapping: {"state": "UNCHANGED-LINES-MAPPED", "first_line": 32, "last_line": 35, "current_file_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89"}
+Current complete intersecting lines (can include adjacent boundary-line context):
+32:     public static string IsNot(string value) => $"{Category}!={value}";
+33: 
+34:     /// <summary>--smoke: skip slow and user-presence tests.</summary>
+35:     public static readonly string SmokeFilter = $"{IsNot(Slow)}&{IsNot(RequiresUserPresence)}";

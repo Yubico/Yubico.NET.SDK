@@ -1,0 +1,1114 @@
+{
+  "predecessor_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-restore-fixed.json",
+    "bytes": 589744,
+    "sha256": "54170deeb614b2683903b11ed2a52495a16335f0eb787c39a71f1a4b3f66f9ae"
+  },
+  "profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-imports-fixed.json",
+    "bytes": 653190,
+    "sha256": "72753dce86098c486a9098bb79c1498efb2127fcc0192a1e6999ef300a8ed9c5"
+  },
+  "old_fixed_rows": 1715,
+  "new_fixed_rows": 1723,
+  "changed_existing_rows": 86,
+  "replaced_manifest_rows": 1,
+  "added_rows": 8,
+  "unchanged_predecessor_rows": 1628,
+  "compile_sources_unchanged": true,
+  "projects_unchanged": true,
+  "accepted_product_map_unchanged": true,
+  "generated_sources_changed": 82,
+  "consumer_sources_changed": 70,
+  "test_sources_changed": 12,
+  "changed_participants": [
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/contexts.py",
+        "bytes": 23538,
+        "sha256": "ea90736bb459c9cb1f5ae1520227859ff744062c4d4d89bb811611ff0c451f42"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/contexts.py",
+        "bytes": 23589,
+        "sha256": "5cae3217a67f34b967687859a1bde3d9269e36437bbc38d3683cc7c5f937d9fe"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-076.cs",
+        "bytes": 1389,
+        "sha256": "aebcf29c0553576fc967675612f2d443cb17fbf8f036f1464715b4276424d47e"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-076.cs",
+        "bytes": 1159,
+        "sha256": "388a776c68949c1d3e4427492f66c2bc24ee2da9f523c16dcaead1543a085b71"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-081.cs",
+        "bytes": 959,
+        "sha256": "764b77e2da59194c77b76d4493213dd92d625f85228a485f59faf4204850fde0"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-081.cs",
+        "bytes": 924,
+        "sha256": "1ccac750ab0683d056ada2cab33eba7af037bec821fa91b03ac36ad9aa079cfd"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-083.cs",
+        "bytes": 1186,
+        "sha256": "f5922156e681df5b30455e08be9a8414b6eb8e0855c31c28983136fdb9048ff2"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-083.cs",
+        "bytes": 1151,
+        "sha256": "616345fb58539b78bbb61aecb985ea1706b05a9e8b689514a4a4e18c16821253"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-087.cs",
+        "bytes": 1557,
+        "sha256": "2f3911ca63c3f177a5ab010dfea471bc5d008bbbf11f030f02f367f970f6293c"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-087.cs",
+        "bytes": 1521,
+        "sha256": "9e51ee869c7b18d4e23aebe5453e386f14eb834ed496f4fdf4a6ac36c5d9db69"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-089.cs",
+        "bytes": 932,
+        "sha256": "adb0c3c80d5cb98f9361e6ef0ac1f58dc18b0cbfe7cd0e04c30d06a3edcff804"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-089.cs",
+        "bytes": 904,
+        "sha256": "9eb17579e662067354ae87a39a28ce3c8b309e288af2d8e4d3be61032b42179d"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-095.cs",
+        "bytes": 2005,
+        "sha256": "8e9e16180e86a02ea11e0b5d4155a6168cc09446e50a0c3e2b5e089b4c25c5af"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-095.cs",
+        "bytes": 1782,
+        "sha256": "89e63d01a51f8147986fb469686f157614baf1e865b1eb5fda24c5ed6b0da318"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-097.cs",
+        "bytes": 1272,
+        "sha256": "8196e90039e4c7a8511bac33472d99ffcb6c9c65b8b50774fa299c93173a6339"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-097.cs",
+        "bytes": 1232,
+        "sha256": "5a9c087b17eeed9b4ac710a7a3322287ad166036c57ca4ee3cb2360f5cac1aa9"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-099.cs",
+        "bytes": 1518,
+        "sha256": "bf6f62ddb797020e7ec68c4035cd699e787b47bfd1efdad12dc6f66d4b414f30"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-099.cs",
+        "bytes": 1374,
+        "sha256": "65859ef37d9d678d804ce630eb5be4ca652eee0c9619e5cc770c69537cd07b54"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-002.cs",
+        "bytes": 1172,
+        "sha256": "88e838aedf4b9e1ec2f04519487294532911e23a2e51c94400973027512d5348"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-002.cs",
+        "bytes": 1139,
+        "sha256": "2f12416689c89b4014a2375d73f59148518f8feba6b66ea68e3e251f4f5b7a8e"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-003.cs",
+        "bytes": 1343,
+        "sha256": "cd5084bac6cac38d36bd6a6f4aad31c6fbb01c73a8c1d946cee37f9c24574321"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-003.cs",
+        "bytes": 1310,
+        "sha256": "e5ad6a39e9944ad444f58995e2a1a7ef431ce7364c5e9602e9b767cc19fde203"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-004.cs",
+        "bytes": 2466,
+        "sha256": "ea4fc078cf31dcaf0aee80111590fe921f6018aa451a8631d280eccbcf7390d6"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-004.cs",
+        "bytes": 2433,
+        "sha256": "ba3a3f2f491515a68a2d237a83b5e8d7b98976d15f589c87d2edaa6e9dc07b73"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-005.cs",
+        "bytes": 1841,
+        "sha256": "142535a904772c13a7e9df99900ad064ac278269a01efaa6a9f210b2d7508133"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-005.cs",
+        "bytes": 1808,
+        "sha256": "0eb11097f992dc30bcc42969c02c87e61a868164956f80ca399b2280632952bb"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-006.cs",
+        "bytes": 1844,
+        "sha256": "442bd8ef7c87a3aba7391be9ac0b531cd3e1b8a4649c244a35b9cfe3bb5725a4"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-006.cs",
+        "bytes": 1811,
+        "sha256": "bacbb2ed9cec106fb64807f6e42deb5589fa2dd8faf29ad10e72ebc04abc3ade"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-007.cs",
+        "bytes": 1273,
+        "sha256": "0af58964364d79ba5ec7cc4c10ce235d553b83375954653a2b6592c919e95a9c"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-007.cs",
+        "bytes": 1240,
+        "sha256": "807ff653ddbd33752c910ab3cf1a9e0cfe027ab48b335d07f89ed8209f458888"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-008.cs",
+        "bytes": 1286,
+        "sha256": "6c830793ad2ee91b5c9d288a5054a97371a994b5518f71e2d852a6922cd6a1f2"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-008.cs",
+        "bytes": 1253,
+        "sha256": "d994864b038ca0e5f6427636eee4b904fac4b04583b28ab9d52690ddb6e1cf7f"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-009.cs",
+        "bytes": 1129,
+        "sha256": "b05d6d30df0c2804e821ae68047bd909b09dd26a454a2c24107f4c53d071729f"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-009.cs",
+        "bytes": 1096,
+        "sha256": "d9a4c6ed6144ae4f2a5a2de3713b8b968a130c50fa84a9c3b5cef61df78036e3"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-014.cs",
+        "bytes": 1563,
+        "sha256": "65e1c896276f0d4ce0bd2ab886c53e108cf526b44ea6e633928e8b9f1d3d23e3"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-014.cs",
+        "bytes": 1530,
+        "sha256": "0903f402c77915e55988751bb65761fc66a3981a106eff984bc790c7019885df"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-015.cs",
+        "bytes": 1190,
+        "sha256": "c27323c3042a492d08b52648d02806bd24fec8d17465d40b857bfb58113d2d57"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-015.cs",
+        "bytes": 1157,
+        "sha256": "fa9a9254905fbe14af5d7fa18fea61f7061b0f0ceb31f71b2155fd587f6d3045"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+        "bytes": 1586,
+        "sha256": "bd722a0e6bbfef166d4471b4bd0264e082fb57c7a5b062ab46641a4c0b5c6e8d"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+        "bytes": 1209,
+        "sha256": "04284ea1abcbc1ca5b5390662274c6549ad474ab4f52039485d006329afc0814"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-018.cs",
+        "bytes": 1790,
+        "sha256": "adb96153bc07dc286defb1257b850a74d57048a92b05d2c05e1c8c049c88b593"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-018.cs",
+        "bytes": 1757,
+        "sha256": "f941c03b4cdf44bb72511fbb52ab1a3741c481788f4747e96a0535ccb72240dd"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-019.cs",
+        "bytes": 1414,
+        "sha256": "4c009bc2bb2832ec2643da40d09f75234af808614d95c81e5a91e91f8545b732"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-019.cs",
+        "bytes": 1381,
+        "sha256": "14e7b3f0b2504c0e338d13a7e15c3dbc155c11e8b514a90b3948ba96604c6801"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-020.cs",
+        "bytes": 1463,
+        "sha256": "464267adb8720db80b3c35b0ecb5578ddcf8633ac45e88c8f8ced206460d3ab7"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-020.cs",
+        "bytes": 1430,
+        "sha256": "34a840e973838ab27dee883ebe65c83a6793b80191f893f4b0d00e8f4893f1be"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-021.cs",
+        "bytes": 1419,
+        "sha256": "741f2fc335b60dd5b5b8e5ef001720df7da0dddcdfce17a22cb1afa6dbce59d7"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-021.cs",
+        "bytes": 1386,
+        "sha256": "aaf3bb36a307b9a59002059b100530c406cf78fcc23593361bb541433edb7511"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-022.cs",
+        "bytes": 3233,
+        "sha256": "67bf2346e3a147f9ede8c22a11a2f2b4939fbef9876035c0296482db410b3e40"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-022.cs",
+        "bytes": 3200,
+        "sha256": "e4aedef81cfed860f3a2e88678a2ca47e79adb01a1e9ff975ea289aac4a3aa35"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-023.cs",
+        "bytes": 1235,
+        "sha256": "ff5592784faa00983c835344f7c6e69f0cbe1cf0ba343a5ccd611b0c30976e9c"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-023.cs",
+        "bytes": 1202,
+        "sha256": "cec5726e5365c3e9eabc37c501939800bce9f72bd2312a45e997bc42c904fbf1"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-024.cs",
+        "bytes": 1530,
+        "sha256": "41e22f9ffafaed594016e0f9782d9d625f14e90e7a37e5dd56b7ffcad0fbf194"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-024.cs",
+        "bytes": 1497,
+        "sha256": "165f6a15fee7f1a810d8785f62ff66d79698eebcecc2b5d18f1ff967b2dc8a00"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-029.cs",
+        "bytes": 1434,
+        "sha256": "ed1be8514e7fb579e32139f06439ce7e0c212d007a21baf18435dca42b0774c0"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-029.cs",
+        "bytes": 1401,
+        "sha256": "fa668dacd74670b395a2cfb4753b24a3de61c9e8d7776db613011a8e75626aaa"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-033.cs",
+        "bytes": 3294,
+        "sha256": "f7bd955a693ce793ea261550a4fa79ae0e5064159c40e151136414d8c61b2247"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-033.cs",
+        "bytes": 3261,
+        "sha256": "764cf6f21343fdbbd806eedbf29073bb407c088ba8e4dba38a5eca52a12dfad8"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-034.cs",
+        "bytes": 2187,
+        "sha256": "3b2efbbe9a13d24664b1d1de26efed1837069b9e127cf0507762827f8a663054"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-034.cs",
+        "bytes": 2154,
+        "sha256": "11d86c99c0dc562f4f6e257e24985c4c9369d10e5ae2336d2c112c43f6f022dd"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-035.cs",
+        "bytes": 1551,
+        "sha256": "7c20fa62f53044ec17b32fa146c980ac7e353b9f42feaf1e26c7a5488907112a"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-035.cs",
+        "bytes": 1518,
+        "sha256": "046d6176851c807873dc1150347eb864180a858ef61521af57d8c705748d3371"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-036.cs",
+        "bytes": 2293,
+        "sha256": "a6504a1a6b30afdde9fae555d36e60ab0330375ebdb5a6059baf22114e957631"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-036.cs",
+        "bytes": 2260,
+        "sha256": "e0dee929f63dd73586cd3b0c723a04f1d05e2084879871149ab2f7c7ca7ce6f7"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+        "bytes": 4665,
+        "sha256": "16e420e2712e1abb2cdf89f9a802cd88fa64d1201b67bc1706896bc6c49369df"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+        "bytes": 3988,
+        "sha256": "35c65df534828906fb7470311fba1c2899e2638ba8b1efe79bc0193840243cf2"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-041.cs",
+        "bytes": 1891,
+        "sha256": "8646107f178a081762de6d69cf58489bd550bd410c3c28a34f676bcdc9a7c388"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-041.cs",
+        "bytes": 1858,
+        "sha256": "36d27f5e1dead332e7b511d0c443d7bf2d9fa9b0910097cc2254061ead5311cd"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-042.cs",
+        "bytes": 2224,
+        "sha256": "58d898a8cdfd81c3a0d712bd1814f98ca4eaa5b380afd3463ac1a4adeb90c76a"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-042.cs",
+        "bytes": 2191,
+        "sha256": "db7d4309cc9d39577a32ca1d1839d6e3aa56f1565b9e993aea6aae1e0f4e71e1"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-043.cs",
+        "bytes": 1647,
+        "sha256": "3733a711e079ec5855dff7e21078b87048feecf0dac51c14715ee0f49339073a"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-043.cs",
+        "bytes": 1614,
+        "sha256": "6e083e477ae144eafc0a768cc8ff83d1539e236f01ac49c09861f3f6f646f53b"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-044.cs",
+        "bytes": 2037,
+        "sha256": "7143879d828a994fb2d3222ac6fbe0f1276eeadfb311fea5c6ec91720231f259"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-044.cs",
+        "bytes": 2004,
+        "sha256": "ab164f93d5f784d017ad1733aa61e7160d438cda8c9bc659cbede90d23326cd4"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-045.cs",
+        "bytes": 1732,
+        "sha256": "f00fc508e93b402458a7613f9bd487ac1cdf83522e10abc631d2fb9d89675b83"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-045.cs",
+        "bytes": 1699,
+        "sha256": "caf60d310dfd79736d2bbb7c30d8b7db8d39ea582d6c5c82bd4a5917db10528f"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-046.cs",
+        "bytes": 2047,
+        "sha256": "f9015cc946a06da84b5242d0edb997363e5c33490c385504870651bff70338ca"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-046.cs",
+        "bytes": 2014,
+        "sha256": "aa4e5a2f7af608fddda47461edd069313fe27520f79d0342a5cc225817ecb608"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-047.cs",
+        "bytes": 1716,
+        "sha256": "ec0a44f8d068534f23cd55575e0930fc74368595143835769657129a3c63111c"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-047.cs",
+        "bytes": 1683,
+        "sha256": "ee2ce68ebdc8e2f4cd33ee223f827ad54755f5c4dc2860369f65fd02bd89132f"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-066.cs",
+        "bytes": 1176,
+        "sha256": "f96c36e5045a4d19ac8fab1f00e508df64953b14920188a584c42f017188884e"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-066.cs",
+        "bytes": 1101,
+        "sha256": "5c8baf7038657c09540acd9b5787b488c1eac273b85378aa649c0d93b6dbbb21"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-094.cs",
+        "bytes": 1419,
+        "sha256": "0846933245fc573bc1c3961812e820e04e239f17071142e1d6b737827408281d"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-094.cs",
+        "bytes": 1356,
+        "sha256": "bad8aabbfcf98f844e5eea3b1d2488da1356c4c25e8704aeade9930767391144"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-100.cs",
+        "bytes": 1072,
+        "sha256": "dde67527e4b0fa9783d03a973e3e4cb75b196d476d796c8ca2844e9d7668b129"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-100.cs",
+        "bytes": 974,
+        "sha256": "c4bd7f15cb4de69ca298c88ab1e2038cbfe79b30123c0a6f5052ddee085b32e0"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-112.cs",
+        "bytes": 1548,
+        "sha256": "4139890ce17fd0e145a0bee67d2f0d7864959093bb05f6717fd5904532a3f4f3"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-112.cs",
+        "bytes": 1512,
+        "sha256": "cc3c529d7729e00145974cf4f6c0f625f7667db8702329a6297b88824eeb95a1"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-151.cs",
+        "bytes": 1786,
+        "sha256": "417f3c9c859af134129c61721d2bd060ec6dd84fdc375f79c7080b1d5eb69dcc"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-151.cs",
+        "bytes": 1724,
+        "sha256": "917447272a60d96e9ce7465fe342c5ac8359cef478fb75c01d8e090089e7c051"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-153.cs",
+        "bytes": 1514,
+        "sha256": "89712be2f90bfbf931a7a7f01b25f4e59078e51680da36702ccdbfb52cb3a5f3"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-153.cs",
+        "bytes": 1424,
+        "sha256": "c4df8ce2abed544e729d9b1137389f96e01e98b8db7a0ede818e92aeadd22f5a"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-155.cs",
+        "bytes": 1145,
+        "sha256": "ab02609565919a98e768cc1659a6a1c8493b93b40226f6596312001824c81056"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-155.cs",
+        "bytes": 1112,
+        "sha256": "b768a56b71aa4e9ca8c7776589ddf8f1fe3bf1060a8b25f7a9774234c178fff4"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-164.cs",
+        "bytes": 2006,
+        "sha256": "6f0b8a0eb495dfcba393def39250beaa9b0d6f1a502e4186d6c57686a709165a"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-164.cs",
+        "bytes": 1887,
+        "sha256": "9115fa1d0e2b7ddfb41738057b261cf3eb81deca8706a1633b1cf6ac679fc5e4"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-181.cs",
+        "bytes": 1221,
+        "sha256": "b4cf4a66becba3841688e749ba41e8503cb1bfe7bd9f0033ee49c091e6ca347e"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-181.cs",
+        "bytes": 1172,
+        "sha256": "6efcc33ea61a580c83964e2bff8f1cdee56f20bcb40a6a127c71b7e18a7e75c0"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-185.cs",
+        "bytes": 1575,
+        "sha256": "5544058ddebbc86630cc61c2b8391416a3d63926943bbd2f24a6db67ff437e9e"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-185.cs",
+        "bytes": 1540,
+        "sha256": "0fc1608e40033323a8422baa6bad2710fad03b6490b258f505e06a34912d0408"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-186.cs",
+        "bytes": 1728,
+        "sha256": "e8899825da4f11e8fe69c7b4368082e40e01e5c8f264e2358bebd1211c81ae66"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-186.cs",
+        "bytes": 1653,
+        "sha256": "8d4fd7c2d146ddb63e2003748c1bdc69fcdfaa41e4823240a4ff11e9e414a101"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-187.cs",
+        "bytes": 1488,
+        "sha256": "80a5ce9195bf8d9aad3b4dbae89ebce23b4c920ee41a26325f5a7810a17c7e6a"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-187.cs",
+        "bytes": 1453,
+        "sha256": "c8418210d3c9b82f430f660dc94dc0aa1cbd80e91549252ba13ea3e6c9de5b39"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-193.cs",
+        "bytes": 2006,
+        "sha256": "90d237c0b8e8bc310d784efa99237889b930c52482b2f4871c4ced440959db29"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-193.cs",
+        "bytes": 1933,
+        "sha256": "fb17bd1a1461827d00873b594aa8f0ea88295ea29fbcd86384a9c169078b9439"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-195.cs",
+        "bytes": 1592,
+        "sha256": "b2ec48697a263918f0a8308675e0c53651f91d4a069a351588580b8cebd21fb6"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-195.cs",
+        "bytes": 1556,
+        "sha256": "086a9a5d1ca7eb8410c053db4a01366d42cc01baa51eea4e28c87228410a0dfb"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-196.cs",
+        "bytes": 1331,
+        "sha256": "13610b0785577a65ae6a747f8ad593d0400769bdab425000926093ca93753567"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-196.cs",
+        "bytes": 1269,
+        "sha256": "e052f2fe437481acffdae164642bf96295d624a4e0c6005a26f92c5d7c3340eb"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-197.cs",
+        "bytes": 1140,
+        "sha256": "15d463413edbef04eff9bf5e3ee49a7b51949cb6acd5f8eccf4ab6accbc6d5cf"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-197.cs",
+        "bytes": 1075,
+        "sha256": "831fba8e3e1652b53ca4687400fbbf2b76f6d801eaec1551b0815d2b4b1e7b68"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-198.cs",
+        "bytes": 1495,
+        "sha256": "08e623f6288de56e436fae84613e4f2dccd4f924dcab3466a93be679057ec962"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-198.cs",
+        "bytes": 1456,
+        "sha256": "9a50bda3cacad69a857b3427ec19318baea09afb8563646fdcedec1342d53408"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-202.cs",
+        "bytes": 1438,
+        "sha256": "4876e593244a92c0585d2a8c1a0c7824cba9bc2ffbc31ac23be1046103c61418"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-202.cs",
+        "bytes": 1375,
+        "sha256": "bc4fe64748c4b65e9a4aaf49a69e746b66704fee89af4cbc0500802be17e8af6"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+        "bytes": 1558,
+        "sha256": "d3b7896ea52f29b6cdb4c347fd786e705bbee8b7811a96a2ec5a9c47451f3d1b"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+        "bytes": 1243,
+        "sha256": "e8eb0f5802d13a7aecae435cf32e125af9655e32523322d9222f829d05416381"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-236.cs",
+        "bytes": 2259,
+        "sha256": "f44c5949b4a8d04952cac4994370f7adbade748f650509f449be49e553f7e18b"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-236.cs",
+        "bytes": 2219,
+        "sha256": "00d41ab9ad16399f0632393751096c5d89023d8102efef5017cc78ace3153d3c"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+        "bytes": 1406,
+        "sha256": "48595c3ec71fda288bba1ac4fbcf2770b68f22be3656bcc879861b768534bfcd"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+        "bytes": 1199,
+        "sha256": "ba1c1374086110e132812309e4ed3e1f4d9ed6c2205a2edc73cecf6ee2e960ec"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-287.cs",
+        "bytes": 1322,
+        "sha256": "8b984fa75ed607c323a9cef846302e3ed6d7135b967fbe611b364a3ee3d7e1fd"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-287.cs",
+        "bytes": 1218,
+        "sha256": "be895a53b69f0e03aa5853929b2fb0fc87ff688103ff276818f7e71585e21d1d"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+        "bytes": 1377,
+        "sha256": "95d3f0a3bce2c3ab6aac1916a1e17440b416733914d1197ec6e71641126cba14"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+        "bytes": 1102,
+        "sha256": "25f14e898ace1f2b677806c8a2165739495198f2fce3864beb7786881b2553e5"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+        "bytes": 1571,
+        "sha256": "f222e11c1e200582f9038726f676c333baf38e388c69926b0c2b06b282592e54"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+        "bytes": 1218,
+        "sha256": "85d334ca28e0cb56a979c28a99f51face8860ea9b931d458e497ba92770d2532"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+        "bytes": 1579,
+        "sha256": "d5fb7fbe7a93efe4cad9f1f7be7d8b535c55d59504fa58755c3f58891d297fb0"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+        "bytes": 1153,
+        "sha256": "210d2d6c039f802642d53afae7130a8a4598862b68bd5ad57f3464839b3bd6d9"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+        "bytes": 1367,
+        "sha256": "c67f913e3facbfa3d063d824ef7c6c40d645e005eca0ae915e84ef8f03ad8f13"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+        "bytes": 1151,
+        "sha256": "cbfb8fbaaba8e3e1a675ff3b72ef5a8f4f63b9a9d86689c7c4fc4281341b2510"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+        "bytes": 1543,
+        "sha256": "607470c9fb7db943a00a032c3bfc97c2f750a6f3250c2e36d31eff608c09847c"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+        "bytes": 1166,
+        "sha256": "bfa26b2f27eaa3d2ab19ab800a5b269bc23c44de723ebb826cabb019d9ebc497"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+        "bytes": 1374,
+        "sha256": "7d8f2b091f1f59c9d82b4d89f4384622f471e71f5d2586db2df8025d740cb080"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+        "bytes": 1050,
+        "sha256": "90df1594008a1c054dc231c06ae3b277723e6cfc606d9ce2c9aa584592839d0f"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs",
+        "bytes": 1452,
+        "sha256": "a1786bce37727b1b546799c2f6e5add6420d87655ba756367142dcb132688b89"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs",
+        "bytes": 1239,
+        "sha256": "6599ee9411e22fa1901c8b9c777584aaffe02f7d5306f7fad0518fa121b7bc88"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-414.cs",
+        "bytes": 985,
+        "sha256": "cf8ed08052eca256053230fe6ea3b5c1e4ed5b16504b7afb94ab32c452037c40"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-414.cs",
+        "bytes": 902,
+        "sha256": "309b9e3a5a88c0c9b3ff66fa8cde57c3bafaadedbca20b5ae48241606e0db83d"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-415.cs",
+        "bytes": 1342,
+        "sha256": "b9de50ef506bd98c0d8eb92e2c744307a916e661e2cb6b900cb798246d872bb3"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-415.cs",
+        "bytes": 1204,
+        "sha256": "a492b5e770cadc650cadb42ef53dcc27b9476d8b74ec50fa45d13c1f4f2b2795"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-060.cs",
+        "bytes": 1081,
+        "sha256": "4e985a408bc35f905ffee3939a7fb3f532cf310567fa8bd4ca8ebdef1bcfaca2"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-060.cs",
+        "bytes": 1033,
+        "sha256": "7eb096821ce8a3280757d0db23cfe517d31187e630684f495f0b1f60a29df876"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-142.cs",
+        "bytes": 972,
+        "sha256": "d7335ccd908d337e5bf8b1d0c56834584c69a8e45c2dce295ed8bea1853c9859"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-142.cs",
+        "bytes": 836,
+        "sha256": "949f5195183049c610f4632c4a9e07cebca54fc0b674d7672303c512f0c14f3d"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-012.cs",
+        "bytes": 1332,
+        "sha256": "03ac527261ef02acc7d820c1bc02c8cdaf6e1a2fb87c7f18b4afa5f0fb44e00b"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-012.cs",
+        "bytes": 1299,
+        "sha256": "12873d2d5be7f231d19e5667ce6f846038009f102e94094d0f0b4f2ae4637f81"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-026.cs",
+        "bytes": 2797,
+        "sha256": "11a6f15142db2120248ef5dd72f0c0eabc61dea5072f0b4b2714c63107dc4d92"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-026.cs",
+        "bytes": 2764,
+        "sha256": "aaf4ee44e575b9d00f06692f526179e11103ca711bac43f2c1ad04a69bdb1885"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-027.cs",
+        "bytes": 1380,
+        "sha256": "fd16f812a587768c29de2667ec6db89d4a41c1542ac263b278fbc9f0df9cce06"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.IntegrationTests/FULL-027.cs",
+        "bytes": 1347,
+        "sha256": "361deea5df62a1614fe38c5de2d7dd651a5c6937b36b5ec8176fe7f9f1a27408"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-010.cs",
+        "bytes": 1308,
+        "sha256": "f22177d79bba0a27dc71b7b1da42421486a87d20abf6f5fc415da9cead7efa2e"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-010.cs",
+        "bytes": 1275,
+        "sha256": "931f54a62c1616c02171d2ebf0618e0bc7e82aa85f2e7a4d9dcb4a085fb12825"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-011.cs",
+        "bytes": 1849,
+        "sha256": "8e0fa3425d3a3993e0c3e0500bb91ac138ea071d52a79a94e247c863a4aad35c"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-011.cs",
+        "bytes": 1816,
+        "sha256": "0fa63bf282b9c70ae11cfb7f77e2e195838f4d5325ead14ad8c54dde95383ed5"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-030.cs",
+        "bytes": 1413,
+        "sha256": "dd8d848832f3e4857cac948de3ec95b97b726223f693245b259da695956bfcd0"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Ctap2.UnitTests/FULL-030.cs",
+        "bytes": 1380,
+        "sha256": "809052b686267d608cf2136eaf9f38d8ae5e47c9c92d8513b2125bcd4ecd8629"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-206.cs",
+        "bytes": 1838,
+        "sha256": "b9ea9de1c145aa3418074fc6bf1e27f97049ef2a78ae86fe0242fb8d1a993a7e"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-206.cs",
+        "bytes": 1710,
+        "sha256": "b1069b9e003a0eb6a8c26d757aba55137a7b759e1ddf85ba39e6e8e5b54824fc"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-227.cs",
+        "bytes": 1787,
+        "sha256": "08a3a108d16687466d007a76fbde42fae2db89ad249c947eff53a85895b3f73b"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/EXT-227.cs",
+        "bytes": 1638,
+        "sha256": "df69d782a0904dba709b825f5705ccd1cd7fc70509d6d8c54cddcf718f8f997d"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-138.cs",
+        "bytes": 1358,
+        "sha256": "52e074861e492231ad5be0cbb95538409df169a9686eae1abd17f1abf16ee8c7"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-138.cs",
+        "bytes": 1308,
+        "sha256": "bad9d82a684743df2da731547f68bd7537719a86054d3697b425f6751fa1cd73"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/EXT-231.cs",
+        "bytes": 1409,
+        "sha256": "91de2389648e9ff4480216ff2a2f24e2b3bf72bc2f35a476a6065a9d3f17ce97"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/EXT-231.cs",
+        "bytes": 1409,
+        "sha256": "48efab792bfb0cf2a20039282da05aa90b02485edf2d093d28dc44c9014ff282"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 6078,
+        "sha256": "059953b5e0ad5076381682a6ebc43991067b6f3b7780e5d58197d96ddd5bf038"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 6230,
+        "sha256": "ec0de5178ee262f6d367476545eadb9a24b0a36b0d73cbccb0e68933c4024896"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/test-contexts.py",
+        "bytes": 8726,
+        "sha256": "e34f9f79e98b7805596a80024f5c77ad791bcf8394e777c78960ac8be5631ea8"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/test-contexts.py",
+        "bytes": 8850,
+        "sha256": "2a573364480efd7ef27d9b05702abfb5be4b7464b21313585f4fc422e9ae7763"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/review-correction/verify.py",
+        "bytes": 5507,
+        "sha256": "bc5ad40a2d58c23784b9590748424b4c241bf367047ac5d4afca8de3b330585d"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/review-correction/verify.py",
+        "bytes": 5512,
+        "sha256": "ba1e1db1446faede24d32cc4e0e283fa417581d8de9dfc7090aeb2905e025ab7"
+      }
+    }
+  ],
+  "replaced_participants": [
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/manifest-admitted.json",
+        "bytes": 2313436,
+        "sha256": "918a1a5fe65c875ad20b98ea2cd53d53593f75ed27eb6ff5201884b114903205"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/manifest-imports-fixed.json",
+        "bytes": 2305922,
+        "sha256": "56081a57131ccc4bc4acabd08ee72ec93da6a95aa37af4c7b7830fcd58dc676e"
+      }
+    }
+  ],
+  "added_participants": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler_imports.py",
+      "bytes": 1712,
+      "sha256": "340afccbfa53947733f842eafae99bef9be1e0738bfabb0126926eceaf8e88bd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler-import-correction/verify.py",
+      "bytes": 7242,
+      "sha256": "26f0bacc4afa269136d2dee89f7a8eaa853217671f22865b4f9b6192b262e33d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/external-contexts.py",
+      "bytes": 5273,
+      "sha256": "7ef74fe319ade5de70f3a5695fa43e304c6ca0b5b804169c2c28d06d0ea4b43d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/manifest-admitted.json",
+      "bytes": 2313436,
+      "sha256": "918a1a5fe65c875ad20b98ea2cd53d53593f75ed27eb6ff5201884b114903205"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler-import-correction/preservation.json",
+      "bytes": 114702,
+      "sha256": "5ee1b9f109317d2cb9f04356bb4c8240631de2aab663192ea7674755de265bc1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler-import-correction/generated-sources.before.json.snapshot",
+      "bytes": 522634,
+      "sha256": "4ad2d2260c707667f7e75c339c746f807a2c0a13b345bda163aa6daaf5020b1c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler-import-correction/actual-diagnostics.json",
+      "bytes": 64744,
+      "sha256": "a610858514e3abc8f8e401ad46ef1566ad486cee588233edc9380ecafbe34ed3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiler-import-correction/diagnostic-triage.json",
+      "bytes": 91501,
+      "sha256": "0ebc6eaf3bac1abee577805079c71063b9ad8d4ce80c67ed85e386bc5c079d6d"
+    }
+  ]
+}

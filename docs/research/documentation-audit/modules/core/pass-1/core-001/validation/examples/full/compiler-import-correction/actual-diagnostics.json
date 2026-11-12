@@ -1,0 +1,1249 @@
+{
+  "source_log": "artifacts/toolchain/runs/20261112-044456-975-build/02-build-Audit20261111.DocExamples.Full.log",
+  "source_log_sha256": "339c1eb31a067df291a702287e6fa982997b87984990d668d99572fe42512864",
+  "unique_diagnostics": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-076.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-076.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-076.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Protocols.SmartCard.Scp' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-076.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-081.cs",
+      "line": "20",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-083.cs",
+      "line": "20",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-087.cs",
+      "line": "20",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-089.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Ctap2' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-095.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Runtime.InteropServices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-095.cs",
+      "line": "22",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-095.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-095.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-095.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-097.cs",
+      "line": "20",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-099.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/EXT-099.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-002.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-003.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-004.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-005.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-006.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-007.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-008.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-009.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-014.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-015.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "29",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Text' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "30",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "31",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "32",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "33",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "34",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Ctap2' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "35",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Ctap2.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "36",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Ctap2.Extensions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-017.cs",
+      "line": "37",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Ctap2.Pin' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-018.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-019.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-020.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-021.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-022.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-023.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-024.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-029.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-033.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-034.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-035.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-036.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "37",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Buffers' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "38",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "39",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Text' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "40",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "41",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "42",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "43",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "44",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Utilities' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "45",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Ctap2.Cose' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "46",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Ctap2.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "47",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.WebAuthn' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "48",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.WebAuthn.Client' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "49",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.WebAuthn.Client.Authentication' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "50",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.WebAuthn.Client.Registration' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "51",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.WebAuthn.Extensions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "52",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.WebAuthn.Extensions.Inputs' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-040.cs",
+      "line": "53",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.WebAuthn.Preferences' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-041.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-042.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-043.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-044.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-045.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-046.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-047.cs",
+      "line": "25",
+      "column": "28",
+      "code": "CS0234",
+      "message": "The type or namespace name 'Ctap' does not exist in the namespace 'Yubico.YubiKit.Ctap2' (are you missing an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-066.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-066.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-094.cs",
+      "line": "30",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Microsoft.Extensions.Logging' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-094.cs",
+      "line": "31",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-100.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Microsoft.Extensions.Logging' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-100.cs",
+      "line": "22",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-100.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-112.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-151.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-151.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-153.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.Hid' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-153.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-155.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Management' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-164.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-164.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-164.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-181.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-185.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-186.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-186.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-187.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-193.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-193.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Utilities' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-195.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-196.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-196.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Piv' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-197.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-197.cs",
+      "line": "22",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Piv' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-198.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-202.cs",
+      "line": "30",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Microsoft.Extensions.Logging' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-202.cs",
+      "line": "31",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "29",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Protocols.SmartCard.Apdu' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "30",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Protocols.SmartCard.Scp' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "31",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "32",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-218.cs",
+      "line": "33",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Piv' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-236.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-272.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Management' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-287.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-287.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-287.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Management' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Protocols.SmartCard.Scp' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-296.cs",
+      "line": "29",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.SecurityDomain' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Text' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+      "line": "30",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+      "line": "31",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+      "line": "32",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+      "line": "33",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-310.cs",
+      "line": "34",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Oath' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Runtime.InteropServices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Text' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "31",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "32",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "33",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "34",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "35",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.Hid.Keyboard' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-328.cs",
+      "line": "36",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.YubiOtp' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-341.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.YubiHsm' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "22",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Runtime.InteropServices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography.X509Certificates' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "29",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "30",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Utilities' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-351.cs",
+      "line": "31",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.OpenPgp' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "22",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Security.Cryptography.X509Certificates' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'System.Text' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "25",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "26",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Credentials' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "27",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Cryptography' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "28",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "29",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-378.cs",
+      "line": "30",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Piv' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Abstractions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs",
+      "line": "22",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs",
+      "line": "23",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-413.cs",
+      "line": "24",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-414.cs",
+      "line": "19",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Devices' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-414.cs",
+      "line": "20",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-415.cs",
+      "line": "21",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Sessions' appeared previously in this namespace"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/FULL-415.cs",
+      "line": "22",
+      "column": "7",
+      "code": "CS0105",
+      "message": "The using directive for 'Yubico.YubiKit.Core.Transports.SmartCard' appeared previously in this namespace"
+    }
+  ],
+  "code_counts": {
+    "CS0105": 146,
+    "CS0234": 31
+  }
+}

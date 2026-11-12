@@ -14,6 +14,12 @@
 
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
+/// <summary>Exposes synchronous Windows report-handle operations for production and injected tests.</summary>
+/// <remarks>
+///     Report byte lengths include the report-ID byte; facade sizes exclude it. The production owner returns
+///     independent payload arrays and borrows SET input only through the synchronous call. This seam supplies
+///     neither a cancellation token nor an observation that concurrent native borrows have drained on Dispose.
+/// </remarks>
 internal interface IWindowsHidReportAccess : IDisposable
 {
     string DevicePath { get; }

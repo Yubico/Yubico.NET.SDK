@@ -29,8 +29,8 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// <summary>
 ///     Fault-injection harness for <see cref="FindYubiKeys" /> (see
 ///     docs/architecture/device-discovery-guarantees.md): scripted identity-read outcomes per interface via
-///     constructor fakes, exercising the identity cache (convergence, eviction, reader-rename behavior) and
-///     deterministically reproducing the Phase-0 scan-1 "aborted" identity-read failures.
+///     constructor fakes, exercising identity-cache convergence, eviction, reader renames, and worker
+///     admission saturation. Scripted failures establish managed behavior rather than a historical native cause.
 /// </summary>
 /// <remarks>
 ///     <para>
@@ -100,10 +100,8 @@ public class FindYubiKeysFaultInjectionTests
     [Fact]
     public async Task FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin()
     {
-        // Phase-2 updated pin (was: "failed read orphans on scan 1" pre-deduction). With the tier-4
-        // pigeonhole deduction, a failed identity read whose interface uniquely fills the single missing
-        // slot of exactly one serial-anchored key is attributed there ALREADY on scan 1 — the orphan
-        // window closes without waiting for the cache. The cache contract is unchanged and still pinned:
+        // Pigeonhole deduction attributes the failed-read interface on scan 1 because it uniquely fills
+        // one serial-anchored key's missing slot. The cache contract remains independently observable:
         // failures are not cached, so the failed interface is re-read on the next scan (now with serial
         // evidence), while already-cached interfaces are not re-read.
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
@@ -182,7 +180,7 @@ public class FindYubiKeysFaultInjectionTests
     [Fact]
     public async Task FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin()
     {
-        // Phase 0 finding 4 (rename PIN): pcsc reader-name suffixes are unstable as the reader set
+        // PC/SC reader-name suffixes can change as the reader set
         // changes. The identity cache is keyed by per-interface DeviceId (reader name), so a rename is a
         // cache MISS for the new name (the old entry self-evicts as absent). With a successful re-read
         // under the new name, grouping stays complete — rename costs one re-read, never correctness.
@@ -207,8 +205,7 @@ public class FindYubiKeysFaultInjectionTests
     [Fact]
     public async Task FindAllAsync_PcscReaderRenameWithFailingReread_RereadsAndDeducesWithoutStaleServe_Pin()
     {
-        // Phase 0 finding 4, failure arm (Phase-2 updated pin — was: "orphans conservatively"
-        // pre-deduction). When the re-read under the renamed reader FAILS, the scan-1 serial cached
+        // When the re-read under the renamed reader fails, the scan-1 serial cached
         // under the OLD reader name must NOT be served for the new name: the rename is a cache MISS and
         // the re-read is attempted (proven by the connect-count assertion below). With the tier-4
         // deduction the null-serial renamed CCID then uniquely fills key A's only missing slot and is
@@ -246,12 +243,12 @@ public class FindYubiKeysFaultInjectionTests
     ///         unplugged, a same-model key plugged into the same slot — reuses the same PC/SC reader name
     ///         (slot-derived) and the same HID path, so the interface is never observed absent and
     ///         scan-time eviction never fires. Without hotplug-driven invalidation, the new key inherits
-    ///         the old key's serial: key substitution, found independently by two consultation runs.
+    ///         the old key's serial. The scripted swap below checks invalidation's effect on that cache path.
     ///     </para>
     ///     <para>
     ///         Platform removal and arrival notifications are therefore the invalidation signal when they
     ///         are delivered. <see cref="IMonitoredDiscovery.InvalidateEvidence" /> is what the device monitor
-    ///         calls at event ingress.
+    ///         calls after coalescing transport hints, immediately before the hotplug-triggered scan.
     ///     </para>
     /// </remarks>
     [Fact]
@@ -270,7 +267,7 @@ public class FindYubiKeysFaultInjectionTests
         factory.SucceedReads(OtpB, serial: 333);
         var readerBConnectsBeforeScan2 = factory.ConnectCalls(ReaderB);
 
-        // The swap is physically impossible without removal+arrival events; the monitor forwards them.
+        // Supply activity explicitly. Native notification delivery is outside this scripted test.
         ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.SmartCard);
         ((IMonitoredDiscovery)find).InvalidateEvidence(ConnectionType.Hid);
 
@@ -502,7 +499,8 @@ public class FindYubiKeysFaultInjectionTests
     ///     On the supported platforms a reconfiguration normally changes the per-interface id too (PC/SC
     ///     reader names and HID paths embed the interface set), which self-evicts. This pins the invariant
     ///     for any id scheme where that does not hold: the PID is part of the evidence's validity, not
-    ///     incidental metadata.
+    ///     incidental metadata. Both OTP instances force identity reads here; this test does not exercise
+    ///     PID validity of the separate best-effort metadata cache.
     /// </remarks>
     [Fact]
     public async Task FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit()

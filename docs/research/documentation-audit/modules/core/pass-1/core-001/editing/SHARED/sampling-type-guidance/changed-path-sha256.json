@@ -1,0 +1,25 @@
+{
+  "paths": [
+    {
+      "path": "CLAUDE.md",
+      "finding": "SAMPLE-B4-001",
+      "original_unit_id": "core-001:unit:001c58b1d1862d76",
+      "before_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+      "primary_accepted_before_sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109",
+      "after_sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+      "clean_sampling_credit": "edited exclusion; coordinator handles expansion",
+      "independent_review": "pending"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "finding": "SAMPLE-B4-002",
+      "original_unit_id": "core-001:unit:a9e434874ba55d57",
+      "before_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+      "primary_accepted_before_sha256": "37108c969a45fcd9a72415a5cca55d99c2805fa910c347e1d996fc0949edcce1",
+      "after_sha256": "4797f0c57ce247952d35bf2e03a63a826f3b63f21b995d4da877484249dafb13",
+      "clean_sampling_credit": "edited exclusion; coordinator handles expansion",
+      "independent_review": "pending"
+    }
+  ],
+  "focused_patch_sha256": "3c066d098c68a289da1ebc4dda2ded4fb2db66357f07907f5269a7061b334623"
+}

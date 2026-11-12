@@ -1,0 +1,67 @@
+{
+  "scope": "Reviewed IOKit seam overview sampling correction",
+  "patch_sha256": "a097122a13ba002f9126de2e00bbf8d7bd2d73fc2ae4a9d9d890d873083b1206",
+  "product_files": [
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "previous_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "sha256": "18d3f8ef6d7d2b72d0bb668ed6301eee634a2659c20ed89e2d8b75e1a69dadd3"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/inputs.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/inputs.json",
+      "sha256": "e3864651fb063bf3e076b5cef26a82c00b7ac0716c015bd24f91169768048206",
+      "bytes": 26769
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source.patch",
+      "sha256": "a097122a13ba002f9126de2e00bbf8d7bd2d73fc2ae4a9d9d890d873083b1206",
+      "bytes": 2909
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/file-disposition.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/file-disposition.json",
+      "sha256": "b25e34e9c7fdbbc1d2bafd810db83e9eddf384f937cf8d887d19d786f59e4c84",
+      "bytes": 5144
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source-evidence.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source-evidence.json",
+      "sha256": "f0eb74f24dd2f2e6721707c85e5764081306a1ea8490503b0942bdd940e4ed82",
+      "bytes": 3044
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/static-preservation.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/static-preservation.json",
+      "sha256": "8b7bfcdaced6fde11084be77634d2df246b0b4832768f7b481926d2dc0e64412",
+      "bytes": 2276
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/report.md",
+      "sha256": "98944c867c48c022a69b8c1a10b6b96864715209be0941442bf86e0731f91fe2",
+      "bytes": 5651
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/return-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/return-identities.json",
+      "sha256": "b34a276ecfd6f09a9752809491e24fbac86861109372192c8b81605348c96e5c",
+      "bytes": 969
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/review.md",
+      "sha256": "fd22eaed272e323d6b7174bd21246692ab8adabadd0db3ce93b411984f986ec9",
+      "bytes": 5632
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/review-identities.json",
+      "sha256": "165171610122339bc0fc2162aefbe67858686b0bb58eae77458309945696922a",
+      "bytes": 5080
+    }
+  ]
+}

@@ -1,0 +1,525 @@
+# Core source findings and deferred handoff — reconciliation 4 draft
+
+**Current bounded checkpoint: reviewed transfers and several actual validation gates are complete;
+Core Pass 1 is not publication-ready.** WA's corrected body, OATH compilation, final sampling
+adjudication, the ordinary uninjected clean build, final SDK unit lane, docs-inclusive packaging,
+freeze and fresh final evidence acceptance remain open. No missing result is represented as PASS.
+
+The source pin remains **`fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef`**. The **363-path** current
+product map has SHA-256 **`2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b`**;
+all current raw hashes match. File-byte comparison against the initial captured checkout covers
+**1,608 paths / 363 changed**, with the changed set exactly equal to that product map. This is a
+raw-source comparison, not a fresh Git-clean/index/staged-object proof.
+
+All **185 original candidates / 100 inherited rows / 70 existing groups / 21 PGP labels** remain.
+Existing `core-001:<original-ID>#facet` references are traceability, not accepted bug counts or a new
+implementation backlog. Historical read depths, types, schemas, failed receipts, retractions and
+qualified source authority remain intact.
+
+## Authoritative reconciliation-4 records
+
+| Record | Current evidence and scope |
+| --- | --- |
+| [Transfers and PF02](triage/final/reconciliation-4/transfers-and-PF02.json) | Ordered accepted receipt replay, actual 363-path hashes, all five former queue patches/nine paths transferred, and completed nine-surface PF02 adjudication |
+| [Final raw source state](triage/final/reconciliation-4/final-source-state.json) | 1,608 captured source paths; current raw comparison gives exactly the 363 accepted changed paths, without a Git command |
+| [WA logging retraction/correction](triage/final/reconciliation-4/logging-body-retraction.json) | Genuine FULL-032 accessibility failure; original sample credit retracted; WA/root content PASS and transfers, one changed body still uncompiled |
+| [Sampling state](triage/final/reconciliation-4/sampling-state.json) | 1,134 actual reads, logical/current candidate target 1,071 on conservative 9,352 basis, five additional WA reads, retracted unit and pending last after-state/adjudication |
+| [Compilation/checkpoints](triage/final/reconciliation-4/compilation-and-checkpoints.json) | Nine actual accepted zero-warning contexts / 298 additional bodies at retained profiles; WA/OATH exceptions; post-EOF 1,320-token/20-API PASS; actual docs/complexity and six docs-patch results |
+| [Formatter state](triage/final/reconciliation-4/formatter-state.json) | Both failed formatter receipts retained; 239+2 introduced EOF bytes reviewed/removed; 10 import/name, 73 code/context-whitespace and 14 existing EOF baseline findings held explicitly |
+| [Deferred continuity](triage/final/reconciliation-4/deferred-finding-continuity.json) | Original candidate identities plus exact certificate and OTP/PIV pre-try caller scopes; protected resolutions, source/profile/producer/Rust/physical gaps unchanged |
+| [Closing-result placeholders](triage/final/reconciliation-4/closing-results-placeholders.json) | Explicit completed, uncompiled, unrun, qualified and pending gates; unprovided closing results remain null |
+| [Preservation](triage/final/reconciliation-4/history-preservation.json), [predecessor handoff](triage/final/reconciliation-4/deferred-findings.reconciliation-3.md.snapshot), [verification](triage/final/reconciliation-4/verification.json) | Prior records and exact handoff preserved before this successor; first reconciliation-4 draft also retained under `before-final-two-EOF/` |
+
+Earlier records below and in reconciliation 1–3 are immutable capture-time history. Use this section
+and reconciliation-4 records for current transfer, compiler, formatter and sampling states.
+
+## Actual transfers and closed accounting gaps
+
+- All **five formerly queued patches, nine paths** are now transferred under separate
+  `accepted-closeout-WA/PGP/B2-receive/final-guides/architecture-map.json` receipts. Their earlier
+  queue/reservation wording remains historical. This includes WA `d70a50aa…`, PGP `9d543310…`,
+  B2 `9405abcd…`, the final-guide correction and the architecture correction.
+- **PF02 is adjudicated for all nine surfaces.** Astra accepted eight retain/referrals. The
+  architecture case received the separately reviewed **five symbol keys plus bounded prose**, then
+  actual transfer in `accepted-closeout-architecture-map.json`. The map check resolved six entries;
+  existing diagram bodies/images and other useful anchors retained their reviewed identities.
+  This closes that accounting/content disposition, not native/runtime or overall release gates.
+- Both further logging corrections are content/source **PASS and transferred**: WA
+  **`fb137a493fb4eac7b02b6592a9fc9d2abf74e1ef69d23f43015d7f76c5e4ad57`** and root bullet
+  **`b43c9a1da1416b45971f25e81b25bc46705158066e474d214e506f7909b452bd`**. No API, runtime
+  helper, project friendship/IVT or test assertion changed.
+- The **239 EOF** patch and the later **two external EOF** patch are independently reviewed and
+  transferred. Each removes exactly one terminal LF while preserving every preceding byte. Their
+  source/packaging reviews and acceptance receipts stay separate from the failed formatter gates.
+
+## Compiler evidence and genuine body correction
+
+**Nine accepted compile contexts cover 298 additional bodies with zero warnings**, at their actual
+retained profiles/source/output identities: consumer 244, Core unit 6, Core integration 2, CTAP unit 3,
+CTAP integration 3, Management integration 34, Management unit 1, PIV integration 1 and Security Domain
+integration 4. Compiled body IDs, aliases, actual Csc context, command receipts and preserved outputs
+remain in the accepted records. This is compilation, not execution or simultaneous equality of old
+outputs to every current mutable path. The earlier **17-body pilot remains accepted** separately.
+
+The failed WebAuthn lane found a **true documentation-body error**, FULL-032 / SAMPLE-WA-002:
+`YubiKitLogging.CreateLogger<T>` is **internal**, and Core's actual friend lists include neither
+WebAuthn nor its integration-test assembly. Referencing Core through CTAP2 supplies no transitive
+friendship. The original clean-content claim for unit **`4886f819fa316d28`** is **retracted and zero
+credit**; the old verdict and compiler CS1929 failure stay preserved.
+
+The corrected WA guide uses public `YubiKitLogging.LoggerFactory` and the real
+`Microsoft.Extensions.Logging` extension in its stated module implementation context. Exactly one
+body changed; root's logging bullet changed prose only. Both reviews passed and both transfers are
+complete, but **the corrected WA body is not yet compiled**; its fresh profile is being prepared.
+**OATH's remaining context has not run.** Thus 298 accepted additional bodies, one corrected/uncompiled
+WA body and one unrun OATH body remain distinct. The failure is not relabeled as a wrapper-only issue
+or repaired by inventing public access, an IVT entry or a helper shim.
+
+After all **239+2 EOF and logging transfers**, bound
+`source-tokens-final-after-eof` and `api-final-after-eof` both **PASS**: **1,320 C# executable/import/
+directive comparisons and 20 API snapshots**, zero failures, using the same valid **db834… profile /
+b358… seal**. They establish preservation, not final build/test or full-example acceptance.
+
+## Sampling: actual reads, candidate totals and final acceptance
+
+The coordinator has **1,134 distinct actual reads = 983 original + 151 additional**, including the
+five completed compiler-triggered WA narrative reads. The **1,071 supported/unchanged candidate**
+matches its **1,071 target** on the conservative **9,352-unit basis**, across the recorded 94 roles /
+17 owners. The old logging unit retains zero credit despite correction review PASS. Qualified,
+historical, protected-output, administrative and edited reads remain excluded or held as recorded.
+
+The transferred-state candidate completed its earlier 363-path/239-EOF/logging identity refresh at
+its own capture. The **last two EOF transfers now require the final after-state/range update and
+independent/Astra adjudication**. Accepted clean count, denominator and sampler PASS remain null.
+Neither logical quota satisfaction, a prepared packet, EOF-only interval policy nor this handoff
+awards final clean credit. No read is counted twice and no broad denominator is reduced to cover a miss.
+
+## Formatter findings: exact remediation and explicit baseline holds
+
+| Retained gate / disposition | Actual outcome and boundary |
+| --- | --- |
+| Full source verify | **Failed**, 249 diagnostic records: 239 introduced final-newline findings plus 10 baseline import/name findings. The 239 exact terminal LF removals were independently approved/applied; no code/import/decl edit followed. |
+| Folder whitespace, all 310 requested C# paths | **Failed**, 73 WHITESPACE and 16 FINALNEWLINE records; verify-only log says “Formatted 17 of 310 files.” Folder population evidence is not semantic/analyzer or solution-project membership proof. |
+| Introduced EOFs | **239+2 resolved** by exact reviewed patches. The two later paths are `verification/LinuxHidRouteVerification/Evidence.cs` and `OperatorScenarios.cs`; declarations and all preceding bytes remain intact. |
+| Preserved baseline/context findings | **10 import/name + 73 code/context-whitespace + 14 existing EOF findings remain held**, under explicit user preservation and the completed bounded source-context reviews. No imports, interop names, assertions, directives, executable layout, style policy or suppression was changed. |
+
+The original formatter failures remain failed; there is **no blanket formatter-clean PASS**. Baseline
+classification is retained source evidence, not a replay of the formatter at the source pin. In
+particular, AesCmac's conditional parsing context and inherited indentation are not a Release build,
+semantic test or permission to reflow source. These formatter qualifications remain separate from
+actual **zero compiler/analyzer warnings in accepted compilation and validation receipts**.
+
+## Completed documentation/complexity checks
+
+`docs-complexity-final` actually **PASSed with zero warnings**: **74 active docs, 10 package READMEs,
+6 map entries, 7 fresh images**; complexity covered **211 files / 63 methods**, with **9 unchanged
+debt methods and 0 new/worse**. Existing debt is not a new refactor assignment.
+`docs-patch-final-first` separately records **six PASSed tests**. These outcomes do not imply final
+packaging, normal SDK tests, full-body compilation or publication.
+
+## Deferred findings and protected qualification scopes
+
+All original candidate/facet and inherited reopening maps remain linked through
+`deferred-finding-continuity.json` and the preserved original exact records. Content corrections do
+not endorse source defects as intended contracts or authorize implementation work.
+
+- **SAMPLE-A004:** PIV CLI attestation unit `10653b759a2209f8` and OpenPGP certificate caller
+  `3ccf06e816f277d2` retain their separate missing deterministic `X509Certificate2` disposal anchors.
+  Same ownership class does not establish a permanent leak, native failure, runtime experiment or fix.
+- **OTP/PIV pre-try cleanup:** OTP HMAC-key unit `4089aedab94d4e23` retains the acquisition/output/
+  access-code-parse-before-finally facet under its existing OTP/CLI scope. PIV PIN/management discovery
+  units `a579b6a5cf4242e4` / `8fc815177a95b970` remain **CORE-PIV-X006 / PIVIMP-006**. No duplicate
+  engineering finding, source correction or cleanup experiment is added.
+- Metadata aliases/caches/mapping/raw representation, workflow-versus-exchange lifetime, callback/
+  logging exceptional cleanup, independent TLV/report/APDU/crypto copies, native ownership/ABI and
+  key/profile/validation policy retain their original observed-versus-desired distinctions.
+- **HSM retry-message mismatch remains RETRACTED.** OATH's fourteen exact IMP resolutions and
+  resolved User/descriptor XREF prose remain resolved. **PIVIMP-005 stays confirmed/unfixed** for its
+  historical tool framing scope; OpenPGP PIN/KDF/X25519/ATT and HSM 56-versus-48-byte/live peer/connector
+  uncertainties retain their precise evidence and owners.
+- SCP03 **1.1.2 Public Release** remains distinct from **1.1.2.6 Public Review**; retained SCP11
+  **1.3.0.13 Public Review** is not uninspected final/vendor authority. Corrected locators and selected
+  R-MAC / C-DECRYPTION plus C-MAC conditions remain explicit. ISO/final profile, installed native
+  producer/provider, original Rust/generator/comparator and capture gaps remain bounded deferrals.
+- Serial 9681620's historical two-key failure remains unexplained. Serial 125's two `6A88` results
+  preceded EXTERNAL AUTHENTICATE/RESET. The future Windows handoff remains unready/unreviewed;
+  PIV physical touch/hotplug and touch-dependent cancellation/recovery remain deferred. No new hardware
+  experiment is a condition of accepting truthful documentation with these limits.
+
+## Remaining actual closing results — unfilled until evidence arrives
+
+The machine-readable [closing-result placeholders](triage/final/reconciliation-4/closing-results-placeholders.json)
+retain actual completed checkpoints and null results for these open gates:
+
+| Open gate | Current boundary |
+| --- | --- |
+| WA corrected body and OATH context | WA content PASS/transferred but fresh actual compile pending; OATH unrun. Retain all failed attempts and original/corrected body identities. |
+| Final sampling | Last two EOF after-state/range refresh plus actual final quota/independent/Astra acceptance; logical 1,071 is not accepted clean count. |
+| Ordinary uninjected clean solution build | **Not yet done.** Restore ordinary compiled outputs after compile-only injections before any final SDK test lane. |
+| Final SDK unit lane | **Not yet done after injections.** Earlier 4,442 / 13 projects / 0 failures / 5 skips stays its retained checkpoint. |
+| Docs-inclusive pack and remaining final preservation/admission | **Not yet done.** Use actual final identities, outcomes and explicit formatter qualifications; do not invent clean/results or weaken policy. |
+| Fresh final evidence review, freeze and publication | **Pending.** External `core.md`/campaign index publication remains Astra's responsibility after freeze, with actual owned commit/push/remote identity evidence. |
+
+Only this handoff and new `triage/final/reconciliation-4/*` records were written. This task used
+record/file-hash joins only: **no product writes, Git, SDK/formatter/tests, native/device/crypto calls
+or subagents**. Prior reconciliations, preflight, failures and exact handoff snapshots remain preserved.
+This is the bounded handoff candidate for later final review, **not a publication-ready claim**.
+Finish Core Pass 1 plus the deferred handoff, then **stop**; no Pass-2 plan, implementation tests,
+refactors, new runtime campaign or validation framework is started.
+
+<details>
+<summary>Historical reconciliation-3 handoff — capture-time states superseded above</summary>
+
+The following narrative is retained for chronology, not current gate selection. Its queued,
+adjudication-pending, compiler-failure and sample-count statements describe the earlier checkpoint.
+The exact original bytes are also preserved in the linked reconciliation-3 snapshot.
+
+# Core source findings and deferred handoff — reconciliation 3 draft
+
+**All main editor batches now have content/citation PASS and are integrated; final sampling,
+compilation and Pass‑1 closeout remain pending.** This handoff accounts for **185 original candidates: 103 Core-family and 82 boundary
+candidates**, with every original ID and exact-scope inherited outcome preserved. These are source
+concerns and traceability records, rather than accepted bug counts. No new `CORE-DOC-*`/`CORE-IMP-*`
+layer was needed: references use `core-001:<original-ID>#documentation`, `#engineering`, `#decision`
+or `#qualification`. A reference labels evidence and responsibility; it accepts no unrun claim.
+
+The original source pin remains **`fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef`**. The consumed
+`current-products.json` contains **361 unique accepted paths**, all matching current primary raw hashes.
+Queued sampling patches are separate. The first reconciliation's original pinned source/range evidence
+remains preserved, independently of legitimate current comment changes. This update ran no Git command
+or source investigation. Earlier preliminary/full-family/final records remain byte-identical; the
+previous handoff is saved byte-exact before this authorized replacement.
+
+**Stopping point:** finish and publish Core Pass 1 with this deferred-finding handoff, then stop.
+This document is findings/status/evidence, not a Pass‑2 plan, implementation assignment, experiment
+plan, new tooling project or permission for physical work.
+
+## Latest additive reconciliation records
+
+The independent [early preflight](validation/closeout-review/preflight.md) remains unchanged and grants
+no release acceptance. Its PF-01/PF-02 record gaps now have a bounded additive response under
+[triage/final/reconciliation-3](triage/final/reconciliation-3/):
+
+| Record | Bounded current scope |
+| --- | --- |
+| [PF response](triage/final/reconciliation-3/response.md) | PF-01 queued correction identities and PF-02 direct finished path decisions; proposal adjudication and final review remain separate |
+| [PF-01 exact overlay](triage/final/reconciliation-3/pf01-sampling-overlay.json) / [three queued corrections](triage/final/reconciliation-3/queued-corrections.json) | SAMPLE-B2-003 original unit, independent PASS, patch/source/before/after identities and zero-credit status, alongside unchanged WA/PGP references |
+| [PF-02 direct path decisions](triage/final/reconciliation-3/pf02-dispositions.json) / [readable nine-path table](triage/final/reconciliation-3/pf02-direct-links.md) | Direct completed editor hold/referral and investigator links for all nine exact preflight surfaces; source/current hashes, facet-specific retention reasons and reopening conditions |
+| [Coordinator proposals](triage/final/reconciliation-3/pf02-proposals.json) | Nine explicit retain/hold/referral proposals for **Astra adjudication**, with no project/configuration/API value changes or blanket retained-path PASS |
+| [Latest validation state](triage/final/reconciliation-3/validation-state.json) | Third full-consumer attempt failed at Csc with 21 remaining diagnostics; earlier two failures and all compiler/qualification gates remain preserved |
+| [Preservation](triage/final/reconciliation-3/history-preservation.json) / [predecessor handoff](triage/final/reconciliation-3/deferred-findings.reconciliation-2.md.snapshot) / [verification](triage/final/reconciliation-3/verification.json) | Preflight, all older triage records and reconciliation 2 including Astra's addendum remain byte-identical; exact prior handoff saved before this update |
+
+**PF-01's missing overlay link is addressed. PF-02's direct finished-decision coverage is addressed at
+9/9.** The nine facet-specific coordinator proposals remain pending Astra's adjudication; no claim is
+made that this records owner granted final configuration semantics, independent final-review acceptance
+or publication. The response is ready for that bounded adjudication at its recorded identities.
+
+### Preserved reconciliation-2 editing and sampling snapshot
+
+These earlier overlays remain unchanged under [triage/final/reconciliation-2](triage/final/reconciliation-2/).
+Their captured sample/editor counts retain their original scope; reconciliation 3 supersedes only the
+explicit PF response and latest third-attempt state. Astra's existing `validation-state-addendum.md`
+is retained as supplied, rather than backfilled into the older JSON.
+
+| Record | Current scope |
+| --- | --- |
+| [Candidate map](triage/final/reconciliation-2/candidate-map.md) / [exact candidate/editor/sampling overlay](triage/final/reconciliation-2/candidate-editor-sampling.json) | All 185 originals → accepted main path decisions, actual coordinator sample links, explicit sampling findings and unchanged engineering/decision/qualification references |
+| [Editor/integration snapshot](triage/final/reconciliation-2/editor-integration.json) | Ten content-PASS batches, ordered integration receipts, 361 unique current product identities and exact returned path decisions |
+| [Original sample verdicts](triage/final/reconciliation-2/sampling-verdicts.json) | One-to-one mapping for all 983 original selected IDs; no missing or duplicate verdicts; supported, qualified and ineligible outcomes kept separate |
+| [Finished expansion/replacement reads](triage/final/reconciliation-2/sampling-expansion-verdicts.json) | 86 additional distinct actual reads at the consumed coordinator checkpoint, with their qualification/exclusion decisions; no final quota acceptance |
+| [Sampling findings](triage/final/reconciliation-2/sampling-findings.json) | Corrected/integrated misses, source-only certificate/cleanup observations, accepted queued WA/PGP patches and exact known PIV aliases |
+| [Prepared packet/read overlay](triage/final/reconciliation-2/sampling-pending-packets.json) | Prepared selections distinguished from consumed actual reads and remaining proposed IDs; final quota/current-span reconciliation pending |
+| [Validation checkpoint](triage/final/reconciliation-2/validation-state.json) | Retained pilot/unit results, final DocCheck profile/seal and token/API receipts, both failed full-consumer attempts and the unaccepted wrapper-fix state |
+| [History preservation](triage/final/reconciliation-2/history-preservation.json) / [first handoff snapshot](triage/final/reconciliation-2/deferred-findings.reconciliation-1.md.snapshot) | All 34 prior triage records unchanged, plus the exact prior handoff bytes; old manifests remain historical rather than silently rebound to this text |
+| [Verification](triage/final/reconciliation-2/verification.json) | Records-only count/hash/association checks and exact input identities; no build/test/Git/native/device/crypto execution |
+
+## Preserved first reconciliation evidence
+
+The following first-reconciliation records remain immutable history under [triage/final](triage/final/).
+Their initial editor/review statuses are superseded by the additive overlays only in explicitly updated
+dimensions; their original source evidence, IDs, resolutions and held facets remain authoritative.
+
+| Record | Content |
+| --- | --- |
+| [Candidate rows](triage/final/rows.md) | All 185 original IDs, source concern, completed editor associations and remaining review state |
+| [Candidate reconciliation](triage/final/candidate-reconciliation.json) | Every candidate/dimension → observed versus proposed or unselected behavior, exact source passage/unit/range evidence, documentation paths, editor/path decisions, review scope and reopening condition |
+| [Deferred facets](triage/final/deferred-facets.json) | Engineering, decision and qualification dimensions with the same evidence/owner/reopening references; no executable work selected or scheduled |
+| [Editor returns](triage/final/editor-returns.json) | Snapshots of completed returns, exact original path decisions and review texts; accepted A/C primary hashes and existing coordinator validation receipts |
+| [Relationships](triage/final/relationships.json) | Exact-facet nonadditive relationships and explicit mechanism separations; no exclusive accepted-defect total |
+| [Inherited reconciliation](triage/final/inherited-reconciliation.json) | All 100 authoritative provenance rows / 70 existing groups, successor boundary observations, original aliases, states, source identities and all 21 PGP-DEP labels |
+| [Protected dispositions](triage/final/protected-dispositions.json) | Fourteen scoped OATH IMP resolutions, OATH decisions, resolved descriptor/User XREFs, retracted HSM observation and retained PIV/OpenPGP/HSM/OTP/SD applet findings |
+| [Source follow-ups](triage/final/source-followups.json) | Additive Management B4/B6 and CTAP2 B4/B6/WebAuthn completion authority and other exact qualifications |
+| [Coverage](triage/final/coverage-reconciliation.json) / [verification](triage/final/verification.json) | Disjoint original IDs, pin/range joins, source-depth qualifications, editor/hash boundaries and exact consumed input hashes |
+| [Prior-map preservation](triage/final/preserved-inputs.json) / [assembly notes](triage/final/record-assembly-notes.md) | Earlier record hashes and retained records-only preparation failures/corrections |
+
+`candidate-reconciliation.json` normalizes repeated source evidence and document surfaces once.
+Each candidate retains its complete original definition and index, source-unit references and four
+separate dimensions. Its `completed_review_path_scope` identifies exact returned decisions, scope,
+review status and accepted primary transfer where applicable. A same-path edit for another concern
+never closes a held facet. Historical proposal text remains evidence of the question; it grants no new
+implementation or probe authorization.
+
+## Completed source populations
+
+| Source assignment | Original candidate IDs | Assigned unit dispositions |
+| --- | ---: | ---: |
+| A, B1–B6, C — eight Core families | 103 | 11,101 |
+| Management | 3 | 331 |
+| CTAP2 | 23 | 590 |
+| Security Domain | 8 | 193 |
+| OATH | 6 | 239 |
+| WebAuthn | 12 | 265 |
+| YubiOTP | 9 | 324 |
+| YubiHSM Auth | 7 | 160 |
+| OpenPGP | 8 | 328 |
+| PIV | 6 | 513 |
+| **Total** | **185** | **14,044 disjoint original IDs** |
+
+All nine source packets and their named source follow-ups have returns. Earlier “B4/B6 active” or
+“WebAuthn return pending” text is historical, superseded only in that source-reading dimension.
+It supplies no automatic independent review, implementation, physical qualification or publication.
+
+B4 retains **105 full-file reads plus one qualified whole Unshipped snapshot support/type
+reconciliation**; unrelated member signatures remain context. Boundary snapshot/context exclusions
+remain explicit. CTAP2 180 selected/181 disposition paths, OTP 61/62 and OpenPGP 91/93 are different
+recorded populations, not missing units to invent. Independent sampling retains its own denominator
+and removes later edited overlaps.
+
+## Accepted main editing batches and remaining scope
+
+All main batches have completed accepted returns copied to primary. Their exact original and successor
+reviews remain preserved. A content PASS applies to the bound edit/facet/path, not every retained file,
+runtime policy, source qualification, compiler context or clean sample on the same path.
+
+| Batch / current owner | Completed return and review state | Remaining gate |
+| --- | --- | --- |
+| Discovery A | Revision 2 **PASS**, 37 changed paths, integrated; additive sampling corrections accepted and integrated separately. | Held ownership/cache/FIPS/native questions remain; sampled corrected overlaps gain no unchanged clean credit. |
+| Crypto C | Revision 2 **PASS**, 54 changed paths, integrated. | C019 has no D release; C020 remains referred. CBC pre-try copies, independent storage/provider/profile concerns remain. |
+| Transports B1–B4 | Revision 2 **PASS**, 62 changed paths; M1–M3 resolved and integrated. | Linux wake/factory and Mac seam corrections are accepted/integrated; separate SAMPLE-B2-003 patch `9405abcd…` is independently PASS but queued/untransferred. Native declaration/release qualifications remain. |
+| Protocols B5–B6 | Revision 2 **PASS**, 57 changed paths; R1–R4 resolved and integrated. | Corrected GP locators, selected-level conditions, null-firmware admission and 64/80-byte distinction remain the current authority; wire/profile/cleanup questions are not repaired. |
+| CTAP2/WebAuthn | Revision 2 **PASS**, 15 changed paths; R1/R2 resolved and integrated. | SAMPLE-WA-001's separate `d70a50aa…` comment correction is independently PASS but queued/untransferred. |
+| SHARED guides | Revision 2 **PASS**, 26 changed paths, integrated; sampling corrections separately accepted/integrated. | Actual example/classification, final current mapping and validation gates remain separate. |
+| Management/SD/OATH/OTP/HSM | Revision 2 **PASS**, 39 changed paths, integrated. | Source-coordinate conventions and reset-attempt comments corrected; original applet qualifications/resolutions remain intact. |
+| OpenPGP | Revision 2 **PASS**, 17 changed paths, integrated. | SAMPLE-PGP-001's separate `9d543310…` UIF logging qualification is independently PASS but queued/untransferred. |
+| PIV | Revision 2 **PASS**, 13 changed paths, integrated. | Two README example scope corrections are accepted; known runtime sample pre-try gaps remain CORE-PIV-X006/PIVIMP-006, not new findings. |
+| External commentary | Revision 4 **PASS**, 37 changed paths, integrated. | Exact helper authorization/configuration and 247 body classifications accepted. Obsolete protected runtime output, unrelated M/Q facets and compiler/profile input identity stay separate. |
+
+Ordered integration receipts reconcile **361 unique accepted current paths**, all matching primary at
+this snapshot. Main batch totals and receipt occurrences overlap, so they are not added as another path
+or finding denominator. Queued WA/PGP/B2 receive patches have not been transferred. No runtime change is inferred
+from any of these comment-only corrections.
+
+The retained **17-body pilot compiled with zero warnings**. The retained SDK test checkpoint records
+**4,442 executed across 13 projects, zero failures and five skips**. Both retain their actual source/output
+identities and receive no fresh execution credit here. The final DocCheck profile
+`db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1` and seal
+`b3583ce08b5b31e7f6b6947ca8764120c46f5d706308c7afd70dd7e5c268b1bc` are the valid bound checkpoint;
+its **1,320 token/directive comparisons and 20 API snapshots passed before the queued patches**.
+These positive gates do not establish full consumer/test-context compilation or final publication.
+
+## Actual sampling verdicts and additive findings
+
+All **983 original samples** have one actual coordinator verdict each, with zero missing/duplicate IDs:
+950 source-content-supported pending final eligibility, 14 documentation-miss unit outcomes, one
+source-only deferred observation, seven administrative exclusions, one dormant illustration, one
+protected-output qualification, five normative-source gaps, one reference-data qualification, two known
+deferred qualifications and one edited overlap. These are unit dispositions, not accepted bug counts.
+
+Finished coordinator expansion/replacement records add **86 distinct actual reads**: A 23 + 19,
+B2/B3/B4 34, and family/SD replacements 10. The seven repeated B3 activation excerpts receive no second
+read count. The combined consumed read set is **1,069 distinct IDs**, with qualification/history/admin/
+edited outcomes retained. This is **not a final clean pass or quota closure**. Remaining actual reads,
+current-span/accepted-diff mapping, exclusions, replacements and per-owner/per-role quotas still require
+sampler reconciliation. Preparation alone supplies no read credit.
+
+| Sampling observation | Existing candidate/facet and current disposition |
+| --- | --- |
+| SAMPLE-A001/A002/A003, B2-001/002, B3-001, B4-001/002, SD-001 | Bounded documentation corrections are independently accepted and integrated at their separate receipts. The exact unit/path and original candidate associations are in the sampling records. Corrected overlaps receive no unchanged clean credit; remaining quota consequences stay open. |
+| **SAMPLE-A004** | Source-only missing deterministic `X509Certificate2` disposal: original PIV CLI unit `10653b759a2209f8` and additional OpenPGP certificate caller `3ccf06e816f277d2`, `src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs`. The latter retains its own output/PIN/import anchor. Same deterministic-certificate ownership class, separate caller evidence; **no permanent leak, native failure, runtime experiment or repair is claimed**. Related sample/resource facets CORE-PIV-X006 and CORE-PGP-X008 remain distinct at their actual sites. |
+| **SAMPLE-PGP-001** | Units `8b2a95f01db9bf2c` / `710814862611f595`: logging can throw before UIF fallback chooses PolicyMayRequire. This applies existing C-C008 logging/cleanup and PGP-X004 advisory-presence responsibility; it creates no new unique Core bug. Patch `9d543310…` is **independently PASS, queued/untransferred**. Zero clean credit; existing logging/implementation qualifications remain. |
+| **SAMPLE-WA-001** | Unit `e29522f04d40349a`: existing WA-X012 oracle/provenance facet. Assertions compare CredentialId/Signature bytes and one backend call, not object identity or all response fields. Patch `d70a50aa…` is **independently PASS, queued/untransferred**. No assertion/runtime change or additional engineering finding. |
+| **SAMPLE-B2-003** | Original unit `82f001f6db22d507`, `src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs`: remove unsupported receive-null cause-frequency ranking, retaining no-event/error possibilities and conservative rescan rationale. Patch `9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86` is **independently PASS, queued/untransferred**, additive to the accepted `a994f308…` Linux state. Before `676d31c9…`, after `27276323…`; exact source/unit/review hashes are in the new PF-01 overlay. **Zero clean credit**, zero additional read credit, no new unique engineering group or event/rescan/wake/cancel/release behavior. |
+| **Known PIV pre-try qualifications** | Units `a579b6a5cf4242e4` / `8fc815177a95b970`: PIN/management bytes precede awaited discovery outside finally. Already **CORE-PIV-X006 / piv-001:PIVIMP-006**; zero clean credit and no duplicate engineering finding. Separate README example correction is an edited overlap, not a runtime fix. |
+| **OTP expansion cleanup qualification** | Unit `4089aedab94d4e23`, `src/Cli.Commands/src/Otp/OtpCommands.cs`: HMAC key acquisition precedes generated-key output/access-code parsing outside try. Retain the existing pre-protected-scope cleanup/M facet with this caller anchor (OTP-X005 and related ownership qualifications). No code change or new runtime proof. |
+| **OpenPGP expansion output/applicability** | Units `297e68004991d4a8` and `cf3538431462d4ab`: fingerprint-derived key presence/runtime PIN-policy text, and accepted slot/algorithm requests subject to existing OpenPGP constraints. Protected-output/applicability qualifications receive no final clean credit; preserve PGP-X008/X007 scope rather than add duplicate findings. |
+
+Queued corrections are separate from accepted main batches. Primary remains reserved for its current
+compilation cycle. Their transfer, refreshed identities, exact mapping and required review/gate updates
+remain coordinator-owned; this records-only task makes no transfer or runtime change.
+
+### PF-02 direct configuration/data/API disposition coverage
+
+The nine omissions were direct-link gaps, not missing source reads or automatic edit requirements.
+Completed SHARED outside-scope holds/referrals directly cover Core.csproj, the canonical and deliberately
+missing-export JSON fixtures, and the architecture map. Completed five-applet outside-scope holds
+directly cover OATH's unit project, YubiOTP's unshipped API snapshot and all three named HSM projects.
+The exact filenames, source-record rows, finished decision JSON pointers and raw hashes are enumerated
+in the [nine-path table](triage/final/reconciliation-3/pf02-direct-links.md).
+
+Facet-specific proposals retain the actual project/API/fixture values: declared Core inputs versus
+evaluated/native evidence; historical export-name census versus ABI/lifetime proof; intentional
+missing-symbol control versus invalid shape; structural map versus graph/type/teaching semantics;
+linked OATH fake and primitive attribution versus whole-SCP proof; named typed-API relocation/absence;
+real HSM tool dependencies; and distinct integration xUnit v2 versus unit xUnit v3/MTP contexts.
+The map semantic referral stays explicit. These reasons supplement the existing completed holds;
+**Astra adjudicates the proposals**, with no blanket format-based closure or new bug allocation.
+
+## Full consumer/test-context validation remains open
+
+Full consumer **attempt 1 failed in restore**, before Csc, on redundant-package pruning conditions.
+The bounded restore correction has its own preserved records. **Attempt 2 reached Csc and failed on
+generated imports/duplicate using context**. The validation owner is correcting wrappers; **all 300
+prepared body bytes remain unchanged**. Neither failed attempt supplies full compilation acceptance,
+an example execution, or a new SDK/runtime defect. Preserve failures and admit only the later exact
+successful consumer and actual project/test contexts if their existing validation gates pass.
+
+The latest completed **attempt 3 also failed at Csc**, with **21 remaining type/prerequisite/async/
+nullability context diagnostics**: CS0104 3, CS1061 1, CS0103 10, CS0246 2, CS4033 4 and CS8604 1.
+The earlier generated-import diagnostics were resolved, which is not compilation acceptance. The
+validation owner is correcting/classifying generated-context versus any genuine body issues; no body
+repair, full consumer or genuine test-context acceptance is granted by this ledger. All three original
+failed receipts, secondary parser qualifications and earlier checkpoints remain intact. Primary is
+still reserved at the unchanged 361-path map, with **three** accepted sampling patches queued outside it.
+
+## Latest qualified review authority
+
+The full source definitions stay historical. Fresh editors and the final verifier should use the
+qualified successors, rather than repeating an initial report's inaccurate locator or assurance.
+
+- **A:** accepted revision-2 review permits stale groups to persist; no one-scan/age-based convergence
+  is promised. Null-resolver assertions establish this SDK's current choice, rather than OS impossibility.
+- **C:** accepted revision-2 review scopes local AES key/IV clearing to entry into the protected scope.
+  CBC's second pre-try allocation can fail after the key copy exists. The latest accepted BER,
+  supplied-Q and AsnWriter qualifications remain: inspected X.690 reading is complete; supplying Q skips
+  the checked .NET v10.0.0 absent-Q extraction; Encode retains writer storage and Reset clears its written
+  prefix. Actual installed runtime/native cleanup remains separately qualified.
+- **Protocol R1:** in retained SCP11 **1.3.0.13 Public Review**, a/c request is **§7.6.2.3** and response
+  **§7.6.3.1/Table 7-18**; b request is **§7.7.2.3** and response **§7.7.3.1/Table 7-22**. INTERNAL
+  AUTHENTICATE is **§7.7**; **§7.1.1** describes parameter coding. SCP03 **1.1.2 Public Release** response
+  is **§7.1.1.6/Table 7-3**, with 29 mandatory bytes plus its conditional three-byte counter; the explicit
+  initial EXTERNAL AUTHENTICATE zero-chain rule is **§6.2.3**. Initial combined request/response locators
+  remain preserved input limitations, not the authority for new wording.
+- **Protocol R2:** null firmware fails configured-processor admission before the support branch.
+  Broad exception tests establish neither that support branching nor a handshake was reached.
+- **Protocol R3:** protected 9000/62xx/63xx claims retain **R-MAC selected** applicability; Core SCP03
+  selects `0x33`. The inspected **§6.2.6** empty-command/counter rule applies when **C-DECRYPTION and
+  C-MAC are both required**. The error-status-only rule, genuine EXTERNAL AUTHENTICATE exception and
+  current instruction-only later-INS82 concern remain separate. Current fake/Python padding agreement
+  supplies no independent resolution of the selected encryption-path discrepancy.
+- **Protocol R4:** two 32-byte P-256 agreements concatenate to **64 bytes**; X9.63 then derives
+  **80 bytes**, split into five 16-byte values. This is a qualified source width correction, not a
+  recomputed crypto result.
+- **FIDO review:** current CTAP peer helper checks coordinates/P-256 provider import, without all
+  required peer COSE labels. A prescriptive strict-profile target is different from implemented checks.
+  Scripted token acquisition/reuse tests establish the SDK choice, not authenticator acceptance.
+
+Protocol correction/qualification authority now includes the **independently accepted revision-2
+successor**, recorded in reconciliation-2 `editor-integration.json`. R1–R4 documentation holds are
+resolved; their engineering and source/profile qualifications remain. The first reconciliation's
+pending status is historical. This update read completed records, not runtime/test bodies or original
+standards anew.
+
+## Unresolved findings, decisions and evidence — exact scope retained
+
+Every entry below is indexed down to original candidate facets, source units and reopening paths in
+the companion records. Shared mechanisms receive one exact-facet relationship; different storage,
+actor, phase or caller responsibilities retain separate questions.
+
+| Retained question | Exact original scope / reopening condition |
+| --- | --- |
+| Metadata ownership/decoding/cache | A C003–C006/C016/C017/C021 and Management X002: timeout alias/equality/hash, FIPS tag mapping/width, flagged form factor, wider capability bits, raw representation and evidence expiry. Stronger ownership/stability or decoding claims require their recorded decision/evidence; corrected prose changes none of them. |
+| Native/connection/listener lifetimes | B1 C002–C006/C009–C012; B3 C002/C005/C006; B4 C001/C002/C003/C005/C006/C009: early context cleanup, cadence, partial startup, post-open logger cleanup, custom versus successful-deferred Windows disposal, context flow, admission precedence, exact declarations and backend interpretation. Native pending, terminal, drained and release proven stay distinct. |
+| Complete workflow/callback ownership | B5 C006 and actual nine-boundary callers: one Core exchange guard supplies no whole public-operation/ceremony lease. Reset/cache, detached callbacks, post-exchange parsing and sequential applet operations retain their actual owners. PIV's callbacks outside its guard differ from OTP's self-wait path. |
+| Input and layered sensitive storage | C input/TLV/crypto concerns, B4 C007, B5 C005, B6 C002 and each applet: UTF-16/code-point/UTF-8/profile enforcement, redirected strings, independent copies, exceptional cleanup, report ownership and read-only result clearing need their exact policy/owner. Public metadata/status alone is not secret by direction. |
+| Wire/profile/state | B5 raw grammar/control/recovery/version and B6 C001/C003–C012/C015/C016: Le/remaining-command limits, partial failures, counter mutation/phase latch, later INS82, startup cleanup/DEK, parameter clones, SCP11 profile/trust, protected chaining, reselect, KeyReference and ATR value semantics remain separate. Use the corrected selected-level conditions above. |
+| Applet reset/auth/version | SD omitted reset options/raw bypass, HSM/OpenPGP retained graph/plain reselect, Management family/reset-success state and OATH's different terminal RESET contract retain distinct policies. Setup flags supply no ongoing channel health, applet PIN/UV/lock authorization or device-phase proof. |
+| CTAP/WebAuthn applet requirements | All old CTAP/WA aliases survive. WA-IMP-010 descriptor recovery remains separate from resolved descriptor prose; CTAP-DEC-002 native DTO/platform/browser/RP serializer intent still needs maintainer decision. No field stripping is authorized. PIN peer/profile, ARKG wire/math, response/envelope/blob/parser/range and extension policies remain their actual applet owners. |
+| HSM format and external authentication | HSM-IMP-008 / HSM X005 retains historical supplied-cryptogram **56 versus 48 bytes**, unknown raw key/tail regions, firmware/response grammar and result/receipt ownership. Omitted-cryptogram three-key agreement is different from successful HSM/connector enrollment, peer verification, host authentication and protected commands. |
+| PIV/OpenPGP confirmed applet/tool scopes | **PIVIMP-005 remains confirmed/unfixed**: actual tool RSA failed original-message verification; Ed25519 verified SHA256(message); direct SDK controls passed. OpenPGP's historical PIN/KDF identity, X25519 framing and ATT read findings remain confirmed for their recorded scopes. Core catalog/owner prose supplies no repair. |
+| Test/sample/tooling scope | Actual fixture, assertion-failure drain, cleanup, output/argv, input/certificate/result and semantic-oracle questions retain their original IDs. A compiler result, method name, callback count or disposal invocation supplies no unobserved lifetime/erasure/restoration. Source descriptions can be corrected without treating those runtime questions as fixed or intended policy. |
+| Source/native/provider/deployment evidence | Original NIST-PIV PDF, final NIST table/sample archive bytes, missing Rust/generator/comparator captures, final SCP11/vendor/ISO clauses, exact installed NativeShims producer/header/flags, actual providers and historical platform artifacts retain bounded gaps. Published source or local headers identify no loaded producer. |
+
+These are deferred status/evidence entries, not a selected implementation backlog. Questions with no
+new implementation defect remain explicit qualifications or referrals, rather than open bugs counted
+from every dimension. All earlier proposed experiments remain **unexecuted**; none is implemented,
+rescheduled or newly authorized by this handoff.
+
+## Resolutions, retraction and physical limits protected
+
+- All **14 OATH IMP resolutions** retain their precise source scopes, including seed/Base32/input,
+  raw VALIDATE/calculation cleanup and terminal RESET. OATH DEC-001's provenance correction is resolved
+  while broader failure usability remains open; DEC-005 timestamp policy stays resolved. Other URI,
+  raw-key, padding, HOTP and firmware-rationale questions retain their old scope. Lower Core copies,
+  workflow or SCP evidence do not reopen the fourteen fixes wholesale.
+- **CTAP-XREF-001 / WA-XREF-001** remain documentation-resolved for their User/descriptor prose.
+  Recovery and disclosure intent keep their different IDs. All 21 PGP-DEP labels remain documentation
+  dependencies, outside new Core bug counts.
+- **HSM retry-message mismatch: RETRACTED.** The helper and asymmetric retry test both use
+  `Invalid credential password`. Preserve `corrections.md` and the failed checker history. This is no
+  open bug or reason to reopen historical passing evidence. X007's actual exception XML and diagnostic/
+  test-oracle concerns remain separate.
+- PIV's exact older fixes, source-confirmed PIVIMP-009 date issue, PIVIMP-010 object encoding and other
+  retained uncertainties stay in `protected-dispositions.json`; historical PIV 86/89 canonical methods
+  and supplemental outcomes keep their original rig/profile/restore limitations. OpenPGP's fourteen
+  engineering groups, HSM's eight and OTP's twelve retain their definitions and current source scope.
+- SCP03 **1.1.2 Public Release** is distinct from code-cited **1.1.2.6 Public Review**. Retained SCP11
+  **1.3.0.13 Public Review** supplies draft-specific actor/phase evidence; final 1.4 publication does not
+  supply inspected final clauses or a complete YubiKey profile. Independent exact-source acceptance
+  remains required at the qualified locators and conditions.
+- B4's PCI discrepancy is conditional on the published selected **Linux LP64** producer/header route:
+  native two unsigned longs versus managed two four-byte values. Windows uses two 32-bit DWORDs;
+  macOS framework selection needs its own producer/header evidence. This supplies no all-OS mismatch
+  claim, installed-producer identity or observed transmit failure.
+- Serial **9681620** remains the unexplained historical two-key abandoned HID read. Serial **125** had
+  two `6A88` results during INITIALIZE UPDATE, **before EXTERNAL AUTHENTICATE and RESET**. Plain or
+  synthetic success supplies no missing secure-reset execution.
+- The user's Windows CCID/HID ready handoff remains **unready/unreviewed** and requires its separate
+  pinned delta/impact review when supplied. It leaves truthful current-baseline documentation available
+  for review. PIV physical touch/hotplug and touch-dependent cancellation/recovery remain **deferred**.
+  No new device, native, credential, reset or crypto operation was requested or performed.
+
+## Verification, remaining gates and later final-review readiness
+
+Reconciliation 2 preserves the original **14,044 source IDs**, **185 candidates**, **100 inherited rows /
+70 groups / 21 labels**, and all first-final/preliminary/full-family records. The first reconciliation's
+proof for 1,397 pinned paths / 14,041 original ranges, with three explicitly post-pin metadata ranges,
+stays historical evidence and was not rerun with Git here. Its 859-path source map remains intact.
+The additive overlay records all accepted main batch decisions, ordered receipts, **361 matching
+current product hashes**, **983 original verdicts** and **86 additional distinct actual reads**, with
+no fabricated final clean or full-compile result. The 185 IDs and existing relationships remain unchanged;
+sampling labels preserve caller-specific evidence without creating duplicate engineering groups.
+
+Reconciliation 3 adds the missing B2 queued correction and direct decisions for the nine PF-02 paths.
+Its checks bind the patch/review/source/unit/before/after identities, all nine retained raw surface
+hashes, the unchanged 361-product map and **52 predecessor/preflight records**. The first handoff and
+reconciliation-2 handoff both retain their exact historical snapshots. The original 983/86 sampling
+counts remain their consumed checkpoint, rather than a new quota adjudication by this bounded response.
+The PF-02 link gap is covered; Astra's facet-specific proposal decisions and final review stay open.
+
+This update used record/schema/file-hash checks only: **no Git command, SDK build/test/formatter,
+source audit, product write, native/device/crypto operation, subagent or implementation work**.
+Only this handoff and `triage/final/reconciliation-2/*` were written. Old records, snapshots, failed
+validation attempts, source evidence, protected runtime output and central coverage remain intact.
+
+The bounded PF response is prepared for Astra/final-review consumption at its hashes. The evidence
+packet remains for a **later finished fresh final review**, not a present release verdict.
+Remaining existing Pass‑1 gates are:
+
+1. Complete the validation owner's generated-context correction and obtain actual accepted full
+   consumer and required project/test-context compilation at the bound source/body/profile identities.
+   Preserve all three failures and all 300 original body identities, with any genuine body correction
+   returned to its owner instead of silently rewritten in a wrapper.
+2. Transfer the exact independently accepted WA/PGP/B2 sampling patches when primary is released, then
+   reconcile their path/body impacts and refresh the required final token/API/profile evidence.
+3. Finish remaining actual expansion/replacement reads and current-span/edited-exclusion/stratum quota
+   adjudication. Actual reads and prepared selections remain different; no final clean-sampling PASS yet.
+4. Reconcile all final accepted path and example identities, retained/referral decisions, normal
+   coordinator validation, warnings and selected test outcomes at the final checkpoint. Retained pilot/
+   unit successes keep their prior scope until the required final identities are accepted.
+5. Record Astra's PF-02 proposal adjudication and obtain fresh independent final evidence acceptance,
+   then publish Core Pass 1 and this deferred handoff with its precise unresolved qualifications.
+
+These are the existing closeout gates, not a new plan or runtime campaign. After the agreed Core
+Pass‑1 publication and deferred handoff, **stop**.
+
+</details>

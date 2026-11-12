@@ -106,6 +106,8 @@ public sealed record AlgorithmInfo
     /// <remarks>
     /// Protocol parameter/security requirements still apply. In particular COSE AES-CBC requires
     /// RFC 9459's PKCS#7 padding and companion integrity protection; a CBC mapping is not a codec.
+    /// Structural applicability on a curve does not establish that COSE permits that curve with this
+    /// identifier. Validate the complete key/algorithm pairing under the consuming protocol profile.
     /// </remarks>
     public int? CoseAlgorithmId { get; }
     /// <summary>A separately selected hash, or null when not separately parameterized.</summary>

@@ -1,0 +1,776 @@
+{
+  "assigned": [
+    {
+      "key": "oath-pilot-and-fixes-wave-002:DEC-007",
+      "dedup_group": "scp-effective-version",
+      "original_state": "policy-known-rationale-gap",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/oath.md",
+        "ledger": "docs/research/documentation-audit/records/implementation-followups.md",
+        "review": "docs/research/documentation-audit/records/runs/fixes-wave-002/documentation-impact-review.md",
+        "source_run": "oath-pilot-and-fixes-wave-002"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/records/implementation-followups.md",
+        "start_line": 228,
+        "end_line": 239,
+        "text": "## DEC-007 — Establish OATH secure-channel gate provenance\n\n- **Source:** OATH-004-F12.\n- **State:** actual source gate confirmed; hardware/policy rationale unresolved; deferred to closeout.\n- **Proposed owner:** SDK maintainer with vendor/firmware input.\n- **Observation:** OATH enforces effective firmware5.6.3 for any SCP parameters. Core gates SCP03at5.3.0 and SCP11at5.7.2. Published vendor material gives generic5.3.0 SCP03 support without explaining an OATH-specific5.6.3 floor.\n- **Evidence:** [technical manual](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html), [legacy SDK SCP guide](https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/secure-channel-protocol.html), OathSession/ScpInitializer source. Legacy example syntax is not v2 API authority.\n- **Decision:** hardware minimum, workaround, or inherited SDK policy; define supported compatibility before changing the gate. Do not lower it based on generic support prose alone.\n- **Documentation dependency:** distinguish device requirements from SDK/effective-version gates now; update factory/version guidance if the policy later changes. Remove unnecessary NEO physical-firmware shorthand rather than inventing a supported NEO contract.\n\n**New direction/evidence:** The user authorizes Python sibling-SDK firmware checks as the policy reference. At local revision `4ca60f706af930459138d8dc0f0f953480e1c7a4`, `yubikit/oath.py:279–282` rejects SCP for `5.0.0 <= version < 5.6.3`, and rename requires5.3.1 at438. This establishes the reference policy for supported YubiKey5 devices. The shallow clone does not establish historical hardware rationale, and this policy is not proof of earliest physical support. Implementation review will preserve the distinction and Core's separate SCP gates.\n"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Oath/README.md",
+          "src/Oath/CLAUDE.md"
+        ],
+        "precise_trigger": "## DEC-007 — Establish OATH secure-channel gate provenance\n\n- **Source:** OATH-004-F12.\n- **State:** actual source gate confirmed; hardware/policy rationale unresolved; deferred to closeout.\n- **Proposed owner:** SDK maintainer with vendor/firmware input.\n- **Observation:** OATH enforces effective firmware5.6.3 for any SCP parameters. Core gates SCP03at5.3.0 and SCP11at5.7.2. Published vendor material gives generic5.3.0 SCP03 support without explaining an OATH-specific5.6.3 floor.\n- **Evidence:** [technical manual](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html), [legacy SDK SCP guide](https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/secure-channel-protocol.html), OathSession/ScpInitializer source. Legacy example syntax is not v2 API authority.\n- **Decision:** hardware minimum, workaround, or inherited SDK policy; define supported compatibility before changing the gate. Do not lower it based on generic support prose alone.\n- **Documentation dependency:** distinguish device requirements from SDK/effective-version gates now; update factory/version guidance if the policy later changes. Remove unnecessary NEO physical-firmware shorthand rather than inventing a supported NEO contract.\n\n**New direction/evidence:** The user authorizes Python sibling-SDK firmware checks as the policy reference. At local revision `4ca60f706af930459138d8dc0f0f953480e1c7a4`, `yubikit/oath.py:279–282` rejects SCP for `5.0.0 <= version < 5.6.3`, and rename requires5.3.1 at438. This establishes the reference policy for supported YubiKey5 devices. The shallow clone does not establish historical hardware rationale, and this policy is not proof of earliest physical support. Implementation review will preserve the distinction and Core's separate SCP gates.\n",
+        "sample_test_reopening_paths": [
+          "src/Oath/examples/OathTool/Program.cs",
+          "src/Oath/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/Oath/src/IOathSession.cs",
+          "src/Oath/src/IYubiKeyExtensions.cs",
+          "src/Oath/src/OathSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-Oath; Core mechanism owner B5/B6/C",
+      "original_conclusion": "OATH's effective 5.6.3 policy has pinned Python corroboration for 5.0.0 <= version < 5.6.3. Core's SCP03 5.3.0 and SCP11 5.7.2 gates are separate. Earliest physical support/workaround rationale remains bounded evidence debt.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "management-001:MGMT-IMP-004",
+      "dedup_group": "scp-parameter-ownership",
+      "original_state": "still-candidate-boundary-review",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/management.md",
+        "ledger": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+        "review": "docs/research/documentation-audit/modules/management/pass-1/management-001/review-closeout.md",
+        "source_run": "management-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+        "start_line": 41,
+        "end_line": 41,
+        "text": "| MGMT-IMP-004 | A-07/B supporting evidence; lock-code test zeroing follows fallible restoration; simple configuration tests restore only after successful assertions; several restorations are not read back. C review also exposed undisposed caller-owned default SCP parameter objects in two executable tests (see correction note below). | Make secret zeroing independent of hardware cleanup, dispose owned SCP inputs, restore after failed assertions, preserve failure provenance and assert restored state. NFC false semantics additionally depend on MGMT-IMP-002. | Lock-code/simple/capability/SCP test comments, test guidance and any claims of verified restoration/cleanup. |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Management/README.md",
+          "src/Management/CLAUDE.md"
+        ],
+        "precise_trigger": "| MGMT-IMP-004 | A-07/B supporting evidence; lock-code test zeroing follows fallible restoration; simple configuration tests restore only after successful assertions; several restorations are not read back. C review also exposed undisposed caller-owned default SCP parameter objects in two executable tests (see correction note below). | Make secret zeroing independent of hardware cleanup, dispose owned SCP inputs, restore after failed assertions, preserve failure provenance and assert restored state. NFC false semantics additionally depend on MGMT-IMP-002. | Lock-code/simple/capability/SCP test comments, test guidance and any claims of verified restoration/cleanup. |",
+        "sample_test_reopening_paths": [
+          "src/Management/examples/ManagementTool/Program.cs",
+          "src/Management/examples/ManagementTool/README.md",
+          "src/Management/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/Management/src/IManagementSession.cs",
+          "src/Management/src/IYubiKeyExtensions.cs",
+          "src/Management/src/ManagementSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-Management; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Two historical undisposed owned-default SCP test inputs and cleanup ordering require exact current-call-site rebaseline; broad source ownership does not certify these tests.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "security-domain-001:SD-DEP-001",
+      "dedup_group": "scp-auth-readiness",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "start_line": 50,
+        "end_line": 50,
+        "text": "| SD-DEP-001 | ApplicationSession IsAuthenticated and SCP preparation/configuration error semantics; SD InitializeAsync | Auth/creation/exception contracts and migration subsection |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/SecurityDomain/README.md",
+          "src/SecurityDomain/CLAUDE.md"
+        ],
+        "precise_trigger": "| SD-DEP-001 | ApplicationSession IsAuthenticated and SCP preparation/configuration error semantics; SD InitializeAsync | Auth/creation/exception contracts and migration subsection |",
+        "sample_test_reopening_paths": [
+          "src/SecurityDomain/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/SecurityDomain/src/ISecurityDomainSession.cs",
+          "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+          "src/SecurityDomain/src/SecurityDomainSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "SOURCE-INVESTIGATION-COMPLETE; selected-wrap/phase qualification retained",
+      "recommendation": "X005/X006; ready after callback, setup bool before draft a/c first correct-MAC phase; b no host authority.",
+      "owner": "SecurityDomain/coordinator triage",
+      "original_conclusion": "ApplicationSession prepares/binds before I/O, publishes IsInitialized after the full callback, and sets IsAuthenticated after successful SCP. SCP11b card authentication differs from host management authority; SD owns exception translation.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "security-domain-001:SD-DEP-002",
+      "dedup_group": "scp-parameter-ownership",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "start_line": 51,
+        "end_line": 51,
+        "text": "| SD-DEP-002 | StaticKeys, Scp03/11KeyParameters, ECPrivateKey/ECPublicKey and certificate clone/borrow/ownership rules; SD `_scpKeyParams` and import/export/test creation | Ownership/security/setup examples, private-import explanation, SD-IMP-008 |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/SecurityDomain/README.md",
+          "src/SecurityDomain/CLAUDE.md"
+        ],
+        "precise_trigger": "| SD-DEP-002 | StaticKeys, Scp03/11KeyParameters, ECPrivateKey/ECPublicKey and certificate clone/borrow/ownership rules; SD `_scpKeyParams` and import/export/test creation | Ownership/security/setup examples, private-import explanation, SD-IMP-008 |",
+        "sample_test_reopening_paths": [
+          "src/SecurityDomain/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/SecurityDomain/src/ISecurityDomainSession.cs",
+          "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+          "src/SecurityDomain/src/SecurityDomainSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "SOURCE-INVESTIGATION-COMPLETE; aliases/cleanup decision retained",
+      "recommendation": "X002/X003/X008; caller wrapper, exact contained keys/certs, reset retains reference; no deep clone or session disposal of caller inputs.",
+      "owner": "SecurityDomain/coordinator triage",
+      "original_conclusion": "StaticKeys clones source arrays. Scp03KeyParameters retains Keys and disposes it; Scp11KeyParameters retains key/certificate object references, copies only the collection, and disposes its private key/certificates. SD retains parameters for reset; per-call/session borrowing and alias scopes need a complete example review.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "security-domain-001:SD-DEP-003",
+      "dedup_group": "scp-effective-version",
+      "original_state": "changed-source-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "start_line": 52,
+        "end_line": 52,
+        "text": "| SD-DEP-003 | ApplicationSession/Feature effective firmware/configuration after reset; local omitted arguments and explicit-version flag | Feature/reset/version contracts, SD-IMP-005 |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/SecurityDomain/README.md",
+          "src/SecurityDomain/CLAUDE.md"
+        ],
+        "precise_trigger": "| SD-DEP-003 | ApplicationSession/Feature effective firmware/configuration after reset; local omitted arguments and explicit-version flag | Feature/reset/version contracts, SD-IMP-005 |",
+        "sample_test_reopening_paths": [
+          "src/SecurityDomain/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/SecurityDomain/src/ISecurityDomainSession.cs",
+          "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+          "src/SecurityDomain/src/SecurityDomainSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "SOURCE-REPRODUCIBLE-LOCAL-OMISSION; original SD-IMP-005 retained",
+      "recommendation": "X001/X004; reset omits config/version, clears explicit flag; Core completion centralization leaves omission; SCP11 can fail pre-handshake local gate.",
+      "owner": "SecurityDomain/coordinator triage",
+      "original_conclusion": "The current readiness completion boundary is centralized. SD's omitted reset configuration/explicit version was a local SD-IMP-005 question; compare reset callback arguments separately before calling options preserved.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "security-domain-001:SD-DEP-004",
+      "dedup_group": "shared-exchange-ownership",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "start_line": 53,
+        "end_line": 53,
+        "text": "| SD-DEP-004 | Session/connection lease, cancellation, response-memory lifetime and APDU Le semantics; factory/OwnConnection/GetData call sites | Factory/connection and raw-data contracts |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/SecurityDomain/README.md",
+          "src/SecurityDomain/CLAUDE.md"
+        ],
+        "precise_trigger": "| SD-DEP-004 | Session/connection lease, cancellation, response-memory lifetime and APDU Le semantics; factory/OwnConnection/GetData call sites | Factory/connection and raw-data contracts |",
+        "sample_test_reopening_paths": [
+          "src/SecurityDomain/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/SecurityDomain/src/ISecurityDomainSession.cs",
+          "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+          "src/SecurityDomain/src/SecurityDomainSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "SOURCE-INVESTIGATION-COMPLETE; workflow/ROM/Le qualifications retained",
+      "recommendation": "X003/X004/X007; direct borrow versus hidden own, per-exchange not whole reset guard, hidden response owner and always-appended zero Le.",
+      "owner": "SecurityDomain/coordinator triage",
+      "original_conclusion": "A direct factory borrows its connection; protocol exchange admission/drain is distinct from a whole multi-command workflow. APDU response copies and Le formatting need the SD GetData call-site trace.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "security-domain-001:SD-DEP-005",
+      "dedup_group": "logging-payload-policy",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/security-domain.md",
+        "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+        "source_run": "security-domain-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+        "start_line": 54,
+        "end_line": 54,
+        "text": "| SD-DEP-005 | Current global logging configuration and payload logging policy; obsolete loggerFactory sample | Contributor diagnostics and sensitive-logging advice |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/YubiKitLogging.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/SecurityDomain/README.md",
+          "src/SecurityDomain/CLAUDE.md"
+        ],
+        "precise_trigger": "| SD-DEP-005 | Current global logging configuration and payload logging policy; obsolete loggerFactory sample | Contributor diagnostics and sensitive-logging advice |",
+        "sample_test_reopening_paths": [
+          "src/SecurityDomain/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/SecurityDomain/src/ISecurityDomainSession.cs",
+          "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+          "src/SecurityDomain/src/SecurityDomainSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "SOURCE-INVESTIGATION-COMPLETE; stale initial formatter claim superseded",
+      "recommendation": "X005; current formatters contain no logs; PCSC ordinary trace headers/length only; opaque exception objects/messages remain distinct provider provenance.",
+      "owner": "SecurityDomain/coordinator triage",
+      "original_conclusion": "Core uses global YubiKitLogging configuration; formatter traces can expose APDU data. Check actual formatter log calls and SD diagnostics before broad sensitive-payload assurances.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-001",
+      "dedup_group": "shared-exchange-ownership",
+      "original_state": "changed-source-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/yubiotp.md",
+        "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+        "source_run": "yubiotp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "start_line": 60,
+        "end_line": 60,
+        "text": "| OTP-DEP-001 / D001 | ApplicationSession/device helpers physical lease, initialization failure cleanup, selected transport/no fallback and disposal | Factory/extension/README ownership, OtpTool creation, migration and architecture |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Devices/YubiKeyDevice.cs",
+          "src/Core/src/Devices/HidConnectionSlot.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiOtp/README.md",
+          "src/YubiOtp/CLAUDE.md"
+        ],
+        "precise_trigger": "| OTP-DEP-001 / D001 | ApplicationSession/device helpers physical lease, initialization failure cleanup, selected transport/no fallback and disposal | Factory/extension/README ownership, OtpTool creation, migration and architecture |",
+        "sample_test_reopening_paths": [
+          "src/YubiOtp/examples/OtpTool/Program.cs",
+          "src/YubiOtp/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/YubiOtp/src/IYubiKeyExtensions.cs",
+          "src/YubiOtp/src/IYubiOtpSession.cs",
+          "src/YubiOtp/src/YubiOtpSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-YubiOtp; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Owned Linux typed HID opens now transfer grouped claims before native acquisition. Current ApplicationSession owns protocol disposal and only convenience factories own hidden connections. Recheck YubiOTP selection/failure cleanup with these routes.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-003",
+      "dedup_group": "shared-exchange-ownership",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/yubiotp.md",
+        "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+        "source_run": "yubiotp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "start_line": 62,
+        "end_line": 62,
+        "text": "| OTP-DEP-003 / D003 | SmartCard admitted cancellation/drain, serialized-copy lifetime and notification exception/cleanup guarantees | Response/input ownership, README cancellation, backend comments/shared interaction and IMP003 |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+          "src/Core/src/Credentials/UserPresenceNotification.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiOtp/README.md",
+          "src/YubiOtp/CLAUDE.md"
+        ],
+        "precise_trigger": "| OTP-DEP-003 / D003 | SmartCard admitted cancellation/drain, serialized-copy lifetime and notification exception/cleanup guarantees | Response/input ownership, README cancellation, backend comments/shared interaction and IMP003 |",
+        "sample_test_reopening_paths": [
+          "src/YubiOtp/examples/OtpTool/Program.cs",
+          "src/YubiOtp/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/YubiOtp/src/IYubiKeyExtensions.cs",
+          "src/YubiOtp/src/IYubiOtpSession.cs",
+          "src/YubiOtp/src/YubiOtpSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-YubiOtp; Core mechanism owner B5/B6/C",
+      "original_conclusion": "SmartCard admitted exchange uses uncancellable constituent work. UserPresence fallback cannot reclaim a sensitive result after transfer if resolution throws; applet producer owns resolution-before-transfer and cleanup.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "yubiotp-001:OTP-DEP-004",
+      "dedup_group": "scp-effective-version",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/yubiotp.md",
+        "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+        "source_run": "yubiotp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+        "start_line": 63,
+        "end_line": 63,
+        "text": "| OTP-DEP-004 / D004 | FirmwareVersion alpha/beta/override, HID status normalization and raw/effective mismatch | Firmware/status/presence docs and IMP004/006 |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiOtp/README.md",
+          "src/YubiOtp/CLAUDE.md"
+        ],
+        "precise_trigger": "| OTP-DEP-004 / D004 | FirmwareVersion alpha/beta/override, HID status normalization and raw/effective mismatch | Firmware/status/presence docs and IMP004/006 |",
+        "sample_test_reopening_paths": [
+          "src/YubiOtp/examples/OtpTool/Program.cs",
+          "src/YubiOtp/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/YubiOtp/src/IYubiKeyExtensions.cs",
+          "src/YubiOtp/src/IYubiOtpSession.cs",
+          "src/YubiOtp/src/YubiOtpSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-YubiOtp; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Feature admits major-zero development firmware; applet raw status, metadata and effective override remain separate. Initial OTP protocol indexes report bytes before returning status; exact route invariants require review.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-001",
+      "dedup_group": "scp-effective-version",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/yubihsm.md",
+        "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+        "source_run": "yubihsm-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "start_line": 55,
+        "end_line": 55,
+        "text": "| HSM-DEP-001 | ApplicationSession/Feature/FirmwareVersion effective development/override semantics versus metadata filtering and applet SELECT | Feature table/XML, reset version policy, old-firmware and development qualification |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiHsm/README.md",
+          "src/YubiHsm/CLAUDE.md"
+        ],
+        "precise_trigger": "| HSM-DEP-001 | ApplicationSession/Feature/FirmwareVersion effective development/override semantics versus metadata filtering and applet SELECT | Feature table/XML, reset version policy, old-firmware and development qualification |",
+        "sample_test_reopening_paths": [
+          "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+          "src/YubiHsm/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/YubiHsm/src/HsmAuthSession.cs",
+          "src/YubiHsm/src/IHsmAuthSession.cs",
+          "src/YubiHsm/src/IYubiKeyExtensions.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-YubiHsm; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Core Feature major-zero acceptance explains a compatibility query, not raw applet/metadata identity. Recheck HSM SELECT fallback, override and reset version retention locally.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "yubihsm-001:HSM-DEP-002",
+      "dedup_group": "shared-exchange-ownership",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/yubihsm.md",
+        "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+        "source_run": "yubihsm-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+        "start_line": 56,
+        "end_line": 56,
+        "text": "| HSM-DEP-002 | SmartCard admitted cancellation/drain and connection/prompt ownership; public outcomes versus native guarantees | Factory/README ownership, cancellation/presence guidance, shared interaction and touch-test explanations |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Credentials/UserPresenceNotification.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiHsm/README.md",
+          "src/YubiHsm/CLAUDE.md"
+        ],
+        "precise_trigger": "| HSM-DEP-002 | SmartCard admitted cancellation/drain and connection/prompt ownership; public outcomes versus native guarantees | Factory/README ownership, cancellation/presence guidance, shared interaction and touch-test explanations |",
+        "sample_test_reopening_paths": [
+          "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+          "src/YubiHsm/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/YubiHsm/src/HsmAuthSession.cs",
+          "src/YubiHsm/src/IHsmAuthSession.cs",
+          "src/YubiHsm/src/IYubiKeyExtensions.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-YubiHsm; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Connection/prompt borrowing and admitted native drain need the CALCULATE path. Historical 6982/Failed plus fresh-session recovery is measured outcome, not proof of native cancellation or timeout causality.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-002",
+      "dedup_group": "shared-exchange-ownership",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/openpgp.md",
+        "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+        "source_run": "openpgp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "start_line": 89,
+        "end_line": 89,
+        "text": "| PGP-CORE-002 | Factory/connection ownership, async disposal dispatch, SCP applicability and KDF cache cleanup boundaries (C003/C021). | Factory/GetKdf/disposal/borrowed-connection guide |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/OpenPgp/README.md",
+          "src/OpenPgp/CLAUDE.md"
+        ],
+        "precise_trigger": "| PGP-CORE-002 | Factory/connection ownership, async disposal dispatch, SCP applicability and KDF cache cleanup boundaries (C003/C021). | Factory/GetKdf/disposal/borrowed-connection guide |",
+        "sample_test_reopening_paths": [
+          "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+          "src/OpenPgp/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/OpenPgp/src/IOpenPgpSession.cs",
+          "src/OpenPgp/src/IYubiKeyExtensions.cs",
+          "src/OpenPgp/src/OpenPgpSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-OpenPgp; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Core async session disposal dispatches DisposeAsyncCore then derived Dispose(bool) in finally; connection ownership remains borrowed unless transferred. OpenPGP KDF cache alias/disposal and SCP applicability need separate applet verification.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-003",
+      "dedup_group": "scp-effective-version",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/openpgp.md",
+        "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+        "source_run": "openpgp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "start_line": 90,
+        "end_line": 90,
+        "text": "| PGP-CORE-003 | Effective firmware/development/override policy, raw applet 0.0.1 versus metadata5.8beta and protocol framing (C010/C021). | Firmware constants/factory/requirements and old-family qualifications |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/OpenPgp/README.md",
+          "src/OpenPgp/CLAUDE.md"
+        ],
+        "precise_trigger": "| PGP-CORE-003 | Effective firmware/development/override policy, raw applet 0.0.1 versus metadata5.8beta and protocol framing (C010/C021). | Firmware constants/factory/requirements and old-family qualifications |",
+        "sample_test_reopening_paths": [
+          "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+          "src/OpenPgp/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/OpenPgp/src/IOpenPgpSession.cs",
+          "src/OpenPgp/src/IYubiKeyExtensions.cs",
+          "src/OpenPgp/src/OpenPgpSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-OpenPgp; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Keep raw 0.0.1, device metadata 5.8 beta and effective override distinct; Feature major-zero bypass is a host compatibility policy, not physical-firmware proof.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "openpgp-001:PGP-CORE-004",
+      "dedup_group": "shared-exchange-ownership",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/openpgp.md",
+        "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+        "source_run": "openpgp-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+        "start_line": 91,
+        "end_line": 91,
+        "text": "| PGP-CORE-004 | SmartCard admitted cancellation, session serialization, operation drain and prompt ownership/outcome (C008/C012). | Crypto/presence/cancellation/resource guidance and actual ceremony tests |"
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Utilities/ExchangeGuard.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/OpenPgp/README.md",
+          "src/OpenPgp/CLAUDE.md"
+        ],
+        "precise_trigger": "| PGP-CORE-004 | SmartCard admitted cancellation, session serialization, operation drain and prompt ownership/outcome (C008/C012). | Crypto/presence/cancellation/resource guidance and actual ceremony tests |",
+        "sample_test_reopening_paths": [
+          "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+          "src/OpenPgp/tests/CLAUDE.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/OpenPgp/src/IOpenPgpSession.cs",
+          "src/OpenPgp/src/IYubiKeyExtensions.cs",
+          "src/OpenPgp/src/OpenPgpSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-OpenPgp; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Exchange serialization and session disposal do not alone prove whole PIN/key/reset workflow atomicity. Preserve 6600/Failed and fresh-session recovery without native-interruption claims.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    },
+    {
+      "key": "piv-001:PIVCORE-002",
+      "dedup_group": "shared-exchange-ownership",
+      "original_state": "source-mapped-review-pending",
+      "original_authority": {
+        "handoff": "docs/research/documentation-audit/piv.md",
+        "ledger": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+        "review": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-closeout.md",
+        "source_run": "piv-001"
+      },
+      "original_definition": {
+        "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+        "start_line": null,
+        "end_line": null,
+        "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+      },
+      "original_reopening_map": {
+        "state": "initial rebaseline; family/boundary review pending",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Utilities/ExchangeGuard.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Piv/README.md",
+          "src/Piv/CLAUDE.md"
+        ],
+        "precise_trigger": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found.",
+        "sample_test_reopening_paths": [
+          "src/Piv/examples/PivTool/Program.cs",
+          "src/Piv/examples/PivTool/README.md"
+        ],
+        "module_xml_reopening_paths": [
+          "src/Piv/src/IPivSession.cs",
+          "src/Piv/src/IYubiKeyExtensions.cs",
+          "src/Piv/src/PivSession.cs"
+        ],
+        "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+      },
+      "original_aliases": [],
+      "boundary_status": "REFERRED-TO-EXACT-APPLET-BOUNDARY-OWNER",
+      "recommendation": "Shared mechanism evidence applied only to actual SD flow here. Complete other-applet call-site disposition remains with its named boundary; no automatic closure or extra bug.",
+      "owner": "BOUNDARY-Piv; Core mechanism owner B5/B6/C",
+      "original_conclusion": "Check multi-APDU authentication/recovery/reset overlap beyond individual protocol exchange guards. The session has no in-flight operation admission lease; disposal may race a larger workflow between exchanges.",
+      "qualification": "No authoritative registry change, acceptance, implementation or device closure. DEC-007 rationale remains gap; PIV physical deferrals remain."
+    }
+  ],
+  "local_original_aliases": {
+    "SD-IMP-001": "X004: incomplete/empty/exhausted reset and no post-state verification retained",
+    "SD-IMP-002": "Original SD owner: component/zero normalized empty delete filter; public warning accurate, no duplicate Core candidate",
+    "SD-IMP-003": "X006/X007: serial/counter draft/profile qualification; no new final conformity conclusion",
+    "SD-IMP-004": "Original SD owner: malformed/trailing metadata parser/open raw result policy; XML already qualified",
+    "SD-IMP-005": "X001/X004: omitted reset config/version persists",
+    "SD-IMP-006": "Original SD owner with X007 wire dependency: ranges/truncation/KCV version/trailing data, public limitations accurate",
+    "SD-IMP-007": "X006/X008: actual test oracles and phase/authority limits",
+    "SD-IMP-008": "X002/X003/X008: concrete key/response/fixture/helper cleanup and alias scopes"
+  },
+  "additional_exact_scope": [
+    {
+      "key": "audit-v2-20261022-20261031:consideration-5",
+      "outcome": "RESOLVED-SOURCE-FOR-EXACT-CERTIFICATE-PARTIAL-CLEANUP-SCOPE",
+      "evidence": "SD GetCertificates303–339 and both complete CertificateBundleTests: actual accumulated handles disposed on later corrupt item; success transfers identity/order and survives session disposal.",
+      "qualification": "No fresh execution. Distinct from Scp11 parameter certificate alias disposal and integration helper leaks."
+    }
+  ]
+}

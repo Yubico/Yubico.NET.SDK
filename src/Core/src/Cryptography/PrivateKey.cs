@@ -18,8 +18,10 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// Abstract base class for private key implementations.
 /// </summary>
 /// <remarks>
-/// This class implements the standard .NET disposal pattern to ensure secure cleanup
-/// of sensitive cryptographic material and provides disposal state checking for derived classes.
+/// Disposal calls the implementation's <see cref="Clear"/> method and marks the wrapper disposed
+/// after it returns. Dispose keys explicitly;
+/// this base class has no finalizer. Caller inputs, exported arrays, and runtime/provider copies have
+/// separate lifetimes and are not cleared by disposing this wrapper.
 /// <para>
 /// Concrete implementations include <see cref="ECPrivateKey"/>, <see cref="RSAPrivateKey"/> and <see cref="Curve25519PrivateKey"/>,
 /// each providing algorithm-specific key handling and cryptographic operations.

@@ -1,0 +1,91 @@
+{
+  "scope": "Reviewed logging accessibility correction; WA changes one documentation body, root changes prose only",
+  "patch_sha256": "b43c9a1da1416b45971f25e81b25bc46705158066e474d214e506f7909b452bd",
+  "product_files": [
+    {
+      "path": "CLAUDE.md",
+      "previous_sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+      "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/report.md",
+      "sha256": "c95efa2dfbeb81ce682a8e412c70bef2ed92e8a2ed3304487a331605e3206e8c",
+      "bytes": 2564
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/before.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/before.md",
+      "sha256": "6e4708a941776bbfd20aa84beae02a3f07e9e114a463d488d4ca22306b61c383",
+      "bytes": 34741
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/product-before-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/product-before-identities.json",
+      "sha256": "3ac6d2d828b0d14695309bd69f111f999016789dadf27884df768fcd5a896304",
+      "bytes": 3650
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/preserved-record-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/preserved-record-identities.json",
+      "sha256": "7686d000b3db2de37ebb8a6d7fba809cbb87f79f29c96a7bc289695fd5d317cb",
+      "bytes": 15798
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/source-evidence.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/source-evidence.json",
+      "sha256": "817bca83da00240558c6284ab2e9a372482a9021967c0b0a94dbced32283c339",
+      "bytes": 9272
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/after.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/after.md",
+      "sha256": "48c7ffbeede39f50234212025f6b8ae809a7717a1c386a44aae2f185acf7d264",
+      "bytes": 35012
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/product.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/product.patch",
+      "sha256": "b43c9a1da1416b45971f25e81b25bc46705158066e474d214e506f7909b452bd",
+      "bytes": 794
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/example-bodies.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/example-bodies.json",
+      "sha256": "1317fc43a090caa177031a773221755352fd40c2ed284bb732a7a4230c54e8a0",
+      "bytes": 23664
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/changed-path-sha256.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/changed-path-sha256.json",
+      "sha256": "7ff7f8478e2faa67a651d9165e05f60e4450d75ee02378e23d3c318f13602714",
+      "bytes": 563
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/verification.json",
+      "sha256": "09ed470ab80dd6142819358517248cb389d098e9df9a1b62fba29a50961c9f2f",
+      "bytes": 574
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/output-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/output-identities.json",
+      "sha256": "00f899995b8ab63f25547078078772a96f5a318bfb6d3eb932985363c3511f6d",
+      "bytes": 1244
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/review.md",
+      "sha256": "89315919ec3430750d714abd14ec1e3c7115b0cfdc04ec0b093342c0f7fc64d5",
+      "bytes": 4503
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/compiler-logging-access/review-identities.json",
+      "sha256": "e12133e17d5b88ea7a709b37dbb304c433991f1a442db530c48bf1ed0d5d5348",
+      "bytes": 4462
+    }
+  ]
+}

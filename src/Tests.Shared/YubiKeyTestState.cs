@@ -48,8 +48,8 @@ public class YubiKeyTestState : IXunitSerializable
     /// </summary>
     /// <remarks>
     ///     During discovery, we don't want to connect to actual hardware.
-    ///     This placeholder is returned instead and tests are re-enumerated
-    ///     with real devices when actually run.
+    ///     A placeholder binds lazily to the first matching authorized device during execution;
+    ///     it does not expand into a separate row for every matching device.
     /// </remarks>
     public static YubiKeyTestState Placeholder { get; } = new(isPlaceholder: true, filterDescription: null);
 
@@ -405,17 +405,25 @@ public class YubiKeyTestState : IXunitSerializable
     }
 
     /// <summary>
-    ///     Checks if the device is FIPS-capable for the specified capability.
+    ///     Checks the cached FIPS-capable mask for any of the specified capability bits.
     /// </summary>
     /// <param name="capability">The capability to check.</param>
     /// <returns>True if FIPS-capable; otherwise, false.</returns>
+    /// <remarks>
+    ///     Current Core FIPS-tag decoding has a bit-mapping issue. This helper does not establish
+    ///     application approval or correct that decoding.
+    /// </remarks>
     public bool IsFipsCapable(DeviceCapabilities capability) => (DeviceInfo.FipsCapabilities & capability) != 0;
 
     /// <summary>
-    ///     Checks if the device is in FIPS-approved mode for the specified capability.
+    ///     Checks the cached FIPS-approved mask for any of the specified capability bits.
     /// </summary>
     /// <param name="capability">The capability to check.</param>
     /// <returns>True if FIPS-approved; otherwise, false.</returns>
+    /// <remarks>
+    ///     Current Core FIPS-tag decoding has a bit-mapping issue. This mask test does not establish
+    ///     an active operating mode or independently verify application approval.
+    /// </remarks>
     public bool IsFipsApproved(DeviceCapabilities capability) => (DeviceInfo.FipsApproved & capability) != 0;
 
     /// <summary>

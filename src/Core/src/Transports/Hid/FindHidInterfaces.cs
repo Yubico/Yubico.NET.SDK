@@ -22,11 +22,19 @@ using Yubico.YubiKit.Core.Transports.Hid.Windows;
 
 namespace Yubico.YubiKit.Core.Transports.Hid;
 
+/// <summary>Finds operating-system HID interfaces rather than grouped physical YubiKeys.</summary>
 public interface IFindHidInterfaces
 {
+    /// <summary>Returns a snapshot of enumerated Yubico interfaces.</summary>
+    /// <remarks>
+    ///     A token canceled before worker execution prevents enumeration. Once enumeration starts, the task
+    ///     remains pending until it finishes; cancellation does not interrupt native enumeration. Unsupported
+    ///     platforms return an empty list. A missing Linux udev library is logged and also returns empty.
+    /// </remarks>
     Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
+/// <summary>Enumerates platform HID interfaces and filters them to the Yubico vendor ID.</summary>
 public class FindHidInterfaces : IFindHidInterfaces
 {
     private readonly ILogger<FindHidInterfaces> _logger;
@@ -45,6 +53,7 @@ public class FindHidInterfaces : IFindHidInterfaces
         _getPlatformDevices = getPlatformDevices;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
@@ -95,6 +104,7 @@ public class FindHidInterfaces : IFindHidInterfaces
     private static IReadOnlyList<IHidInterface> FindAllWindows() =>
         WindowsHidInterface.GetList();
 
+    /// <summary>Creates a one-shot interface finder with the supplied logger or a no-op logger.</summary>
     public static FindHidInterfaces Create(ILogger<FindHidInterfaces>? logger = null) =>
         new(logger ?? NullLogger<FindHidInterfaces>.Instance);
 }

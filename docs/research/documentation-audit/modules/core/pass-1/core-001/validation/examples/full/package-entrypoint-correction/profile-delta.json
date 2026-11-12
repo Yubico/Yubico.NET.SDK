@@ -1,0 +1,123 @@
+{
+  "predecessor_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-contexts-fixed.json",
+    "bytes": 670995,
+    "sha256": "3e40cb440ddd872de8bfba3ae3c0e45166ff5dbcb3a44aad890b968c97885228"
+  },
+  "profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-package-entrypoint.json",
+    "bytes": 681528,
+    "sha256": "fa8db15afb99ca26f5e7912e2754981fb8a4cffba59e76df5a76136080652aed"
+  },
+  "old_fixed_rows": 1732,
+  "new_fixed_rows": 1743,
+  "changed_existing_rows": 3,
+  "unchanged_predecessor_rows": 1729,
+  "added_rows": 11,
+  "old_compile_source_paths": 1330,
+  "new_compile_source_paths": 1331,
+  "compile_source_added": {
+    "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+    "bytes": 218,
+    "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a"
+  },
+  "original_compile_sources_preserved": true,
+  "projects_unchanged": true,
+  "accepted_product_map_unchanged": true,
+  "all_300_sources_and_manifest_unchanged": true,
+  "changed_participants": [
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.py",
+        "bytes": 7838,
+        "sha256": "175480934087da62df5c9cfeee3fa4335a1c2727440480408fcb62d4fa4486f2"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.py",
+        "bytes": 11993,
+        "sha256": "48d6c51c11a5ac79385453ccd068484fd17c59d40b601e05c1e5e35ed86a1424"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.targets",
+        "bytes": 3534,
+        "sha256": "6f2f0f081e2a727f60be6b90284ea56b1208ac416fdad0f0a3c2012a265de7a6"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/capture.targets",
+        "bytes": 3680,
+        "sha256": "ff4d4a5eff05e391e27418e1932b0b9b189663b9dbc6c4d6deb6cf6d7cc2b74c"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 6786,
+        "sha256": "eb424dd4856639140f805d580aa4e1d83d3d79c3b1310e320d042279138b8dd8"
+      },
+      "after": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/verify.py",
+        "bytes": 7027,
+        "sha256": "2270b3e396e7d86720a1843adbb388f3cb95cd69b0a255ff7db4596c9ed04310"
+      }
+    }
+  ],
+  "added_participants": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-admission.json",
+      "bytes": 4872,
+      "sha256": "502d4f2dcf8cccd3c50105b601ff647a7600914dc1b8cfe314758f16c28880fd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-correction/verify.py",
+      "bytes": 10551,
+      "sha256": "28db09ba8988d497d58ab9849b16af3f9ea66861c6e523cc6c0247d75d4711ac"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-correction/preservation.json",
+      "bytes": 258773,
+      "sha256": "bf36dbec72c1d10dc86c25a934d18d7920287e29b80a1dd6016fe7e1ce2e2c13"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/package-entrypoint-correction/resolved-contexts.before.json.snapshot",
+      "bytes": 1880332,
+      "sha256": "f6202f173e800b9cdcc7185a20a3fb6ae5725b1157158e19fb302540a0a89ddb"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs",
+      "bytes": 218,
+      "sha256": "d66f12f9433816a8c7dc1b2acb9e1010f5418f5eeb51e80f1df57aa1dcab8d8a"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.targets",
+      "bytes": 3211,
+      "sha256": "93e2c4a4e08fa8db6af3b5907205741ad5184e642181bfdbe949c5109e19aa2f"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.props",
+      "bytes": 848,
+      "sha256": "a52a33ff2b93571aaba9311d42b62b6cbb14eb4f71ab580a40eb7e7ffe1f13ba"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.nuspec",
+      "bytes": 1376,
+      "sha256": "2dd29606329ec4f855d243329f56fad96b71cd315897a1f721eeb57f38f85290"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.18.0.1.nupkg",
+      "bytes": 39745,
+      "sha256": "d1cdffae9f5d8b4c3b1395267d187a3ebae6dc07b28bc34e8f96e6da2ea3021d"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/microsoft.net.test.sdk.18.0.1.nupkg.sha512",
+      "bytes": 88,
+      "sha256": "f665987c75f76a2c228ee04fe9d80fddb9fb32f507fbfea9ddd87bdc5bc96b2b"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/.nupkg.metadata",
+      "bytes": 178,
+      "sha256": "76ba008b650088ff2b68c7a6a9516858a364022bedf75efd8b10d0e14c250a27"
+    }
+  ]
+}

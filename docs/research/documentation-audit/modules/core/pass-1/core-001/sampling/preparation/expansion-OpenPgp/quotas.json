@@ -1,0 +1,30 @@
+[
+  {
+    "owner": "OpenPgp",
+    "stratum": "implementation-state-and-internal-contracts",
+    "original_population": 32,
+    "original_full_quota": 4,
+    "additional_full_quota": 4,
+    "proposed_total": 8,
+    "miss_final_clean_credit": 0,
+    "additional_ids": [
+      "core-001:unit:f266412cbf666ee5",
+      "core-001:unit:8490dabf2e2bd6ea",
+      "core-001:unit:c695a3c8180b434c",
+      "core-001:unit:606c7462df485c41"
+    ]
+  },
+  {
+    "owner": "OpenPgp",
+    "stratum": "narrative-examples-and-maps",
+    "original_population": 15,
+    "original_full_quota": 2,
+    "additional_full_quota": 2,
+    "proposed_total": 4,
+    "miss_final_clean_credit": 0,
+    "additional_ids": [
+      "core-001:unit:3f79f975e26f3c6c",
+      "core-001:unit:15611fb8dbaa0ab5"
+    ]
+  }
+]

@@ -1,0 +1,106 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "rule": "Owned final records and report only; manifest excludes itself. No historical archive recopied or rewritten.",
+  "files": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/analysis.md",
+      "sha256": "05ed0e3fe657792fc02335d5de2fd3d648404a93fb8f6ad950313738ff610a53",
+      "bytes": 21004
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/anchors.json",
+      "sha256": "e1515b32017dd1cdb2757328419c3f221ac9e741707499171fcc3cd99242127f",
+      "bytes": 4207
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/candidate-index.json",
+      "sha256": "f84999328c760292ee2b58b40ba1052aaa54f065476f03a009539beb0ef7ad54",
+      "bytes": 16078
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/candidates.md",
+      "sha256": "c55801e27a3ec463cc36ba138492c40c5a4c01112b2fad188f91b8403fcc4a81",
+      "bytes": 13950
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/clean-nominees.json",
+      "sha256": "e9687a30dfd612a37b8499ba07c30a866a98f321f54365396fcd91a91db6aa33",
+      "bytes": 7359
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/coverage-summary.json",
+      "sha256": "91eee7e821d173f614b79b580d308bba4ff564f2041ed13127c4809dd05be9e2",
+      "bytes": 1014
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/dependency-dispositions.json",
+      "sha256": "dd1b17fd0689c17e03fadc9534f730cf17315ef42b53150764981612412887f9",
+      "bytes": 26534
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/execution-notes.md",
+      "sha256": "55b1d55afbe0fd92ac63742b2062ea8148a7108d97fd06f27dfcac8428b4e0dc",
+      "bytes": 3247
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/file-dispositions.json",
+      "sha256": "16a950ed0c6d4ed53684a7d044e38e9dab177531b529946b403cb7d4d55536d5",
+      "bytes": 118217
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/file-notes.tsv",
+      "sha256": "40ba2c7d923a335634199f1cd14663d3ccf9c5b865f81880d5f9da7f86ed863f",
+      "bytes": 27455
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/inherited-dispositions.json",
+      "sha256": "723e1cb10296c0c0be5b12b1dae1277414bf31a2ad5f3c1087cded7787c246e2",
+      "bytes": 92035
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/inherited-outcomes.md",
+      "sha256": "630b2213b49716d6053c1a6dea7aa9fbdb74956cff2b2c0dc23be5d94573f795",
+      "bytes": 8753
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/metadata-input-current.md",
+      "sha256": "6ea0a2f4eeff0fa9dae1cf9d67e77ca22f0b27bef3bccd649c7f2dd970ae009e",
+      "bytes": 6220
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/oracles-and-verification.md",
+      "sha256": "b1af0c00be901c1fb13b1bedf367658c245af3114df70c246c068227e0ffad95",
+      "bytes": 8326
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/source-manifest.json",
+      "sha256": "d2b01f23622e01667b2781d21ea2d18c23c8670e8f905d68ab5157283d6e6f9e",
+      "bytes": 134662
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/sources.md",
+      "sha256": "09da98e8918c297a63af0816dd8f75d303256774a8366dfca99dc708184370b0",
+      "bytes": 8188
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/unit-dispositions.json",
+      "sha256": "6d0b5f47c2ea327c464bf9a74ba1cfdc60199561b2cf230621a87dcc3809e9e2",
+      "bytes": 966261
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/verification-attempt-1.json",
+      "sha256": "a2d1b1aaac62b96e5d992ee733d040af89af20cc8a109499c1a202df592dddf0",
+      "bytes": 96957
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/verification.json",
+      "sha256": "c50f9439722ab65cd98d01e08d9eb3a4b0df62c1782c783fe88928050636beb8",
+      "bytes": 97502
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Piv.md",
+      "sha256": "7c1a3bef1b85ba38c936c81695f81ccb4bbc1933224037dde82061933d29e4a8",
+      "bytes": 10953
+    }
+  ]
+}

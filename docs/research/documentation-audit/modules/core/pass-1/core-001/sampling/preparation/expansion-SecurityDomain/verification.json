@@ -1,0 +1,13 @@
+{
+  "result": "STRUCTURAL-SD-EXPANSION-VERIFIED; NO CONTENT VERDICTS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_quota": 2,
+  "additional_units": 2,
+  "proposed_total": 4,
+  "miss_final_clean_credit": 0,
+  "shared_preparation_receipt": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/family-replacements/revision-2/verification.json",
+  "shared_preparation_receipt_sha256": "0f3cbe8ffa302ad423e09adf9b7c9eb523ac33450fd026653b3e0699efd40257",
+  "selection_sha256": "dc759698b61e2db7ef53986af6b6bdf6c15b81462967d2a32e79112edbfc16d9",
+  "new_units_read_status": "UNREAD; clean credit zero",
+  "final_denominator": null
+}

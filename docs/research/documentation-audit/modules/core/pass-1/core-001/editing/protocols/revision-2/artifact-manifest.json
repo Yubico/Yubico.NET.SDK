@@ -1,0 +1,34 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/candidate-decisions.json",
+    "sha256": "1af8cf3d6c4b91e61c8db0a55cd65538066d7fb3dbeea0e07a6b3e318b7a56dd"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/citations.md",
+    "sha256": "5fd27a20a195f0775039e259cfd08987f24258b869c0e415d442fe9590073d55"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/correction.diff",
+    "sha256": "86e72eb988961fca3b8241905c548056316ce858b108e2530de7f9215812628e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/full-transfer.diff",
+    "sha256": "7d2f50621bddf029cc3b494a256552ea9169d3a2d142caeb101a72d7ebd50b5e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/path-decisions.json",
+    "sha256": "89d65f56a53382e40117c61bbb19b678e80d246944518b98d84a979247730f4e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/receipt.json",
+    "sha256": "ebf4621dc57dc1090222193b9a3474a03fd93e1b071b502c07730e3cff9fc1a4"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/report.md",
+    "sha256": "debece57ab9b490c9762e106b551880f3f1606d191ae73123e5bbad7a1b963ac"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/reviewed-input.json",
+    "sha256": "297b3425611e47fc6abb8c6916578eded2544e6d6393b6b924730c83eb0ed4a9"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "scope": "Pure Python ownership and source-set oracles only; no SDK test/build/capture execution.",
+  "red": {
+    "exit_code": 1,
+    "reason": "Original generator has no Management.UnitTests ownership for FULL-061; all56 scan identifies exactly this v3/v2 mismatch."
+  },
+  "green": {
+    "exit_code": 0,
+    "all56_runner_compatible": true,
+    "correct_existing_v3_context": true,
+    "already_correct_FULL_011_unchanged": true,
+    "core_unit_rejected_for_missing_management_reference": true
+  },
+  "command": "python3 -B runner-context-correction/verify.py"
+}

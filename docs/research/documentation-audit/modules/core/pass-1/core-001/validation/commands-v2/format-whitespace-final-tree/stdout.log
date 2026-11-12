@@ -1,0 +1,30 @@
+Formatting code files in workspace '.'.
+Loading workspace.
+Project C#.csproj is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.
+Project C#.csproj is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/node_modules/dayjs/.editorconfig'.
+Project C#.csproj is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/node_modules/khroma/.editorconfig'.
+Complete in 521ms.
+Determining formattable files.
+Complete in 576ms.
+Running formatters.
+Complete in 533ms.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidBoundaryComparison/Program.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Process.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Results.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/TestTargets.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/Evidence.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/OperatorScenarios.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidInputVerification/Program.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/ListenerDrainScenario.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/Program.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/SmartCardScenario.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeAotVerification/Program.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeCompatibilityVerification/Program.cs'.
+Formatted code file '/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs'.
+Writing formatting report to: '/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/format-whitespace-final-tree.json'.
+Formatted 17 of 310 files.
+Format complete in 1651ms.

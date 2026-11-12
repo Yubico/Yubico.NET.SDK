@@ -1,0 +1,134 @@
+[
+  {
+    "unit_id": "core-001:unit:4435dc3a2177fed9",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/AuditV2/PivAuditReproTests.cs",
+    "first_line": 10,
+    "last_line": 36,
+    "source_sha256": "3850abf8f6cf58b40f0fea5977f0865c285aefc0e3414478ab0f4ae008a18ba2",
+    "range_sha256": "3567b73f438bcfa1431b1e2cd6ceb5050699775fcab3f9bbbbc6a513ccccad8e",
+    "reason": "Complete independently specified short APDU bytes for two Ed25519 message lengths; real recorder context.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:75a86b94393d80a1",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/CatalogCapabilityBoundaryTests.cs",
+    "first_line": 8,
+    "last_line": 36,
+    "source_sha256": "436c1b7c3de8fdb134f2234e7bcf915230da7f9fa90326759b73dcfb8a743add",
+    "range_sha256": "939f9044368288d79bac20ad1169485d927d80ea6d116a5d322a7dcf660c7f2e",
+    "reason": "Catalog-backed carrier rejects four modeled unsupported curves before export/clear/transmit.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:7526d149039b46fa",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+    "first_line": 46,
+    "last_line": 74,
+    "source_sha256": "8c2ae6d348924c541b9118597d9f16483be151fb744a95a756ef55a419f0fe17",
+    "range_sha256": "b7392595056c7121775680496f70e3475805536753efb7786acc38d91a862a09",
+    "reason": "Captures exact product response owner, checks result survives clearing; excludes transport staging.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:008878f761492d0c",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+    "first_line": 74,
+    "last_line": 103,
+    "source_sha256": "8c2ae6d348924c541b9118597d9f16483be151fb744a95a756ef55a419f0fe17",
+    "range_sha256": "ad0a112f34b8bf8301473d503717855c8edfe7aaf7bdc8c0e268f172c06ffb49",
+    "reason": "Actual shared-secret response-owner clearing with independent transferred output.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:f17a3eccd0c5c7e1",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs",
+    "first_line": 324,
+    "last_line": 338,
+    "source_sha256": "5f9870050aaef0a93617b458f064385cba4b67512203aafc29284656ddde5e1b",
+    "range_sha256": "d6c4da12ac5a317615a9ba1428c4e627155333bd98dd9f1b16016a9a42176e5f",
+    "reason": "Detected5.7 fallback remains AES192 under4.3 compatibility override; exact fake sequence.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:0c144a012c0840f5",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs",
+    "first_line": 314,
+    "last_line": 337,
+    "source_sha256": "5b6b3bb25515b150ec42a0dfe39e8dc847beab22d3c7c3d069128291cc53c5e8",
+    "range_sha256": "e3e6cda2f5845ba734b7e6ec9407d42eb1c7c14fd113cf4fc27447a461d2b20b",
+    "reason": "Primary APDU failure survives resolution callback failure; actual notification helper context.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:0cf32693862d0e51",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs",
+    "first_line": 45,
+    "last_line": 68,
+    "source_sha256": "5f9870050aaef0a93617b458f064385cba4b67512203aafc29284656ddde5e1b",
+    "range_sha256": "b123fed5211e8eddeae8828387f590460f97ad9c3299b69603e65f5477208e2d",
+    "reason": "Four key operations distinguish unsupported instruction from unrelated device status.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:d40399e38e898b22",
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs",
+    "first_line": 56,
+    "last_line": 86,
+    "source_sha256": "f13f0812e0c554620c054b76f825b4946e29c386ce4beb7f45b8c540dfa74aac",
+    "range_sha256": "c4296561355f74650eb31697dc272cdba4748b909cb90e04bfdb2e66bd058ef3",
+    "reason": "Disable defaults for four types precede PRINTED/ADMIN deletion; shared default view preserved.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:89c5d1ecb6fd0e8d",
+    "path": "src/Piv/README.md",
+    "first_line": 142,
+    "last_line": 175,
+    "source_sha256": "d62600bc7ffa804d9ea11b91d2ab7b9e762482eedd7ac5df2e9e9b7ddf653e9f",
+    "range_sha256": "ed42ffe6e4005dba27cd5568fad439f297afcb3ffb769b71f77b2ae03770620f",
+    "reason": "Complete P256 digest/DER host verification example with caller-owned PIN/digest/signature cleanup.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:5605704bd39c8c9f",
+    "path": "src/Piv/README.md",
+    "first_line": 176,
+    "last_line": 211,
+    "source_sha256": "d62600bc7ffa804d9ea11b91d2ab7b9e762482eedd7ac5df2e9e9b7ddf653e9f",
+    "range_sha256": "dd2dfcd37d5efa86eb73c7d3929861c5d283da993f744e6edf11b4a6187f7d23",
+    "reason": "Complete known-plaintext RSA task with certificate/key disposal and plaintext/PIN finally.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:84da46a87e6fa085",
+    "path": "src/Piv/src/IPivSession.cs",
+    "first_line": 224,
+    "last_line": 243,
+    "source_sha256": "1d3f05a16d3cd60f892def4beb1c20ea8a9e1226d19520e957540f35d7994447",
+    "range_sha256": "3a81741c5ceaee74384f6458e619837888ffebb73384a1dec15209c4c652a9cd",
+    "reason": "Import XML scopes caller-owned IPrivateKey through actual awaited call and later disposal.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  },
+  {
+    "unit_id": "core-001:unit:ce3e1576312e0d4c",
+    "path": "src/Piv/src/SlotMetadataExtensions.cs",
+    "first_line": 95,
+    "last_line": 173,
+    "source_sha256": "758d3c5ffef0ef0c18d35d8a86e131c85970434970088b6b5d7de156ce1f6c34",
+    "range_sha256": "a37072e629335d87549451e07ce8d9d6499c02b5c094c1aeb17e54e74a80a2c6",
+    "reason": "Public-only ECDsa extraction, point dimensions and host-provider ownership, with no private-key implication.",
+    "sample_status": "NOMINATED-NOT-INDEPENDENTLY-SAMPLED",
+    "condition": "Remove later edited overlaps before coordinator stratified sampling."
+  }
+]

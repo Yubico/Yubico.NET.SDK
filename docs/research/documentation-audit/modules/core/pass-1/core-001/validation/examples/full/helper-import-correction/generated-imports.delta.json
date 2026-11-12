@@ -1,0 +1,36 @@
+{
+  "source_files_checked": 300,
+  "changed_materialized_sources": 3,
+  "changes": [
+    {
+      "id": "FULL-302",
+      "path": "injections/SecurityDomain.IntegrationTests/FULL-302.cs",
+      "before_sha256": "154ce9459a9ef62eb9efbc0ecfb9b5acbec37c8a3533300690c1a91abbe404f2",
+      "after_sha256": "86e547eaafc066414e6553842bb3b8d2a91522c8840e4d498ff69cab9cf44480",
+      "added_directive": "using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n",
+      "all_original_directives_and_nonprefix_remainder_exact": true,
+      "diff": "--- before/injections/SecurityDomain.IntegrationTests/FULL-302.cs\n+++ helper-imports/injections/SecurityDomain.IntegrationTests/FULL-302.cs\n@@ -17,6 +17,7 @@\n using Yubico.YubiKit.Management;\n using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\n using Yubico.YubiKit.SecurityDomain;\n+using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n namespace Audit20261111.DocExamples.Test302;\n public sealed class DocumentationBody302\n {\n"
+    },
+    {
+      "id": "FULL-303",
+      "path": "injections/SecurityDomain.IntegrationTests/FULL-303.cs",
+      "before_sha256": "a57bb44f26c3bfe797840f3e095f6cc5c782f53a2213d28f8677a395d984662a",
+      "after_sha256": "d97b88988fbb11d26d1d9d370d2a0ffb825e267dabff729cb4059bf7c1c9e4c2",
+      "added_directive": "using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n",
+      "all_original_directives_and_nonprefix_remainder_exact": true,
+      "diff": "--- before/injections/SecurityDomain.IntegrationTests/FULL-303.cs\n+++ helper-imports/injections/SecurityDomain.IntegrationTests/FULL-303.cs\n@@ -17,6 +17,7 @@\n using Yubico.YubiKit.Management;\n using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\n using Yubico.YubiKit.SecurityDomain;\n+using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n namespace Audit20261111.DocExamples.Test303;\n public sealed class DocumentationBody303\n {\n"
+    },
+    {
+      "id": "FULL-306",
+      "path": "injections/SecurityDomain.IntegrationTests/FULL-306.cs",
+      "before_sha256": "8dbaf8c62f6beeb59dba3f0bfbe6e639e9c521ac950a144bbae77163778edf0a",
+      "after_sha256": "b763d379a3f7a6832c2fae5b6aecd9fc3c70e5feec73ba0eabca728fd15dd5c8",
+      "added_directive": "using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n",
+      "all_original_directives_and_nonprefix_remainder_exact": true,
+      "diff": "--- before/injections/SecurityDomain.IntegrationTests/FULL-306.cs\n+++ helper-imports/injections/SecurityDomain.IntegrationTests/FULL-306.cs\n@@ -17,6 +17,7 @@\n using Yubico.YubiKit.Management;\n using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\n using Yubico.YubiKit.SecurityDomain;\n+using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;\n namespace Audit20261111.DocExamples.Test306;\n public sealed class DocumentationBody306\n {\n"
+    }
+  ],
+  "consumer_sources_unchanged": 244,
+  "test_sources_checked": 56,
+  "all_context_and_project_membership_unchanged": true
+}

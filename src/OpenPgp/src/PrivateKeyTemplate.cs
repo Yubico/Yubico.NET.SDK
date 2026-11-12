@@ -43,6 +43,11 @@ internal abstract class PrivateKeyTemplate
     ///     Serializes the private key template to its wire format for PUT_DATA_ODD, addressed to <paramref name="keyRef" />.
     /// </summary>
     /// <returns>Caller-owned encoded private material; clear after transmission, including failure paths.</returns>
+    /// <remarks>
+    ///     After GetComponents returns, the finally scopes dispose those copied TLVs and clear concatenated
+    ///     values and inner encoding. PutKeyAsync clears the returned encoding separately. Source key memory
+    ///     remains with its original owner. Partial allocation inside GetComponents precedes these cleanup scopes.
+    /// </remarks>
     public byte[] ToBytes(KeyRef keyRef)
     {
         var crtBytes = keyRef.GetCrt();

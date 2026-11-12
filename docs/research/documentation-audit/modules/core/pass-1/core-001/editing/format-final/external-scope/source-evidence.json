@@ -1,0 +1,1133 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_map_sha256": "224d22f7d6be130abf950ef291177b0d0ee85de2605dfc4b5879c0edd3b3b3fc",
+  "accepted_products": 363,
+  "requested_cs_paths": [
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "scripts/toolchain/Process.cs",
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs",
+    "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "src/Cli.Shared/src/Device/DeviceSelector.cs",
+    "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+    "src/Cli.Shared/src/Output/PinPrompt.cs",
+    "src/Cli.Shared/src/Output/SecureCredential.cs",
+    "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+    "src/Core/src/Abstractions/IApplicationSession.cs",
+    "src/Core/src/Abstractions/IProtocol.cs",
+    "src/Core/src/Abstractions/IYubiKey.cs",
+    "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "src/Core/src/Credentials/CredentialPromptContext.cs",
+    "src/Core/src/Credentials/CredentialReaderOptions.cs",
+    "src/Core/src/Credentials/ICredentialPrompt.cs",
+    "src/Core/src/Credentials/ISecureCredentialReader.cs",
+    "src/Core/src/Credentials/UserPresenceIntent.cs",
+    "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "src/Core/src/Cryptography/AesUtilities.cs",
+    "src/Core/src/Cryptography/AlgorithmInfo.cs",
+    "src/Core/src/Cryptography/ArkgPrimitives.cs",
+    "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+    "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+    "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+    "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+    "src/Core/src/Cryptography/AsnUtilities.cs",
+    "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+    "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+    "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+    "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+    "src/Core/src/Cryptography/CryptographyProviders.cs",
+    "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+    "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+    "src/Core/src/Cryptography/ECParametersExtensions.cs",
+    "src/Core/src/Cryptography/ECPrivateKey.cs",
+    "src/Core/src/Cryptography/ECPublicKey.cs",
+    "src/Core/src/Cryptography/IArkgPrimitives.cs",
+    "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+    "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+    "src/Core/src/Cryptography/PrivateKey.cs",
+    "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+    "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+    "src/Core/src/Cryptography/RSAPrivateKey.cs",
+    "src/Core/src/Cryptography/RSAPublicKey.cs",
+    "src/Core/src/Cryptography/X963Kdf.cs",
+    "src/Core/src/Devices/CompositeDeviceMerger.cs",
+    "src/Core/src/Devices/CompositeMetadataReader.cs",
+    "src/Core/src/Devices/ConnectionType.cs",
+    "src/Core/src/Devices/DeviceCapabilities.cs",
+    "src/Core/src/Devices/DeviceChange.cs",
+    "src/Core/src/Devices/DeviceChangeFeed.cs",
+    "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+    "src/Core/src/Devices/DeviceFlags.cs",
+    "src/Core/src/Devices/DeviceInfo.cs",
+    "src/Core/src/Devices/DeviceInfoReader.cs",
+    "src/Core/src/Devices/DiscoveryBudgets.cs",
+    "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+    "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+    "src/Core/src/Devices/DiscoveryReadScope.cs",
+    "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "src/Core/src/Devices/Feature.cs",
+    "src/Core/src/Devices/FindYubiKeys.cs",
+    "src/Core/src/Devices/FirmwareVersion.cs",
+    "src/Core/src/Devices/FormFactor.cs",
+    "src/Core/src/Devices/HidConnectionSlot.cs",
+    "src/Core/src/Devices/HotplugSignals.cs",
+    "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+    "src/Core/src/Devices/PcscConnectionSlot.cs",
+    "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+    "src/Core/src/Devices/RegisteredConnections.cs",
+    "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+    "src/Core/src/Devices/VersionQualifier.cs",
+    "src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+    "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+    "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "src/Core/src/Devices/YubiKeyManager.cs",
+    "src/Core/src/Devices/YubiKeyMonitor.cs",
+    "src/Core/src/Exceptions.cs",
+    "src/Core/src/Native/Desktop/SCard/SCard.Interop.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardException.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardIORequest.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardProtocol.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardScope.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardShare.cs",
+    "src/Core/src/Native/Desktop/SCard/SCardStatus.cs",
+    "src/Core/src/Native/Libraries.cs",
+    "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+    "src/Core/src/Native/Linux/Linux.Libraries.cs",
+    "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+    "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+    "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+    "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+    "src/Core/src/Native/NativeMethods.cs",
+    "src/Core/src/Native/PlatformApiException.cs",
+    "src/Core/src/Native/SdkPlatformInfo.cs",
+    "src/Core/src/Native/UnmanagedDynamicLibrary.cs",
+    "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+    "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+    "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+    "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+    "src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+    "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+    "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+    "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+    "src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+    "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+    "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "src/Core/src/ServiceLocator.cs",
+    "src/Core/src/Sessions/ApplicationSession.cs",
+    "src/Core/src/Sessions/ConnectionSessionGuard.cs",
+    "src/Core/src/Sessions/RawCtapHidSession.cs",
+    "src/Core/src/Sessions/RawOtpHidSession.cs",
+    "src/Core/src/Sessions/RawSmartCardSession.cs",
+    "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "src/Core/src/Transport.cs",
+    "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+    "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+    "src/Core/src/Transports/Hid/IHidInterface.cs",
+    "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+    "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+    "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs",
+    "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs",
+    "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+    "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+    "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+    "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+    "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+    "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+    "src/Core/src/Transports/IDeviceChangeListener.cs",
+    "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+    "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+    "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+    "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+    "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+    "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+    "src/Core/src/Utilities/BerLength.cs",
+    "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+    "src/Core/src/Utilities/DisposableBufferHandle.cs",
+    "src/Core/src/Utilities/DisposableTlvList.cs",
+    "src/Core/src/Utilities/ExchangeGuard.cs",
+    "src/Core/src/Utilities/MemoryExtensions.cs",
+    "src/Core/src/Utilities/Tlv.cs",
+    "src/Core/src/Utilities/TlvHelper.cs",
+    "src/Core/src/YubiKitLogging.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+    "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Ctap2/src/Backend/HidBackend.cs",
+    "src/Ctap2/src/Backend/SmartCardBackend.cs",
+    "src/Ctap2/src/Ctap2Session.cs",
+    "src/Ctap2/src/ICtap2Session.cs",
+    "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+    "src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+    "src/Management/src/IManagementSession.cs",
+    "src/Management/src/ManagementSession.cs",
+    "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+    "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+    "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs",
+    "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+    "src/Oath/src/Credentials/OathCredentialOptions.cs",
+    "src/Oath/src/IOathSession.cs",
+    "src/Oath/src/IYubiKeyExtensions.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+    "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+    "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+    "src/OpenPgp/src/IOpenPgpSession.cs",
+    "src/OpenPgp/src/IYubiKeyExtensions.cs",
+    "src/OpenPgp/src/Kdf.cs",
+    "src/OpenPgp/src/OpenPgpSession.Config.cs",
+    "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+    "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+    "src/OpenPgp/src/OpenPgpSession.cs",
+    "src/OpenPgp/src/PrivateKeyImport.cs",
+    "src/OpenPgp/src/PrivateKeyTemplate.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+    "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+    "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+    "src/Piv/src/IPivSession.cs",
+    "src/Piv/src/IYubiKeyExtensions.cs",
+    "src/Piv/src/Keys/KeyProtocol.cs",
+    "src/Piv/src/PivSession.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+    "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+    "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+    "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+    "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+    "src/Tests.Shared/IYubiKeyFilter.cs",
+    "src/Tests.Shared/Infrastructure/AllowList.cs",
+    "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+    "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    "src/Tests.Shared/Infrastructure/TestCategories.cs",
+    "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "src/Tests.Shared/YubiKeyTestState.cs",
+    "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+    "src/WebAuthn/src/Client/WebAuthnClient.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+    "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+    "src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs",
+    "src/YubiHsm/src/HsmAuthRetryException.cs",
+    "src/YubiHsm/src/HsmAuthSession.cs",
+    "src/YubiHsm/src/IHsmAuthSession.cs",
+    "src/YubiOtp/src/Backend/HidBackend.cs",
+    "src/YubiOtp/src/IYubiKeyExtensions.cs",
+    "src/YubiOtp/src/IYubiOtpSession.cs",
+    "src/YubiOtp/src/StaticPasswordSlotConfiguration.cs",
+    "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs",
+    "verification/LinuxHidRouteVerification/Evidence.cs",
+    "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "verification/MacOSHidBoundaryComparison/Program.cs",
+    "verification/MacOSHidInputVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "verification/MacOSHidRouteVerification/Program.cs",
+    "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "verification/NativeAotVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/Program.cs",
+    "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs"
+  ],
+  "folder_workspace_files_reported": 310,
+  "changed_files_reported": 17,
+  "semantic_solution_membership_claim": false,
+  "actual_exit_code": 2,
+  "diagnostics": {
+    "WHITESPACE": 73,
+    "FINALNEWLINE": 16
+  },
+  "actual_report_path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/format-whitespace-final-tree.json",
+  "actual_report_sha256": "969aa30485120f9940bc28e38051102bc5909f533d25e5ab1e7ebedd8132570b",
+  "actual_report": [
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "9764f486-3baf-41f0-8714-627bdc386cf4"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 133,
+          "CharNumber": 30,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 133,
+          "CharNumber": 32,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 133,
+          "CharNumber": 41,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 143,
+          "CharNumber": 80,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 144,
+          "CharNumber": 26,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 144,
+          "CharNumber": 28,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 144,
+          "CharNumber": 67,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 145,
+          "CharNumber": 66,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 146,
+          "CharNumber": 26,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 146,
+          "CharNumber": 28,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 146,
+          "CharNumber": 36,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 147,
+          "CharNumber": 85,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 148,
+          "CharNumber": 33,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 148,
+          "CharNumber": 54,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 148,
+          "CharNumber": 64,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 158,
+          "CharNumber": 37,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 158,
+          "CharNumber": 68,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 185,
+          "CharNumber": 40,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 187,
+          "CharNumber": 73,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 197,
+          "CharNumber": 37,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 198,
+          "CharNumber": 51,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 199,
+          "CharNumber": 70,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 214,
+          "CharNumber": 31,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 214,
+          "CharNumber": 33,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 214,
+          "CharNumber": 78,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 215,
+          "CharNumber": 37,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 216,
+          "CharNumber": 63,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 267,
+          "CharNumber": 55,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 267,
+          "CharNumber": 57,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 267,
+          "CharNumber": 76,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 267,
+          "CharNumber": 83,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 268,
+          "CharNumber": 23,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 269,
+          "CharNumber": 75,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "0c55da5d-baee-47eb-a62f-e479ae19048c"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 53,
+          "CharNumber": 47,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 2 characters with '\\n\\n'."
+        },
+        {
+          "LineNumber": 59,
+          "CharNumber": 5,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Insert '\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 60,
+          "CharNumber": 5,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Insert '\\s\\s\\s\\s'."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "c2a3a7f4-0de5-45bc-8f3a-873cb50f81e2"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidBoundaryComparison/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidBoundaryComparison/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 97,
+          "CharNumber": 31,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 97,
+          "CharNumber": 33,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 97,
+          "CharNumber": 62,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 98,
+          "CharNumber": 41,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 98,
+          "CharNumber": 68,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 124,
+          "CharNumber": 26,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 124,
+          "CharNumber": 28,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 124,
+          "CharNumber": 72,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 125,
+          "CharNumber": 43,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 126,
+          "CharNumber": 49,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 129,
+          "CharNumber": 37,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 129,
+          "CharNumber": 60,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 130,
+          "CharNumber": 13,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Delete 1 characters."
+        },
+        {
+          "LineNumber": 130,
+          "CharNumber": 31,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 130,
+          "CharNumber": 33,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 130,
+          "CharNumber": 66,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 131,
+          "CharNumber": 45,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 131,
+          "CharNumber": 80,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 132,
+          "CharNumber": 50,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 132,
+          "CharNumber": 112,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 133,
+          "CharNumber": 26,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 133,
+          "CharNumber": 28,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 133,
+          "CharNumber": 67,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 134,
+          "CharNumber": 66,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 134,
+          "CharNumber": 69,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 135,
+          "CharNumber": 34,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 135,
+          "CharNumber": 102,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 135,
+          "CharNumber": 125,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 135,
+          "CharNumber": 145,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 135,
+          "CharNumber": 168,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 135,
+          "CharNumber": 176,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 213,
+          "CharNumber": 55,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 213,
+          "CharNumber": 57,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 213,
+          "CharNumber": 64,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 213,
+          "CharNumber": 102,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 214,
+          "CharNumber": 63,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+        },
+        {
+          "LineNumber": 215,
+          "CharNumber": 72,
+          "DiagnosticId": "WHITESPACE",
+          "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "9764f486-3baf-41f0-8714-627bdc386cf4"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 464,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "e6ffe993-c53e-4f1f-9d97-bc45d147b17c"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 256,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "96beb173-f3e8-4812-877d-99e50640f702"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Process.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Process.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 170,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "6a796430-7a57-4f88-ae4f-03bf2b94f4af"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Results.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/Results.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 162,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "693ca678-451c-4d48-a9c4-4c6413d14cc2"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/TestTargets.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/scripts/toolchain/TestTargets.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 294,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "3435f2db-8185-4914-9dca-7479b9f7d3b6"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 470,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "d75cf6fd-ef9c-45b1-aea6-2ade1004a3ab"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/Evidence.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/Evidence.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 65,
+          "CharNumber": 68,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "f5a8562a-23b7-4a75-a1c6-29c223357d17"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 134,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "c2a3a7f4-0de5-45bc-8f3a-873cb50f81e2"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidBoundaryComparison/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidBoundaryComparison/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 420,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "e40a2007-0453-45c7-8d40-c5a05c0898c9"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidInputVerification/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidInputVerification/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 262,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "da7b2317-9096-49aa-bc50-0a1fdb38c49a"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 431,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "e77ed2cd-b2f5-49ef-bd9b-57958f1d4197"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 384,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "bcc9e2ee-5a01-4046-a71f-d621ba7aa61e"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 90,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "49c069d4-ad8b-46b4-9db4-d563416c31d6"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeAotVerification/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeAotVerification/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 446,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "f701d43b-ec9c-42ca-8269-1ce39436674d"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeCompatibilityVerification/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeCompatibilityVerification/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 87,
+          "CharNumber": 2,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    },
+    {
+      "DocumentId": {
+        "ProjectId": {
+          "Id": "e9062826-5fd8-44b6-9107-5075723754ea"
+        },
+        "Id": "830abf3f-f377-4de1-bfcc-a477e7731832"
+      },
+      "FileName": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+      "FilePath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+      "FileChanges": [
+        {
+          "LineNumber": 194,
+          "CharNumber": 44,
+          "DiagnosticId": "FINALNEWLINE",
+          "FormatDescription": "Fix final newline. Delete 1 characters."
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+      "sha256": "224d22f7d6be130abf950ef291177b0d0ee85de2605dfc4b5879c0edd3b3b3fc"
+    },
+    {
+      "path": ".editorconfig",
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+      "sha256": "a778d4fe2a7ba5e3da251972f9d142b6e3e3e0a7aa782fbb0e2ee3065ab3a6ad"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-final-source-check/stdout.log",
+      "sha256": "0f7771bd91d6e6db0adfd44f8810c22cac6c89525b09b1c1824d7a147bad905b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-whitespace-final-tree/invocation.json",
+      "sha256": "a14e8ce5d4608a2f86defce375f3ae4b322e5e1ce83dbda69f828b53f2800195"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-whitespace-final-tree/receipt.json",
+      "sha256": "b9e8159edbb0f2adc82dc178c1b361bec5333d5e45755bf17081a512f5c5e7a2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-whitespace-final-tree/stdout.log",
+      "sha256": "279dda4bb0e05eeb08d31c14ca1dcc462f389d7950154f2841fc63d2e0b53ba0"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/format-whitespace-final-tree/stderr.log",
+      "sha256": "c43cfb40e28a812fa42b93a16d6c6e481b77c85a920df7619d4e74fe09099678"
+    }
+  ]
+}

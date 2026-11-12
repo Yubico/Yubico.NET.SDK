@@ -1,0 +1,42 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "runtime_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_patch_sha256": "3267ab5d547b281f19c28b3b709ef509a7cd54ee82439b6386b33a842030b937",
+  "full_successor_patch_sha256": "8e743d0336f0d0338d6a726f63ececcd37a3877cb7da6741626e169d8b99c56c",
+  "corrections_patch_sha256": "a34a75042e69e0f0355402c6508b5aa47b3be26c14472af2e106e60aaefd94f9",
+  "corrected_product_paths": [
+    "CLAUDE.md",
+    "docs/LOGGING.md",
+    "docs/TESTING.md",
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/architecture/raw-access-tiers.md",
+    "docs/usage/device-discovery.md",
+    "src/Core/CLAUDE.md"
+  ],
+  "stable_content_reviewed_paths": 19,
+  "edited_paths": 26,
+  "retained_paths": 7,
+  "complete_example_bodies": 193,
+  "unchanged_body_65": true,
+  "unchanged_full_mixed_body_118": true,
+  "new_missing_local_targets": [],
+  "unclosed_fences": [],
+  "static_checks": {
+    "diff": {
+      "exit": 0,
+      "output": ""
+    },
+    "successor_patch": {
+      "exit": 0,
+      "output": ""
+    },
+    "correction_patch": {
+      "exit": 0,
+      "output": ""
+    }
+  },
+  "original_records_preserved": 17,
+  "compilation_execution": "NOT RUN",
+  "focused_independent_review": "pending",
+  "index_unchanged": true
+}

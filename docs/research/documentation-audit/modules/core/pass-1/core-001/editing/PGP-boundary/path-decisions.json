@@ -1,0 +1,1201 @@
+[
+  {
+    "path": "src/OpenPgp/CLAUDE.md",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+    "after_sha256": "7e7b584bfe6ef745f19b5d4adc10768b1b0826c9811a91b25bb4662980e43745",
+    "primary_input_source_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/PACKAGE_README.md",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The short package page describes applet tasks, alpha/security-audit status, transitive Core and links. Its install fragment carries no connection, key, prompt or secret result lifetime and needs no boundary-specific expansion; detailed task constraints are linked.",
+    "before_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+    "after_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+    "primary_input_source_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/README.md",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X002",
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "after_sha256": "4f6f671e61970d04c7fb06d2e6c5ba08f78208c4e18fca30d739e39692123229",
+    "primary_input_source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangeAdminPinCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command obtains two disposable credential owners and awaits ChangeAdmin before they leave scope; known-current verification is performed by that applet method rather than a separate Verify. Supplied option strings outlive byte-owner disposal and the helper uses no confirmation reader. Keep runtime/help unchanged and retain PGP-IMP-015 input policy scope.",
+    "before_sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+    "after_sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+    "primary_input_source_sha256": "7ff369f8579c47fcdaf2524e9ae80474aded01f90b44450fe6ac4976f56a5532",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command owns current/new byte owners through awaited ChangePin and handles null input. It applies the generic credential helper rather than card C4 byte validation, and no new-PIN confirmation call occurs. Source strings and device persistent change have separate lifetimes; a success message establishes no independent state readback.",
+    "before_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+    "after_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+    "primary_input_source_sha256": "84f37abc4ebef9584d7acdea7201d08a911137f059c4de57a660b685fc5e6b48",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetResetCodeCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Admin verification and Reset Code write are sequential awaited operations under one borrowed session callback. Two disposable inputs remain alive through transmission. Reader length and card limits remain distinct; clearing option-derived bytes leaves immutable command-line strings.",
+    "before_sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+    "after_sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+    "primary_input_source_sha256": "cafab235d7fa46edf85db375bc7e4b3a85777c8c79d7e40c28667a6e6e08650a",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetRetriesCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Admin verification precedes three-count mutation; the session validates 1..255 and leaves family/device acceptance to the card. The command displays requested values rather than independent readback. Preserve NEO default-credential effects and capability gaps under PGP-IMP-010/015.",
+    "before_sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+    "after_sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+    "primary_input_source_sha256": "ad911419163de36ea121584ca0b0454aea371133ffeaf9f596fb83318c94d213",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessUnblockPinCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command separately collects Reset Code/new User PIN, retains both disposable owners through the reset-code route and reports completion. It neither borrows an Admin credential nor conditionally ignores a credential. It adds no card-profile byte checks or post-reset authentication assertion.",
+    "before_sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+    "after_sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+    "primary_input_source_sha256": "da02efebfe500148ace77a80777fb1f17015ede7a8067bcf535c01d14bcbf0d3",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesDeleteCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Slot parsing/confirmation precedes credential collection, Admin verification and awaited deletion. The supplied session remains owned by the command base. ATT public certificate deletion is independent of private-key erasure and reset; existing destructive task caveats remain applicable.",
+    "before_sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+    "after_sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+    "primary_input_source_sha256": "7d8a1b892e46000910c5c39ae4d26c1c2c5472ae38467f71e36bbb87801f33b2",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The returned X509 object is not disposed; PEM/DER export branches use it and public output bytes need no secret erasure. DER branch disposes its stdout stream, not the certificate. Existing remarks accurately identify the missing owner and leave trust validation separate.",
+    "before_sha256": "d84b95f30ee4efcf484ce3dcf94562c5aab121b0ac5ce506fb9c2e1687864efc",
+    "after_sha256": "d84b95f30ee4efcf484ce3dcf94562c5aab121b0ac5ce506fb9c2e1687864efc",
+    "primary_input_source_sha256": "d84b95f30ee4efcf484ce3dcf94562c5aab121b0ac5ce506fb9c2e1687864efc",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. File loading occurs before Admin input; the loaded certificate survives every return/exception without a disposal scope. Its subject/issuer/thumbprint display is metadata, never a trusted key-binding check. Existing comments retain that PGP-IMP-015 lifetime gap rather than advertising complete cleanup.",
+    "before_sha256": "539ea85c4c9e9e328fabb9254ab89f77500a75137526434d890e09126f542f5c",
+    "after_sha256": "539ea85c4c9e9e328fabb9254ab89f77500a75137526434d890e09126f542f5c",
+    "primary_input_source_sha256": "539ea85c4c9e9e328fabb9254ab89f77500a75137526434d890e09126f542f5c",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command refreshes app data, separately reads retries/counter/UIF and displays each known slot. Key status is inferred from nonempty fingerprint length, including zero-filled fields; current comment directs decisions to ListKeyInformation. Once display says per session although card access state is the real boundary; this executable string is retained under the existing tool finding, not edited here.",
+    "before_sha256": "7b29ad094e5b1d9ce7f49ecddbda67edf8cf4a2d8a466c3a81ce2874c20f3d55",
+    "after_sha256": "7b29ad094e5b1d9ce7f49ecddbda67edf8cf4a2d8a466c3a81ce2874c20f3d55",
+    "primary_input_source_sha256": "7b29ad094e5b1d9ce7f49ecddbda67edf8cf4a2d8a466c3a81ce2874c20f3d55",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The settings declare --pin, while execution directly invokes Attest on a fresh session without reading/verifying that input; returned certificate is undisposed. Metadata/PEM display establishes neither signature/key binding nor chain trust. Existing caveat accurately preserves the engineering finding.",
+    "before_sha256": "11f44d7298fc86e2c6b41565b2a85811c64f0d4e423f24625a110a0b821f1b05",
+    "after_sha256": "11f44d7298fc86e2c6b41565b2a85811c64f0d4e423f24625a110a0b821f1b05",
+    "primary_input_source_sha256": "11f44d7298fc86e2c6b41565b2a85811c64f0d4e423f24625a110a0b821f1b05",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Admin input remains scoped through awaited Spectre status callback and generation; algorithm strings choose concrete ordinary algorithms, with no ROCA guard or capability proof beyond session checks. The command parser accepts ATT despite narrower help; malformed ATT CRT and persistent partial attribute changes remain qualified.",
+    "before_sha256": "b0a620a78453cf9a1bec5e2966e2538559e6b772aec6fa21cd4cf3a971c8b235",
+    "after_sha256": "b0a620a78453cf9a1bec5e2966e2538559e6b772aec6fa21cd4cf3a971c8b235",
+    "primary_input_source_sha256": "b0a620a78453cf9a1bec5e2966e2538559e6b772aec6fa21cd4cf3a971c8b235",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. PEM is read into an immutable string; PKCS8 DER is cleared in finally and returned private-key owner is disposed after import. RSA/EC PEM branches export private parameters into temporary arrays before SDK cloning; disposing providers/SDK keys leaves those separate exports outside explicit cleanup. Link C's private-array/provider ownership and existing PGP-IMP-015 rather than claiming the DER finally clears every producer.",
+    "before_sha256": "5f909d54a5d3f3619fc70151baab4424bca2459e4ee518eab8ed5eefe88f4624",
+    "after_sha256": "5f909d54a5d3f3619fc70151baab4424bca2459e4ee518eab8ed5eefe88f4624",
+    "primary_input_source_sha256": "5f909d54a5d3f3619fc70151baab4424bca2459e4ee518eab8ed5eefe88f4624",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The command reads current UIF, refuses fixed values, confirms selected fixed policy, verifies Admin and writes policy. Its actual UI still overstates factory-reset recovery for ATT, accurately qualified by the current comment/README. Preserve output and the irreversible ATT replacement boundary.",
+    "before_sha256": "721fa97551f978fb894ef67d0d811d2a76b3797e5a0070076e6b1fcc77e60cbb",
+    "after_sha256": "721fa97551f978fb894ef67d0d811d2a76b3797e5a0070076e6b1fcc77e60cbb",
+    "primary_input_source_sha256": "721fa97551f978fb894ef67d0d811d2a76b3797e5a0070076e6b1fcc77e60cbb",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+    "candidates": [
+      "CORE-PGP-X002",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "145fafcbddd198dfbb694d085b856100dbd7ec71d740cf1c8e277222de3c2d67",
+    "after_sha256": "23c3985a3fd1b9fa344917db33b8186ec2c350718e11c765f91edb1074bc57e9",
+    "primary_input_source_sha256": "145fafcbddd198dfbb694d085b856100dbd7ec71d740cf1c8e277222de3c2d67",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+    "candidates": [
+      "CORE-PGP-X005",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The status callback awaits Reset, then prints default credentials without full readback. Existing remarks qualify unchecked statuses and ATT persistence, while executable ALL/private-key/factory-reset wording stays unchanged under the old sample finding. No independent state restoration is implemented by this command.",
+    "before_sha256": "e1ac6a3b5917e1002061166dfb8fdaccb244cef3463e345ab89762ec6680839e",
+    "after_sha256": "e1ac6a3b5917e1002061166dfb8fdaccb244cef3463e345ab89762ec6680839e",
+    "primary_input_source_sha256": "e1ac6a3b5917e1002061166dfb8fdaccb244cef3463e345ab89762ec6680839e",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Output/OutputHelpers.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Delegated formatting/confirmation helpers forward public strings and data; WriteError writes raw exception text to stderr. This is diagnostic provenance rather than a central secret-redaction boundary. No helper creates a session, owns a credential or verifies a device result.",
+    "before_sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+    "after_sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+    "primary_input_source_sha256": "0a7bc56e6b7aeaefec99531c23a08db9d76f70c40df72b5a572cb40a05227244",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/DeviceSelector.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The actual selector delegates to Cli.Shared with SmartCard-only eligibility and FirstEligible noninteractive policy; noninteractive diagnostics are redirected to stderr. It passes a cancellation token but the command base invokes it with default. Selection is not independent physical identity attestation or authorisation for mutation.",
+    "before_sha256": "4e664848be8690ab0d9b880dd1e345c1d291402bffecacad7524a9aee555c89c",
+    "after_sha256": "4e664848be8690ab0d9b880dd1e345c1d291402bffecacad7524a9aee555c89c",
+    "primary_input_source_sha256": "4e664848be8690ab0d9b880dd1e345c1d291402bffecacad7524a9aee555c89c",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": false,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The sample references OpenPgp/Core/Management/Cli.Shared/Cli.Commands and Spectre/Hosting packages; it is nonpackable and suppresses only the named example analyzer. Project configuration is retained, compilation and analyzer participation remain later gates; references supply no execution evidence.",
+    "before_sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b",
+    "after_sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b",
+    "primary_input_source_sha256": "e79098a0f4ec0cae35017899af6c65e6f46f6196387c9b7ec818eaadc406f13b",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The complete command tree registers info/reset/access/keys/certificates and invokes the Spectre runner synchronously. Reset's executable all-data description remains within PGP-IMP-015. Registration creates no SCP/prompt/credential policy or extra connection lifetime.",
+    "before_sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75",
+    "after_sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75",
+    "primary_input_source_sha256": "b3aa927f8bfd67fd9a0bb510ceb72473fbc1e6f9bb433854f4c7c01004d50d75",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/AlgorithmAttributes.cs",
+    "candidates": [
+      "CORE-PGP-X007"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. RSA parse/encoding retains modulus/exponent/import format with explicit big-endian fields. EC factories consult Core concrete identity and module representation, choose construction/slot ID and reject non-EC; parsing retains received algorithm and trailing FF format while unknown OIDs fail. Default direct initialization and malformed/unknown admission remain PGP-IMP-018; exact roundtrip tests do not establish device support.",
+    "before_sha256": "0acb91684e3f6c9d88ea4fb5fbf84593a65f7b8776641bbd9513f144dd9cdeb1",
+    "after_sha256": "0acb91684e3f6c9d88ea4fb5fbf84593a65f7b8776641bbd9513f144dd9cdeb1",
+    "primary_input_source_sha256": "0acb91684e3f6c9d88ea4fb5fbf84593a65f7b8776641bbd9513f144dd9cdeb1",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/ApplicationRelatedData.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The parser owns/disposes the outer Tlv and obtains independently copied dictionary values. It decodes optional extended lengths/GFM and mandatory AID/discretionary algorithms, with old outer-level fallback. HistoricalBytes remains a dictionary-owned copy rather than an alias of the disposed outer TLV. Unknown mandatory algorithms can prevent typed session creation before raw GetData is available; an independent RawSmartCardSession is the lower-tier diagnostic route.",
+    "before_sha256": "0cc21c1c01d0d2178186108ffcb0ab224cca84ebe47a90e89f5b8d58b62f1e5e",
+    "after_sha256": "0cc21c1c01d0d2178186108ffcb0ab224cca84ebe47a90e89f5b8d58b62f1e5e",
+    "primary_input_source_sha256": "0cc21c1c01d0d2178186108ffcb0ab224cca84ebe47a90e89f5b8d58b62f1e5e",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Backend/IOpenPgpBackend.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The internal backend contract contains only initialization and APDU Send. It introduces no IDisposable or key/prompt ownership, consistent with ApplicationSession retaining the effective protocol owner.",
+    "before_sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+    "after_sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+    "primary_input_source_sha256": "4340a3d888e757c06fc08d5975229285a9884ecdef9daebcea334a73f32cc398",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+    "candidates": [
+      "CORE-PGP-X005",
+      "CORE-PGP-X006"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+    "after_sha256": "0a652dbd773cdd634a357e5cd9f7adddb654761404babf34a768517614502b15",
+    "primary_input_source_sha256": "2158b42ab9c5dd247a194609ff3e327703ca84a589c94e2866c9f8e89f208f9a",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/BcdHelper.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. DecodeByte computes two nibbles without rejecting A..F; TryDecodeSerial rejects either invalid nibble and resets output. OpenPGP version and AID callers use different contracts. Valid six-case BCD tests do not establish malformed-version rejection; keep identity raw bytes and backend fallback policy separate.",
+    "before_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+    "after_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+    "primary_input_source_sha256": "5367050abf2e699347f1e11e4099c440efb979f293e23656b0cb5fa6aba45e5b",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+    "candidates": [
+      "CORE-PGP-X002"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "d893613409896ba63a52e2826dbfb129dd624410b8e85cd7b620bef7f51614d8",
+    "after_sha256": "4127df8af0efee371c0dbe851cb061e17571e2a182c853d0c883162855c024d9",
+    "primary_input_source_sha256": "d893613409896ba63a52e2826dbfb129dd624410b8e85cd7b620bef7f51614d8",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Crt.cs",
+    "candidates": [
+      "CORE-PGP-X007"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Ordinary static CRTs encode empty B6/B8/A4 values. ATT builds an inner 84 TLV then passes only inner.Value to B6, yielding B60181; the correct vendor nested encoding is B603840181. Borrowed static output must stay read-only. Preserve the confirmed ATT read defect and separate target-key FB attestation.",
+    "before_sha256": "273b4df438ba81f96033c688b1ccc10a9817d5879ca49198a83ae3cb8a774bda",
+    "after_sha256": "273b4df438ba81f96033c688b1ccc10a9817d5879ca49198a83ae3cb8a774bda",
+    "primary_input_source_sha256": "273b4df438ba81f96033c688b1ccc10a9817d5879ca49198a83ae3cb8a774bda",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/DataObject.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The enum carries full/nested tags with object-specific access caveats, UTF8 language-pair semantics and metadata identifiers. No blanket direct-access prohibition follows from container grouping. This is public nonsecret numeric metadata, not an owned secret TLV or universal card capability declaration.",
+    "before_sha256": "39f3c960032e0142745d6657d66f705a58ae19680e0221963e955e21f744047c",
+    "after_sha256": "39f3c960032e0142745d6657d66f705a58ae19680e0221963e955e21f744047c",
+    "primary_input_source_sha256": "39f3c960032e0142745d6657d66f705a58ae19680e0221963e955e21f744047c",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/DigestInfo.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The helper borrows a fixed public header and returns header+digest bytes; hashes supported are SHA1/256/384/512. The caller session constructs DigestInfo and the card supplies RSA padding. Literal-header tests compare full headers, while Build checks shape/selected digest endpoints; no standalone host/provider execution occurred.",
+    "before_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+    "after_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+    "primary_input_source_sha256": "c36816516d2bc6fbb73bd9c831a8a3be856b1633f3a64d7da95475858268b75a",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/DiscretionaryDataObjects.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Dictionary field copies feed mandatory capabilities/algorithms/PW status and optional collections/UIFs. Fingerprints receive independent per-entry arrays; timestamp four-byte bit assembly uses signed int and zero remains unspecified. Unknown slot IDs are skipped, known unknown status values survive and incomplete collection tails are ignored. Preserve PGP-IMP-018 and avoid secret cleanup requirements for public metadata by default.",
+    "before_sha256": "c90fd5003c306f39ba32ec0d4db63a7c660a1e10c3ca3d818ec52956ad19f042",
+    "after_sha256": "c90fd5003c306f39ba32ec0d4db63a7c660a1e10c3ca3d818ec52956ad19f042",
+    "primary_input_source_sha256": "c90fd5003c306f39ba32ec0d4db63a7c660a1e10c3ca3d818ec52956ad19f042",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/EcImportFormat.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Standard/StandardWithPubkey are protocol encoding values 0/FF, not device support claims. PrivateKeyImport currently emits private-only templates; directly modeled optional public material has its own caller lifetime.",
+    "before_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+    "after_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+    "primary_input_source_sha256": "303710b95b3aa4434d985c2e5cfda74737981b0342f60b4739527961cdfcc7bc",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/ExtendedCapabilities.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The parser requires at least ten bytes, reads challenge/certificate/special-DO lengths as big-endian uint16 and retains flag/SM bytes. Boolean fields test equality to 1; extensions are ignored. These advertised sizes are not automatically enforced by all session operations, retained under PGP-IMP-010.",
+    "before_sha256": "a586a6949514d62c9774380bc73a8a41253929e8852e3daf88a4249ff6cc07fd",
+    "after_sha256": "a586a6949514d62c9774380bc73a8a41253929e8852e3daf88a4249ff6cc07fd",
+    "primary_input_source_sha256": "a586a6949514d62c9774380bc73a8a41253929e8852e3daf88a4249ff6cc07fd",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/ExtendedCapabilityFlags.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The byte bit assignments distinguish KDF, AES, changeable algorithms, private use, PW status, import, challenge and secure messaging. Presence of an enum flag alone grants no Core SCP profile or applet enforcement guarantee.",
+    "before_sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+    "after_sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+    "primary_input_source_sha256": "93ba53dcd741d201781298d441067699f5f3c2f303b868a96c5135761ab33008",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/ExtendedLengthInfo.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Disposable decoded TLVs yield first request and later response values for repeated tag02; sizes are metadata and are not passed into Pcsc.Configure by OpenPGP. Extra tag02 entries overwrite response max; short values fail. No advertised-bound enforcement is inferred from this model.",
+    "before_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+    "after_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+    "primary_input_source_sha256": "02023aab457826d5f2b21150c9e04bd29ba2a556e0306644e92a99ff9adb7ffc",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/GeneralFeatureManagement.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The public flags describe card-reported hardware features; UIF encoding uses Button. This enum does not establish a prompt-service lifetime, live touch event or host device capability.",
+    "before_sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+    "after_sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+    "primary_input_source_sha256": "6812033c5dfd3bceb683a04a4cd107783fa5e707294c8be2919f68f69c103a94",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/GenerationTimes.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The read-only dictionary stores signed int carriers with explicit unsigned four-octet seconds and zero-sentinel interpretation. The current XML already handles high-bit timestamps; retain the historical PGP-C022 extension of PGP-IMP-018 rather than treating documentation as a fixed representation.",
+    "before_sha256": "fa6cd5981fc6f12bdc6987b87bb4012eb3dbb83d133b5eb7b0cf0e09355ffd4a",
+    "after_sha256": "fa6cd5981fc6f12bdc6987b87bb4012eb3dbb83d133b5eb7b0cf0e09355ffd4a",
+    "primary_input_source_sha256": "fa6cd5981fc6f12bdc6987b87bb4012eb3dbb83d133b5eb7b0cf0e09355ffd4a",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X002",
+      "CORE-PGP-X004",
+      "CORE-PGP-X005",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "c80eca42c1b5c5d18d867af94d7c625413e2fce7d26253d24ee73237c8daa9ca",
+    "after_sha256": "0869eb6ee872f520132e4856cfe492cdb3fb6e06f6c69d185b03e2cecd6a6988",
+    "primary_input_source_sha256": "c80eca42c1b5c5d18d867af94d7c625413e2fce7d26253d24ee73237c8daa9ca",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X006"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+    "after_sha256": "3e2cc825ab4bd1227f7b19bf26e37504c0f2f4dba0704929f9e0a099c9069e83",
+    "primary_input_source_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Ins.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The internal enum retains instruction bytes for PIN, crypto, activation, key management, SELECT DATA, raw access, version/retries and attestation. Wire construction stays visible in session methods; no command-object or execution state is hidden here.",
+    "before_sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+    "after_sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+    "primary_input_source_sha256": "512ecc1908428b5d93d31ccba7e2858081fcf8a574458dfa4e2811dcfda5a7fd",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Kdf.cs",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X002",
+      "CORE-PGP-X003"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "c801bcb46603c91a89c08bdb68e895e1a3f5b0c5f2fa73221ec2748fcb85a0fe",
+    "after_sha256": "899a908e9b7a0a14979ab68225533128855aa50b6462cf24a069b7dfd9c65d15",
+    "primary_input_source_sha256": "c801bcb46603c91a89c08bdb68e895e1a3f5b0c5f2fa73221ec2748fcb85a0fe",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/KeyFingerprints.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The sealed read-only dictionary receives an exclusively owned parser dictionary and exposes ReadOnlyMemory values. Repeated parse test proves separate backing arrays; read-only views are not universal immutability against unsafe/writable owner access. Public fingerprint metadata has no secret cleanup obligation.",
+    "before_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+    "after_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+    "primary_input_source_sha256": "736abace3af145a25c851bda6eeb3fa950461c0ea965fbb6604e75f7b0450679",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/KeyInformation.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The sealed collection stores a parser-owned dictionary, exposes only read-only dictionary operations and retains known-slot status bytes. It is the relevant key-presence source rather than fingerprint length. Reflection tests check surface shape, not hardware truth.",
+    "before_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+    "after_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+    "primary_input_source_sha256": "563d5b45ee077497e503f2228b6507922954d8c938e6adba46da0f79f04ebb63",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/KeyRef.cs",
+    "candidates": [
+      "CORE-PGP-X007"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The four slot values map through one switch to attributes/UIF/time/fingerprint/CRT. Ordinary mappings and static memory are public protocol metadata. ATT mapping preserves its malformed CRT qualification and persistent vendor exception; invalid slot values throw.",
+    "before_sha256": "89c55bec16ab698482d8e9b0fe54ef1564f12f94aa44de57236737ba1288383b",
+    "after_sha256": "89c55bec16ab698482d8e9b0fe54ef1564f12f94aa44de57236737ba1288383b",
+    "primary_input_source_sha256": "89c55bec16ab698482d8e9b0fe54ef1564f12f94aa44de57236737ba1288383b",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/KeyStatus.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. None/Generated/Imported describe reported origin status, not independent manufacturer or host trust. OpenPgpTool's fingerprint-length display should not be mistaken for this typed status.",
+    "before_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+    "after_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+    "primary_input_source_sha256": "71132f6d2dffad66b006e54ec11b1c8ab86e11db9758e52f57a7e4543244487f",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpAid.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The parser checks minimum14, clones raw AID, BCD-decodes version and tries BCD serial before negating a signed cast of raw uint32. Current XML correctly warns that high-bit invalid-BCD values may be positive. AID card version, applet GET VERSION and physical metadata remain different provenance.",
+    "before_sha256": "ef109e699a27fc4e2993de7b6aed9643e484ea45af16f9d5b9480d9779ed5f02",
+    "after_sha256": "ef109e699a27fc4e2993de7b6aed9643e484ea45af16f9d5b9480d9779ed5f02",
+    "primary_input_source_sha256": "ef109e699a27fc4e2993de7b6aed9643e484ea45af16f9d5b9480d9779ed5f02",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+    "candidates": [
+      "CORE-PGP-X002"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The exception retains SW and nullable retry count for VerifyPin/VerifyAdmin only. XML already qualifies broad non-PIN failure mapping, extended Reset-counter mismatch and supported User recovery. No new Core status-decoder fix closes applet identity/error policy.",
+    "before_sha256": "3fa2b9e1f36c4cf10e452e4a895a3d37e16565e3c5a71d7ac7909a5cba882b99",
+    "after_sha256": "3fa2b9e1f36c4cf10e452e4a895a3d37e16565e3c5a71d7ac7909a5cba882b99",
+    "primary_input_source_sha256": "3fa2b9e1f36c4cf10e452e4a895a3d37e16565e3c5a71d7ac7909a5cba882b99",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpKeyInfo.cs",
+    "candidates": [
+      "CORE-PGP-X007"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Frozen module metadata derives ordinary named-curve OIDs from Core and adds legacy Ed/X25519 overrides plus RSA2048/3072/4096. DER value-octet encoding is cached nonsecret metadata; no secret AsnWriter cleanup finding applies. Optional metadata and exact OID lookup are representation, not a provider/card support assertion.",
+    "before_sha256": "a50c3139ab90563318a1cf641e827cfe745770b1c326c03026d62856f8c4b3f1",
+    "after_sha256": "a50c3139ab90563318a1cf641e827cfe745770b1c326c03026d62856f8c4b3f1",
+    "primary_input_source_sha256": "a50c3139ab90563318a1cf641e827cfe745770b1c326c03026d62856f8c4b3f1",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+    "candidates": [
+      "CORE-PGP-X004",
+      "CORE-PGP-X006"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Ordinary SELECT DATA then GET/PUT/empty write spans separate guarded exchanges; ATT uses FC directly. Certificate parsing returns a new caller-owned X509 object, with ordinary6A88 absence only after successful selection. Workaround prefix depends on effective feature version. Public certificate TLV payloads are not private keys; occurrence selection is shared device state without whole-workflow exclusion.",
+    "before_sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449",
+    "after_sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449",
+    "primary_input_source_sha256": "0d5ad3295feb9cb698d52261620252e258976e311fd83a4f4477728300f6c449",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X006"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "f0d3c11cdd8b7c2c5c6b0f2f05bff6acc0d27b1d007a865ae40025aea1c54760",
+    "after_sha256": "ab35501aff68ffe955c16f210b031abfa1302653e28c9451651ff5889472f807",
+    "primary_input_source_sha256": "f0d3c11cdd8b7c2c5c6b0f2f05bff6acc0d27b1d007a865ae40025aea1c54760",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X004"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Full payload/notification/formatting methods were read: RSA/ECDSA hash, EdDSA copies raw input; Decipher wraps ordinary EC but passes X25519 raw. Results have branch-specific transfer/clear scopes and callback-resolution ordering. Empty/malformed ECDSA response can fail formatting, with raw cleanup retained. Core transport/chaining/SCP staging remains a separate producer graph.",
+    "before_sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+    "after_sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+    "primary_input_source_sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+    "candidates": [
+      "CORE-PGP-X004"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "a56b8eb0ebf35588d53239c981f190b29c6872976c283552a9ee677dd39c6163",
+    "after_sha256": "56c1ec91bf7e5e230866432662d38ba407ab42494c25684881007eae616ffc19",
+    "primary_input_source_sha256": "a56b8eb0ebf35588d53239c981f190b29c6872976c283552a9ee677dd39c6163",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+    "candidates": [
+      "CORE-PGP-X002",
+      "CORE-PGP-X003",
+      "CORE-PGP-X004"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Both User modes use P2 correctly but extended logical identity selects Reset for KDF and retry fallback. KDF-derived inputs/combined arrays clear in finally; caller inputs stay borrowed. Two-mode Unverify, lazy F9 lookup and fallback C4 are separate exchanges. Change/reset routes differ deliberately; failures become either broad typed VERIFY or ordinary APDU exceptions. Generic Core guards supply no complete credential workflow lease.",
+    "before_sha256": "6fc6942f305ffaa58482b46900531164d61bf005897cbf2028ea8cb5b3f91d56",
+    "after_sha256": "6fc6942f305ffaa58482b46900531164d61bf005897cbf2028ea8cb5b3f91d56",
+    "primary_input_source_sha256": "6fc6942f305ffaa58482b46900531164d61bf005897cbf2028ea8cb5b3f91d56",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+    "candidates": [
+      "CORE-PGP-X005"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "a3e816b6d82a4da3a87603cfd062637f889e4c42ed147be34bea2dd9781f3377",
+    "after_sha256": "1509f0e864ab5424dbc5d9482978ad020951304545c9732212c5e375d33e4663",
+    "primary_input_source_sha256": "a3e816b6d82a4da3a87603cfd062637f889e4c42ed147be34bea2dd9781f3377",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.cs",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X003",
+      "CORE-PGP-X004",
+      "CORE-PGP-X006"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+    "after_sha256": "2ac58c16bc386cd362bf7c14343ffe3685e01616bf40406b6ab856d3c2dc855b",
+    "primary_input_source_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/PinPolicy.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Always consumes signature authorization; Once follows card access state rather than managed session lifetime. Current XML names selection/reset/unverify boundaries accurately. Retain the useful clarification and keep executable sample wording tracked separately.",
+    "before_sha256": "797223515b16746e8fc61d7fdb28c0972aa7c60f00b40999518a6e90769470d1",
+    "after_sha256": "797223515b16746e8fc61d7fdb28c0972aa7c60f00b40999518a6e90769470d1",
+    "primary_input_source_sha256": "797223515b16746e8fc61d7fdb28c0972aa7c60f00b40999518a6e90769470d1",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X006",
+      "CORE-PGP-X007"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "1d98b567de4df25c42b74947f7ba100148d9c76a01d188ab2110644a882bf393",
+    "after_sha256": "2281e630a43346e33376365cfaaf5bd578add06e8c8f26876c5caf1c4571c0f7",
+    "primary_input_source_sha256": "1d98b567de4df25c42b74947f7ba100148d9c76a01d188ab2110644a882bf393",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/PrivateKeyTemplate.cs",
+    "candidates": [
+      "CORE-PGP-X003"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "bf994242ce0c9a0529bc1c9037cc4ede1c83bbb41ffa90aba2b5dfdf4780764f",
+    "after_sha256": "8143bdcf68b605697757b386fe31c37017bd9e54fa30012aa0a9d6042ccf0701",
+    "primary_input_source_sha256": "bf994242ce0c9a0529bc1c9037cc4ede1c83bbb41ffa90aba2b5dfdf4780764f",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/PublicAPI.Shipped.txt",
+    "candidates": [],
+    "eligible": false,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The shipped snapshot contains only nullable enable and has no assigned semantic unit. Preserve the disposition-only path without inventing a method/type or coverage unit.",
+    "before_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "after_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "primary_input_source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/PublicAPI.Unshipped.txt",
+    "candidates": [],
+    "eligible": false,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The complete API snapshot was reconciled with current public declarations: SmartCard factory/convenience entry, Core KeyType metadata navigation, KDF/public collection shapes and forty interface methods. Generated record/accessor syntax needs no invented prose. Preserve bytes; signature data proves no compiler or device gate.",
+    "before_sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf",
+    "after_sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf",
+    "primary_input_source_sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Pw.cs",
+    "candidates": [
+      "CORE-PGP-X002"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Logical User/Reset/Admin values intentionally overlap VERIFY User-other-mode byte82. Current Reset XML explicitly separates recovery identity from access-mode encoding, preserving the confirmed identity defect rather than normalizing it as intended behavior.",
+    "before_sha256": "9d6a58143ad43251e5d48eae541d2d5776b9f99ddac2d989d8db0566f45756c8",
+    "after_sha256": "9d6a58143ad43251e5d48eae541d2d5776b9f99ddac2d989d8db0566f45756c8",
+    "primary_input_source_sha256": "9d6a58143ad43251e5d48eae541d2d5776b9f99ddac2d989d8db0566f45756c8",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/PwStatus.cs",
+    "candidates": [
+      "CORE-PGP-X002"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Seven raw bytes map policy/limits/retries, unknown policy falls to Once and raw format bits remain inside integer limits. GetMaxLen/GetAttempts select logical credentials and reject invalid enum values. Literal tests cover ordinary counts/limits, not format-bit parsing or all card profiles.",
+    "before_sha256": "6363c56e80aad022fa327a4130385608b0bcf891e3540a17b6878462647ca723",
+    "after_sha256": "6363c56e80aad022fa327a4130385608b0bcf891e3540a17b6878462647ca723",
+    "primary_input_source_sha256": "6363c56e80aad022fa327a4130385608b0bcf891e3540a17b6878462647ca723",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/RsaImportFormat.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The four numeric formats distinguish standard/standard+modulus/CRT/CRT+modulus. NEO PrivateKeyImport currently chooses02 with an N component; model values are accurate and the caller mismatch stays applet-owned.",
+    "before_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+    "after_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+    "primary_input_source_sha256": "2aabfd1ec973fe5c0963b8a1b4ee35aefae875749eeef3070634f86b043b4d81",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/RsaSize.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The public enum models2048/3072/4096 only; Core RSA1024 is intentionally absent from OpenPGP metadata. Size availability remains card/slot/firmware-specific.",
+    "before_sha256": "ec8c027e1e482d74a33d5dcf27c386ff28db5d38a7ee67f7382a1d36a8728a41",
+    "after_sha256": "ec8c027e1e482d74a33d5dcf27c386ff28db5d38a7ee67f7382a1d36a8728a41",
+    "primary_input_source_sha256": "ec8c027e1e482d74a33d5dcf27c386ff28db5d38a7ee67f7382a1d36a8728a41",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/SecuritySupportTemplate.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Counter parsing accepts variable1..4+ widths and defaults missing/empty to zero; normal card counter is three-byte. Current XML correctly records signature-key import/generation and application reset effects, without treating metadata as independent provenance.",
+    "before_sha256": "87e75603f7177bb63d24d2c65652b32a18a4d691f22956b21c6995de21192765",
+    "after_sha256": "87e75603f7177bb63d24d2c65652b32a18a4d691f22956b21c6995de21192765",
+    "primary_input_source_sha256": "87e75603f7177bb63d24d2c65652b32a18a4d691f22956b21c6995de21192765",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/SupportedAlgorithm.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Each immutable entry owns references to slot/attributes; ordered repeated slots are preserved by the session list. This reports interpreted card information rather than selecting a default or attesting provider/card operation support.",
+    "before_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+    "after_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+    "primary_input_source_sha256": "72e227be67f7d7e8c35c0bab30871e5d53f1358ba43c9f2df72a9623b28782e1",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Uif.cs",
+    "candidates": [],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Policy values, Button encoding and first-byte parse remain straightforward. Current fixed-policy XML distinguishes ordinary key replacement/reset from ATT's irreversible replacement requirement and malformed CRT constraint. The enum creates no actual touch event or callback lifetime.",
+    "before_sha256": "53528c10dc014e49c3c5f24f98975ca82f5843a86487c351ff4aa2341c4c60d5",
+    "after_sha256": "53528c10dc014e49c3c5f24f98975ca82f5843a86487c351ff4aa2341c4c60d5",
+    "primary_input_source_sha256": "53528c10dc014e49c3c5f24f98975ca82f5843a86487c351ff4aa2341c4c60d5",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+    "candidates": [],
+    "eligible": false,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Shipping project references Core and opts into shared NativeAOT analyzer/metadata properties; description accurately says raw deciphering/agreement rather than content encryption. Preserve source/newline identity and separate project declaration from compilation/AOT runtime acceptance.",
+    "before_sha256": "0eddc3bde1e97e6eae9445e9191420cfd3a774f1d1c04fb813083d6cbc4376c5",
+    "after_sha256": "0eddc3bde1e97e6eae9445e9191420cfd3a774f1d1c04fb813083d6cbc4376c5",
+    "primary_input_source_sha256": "d150bc39c7c4545e4cf9b87ed2ad25e967c6116211d66f6026638306a0ac68af",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/CLAUDE.md",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+    "after_sha256": "4d5017e2de94d53b1c215ff755f81c1ac534f2a6b3383b62b9b5e6509f7b901e",
+    "primary_input_source_sha256": "f91706d227c7a7df549dc2d5fbc5914251428fa10f614badd6c5d1ee903dae13",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The KDF test derives initial hashes, installs an aliased object, changes equal old/new credentials and checks cached properties plus ordinary verification; no fresh reload/extended transition proof. Generation tests mostly inspect attrs/public-key nonemptiness; Ed25519 checks64-byte output only. Initial hash finally does not clear all KDF/source/result copies and helper leaves state after body.",
+    "before_sha256": "6ec572967563350d6a613495117a46dc458cd28d366b000cf4fdfd3c2a2c6861",
+    "after_sha256": "6ec572967563350d6a613495117a46dc458cd28d366b000cf4fdfd3c2a2c6861",
+    "primary_input_source_sha256": "6ec572967563350d6a613495117a46dc458cd28d366b000cf4fdfd3c2a2c6861",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. RSA imports a host key and compares plaintext; P256 compares returned raw secret to host agreement with the same keys, a meaningful independent operation oracle. RSA's early return covers4.2.0..4.3.5 inclusive before setup despite imported-key mitigation. Successful plaintext/shared-secret/host-export arrays lack complete explicit cleanup; no X25519 decipher test exists here.",
+    "before_sha256": "5885993d692f88631bc7816a37c95aefe53dcaa1a73c77888bc531bc3ebb33b7",
+    "after_sha256": "5885993d692f88631bc7816a37c95aefe53dcaa1a73c77888bc531bc3ebb33b7",
+    "primary_input_source_sha256": "5885993d692f88631bc7816a37c95aefe53dcaa1a73c77888bc531bc3ebb33b7",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. RSA/P256/P384 and Aut imports verify card signatures using host-generated keys. Ed25519/X25519 import tests compare published RFC public points only; X25519 agreement remains untested. Helper parses7F49/86 using Core TLV copies. Host-exported private arrays and signature/result lifetimes retain the old cleanup finding; old RSA early return preserves exact inclusive bound.",
+    "before_sha256": "bacf4048602661e4abfcf4f7e2a5b70ffa699b3dfc4fd39b588e895bf6e8e277",
+    "after_sha256": "bacf4048602661e4abfcf4f7e2a5b70ffa699b3dfc4fd39b588e895bf6e8e277",
+    "primary_input_source_sha256": "bacf4048602661e4abfcf4f7e2a5b70ffa699b3dfc4fd39b588e895bf6e8e277",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpMultiCurveTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. P384 and Brainpool generation check attributes, public-key nonemptiness and/or generated status; signature case checks nonempty, never host verification. Retry configuration writes recovery code then5/3/5 and reads those counters; helper restores nothing after body. Core catalog support is not additional real-device evidence.",
+    "before_sha256": "7ae9bca9085debd3c2d499431f53ddd11dcde65f24c8115f61fab762628cf1d2",
+    "after_sha256": "7ae9bca9085debd3c2d499431f53ddd11dcde65f24c8115f61fab762628cf1d2",
+    "primary_input_source_sha256": "7ae9bca9085debd3c2d499431f53ddd11dcde65f24c8115f61fab762628cf1d2",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "1552a15e3e7fc35e3d6acaf173ae1e6fd9319876c80db3de14df4aafde99a71e",
+    "after_sha256": "7d4338b27a41d8516806f62466b3276464f1560c82fd18f64c7487dc62e1f7bd",
+    "primary_input_source_sha256": "1552a15e3e7fc35e3d6acaf173ae1e6fd9319876c80db3de14df4aafde99a71e",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+    "candidates": [
+      "CORE-PGP-X005",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. All methods and helper calls were read: reset asserts3/0/3 only; generated signatures/public data mostly shape; certificate CRUD compares bytes; attestation checks decoded/nonempty and overwrite under ordinary User mode, not trust/key binding. Four-slot fingerprint/time expectations remain old-family qualifications. Two unequal challenges are no RNG qualification. Two RSA methods early-return through4.3.5; successful body operations leave state to external restoration.",
+    "before_sha256": "89e2afda5a93f492982335f640b79144a73646ee523fffcac6cdd12b06b47fac",
+    "after_sha256": "89e2afda5a93f492982335f640b79144a73646ee523fffcac6cdd12b06b47fac",
+    "primary_input_source_sha256": "89e2afda5a93f492982335f640b79144a73646ee523fffcac6cdd12b06b47fac",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+    "candidates": [
+      "CORE-PGP-X005",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "EDIT",
+    "reason": "Source-supported documentation facet only; see changed ranges and candidate-decisions.md.",
+    "before_sha256": "90b087ce7568b52cb0c8a945d2379928fe9b07f32f1d7aa6422ef1404df57d12",
+    "after_sha256": "8fd707acf4c1f4db33393908dcbe6d009096c94bb6fa7ea4256c76b09d9cc931",
+    "primary_input_source_sha256": "90b087ce7568b52cb0c8a945d2379928fe9b07f32f1d7aa6422ef1404df57d12",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": false,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Integration uses xunitv2/TestSDK/SkippableFact, explicit Core/OpenPgp/Tests.Shared references and nonparallel runner config. No current compile/runner/device result follows from these package declarations; preserve project bytes.",
+    "before_sha256": "6744bd61272f01d8a9af9050b0aa4e1463eece747ebbb354252515d96b698846",
+    "after_sha256": "6744bd61272f01d8a9af9050b0aa4e1463eece747ebbb354252515d96b698846",
+    "primary_input_source_sha256": "6744bd61272f01d8a9af9050b0aa4e1463eece747ebbb354252515d96b698846",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Literal RSA wire fields, EC constructor ID choices, parse preservation and non-EC rejection are checked. Roundtrips share production encoder/decoder; exact independent literals have stronger wire identity scope. The X25519 Aut factory case proves identifier selection, not supported card slot. No crypto operation or hardware proof follows.",
+    "before_sha256": "cf9ba41f61564f69291c3b068d5fd1577af000d6eec6b4f62cd507730d0fd0b4",
+    "after_sha256": "cf9ba41f61564f69291c3b068d5fd1577af000d6eec6b4f62cd507730d0fd0b4",
+    "primary_input_source_sha256": "cf9ba41f61564f69291c3b068d5fd1577af000d6eec6b4f62cd507730d0fd0b4",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Fixture encodes mandatory tags with production TLV helpers; tests check AID/capabilities/optional absence and collection content. Repeated parse test mutates original encoding and compares distinct actual fingerprint backing arrays, a meaningful ownership oracle. HistoricalBytes test only checks nonempty; it does not prove all optional field contents or unknown-profile behavior.",
+    "before_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+    "after_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+    "primary_input_source_sha256": "56dbcbb03d85688faf00a4cd76e371ad6e01525d6ef84463d9687e565a1bd28f",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Slot import test inspects first short-chain CRT after attribute write; short-count S2K compares host SHA256 of explicit input, unsigned count checks encode/decode and one-above case names exact bytes. Libgcrypt-named tests compare retained literals while executing SDK only. Literal provenance remains historical qualification and no test ran in this packet.",
+    "before_sha256": "46ed843b7cba4e2b77521c071e27f96e6feb58b47a67bd2f7b8eadf7c3588919",
+    "after_sha256": "46ed843b7cba4e2b77521c071e27f96e6feb58b47a67bd2f7b8eadf7c3588919",
+    "primary_input_source_sha256": "46ed843b7cba4e2b77521c071e27f96e6feb58b47a67bd2f7b8eadf7c3588919",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+    "candidates": [
+      "CORE-PGP-X006",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Six valid single-byte BCD vectors and multi-byte valid/zero/high-invalid/low-invalid serial cases are explicit. These establish local arithmetic/admission assertions, not full GET VERSION response validation or firmware provenance.",
+    "before_sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+    "after_sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+    "primary_input_source_sha256": "568be427fe9a635459e08777ba7c39349e7dc290e699b1b3e352bf431f7c03c4",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. SHA256/384/512 literal headers are compared byte-exact; unsupported algorithm checks dispatch; Build checks total51, prefix and digest endpoint placement rather than full emitted-body equality. Retain that exact oracle scope and host/card padding distinction.",
+    "before_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+    "after_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+    "primary_input_source_sha256": "3907c48f2d319ea7699c693d14a1a42aef572ecc5c4a915bb6068f0c358027b1",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Tests distinguish raw KdfNone, byte-count SHA256 transcripts, length-only SHA512, unequal-salt outputs, null salt fallback, encode/parse fields and exact multiples. Several objects/output hashes remain undisposed/uncleared. Unknown algorithm fixture maps to KdfNone, without actually supplying empty input despite the method name. No transition or live credential identity proof is supplied by model tests.",
+    "before_sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+    "after_sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+    "primary_input_source_sha256": "ff763440884972fca0fbc1469fa5155894ec113488aee94febf46fe02b826e5a",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpAidTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Known AID fields/raw bytes and one low-high-bit invalid-BCD negative serial are asserted. The fixture does not test the high-bit raw value that can produce a positive signed result; current public XML already preserves that condition. Too-short check alone is not the substantive sampling nominee.",
+    "before_sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+    "after_sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+    "primary_input_source_sha256": "cae003ca497e9d4c5c630a0e07755b273edc298513bc821c544c1eb759995a18",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Reflection asserts sealed object-derived read-only dictionary contracts, absence of mutable dictionary interfaces/public constructors. It does not assert immutable byte storage, parsed content or device state; ApplicationRelatedData tests carry the distinct array-ownership oracle.",
+    "before_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+    "after_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+    "primary_input_source_sha256": "52d20619a593cee18964d2f0417a080f116048bcc2fbdebab5f5f84a8736984e",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+    "candidates": [
+      "CORE-PGP-X002",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Fake responses check63Cx,6983,6982/User/Admin/extended Reset count and unavailable count. Extended test intentionally records the defect. CancelOnPwStatusLookupConnection cancels its own CTS and returns Task.FromCanceled regardless of supplied token; the test proves exception propagation rather than admitted native cancellation. Recorder/application-data helpers were read completely; F9 6A82 is broad fallback evidence, not absence.",
+    "before_sha256": "ad67b4ff9c4445f7d18a9dc67de7ac36af8035152ef1660024b57003e2a46d89",
+    "after_sha256": "ad67b4ff9c4445f7d18a9dc67de7ac36af8035152ef1660024b57003e2a46d89",
+    "primary_input_source_sha256": "ad67b4ff9c4445f7d18a9dc67de7ac36af8035152ef1660024b57003e2a46d89",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+    "candidates": [
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Independent dotted OID/value-octet literals cover all nine EC representations, lookup None rejection, optional RSA/symmetric metadata and RFC8410 distinction. These exact representation assertions are substantive and stay separate from provider execution, firmware/slot support and X25519 agreement.",
+    "before_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "after_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "primary_input_source_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+    "candidates": [
+      "CORE-PGP-X007",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Complete helpers reassemble outgoing APDU chunks, parse4D/7F48/5F48 and compare requested ordinary CRT/component bytes. Exponent rejection precedes wire; nonchangeable attrs branch is explicit. Named non-NIST scalar1 tests compare literal attributes/template and require a host provider with skip on unsupported curves. Source code checks no ATT or decipher flow, complete cryptographic import result or secret-producer cleanup.",
+    "before_sha256": "7c6efd3849e17bae1e82c6b2e553898b04913c34dee71737036ad9a43da948fa",
+    "after_sha256": "7c6efd3849e17bae1e82c6b2e553898b04913c34dee71737036ad9a43da948fa",
+    "primary_input_source_sha256": "7c6efd3849e17bae1e82c6b2e553898b04913c34dee71737036ad9a43da948fa",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+    "candidates": [
+      "CORE-PGP-X001",
+      "CORE-PGP-X004",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Complete synthetic responses, queue/command/prompt helpers and all bodies were read. UIF/cache/request-failure/pre-admission cancel/status paths are explicit. Signature helpers retain actual arrays for successful transfer and failure erasure; Decrypt resolution only checks exception/outcome. Cached-KDF disposal checks an aliased salt after async disposal, while throwing-KDF test checks sync detach. No held whole-workflow, native release, SCP reset, F9 replacement-disposal or certificate-resolution-failure oracle exists.",
+    "before_sha256": "3dcdc1931cdcf47673e14f63a71745b38c30abf77f86bdc685e16a978c8e3501",
+    "after_sha256": "3dcdc1931cdcf47673e14f63a71745b38c30abf77f86bdc685e16a978c8e3501",
+    "primary_input_source_sha256": "3dcdc1931cdcf47673e14f63a71745b38c30abf77f86bdc685e16a978c8e3501",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+    "candidates": [
+      "CORE-PGP-X003",
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. The custom descriptor helper independently parses one/two-byte BER lengths; tests inspect tags, concatenated components, optional public field count and header/value widths using deliberately tiny noncryptographic key data. They establish serialization layout, not provider-valid keys, all byte equality or card import. Sensitive fixture encodings/dictionary copies are not comprehensively cleared.",
+    "before_sha256": "6dc53913bcb7e721ea0378e8d3198caea428def944cdef6b354c40bde502b8a9",
+    "after_sha256": "6dc53913bcb7e721ea0378e8d3198caea428def944cdef6b354c40bde502b8a9",
+    "primary_input_source_sha256": "6dc53913bcb7e721ea0378e8d3198caea428def944cdef6b354c40bde502b8a9",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PwStatusTests.cs",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": true,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Seven-byte literals assert policy/three limits/retries and logical lookup selection; raw format bits, unknown policies and extended-mode identity are outside these tests. The default fixture explicitly uses Always, distinct from historical reset hardware Once; no universal device default is inferred.",
+    "before_sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df",
+    "after_sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df",
+    "primary_input_source_sha256": "cc30c1a61e32e60c5ce3613117a55d50341ec15205824c3b0c34cfabc8bb04df",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  },
+  {
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj",
+    "candidates": [
+      "CORE-PGP-X008"
+    ],
+    "eligible": false,
+    "decision": "RETAIN",
+    "reason": "Retain the existing contract/context; no executable, configuration or snapshot changes authorized. Unit project uses xunitv3 MTP executable with explicit library and private Tests.Shared reference; no traditional TestSDK runner is declared. Keep test framework distinctions and no-runtime source outcome explicit.",
+    "before_sha256": "eec7d8b986d4cfba471ee689d8d83347d6bd41bd6b40eba9500e7e6bfbf576f0",
+    "after_sha256": "eec7d8b986d4cfba471ee689d8d83347d6bd41bd6b40eba9500e7e6bfbf576f0",
+    "primary_input_source_sha256": "eec7d8b986d4cfba471ee689d8d83347d6bd41bd6b40eba9500e7e6bfbf576f0",
+    "input_file_disposition": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json"
+  }
+]

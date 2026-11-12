@@ -1,0 +1,254 @@
+[
+  {
+    "path": "src/Ctap2/src/Ctap2Session.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "870046812fe2802a82ef3c84ab1af7bd118e283a0e2f3ce21934e8c5c8087729",
+    "pinned_git_bytes_sha256": "870046812fe2802a82ef3c84ab1af7bd118e283a0e2f3ce21934e8c5c8087729",
+    "git_blob": "611bcb0bc54ed620af59cc865f5b99261672e88b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        90,
+        225
+      ],
+      [
+        265,
+        478
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Ctap2/src/IYubiKeyExtensions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4a456736bcb7c35d25cbbee5508dde57a4dfed04a9f039f56740a9ad6c411673",
+    "pinned_git_bytes_sha256": "4a456736bcb7c35d25cbbee5508dde57a4dfed04a9f039f56740a9ad6c411673",
+    "git_blob": "2f0b5baba645ffb014319da032137c0355ca858a",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        140,
+        206
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Ctap2/src/Credentials/GetAssertionResponse.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "44bceddfd5691092dc76ac757ab486a4509f73f83051a44628a64f9d92bbc0ab",
+    "pinned_git_bytes_sha256": "44bceddfd5691092dc76ac757ab486a4509f73f83051a44628a64f9d92bbc0ab",
+    "git_blob": "c4169a5f9ff3a9489771830b923afc687d6a5d6a",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        19,
+        245
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Ctap2/src/Credentials/MakeCredentialResponse.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "46de2b3348f861a89d507acde0840f227a609e998c93575ae361cd005aa8e1fb",
+    "pinned_git_bytes_sha256": "46de2b3348f861a89d507acde0840f227a609e998c93575ae361cd005aa8e1fb",
+    "git_blob": "d8e7194ff3f75a1e5957dca1a4bad5aadf1567e8",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        19,
+        304
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Ctap2/src/Credentials/PublicKeyCredentialTypes.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "269aab7260dd7e62f00972b5d9662f7fa4eca8578c61c9f3b8ca0a1a11f9b034",
+    "pinned_git_bytes_sha256": "269aab7260dd7e62f00972b5d9662f7fa4eca8578c61c9f3b8ca0a1a11f9b034",
+    "git_blob": "4a3c9ce0ac5954873eeb1cec1560c2e08095ae79",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        19,
+        439
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Ctap2/src/Backend/HidBackend.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "14941f940c60035457b0d3edf6b6f87b2422aba25ad62f28fe900ec4e6ef6c55",
+    "pinned_git_bytes_sha256": "14941f940c60035457b0d3edf6b6f87b2422aba25ad62f28fe900ec4e6ef6c55",
+    "git_blob": "a21a717b3ecfb5a2905a1fc4e854d20bbc2c4435",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        23,
+        117
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "d684c8aaedfc9c407f6e0830ee088af490b7ea06ab5c3cf597b54bdf88a602fa",
+    "pinned_git_bytes_sha256": "d684c8aaedfc9c407f6e0830ee088af490b7ea06ab5c3cf597b54bdf88a602fa",
+    "git_blob": "73fd49b5257682d368226265e59f0107140ed653",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        25,
+        148
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Ctap2/src/Pin/ClientPin.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "f05a11468d6adc6bdd732070523cce09c8bccd8e307ce4b85e47f1c2854b5b4f",
+    "pinned_git_bytes_sha256": "f05a11468d6adc6bdd732070523cce09c8bccd8e307ce4b85e47f1c2854b5b4f",
+    "git_blob": "aeb841d836bfc65f1dcd2dc3e9ede85404847029",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        298,
+        490
+      ],
+      [
+        571,
+        584
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "pinned_git_bytes_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        202,
+        380
+      ],
+      [
+        461,
+        568
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "fc50686f051f5fb6f3ee01aca09f3b9f2175f9fc60cc6c97bbc7f2ed308c62a2",
+    "pinned_git_bytes_sha256": "fc50686f051f5fb6f3ee01aca09f3b9f2175f9fc60cc6c97bbc7f2ed308c62a2",
+    "git_blob": "45ffb348d555176602d99dc4bcaa2a6165728d67",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        230,
+        433
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "pinned_git_bytes_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "git_blob": "a9704b1ed619b31ccda8ff49fbae6397e0521baf",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        19,
+        204
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "948d8513a3853a476323b3263652a8065c4312c02a72910615b259fe93ac2d83",
+    "pinned_git_bytes_sha256": "948d8513a3853a476323b3263652a8065c4312c02a72910615b259fe93ac2d83",
+    "git_blob": "e4a88d963c05b5ab43fff6e431fa43a975c45d8b",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        20,
+        116
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialPromptContext.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "aa1eb866acff5887fe426097fc5726e6e1e8a84d1f6fe5065e7c309cfc70bc45",
+    "pinned_git_bytes_sha256": "aa1eb866acff5887fe426097fc5726e6e1e8a84d1f6fe5065e7c309cfc70bc45",
+    "git_blob": "43bf24070ab35f67861f5f0183204e9388b1aac9",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        17,
+        68
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "pinned_git_bytes_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "git_blob": "0418d7391a09c38c3d86d844a09848b0207b9406",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        220,
+        330
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  },
+  {
+    "path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "b2199a37a76357c932c61b65d6c214a2e31cc1be94353c239788779bcae554ba",
+    "pinned_git_bytes_sha256": "b2199a37a76357c932c61b65d6c214a2e31cc1be94353c239788779bcae554ba",
+    "git_blob": "1da9ea9e1a665dd7a9b87d2a5e1f894cd015c8c2",
+    "raw_matches_pin": true,
+    "bom_crlf_normalized_matches_pin": true,
+    "read_line_ranges": [
+      [
+        20,
+        84
+      ]
+    ],
+    "primary_owner": "Core family / CTAP2 boundary; contextual read only"
+  }
+]

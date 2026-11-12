@@ -1,0 +1,41 @@
+{
+  "self_excluded": true,
+  "artifacts": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/candidate-dispositions.json",
+      "sha256": "37044d79f9a7f47312c1c8a702621c37193de7eafcea012c5a5a0f950433c958"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/changed-path-sha256.json",
+      "sha256": "4ecc11cf6e641cb94be9d578aa5c98a504a14baba00be73884d97f90aa39b0e1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/correction-paths.json",
+      "sha256": "7a411c97d08d8708fff0b839b551dca7f157d63dcfb940c0acefa5d55f57b755"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/example-bodies.json",
+      "sha256": "4088b11eb2dc2c872c99ea7f06a4421e1edd981bfe855b2aa04ecc20010b290f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/path-dispositions.json",
+      "sha256": "7a94167e7b3830b9686fb79eed04f70e87bd5045634e68cfd65bd17caca0af4e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/predecessor-identities.json",
+      "sha256": "8e5611c69ed18dea8643050e8d610bcdfe2928ce9bedbfab38a30ffa1eb8466e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/product.patch",
+      "sha256": "028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/report.md",
+      "sha256": "014c09198326a2050d0f5ae82e657a21c00c6029db1f078ebe5b1c890f80b3cd"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/verification.json",
+      "sha256": "d06a4eae1698168aa7c4127e931048975b92ea6c84001822ca2df3a53efa56ca"
+    }
+  ]
+}

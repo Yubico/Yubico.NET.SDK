@@ -1,0 +1,2103 @@
+[
+  {
+    "proposal_id": "FPT-058",
+    "local_ids": [
+      "CORE-B5-C001"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Separate raw attachment/readiness, lazy initialization, configured/discovered/assumed firmware, historical protocol-auth flag and retained option objects.",
+    "precise_follow_up": "Decide raw HID version propagation; use B6 draft-specific first protected-command phase without promoting flag to applet or host authority.",
+    "edited_paths": [
+      "src/Core/src/Abstractions/IApplicationSession.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/Core/src/Sessions/RawCtapHidSession.cs",
+      "src/Core/src/Sessions/RawOtpHidSession.cs",
+      "src/Core/src/Sessions/RawSmartCardSession.cs",
+      "src/Core/src/Sessions/SessionCreationOptions.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C001",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:c7efad99afd618f3",
+          "core-001:unit:cdb92a387279e464",
+          "core-001:unit:5d14103a2630dac0",
+          "core-001:unit:da4452142afe2119",
+          "core-001:unit:28d27ee878322a00",
+          "core-001:unit:46ebe281fd67872b",
+          "core-001:unit:a31cac4b6e482a9f",
+          "core-001:unit:036e5d6208295bde",
+          "core-001:unit:e1fd8e7f0321811d",
+          "core-001:unit:7958d0703696b837",
+          "core-001:unit:9c86e938e4708d6e",
+          "core-001:unit:0803124846ae7828",
+          "core-001:unit:548fd4dd7ae8184d",
+          "core-001:unit:6c32785ea767d45d",
+          "core-001:unit:50b59c62c985ef8f",
+          "core-001:unit:33ae8acf2460be87",
+          "core-001:unit:f8d1989ef82a9138",
+          "core-001:unit:8ece2813b449c1a3",
+          "core-001:unit:269746640823eea4",
+          "core-001:unit:8ad058f85defa68e",
+          "core-001:unit:1e08b68eca850eec",
+          "core-001:unit:aad2750b841235be",
+          "core-001:unit:e7eed88f17ee547d",
+          "core-001:unit:23faca1ebe4502c7",
+          "core-001:unit:097cf4f60caefb84",
+          "core-001:unit:4cb22a75093d26e0",
+          "core-001:unit:e63ac0e6fc5ace49",
+          "core-001:unit:4f888bc8469192df",
+          "core-001:unit:1ed10d86028efc66",
+          "core-001:unit:6a730ef8845ddf3c",
+          "core-001:unit:9cc5bf091d1f7fcd",
+          "core-001:unit:d93aaf04e4318051",
+          "core-001:unit:2acc249f85fc6d36",
+          "core-001:unit:2329bfeabd7faf63",
+          "core-001:unit:f6483db81f6f048e",
+          "core-001:unit:d0f7ff1289a8023b",
+          "core-001:unit:14aa0019ca75eaf0",
+          "core-001:unit:28037a9b0dffae8d",
+          "core-001:unit:13572f6be02741d4",
+          "core-001:unit:d6b228fdb13ab417",
+          "core-001:unit:1d3fe56a8baa414a",
+          "core-001:unit:3b82efe0a9a7aee3",
+          "core-001:unit:8f68ef659f5a0e3d",
+          "core-001:unit:fce2188000ccc79f",
+          "core-001:unit:de45cafad3d99a58",
+          "core-001:unit:8c70f4cf5a322fe9",
+          "core-001:unit:ce4f782aab106080"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/SDK-HOUSE-STYLE.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/architecture/raw-access-tiers.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/migration/v1-to-v2.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/v1-to-v2-comparison.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/v2-highlights.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/CLAUDE.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/README.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Abstractions/IApplicationSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Management/src/ManagementSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          },
+          {
+            "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": [
+      "oath-pilot-and-fixes-wave-002:DEC-007",
+      "management-001:MGMT-IMP-004",
+      "security-domain-001:SD-DEP-001",
+      "security-domain-001:SD-DEP-002",
+      "security-domain-001:SD-DEP-003",
+      "yubiotp-001:OTP-DEP-004",
+      "yubihsm-001:HSM-DEP-001",
+      "openpgp-001:PGP-CORE-003",
+      "audit-v2-20261022-20261031:consideration-3"
+    ]
+  },
+  {
+    "proposal_id": "FPT-059",
+    "local_ids": [
+      "CORE-B5-C002"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Explain keepalive-triggered CANCEL and original-response drain; preserve request-response grammar, encoded 90 late-success policy and no-response CANCEL distinction.",
+    "precise_follow_up": "Decide command normalization/control API policy; bounded encoded-CBOR/no-further-report probe only if stronger wording is selected.",
+    "edited_paths": [
+      "src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+      "src/Core/src/Sessions/RawCtapHidSession.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C002",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:f8cbb7a551e6016e",
+          "core-001:unit:1ec8a105c8be433f",
+          "core-001:unit:53aaffa02e58ec1f",
+          "core-001:unit:b1e084d179db6039",
+          "core-001:unit:5c5867c122bf78b9",
+          "core-001:unit:b1a19380b6159d13",
+          "core-001:unit:2dc0e9094427136b",
+          "core-001:unit:e7eed88f17ee547d",
+          "core-001:unit:8471724a7e40de20",
+          "core-001:unit:0fcd2ecfdebb0cf3",
+          "core-001:unit:daecccd8060f88f1",
+          "core-001:unit:0b53788fa89bf09f",
+          "core-001:unit:a4e1bf076a3b4840",
+          "core-001:unit:160da8a040d2bc5b",
+          "core-001:unit:017400764a7eea12",
+          "core-001:unit:4ebb5dd14764295c",
+          "core-001:unit:604b8d2421d76d79",
+          "core-001:unit:197ff074340e9a0e"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/architecture/raw-access-tiers.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/CLAUDE.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/README.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Ctap2/src/Backend/HidBackend.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          },
+          {
+            "path": "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": []
+  },
+  {
+    "proposal_id": "FPT-060",
+    "local_ids": [
+      "CORE-B5-C003"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Qualify INIT/control validation and failed partial-exchange recovery; retain reserved CID, length and surviving-tail decisions as scoped robustness work.",
+    "precise_follow_up": "Choose malformed/control/recovery policy; later scripted tail/reopen vectors before broad reuse assurance.",
+    "edited_paths": [
+      "src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C003",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:57b8e8cf8053107f",
+          "core-001:unit:b6a85d3192dceedb",
+          "core-001:unit:1ec8a105c8be433f",
+          "core-001:unit:53aaffa02e58ec1f",
+          "core-001:unit:b1e084d179db6039",
+          "core-001:unit:5bef2866e0981f3e",
+          "core-001:unit:63b18cdc5393ba40",
+          "core-001:unit:d251260bc471af93",
+          "core-001:unit:478a3b187f510bbe",
+          "core-001:unit:0373ed1006801700",
+          "core-001:unit:e54232b12fff99be",
+          "core-001:unit:d78f906718363ec6",
+          "core-001:unit:f735527f2549ac1d",
+          "core-001:unit:ed08d0e6c0bf6d49",
+          "core-001:unit:d557c5153be0a296",
+          "core-001:unit:47bbe8f9d8389d2f",
+          "core-001:unit:f038476f58045d84",
+          "core-001:unit:917a64fce4259717",
+          "core-001:unit:28e791bb7fce7dad",
+          "core-001:unit:8c6b27dbc41b0c78",
+          "core-001:unit:3e65541b72d351f9",
+          "core-001:unit:09b8d352512a2b6a",
+          "core-001:unit:cdc1d3be3b5ae318",
+          "core-001:unit:e704a38f149f0c7b",
+          "core-001:unit:1dde96db8244868b",
+          "core-001:unit:01003be2f7d65288",
+          "core-001:unit:33fa14a3b8762cd3",
+          "core-001:unit:af87be6c80d27a02",
+          "core-001:unit:d1580d888d0a8a18"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/architecture/raw-access-tiers.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/README.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": []
+  },
+  {
+    "proposal_id": "FPT-061",
+    "local_ids": [
+      "CORE-B5-C004"
+    ],
+    "facets_preserved": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Name process-local known-member admission and incremental input borrowing through lazy init/packet sends; retain actual returned owner lifetime.",
+    "precise_follow_up": "Reopen after native route/copy policy or ready Windows delta changes; actual task terminal remains source-supported without new timing tests.",
+    "edited_paths": [
+      "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+      "src/Core/src/Sessions/RawCtapHidSession.cs",
+      "src/Core/src/Sessions/RawOtpHidSession.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C004",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:cad893c0ef760598",
+          "core-001:unit:3f8adbecfdbaddfc",
+          "core-001:unit:f7b6973e21bd166f",
+          "core-001:unit:d55c158fcbb01fdc",
+          "core-001:unit:ac3ad1bdc3537fe6",
+          "core-001:unit:e7eed88f17ee547d",
+          "core-001:unit:1ed10d86028efc66",
+          "core-001:unit:604b8d2421d76d79",
+          "core-001:unit:197ff074340e9a0e",
+          "core-001:unit:e69894b46c744fcb"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/architecture/raw-access-tiers.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/CLAUDE.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/README.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": [
+      "security-domain-001:SD-DEP-004",
+      "yubiotp-001:OTP-DEP-001",
+      "yubiotp-001:OTP-DEP-003",
+      "yubihsm-001:HSM-DEP-002",
+      "openpgp-001:PGP-CORE-002",
+      "openpgp-001:PGP-CORE-004",
+      "piv-001:PIVCORE-002"
+    ]
+  },
+  {
+    "proposal_id": "FPT-062",
+    "local_ids": [
+      "CORE-B5-C005"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Separate cleared outgoing/accumulation arrays from uncleared connection-returned report arrays; preserve external ReadOnlyMemory ownership question.",
+    "precise_follow_up": "Choose report clearing/transfer contract, then observe actual incoming arrays under success/failure/cancel; no writable-cast workaround.",
+    "edited_paths": [
+      "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+        "decision": "hold",
+        "reason": "Retain actual outgoing/pool observers; incoming-report zeroing is unobserved. Hold new ownership oracles and harness changes."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C005",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:f8cbb7a551e6016e",
+          "core-001:unit:1ec8a105c8be433f",
+          "core-001:unit:63b18cdc5393ba40",
+          "core-001:unit:d251260bc471af93",
+          "core-001:unit:919148aa6538c226",
+          "core-001:unit:d991f69c9564f534",
+          "core-001:unit:5902305ddcc386f6",
+          "core-001:unit:1d9a347723311f97",
+          "core-001:unit:1a5c6a55d327ee54",
+          "core-001:unit:2e57ecd123c1f8a2",
+          "core-001:unit:9be2ecdeb70cb636",
+          "core-001:unit:d1580d888d0a8a18",
+          "core-001:unit:5556bcf56ba54b25",
+          "core-001:unit:4c840999e29b86a1",
+          "core-001:unit:916ee306765f2ce7",
+          "core-001:unit:446afaeff7245467",
+          "core-001:unit:7c553593acc0012f",
+          "core-001:unit:7ee7f69146cb64a4",
+          "core-001:unit:eca00131f5c8126b",
+          "core-001:unit:85848b778da72846",
+          "core-001:unit:fa6f90bfab0ed825",
+          "core-001:unit:42ad58eb9474b888",
+          "core-001:unit:b50c9f9296daa7ca",
+          "core-001:unit:cbcf6ba9966471b0",
+          "core-001:unit:ef339f391a0eea20"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/MEMORY-MANAGEMENT.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          },
+          {
+            "path": "docs/usage/user-interaction.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          },
+          {
+            "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Ctap2/src/Backend/HidBackend.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          },
+          {
+            "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": [
+      "yubiotp-001:OTP-DEP-002",
+      "yubihsm-001:HSM-DEP-003",
+      "piv-001:PIVCORE-003"
+    ]
+  },
+  {
+    "proposal_id": "FPT-063",
+    "local_ids": [
+      "CORE-B5-C006"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "State exchange drain rather than full public workflow lease; keep callbacks non-reentrant for both sync and async disposal.",
+    "precise_follow_up": "Decide whole-operation/self-disposal/reinit policy; future tests need finally-owned release and complete task drain, not a new semaphore by default.",
+    "edited_paths": [
+      "src/Core/src/Abstractions/IProtocol.cs",
+      "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "src/Core/src/Sessions/ApplicationSession.cs",
+      "src/Core/src/Utilities/ExchangeGuard.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C006",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:d0ffb7eae3335674",
+          "core-001:unit:577cfa4781587da8",
+          "core-001:unit:dadba42da7a71e31",
+          "core-001:unit:1ded1b88a4f2dc3f",
+          "core-001:unit:19a71234f37d8c78",
+          "core-001:unit:f259753163fca89e",
+          "core-001:unit:1f868779a4f806bb",
+          "core-001:unit:590567486df6356f",
+          "core-001:unit:8a27fa7d810c3cba",
+          "core-001:unit:0803124846ae7828",
+          "core-001:unit:548fd4dd7ae8184d",
+          "core-001:unit:6c32785ea767d45d",
+          "core-001:unit:50b59c62c985ef8f",
+          "core-001:unit:33ae8acf2460be87",
+          "core-001:unit:f8d1989ef82a9138",
+          "core-001:unit:e71140522d6b64e9",
+          "core-001:unit:1fa9bd11b27d4e3d",
+          "core-001:unit:43f412b2ba5419ec",
+          "core-001:unit:34e9acc053297a26",
+          "core-001:unit:f763e705d2ad23a9",
+          "core-001:unit:2f36ecda10dcddef",
+          "core-001:unit:09450dba5e20108e",
+          "core-001:unit:6d80f9ba9d7f432d",
+          "core-001:unit:51e7819edbe9f97a",
+          "core-001:unit:d413feb148a21929",
+          "core-001:unit:5c7cf44780fe2554",
+          "core-001:unit:a200b65eb769e227",
+          "core-001:unit:bdd9b9ac44d12a98",
+          "core-001:unit:f2549f4b5f919f47",
+          "core-001:unit:77f6df12e9ecc416",
+          "core-001:unit:7b544f80417706f9",
+          "core-001:unit:11a0746ddf689437",
+          "core-001:unit:60849efdb8bed2c5",
+          "core-001:unit:f48af365dff7b56a",
+          "core-001:unit:3b82efe0a9a7aee3",
+          "core-001:unit:604b8d2421d76d79",
+          "core-001:unit:e69894b46c744fcb",
+          "core-001:unit:8f68ef659f5a0e3d",
+          "core-001:unit:8c70f4cf5a322fe9",
+          "core-001:unit:ce4f782aab106080"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/SDK-HOUSE-STYLE.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/architecture/raw-access-tiers.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/migration/v1-to-v2.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/usage/user-interaction.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          },
+          {
+            "path": "src/Core/CLAUDE.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/README.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Abstractions/IProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": [
+      "security-domain-001:SD-DEP-004",
+      "yubiotp-001:OTP-DEP-001",
+      "yubiotp-001:OTP-DEP-003",
+      "yubihsm-001:HSM-DEP-002",
+      "openpgp-001:PGP-CORE-002",
+      "openpgp-001:PGP-CORE-004",
+      "piv-001:PIVCORE-002"
+    ]
+  },
+  {
+    "proposal_id": "FPT-064",
+    "local_ids": [
+      "CORE-B5-C007"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Describe OTP report/control/CRC offsets, local polling windows and broad NEO refresh catch; local deadlines exclude native duration.",
+    "precise_follow_up": "Choose cadence and failure classification; no-wire/fake immediate-return probe only for a selected stronger contract, not vendor timing as mandate.",
+    "edited_paths": [
+      "src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+      "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+      "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C007",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:c8334c580b8db509",
+          "core-001:unit:1d6339a0b69bfbd4",
+          "core-001:unit:02212239c91ff162",
+          "core-001:unit:8d93a47c2c8333ae",
+          "core-001:unit:5f556e5d54b34f57",
+          "core-001:unit:943f149afa751236",
+          "core-001:unit:acc7509df1e3806b",
+          "core-001:unit:c23b9ece05351355",
+          "core-001:unit:bd1f52d2dd81686b",
+          "core-001:unit:919148aa6538c226",
+          "core-001:unit:d991f69c9564f534",
+          "core-001:unit:5902305ddcc386f6",
+          "core-001:unit:1d9a347723311f97",
+          "core-001:unit:dd0f053f6d649c0c"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/architecture/raw-access-tiers.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "narrow dependency / future owner; no whole-file disposition"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": [
+      "yubiotp-001:OTP-DEP-002"
+    ]
+  },
+  {
+    "proposal_id": "FPT-065",
+    "local_ids": [
+      "CORE-B5-C008"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Correct lazy INIT, CRC consistency and managed/fake-native test explanations; retain assertion-failure gate/drain work separately.",
+    "precise_follow_up": "Authorized harness repair before stress; changing comments to reflect existing assertions requires no new coverage test.",
+    "edited_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolConcurrencyTests.cs",
+        "decision": "hold",
+        "reason": "Retain scripted overlap assertions; hold failure-safe gate release/drain and stronger NEO/physical oracles as harness work."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+        "decision": "hold",
+        "reason": "Retain disposal/query assertions. Hold finally-owned release/drain for failing assertions; no whole-workflow drain inference."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawCtapHidSessionTests.cs",
+        "decision": "hold",
+        "reason": "Retain existing lazy-INIT/borrowed-connection assertions; hold failure-safe held-send cleanup and raw firmware propagation probes."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionYubiKeyExtensionsTests.cs",
+        "decision": "hold",
+        "reason": "Retain hidden-connection ownership assertions; hold task observation/drain on assertion failure even where release is in finally."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardSessionTests.cs",
+        "decision": "hold",
+        "reason": "Retain current APDU/version/borrow assertions; hold finally-owned barrier release/drain and authenticated success vectors."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+        "decision": "hold",
+        "reason": "Retain notification assertions; hold failure-path pending callback release/drain. C owns implementation semantics."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/ExchangeGuardTests.cs",
+        "decision": "hold",
+        "reason": "Retain per-exchange assertions; hold finally-owned gate release and actual task drain. These are not whole-workflow or physical-release oracles."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C008",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:52a7d08d211c4c05",
+          "core-001:unit:d6e3daa547bca707",
+          "core-001:unit:fa8a6f636994b6a2",
+          "core-001:unit:7f6d5da6ca550b70",
+          "core-001:unit:9b3f4ce36036a497",
+          "core-001:unit:76c1c1d5394629ae",
+          "core-001:unit:97cdc1bfb84d3d12",
+          "core-001:unit:d39e5f334ae26a45",
+          "core-001:unit:8fc80a3415b48c91",
+          "core-001:unit:d80bcd699a83ed6c",
+          "core-001:unit:f84aa2d8196476f4",
+          "core-001:unit:4b34259a67cfe273",
+          "core-001:unit:cdda525387acbc71",
+          "core-001:unit:8471724a7e40de20",
+          "core-001:unit:0fcd2ecfdebb0cf3",
+          "core-001:unit:0b53788fa89bf09f",
+          "core-001:unit:a4e1bf076a3b4840",
+          "core-001:unit:10490e3a793bdfa6",
+          "core-001:unit:a15da83eb1afea27",
+          "core-001:unit:d0d2c0e955b1f1ba",
+          "core-001:unit:e1d1990346d59b06",
+          "core-001:unit:14cff0763747498f",
+          "core-001:unit:cd671fa8427092b8",
+          "core-001:unit:881562a0d67f7dc7",
+          "core-001:unit:be9a4106a0ed40f7",
+          "core-001:unit:38c672fd3533fbe8",
+          "core-001:unit:74d0a4541f5c87ef",
+          "core-001:unit:cc3d0c4d77c71644",
+          "core-001:unit:fb84bf00d7265a52",
+          "core-001:unit:f9630f456c40bf52",
+          "core-001:unit:2eddd78cc3dfde66",
+          "core-001:unit:f5e3d2063bbdcc03",
+          "core-001:unit:d029af1604c08072",
+          "core-001:unit:438ccf0a63c09b2d",
+          "core-001:unit:a499376ab9455cbe",
+          "core-001:unit:0c49929250489a41",
+          "core-001:unit:62b1a36ccd18de04",
+          "core-001:unit:4c1b12ddb5d74d97",
+          "core-001:unit:d9b8bcb65420654d",
+          "core-001:unit:a210f3f1e8eb3907",
+          "core-001:unit:10c5f1298a44ddd3",
+          "core-001:unit:c94022ab6a156076",
+          "core-001:unit:b70d16f057b7fd44",
+          "core-001:unit:405440f350e7769f",
+          "core-001:unit:577b33982783a0b8",
+          "core-001:unit:2eb636ac268bb9a6",
+          "core-001:unit:d8911e9de705c723",
+          "core-001:unit:055f8be0856730fc",
+          "core-001:unit:2135bf70d821de51",
+          "core-001:unit:bed644857f5d9c33",
+          "core-001:unit:e9d7aca8f4f68210",
+          "core-001:unit:d6af94e2c0b6b1a4",
+          "core-001:unit:8ed6169eb7c868fb",
+          "core-001:unit:6d021b292c7b1434",
+          "core-001:unit:8ff2e7094cc9295f",
+          "core-001:unit:e69894b46c744fcb"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/architecture/raw-access-tiers.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/CLAUDE.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/README.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolConcurrencyTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawCtapHidSessionTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionYubiKeyExtensionsTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardSessionTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/ExchangeGuardTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": [
+      "audit-v2-20261022-20261031:consideration-3"
+    ]
+  },
+  {
+    "proposal_id": "FPT-066",
+    "local_ids": [
+      "CORE-B5-C009"
+    ],
+    "facets_preserved": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Describe extension as standard owned entry with public direct borrowing factories; preserve finite reflection grammar and unpinned sibling comparison gap.",
+    "precise_follow_up": "Reopen after actual factory shape or supplied comparator identity; qualify historical event prose without rewriting archives.",
+    "edited_paths": [
+      "src/Core/src/Sessions/ConnectionSessionGuard.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B5-C009",
+        "canonical_accepted_id": null,
+        "unit_ids": [
+          "core-001:unit:ccb24bb277015679",
+          "core-001:unit:f4d6b1f2bd76d6b3",
+          "core-001:unit:e04f646058d4dc11",
+          "core-001:unit:4a26f5eb924b0b4e",
+          "core-001:unit:dc1c19b8d927bb13",
+          "core-001:unit:77ee50d694a6b6f0",
+          "core-001:unit:b1c5a44497b2bdbb"
+        ],
+        "candidate_associated_unchanged_paths": [
+          {
+            "path": "docs/migration/v1-to-v2-changelog.md",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "docs/migration/v1-to-v2-map.yml",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/src/Sessions/ConnectionSessionGuard.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          },
+          {
+            "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+            "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+            "scope": "assigned B5 unit context"
+          }
+        ],
+        "documentation": "CANDIDATE-TRIAGE",
+        "implementation": "NOT-FIXED; decisions in candidates.md",
+        "qualification": "NO-NEW-RUNTIME-PROOF",
+        "independent_review": "PENDING"
+      }
+    ],
+    "inherited_association_keys": [
+      "oath-pilot-and-fixes-wave-002:DOC-002"
+    ]
+  },
+  {
+    "proposal_id": "FPT-067",
+    "local_ids": [
+      "CORE-B6-C001"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Name always-present encoded Le, complete-command ceilings, short data chunks, 61xx follow-ups and non-9000 status handling as separate quantities.",
+    "precise_follow_up": "FPX-03 exact bytes may anchor examples; decide absent-Le/channel/6C/response-limit profile before changing wire behavior. ISO target clauses unavailable.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/ApduFormatterTests.cs",
+        "decision": "retain",
+        "reason": "Retain the source-supported contract and existing assertions; no independent documentation correction was identified in this path."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C001",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:4a2d66e84ded8223",
+          "core-001:unit:acf5e1e2420d4d3f",
+          "core-001:unit:1a1c567b03546dc8",
+          "core-001:unit:9188cc8e095d349c",
+          "core-001:unit:7dcf5423fe4feeb3",
+          "core-001:unit:bc141b49fede19f5",
+          "core-001:unit:31c145ddf90d0dbd",
+          "core-001:unit:b7250c1f52cafa1d",
+          "core-001:unit:14b31753985531bb",
+          "core-001:unit:4722861e3442c2ba",
+          "core-001:unit:d8cbb535de56c4be",
+          "core-001:unit:e86e64e529f433a8",
+          "core-001:unit:1de200300b0e4882",
+          "core-001:unit:2637633b642ae69c"
+        ],
+        "direct_paths": [
+          "docs/architecture/raw-access-tiers.md",
+          "src/Core/CLAUDE.md",
+          "src/Core/README.md",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": []
+  },
+  {
+    "proposal_id": "FPT-068",
+    "local_ids": [
+      "CORE-B6-C002"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Describe response.Clear's copied owner including status; retain transport/formatter/fragments/assembly/decrypted-temporary cleanup as independent storage facets.",
+    "precise_follow_up": "Reopen each actual owner after selected cleanup; later retained-buffer observation seam can test erasure, while source already establishes copy graph.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+        "decision": "retain",
+        "reason": "Retain current formatted-buffer finally cleanup. Transport-result clone cleanup is a separate implementation hold, documented on ApduResponse and receiver/processor owners."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs",
+        "decision": "hold",
+        "reason": "Hold retained command aliases and nonproduction formatter behavior for harness work; using a production formatter in wire-sensitive tests requires executable changes."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C002",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:2ea6832be512ee64",
+          "core-001:unit:acf5e1e2420d4d3f",
+          "core-001:unit:1a1c567b03546dc8",
+          "core-001:unit:f0c7ca53cb55ff33",
+          "core-001:unit:bc141b49fede19f5",
+          "core-001:unit:7dcccc04e4303b62",
+          "core-001:unit:51201a54e9f33cb2",
+          "core-001:unit:d753e6c270ca4e74",
+          "core-001:unit:7f8ea35c6e10ae37",
+          "core-001:unit:2637633b642ae69c"
+        ],
+        "direct_paths": [
+          "CLAUDE.md",
+          "src/Core/CLAUDE.md",
+          "src/Core/README.md",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "yubihsm-001:HSM-DEP-003",
+      "piv-001:PIVCORE-003"
+    ]
+  },
+  {
+    "proposal_id": "FPT-069",
+    "local_ids": [
+      "CORE-B6-C003"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Qualify plain first-fragment uncertainty and configuration/recovery retention, including major-zero ForceShortApdus behavior.",
+    "precise_follow_up": "Selected first-fragment and reconfiguration probes before stronger recovery policy; no native delivery inferred from fake receipt.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+      "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "decision": "retain",
+        "reason": "Retain actual configuration and logger implementation/comments. Below-4 reconfiguration retention, development ForceShort behavior, SELECT input classification and provider exception provenance remain qualified in the handoff."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C003",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:9188cc8e095d349c",
+          "core-001:unit:2962996cb29a1f77",
+          "core-001:unit:b2e8553f057539fa",
+          "core-001:unit:31c145ddf90d0dbd",
+          "core-001:unit:e86e64e529f433a8",
+          "core-001:unit:2637633b642ae69c"
+        ],
+        "direct_paths": [
+          "docs/architecture/raw-access-tiers.md",
+          "src/Core/README.md",
+          "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "oath-pilot-and-fixes-wave-002:DEC-007",
+      "security-domain-001:SD-DEP-003",
+      "security-domain-001:SD-DEP-004",
+      "yubiotp-001:OTP-DEP-001",
+      "yubiotp-001:OTP-DEP-003",
+      "yubiotp-001:OTP-DEP-004",
+      "yubihsm-001:HSM-DEP-001",
+      "yubihsm-001:HSM-DEP-002",
+      "openpgp-001:PGP-CORE-002",
+      "openpgp-001:PGP-CORE-003",
+      "openpgp-001:PGP-CORE-004",
+      "piv-001:PIVCORE-002"
+    ]
+  },
+  {
+    "proposal_id": "FPT-070",
+    "local_ids": [
+      "CORE-B6-C004"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Separate Encrypt counter mutation before provider return, recovery notification timing, CMAC offset failure state and broad provider exception translation.",
+    "precise_follow_up": "FPX-03 targeted managed provider failure may establish phase; choose exhaustion/failure reuse policy without billion-call stress.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/src/Protocols/SmartCard/Scp/AesCmac.cs",
+        "decision": "hold",
+        "reason": "Hold failed-finalization offset/reset policy and stack initialization for separately selected implementation work. No existing explanatory claim needs rewriting here."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C004",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:640bed301b207408",
+          "core-001:unit:9641f381d9a6fad4",
+          "core-001:unit:7dcccc04e4303b62",
+          "core-001:unit:b5500f864275540e",
+          "core-001:unit:b5e04822d1ada592",
+          "core-001:unit:a95067ad39d1fd00",
+          "core-001:unit:eb4aa42d103e03fd"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/AesCmac.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": []
+  },
+  {
+    "proposal_id": "FPT-071",
+    "local_ids": [
+      "CORE-B6-C005"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Retain N2's ordinary-command fix while recording instruction-only INS82 exemption without handshake phase restriction.",
+    "precise_follow_up": "FPX-03 later same-INS bare success versus genuine setup vector; choose phase gate. No exploit or management authority inferred.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C005",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:7dcccc04e4303b62",
+          "core-001:unit:288d76702f829d8f"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "audit-v2-20261022-20261031:N2"
+    ]
+  },
+  {
+    "proposal_id": "FPT-072",
+    "local_ids": [
+      "CORE-B6-C006"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Describe pre-diversified static inputs, actual derivation, minimum response/profile admission and pre-state-return cleanup/optional-DEK limitation.",
+    "precise_follow_up": "Selected provider failure observation before strengthening cleanup; decide key-info/response-profile/DEK contract; source supports scoped prose now.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C006",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:f0737142baf9498e",
+          "core-001:unit:6d577216b0691640",
+          "core-001:unit:5d53b9c712924cac",
+          "core-001:unit:c29d9a9acefbd569",
+          "core-001:unit:3b9265161a84c23d"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "audit-v2-20261022-20261031:#23"
+    ]
+  },
+  {
+    "proposal_id": "FPT-073",
+    "local_ids": [
+      "CORE-B6-C007"
+    ],
+    "facets_preserved": [
+      "D",
+      "M",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Name source-array copies, exact contained key/certificate owners, shared record clones and encryptor/session lifetime; use C020 as referral.",
+    "precise_follow_up": "Decide clone/disposed-alias lifetime policy; keep parameter owner outside session disposal in complete examples.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+        "decision": "retain",
+        "reason": "Retain firmware-routing assertions; they admit non-NotSupported failures and do not establish setup success. Parameter disposal/harness improvements remain separate work."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C007",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:7ce00f002ec7957b",
+          "core-001:unit:b641e3a5fc144d37",
+          "core-001:unit:f0737142baf9498e",
+          "core-001:unit:8a760f2244ede4bb",
+          "core-001:unit:8efd0bd297728434",
+          "core-001:unit:bf2a3bb976ef652d",
+          "core-001:unit:f1904cfaa1e8064f",
+          "core-001:unit:3bae7d0a95aca638",
+          "core-001:unit:e8104de655815f03",
+          "core-001:unit:1311d830e8295b0b",
+          "core-001:unit:98508c3351628b6d",
+          "core-001:unit:ab8be7cd1412c832",
+          "core-001:unit:330e0022e573569e",
+          "core-001:unit:6c82476765dcc489",
+          "core-001:unit:011236da3ee91145",
+          "core-001:unit:3b97a120d0847148",
+          "core-001:unit:5ca9bbd81fc54561",
+          "core-001:unit:4be63513c64d2e57",
+          "core-001:unit:4dfe2e82464430cf",
+          "core-001:unit:1313f3f8ccf07b57",
+          "core-001:unit:247e90a5a42e1742",
+          "core-001:unit:aa93554ead2699ec",
+          "core-001:unit:911aecf7d17711ec",
+          "core-001:unit:a196d3416b0b4e9d",
+          "core-001:unit:feb637f3002838f3",
+          "core-001:unit:4a8677b31b689a8c",
+          "core-001:unit:4ea14f95e100e574"
+        ],
+        "direct_paths": [
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2-gaps.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Core/CLAUDE.md",
+          "src/Core/README.md",
+          "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "management-001:MGMT-IMP-004",
+      "security-domain-001:SD-DEP-002"
+    ]
+  },
+  {
+    "proposal_id": "FPT-074",
+    "local_ids": [
+      "CORE-B6-C008"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Keep KeyReference init properties versus cached bytes/default/equality as one representation concern, separate from metadata/catalog caches.",
+    "precise_follow_up": "Later tiny managed consumer shape probe if equality/default wording is selected; decide value representation and hash contract first.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C008",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:fa725e80a5ab3f42",
+          "core-001:unit:c02a88e8469de07b",
+          "core-001:unit:64d30ee8ec267609",
+          "core-001:unit:aa3b14407e05163d"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": []
+  },
+  {
+    "proposal_id": "FPT-075",
+    "local_ids": [
+      "CORE-B6-C009"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Separate constructor admission from fixed P-256/AES128 profile, optional OCE-reference behavior, b static-key input and trust/provisioning roles.",
+    "precise_follow_up": "Decide profile/input/certificate/extension policy; synthetic profile vectors later cannot establish actual device trust or final SCP11 compliance.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C009",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:f79bc30c5180688e",
+          "core-001:unit:f1904cfaa1e8064f",
+          "core-001:unit:7382a9299938b481",
+          "core-001:unit:5df33e0e0290c2a5",
+          "core-001:unit:3bae7d0a95aca638",
+          "core-001:unit:ed29a0d4142cea6f",
+          "core-001:unit:b8a01a7a1e7503d7",
+          "core-001:unit:4ed7b8ad244016cf",
+          "core-001:unit:b94b36f02ab1fa41",
+          "core-001:unit:2943a3600c8d5f1c",
+          "core-001:unit:bc048bee1753fd7b",
+          "core-001:unit:a196d3416b0b4e9d",
+          "core-001:unit:4a8677b31b689a8c",
+          "core-001:unit:4ea14f95e100e574"
+        ],
+        "direct_paths": [
+          "docs/migration/v1-to-v2-gaps.md",
+          "src/Core/CLAUDE.md",
+          "src/Core/README.md",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "management-001:MGMT-IMP-004",
+      "security-domain-001:SD-DEP-001",
+      "security-domain-001:SD-DEP-002"
+    ]
+  },
+  {
+    "proposal_id": "FPT-076",
+    "local_ids": [
+      "CORE-B6-C010"
+    ],
+    "facets_preserved": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Identify SCP03 release/review and SCP11 review/final sources precisely; correct c static SD role and conditional identity fields; qualify first protected-command auth phase.",
+    "precise_follow_up": "Independent review of cited retained passages; final SCP11 1.4/vendor and code-cited SCP03 1.1.2.6 clauses remain gaps, not another uncontrolled search.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C010",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:f79bc30c5180688e",
+          "core-001:unit:ed29a0d4142cea6f",
+          "core-001:unit:4ed7b8ad244016cf",
+          "core-001:unit:1c461e374d30cba4",
+          "core-001:unit:7dcccc04e4303b62",
+          "core-001:unit:bcb56cf50c0e5c16",
+          "core-001:unit:c6f5c468d9a9bbac",
+          "core-001:unit:9cfa35ed0cea8faa",
+          "core-001:unit:b94b36f02ab1fa41",
+          "core-001:unit:7415284085a54d86",
+          "core-001:unit:3b9265161a84c23d",
+          "core-001:unit:5124d6c2a03d75fd",
+          "core-001:unit:2e689f7b1a41ad95",
+          "core-001:unit:32f7674fc8fa3f15",
+          "core-001:unit:393dc2891da1a099",
+          "core-001:unit:a196d3416b0b4e9d"
+        ],
+        "direct_paths": [
+          "docs/migration/v1-to-v2-gaps.md",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "security-domain-001:SD-DEP-001"
+    ]
+  },
+  {
+    "proposal_id": "FPT-077",
+    "local_ids": [
+      "CORE-B6-C011"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Preserve current empty-data padding versus inspected SCP03 1.1.2 release rule; counter advance and encryption are distinct requirements.",
+    "precise_follow_up": "FPX-03 independent empty-command transcript; choose target profile before implementation; current Python/fake agreement is not normative confirmation.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C011",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:acf5e1e2420d4d3f",
+          "core-001:unit:7dcccc04e4303b62",
+          "core-001:unit:b5500f864275540e",
+          "core-001:unit:f35d5005ea2c9bda"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "audit-v2-20261022-20261031:N2"
+    ]
+  },
+  {
+    "proposal_id": "FPT-078",
+    "local_ids": [
+      "CORE-B6-C012"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Retain secure graph and synthetic signed 61xx/6A82 oracle limits separately from independent protected response-chain validity.",
+    "precise_follow_up": "FPX-03 split-ciphertext/RMAC and status-only error transcript with independent expected bytes; target profile decision and physical qualification stay separate.",
+    "edited_paths": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C012",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:04a2a02cc150bf36",
+          "core-001:unit:2de8a7da94e92068",
+          "core-001:unit:072f97220769fdce",
+          "core-001:unit:53336ed3c6aac754",
+          "core-001:unit:5f53ac59d59d55bb",
+          "core-001:unit:bfa98da9d727c0ba",
+          "core-001:unit:f35d5005ea2c9bda",
+          "core-001:unit:1de200300b0e4882"
+        ],
+        "direct_paths": [
+          "src/Core/CLAUDE.md",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "audit-v2-20261022-20261031:N2"
+    ]
+  },
+  {
+    "proposal_id": "FPT-079",
+    "local_ids": [
+      "CORE-B6-C013"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Correct length/equivalence/disposed-refusal versus actual zeroing/trust assertions; retain complete vector addendum, fixture serial mismatch and absent capture identity.",
+    "precise_follow_up": "Reopen after fixture/harness/oracle repair or original capture/sample artifact; current comments can be narrowed without running tests.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs"
+    ],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs",
+        "decision": "hold",
+        "reason": "Hold retained command aliases and nonproduction formatter behavior for harness work; using a production formatter in wire-sensitive tests requires executable changes."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+        "decision": "hold",
+        "reason": "Hold async-disposal TODO and harness implementation. Correct stale guide API names through the shared-guide owner, not by changing this fake."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolConcurrencyTests.cs",
+        "decision": "retain",
+        "reason": "Retain per-exchange and no-replay assertions; stronger first-fragment/whole-workflow/native claims are held."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+        "decision": "retain",
+        "reason": "Retain firmware-routing assertions; they admit non-NotSupported failures and do not establish setup success. Parameter disposal/harness improvements remain separate work."
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/X963KdfTests.cs",
+        "decision": "retain",
+        "reason": "Retain exact twenty SHA-256 vector equality cases and bounded length/consistency cases. Completed vector addendum supersedes the older pending-reading note; no new execution or NIST validation is claimed."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C013",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:e9598ff0fbef1af3",
+          "core-001:unit:1a3d8b037a9d6500",
+          "core-001:unit:ea9f6b5994260910",
+          "core-001:unit:748adabdd90f2d79",
+          "core-001:unit:0c607f68f7ddd21d",
+          "core-001:unit:2e689f7b1a41ad95",
+          "core-001:unit:afe99a1e8b3b98b9",
+          "core-001:unit:51201a54e9f33cb2",
+          "core-001:unit:1e4c77e7b7c3d3cb",
+          "core-001:unit:404451ae34dcd8bd",
+          "core-001:unit:feaa3babb38af5d0",
+          "core-001:unit:8b4a1c9835fc1f8a",
+          "core-001:unit:a737fb2e7f877e30",
+          "core-001:unit:3d39289ab04ee82b",
+          "core-001:unit:30316a3b08356690",
+          "core-001:unit:6014e3caf6278bb2",
+          "core-001:unit:999885ece10a86e3",
+          "core-001:unit:049f1b0596eeec0d",
+          "core-001:unit:3c41da358143f39a",
+          "core-001:unit:4a5564d87ce3e2f9",
+          "core-001:unit:08746ee9bf566ca6",
+          "core-001:unit:6a9d66835a58e382",
+          "core-001:unit:fb4765df31af66cb",
+          "core-001:unit:e5be1b824deaf6b2",
+          "core-001:unit:9bd17bf094454656",
+          "core-001:unit:ba03cdb07422f2c6",
+          "core-001:unit:3475e6fcd027e59c",
+          "core-001:unit:c6e753532dd998b6",
+          "core-001:unit:debe155147a36a3e",
+          "core-001:unit:06b0603e040a54a0",
+          "core-001:unit:bc048bee1753fd7b",
+          "core-001:unit:8833641435b41fd6",
+          "core-001:unit:c301a3dfcf1668e3",
+          "core-001:unit:9ea7b505b892a3f6",
+          "core-001:unit:ab8be7cd1412c832",
+          "core-001:unit:330e0022e573569e",
+          "core-001:unit:6c82476765dcc489",
+          "core-001:unit:011236da3ee91145",
+          "core-001:unit:47f05c764fc65b13",
+          "core-001:unit:0ca08eabf12b3ed9",
+          "core-001:unit:71b2b85aac00509b",
+          "core-001:unit:7860e784b6014c7f",
+          "core-001:unit:3b97a120d0847148",
+          "core-001:unit:5ca9bbd81fc54561",
+          "core-001:unit:ceb15a851591133b",
+          "core-001:unit:640ddb440b0fdd63",
+          "core-001:unit:4be63513c64d2e57",
+          "core-001:unit:4dfe2e82464430cf",
+          "core-001:unit:1313f3f8ccf07b57",
+          "core-001:unit:247e90a5a42e1742",
+          "core-001:unit:393dc2891da1a099",
+          "core-001:unit:288d76702f829d8f",
+          "core-001:unit:aa93554ead2699ec",
+          "core-001:unit:288f7357241a755c",
+          "core-001:unit:042558edf20640ad",
+          "core-001:unit:aaea7bd019020f99",
+          "core-001:unit:cd2a1c5e0862d929"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolConcurrencyTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+          "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/X963KdfTests.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "audit-v2-20261022-20261031:#23"
+    ]
+  },
+  {
+    "proposal_id": "FPT-080",
+    "local_ids": [
+      "CORE-B6-C014"
+    ],
+    "facets_preserved": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Scope actual ordinary APDU trace to header/length, SELECT identifier and opaque exception provenance; C008 global payload claim is overbroad.",
+    "precise_follow_up": "Reopen after template/input/provenance policy change; exact source templates settle present wording without another logging test.",
+    "edited_paths": [],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+        "decision": "retain",
+        "reason": "Retain actual configuration and logger implementation/comments. Below-4 reconfiguration retention, development ForceShort behavior, SELECT input classification and provider exception provenance remain qualified in the handoff."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C014",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:b15344a8aed3f7c3"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": [
+      "security-domain-001:SD-DEP-005"
+    ]
+  },
+  {
+    "proposal_id": "FPT-081",
+    "local_ids": [
+      "CORE-B6-C015"
+    ],
+    "facets_preserved": [
+      "D",
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "documentation": "D correction applied where eligible; retained and held paths remain explicit",
+    "proposal_and_rationale": "Complete useful secure-channel tasks with caller source finally and parameter/session scopes; qualify plain SELECT after SCP retaining old graph.",
+    "precise_follow_up": "Compile meaningful examples later; choose reselect/recovery policy only with exact profile/caller evidence. Creation success is not ongoing authority.",
+    "edited_paths": [
+      "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs"
+    ],
+    "retained_or_held_paths": [],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C015",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:265fda84c1d0f40e",
+          "core-001:unit:2ea6832be512ee64",
+          "core-001:unit:2a95b92153abb6fc",
+          "core-001:unit:90621006fae95a37",
+          "core-001:unit:bf2a3bb976ef652d",
+          "core-001:unit:d753e6c270ca4e74",
+          "core-001:unit:911aecf7d17711ec",
+          "core-001:unit:a196d3416b0b4e9d",
+          "core-001:unit:feb637f3002838f3",
+          "core-001:unit:4a8677b31b689a8c",
+          "core-001:unit:7f8ea35c6e10ae37",
+          "core-001:unit:2637633b642ae69c",
+          "core-001:unit:4ea14f95e100e574"
+        ],
+        "direct_paths": [
+          "CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2-gaps.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Core/CLAUDE.md",
+          "src/Core/README.md",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+          "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": []
+  },
+  {
+    "proposal_id": "FPT-082",
+    "local_ids": [
+      "CORE-B6-C016"
+    ],
+    "facets_preserved": [
+      "P",
+      "M",
+      "B"
+    ],
+    "documentation": "HOLD; no released D facet",
+    "proposal_and_rationale": "Retain ATR content-equality versus identity-hash and null-operator concerns as metadata value semantics engineering work.",
+    "precise_follow_up": "Choose equality/hash contract; tiny managed collection vector later only if it materially supports selected implementation/usage guidance.",
+    "edited_paths": [],
+    "retained_or_held_paths": [
+      {
+        "path": "src/Core/src/Protocols/SmartCard/Apdu/AnswerToReset.cs",
+        "decision": "hold",
+        "reason": "FPT-082 has P/M/B facets only. Preserve ATR equality/hash/null behavior; no D correction is authorized."
+      }
+    ],
+    "original_indices": [
+      {
+        "id": "CORE-B6-C016",
+        "status": "LOCAL-CANDIDATE-NOT-ACCEPTED",
+        "definition": "candidates.md",
+        "direct_unit_ids": [
+          "core-001:unit:0e456a70ab8083ba",
+          "core-001:unit:48e3456283935507",
+          "core-001:unit:31a068f9b9105a1f"
+        ],
+        "direct_paths": [
+          "src/Core/src/Protocols/SmartCard/Apdu/AnswerToReset.cs"
+        ],
+        "documentation": "CANDIDATE; exact correction/qualification needs coordinator triage and fresh edit/review",
+        "implementation": "SOURCE-ONLY; unchanged; no fix authorized",
+        "decision": "Target-profile/API/lifetime choices remain explicit in candidate definition, not implied intended policy",
+        "qualification": "Original edition/source and platform/device bounds retained; no new execution",
+        "counting": "One stable local concern group; unit/path occurrences are nonadditive"
+      }
+    ],
+    "inherited_association_keys": []
+  }
+]

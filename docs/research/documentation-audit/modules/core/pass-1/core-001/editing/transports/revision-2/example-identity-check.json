@@ -1,0 +1,22 @@
+{
+  "result": "UNCHANGED",
+  "current_xml_bodies": [
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "body_sha256": "93c6e18a42028e6ee02a1c19a426d916e02df9684bc1cade1d9a4790266d414e"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "body_sha256": "36c0086b750a13aa9044d29ac0581e82a5d44fdec049817fa4adb9c1b367b9f9"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "body_sha256": "5289baa08de2b885c902887c3e7c3f7e88fbf1fff7ba07efa2177760eb1074c5"
+    }
+  ],
+  "original_current_body_count": 3,
+  "inventory_copy_byte_exact": true,
+  "inventory_sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1",
+  "compiler_status": "VALID-NOT-CHECKED",
+  "execution": "NOT-EXECUTED"
+}

@@ -85,9 +85,11 @@ internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBack
         }
         catch (ApduException)
         {
-            // CONDITIONS_NOT_SATISFIED on very old firmware
+            // APDU exceptions share the compatibility fallback below. Transport and other exceptions propagate.
         }
 
+        // Every non-OK response and every successful response shorter than three bytes also reaches this fallback.
+        // It is an effective compatibility value, not evidence that the device runs version 1.0.0.
         return new FirmwareVersion(1, 0, 0);
     }
 }

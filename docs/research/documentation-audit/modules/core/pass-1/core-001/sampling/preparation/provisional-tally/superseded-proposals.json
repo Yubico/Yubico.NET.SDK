@@ -1,0 +1,11 @@
+{
+  "retired_SW_ids": [
+    "core-001:unit:3ad8b9f956a4e672",
+    "core-001:unit:a3d37dc1aed22b2f",
+    "core-001:unit:aa9d6d49701b178d",
+    "core-001:unit:f39183b2d438d21d"
+  ],
+  "active_unread_contains_retired_SW": false,
+  "authority": "sampling/preparation/family-replacements/revision-2/predecessor-history.json",
+  "activation": "Seven B1/B2 history replacements counted once through expansion-B3 activation; old conditional rows remain preserved, not duplicated."
+}

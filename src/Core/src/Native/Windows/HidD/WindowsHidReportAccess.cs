@@ -17,6 +17,15 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
+/// <summary>Owns synchronous Windows metadata, input/output, and feature-report handle access.</summary>
+/// <remarks>
+///     ReadFile/WriteFile use a normal handle and null OVERLAPPED storage. Calls can block the invoking thread;
+///     the typed compatibility adapters do not add native cancellation. A synchronous import retains the handle
+///     through native return, so concurrent Dispose can return before the last native borrow releases it.
+///     Callers must finish report work before disposal; this owner exposes no checked native-close outcome.
+///     Report-ID-prefixed staging arrays are separate from typed-adapter copies and returned payload arrays.
+///     Clearing an adapter copy does not clear this owner's staging, which is currently left for GC.
+/// </remarks>
 internal sealed class WindowsHidReportAccess : IWindowsHidReportAccess
 {
     private const int ErrorAccessDenied = 5;
@@ -47,9 +56,8 @@ internal sealed class WindowsHidReportAccess : IWindowsHidReportAccess
     public short OutputReportByteLength { get; }
     public short FeatureReportByteLength { get; }
 
-    // The two report paths below deliberately request DIFFERENT access, and are deliberately SEPARATE
-    // methods. Read the note on OpenFeatureConnection before changing either: the split is load-bearing,
-    // and it is what makes hidapi's retry-on-failure pattern unnecessary here.
+    // Keep desired access specific to the report operation: ReadFile/WriteFile need read/write access,
+    // while the feature path requests none. Availability still depends on the collection, ACL and driver.
 
     /// <summary>
     ///     Opens the handle used for input/output reports (FIDO).
@@ -57,10 +65,9 @@ internal sealed class WindowsHidReportAccess : IWindowsHidReportAccess
     /// <remarks>
     ///     Requires GENERIC_READ | GENERIC_WRITE because this path really does use ReadFile/WriteFile
     ///     (see <see cref="GetInputReport" /> and <see cref="SetOutputReport" />), unlike the feature path.
-    ///     Do NOT add a fall back to a lesser access level here: a zero-access handle would open
-    ///     successfully and then fail on every subsequent ReadFile/WriteFile, turning one clear
-    ///     UnauthorizedAccessException at open time — which carries the elevation guidance a non-elevated
-    ///     Windows caller needs — into cryptic failures at each I/O call.
+    ///     A zero-access fallback cannot supply the access required by these file calls. Access denied can
+    ///     reflect collection restrictions, ACLs, another handle's sharing policy, or host token policy;
+    ///     elevation is an environment-specific troubleshooting step, not a universal FIDO prerequisite.
     /// </remarks>
     public void OpenIOConnection()
         => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |
@@ -71,38 +78,23 @@ internal sealed class WindowsHidReportAccess : IWindowsHidReportAccess
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature, which are IOCTLs that succeed on
-    ///         a zero-access handle. The OTP interface is a keyboard top-level collection, and Windows
-    ///         refuses GENERIC_READ/GENERIC_WRITE on the system keyboard even for an elevated process
-    ///         (anti-keylogger restriction). Opening with no access sidesteps that while still permitting
-    ///         feature-report IOCTLs.
+    ///         OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature rather than ReadFile/WriteFile.
+    ///         This path requests zero desired access so it does not request keyboard input/output access
+    ///         that it will not use. The collection, ACL, driver, and existing handle sharing still determine
+    ///         whether open and feature transfer succeed.
     ///     </para>
     ///     <para>
-    ///         Scope of the evidence, stated precisely: the constructor's metadata probe shows only that this
-    ///         same path OPENS with zero access (CreateFile + HidD_GetPreparsedData/HidP_GetCaps). It does not
-    ///         exercise HidD_GetFeature/HidD_SetFeature, so it is supporting evidence, not proof that feature
-    ///         I/O succeeds. Sufficiency for feature I/O rests on the Win32 contract for these IOCTLs plus the
-    ///         Windows hardware run recorded in docs/architecture/connection-ownership-and-contention.md (YubiOtp integration
-    ///         10/10, fw 5.8.0).
+    ///         The constructor's metadata probe first tries zero desired access and retrieves capabilities
+    ///         (CreateFile + HidD_GetPreparsedData/HidP_GetCaps). If opening the handle or retrieving capabilities
+    ///         throws UnauthorizedAccessException, it retries with GENERIC_READ | GENERIC_WRITE. Constructor
+    ///         success therefore does not establish zero-access success. Neither route exercises
+    ///         HidD_GetFeature/HidD_SetFeature. Historical hardware results retain their own source, host,
+    ///         and device scope and do not qualify every deployment of this implementation.
     ///     </para>
     ///     <para>
-    ///         <b>Why there is no "try read/write, fall back to none" retry, as hidapi does.</b> hidapi's
-    ///         Windows backend (<c>windows/hid.c</c>, <c>hid_open_path</c>) opens with
-    ///         GENERIC_READ | GENERIC_WRITE and, on failure, retries with zero access, commenting that system
-    ///         devices such as keyboards cannot be opened read/write because the system takes exclusive
-    ///         control to prevent keyloggers, but that feature reports still work. It needs that retry because
-    ///         it returns ONE handle serving both <c>hid_read</c>/<c>hid_write</c> (ReadFile/WriteFile) and
-    ///         <c>hid_get_feature_report</c> (IOCTL), so it must request the maximal access and degrade.
-    ///     </para>
-    ///     <para>
-    ///         This type splits those into two handles instead — <see cref="OpenIOConnection" /> for
-    ///         ReadFile/WriteFile, this method for feature IOCTLs — so each already requests exactly what its
-    ///         callers use. Adding the retry here would buy nothing and cost a syscall: read/write access
-    ///         grants no capability this path uses; on the keyboard-class OTP collection the first attempt
-    ///         always fails, so it would always fall through to zero access anyway; and zero access already
-    ///         succeeds in a superset of the cases read/write does, being the least restrictive request and
-    ///         not subject to share-mode conflicts. There is no case a read/write-first retry could rescue
-    ///         that this call does not already handle.
+    ///         The separate open methods choose access from the operation instead of trying read/write first
+    ///         and degrading on failure. Both request FILE_SHARE.ALL, which allows compatible OS opens but
+    ///         does not override another handle's sharing restrictions or acquire a process-local SDK claim.
     ///     </para>
     /// </remarks>
     public void OpenFeatureConnection()

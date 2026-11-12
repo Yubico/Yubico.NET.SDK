@@ -193,8 +193,12 @@ properties are optional and default to null; construct them with named object in
 
 As an alternative to borrowed PIN bytes, set `WebAuthnClientOptions.CredentialPrompt` and leave
 `pinBytes` null in ceremony calls. The client asks only when a ceremony needs a PIN and owns the retry
-loop. `ReadPinAsync` below is an application-supplied input routine, which `ConsoleCredentialReader`
-can back; it must honor cancellation and return only the UTF-8 secret bytes.
+loop. `ReadPinAsync` below is an application-supplied input routine; it must honor cancellation and
+return only the UTF-8 secret bytes. An adapter over `ConsoleCredentialReader` must account for its
+UTF-16 code-unit limits and configurable encoding: these are not the prompt's Unicode-code-point
+minimum and UTF-8-byte maximum. The application must supply a PIN meeting the CTAP profile, including
+NFC and no final NUL; context values and ClientPin's byte-length guard do not enforce that profile.
+Do not silently normalize an existing PIN into a different credential.
 
 ```csharp
 internal sealed class PinPrompt(Func<CredentialPromptContext, CancellationToken, Task<byte[]>> readPin) : ICredentialPrompt
@@ -239,6 +243,11 @@ sealed class TouchPrompt : IUserPresencePrompt
 await using var client = await device.CreateWebAuthnClientAsync(
     origin, clientOptions, sessionOptions: new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
 ```
+
+The session retains but does not own the presence prompt. Its terminal notification reflects CTAP
+exchange status before typed decoding and extension-output processing, not complete ceremony success.
+Resolution uses an uncancelled token and can delay return after cancellation; a failed request callback
+receives no resolution callback. Keep prompt resources usable until their actual callbacks finish.
 
 User verification is separate from presence. `UserVerification` expresses a preference; authenticator
 policy and extension permissions also affect the SDK's PIN/UV-token decision:
@@ -451,8 +460,14 @@ does not change the origin in client data or make an assertion acceptable to the
 
 ## Constraints
 
-- After successful construction, the client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself. Rejected construction does not transfer a caller-supplied session. Prompts remain caller-owned; keep them alive until the client ends.
-- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection; a second session throws `ConnectionInUseException` until the first is disposed.
+- After successful construction, the client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself. Rejected construction does not transfer a caller-supplied session. A session that borrowed a connection still leaves connection disposal with its original caller.
+- Serialize and fully await complete ceremonies before client disposal. Disposal drains individual
+  exchanges, not the complete probing, token, assertion and extension-output workflow. Keep borrowed
+  inputs and caller-owned prompt resources usable through actual remaining work, including a PIN prompt
+  returning late after cancellation. Callbacks must not reenter or dispose the client awaiting them.
+- SDK-managed opens claim the device view's known member interface IDs in this process. An overlapping
+  claim throws `ConnectionInUseException`; disjoint scoped views, direct connection factories and other
+  processes need separate coordination. Each connection admits one live session.
 - Transport is fixed when the CTAP2 session is created and is never renegotiated after a failure. Override it with `SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }`. Supplying SCP parameters without a transport override selects SmartCard automatically; explicit HID plus SCP is unsupported. Firmware/FIDO-AID qualifications still apply.
 - RP validity and origin/RP authorization are mandatory application policy through `WebAuthnClientOptions.RpIdValidator`; there is no built-in domain/URI syntax gate, domain-suffix policy, or enterprise bypass.
 - The client asks for nothing but a PIN, supplied as `pinBytes` or by the prompt. A ceremony that needs one and has neither fails with `NotAllowed` rather than prompting.

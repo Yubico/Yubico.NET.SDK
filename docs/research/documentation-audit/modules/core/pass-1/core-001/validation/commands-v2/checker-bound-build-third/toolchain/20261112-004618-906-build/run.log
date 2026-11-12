@@ -1,0 +1,41 @@
+# dotnet toolchain.cs -- build --project Audit20261111.DocCheck --clean
+# started:   2026-11-12 00:46:18 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ bb94f0884 (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: build  (log: artifacts/toolchain/runs/20261112-004618-906-build/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release
+  output: artifacts/toolchain/runs/20261112-004618-906-build/01-clean-Audit20261111.DocCheck.log
+▶ RUN dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261112-004618-906-build/02-build-Audit20261111.DocCheck.log
+✓ Built 1 project(s) matching 'Audit20261111.DocCheck': Audit20261111.DocCheck
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- build --project Audit20261111.DocCheck --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      3.3s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261112-004618-906-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

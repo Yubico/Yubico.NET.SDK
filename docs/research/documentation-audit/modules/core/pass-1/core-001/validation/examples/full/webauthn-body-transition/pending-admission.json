@@ -1,0 +1,91 @@
+{
+  "status": "BLOCKED_AWAITING_EXPLICIT_COMPLETED_KNOWN_TRANSFER_MESSAGE",
+  "permission_scope": "New Full-local archival/diagnostic/transition records only. No product/body/wrapper/manifest/profile/tool/policy modifications; no builds/tests/capture/native/device/Git/subagents.",
+  "predecessor_profile_sha256": "52234498f7d167899c296daadec96dd0a543d9dbbd3f72c72007d1983fc099e7",
+  "pilot_manifest_original": {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/manifest.json",
+    "bytes": 87165,
+    "sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60"
+  },
+  "pilot_manifest_snapshot": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/before/pilot-manifest.json.snapshot",
+    "bytes": 87165,
+    "sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60"
+  },
+  "baseline_generated_source_count": 300,
+  "baseline_full_authority_records": 703,
+  "baseline_accepted_contexts": 9,
+  "baseline_accepted_body_occurrences": 298,
+  "baseline_distinct_accepted_compilations": 297,
+  "planned_body_change_ids": [
+    "FULL-032"
+  ],
+  "all_other_body_hashes_must_match_baseline": true,
+  "awaited_transitions": [
+    {
+      "name": "five queued reviewed patches",
+      "state": "Astra reports transferred; 363-path actual map matches projected AFTER exactly",
+      "independently_admitted": false,
+      "required_inputs": "Exact five patch identities, accepted review receipts, source pins and final accepted product-map identity. Preserve original 361-path predecessor map/profile; do not infer allowed rows from aggregate counts."
+    },
+    {
+      "name": "239 EOF-only C# patch",
+      "state": "dedicated Sol preparing reviewed patch; transfer completion not yet explicit",
+      "independently_admitted": false,
+      "required_inputs": "Reviewed exact 239-path patch/list, per-path before/after hashes and source-pin qualification. Verify every hunk only removes the final EOF newline and is outside all accepted raw body spans; no broad formatting, import/declaration/name rewrite or warning suppression."
+    },
+    {
+      "name": "WebAuthn logging body and prose",
+      "state": "FIDO editor assigned; accepted return and completed primary transfer not yet explicit",
+      "independently_admitted": false,
+      "required_inputs": "Accepted FULL-032 public LoggerFactory body plus prose, exact document/patch/body/source identities and focused reviewer receipt. Re-extract eight guide rows and all authority aliases precisely; no IVT/access/context workaround."
+    },
+    {
+      "name": "root logging bullet",
+      "state": "await accepted reviewed correction and completed transfer",
+      "independently_admitted": false,
+      "required_inputs": "Exact root-bullet accepted patch/source/review identities. Verify every root fence body stays baseline-exact; no unapproved new body change."
+    },
+    {
+      "name": "formatter source-pin qualifications",
+      "state": "verify-only results reported; qualification being prepared",
+      "independently_admitted": false,
+      "required_inputs": "Actual retained formatter receipt/log/source population and accepted qualification for remaining 1 IMPORTS, 3 IDE1006 and 6 IDE0005 findings. No application of forbidden import/decl changes."
+    }
+  ],
+  "reported_verify_only_formatter": {
+    "source": "User/coordinator report; no formatter run or log verification by this worker",
+    "would_format_files": 241,
+    "visited_files": 1426,
+    "final_newline_findings": 239,
+    "imports_findings": 1,
+    "IDE1006_findings": 3,
+    "IDE0005_findings": 6,
+    "accepted_product_paths_after_queued_transfers": 363,
+    "all_363_hashes_unchanged_by_formatter": true,
+    "report_counts_not_automatically_reconciled": "Different counts describe file/rule populations; await exact reviewed records, not guessed deductions."
+  },
+  "unchanged_doccheck_qualification": {
+    "source": "Coordinator instruction; preserve existing qualification, no rebuild/reseal",
+    "profile_sha256": "db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1",
+    "seal_sha256_prefix": "b358",
+    "condition": "The three qualified toolchain inputs remain unchanged. EOF/other transfers must not silently change any qualified participant."
+  },
+  "future_admission_gate": [
+    "Wait for Astra explicit completed known-transfer acceptance; no polling or piecemeal input refresh.",
+    "Check every allowed fixed-input delta against its exact accepted patch/review/source pin; reject unknown changes.",
+    "Verify exact EOF-only nature and outside-body location for all 239 paths; re-extract source/body identities after all transfers.",
+    "Prove only FULL-032 accepted raw/decoded body changes; prove all other 299 generated preparation bodies unchanged and reconcile source coordinates/document identities without blind authority hash repin.",
+    "Preserve nine original accepted checkpoints/profile identities/retained outputs; construct final source/body-to-original-Csc linkage, not blanket recompilation or later-binary equivalence.",
+    "Create one fresh bounded versioned profile only after coherent final admission.",
+    "Coordinator then actually compiles the changed FULL-032 in unchanged WebAuthn.IntegrationTests context (with unchanged FULL-037); then compiles Oath. No individual credit for FULL-037 from the failed WA attempt.",
+    "Existing DocCheck profile/seal stay valid only under their unchanged qualified inputs; do not invent a global checker or trigger a bookkeeping rebuild."
+  ],
+  "future_retry_labels": [
+    "examples-full-webauthn-second",
+    "examples-full-oath-first"
+  ],
+  "new_profile_created": false,
+  "body_changed_by_worker": false,
+  "polling_performed": false
+}

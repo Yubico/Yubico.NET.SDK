@@ -24,6 +24,12 @@ public static class OathCredentialOptions
     /// <summary>
     /// Creates options configured for OATH password input.
     /// </summary>
+    /// <remarks>
+    ///     The 1..128 limit counts UTF-16 code units in the console reader, before UTF-8 conversion.
+    ///     Interactive input filters entries at its input boundary; redirected lines are validated and
+    ///     rejected when outside the limits. This is a UI preset, not a firmware or raw access-key limit.
+    ///     Password byte buffers supplied directly to session APIs do not pass through this preset.
+    /// </remarks>
     public static CredentialReaderOptions ForOathPassword() => new()
     {
         Prompt = "Enter OATH password: ",

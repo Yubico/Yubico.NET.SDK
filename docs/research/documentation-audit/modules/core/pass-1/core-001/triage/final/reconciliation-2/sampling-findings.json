@@ -1,0 +1,507 @@
+{
+  "findings": {
+    "SAMPLE-A004": {
+      "state": "SOURCE-ONLY-DEFERRED; no permanent leak/native failure demonstrated",
+      "units": [
+        "core-001:unit:10653b759a2209f8",
+        "core-001:unit:3ccf06e816f277d2"
+      ],
+      "paths": [
+        "src/Cli.Commands/src/Piv/PivCommands.cs",
+        "src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs"
+      ],
+      "observed": "PIV CLI attestation receives separately returned X509Certificate2; OpenPGP certificate caller loads a certificate that survives output/PIN/import paths. Both lack deterministic certificate disposal, with separate caller-specific anchors.",
+      "candidate_links": [
+        {
+          "id": "CORE-PIV-X006",
+          "relation": "related sample/resource-lifetime family; unified CLI site remains explicitly distinct from standalone tool callers"
+        },
+        {
+          "id": "CORE-PGP-X008",
+          "relation": "same deterministic-certificate ownership class; retain distinct OpenPGP CLI caller anchor, not a second permanent-leak assertion"
+        }
+      ],
+      "owner": "External CLI/result owner; retain SAMPLE-A004 site evidence and exact existing aliases before any later engineering grouping",
+      "reopen": "Returned certificate deterministic lifetime/output behavior or resource guidance changes; no new implementation/test work authorized.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:10653b759a2209f8",
+          "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+          "first_line": 545,
+          "last_line": 566,
+          "source_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+          "range_sha256": "b01709e374ade5884fc4700be4accffe81fa78cf8ec190023158c5bb677291d1"
+        },
+        {
+          "id": "core-001:unit:3ccf06e816f277d2",
+          "path": "src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs",
+          "first_line": 108,
+          "last_line": 151,
+          "source_sha256": "39a4dd33e9fb593e1658c4e25efbee5146b2ce4c3dcb36129f47f77b74342199",
+          "range_sha256": "a238802748a29e3145921c74cc496c86078fd4bb7151916c4e5b4777848db400"
+        }
+      ]
+    },
+    "SAMPLE-PGP-001": {
+      "state": "FOCUSED-CONTENT-PASS; queued and untransferred",
+      "units": [
+        "core-001:unit:8b2a95f01db9bf2c",
+        "core-001:unit:710814862611f595"
+      ],
+      "paths": [
+        "src/OpenPgp/src/OpenPgpSession.cs",
+        "src/OpenPgp/CLAUDE.md"
+      ],
+      "observed": "UIF failed-read fallback logs before selecting PolicyMayRequire; a throwing provider can interrupt that fallback.",
+      "candidate_links": [
+        {
+          "id": "CORE-C-C008",
+          "relation": "existing logger/callback-exception mechanism"
+        },
+        {
+          "id": "CORE-PGP-X004",
+          "relation": "actual advisory presence fallback caller"
+        }
+      ],
+      "patch_sha256": "9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5",
+      "review_path": "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/sampling-UIF-fallback/review.md",
+      "review_text": "# Independent focused UIF-fallback review\n\n**PASS — accepted focused patch SHA-256\n`9d5433109986b2037f47654d912970b7618cc84c336873950a5d1fecba33e2c5`.**\nNo mandatory correction remains within SAMPLE-PGP-001's two selected passages. Apply this\nfocused patch to its exact accepted-primary/revision-2 before files, not to the original source\npin or an already corrected copy. Earlier full-batch patches and reviews remain historical,\nbyte-preserved records; this verdict accepts the focused successor, not a rewritten full patch.\n\n## Content and source check\n\nI read the complete current GetUserPresenceContextAsync method, the contributor-guide passage,\nbefore/after snapshots and focused delta, report/source evidence, sampled-unit map and identities.\nThe actual method at `src/OpenPgp/src/OpenPgpSession.cs:327–378` has this order:\n\n1. The separate OperationCanceledException catch rethrows without entering the diagnostic fallback.\n2. The other-error catch calls `_logger.LogDebug` at line 367.\n3. Only after that call returns does line 368 assign PolicyMayRequire.\n\nNo local catch suppresses an exception from diagnostic logging. The crypto callers await context\nacquisition before their private-key transmits, so logging failure can prevent that APDU. The\nnew source comment and `src/OpenPgp/CLAUDE.md` correctly make fallback conditional on logging\ncompleting successfully and preserve cancellation propagation. A filtered/no-op diagnostic can\ncomplete normally too; the wording does not require that a provider actually emit a message.\n\nThe configurable YubiKitLogging factory and actual logger forwarding provide the relevant\nboundary, not a universal nonthrowing-logging assumption. Directory.Packages.props requests\nMicrosoft.Extensions.Logging/Abstractions/Console 10.0.2. I checked the retained runtime v10.0.2\nLoggerExtensions forwarding methods and Logger.Log/ThrowLoggingError: the standard logger\ncollects enabled providers' Log exceptions and throws AggregateException; an application-supplied\nfactory/logger can propagate its own exception. Neither route guarantees this diagnostic returns.\nThe retained source hashes match source-manifest.json. This is version-specific source evidence,\nnot an installed-binary identity or an observed throwing-provider experiment.\n\nA bounded independent Context7 lookup of `/dotnet/docs` corroborated synchronous ILogger.Log\nin `docs/core/extensions/logging/providers.md`. Its current-main documentation supplied no immutable\nrevision and is orientation only; retained v10.0.2 source supplies the exception-propagation evidence.\nThe unrelated Testing Platform logger result was not used. No new normative protocol claim was added.\n\n## Fresh preservation checks\n\n- Reconstructed focused.patch exactly from the two saved before files and current after files.\n  Both before hashes match the accepted revision-2 manifest and the still-reserved primary bytes.\n  Both after files match their snapshots and changed-files.json.\n- The sole C# change is one standalone comment replaced by two standalone comments. All noncomment\n  source lines, including logging order, catch/rethrow, declarations and executable strings, remain exact.\n- Both selected successor unit ranges match unit-miss-map.json's hashes. One sampled issue affects\n  two original units: `core-001:unit:8b2a95f01db9bf2c` and `core-001:unit:710814862611f595`.\n  It allocates **zero new unique Core bugs** and supplies no additional investigation/sampling credit.\n- All 99 prior patch/record/review/predecessor-product files match prior-record-identities.json.\n  All seventeen focused editor-indexed records and four local/two retained library source identities\n  match their hashes. The editor index is preserved, not regenerated to include this later review.\n- The other 28 accepted OpenPGP/PIV product files retain their revision-2 after-hashes. All\n  **36 Markdown and 28 XML bodies remain unchanged** from accepted revision 2, including PIV's\n  two previously authorized corrected examples. This focused patch changes no example body.\n\nOnly this review and review-identities.json were written. Primary was read-only and remains reserved\nthrough its owner's full compile cycle. No SDK build/test, formatter, native/device/crypto execution,\nGit command/mutation, subagent, product edit or editor/history rewrite ran. No failure was injected.\nCompiler/API/cref/example/runtime gates remain with the coordinator. All engineering/policy/physical\nholds, PIN/KDF/X25519/ATT and PIVIMP-005 findings, and the unready future Windows handoff remain\nunchanged. Finish the existing Core Pass-1 publication and deferred handoff, then stop.\n",
+      "owner": "Coordinator transfer after reserved compilation cycle; no main runtime change",
+      "reopen": "Qualified fallback comment/guide and corresponding logging/provider failure policy; zero clean credit, implementation/narrative expansions pending.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:8b2a95f01db9bf2c",
+          "path": "src/OpenPgp/src/OpenPgpSession.cs",
+          "first_line": 320,
+          "last_line": 372,
+          "source_sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+          "range_sha256": "19eb9a94af9c4b6f044490e9b3995c18107fca88f80f0994e256f930776d9719"
+        },
+        {
+          "id": "core-001:unit:710814862611f595",
+          "path": "src/OpenPgp/CLAUDE.md",
+          "first_line": 192,
+          "last_line": 202,
+          "source_sha256": "6acd87a09444624bf98a6ee64f21153c512c0f9a9226d1549b38074df2f74176",
+          "range_sha256": "7a87d4759e414455647804d973259ef455146f5b3516c835854c9a57133e0427"
+        }
+      ]
+    },
+    "SAMPLE-WA-001": {
+      "state": "FOCUSED-CONTENT-PASS; queued and untransferred",
+      "units": [
+        "core-001:unit:e29522f04d40349a"
+      ],
+      "paths": [
+        "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs"
+      ],
+      "observed": "Comment overstates instance identity/all-fields equality; actual assertions compare CredentialId/Signature bytes and one backend call.",
+      "candidate_links": [
+        {
+          "id": "CORE-WA-X012",
+          "relation": "existing test-oracle/provenance facet; no new engineering finding"
+        }
+      ],
+      "patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+      "review_path": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/sampling-selection-oracle/review.md",
+      "review_text": "# SAMPLE-WA-001 focused independent review\n\n**PASS** for the focused patch SHA-256\n`d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e`.\nNo mandatory correction remains within this one-comment scope.\n\n## Content and actual oracle\n\nRead the complete `WebAuthnClientGetAssertionTests.cs` fixture, including constructor setup at\n`36–51` and the selected `GetAssertion_MatchedCredential_SelectAsync_IsIdempotent` method at\n`132–164`. The corrected comment at `155–156` accurately describes the two byte-array equality\nassertions (`157–158`) and the single backend GetAssertion call assertion (`160–163`). It claims\nneither reference identity nor equality of the whole response. The test name and assertions remain\nunchanged; this review does not upgrade the coverage implied by the name.\n\nRead the complete `MatchedCredential.cs:1–96` and checked the production construction caller at\n`WebAuthnClient.Authentication.cs:118–135`. The client builds each response before returning matches\nand supplies a factory returning that already-built response. MatchedCredential retains one lazy\ntask (`60–69`) and SelectAsync retrieves it (`92–95`). Actual cached-instance behavior is consistent\nwith the implementation; it is not an instance-identity oracle in this test. The narrower comment\ntherefore corrects the assertion description without disputing or changing the implementation.\n\nNo new library/API question or normative protocol claim is introduced; actual source and assertions\nare sufficient for this correction. No wider fixture/module clean claim or new engineering finding\nis made. Edited-unit credit and any WebAuthn test-stratum expansion remain sampler-owned.\n\n## Exact preservation checks\n\nIndependent read-only checks confirmed:\n\n- `before.snapshot` is byte-identical to the still-read-only PRIMARY fixture, SHA-256\n  `9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5`.\n- The accepted fixture after correction has SHA-256\n  `9223a2299f63cd2f8ceb5479cf5cc56ed5fb99463c084db60590cf3123f4cff1`.\n  Its bytes equal the snapshot with only the exact old comment replaced by the two new comment lines\n  and a final newline added. All code, test names, assertions, imports, declarations, defaults,\n  attributes, runtime strings and APIs are unchanged.\n- All 27 historical editor/review/revision records match their preserved hashes. All 309 other\n  packet product paths match their pre-correction identities. The earlier full-batch patches,\n  decisions and reviews remain immutable; this focused patch is additive, not a regenerated batch.\n- All 47 actual Markdown fence bodies and their hashes/classifications remain unchanged.\n- The implementation and caller identities are bound in `review-identities.json`.\n\nThis is focused content/oracle acceptance, not compilation or an executed test. Compiler/token/API,\ncref, consumer/example and actual test-project-context validation remain coordinator gates. No build,\nSDK test, formatter, cryptographic/native/device execution, Git command/mutation, broader audit or\nsubagent occurred. Only this review and its identity record were written.\n\nPRIMARY remains reserved for the coordinator's full consumer/test-context compilation. No transfer or\nintegration is authorized before that cycle ends. Existing engineering/privacy/recovery/qualification\nholds are unchanged. Finish Core Pass 1 through its remaining gates, deliver deferred findings, then stop.\n",
+      "current_primary_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+      "accepted_after_sha256": "9223a2299f63cd2f8ceb5479cf5cc56ed5fb99463c084db60590cf3123f4cff1",
+      "owner": "Coordinator transfer only after reserved compilation cycle; test/helper expansion and eligibility repairs remain sampler-owned",
+      "reopen": "Transfer exact focused patch, preserve original assertions, then current-source mapping and actual expansion/replacement reads; no present clean credit.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:e29522f04d40349a",
+          "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+          "first_line": 130,
+          "last_line": 163,
+          "source_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+          "range_sha256": "d108a6347987883fcc435654d629e8e4f0c605de18f02e60bf9af5e8e96e561c"
+        }
+      ]
+    },
+    "PIV-pretry-known-qualification": {
+      "state": "ALREADY-DEFERRED; no duplicate engineering finding",
+      "units": [
+        "core-001:unit:a579b6a5cf4242e4",
+        "core-001:unit:8fc815177a95b970"
+      ],
+      "paths": [
+        "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+        "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs"
+      ],
+      "observed": "PIN and management-key allocations precede awaited discovery outside the clearing scope.",
+      "candidate_links": [
+        {
+          "id": "CORE-PIV-X006",
+          "relation": "same preserved pre-try sample cleanup facet"
+        },
+        {
+          "id": "piv-001:PIVIMP-006",
+          "relation": "original engineering identity"
+        }
+      ],
+      "owner": "Existing PIV sample owner; runtime unchanged",
+      "reopen": "Same original resource/discovery cleanup condition; zero clean credit and quota replacements, without another runtime group.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:a579b6a5cf4242e4",
+          "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+          "first_line": 155,
+          "last_line": 176,
+          "source_sha256": "bf59c61431a198fde239e788433ae3b37a95403bfa4a4ecbfbf157dfa5a81490",
+          "range_sha256": "aefc10760d1f59352d4382784aed936fd364f456b693bcb360a852eb4f74b73d"
+        },
+        {
+          "id": "core-001:unit:8fc815177a95b970",
+          "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+          "first_line": 256,
+          "last_line": 277,
+          "source_sha256": "bf59c61431a198fde239e788433ae3b37a95403bfa4a4ecbfbf157dfa5a81490",
+          "range_sha256": "313302fa8a03924226c17e0e5a78dcfcf1c3d2bf011db984f650a286c8fb1b26"
+        }
+      ]
+    },
+    "OTP-expansion-pretry-qualification": {
+      "state": "SOURCE-ONLY-KNOWN-CLEANUP-CLASS; M facet retained; no new runtime proof",
+      "units": [
+        "core-001:unit:4089aedab94d4e23"
+      ],
+      "paths": [
+        "src/Cli.Commands/src/Otp/OtpCommands.cs"
+      ],
+      "observed": "Acquired HMAC key precedes generated-key output and access-code parsing outside the clearing finally.",
+      "candidate_links": [
+        {
+          "id": "CORE-OTP-X005",
+          "relation": "existing pre-protected-scope cleanup responsibility, caller-specific HMAC-key anchor"
+        },
+        {
+          "id": "CORE-C-C013",
+          "relation": "related source/acquisition/intermediate ownership class, not an identical helper"
+        }
+      ],
+      "owner": "Existing OTP/CLI cleanup owner; no code change or new engineering group authorized",
+      "reopen": "Same acquired-owner/protected-scope/output/parse lifetime changes; zero final clean credit.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:4089aedab94d4e23",
+          "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+          "first_line": 447,
+          "last_line": 499,
+          "source_sha256": "ed6ba5d91314eb226d83fac9724ff2d4b22fcf1caa7332bd516e30d6d1d83bb9",
+          "range_sha256": "2900fce50592644b9d66fef13b81cccb87555c51032c5ba6ef93595407478303"
+        }
+      ]
+    },
+    "OpenPGP-expansion-applicability-output": {
+      "state": "PROTECTED-OUTPUT-AND-APPLICABILITY-QUALIFIED; no duplicate finding",
+      "units": [
+        "core-001:unit:297e68004991d4a8",
+        "core-001:unit:cf3538431462d4ab"
+      ],
+      "paths": [
+        "src/Cli.Commands/src/OpenPgp/OpenPgpInfoCommand.cs",
+        "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs"
+      ],
+      "observed": "Info infers key presence from fingerprint and emits PIN-policy text; keygen requests slot/algorithm combinations subject to existing OpenPGP applicability limits.",
+      "candidate_links": [
+        {
+          "id": "CORE-PGP-X008",
+          "relation": "existing protected sample output/oracle qualification"
+        },
+        {
+          "id": "CORE-PGP-X007",
+          "relation": "existing key/slot/profile applicability responsibility"
+        }
+      ],
+      "owner": "Existing OpenPGP sample/profile owners; no runtime string or behavior changed",
+      "reopen": "Existing metadata/output or key/slot applicability conditions; zero final clean credit.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:297e68004991d4a8",
+          "path": "src/Cli.Commands/src/OpenPgp/OpenPgpInfoCommand.cs",
+          "first_line": 16,
+          "last_line": 109,
+          "source_sha256": "da2d48cda7d9272dbef97240ad16dd1fd144fc7492b7a51a31ba22d4b8cc45bf",
+          "range_sha256": "9fb48d8a6b939fef12aedcc7d1b9b279c7f55ee7bd1c8a2b582834166f8f1c7c"
+        },
+        {
+          "id": "core-001:unit:cf3538431462d4ab",
+          "path": "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs",
+          "first_line": 244,
+          "last_line": 301,
+          "source_sha256": "167e5234ae5703ba2084455611b0bab81a3cb627aee6c9d994cb944a5612037e",
+          "range_sha256": "f4868c591c167034d57603e116b35d04a72fece08d45305b56dc81b6e5257ada"
+        }
+      ]
+    },
+    "SAMPLE-A001": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:cf1e2081af8b8ac4",
+        "core-001:unit:711e47d18bab0742"
+      ],
+      "integration_receipt": "accepted-sampling-A.json",
+      "paths": [
+        "src/Core/src/Devices/HotplugSignals.cs",
+        "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+        "src/Core/src/Devices/DeviceChangeFeed.cs"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-002-verdicts.json",
+        "sampling/coordinator/read-001-verdicts.md"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:cf1e2081af8b8ac4",
+          "path": "docs/architecture/event-driven-device-discovery.md",
+          "first_line": 124,
+          "last_line": 149,
+          "source_sha256": "fb3e8538fa9a4bc5809cc71d552e1041a004d5d89e574280dd06bd87ce0c3643",
+          "range_sha256": "54530cfe088e7bdfd9ccc6f78c181be3b03c88df9f002a9b602de34866ffa547"
+        },
+        {
+          "id": "core-001:unit:711e47d18bab0742",
+          "path": "src/Core/src/Devices/HotplugSignals.cs",
+          "first_line": 80,
+          "last_line": 98,
+          "source_sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561",
+          "range_sha256": "3cb67fa588270fbe5d81dcabdbc82618a31a0dac0cb4081a923d14b909298c97"
+        }
+      ]
+    },
+    "SAMPLE-A002": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:c085f1cd3632e7c2",
+        "core-001:unit:076b4d4328825902"
+      ],
+      "integration_receipt": "accepted-sampling-A.json",
+      "paths": [
+        "src/Core/src/Devices/HotplugSignals.cs",
+        "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+        "src/Core/src/Devices/DeviceChangeFeed.cs"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-001-verdicts.md",
+        "sampling/coordinator/read-001-verdicts.md"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:c085f1cd3632e7c2",
+          "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "first_line": 26,
+          "last_line": 31,
+          "source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+          "range_sha256": "272daa5efb4dab19eb9a45a55f37d6e4e1371a2ca8e9ba1034e50b5362943a04"
+        },
+        {
+          "id": "core-001:unit:076b4d4328825902",
+          "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+          "first_line": 1,
+          "last_line": 22,
+          "source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+          "range_sha256": "23290cb532f8ad35c9edc33f382085b9e00f55247a3ce3dc95d5e35cdfa2ca65"
+        }
+      ]
+    },
+    "SAMPLE-A003": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:cf1e2081af8b8ac4"
+      ],
+      "integration_receipt": "accepted-sampling-A.json",
+      "paths": [
+        "src/Core/src/Devices/HotplugSignals.cs",
+        "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+        "src/Core/src/Devices/DeviceChangeFeed.cs"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-002-verdicts.json"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:cf1e2081af8b8ac4",
+          "path": "docs/architecture/event-driven-device-discovery.md",
+          "first_line": 124,
+          "last_line": 149,
+          "source_sha256": "fb3e8538fa9a4bc5809cc71d552e1041a004d5d89e574280dd06bd87ce0c3643",
+          "range_sha256": "54530cfe088e7bdfd9ccc6f78c181be3b03c88df9f002a9b602de34866ffa547"
+        }
+      ]
+    },
+    "SAMPLE-B2-001": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:7a90c15f7fb4a767",
+        "core-001:unit:2ab3cc1db2ed4269"
+      ],
+      "integration_receipt": "accepted-sampling-B2.json",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-B2-verdicts.json",
+        "sampling/coordinator/read-B2-verdicts.json"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:7a90c15f7fb4a767",
+          "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+          "first_line": 55,
+          "last_line": 66,
+          "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+          "range_sha256": "52059f37083dfb05e60717748db08dba1c00c4b64bd0bc812c5db8e508d34e92"
+        },
+        {
+          "id": "core-001:unit:2ab3cc1db2ed4269",
+          "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+          "first_line": 86,
+          "last_line": 92,
+          "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+          "range_sha256": "4d95c55a7f81e7e80c8b071e54bb55bfd4a720bcb01b2d28c6b4e8060d8d437f"
+        }
+      ]
+    },
+    "SAMPLE-B2-002": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:5c0f333d06ef9126"
+      ],
+      "integration_receipt": "accepted-sampling-B2.json",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-B2-verdicts.json"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:5c0f333d06ef9126",
+          "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+          "first_line": 54,
+          "last_line": 67,
+          "source_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+          "range_sha256": "2207b51f3945973ef6872a1b6489728942394f5e49b8cd1b1aa2156f04ee9513"
+        }
+      ]
+    },
+    "SAMPLE-B3-001": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:f8412d69f0903d78"
+      ],
+      "integration_receipt": "accepted-sampling-B3.json",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-B3-verdicts.json"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:f8412d69f0903d78",
+          "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+          "first_line": 1,
+          "last_line": 43,
+          "source_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+          "range_sha256": "e1c59ac5aa5c5193f00ec7822e25c9d2a30c2771e4db9fbe93c538fe5ae519ce"
+        }
+      ]
+    },
+    "SAMPLE-B4-001": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:001c58b1d1862d76"
+      ],
+      "integration_receipt": "accepted-sampling-B4.json",
+      "paths": [
+        "CLAUDE.md",
+        "docs/v1-to-v2-comparison.md"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-B4-verdicts.json"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:001c58b1d1862d76",
+          "path": "CLAUDE.md",
+          "first_line": 175,
+          "last_line": 230,
+          "source_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+          "range_sha256": "1416aeac6ae4fba9eb51454d0b7a5e2d3a552dee8d8e00cae10133b92dca10c6"
+        }
+      ]
+    },
+    "SAMPLE-B4-002": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:a9e434874ba55d57"
+      ],
+      "integration_receipt": "accepted-sampling-B4.json",
+      "paths": [
+        "CLAUDE.md",
+        "docs/v1-to-v2-comparison.md"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-B4-verdicts.json"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:a9e434874ba55d57",
+          "path": "docs/v1-to-v2-comparison.md",
+          "first_line": 25,
+          "last_line": 41,
+          "source_sha256": "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2",
+          "range_sha256": "7247e4fe58b861d736ec834417ec98b43a9a2de10d2ff6c412beed466fc7ddbc"
+        }
+      ]
+    },
+    "SAMPLE-SD-001": {
+      "state": "DOCUMENTATION-CORRECTION-CONTENT-ACCEPTED-AND-INTEGRATED; expansion/clean-quota gate pending",
+      "units": [
+        "core-001:unit:ed3e115f81fd126c"
+      ],
+      "integration_receipt": "accepted-sampling-SD.json",
+      "paths": [
+        "src/SecurityDomain/CLAUDE.md"
+      ],
+      "source_verdicts": [
+        "sampling/coordinator/read-boundary-SecurityDomain-verdicts.json"
+      ],
+      "candidate_links": "Use exact-unit/same-path candidate associations in sampling-verdicts.json; a documentation miss adds no independently demonstrated runtime defect.",
+      "reopen": "Corrected/edited overlaps receive zero unchanged clean credit; actual expanded strata and replacements require coordinator verdicts.",
+      "original_unit_anchors": [
+        {
+          "id": "core-001:unit:ed3e115f81fd126c",
+          "path": "src/SecurityDomain/CLAUDE.md",
+          "first_line": 217,
+          "last_line": 221,
+          "source_sha256": "2fb6f493041718623418bea7370f071700b7145c35dd0013e6d3ccd2a97dbdba",
+          "range_sha256": "34ac08f4e3d402064aefdac1b267410d3abb36e3f796fabcd7a1fc4d665e20ec"
+        }
+      ]
+    }
+  },
+  "original_candidate_count_preserved": 185,
+  "rule": "Sampling labels supplement original evidence; they do not renumber original candidates or manufacture accepted engineering groups. HSM retry-message observation remains retracted."
+}

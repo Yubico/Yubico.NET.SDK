@@ -48,21 +48,24 @@ internal readonly record struct DeviceInterfaceDescriptor(
     bool IdentityReadBudgetConsumed = false);
 
 /// <summary>
-///     Deterministic, side-effect-free merge of per-interface descriptors into physical YubiKey devices,
-///     correlating by USB Product ID (the Rust reference model).
+///     Groups per-interface descriptors using topology, serial, USB Product ID, and deduction evidence.
 /// </summary>
 /// <remarks>
-///     Primary key is the USB Product ID, applied as a deterministic evidence hierarchy. USB interfaces
-///     sharing a known PID that is present on exactly one physical key (PID count == 1) merge with no serial
+///     Topology groups first. Among remaining USB interfaces, PID count is the largest count of one
+///     concrete interface type for that PID, rather than an independently observed physical-key count.
+///     Interfaces sharing a known PID with count 1 merge with no serial
 ///     required, but only when the observed connection set exactly equals the PID's expected interface set
 ///     (the generalized guard); partial observations fall through to the serial path. When a PID is present
-///     on more than one physical key (PID count > 1), or when the guard refuses, interfaces are grouped by
+///     more than once for an interface type (PID count > 1), or when the guard refuses, interfaces are grouped by
 ///     serial evidence within their PID class, remaining null-serial orphans are attributed by pigeonhole
 ///     deduction (unique candidate, and no interface type outnumbering the candidate keys), and anything
 ///     still ambiguous stays conservatively standalone. When <c>pidCorrelationUntrusted</c> is set (an
 ///     unparsed USB CCID reader made PID correlation untrustworthy for this scan), topology evidence still
 ///     groups first and only the interfaces topology leaves behind are merged by serial, with conservative
-///     no-collapse for null serials. NFC and null-PID interfaces stand alone.
+///     no-collapse for null serials. NFC stands alone; a null PID also stands alone outside the topology
+///     and serial-only fallback paths. Complementary partial interfaces from different same-PID keys can
+///     resemble one complete key and merge across keys until distinguishing evidence arrives. Slot routing
+///     still follows each enumerated path, which can differ from the key a caller selected by composite serial.
 /// </remarks>
 internal static class CompositeDeviceMerger
 {
@@ -82,7 +85,7 @@ internal static class CompositeDeviceMerger
 
         if (pidCorrelationUntrusted)
         {
-            // Reader-name drift: correlate remaining USB interfaces by serial (Phase 37 behavior) so an
+            // Reader-name drift: correlate remaining USB interfaces by serial so an
             // unparsed CCID rejoins its HID siblings. Non-USB interfaces still stand alone.
             MergeUsbBySerial(usbRemaining, result);
             AddStandaloneDevices(descriptors.Where(d => !d.IsUsb), result);
@@ -101,7 +104,7 @@ internal static class CompositeDeviceMerger
 
         // USB interfaces with a known PID present on exactly one physical key: merge by PID (no serial).
         // A group holding a contested serial never takes the no-serial shortcut: the shortcut would discard
-        // the very evidence (the serial) that decides which enumeration keeps the durable identity.
+        // the serial evidence that decides which enumeration keeps the serial-shaped identifier.
         var mergeableByPid = usbRemaining.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) == 1);
         foreach (var group in mergeableByPid.GroupBy(d => d.Pid!.Value).OrderBy(g => g.Key))
         {
@@ -127,8 +130,8 @@ internal static class CompositeDeviceMerger
     }
 
     /// <summary>
-    ///     Per-PID physical-key count over USB interfaces: the max across transports for each known PID,
-    ///     mirroring the Rust reference (the same physical key appears once per transport under the same PID).
+    ///     Per-PID count estimate: the largest concrete-interface-type count among USB descriptors for each
+    ///     known PID. Partial enumeration can undercount physical keys.
     /// </summary>
     public static IReadOnlyDictionary<ushort, int> ComputePidCounts(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors)
     {
@@ -196,7 +199,7 @@ internal static class CompositeDeviceMerger
 
     /// <summary>
     ///     The cross-PID contested-serial verdict for one scan: which serials were observed under more
-    ///     than one PID, and for each, which PID group (if any) won the durable <c>ykphysical:{serial}</c>
+    ///     than one PID, and for each, which PID group (if any) won the scan's <c>ykphysical:{serial}</c>
     ///     identity.
     /// </summary>
     private readonly record struct ContestedSerials(
@@ -205,7 +208,7 @@ internal static class CompositeDeviceMerger
     {
         public static readonly ContestedSerials None = new([], new Dictionary<int, ushort>());
 
-        /// <summary>Whether this (pid, serial) group carries the durable identity.</summary>
+        /// <summary>Whether this (pid, serial) group carries the serial-shaped identifier in this scan.</summary>
         public bool IsWinner(ushort pid, int serial) =>
             !Serials.Contains(serial)
             || (WinnerPidBySerial.TryGetValue(serial, out var winner) && winner == pid);
@@ -213,7 +216,7 @@ internal static class CompositeDeviceMerger
 
     /// <summary>
     ///     Finds serials observed under more than one PID and decides which PID group, if any, keeps the
-    ///     durable <c>ykphysical:{serial}</c> identity: the group whose anchored census exactly matches its
+    ///     serial-shaped <c>ykphysical:{serial}</c> identifier: the group whose anchored census exactly matches its
     ///     PID's expected interface set. Zero or multiple complete groups leaves the serial with no winner.
     /// </summary>
     /// <remarks>
@@ -224,17 +227,18 @@ internal static class CompositeDeviceMerger
     ///         enumeration: the stale one is dying interface-by-interface and its census is usually already
     ///         failing, while the fresh one converges on its PID's full set. It can pick wrong - a scan can
     ///         catch the stale set still fully enumerated while the fresh set is mid-arrival - and the
-    ///         consequence is bounded and accepted: both groups are the same physical key, so the id lands
-    ///         on the right key either way, at worst with one scan of stale membership whose dead members
-    ///         fail loudly at connect time; the next scan corrects. When completeness cannot decide at all -
-    ///         no group complete, or more than one - every contested interface publishes standalone and the
-    ///         next scan converges. Any tie-break beyond completeness (newest PID, enumeration order) would
-    ///         be guessing with a different name.
+    ///         identifier still names that physical key, but its stale members can fail at connect time.
+    ///         The same evidence can select that stale group on repeated scans: this rule has no age or
+    ///         expiry mechanism. Later regrouping depends on evidence the implemented grouping tiers use
+    ///         to distinguish the members. When completeness cannot decide - no group complete, or more
+    ///         than one - every contested interface publishes standalone while that ambiguity persists.
+    ///         Any tie-break beyond completeness (newest PID, enumeration order) would be guessing with
+    ///         a different name.
     ///     </para>
     ///     <para>
     ///         The census deliberately uses <em>anchored</em> members only (interfaces that actually bear
     ///         the serial). If attributed null-serial orphans could complete a contested census, a
-    ///         deduction would decide which enumeration gets the durable identity - inverting the evidence
+    ///         deduction would decide which enumeration gets the serial-shaped identifier - inverting the evidence
     ///         hierarchy during the one window where the evidence is least trustworthy.
     ///     </para>
     ///     <para>
@@ -300,7 +304,7 @@ internal static class CompositeDeviceMerger
             .ToList();
         var orphans = descriptors.Where(d => d.Serial is null).ToList();
 
-        // Contested serials that did not win in this PID group publish standalone: the durable identity,
+        // Contested serials that did not win in this PID group publish standalone: the serial-shaped id,
         // if awarded at all, belongs to the complete enumeration in another PID group.
         var eligible = anchored.Where(a => contested.IsWinner(pid, a.Serial)).ToList();
         foreach (var loser in anchored.Where(a => !contested.IsWinner(pid, a.Serial)))
@@ -315,8 +319,8 @@ internal static class CompositeDeviceMerger
         // members) while candidacy is restricted to eligible keys. A contested loser's interfaces are
         // physically present and unaccounted-for; an orphan in this group could belong to that
         // mid-transition key rather than to a clean candidate. Counting them makes deduction strictly more
-        // conservative while a contest is in progress - orphans stay standalone and the next scan
-        // converges. Pinned by Merge_ContestedSerial_LoserSuppressesOrphanAttributionToCleanKeys.
+        // conservative while a contest is in progress - orphans stay standalone until later evidence
+        // resolves the contest. Pinned by Merge_ContestedSerial_LoserSuppressesOrphanAttributionToCleanKeys.
         var canAttributeOrphans = eligible.Count > 0
             && orphans.Count > 0
             && NoInterfaceTypeOutnumbersCandidateKeys(expected, descriptors, eligible.Count);

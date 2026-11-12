@@ -41,8 +41,8 @@ namespace Yubico.YubiKit.YubiHsm;
 ///     </para>
 ///     <para>
 ///         This type derives from <see cref="ApduException" /> so existing code that catches
-///         <see cref="ApduException" /> continues to observe every YubiHSM Auth protocol failure,
-///         including retry failures.
+///         <see cref="ApduException" /> also observes these retry-count APDU-status failures.
+///         Malformed responses, strict key parsing and transport failures can use other exception types.
 ///     </para>
 /// </remarks>
 public sealed class HsmAuthRetryException : ApduException

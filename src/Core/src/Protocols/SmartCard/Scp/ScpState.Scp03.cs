@@ -25,7 +25,7 @@ internal partial class ScpState
     private const byte DerivationTypeCardCryptogram = 0x00;
     private const byte DerivationTypeHostCryptogram = 0x01;
     private const byte DerivationContextLength = 0x40; // Cryptogram length in bits: 64 = 8 bytes
-    private const int InitializeUpdateResponseLength = 29; // Amd D §7.1.1.3: 10 div data + 3 key info + 8 challenge + 8 cryptogram
+    private const int InitializeUpdateResponseLength = 29; // Minimum parsed prefix: 10 div data + 3 key info + 8 challenge + 8 cryptogram
 
     /// <summary>
     ///     Runs the host side of the SCP03 INITIALIZE UPDATE step (Amd D §7.1.1): derives the session
@@ -36,6 +36,14 @@ internal partial class ScpState
     ///     (Amd D §7.1.2) to complete the handshake. The MAC chain starts at zero; EXTERNAL AUTHENTICATE
     ///     is the first command MAC'd through it.
     /// </returns>
+    /// <remarks>
+    ///     References here use SCP03 1.1.2 Public Release (March 2019). Its §7.1.1.6/Table 7-3 lists 29 mandatory
+    ///     bytes plus a three-byte sequence counter for pseudo-random challenge generation. This parser consumes
+    ///     the 29-byte prefix without validating that profile or key-info fields; diversification bytes are unused,
+    ///     so supplied static keys must already be per-card.
+    ///     The caller owns returned state and cryptogram. The initializer's post-return cleanup does not cover
+    ///     provider failures during cryptogram derivation after this method has allocated SessionKeys.
+    /// </remarks>
     /// <exception cref="BadResponseException">
     ///     The response is shorter than 29 bytes, or the card cryptogram does not match (wrong key set).
     /// </exception>
@@ -68,7 +76,7 @@ internal partial class ScpState
         var cardChallenge = responseData[13..21];
         var cardCryptogram = responseData[21..29];
 
-        // Derivation context is host challenge || card challenge (Amd D §6.2.2.1)
+        // Host challenge || card challenge: SCP03 1.1.2 Public Release §6.2.1.
         Span<byte> context = stackalloc byte[16];
         hostChallenge.AsSpan().CopyTo(context);
         cardChallenge.CopyTo(context[8..]);

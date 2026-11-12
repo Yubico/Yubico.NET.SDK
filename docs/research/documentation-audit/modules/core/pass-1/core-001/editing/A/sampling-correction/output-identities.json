@@ -1,0 +1,41 @@
+{
+  "self_excluded": true,
+  "artifacts": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/annotation.json",
+      "sha256": "6e20be39b0ce6f33d9b56808169212818833cf85929ca2d69b3f5f62c346619c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-DiscoveryReadSkippedException-identities.json",
+      "sha256": "2b3d0c13f4582158b9e19dfa5264e7d620711c7267576cc25d43044f769f3e63"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-DiscoveryReadSkippedException.cs.txt",
+      "sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-identities.json",
+      "sha256": "ce78d23d2f8a1bc758c354c04b3b0082e059833a4c6b8e540c7f7a4f0686add4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/before-source.cs.txt",
+      "sha256": "e6191215527e0863f7548c4d53047696d9b85a24357f3f6aff8df13c8cda0561"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/file-identities.json",
+      "sha256": "539d5895cec568443e7408264eb91ba6f5c24ffee1868e02ac76051f6db03b56"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/product.patch",
+      "sha256": "c00893c28c7b215f129b6b68e36a8240b2b34d5eec511da7fc4df8a082e29651"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/report.md",
+      "sha256": "435f579ca76e1f81ef8e01519e8e5bf40bf2e707f05aeda19785ecf9abb2c54e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/sampling-correction/verification.json",
+      "sha256": "97d9c4b8d24cef95dd82bc9aa139a140e801e76f8988b32eea15dc160c49b8e3"
+    }
+  ]
+}

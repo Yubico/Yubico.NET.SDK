@@ -1,0 +1,6 @@
+{
+  "new_missing_local_paths": [],
+  "preexisting_missing_local_paths": [],
+  "unclosed_fences": [],
+  "scope": "Local file targets outside fences; anchors/external URLs and semantic binding not checked."
+}

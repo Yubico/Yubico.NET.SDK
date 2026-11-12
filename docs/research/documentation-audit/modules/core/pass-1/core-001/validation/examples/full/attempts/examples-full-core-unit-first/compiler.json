@@ -1,0 +1,2459 @@
+{
+  "arguments": [
+    "/noconfig",
+    "/unsafe-",
+    "/checked-",
+    "/nowarn:CS1591,CA1848,CA1707,CA1716,CA1873,CA1001,CA1513,CA1852,CA1859,CA1826,CS8892,1701,1702,8002",
+    "/fullpaths",
+    "/nostdlib+",
+    "/errorreport:prompt",
+    "/warn:9999",
+    "/define:TRACE;RELEASE;NET;NET10_0;NETCOREAPP;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER",
+    "/highentropyva+",
+    "/nullable:enable",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.bcl.asyncinterfaces/6.0.0/lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.codeanalysis.csharp/5.6.0/lib/net10.0/Microsoft.CodeAnalysis.CSharp.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.codeanalysis.common/5.6.0/lib/net10.0/Microsoft.CodeAnalysis.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.CSharp.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.dependencyinjection/10.0.2/lib/net10.0/Microsoft.Extensions.DependencyInjection.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.diagnostics.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.fileproviders.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.hosting.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Logging.Abstractions.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.logging/10.0.2/lib/net10.0/Microsoft.Extensions.Logging.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.options/10.0.2/lib/net10.0/Microsoft.Extensions.Options.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.primitives/10.0.2/lib/net10.0/Microsoft.Extensions.Primitives.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.extensions.timeprovider.testing/10.0.0/lib/net10.0/Microsoft.Extensions.TimeProvider.Testing.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.testing.platform.msbuild/1.7.3/lib/net9.0/Microsoft.Testing.Extensions.MSBuild.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.testing.extensions.trxreport.abstractions/1.7.3/lib/net9.0/Microsoft.Testing.Extensions.TrxReport.Abstractions.dll",
+    "/reference:/home/rupicola/.nuget/packages/microsoft.testing.platform/1.7.3/lib/net9.0/Microsoft.Testing.Platform.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.VisualBasic.Core.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.VisualBasic.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.Win32.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.Win32.Registry.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/mscorlib.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/netstandard.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.AppContext.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Buffers.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.Concurrent.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.Immutable.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.NonGeneric.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.Specialized.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.Annotations.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.DataAnnotations.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.EventBasedAsync.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.TypeConverter.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Configuration.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Console.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Core.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Data.Common.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Data.DataSetExtensions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Data.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Contracts.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Debug.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.DiagnosticSource.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.FileVersionInfo.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Process.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.StackTrace.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.TextWriterTraceListener.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Tools.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.TraceSource.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Tracing.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Drawing.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Drawing.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Dynamic.Runtime.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Formats.Asn1.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Formats.Tar.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Globalization.Calendars.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Globalization.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Globalization.Extensions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.Brotli.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.FileSystem.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.ZipFile.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.AccessControl.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.DriveInfo.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.Watcher.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.IsolatedStorage.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.MemoryMappedFiles.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Pipelines.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Pipes.AccessControl.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Pipes.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.UnmanagedMemoryStream.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.AsyncEnumerable.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.Expressions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.Parallel.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.Queryable.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Memory.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Http.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Http.Json.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.HttpListener.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Mail.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.NameResolution.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.NetworkInformation.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Ping.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Quic.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Requests.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Security.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.ServerSentEvents.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.ServicePoint.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Sockets.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebClient.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebHeaderCollection.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebProxy.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebSockets.Client.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebSockets.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Numerics.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Numerics.Vectors.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ObjectModel.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.DispatchProxy.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Emit.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Emit.ILGeneration.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Emit.Lightweight.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Extensions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Metadata.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.TypeExtensions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Resources.Reader.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Resources.ResourceManager.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Resources.Writer.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.CompilerServices.Unsafe.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.CompilerServices.VisualC.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Extensions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Handles.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.InteropServices.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.InteropServices.JavaScript.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.InteropServices.RuntimeInformation.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Intrinsics.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Loader.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Numerics.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Formatters.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Json.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Xml.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.AccessControl.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Claims.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Algorithms.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Cng.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Csp.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Encoding.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.OpenSsl.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Primitives.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.X509Certificates.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Principal.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Principal.Windows.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.SecureString.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ServiceModel.Web.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ServiceProcess.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encoding.CodePages.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encoding.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encoding.Extensions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encodings.Web.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Json.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.RegularExpressions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.AccessControl.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Channels.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Overlapped.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.Dataflow.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.Extensions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.Parallel.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Thread.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.ThreadPool.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Timer.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Transactions.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Transactions.Local.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ValueTuple.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Web.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Web.HttpUtility.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Windows.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.Linq.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.ReaderWriter.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.Serialization.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XDocument.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XmlDocument.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XmlSerializer.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XPath.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XPath.XDocument.dll",
+    "/reference:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/WindowsBase.dll",
+    "/reference:/home/rupicola/.nuget/packages/xunit.v3.assert/3.0.0/lib/net8.0/xunit.v3.assert.dll",
+    "/reference:/home/rupicola/.nuget/packages/xunit.v3.common/3.0.0/lib/netstandard2.0/xunit.v3.common.dll",
+    "/reference:/home/rupicola/.nuget/packages/xunit.v3.extensibility.core/3.0.0/lib/netstandard2.0/xunit.v3.core.dll",
+    "/reference:/home/rupicola/.nuget/packages/xunit.v3.runner.common/3.0.0/lib/netstandard2.0/xunit.v3.runner.common.dll",
+    "/reference:/home/rupicola/.nuget/packages/xunit.v3.runner.inproc.console/3.0.0/lib/net8.0/xunit.v3.runner.inproc.console.dll",
+    "/reference:/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+    "/features:InterceptorsNamespaces=;Microsoft.Extensions.Validation.Generated",
+    "/debug-",
+    "/debug:portable",
+    "/filealign:512",
+    "/optimize+",
+    "/out:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll",
+    "/refout:obj/Release/net10.0/refint/Yubico.YubiKit.Core.UnitTests.dll",
+    "/target:exe",
+    "/warnaserror+",
+    "/utf8output",
+    "/deterministic+",
+    "/sourcelink:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.sourcelink.json",
+    "/langversion:14",
+    "/embed:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GlobalUsings.g.cs",
+    "/embed:obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+    "/embed:/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+    "/embed:/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/buildTransitive/../_content/DefaultRunnerReporters.cs",
+    "/embed:/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+    "/embed:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.AssemblyInfo.cs",
+    "/analyzerconfig:/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+    "/analyzerconfig:/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig",
+    "/analyzerconfig:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+    "/analyzer:/home/rupicola/.nuget/packages/microsoft.codeanalysis.analyzers/5.3.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
+    "/analyzer:/home/rupicola/.nuget/packages/microsoft.codeanalysis.analyzers/5.3.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
+    "/analyzer:/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+    "/analyzer:/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+    "/analyzer:/home/rupicola/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Logging.Generators.dll",
+    "/analyzer:/home/rupicola/.nuget/packages/microsoft.extensions.options/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Options.SourceGeneration.dll",
+    "/analyzer:/home/rupicola/.nuget/packages/xunit.analyzers/1.23.0/analyzers/dotnet/cs/xunit.analyzers.dll",
+    "/analyzer:/home/rupicola/.nuget/packages/xunit.analyzers/1.23.0/analyzers/dotnet/cs/xunit.analyzers.fixes.dll",
+    "/analyzer:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll",
+    "/analyzer:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll",
+    "/analyzer:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll",
+    "/analyzer:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll",
+    "/analyzer:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll",
+    "/analyzer:/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll",
+    "AuditV2/ChildProcessTestRunner.cs",
+    "AuditV2/CoreAuditReproTests.cs",
+    "AuditV2/CoreCredentialReaderAuditReproTests.cs",
+    "AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+    "AuditV2/CoreScpAuditReproTests.cs",
+    "BoundaryInventory/AdapterContractRegistry.cs",
+    "BoundaryInventory/AdapterContractRegistryTests.cs",
+    "BoundaryInventory/BoundaryInventoryTests.cs",
+    "BoundaryInventory/BoundaryManifest.cs",
+    "BoundaryInventory/BoundaryScanner.cs",
+    "BoundaryInventory/CrossLayerAcceptanceTests.cs",
+    "BoundaryInventory/MigrationDiagnosticsTests.cs",
+    "BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+    "BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+    "BoundaryInventory/ResponsivenessProbeTests.cs",
+    "BoundaryInventory/WithheldNativeProbe.cs",
+    "Credentials/ConsoleCredentialReaderTests.cs",
+    "Credentials/HexParsingTests.cs",
+    "Credentials/UserPresenceIntentTests.cs",
+    "Cryptography/AlgorithmIdentifierParameterTests.cs",
+    "Cryptography/ArkgP256Tests.cs",
+    "Cryptography/AsnPrivateKeyDecoderTests.cs",
+    "Cryptography/AsnPrivateKeyEncoderTests.cs",
+    "Cryptography/AsnPublicKeyDecoderTests.cs",
+    "Cryptography/AsnPublicKeyEncoderTests.cs",
+    "Cryptography/AsnUtilitiesTests.cs",
+    "Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+    "Cryptography/CryptographicDefinitionsTests.cs",
+    "Cryptography/CryptographyProviderExtensionTests.cs",
+    "Cryptography/Curve25519PrivateKeyTests.cs",
+    "Cryptography/EcTestSupport.cs",
+    "Cryptography/KnownPrivateKeyVectors.cs",
+    "Cryptography/NamedCurveCatalogVectorsTests.cs",
+    "Cryptography/PrivateKeyConsistencyTests.cs",
+    "Cryptography/PrivateKeyDecodingZeroingTests.cs",
+    "Cryptography/PrivateKeyZeroingFollowupTests.cs",
+    "Devices/ApplicationSessionScpTests.cs",
+    "Devices/CapabilityMapperTests.cs",
+    "Devices/CompositeDeviceMergerTests.cs",
+    "Devices/CompositeDeviceMergerVectorTests.cs",
+    "Devices/ConnectionOwnershipContractTests.cs",
+    "Devices/ConnectionTypeMapperTests.cs",
+    "Devices/ConnectionTypeTests.cs",
+    "Devices/DeviceChangeFeedTests.cs",
+    "Devices/DeviceConnectionOwnershipTests.cs",
+    "Devices/DeviceConnectionRegistryTests.cs",
+    "Devices/DeviceIdentityContractTests.cs",
+    "Devices/DeviceInfoFieldLengthTests.cs",
+    "Devices/DeviceInfoReaderTests.cs",
+    "Devices/DeviceInfoTests.cs",
+    "Devices/DiscoveryIdentityReaderTests.cs",
+    "Devices/DiscoveryReadSchedulingTests.cs",
+    "Devices/DiscoverySingleFlightTests.cs",
+    "Devices/DiscoveryWorkerAdmissionCollection.cs",
+    "Devices/FeatureTests.cs",
+    "Devices/FindYubiKeysEnumerationBudgetTests.cs",
+    "Devices/FindYubiKeysFaultInjectionTests.cs",
+    "Devices/FindYubiKeysPidMergeTests.cs",
+    "Devices/FindYubiKeysScopeTests.cs",
+    "Devices/FindYubiKeysTests.cs",
+    "Devices/FirmwareVersionSelectResponseTests.cs",
+    "Devices/HeldExceptionPropagationTests.cs",
+    "Devices/HidConnectionSlotTests.cs",
+    "Devices/HotplugSignalsTests.cs",
+    "Devices/LinuxHidRoutingTests.cs",
+    "Devices/PcscConnectionSlotTests.cs",
+    "Devices/PcscDiscoveryLifetimeTests.cs",
+    "Devices/PhysicalYubiKeyTests.cs",
+    "Devices/ReaderNamePidParserTests.cs",
+    "Devices/RescanSchedulerTests.cs",
+    "Devices/ResolvePreferredConnectionTests.cs",
+    "Devices/SessionTransportTests.cs",
+    "Devices/SnapshotDiffTests.cs",
+    "Devices/WindowsDeviceTopologyResolverTests.cs",
+    "Devices/YubiKeyDeviceTests.cs",
+    "Devices/YubiKeyManagerStaticTests.cs",
+    "Devices/YubiKeyManagerWatchTests.cs",
+    "Devices/YubiKeyMonitorAcceptanceTests.cs",
+    "Devices/YubiKeyMonitorTests.cs",
+    "Infrastructure/AsyncWait.cs",
+    "Infrastructure/DeviceChangeWatcher.cs",
+    "Infrastructure/FakeYubiKey.cs",
+    "Infrastructure/ObservedTimeProvider.cs",
+    "Infrastructure/OwnedMonitorFixture.cs",
+    "Infrastructure/TransientScanRetryTests.cs",
+    "Native/Windows/CfgMgr32InteropTests.cs",
+    "Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+    "Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+    "Protocols/Otp/Hid/OtpHidProtocolConcurrencyTests.cs",
+    "Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+    "Protocols/ProtocolConnectionOwnershipTests.cs",
+    "Protocols/ProtocolFactoryTests.cs",
+    "Protocols/SmartCard/Apdu/ApduFormatterTests.cs",
+    "Protocols/SmartCard/Apdu/ApduResponseOwnershipTests.cs",
+    "Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs",
+    "Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+    "Protocols/SmartCard/Apdu/PcscProtocolConcurrencyTests.cs",
+    "Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+    "Protocols/SmartCard/Scp/AesCmacTests.cs",
+    "Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+    "Protocols/SmartCard/Scp/Scp11TestData.cs",
+    "Protocols/SmartCard/Scp/Scp11Tests.cs",
+    "Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+    "Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+    "Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+    "Protocols/SmartCard/Scp/X963KdfTests.cs",
+    "RuntimeResilience/RuntimeResilienceStaticScanTests.cs",
+    "Sessions/ApplicationIdsTests.cs",
+    "Sessions/ApplicationSessionDisposalTests.cs",
+    "Sessions/RawAccessPublicApiTests.cs",
+    "Sessions/RawCtapHidSessionTests.cs",
+    "Sessions/RawOtpHidSessionTests.cs",
+    "Sessions/RawSessionConstructionFailureTests.cs",
+    "Sessions/RawSessionYubiKeyExtensionsTests.cs",
+    "Sessions/RawSmartCardNativeBoundaryTests.cs",
+    "Sessions/RawSmartCardSessionTests.cs",
+    "Sessions/SessionConstructionGuardTests.cs",
+    "Sessions/SessionCreationOptionsTests.cs",
+    "Sessions/UserPresenceNotificationTests.cs",
+    "Transports/Hid/CoreFoundationStringTests.cs",
+    "Transports/Hid/FindHidInterfacesBoundaryTests.cs",
+    "Transports/Hid/HidDeviceListenerDisposalTests.cs",
+    "Transports/Hid/HidInterfaceClassifierTests.cs",
+    "Transports/Hid/Linux/LinuxDescriptorCloseTests.cs",
+    "Transports/Hid/Linux/LinuxDirectFacadeAcceptanceTests.cs",
+    "Transports/Hid/Linux/LinuxDiscoveryAdmissionTests.cs",
+    "Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+    "Transports/Hid/Linux/LinuxFidoWorkerFailureTests.cs",
+    "Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+    "Transports/Hid/Linux/LinuxHidReadReactorTests.Native.cs",
+    "Transports/Hid/Linux/LinuxHidReportApiTests.cs",
+    "Transports/Hid/Linux/LinuxNativeAbiTests.cs",
+    "Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+    "Transports/Hid/Linux/LinuxOtpRecoveryTests.cs",
+    "Transports/Hid/Linux/LinuxOtpWorkerFailureTests.cs",
+    "Transports/Hid/Linux/LinuxReportConnectionTests.cs",
+    "Transports/Hid/Linux/LinuxWorkerFailureTestSetup.cs",
+    "Transports/Hid/LinuxHidDescriptorParsingTests.cs",
+    "Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+    "Transports/Hid/LinuxUdevHidEventSourceTests.cs",
+    "Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+    "Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+    "Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+    "Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+    "Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+    "Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+    "Transports/Hid/MacOSHidIOFacadeTests.cs",
+    "Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+    "Transports/Hid/MacOSOtpRecoveryTests.cs",
+    "Transports/Hid/MacOSOtpRouteTests.cs",
+    "Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+    "Transports/Hid/WindowsHidDeviceListenerTests.cs",
+    "Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs",
+    "Transports/SmartCard/DesktopSmartCardDeviceListenerSCardErrorTests.cs",
+    "Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+    "Transports/SmartCard/Fakes/PcscCleanupFailureProbe.cs",
+    "Transports/SmartCard/Fakes/PcscIsolatedProbe.cs",
+    "Transports/SmartCard/Fakes/PcscTestDevices.cs",
+    "Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+    "Transports/SmartCard/FindPcscDevicesTests.cs",
+    "Transports/SmartCard/PcscConnectionKindDetectorTests.cs",
+    "Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+    "Transports/SmartCard/PcscContextIsolationTests.cs",
+    "Transports/SmartCard/PcscReaderNameOwnershipTests.cs",
+    "Transports/SmartCard/SmartCardConnectionFactoryTests.cs",
+    "Transports/SmartCard/SmartCardSharingTests.cs",
+    "Transports/SmartCard/UsbSmartCardConnectionTests.cs",
+    "Utilities/Base32Tests.cs",
+    "Utilities/DisposableArrayPoolBufferTests.cs",
+    "Utilities/DisposableTlvListTests.cs",
+    "Utilities/ExchangeGuardTests.cs",
+    "Utilities/TlvHelperTests.cs",
+    "Utilities/TlvTests.cs",
+    "../../../Tests.Shared/Infrastructure/TransientScanRetry.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-060.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-142.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-204.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-205.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-211.cs",
+    "obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GlobalUsings.g.cs",
+    "obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+    "/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/buildTransitive/../_content/DefaultRunnerReporters.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+    "obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.AssemblyInfo.cs",
+    "/warnaserror+:NU1605,SYSLIB0011"
+  ],
+  "file_arguments": [
+    {
+      "switch": "/sourcelink:",
+      "raw": "/sourcelink:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.sourcelink.json",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.sourcelink.json"
+    },
+    {
+      "switch": "/embed:",
+      "raw": "/embed:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GlobalUsings.g.cs",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GlobalUsings.g.cs"
+    },
+    {
+      "switch": "/embed:",
+      "raw": "/embed:\"obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs\"",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs"
+    },
+    {
+      "switch": "/embed:",
+      "raw": "/embed:/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs"
+    },
+    {
+      "switch": "/embed:",
+      "raw": "/embed:/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/buildTransitive/../_content/DefaultRunnerReporters.cs",
+      "path": "/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/_content/DefaultRunnerReporters.cs"
+    },
+    {
+      "switch": "/embed:",
+      "raw": "/embed:/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs"
+    },
+    {
+      "switch": "/embed:",
+      "raw": "/embed:obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.AssemblyInfo.cs",
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.AssemblyInfo.cs"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll",
+      "bytes": 2439168,
+      "sha256": "315424419d451bc10536e69837cdf511e081471729e180cf0e4f3ed3333ddd54"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/refint/Yubico.YubiKit.Core.UnitTests.dll",
+      "bytes": 992768,
+      "sha256": "01a71652b60860be684ae39840f81eb1a59ac29f5f3f40d3450b2b41ddc200a5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.pdb",
+      "bytes": 458764,
+      "sha256": "6a63048c387856abbcf9758e25289b16705c060d90467561c76c5436d9607529"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll",
+      "bytes": 328488,
+      "sha256": "217ed678ccbf8dbcae0be06fb19592a0351e95ecdb0a1536b2f95c3766e05dcf"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll",
+      "bytes": 136488,
+      "sha256": "8e885bf06d755a98af31591b7291c972fe7338930ad47efcbd1cb3b213922507"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll",
+      "bytes": 261928,
+      "sha256": "2d20ec9efcf8c2601569170477041b7fb5d0bbbf4b6f47e3cfeeac2019e42de4"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll",
+      "bytes": 462632,
+      "sha256": "bdef777ca87b3df5ea6f5b537c81af5d43261b94188d28f7ffcc61add30f2f4b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll",
+      "bytes": 203088,
+      "sha256": "39f9ef1932ab0014af65ce996c8d920e1853dbcd72a4b530797994ad5653177d"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll",
+      "bytes": 371536,
+      "sha256": "7c15bca81306861c5d6ccdc464d5006a77b12b056b2b5d845e09ffa84bee47b3"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.CSharp.dll",
+      "bytes": 18256,
+      "sha256": "a1c03fccd3c9311dd531c7d7e5ea3fa2df2c12427e9903a21227409239f482db"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.VisualBasic.Core.dll",
+      "bytes": 59176,
+      "sha256": "36c921bb6fe5245cdd230204e8edbba1df920fc76e17b52dbe027ec13add77a7"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.VisualBasic.dll",
+      "bytes": 17232,
+      "sha256": "1af2d7c70e0c1e8829587d681e064b1df337b9fae69bfc954172490fb830367c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.Win32.Primitives.dll",
+      "bytes": 16208,
+      "sha256": "96e89f2da46204011880789bc641500cf74b9a43f5d7fffd141d4a60a779bb89"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/Microsoft.Win32.Registry.dll",
+      "bytes": 21288,
+      "sha256": "76e7223f5cb685498173eb4f378c8046a4f0fef9fc457b05a9a93605c7986076"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.AppContext.dll",
+      "bytes": 15144,
+      "sha256": "5824233c5a6129f5741e1e0bd14f60a58a38600bac384dc8b3cd09f969d67543"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Buffers.dll",
+      "bytes": 15144,
+      "sha256": "b569db17c9a66433310a3b71a86157f025ae573f60d4bb4e20e5d1c3cac94896"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.Concurrent.dll",
+      "bytes": 27432,
+      "sha256": "cf050dcabbd2efb8b8e47d377160250fad44d32ec501ad8b6db82e8349c68dba"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.Immutable.dll",
+      "bytes": 75088,
+      "sha256": "9bc9a7d36725d9a07a02770633870be8d62bea0584e224be839ea58e5108cdd5"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.NonGeneric.dll",
+      "bytes": 22824,
+      "sha256": "47356302f3ec77dab8b52be626dd24ef384f5eab6c2dfeb6e879ef61fc2e2708"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.Specialized.dll",
+      "bytes": 25936,
+      "sha256": "e715f6cc3a9fce2bf6d4c383c367eb585240df214b1dec97b9b6355836cde05b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Collections.dll",
+      "bytes": 55080,
+      "sha256": "5291a8080cec5ce08703a7e2b0da5ca3e1e61c9a1ead9a9c5384a4be1f4ccfa5"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.Annotations.dll",
+      "bytes": 31528,
+      "sha256": "6df9941244d2ca015be5ea99f3e4045a4bcc732b1518ba6bd07de4926c2b5b98"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.DataAnnotations.dll",
+      "bytes": 16680,
+      "sha256": "0b47479c27b050e90cc0c232561781f71a85df75686758eff459890e73045d81"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.EventBasedAsync.dll",
+      "bytes": 19240,
+      "sha256": "355f17680e4bde9fc2c3151e0a7bbd73e80fe0ee8c29b9384aca656f880baf73"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.Primitives.dll",
+      "bytes": 25936,
+      "sha256": "778ffd5f0b0969aef963afc617817d3356e3c21ffb7e1f2a86a405fd491156cd"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.TypeConverter.dll",
+      "bytes": 104744,
+      "sha256": "70b250ed0d33af1d351d9fa6e60922f3b3b45d6c211b8e56eb1d26bc6294f950"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ComponentModel.dll",
+      "bytes": 15696,
+      "sha256": "6ab65ac403c6a1bf8392b24d098d2734f4a8ea3f6c674b64c9219b01d8f09991"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Configuration.dll",
+      "bytes": 19240,
+      "sha256": "1f7c4f09bd5eebb988c7f6b16db293260a7ffdaf30e407ee44d1e492e83ae78f"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Console.dll",
+      "bytes": 26448,
+      "sha256": "33fff2acc52bf04fb8398afc33bf1ba1e8035e97d0ff37fd195ada6390b2b86a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Core.dll",
+      "bytes": 23336,
+      "sha256": "7828fa13325f9b97ddd8d8e6dcb1cc54de1afc5fb2dc69a29f86ca686fb8e04c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Data.Common.dll",
+      "bytes": 154408,
+      "sha256": "4836bd8f950fdcd3ac6675e16d2dbdf0a55dd4b1bd5c33c6a7891e9e014d0027"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Data.DataSetExtensions.dll",
+      "bytes": 15656,
+      "sha256": "f7dec6629d252f03e1c90e0a2ead24e482a2a24914101710391aba6dc8a453c7"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Data.dll",
+      "bytes": 23848,
+      "sha256": "c9ca5f24741a7170e509ba00a589c13ac43dfc497c94b88d7d265e7d87a8c4fb"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Contracts.dll",
+      "bytes": 19752,
+      "sha256": "abb02620f56eabfb67697204b7849bb2b60a46590c5837ab2a976cb279793d41"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Debug.dll",
+      "bytes": 15656,
+      "sha256": "54340793a5d2f86aedc1573f0c438bb53ff810c13ad839362fe153a560acb9bc"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.DiagnosticSource.dll",
+      "bytes": 43304,
+      "sha256": "ed71a190d5bdd55f8f6b9200dbeecec4c0a81db4986f3e3c4f629fa8ae88f21a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.FileVersionInfo.dll",
+      "bytes": 16720,
+      "sha256": "8c2a28dd6013a27d92817035528a677349e947d80380aac10912de487cfb0110"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Process.dll",
+      "bytes": 31528,
+      "sha256": "47f5b8565653b349a18f7d9feaefc66a9f845f362043531c82f585362f4e227c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.StackTrace.dll",
+      "bytes": 22824,
+      "sha256": "aa7b33eba0d9296c0b156bb8a1a9680c3f3f07285984de90fbf9fd036c3ad04c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.TextWriterTraceListener.dll",
+      "bytes": 17704,
+      "sha256": "f02eb8967d3c14e4699766f69a34cad4316f94a6f5849dd02545702bfab15a0a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Tools.dll",
+      "bytes": 15144,
+      "sha256": "a39e302a28f1f35cd9cd975c52358c7796330080920ddc4dcd3b336760b769fc"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.TraceSource.dll",
+      "bytes": 27944,
+      "sha256": "440cba0ba25e80ac99566384b77afa7c2fa51c73d82d73994430c5755468fad4"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Diagnostics.Tracing.dll",
+      "bytes": 28968,
+      "sha256": "d1786a8092c2be01aa8e91edda3988608540a0d3c0fe4258d3b4b9b54b373f3d"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Drawing.Primitives.dll",
+      "bytes": 35664,
+      "sha256": "ceaae74e826a88c7c88d5cf8a3bd9865f4e2b4019cdeb9a4eaffa3ae8a13f5c1"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Drawing.dll",
+      "bytes": 20264,
+      "sha256": "76163a1b4918236bf2041036e76d83d75e0405a7a7022168121d21b3aa80e30d"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Dynamic.Runtime.dll",
+      "bytes": 16168,
+      "sha256": "02b2c3fd58f793718fd4a0707993b3cfac272541166ada7b0373902fe5fc6384"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Formats.Asn1.dll",
+      "bytes": 26408,
+      "sha256": "84e99937864d91f673ea8e00a8ff2e405488f6c7db98fde33f119d823a835464"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Formats.Tar.dll",
+      "bytes": 20264,
+      "sha256": "92aa7fe2d10e6cfb56c799ef730ff3bdc755621742d75e52db90d9a75da84eca"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Globalization.Calendars.dll",
+      "bytes": 15656,
+      "sha256": "d169ed333b4bab2d6f9ba6a0fc9e4f1a8301e97e9c265a46d949ea5651080c0d"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Globalization.Extensions.dll",
+      "bytes": 15144,
+      "sha256": "4a5ff15607bb3af1016a471eb2e3e93b94ab60da4b862de5de9aea27fb1ddf8a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Globalization.dll",
+      "bytes": 15696,
+      "sha256": "bdeb8d26d917976915190c6213907967b5a2ce83b7c575b67a71d121993dfd24"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.Brotli.dll",
+      "bytes": 18216,
+      "sha256": "984cec8f8d2ee4110329858d3f3febb0257d1aef60f170e30d0af540ae71716d"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.FileSystem.dll",
+      "bytes": 15144,
+      "sha256": "889ecc7a7c5b44071aab2826fd6d6b8dad8b88ea04119870a3e4f2caaae95009"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.ZipFile.dll",
+      "bytes": 18768,
+      "sha256": "6ca63f9d9c20494a1141c1fb4e377af0b3c9a6788f33897fe3ec03a7874517dc"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Compression.dll",
+      "bytes": 21800,
+      "sha256": "105158fb3a4c19a89311bb52ed077a65425584b676100efbbe8e6ef5cc423929"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.AccessControl.dll",
+      "bytes": 20264,
+      "sha256": "b4eac01472984530ee36144c4eca4c9c6674a7dba11f17da2cfedba79b61617b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.DriveInfo.dll",
+      "bytes": 17192,
+      "sha256": "0783900dd2bb403901cd972151be3566c3511535fd3c4bee66c207dce8b11091"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.Primitives.dll",
+      "bytes": 15144,
+      "sha256": "0602e2f6227d8a0842bba942fb84c9a68331266802c449af9e11aeb45f9193fe"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.Watcher.dll",
+      "bytes": 20776,
+      "sha256": "c2b72568a947fc1fa7060432fd46655cf952ceda0b75e5c087ec6513ca40d2a1"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.FileSystem.dll",
+      "bytes": 15656,
+      "sha256": "b2b09f39e7cb61dddb3658d95a4feb62498d25a9a477a1e11f5faf36d829a19b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.IsolatedStorage.dll",
+      "bytes": 22352,
+      "sha256": "965a2656d5db2f5b6acd91ee70a99ac9bcc50c7759cbb12c68d949c2bd1ec28f"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.MemoryMappedFiles.dll",
+      "bytes": 18216,
+      "sha256": "6b4dc4a0a68536169fb2967d9bb2919bc3d44097843860c706ab577dfe6f9c84"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Pipelines.dll",
+      "bytes": 20264,
+      "sha256": "4f831caa8151c80ea14ad38ceb34b36b2d3488dafeb923ed3235069144c755cc"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Pipes.AccessControl.dll",
+      "bytes": 18256,
+      "sha256": "1de44fca45b74a3b69961cc36d3ba3e998b20f3839df0094ab39775468427c72"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.Pipes.dll",
+      "bytes": 22312,
+      "sha256": "e3ab3d906fdd75f6b12256b8e893112a8d582da42032fbcad28c74195f60e1f7"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.UnmanagedMemoryStream.dll",
+      "bytes": 15696,
+      "sha256": "e3b1ba5a4ff28ee788f1e88dfbb50762135a7c29f0adb93dbac9ac5284dec769"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.IO.dll",
+      "bytes": 15656,
+      "sha256": "2699ce957e080e2fa5f87cfedfc0d469475fd8d1ada1f5db09c48a085c2282e3"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.AsyncEnumerable.dll",
+      "bytes": 36176,
+      "sha256": "8375fab8f6479cfea92d13414a54c8026dcfd28406e9cc57a66a893d21acec3c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.Expressions.dll",
+      "bytes": 63272,
+      "sha256": "ab2c42702a6af263c97ee1072b7cece5a3ab9b468dfe50c5403d47edcc270897"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.Parallel.dll",
+      "bytes": 31016,
+      "sha256": "39b059129c5b8cccb666c3e26a536e1c906e3b4ec0aa71c05536c8e3992b6f97"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.Queryable.dll",
+      "bytes": 32040,
+      "sha256": "e30982cd8e8651cc72e04b5cd73ccfe069c0fa22c97495ff5fbd671fe8d3c27b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Linq.dll",
+      "bytes": 33576,
+      "sha256": "545ea2e23b03ea42a29d4be1e8dbb61227f350abb999ab61e425cfb0cef0aa1a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Memory.dll",
+      "bytes": 57128,
+      "sha256": "141df53b6bc61607943d4c3639f49b1f8ed543682ad5e7a257f8079cefb81aa1"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Http.Json.dll",
+      "bytes": 23336,
+      "sha256": "67e38b320c4e279325863d8f8c4d638b1edaca929878f91e315cd03264e67c83"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Http.dll",
+      "bytes": 60240,
+      "sha256": "30dcbcf51de34ae5eecfa3f3807add014d7c13ca99738db7c3a8e95f49a234d3"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.HttpListener.dll",
+      "bytes": 25384,
+      "sha256": "a606c3cce5d3548f8fac0dd594aa4da333dc604dce0090ab121e08493333dea3"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Mail.dll",
+      "bytes": 32040,
+      "sha256": "13a1fe1db1f2168c505621016ba81e92648726fc30b8e7a4ddec8a7cb35af424"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.NameResolution.dll",
+      "bytes": 17744,
+      "sha256": "36b1feeb7885fceb071fe90b6a837f7466552a16597c99f4a131d23bacd96a64"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.NetworkInformation.dll",
+      "bytes": 33576,
+      "sha256": "4b95a66b9229538824f1b52ec80e91521ecc5fe71ad46dbf684db9ab76739305"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Ping.dll",
+      "bytes": 20264,
+      "sha256": "c767b9dcfc934111cdbf9ede9cf7661fd7714ab09c3e1d4c453c4f069a0b29c8"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Primitives.dll",
+      "bytes": 37200,
+      "sha256": "3e88ee6c92068131255c360fd223b75fef4bef2552da753566765c192153917f"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Quic.dll",
+      "bytes": 23848,
+      "sha256": "eecf4c24a351beaacfcc9fc65bf370a8d532237c2288363b45d409e10ce1e240"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Requests.dll",
+      "bytes": 41256,
+      "sha256": "c580834c795c6309423f0b4641fb2687983cc869af43702edb4d4630f2daea96"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Security.dll",
+      "bytes": 53544,
+      "sha256": "0eab0de08b38ea93245eea0e5018e423174a99f3c43e1db776cc8f251cfc32c9"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.ServerSentEvents.dll",
+      "bytes": 17192,
+      "sha256": "fdf13ae2b83c6fff01744bf11fcf3629eeb5ecb2e48fd3546873ba27243ab09e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.ServicePoint.dll",
+      "bytes": 15144,
+      "sha256": "678104fe7e696b9b182734ed4bbde61f23e8466c942a68baa9f9e504781aa978"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.Sockets.dll",
+      "bytes": 47400,
+      "sha256": "105cc2f2bdf353cf23388ff249313b9374c8eb3ef7c3806579dea7664b0f724f"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebClient.dll",
+      "bytes": 27984,
+      "sha256": "8e8c426ddcdcb951424a59e2c941557665710893fe59909ca26fffc5bb4b537c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebHeaderCollection.dll",
+      "bytes": 19240,
+      "sha256": "6af525f8d80f69246ca78c8f3e6e3a5af39595407b35eb9772d8118a4e24d4fc"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebProxy.dll",
+      "bytes": 18256,
+      "sha256": "6484198ee216bc68869be85a3282d51a6b76d38a1b2194181f2accc927e30963"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebSockets.Client.dll",
+      "bytes": 19240,
+      "sha256": "ff4580761edac0f2eca7a97f9867cc54300b109a487b40173f7152a6a2e1e923"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.WebSockets.dll",
+      "bytes": 23888,
+      "sha256": "743d430175c51dbceda3485b3e4550178c9be59a13286c5b89a8dae19463a192"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Net.dll",
+      "bytes": 17192,
+      "sha256": "9966e1605fda50d083beaa307bcdb9daf0d8b7bae84771265d8c44534748ffd8"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Numerics.Vectors.dll",
+      "bytes": 58152,
+      "sha256": "56892956cadccb1af8a7a2bfe0d7f469c33b896bd746aa5a77c0f3a544536d0a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Numerics.dll",
+      "bytes": 15144,
+      "sha256": "da30ddc2fbfed6382c9a029f4ab19eca96a60ce36bda432f2feb5e209ccd2457"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ObjectModel.dll",
+      "bytes": 23336,
+      "sha256": "b867db3a4f84d0f54c7456710ad5b80070da9b52362fd46b5ff13b04a8b01dcd"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.DispatchProxy.dll",
+      "bytes": 15656,
+      "sha256": "cf1da354467d9cc3a050f8528f6ac08d04bc4b6a858e3c5b3121fe98095f4d2e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Emit.ILGeneration.dll",
+      "bytes": 20776,
+      "sha256": "de43e116c1a4798aa34418f7a107fb3dbefea48df61964abc620c7d36a2e523b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Emit.Lightweight.dll",
+      "bytes": 19240,
+      "sha256": "df90f0eacde94718f4e5b4cfe1598eb4d2f21a88051aaaa2e17a1b83682d0409"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Emit.dll",
+      "bytes": 44328,
+      "sha256": "e7985117cd85ed442d605d493d52946a9472fb1f7818770bce21b04c7a7a2b66"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Extensions.dll",
+      "bytes": 15184,
+      "sha256": "1acbc49deb1a9410cfa6b357c1f2e185e8183584cf4ab237961ddd7a561a0efb"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Metadata.dll",
+      "bytes": 122152,
+      "sha256": "d5b1ef32f8d005a176351a6fd49bb90de8e9d7ee3e101803063431fa2f6fa7a8"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.Primitives.dll",
+      "bytes": 21800,
+      "sha256": "bf3b0bc3ddab81463629e78210eb530743f4d6202d2ab02331dde09821216185"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.TypeExtensions.dll",
+      "bytes": 19752,
+      "sha256": "b7648913409545097abf4936f62c96660b25f15c51adda3c96152543ca40b141"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Reflection.dll",
+      "bytes": 16168,
+      "sha256": "9aa8acb636611ba2324bedd4dd9650bc9e7a1f016cf7acc4c2a69051c0cbed4b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Resources.Reader.dll",
+      "bytes": 15144,
+      "sha256": "c72a47e82365921b09a61f1ca72b722e4d28683d085035937dbfce32ba4503e2"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Resources.ResourceManager.dll",
+      "bytes": 15656,
+      "sha256": "41b34aa003a48c68fba186cd7b5ea4f68e8f6ce4418bd5a68a158a79ad58293c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Resources.Writer.dll",
+      "bytes": 16168,
+      "sha256": "55a20cdea691b6c1964a30b9e14d7bf59a7f59e86d9d1ab66b586a9fef68a2ac"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.CompilerServices.Unsafe.dll",
+      "bytes": 15144,
+      "sha256": "0c2a4e77f62bc47e73ee4868364d7de3013cc41b42f71989f601c0cfb2ef8c8d"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.CompilerServices.VisualC.dll",
+      "bytes": 17232,
+      "sha256": "db0e148b84f883b0b9620112bd69d4fc305834c5592d8db69a656b12260a8aa0"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Extensions.dll",
+      "bytes": 17704,
+      "sha256": "95b093657b594177ef20472048c926bb9ae39feae5783d6c630f56183937c433"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Handles.dll",
+      "bytes": 15656,
+      "sha256": "ddedbbb02981acde482bd310b3b48fe9a7003dec68d0cc4b9bcc3663f187a2a8"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.InteropServices.JavaScript.dll",
+      "bytes": 25896,
+      "sha256": "125a105e7aeba4925d38c6430fdb75c29cc9e69d18b2dcbf7aafbdf87b44e831"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.InteropServices.RuntimeInformation.dll",
+      "bytes": 15696,
+      "sha256": "499c566f61b78a68d0f48ebb3a6d431c4f3875a1067943d903eab1e7d43fedc0"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.InteropServices.dll",
+      "bytes": 101160,
+      "sha256": "ece82b0872ceb4a4b7111c765acd21c05b0b3398356b1c9580848719438b93d3"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Intrinsics.dll",
+      "bytes": 466256,
+      "sha256": "9ba92e69ca92189d1ac537962fa0f6b699e0fab96348f2fb040daa6284e615df"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Loader.dll",
+      "bytes": 19752,
+      "sha256": "bd1f897f4035b7d8830b387a68ef3d5d929f947caa3015c9966e0599c8931043"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Numerics.dll",
+      "bytes": 36136,
+      "sha256": "b8df2e8f15ba21a37176f1d7487f02450220da37cfccae02467b210c180e256e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Formatters.dll",
+      "bytes": 23888,
+      "sha256": "5a224498edbabdf2030da4ff8048e61e41af44c02097eab8a28592187218a9c0"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Json.dll",
+      "bytes": 20776,
+      "sha256": "db031f12af5b04a1939131efc14ca89676427afac1cda4475e273e24f95ddd1a"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Primitives.dll",
+      "bytes": 19752,
+      "sha256": "b4721e1f40f799c055c2acc4ae5629c49a6c699cceeab1aefd679f55d8d3dab7"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.Xml.dll",
+      "bytes": 39760,
+      "sha256": "da0c57cbc659bbcb7de413e72ed92b2543e9699b2f8f99c728816ab07a40dfca"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.Serialization.dll",
+      "bytes": 17192,
+      "sha256": "20c4a3e000268704d5a9fa72e10ddec5a462f2ed5ecd18e24d53c0b6929d15ed"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Runtime.dll",
+      "bytes": 862544,
+      "sha256": "fc8507281669095a338eeb3cc2a4c0c752f330ce1bafdd9a3cd89311d4eadfe9"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.AccessControl.dll",
+      "bytes": 37160,
+      "sha256": "af8430ea420055774c935aea0df079adccced58fa5b09f10dabcb30aef21538c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Claims.dll",
+      "bytes": 32552,
+      "sha256": "20d79f18812c3baa78f38902e0de9b52a45169c77e486a03fc1aad3ae99c0296"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Algorithms.dll",
+      "bytes": 17192,
+      "sha256": "bfebcc7308e202b1971d621883574a203ecab74ae992a152dd4071ed08fa00d7"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Cng.dll",
+      "bytes": 16208,
+      "sha256": "a238bc58dabf109aa46685cd4aa3d18a8cc35f4b1e3788710465f2afe5813c9c"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Csp.dll",
+      "bytes": 16208,
+      "sha256": "3737f8ea4d0a41d83e3e2d860e74b3ca2aab7349f9a265577b0f66faaa6ef109"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Encoding.dll",
+      "bytes": 15656,
+      "sha256": "75b36584506dbd64b68e0d60a2189f70f03262d620cdf26b394b0abc97fe52fd"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.OpenSsl.dll",
+      "bytes": 15656,
+      "sha256": "dc856022ebdec7f030817c7a6a5fcda06aefaa7e2c7b4cd83d8525db476d9823"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.Primitives.dll",
+      "bytes": 15656,
+      "sha256": "2d4f209f4b2f7bc0af1e7fb39c99349f6ad081689e89028a8dce1d580e1f39d9"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.X509Certificates.dll",
+      "bytes": 16680,
+      "sha256": "6fe5848bafd502672fd206e4208b64e1aca84627427e131e33167b0795309207"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Cryptography.dll",
+      "bytes": 163112,
+      "sha256": "39447f3a09b6e9cae88b79750078728e414dcedf257787180d6e15f5383e4726"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Principal.Windows.dll",
+      "bytes": 26960,
+      "sha256": "ca3cb2ec3365fc9e2921c9436560f801f94f0612db4db4189042c85cb55095a7"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.Principal.dll",
+      "bytes": 15144,
+      "sha256": "089428925c94b2cd5a5faede9bf7799ffa144e899a1e56f1c2c05159660da580"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.SecureString.dll",
+      "bytes": 15656,
+      "sha256": "f51d458bde0a367ebec626cc1c2247a374f5145170fd5df9fd501426f2cc2c4b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Security.dll",
+      "bytes": 18216,
+      "sha256": "4887e93d7fbf6c6f0909579400ef892d42896a2123cc1a0c702f7c555e9e9d98"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ServiceModel.Web.dll",
+      "bytes": 16680,
+      "sha256": "9af5e984adf9989a462618c55de79429563ee20f583e40ad9d001f5022d0b4bd"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ServiceProcess.dll",
+      "bytes": 15656,
+      "sha256": "e40fc253a50bee22e6e20e1af1140bdeb5e92f4459f0427bc8a05a0e81e74821"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encoding.CodePages.dll",
+      "bytes": 15656,
+      "sha256": "2393c81b85f4f40e2d96ad4e0e4e8f0e2c4a466cc35c4ab6abdf8b390003d482"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encoding.Extensions.dll",
+      "bytes": 20776,
+      "sha256": "1c5e1912e64a8d42566c50fc7b6da7c34f07562d0ad5b3d0f14829d63cf0eab4"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encoding.dll",
+      "bytes": 15696,
+      "sha256": "677fef60be9acb153be1ccaac221ecc93c358231d21cbfd69c98ae98fa71929b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Encodings.Web.dll",
+      "bytes": 26408,
+      "sha256": "c8f11b47779ba611464f2e0328920f3c8dcd4c3d7c85cef458d397687388edab"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.Json.dll",
+      "bytes": 82216,
+      "sha256": "a611c809a9d4076027687d4c951202cb06b714e8a178f4b7583566012e345111"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Text.RegularExpressions.dll",
+      "bytes": 36680,
+      "sha256": "3b1e0eab651b23c1993ff2e18be73c1e561cdf7a0cfea449ce0d8c8d7fd1d096"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.AccessControl.dll",
+      "bytes": 20776,
+      "sha256": "8aa7cb9f234797a4d07e20f7d67dc72cabc6e52ae29250b4b509e8eebc1d4130"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Channels.dll",
+      "bytes": 19240,
+      "sha256": "bdd9a16f583cccec51d1acc52a795ee56c1597b1c3896f38f23e90676924a9ba"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Overlapped.dll",
+      "bytes": 18728,
+      "sha256": "64258773cf1d90e7cde2e720c4fda5346253b7feac73ec2670d62403d0def3d6"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.Dataflow.dll",
+      "bytes": 32080,
+      "sha256": "d305d6ec83fdcb436edfb481de3eeb0a0f9087570d0a071735bfa75b3d9912b7"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.Extensions.dll",
+      "bytes": 15656,
+      "sha256": "c5273c4e16be5914a4975a7fe8c63d5db054931fe9bbb8fcef249e83ed246eb0"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.Parallel.dll",
+      "bytes": 20264,
+      "sha256": "6d68830d67da12f6c2adf0e8a96b693d3557cbcda8556ed664c11fe4aefdd3b8"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Tasks.dll",
+      "bytes": 16720,
+      "sha256": "f0bb5a82e4f78a07499688319ba0bf5078758dddd5c6007028d65a18baeff45e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Thread.dll",
+      "bytes": 23848,
+      "sha256": "5a8fc87073e7ae33249740c7aa2a32963b5ce6acbffe8d57a4f4a62ef02c22f6"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.ThreadPool.dll",
+      "bytes": 18256,
+      "sha256": "e32047c6a5fd3d871e0822aafd445a4e06d0f01a113c8443a9f8d20627f5b512"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.Timer.dll",
+      "bytes": 15184,
+      "sha256": "af0370e66f201115b9cc2bc774ee6e54858647381ed55bb72e44095478d03a44"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Threading.dll",
+      "bytes": 33576,
+      "sha256": "5564a826e8db99386c1e6678e4ef663daa8cd415f48d465ec65d210dfc326685"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Transactions.Local.dll",
+      "bytes": 25896,
+      "sha256": "7fa63222ed5d1c315a59a5d9f283685133d0d0cd441963d795a75bca11a7d595"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Transactions.dll",
+      "bytes": 16680,
+      "sha256": "32c9035d0d0425ac81823e0dcf390da9873af970d0c2856f584ac2470d806550"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.ValueTuple.dll",
+      "bytes": 15656,
+      "sha256": "e6ec3e8c2013a3387978258aa60e947b46ef1d0bdb97d26f860609e696e1365e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Web.HttpUtility.dll",
+      "bytes": 17192,
+      "sha256": "a518164132e4d9833b05d74f2586bb8b0d4ae34aa507fada43c837c419338339"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Web.dll",
+      "bytes": 15144,
+      "sha256": "86c80fb864eecf77cd27c40bba62c5385e44bb689c4fc3c123769ecf4d77efc2"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Windows.dll",
+      "bytes": 15656,
+      "sha256": "32dcb5c5f2dbd85b744ff708f39e3a703f5a75e96bb715569452601de11f1b4f"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.Linq.dll",
+      "bytes": 15656,
+      "sha256": "dac823176f31b117dbac2ad9576f59607425eca50c73d02331ac3bc4852bb32e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.ReaderWriter.dll",
+      "bytes": 116008,
+      "sha256": "398c0fbb0655cc800f95ec24d451072ec4946d4d04b2f902b71b1f3963acc127"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.Serialization.dll",
+      "bytes": 16168,
+      "sha256": "3db5344fc841410d44647dd5a1fef3b1d543501d59ded9ebbc96be2372913191"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XDocument.dll",
+      "bytes": 34088,
+      "sha256": "1da029ae5199d5aa7ee31b188825f5fcee46c26c7db0288d154253085e862e50"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XPath.XDocument.dll",
+      "bytes": 16168,
+      "sha256": "7df88b906b2be9b8f354edca23048c2a3b461e52a261521e169c2eee79b6c6c6"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XPath.dll",
+      "bytes": 16680,
+      "sha256": "7f5631a042f9e83fd8d00424183680f3dac61b7bc07698c7da4e40f460d54096"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XmlDocument.dll",
+      "bytes": 15656,
+      "sha256": "dd70d2a5487da1fd127582dce7f9981dcba248d50683052055643dc9e321126b"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.XmlSerializer.dll",
+      "bytes": 50984,
+      "sha256": "74e81c4d9faf979e1385aee18bc46639c79e265fdfd13cab645f5d08f5532eda"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.Xml.dll",
+      "bytes": 23376,
+      "sha256": "28f10f4ffad07b173af6114e74c5f57e8e02accb59850ef22abc4c6351ef349e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/System.dll",
+      "bytes": 49448,
+      "sha256": "97a1f413d77e9c3d92c9a36c6de8e1608bbac801b75046785516ae1e82c397ed"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/WindowsBase.dll",
+      "bytes": 16168,
+      "sha256": "79d27fe8e5f0b9eef211809d683141a7fbe1af2d920ca7e37456e9870856821e"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/mscorlib.dll",
+      "bytes": 55592,
+      "sha256": "2129b26e6f011805e03fdcfb65d56f2a968c2a783e32eea9ec6678af106cdd48"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/ref/net10.0/netstandard.dll",
+      "bytes": 100688,
+      "sha256": "6b7a22cce7004dea2d1747db1f150e2809afa7d41508b1b288f967ec1332f2f5"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Roslyn/bincore/csc.dll",
+      "bytes": 141096,
+      "sha256": "1c70425ebcac3cff69b46f93b2e46ce8f4367ab57559e9678fe8f54afe925b08"
+    },
+    {
+      "path": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig",
+      "bytes": 15007,
+      "sha256": "f23ec2c89e959e21eb6135674b3108b5cb78601b9e5e14de4252fd7fffaaffb9"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.bcl.asyncinterfaces/6.0.0/lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll",
+      "bytes": 16000,
+      "sha256": "5705d245072d3eb78400547b32147dbb6e2c8b02ba8bda76729798f5efdeaecb"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.analyzers/5.3.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll",
+      "bytes": 2478384,
+      "sha256": "014848d4fcc7b8cb5b04162ead71b084d5c61915e095f48afae70ec9d868c780"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.analyzers/5.3.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll",
+      "bytes": 34104,
+      "sha256": "20814782fb36c50bbf1b4ef3f85bc195c8c422a172df5c3bf3af3789d61f87f4"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.common/5.6.0/lib/net10.0/Microsoft.CodeAnalysis.dll",
+      "bytes": 3085096,
+      "sha256": "42c9ce7891470f430267e2dc02d03571f9d046a7e7e121107754bee58d344613"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.csharp/5.6.0/lib/net10.0/Microsoft.CodeAnalysis.CSharp.dll",
+      "bytes": 7013712,
+      "sha256": "1af1de8a162d2312eb2f6b781f5edbe8cec7d5cd268c7e4de24396225e54260f"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
+      "bytes": 129808,
+      "sha256": "cd27a044799acfc9e04c451488b75dd20cd49ded5fd2dc7c6ff2dac0656cf1d5"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll",
+      "bytes": 2495248,
+      "sha256": "572bf5c83b409a919d01da199c63cc58c7f7cec6cb8037419075471b47cb84c6"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll",
+      "bytes": 28944,
+      "sha256": "722430c2456c43709a390c3e411f39d1fd32ccb7c820b39d1997e2573cf0a581"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.dependencyinjection/10.0.2/lib/net10.0/Microsoft.Extensions.DependencyInjection.dll",
+      "bytes": 96048,
+      "sha256": "d723a3d85ccff102a2aad1f3fd39bb89aa71bac8d15b1bc56bded67087efb266"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+      "bytes": 66312,
+      "sha256": "2ed3794ec58972f03ce9377a16fec1c73c7e1ffcc0392890579c05fb789c0f13"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.diagnostics.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll",
+      "bytes": 31496,
+      "sha256": "f307f2b10163e42593822dd768b530516eb8f7ba24fda3576d18b49a8f0f05f5"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.fileproviders.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll",
+      "bytes": 23816,
+      "sha256": "345e29f6887414124b18f67de668c16ff77e20fb195bbba4234e09a2bb1f9f22"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.hosting.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll",
+      "bytes": 54584,
+      "sha256": "ddb12c9ee77c9ad262f2202808010b727016077d701ddeb4d93cceaea709646d"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.logging/10.0.2/lib/net10.0/Microsoft.Extensions.Logging.dll",
+      "bytes": 51984,
+      "sha256": "d24a34bf563fb4589f15d66eb902c8ea6e6919338401d8c1949d523fb9ec087f"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Logging.Generators.dll",
+      "bytes": 80688,
+      "sha256": "88139b918cc7fab679feef0c4fd4a25ba3773082d2ae1c6cf485f9cc92cdc6f6"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.2/lib/net10.0/Microsoft.Extensions.Logging.Abstractions.dll",
+      "bytes": 67336,
+      "sha256": "69642e69c3259e4defee5858bbb9a36260ca2171524f55510110f4c7f86770d4"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.options/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Options.SourceGeneration.dll",
+      "bytes": 134928,
+      "sha256": "c0f9fc70a18c42637f8801a6ee7af722943fb7093731c95e85269f29198c7608"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.options/10.0.2/lib/net10.0/Microsoft.Extensions.Options.dll",
+      "bytes": 65800,
+      "sha256": "b0a7ca186efe6c6e52779d5f0b5698fd8cf3d81eaee9333a44312f59e6a432eb"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.primitives/10.0.2/lib/net10.0/Microsoft.Extensions.Primitives.dll",
+      "bytes": 45360,
+      "sha256": "36785e9195be2ddbd3eca11a94bbd6b3f4ac0efc27fb84dbf042fed8e16e5568"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.extensions.timeprovider.testing/10.0.0/lib/net10.0/Microsoft.Extensions.TimeProvider.Testing.dll",
+      "bytes": 33824,
+      "sha256": "4cb6456c9432c2ec0b7dcfc4a2cbb84ffc3f72ab985aa09e8cd78139e0d18976"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.testing.extensions.trxreport.abstractions/1.7.3/lib/net9.0/Microsoft.Testing.Extensions.TrxReport.Abstractions.dll",
+      "bytes": 32824,
+      "sha256": "cd0eaa3498e4d3136cb63406bf2b09e8a1279a475d280d50b6ccb66042edb469"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.testing.platform/1.7.3/lib/net9.0/Microsoft.Testing.Platform.dll",
+      "bytes": 1169952,
+      "sha256": "73b2c867203c178c19265eb23c26a2ab840381ef24d7c70c397269ee3dc8c0a8"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/microsoft.testing.platform.msbuild/1.7.3/lib/net9.0/Microsoft.Testing.Extensions.MSBuild.dll",
+      "bytes": 57376,
+      "sha256": "00986beed44ac4054abaa625730dbd44b173989a1a7685bbe7c85b6b91723239"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.analyzers/1.23.0/analyzers/dotnet/cs/xunit.analyzers.dll",
+      "bytes": 284672,
+      "sha256": "3e0964a5a0560406a641a2df0f636d41ba422cabea5f713add8853b0d97076d0"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.analyzers/1.23.0/analyzers/dotnet/cs/xunit.analyzers.fixes.dll",
+      "bytes": 227328,
+      "sha256": "bb76a72d7af658f1d40eb00c80ea1a29b47c8c577bb8f88877a5a6be7ea30a3e"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.v3.assert/3.0.0/lib/net8.0/xunit.v3.assert.dll",
+      "bytes": 210696,
+      "sha256": "e8d071b3506eb3413a2a4130a613ae604626fc6d5b85c63c430fa2c42da881ae"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.v3.common/3.0.0/lib/netstandard2.0/xunit.v3.common.dll",
+      "bytes": 186632,
+      "sha256": "1201b512ecd0b3d89c81cd0822ba73907dbabb7126e526f4777efc3224515af0"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.v3.core/3.0.0/_content/DefaultRunnerReporters.cs",
+      "bytes": 1018,
+      "sha256": "e110bb9fe21ca6c3120a00382c773a086d62a008a0b0d2b76d08416f27d92bf2"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.v3.extensibility.core/3.0.0/lib/netstandard2.0/xunit.v3.core.dll",
+      "bytes": 480520,
+      "sha256": "e61bda4c4ebe5f7e0112a044bfc3e2b518f76e9870d9b27fcf8ff740aad9981f"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.v3.runner.common/3.0.0/lib/netstandard2.0/xunit.v3.runner.common.dll",
+      "bytes": 972040,
+      "sha256": "06cec7b7178f7be9a3dfa31af0f7df5c7e5c795d147cce7f2ff367282c08bcd8"
+    },
+    {
+      "path": "/home/rupicola/.nuget/packages/xunit.v3.runner.inproc.console/3.0.0/lib/net8.0/xunit.v3.runner.inproc.console.dll",
+      "bytes": 163080,
+      "sha256": "504ee317669e90bb49b6431cc2d5f17d42b3a9860cad59377b1c74e1bc14b543"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig",
+      "bytes": 10824,
+      "sha256": "630a8659fc5ba2d8278dfb3d8e8420446344bd957037f60aa6645c55c47f33d3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-060.cs",
+      "bytes": 1033,
+      "sha256": "7eb096821ce8a3280757d0db23cfe517d31187e630684f495f0b1f60a29df876"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-142.cs",
+      "bytes": 836,
+      "sha256": "949f5195183049c610f4632c4a9e07cebca54fc0b674d7672303c512f0c14f3d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-204.cs",
+      "bytes": 980,
+      "sha256": "718411f756db3fa29ea10c48b430f9dc0ce72167f65d508e1976eba011ff76d8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-205.cs",
+      "bytes": 1053,
+      "sha256": "77b86d7c941b055f24d06b2c8ed30619e7c4288a720dfac258eb73226d1e0a57"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Core.UnitTests/FULL-211.cs",
+      "bytes": 1112,
+      "sha256": "c831150b9a796cfb77b54e7620ed95cb3b4c67ffde9db26abee71ce73af57a75"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll",
+      "bytes": 289280,
+      "sha256": "b211c25ba314f6ab92f65e202fdf204bf2affc81faf279676dd6906189e25393"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/ChildProcessTestRunner.cs",
+      "bytes": 3499,
+      "sha256": "6c9b1302795903c9880e619c12e05d1bb7353781d0372cac7e549dc69ac2ff99"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreAuditReproTests.cs",
+      "bytes": 4307,
+      "sha256": "926ce7b360e09e8e42479962eaedbfabcb6aa8da46cfccccee088f6a8d305feb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+      "bytes": 8231,
+      "sha256": "4c5cba1c0c827f8a15cb3c545672e183252d9244a647a019ecc723435eb2b537"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "bytes": 7503,
+      "sha256": "ecaa0167ed46ba84809f1789d121d0bbba314e6e6e6a3951cf87020e6a910c48"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "bytes": 9524,
+      "sha256": "fe0f0337ed59109a259590a1497320c7a4e7e233db07911c0ad6b21b04a47556"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "bytes": 12794,
+      "sha256": "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs",
+      "bytes": 12254,
+      "sha256": "7b2849955ecfd57c61ad61c438994615b680445b6abee350a861ef7955a148c5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+      "bytes": 16695,
+      "sha256": "e46904fcfd3b69e78358de905917bac4fc5796e89aee5ef277b47ccc4fe242cb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryManifest.cs",
+      "bytes": 5971,
+      "sha256": "49ac596611527a2d57b83ee3fad39fb44c77381c451faa1ccf90ed6754c7a1f7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs",
+      "bytes": 19306,
+      "sha256": "e9f5a1ef0e80aff32cba6d3d75d5625d95937d7ae14508c64a7126de5091d33b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/CrossLayerAcceptanceTests.cs",
+      "bytes": 8070,
+      "sha256": "a775510040aff92d84baf5ff427161ad4ed2921344f6d3aa7a0ab42c2de0870c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "bytes": 22249,
+      "sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+      "bytes": 13827,
+      "sha256": "958a5e4783b1f5d9a0a7a2102e9f65c8fcfca71d7da971aa331e838ef190ffdb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+      "bytes": 2516,
+      "sha256": "9337124408a09f1a0470f15f1f35f56b5bdff60129039875e85f6214a41816cc"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "bytes": 11787,
+      "sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+      "bytes": 3573,
+      "sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/ConsoleCredentialReaderTests.cs",
+      "bytes": 7207,
+      "sha256": "d6e02a1f3fcbee186b6d465db79fd1dff4b744f032a8c5681cae281d103916aa"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/HexParsingTests.cs",
+      "bytes": 5465,
+      "sha256": "88b9e489b25d68f425b6320d36a84a213bb882b8d3a66db4e092e304ae39cea4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/UserPresenceIntentTests.cs",
+      "bytes": 13771,
+      "sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AlgorithmIdentifierParameterTests.cs",
+      "bytes": 10296,
+      "sha256": "1e392325edcc90d627a0dfd65a1f58a912c2fe20f5adacffc536f70352d9f768"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+      "bytes": 5027,
+      "sha256": "de9ee73e9d918441d66e3f71cc0197c1105b4625f30185fa2a987612b7215fc0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "bytes": 22563,
+      "sha256": "375581b5321b6b8c4975d137c17e389d27e2ab7ea7b11c221fb51dbb20bafd44"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+      "bytes": 21890,
+      "sha256": "4051b8ba7c567249aeb6871d2eb5864a52b2c652cb24c93977f960dc6b272145"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+      "bytes": 10079,
+      "sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+      "bytes": 11177,
+      "sha256": "3ba5f002966c4566ff894a214079b9c570167304dd1a7b512a898640febbfaf6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+      "bytes": 11100,
+      "sha256": "d66e1e5976ce1090b6545cacefba11e4f66c07f4e060d417e58cd94bfd6a511b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+      "bytes": 5659,
+      "sha256": "3d176b07a6c9ee5a51c88efbf49e06fb9273d54f6d42bbb96207655a718cad8a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicDefinitionsTests.cs",
+      "bytes": 11484,
+      "sha256": "26d450371b0ad0de2af0a23a5f5f4ad36cc2ea1c9c38f964adb272017bb4ce00"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs",
+      "bytes": 16748,
+      "sha256": "b0d78f740745504de4c6e636f2013fbf95ca070938b2483f2f3c993ef3cfc294"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/Curve25519PrivateKeyTests.cs",
+      "bytes": 4024,
+      "sha256": "7a41e3311bd2d0e8849584a11264437a688c2b416f6cd238630608b351df1ecc"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+      "bytes": 2291,
+      "sha256": "8c9ecb3fbfc3407945111b012b39c4171961ed9c652e07b5dc7d134a406cf0dd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/KnownPrivateKeyVectors.cs",
+      "bytes": 5559,
+      "sha256": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+      "bytes": 5171,
+      "sha256": "b0b0ea4eeec11dd117983b4f1cd854bf6a230ac03514d249e0cb1dfc86c7c5c0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+      "bytes": 8286,
+      "sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+      "bytes": 14874,
+      "sha256": "c40f52063e35bbd97a0f1ab60c9a4b1e25a03cc7af20615be4aee6ff5333feff"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyZeroingFollowupTests.cs",
+      "bytes": 3287,
+      "sha256": "9ed00911dd78fa126730664aebe3e658bac914db05826d1e45b72b03f40b7b99"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "bytes": 20295,
+      "sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+      "bytes": 8857,
+      "sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+      "bytes": 9459,
+      "sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "bytes": 42010,
+      "sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "bytes": 20833,
+      "sha256": "a4adb44b77ba49b91f3bc6311130e627fe25d96c8d059cd33f3f3254576e4bf3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionTypeMapperTests.cs",
+      "bytes": 2201,
+      "sha256": "914ea51a1376be50f74526cd3a1bb26bdc970b446eeba4103652bd16f9be0fa4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionTypeTests.cs",
+      "bytes": 1520,
+      "sha256": "1c7d6159e9f88f9da5c3b53ec5aad6e9f358e5a9391f5c336bfd62239e9c3cd5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceChangeFeedTests.cs",
+      "bytes": 9552,
+      "sha256": "9669997f6a9aff0e5c7c2210ada816c3c8624907db7df75a553b78dfce76ec49"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionOwnershipTests.cs",
+      "bytes": 11348,
+      "sha256": "30990ad0c384418386558e0b6ae7b1de2d019c98a7c620f8e739b3a1d3cc1bc4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionRegistryTests.cs",
+      "bytes": 24222,
+      "sha256": "0dbcecbc4b6606d9e901f768c0a8e259f531dbfaa60b354e379aff250b5ccf28"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+      "bytes": 11561,
+      "sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+      "bytes": 10572,
+      "sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+      "bytes": 15348,
+      "sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+      "bytes": 5255,
+      "sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+      "bytes": 4035,
+      "sha256": "7fb638eb701db765ada5fbd04796f272baa78fae19cb213e7c4f7cf66c5957c2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs",
+      "bytes": 15267,
+      "sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+      "bytes": 29939,
+      "sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryWorkerAdmissionCollection.cs",
+      "bytes": 2833,
+      "sha256": "2cc151cbc6c0314d94b8b5d66e472a8b8cc747ecd0791b95730a035b815085f9"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FeatureTests.cs",
+      "bytes": 1684,
+      "sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysEnumerationBudgetTests.cs",
+      "bytes": 10543,
+      "sha256": "14d4a83b5684d5478ad7f4b9ac8b51d2d48f137755fee7440a61a6e804562171"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "bytes": 46259,
+      "sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysPidMergeTests.cs",
+      "bytes": 8335,
+      "sha256": "2ed38592f771e440f6b13313b5badd33df221710a2806c45222aa899ba3636f0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+      "bytes": 28914,
+      "sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysTests.cs",
+      "bytes": 6496,
+      "sha256": "3ed50f2772f39efefa028a8285c44e7e39d1378fd21555308969d95c5bc76125"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FirmwareVersionSelectResponseTests.cs",
+      "bytes": 2260,
+      "sha256": "a68f7ea10a23a40ad64016e03d88fe37e0609b0ba4cd629e0d172e689360d982"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HeldExceptionPropagationTests.cs",
+      "bytes": 3886,
+      "sha256": "701241dd20f11f931bff67b8178b81231d4e3f6a936e961fa3c4324f58c7a6ae"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HidConnectionSlotTests.cs",
+      "bytes": 3746,
+      "sha256": "245278271407b9a8bbb45625d5b4755ad6f4ff1603bc73a7e38c0be0a331c1d4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HotplugSignalsTests.cs",
+      "bytes": 5959,
+      "sha256": "01e0601755b80b3a3881ac5a74c83cbcba99aa6e2e6e50398be6c69454c771af"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "bytes": 28870,
+      "sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscConnectionSlotTests.cs",
+      "bytes": 3318,
+      "sha256": "982b55764b21b769aafc7863f2da2ce5efe9890c86feba3915c4dbed883faa5b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscDiscoveryLifetimeTests.cs",
+      "bytes": 4914,
+      "sha256": "1e3ed0e21ad843e5ec980cd3a3277e60dd7b0bf9ecd9c61e3003347286eddd4b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PhysicalYubiKeyTests.cs",
+      "bytes": 6723,
+      "sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ReaderNamePidParserTests.cs",
+      "bytes": 3076,
+      "sha256": "2f3c17e04b5f907451e590cc882f16a5700f50515e47e14f85e41c8e0181ccb7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/RescanSchedulerTests.cs",
+      "bytes": 9681,
+      "sha256": "84d9cbc0cf2dffe1e82443b2dcedd23a0dd5936ac03a5b4a72a1ce915775c6c5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ResolvePreferredConnectionTests.cs",
+      "bytes": 2751,
+      "sha256": "c1ef66ab44a1a914fa77c7ed9b5c5a30af31db33f5d715e6df798bf721703eb4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SessionTransportTests.cs",
+      "bytes": 13391,
+      "sha256": "5a6b87b37aea98564c0e073022e55fb69ad0667015eb308e6fe9be16b448fe7e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SnapshotDiffTests.cs",
+      "bytes": 12155,
+      "sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "bytes": 11890,
+      "sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+      "bytes": 17050,
+      "sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerStaticTests.cs",
+      "bytes": 12138,
+      "sha256": "5a2faefe0ac1588e2cf8919863cc503a05670c8139db9768eb9c217d9763773c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyManagerWatchTests.cs",
+      "bytes": 5812,
+      "sha256": "807f3fd50aa10faffd4233fb828e260cf6efb57108e42307f1ecd896afd0435e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorAcceptanceTests.cs",
+      "bytes": 6070,
+      "sha256": "c51bbcda36c0038c8e14736a5121509e1bd36c04affbdc28876f50f1dc03652b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorTests.cs",
+      "bytes": 37015,
+      "sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/AsyncWait.cs",
+      "bytes": 3668,
+      "sha256": "42616a2053b76e96bd0cf7257874027df77bdab9abfaabdeeffcbfe67483651b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/DeviceChangeWatcher.cs",
+      "bytes": 8002,
+      "sha256": "ce429da64d8c5657c6b4f37c176e72c496edf90117578b7f1f843e73c61e66bd"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/FakeYubiKey.cs",
+      "bytes": 1690,
+      "sha256": "5c4e5fff6adece702e4a7b736d985b6866f5024d987a634aff6ecc8bd931bf61"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/ObservedTimeProvider.cs",
+      "bytes": 1505,
+      "sha256": "f9e0c12fd31627a11d7b316d00d81cf78d11a61b3ce4506992bd7ea14e692b4b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/OwnedMonitorFixture.cs",
+      "bytes": 5638,
+      "sha256": "3a3ef5c90cd596c76e60962930b2fb3bcb3ce20cd2d1e4656210664f389dd323"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/TransientScanRetryTests.cs",
+      "bytes": 5192,
+      "sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Native/Windows/CfgMgr32InteropTests.cs",
+      "bytes": 1613,
+      "sha256": "117a95d2925e465c3971a7172284a1d4701216a2090e9579b50226a03958d07a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "bytes": 13691,
+      "sha256": "d07b2786c2201ce46ea2b6f06e92bb9cfd03ce18c70d9e57162920f7b0649618"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "bytes": 46612,
+      "sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolConcurrencyTests.cs",
+      "bytes": 10637,
+      "sha256": "3725b4d92260302b51f3a5ec5eab0537eb876e799b0688ca860b3e695a2e9ebe"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+      "bytes": 41229,
+      "sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "bytes": 3811,
+      "sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolFactoryTests.cs",
+      "bytes": 3702,
+      "sha256": "476aa9aa857fcebd94f58127c04e500b961521df7d3bcf202d3186fde22b82cf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/ApduFormatterTests.cs",
+      "bytes": 4142,
+      "sha256": "ac64332cf8ba703ad7677d84f5cb58e2094bd963f8684ad4d37d3661c931a295"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/ApduResponseOwnershipTests.cs",
+      "bytes": 1029,
+      "sha256": "97b22494342eb74d952d3526d4c7b1f15fbdd259fcdb119e8478e314fab2632a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs",
+      "bytes": 2900,
+      "sha256": "197768eb7cf136a1627e669307b515d28b5398f44da95f0de358eeb5eb0ccf28"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+      "bytes": 2444,
+      "sha256": "2238b68c379cacc52dc4b8648760ac5d05961092963ce2e44f0f761268e6ebe7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolConcurrencyTests.cs",
+      "bytes": 16991,
+      "sha256": "997dc048355ef6d952681854a65c71d5147e3c067996bf41efe12e97017b30a2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "bytes": 15888,
+      "sha256": "0f1a4eff327d3d87ab02e9b6f6a6fd69df1be586881f66409b6912b1c2789bf3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "bytes": 16120,
+      "sha256": "0309afaef1dd32bc103b3aa064effdcdf8fb8a747c8f3273731defa804303494"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "bytes": 38722,
+      "sha256": "366f2813be1a73df6e0c9fcfafd415260da0910f8e7b2421c4b4e8ab47f17240"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+      "bytes": 9716,
+      "sha256": "e86dd2e2d88973d0bec0419a293e721c693502681ca2048e4977cd20e76b49f2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "bytes": 10079,
+      "sha256": "006dbb8a4760392d01988703709a6e0c74cf441c9bf359c4f9dc196af51c1013"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+      "bytes": 13127,
+      "sha256": "6db4dcab6ef539a976e76e032de5004970e71caaa565bad4ceef9877763c7c58"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+      "bytes": 4243,
+      "sha256": "6ba679af8ed31428777fc5872a9355f3b602c784b482481999366e67293d760d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+      "bytes": 9721,
+      "sha256": "a6fcce466e6c12262dbe9c4d7fe6b856993e9f6aa6ebb7e1beca66774ca59bc1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/X963KdfTests.cs",
+      "bytes": 13134,
+      "sha256": "2206aba4feec8e08c9743350bf1c5fff789f5f4ac1b7726eade8b8c260a64ba6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/RuntimeResilience/RuntimeResilienceStaticScanTests.cs",
+      "bytes": 14080,
+      "sha256": "0c22f9586d74e7e9d46c8feb6f6da0eeef882563f7f9e8d458881dbe4f766752"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationIdsTests.cs",
+      "bytes": 5069,
+      "sha256": "36daee6e9c6f6c910706edfde90c82a6656355870b4084d60f43ac8b37d70177"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "bytes": 21926,
+      "sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawAccessPublicApiTests.cs",
+      "bytes": 1480,
+      "sha256": "00c1795b873a807651dffb2e775157288140e4f452b89a8513df297d3cdf0483"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawCtapHidSessionTests.cs",
+      "bytes": 6444,
+      "sha256": "a4325d673cf500ebcbb70b25ad7982857fc1770554cfab4a2d667e127884bb33"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "bytes": 7270,
+      "sha256": "2cba79d85a56d031cccb3190a80da9db59e30316ef6cfb12f706e8ef1e21a859"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionConstructionFailureTests.cs",
+      "bytes": 6933,
+      "sha256": "6a23d3d98244799c3632e3a2305afa83d38f80c14a7cb737c31bf48500bbbf47"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionYubiKeyExtensionsTests.cs",
+      "bytes": 12363,
+      "sha256": "dbf533cb517cb1f69605d2e559ef43ceeb92e45caa93331736be6c3b3ebe7a41"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "bytes": 8233,
+      "sha256": "d4e0973e0eaa5864f603876404656d19f06cf0f09e946dd1f0f0ad50370f4806"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardSessionTests.cs",
+      "bytes": 12793,
+      "sha256": "17665fa97aaae168f6e89a08ed989ded1541f19e523ad69439d60f66e39b62af"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+      "bytes": 6735,
+      "sha256": "163ad7c64d6cfd2429c5fb264ab9e9a982f18fcbca89469b52e777150282320f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionCreationOptionsTests.cs",
+      "bytes": 2490,
+      "sha256": "7743945a537f2551b33983a7cf48740b9a6b73c9931c2d808c42edf35a685093"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+      "bytes": 12635,
+      "sha256": "f082f2fb5630e1dee6c8549ee6676823e1b601239b118c43bf6aa5781c60325a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/CoreFoundationStringTests.cs",
+      "bytes": 1597,
+      "sha256": "adc61a0e5b4c6e882a8bee2c714d6cc6f27962bae43fb24bae38fe1eb4f6a4e2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/FindHidInterfacesBoundaryTests.cs",
+      "bytes": 4865,
+      "sha256": "2b4c17d56ab72d2a22c0e1c82d91c3d823e36f7fce38eb73fed6d2a5b3203b2d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs",
+      "bytes": 9025,
+      "sha256": "f7ddfe4cf0c5cb08c62c4044121286192c639d990ea32697533122dd11d97318"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidInterfaceClassifierTests.cs",
+      "bytes": 2679,
+      "sha256": "83e7f8999f42f2bec87b154d39f69dd572fe1de40889a6a63126378ec7995f03"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDescriptorCloseTests.cs",
+      "bytes": 5011,
+      "sha256": "f3c0c925f65437e65d33b9a9f2eb84940f60afffa7bdcc509a97aed885596f58"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDirectFacadeAcceptanceTests.cs",
+      "bytes": 10242,
+      "sha256": "c3d6e7f173a0affe60f4127304c5c199d4c90f6f6a8310d00bbe32d2ce8c5538"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDiscoveryAdmissionTests.cs",
+      "bytes": 14335,
+      "sha256": "1463c0c2e7c56fc830d8a0cde3ef974963373ae5b2bb57da3195dd5416c1c397"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+      "bytes": 31345,
+      "sha256": "50731b914229e48d1cdaafc620e054737aa377a7391d29c2854314a63fd21ae8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoWorkerFailureTests.cs",
+      "bytes": 16143,
+      "sha256": "cbdee9f5b0ac6ca1cc1f1b90ec2e2ebe066f9f24044e83e29017367f93f54faa"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.Native.cs",
+      "bytes": 8592,
+      "sha256": "5e5589c0453d60bfac21a3fa97bd49490d746cf3b0f09db46c62e116d03ce4b3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+      "bytes": 30023,
+      "sha256": "d614d59ee542bf53c343b2b3cd0da1e7f2d5aa748141bd9465a127c32be73338"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReportApiTests.cs",
+      "bytes": 13081,
+      "sha256": "ae7e3ec195ea7e547328399199f9fa225abac4e69f401d61745eadd3637e72be"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxNativeAbiTests.cs",
+      "bytes": 7684,
+      "sha256": "17d0da987a8ba9c3a85c1515166cc81276bbc4113821dc6e9b19bcbac1758f36"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "bytes": 18246,
+      "sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpRecoveryTests.cs",
+      "bytes": 4263,
+      "sha256": "bdece8baba7e33e16e1f07ed23815ed331c54f069e10b12e8fa3fb14ced3c4b6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpWorkerFailureTests.cs",
+      "bytes": 10570,
+      "sha256": "007a6ff3a9102a557ff55bca692fd3fe901460cedf4debb0fc0255023f41527a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxReportConnectionTests.cs",
+      "bytes": 4021,
+      "sha256": "290c8a6b70fca49984fe0f91a914cc3615d00348ed43952ee814339f082036ed"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxWorkerFailureTestSetup.cs",
+      "bytes": 4197,
+      "sha256": "b32b87ea5b60df26e8ee9f70ea8f9d8ed5093bc5193b3ff4b253bbef5e80ce9b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDescriptorParsingTests.cs",
+      "bytes": 8929,
+      "sha256": "e4988b8f8dc3251631fd83b882e61a515f73c4044e55fe518d7802ed81f83a5f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "bytes": 14100,
+      "sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxUdevHidEventSourceTests.cs",
+      "bytes": 7315,
+      "sha256": "8829b2d0b190b7446813c1e12bd3c76be7494b5a9014178d8560c48217b6dbc4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+      "bytes": 3550,
+      "sha256": "a66c5b5b9cd8cb9ec0fbdc86c1b4dd913a1012c7b585d91cfdbccdad3d07286e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+      "bytes": 6084,
+      "sha256": "2dd0b7d3c711a468f95600ccad7225326845db99d487f8b49324b87582083286"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+      "bytes": 6901,
+      "sha256": "70e323c35bd061f2bc9c39359b0f689ffd221fab288218dccdc055fe05019ed6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+      "bytes": 7701,
+      "sha256": "1d132cbbaf5b3805ff1e3f02f61b0b968c72ef36b1931ce52d28e85571f44b87"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "bytes": 20972,
+      "sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "bytes": 10243,
+      "sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "bytes": 3044,
+      "sha256": "cb28f7961c93d35e7ea170dbc78a64ca7c5effe005b5982973bf5054f8d83774"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+      "bytes": 15052,
+      "sha256": "3230dab40cee0644453240b0f70e7b94647f844d1d683647c5a46fc3994a0848"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRecoveryTests.cs",
+      "bytes": 6253,
+      "sha256": "219bad77cbe41d3d0e362d681e0453d86032e7f6c7d68134673ae18e52ed375b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "bytes": 19048,
+      "sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+      "bytes": 4127,
+      "sha256": "dd668b4da846830cb54d956177bfaad3f08c347c77e0e3fcc8f6aaece1c41be0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidDeviceListenerTests.cs",
+      "bytes": 5175,
+      "sha256": "5543e24c877c3e4afa1dcca1d0f1cfddabf7372dac07929228b8bf5678baf3a3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs",
+      "bytes": 9811,
+      "sha256": "0bc79209f2fac5db4c4f63b456bd9265c154a6e148b48f5d869bb55889692879"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerSCardErrorTests.cs",
+      "bytes": 9113,
+      "sha256": "a309aee019947c76d1cc6859a53c2f00b6393d9201b025562ccca4762d04dafb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+      "bytes": 9352,
+      "sha256": "29de34cb39f881d87f172270e2fdd30d423de6571b24c37db441ed143b5b19eb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscCleanupFailureProbe.cs",
+      "bytes": 5268,
+      "sha256": "f40aef9938191650ff06385f7e668e15f8dd3479550ecb2e15d3e1e88f63102e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscIsolatedProbe.cs",
+      "bytes": 3629,
+      "sha256": "4b1f2a13d5d4f9365f418b2306bc3459c1191945af830befd239882df8a997d0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscTestDevices.cs",
+      "bytes": 1355,
+      "sha256": "73e74870b193b11c7e78cefa860291fb6d3ac89d15b0deb8e008783f70fd06ac"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "bytes": 4629,
+      "sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/FindPcscDevicesTests.cs",
+      "bytes": 11246,
+      "sha256": "e36b3fb438020e7420e5f60c470cc9e760421ab995097c1e82bd14fcc8cb2e20"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionKindDetectorTests.cs",
+      "bytes": 1284,
+      "sha256": "463c7e31d458fe026e31ca74449f6a76c35a0b8877b06b6dbadde8e00cddb776"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "bytes": 41354,
+      "sha256": "d592c70ef9ce35b70d6fa1cdb87201398573896ecf3bb7329f88ece79089f550"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscContextIsolationTests.cs",
+      "bytes": 6028,
+      "sha256": "9d9c082a3743a318fd8a77714338a9a4f37bfb8381ac40f403cd79274282e92f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscReaderNameOwnershipTests.cs",
+      "bytes": 8399,
+      "sha256": "4e44922b4dffd3ee8f4c7251affd8a67cb3d0ee8907c9a77e1c64b458d056bb6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardConnectionFactoryTests.cs",
+      "bytes": 8752,
+      "sha256": "0dbbe9f65607812416a55e7315266a3a017b751fd1cc417fc6580988771d49e2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "bytes": 10863,
+      "sha256": "a17c5ca5567636e3f32ab0e203843377a8cb02e5328f21c1f1c7dc83ef51f215"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/UsbSmartCardConnectionTests.cs",
+      "bytes": 1692,
+      "sha256": "fc0a8caa5175b9ab844d45cc288de744f95cd30bb55707a46faa19768c28a4a2"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+      "bytes": 4118,
+      "sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableArrayPoolBufferTests.cs",
+      "bytes": 2357,
+      "sha256": "c769011cc5fd5a1a1b27cd5d51d345ef5413f7c272c5a31e56fd8d5d6b1cf8ec"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableTlvListTests.cs",
+      "bytes": 10219,
+      "sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/ExchangeGuardTests.cs",
+      "bytes": 6167,
+      "sha256": "16caa98382ac989114486bf624c7517bf1b7c838f924dc68e2f122a1a255e73a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+      "bytes": 8049,
+      "sha256": "03cd00c4c169df7f097684c14545575bf3bdcb3e102bba8bd237cc9309645afb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvTests.cs",
+      "bytes": 6234,
+      "sha256": "0de8bda5324ae6b29f00245df91ddae8a6aa33a34b375f703695f655260de92a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "bytes": 196,
+      "sha256": "f79c1ad9a9fc76110b3655f5bfb5ff4e3168e9addceff05b937c0796f0ec34eb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/SelfRegisteredExtensions.cs",
+      "bytes": 748,
+      "sha256": "e22e32a7b820d10c3bec48e7df308bb2c9b17d690b8c9ba380d89084fd1cc8c0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/XunitAutoGeneratedEntryPoint.cs",
+      "bytes": 715,
+      "sha256": "59fcdac5b9b1c717daf8ad9ef76a81455b8d5a00b8f27ea227fd5a0cca3b195c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.AssemblyInfo.cs",
+      "bytes": 1317,
+      "sha256": "a191024ed986ab5def26e70b7eaea8e2d700fcc9b70405f400e6d0baaf2fae42"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GeneratedMSBuildEditorConfig.editorconfig",
+      "bytes": 1185,
+      "sha256": "179e3fb42a45e2c0cf644bd674e99b63e4cc04d9fb8950128c11805f6931517c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.GlobalUsings.g.cs",
+      "bytes": 251,
+      "sha256": "303e9cd7ab294ddd335cd7bba5ab391da9053502115a0a650433a369b543873f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Release/net10.0/Yubico.YubiKit.Core.UnitTests.sourcelink.json",
+      "bytes": 161,
+      "sha256": "8ea1fd1ee9d2dcdfa0035854c711fe214e45c93056ce5c9b8a88ff4871d9878e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/project.assets.json",
+      "bytes": 173076,
+      "sha256": "7537e7c68390bd66c2903d7545c8bfd0b7580d301a6c5fed94ec62304d998b95"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/Infrastructure/TransientScanRetry.cs",
+      "bytes": 2903,
+      "sha256": "1482c58e54b0e2840c6a27ccead517579124887fa710bf1ecfaeb0d36cbd2e9a"
+    }
+  ],
+  "scope": "Actual clean compile only; no example execution."
+}

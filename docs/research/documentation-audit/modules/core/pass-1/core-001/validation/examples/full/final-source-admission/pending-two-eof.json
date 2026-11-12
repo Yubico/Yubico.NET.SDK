@@ -1,0 +1,35 @@
+{
+  "status": "AWAITING_ASTRA_REVIEWED_TWO_PATH_TRANSFER_BEFORE_FINAL_PROFILE",
+  "paths": [
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "current_identity": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/Evidence.cs",
+        "bytes": 3213,
+        "sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5"
+      },
+      "accepted_map_entry": {
+        "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+        "sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+        "accepted_receipt": "accepted-external.json"
+      },
+      "expected_change": "Delete exactly one terminal LF; all other bytes unchanged. Explicit receipt/review/current-map completion required."
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "current_identity": {
+        "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+        "bytes": 7419,
+        "sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e"
+      },
+      "accepted_map_entry": {
+        "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+        "sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+        "accepted_receipt": "accepted-external.json"
+      },
+      "expected_change": "Delete exactly one terminal LF; all other bytes unchanged. Explicit receipt/review/current-map completion required."
+    }
+  ],
+  "qualification": "These two additional format-input fixes are not yet admitted. Prior14pin-matchingEOF and73preexistingwhitespace findings are holds, not authorized reflow. Three qualified toolchain inputs remain untouched.",
+  "profile_created": false
+}

@@ -1,0 +1,97 @@
+{
+  "classification": "Audit-host restore configuration failure before Csc; no doc-body/compiler/runtime result.",
+  "old_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-admitted.json",
+    "bytes": 588371,
+    "sha256": "8c385b8dae912d846dcd9463c08bf0bbb765ba6a00ffa9f657962a7971f0b81d"
+  },
+  "old_project": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/host/src/Yubico.YubiKit.Audit20261111.DocExamples.Full.csproj",
+    "bytes": 1940,
+    "sha256": "7befe2b321ed23e4f7c06d00167d3641e214f10c4c3c2a2e96623f6dffb8d6ee"
+  },
+  "failed_records": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-consumer-first/context.json",
+      "bytes": 164853,
+      "sha256": "9808c5a5b1c307626ee801a3168d52be21a18535ca9c48f8d901e49b89d20ba1"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-consumer-first/mutable-output-preservation.json",
+      "bytes": 166,
+      "sha256": "001e5d52369e4fb602fa1ba83adfb5f73424c6466c0086e92af28dbcd06a3113"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-consumer-first/source-after.json",
+      "bytes": 428136,
+      "sha256": "f7b25c00979e94997b37f0f840c206eaa038a68b8fdb50c75f9039a889f1159c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-consumer-first/source-before.json",
+      "bytes": 428136,
+      "sha256": "f7b25c00979e94997b37f0f840c206eaa038a68b8fdb50c75f9039a889f1159c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/invocation.json",
+      "bytes": 2338,
+      "sha256": "9922fc08a39e14cda90a1d341e712f2780bcf73deddc60c15bd7e05f7334b9c3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/receipt.json",
+      "bytes": 11543,
+      "sha256": "1a37750dd9dc86d61822f60fcecb6334f8ee491271afc66d1b5ba27fb65618d6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/stdout.log",
+      "bytes": 3251,
+      "sha256": "acc139f1fbc61809cdd3bb6759f0619519c51194c1131f7cb5fbe17bd943040a"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/01-clean-Audit20261111.DocExamples.Full.log",
+      "bytes": 68524,
+      "sha256": "21d6fe29957193db95e5cd4576a31d92a2e3f96204476016ec84cdd7b47650d5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/02-build-Audit20261111.DocExamples.Full.log",
+      "bytes": 4319,
+      "sha256": "e75df492acc9bb23b076c3c4c1e9b393376d74a1d99531e93e5e15f753828c6b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/result.json",
+      "bytes": 1053,
+      "sha256": "cc54c36be47051d237cd4b451839239bce6bc34f9a22d0de369e16183b256780"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/result.txt",
+      "bytes": 784,
+      "sha256": "240a012c3f3972873ce80870d2fbd2c711e379577a9ddb3f46552a48554ed00f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/toolchain/20261112-043759-447-build/run.log",
+      "bytes": 3597,
+      "sha256": "8adf35fa0cbe61c596c6bbfe9ce0b0688552c853c092ae011f095738beb1b2af"
+    }
+  ],
+  "receipt": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-consumer-first/receipt.json",
+    "bytes": 11543,
+    "sha256": "1a37750dd9dc86d61822f60fcecb6334f8ee491271afc66d1b5ba27fb65618d6"
+  },
+  "source_before": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/attempts/examples-full-consumer-first/source-before.json",
+    "bytes": 428136,
+    "sha256": "f7b25c00979e94997b37f0f840c206eaa038a68b8fdb50c75f9039a889f1159c"
+  },
+  "framework_source": {
+    "path": "/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.AspNetCore.App.Ref/10.0.15/data/PackageOverrides.txt",
+    "bytes": 6448,
+    "sha256": "e16e73725152c809effe44f02c8bc568bae0f646ca3a49d3990757998b9a4704"
+  },
+  "diagnostic": "NU1510 explicitly requests removal of the two framework-provided direct PackageReference entries.",
+  "no_csc_or_success_record": true
+}

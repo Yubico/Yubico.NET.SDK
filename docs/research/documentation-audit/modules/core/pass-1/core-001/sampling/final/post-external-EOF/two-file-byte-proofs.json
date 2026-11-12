@@ -1,0 +1,36 @@
+[
+  {
+    "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+    "before_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+    "after_sha256": "faba33e119d3ea2361dd390943adc57fbb36ae1741a31283c817c56658d476a1",
+    "before_bytes": 3213,
+    "after_bytes": 3212,
+    "removed_byte_interval": [
+      3212,
+      3213
+    ],
+    "removed_hex": "0a",
+    "all_preceding_bytes_exact": true,
+    "recorded_pin_terminal_LF": false,
+    "reconstructed_original_inventory_sha256": "f9bbf5907ba6bb7af56a0865d6b2c66c8122f017b1e244f9b5ae8b19e93eefda",
+    "semantic_edit": false,
+    "whole_file_exclusion": false
+  },
+  {
+    "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "before_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+    "after_sha256": "194b29775d29323ae1ce2d94ccc35abbf162ac15de858ca58a63295c90e4652d",
+    "before_bytes": 7419,
+    "after_bytes": 7418,
+    "removed_byte_interval": [
+      7418,
+      7419
+    ],
+    "removed_hex": "0a",
+    "all_preceding_bytes_exact": true,
+    "recorded_pin_terminal_LF": false,
+    "reconstructed_original_inventory_sha256": "d437ca74350a4220c03e982bdbda61df3091b51ed341064bc2ea37f17bdf507d",
+    "semantic_edit": false,
+    "whole_file_exclusion": false
+  }
+]

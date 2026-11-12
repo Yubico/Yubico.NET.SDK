@@ -1,0 +1,3807 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "metadata_checkpoint": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "status": "FAIL",
+  "checks_run": 757,
+  "failures": [
+    "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+    "local link boundary-Piv.md -> boundaries/Piv/verification.json"
+  ],
+  "checks": [
+    {
+      "check": "exact unit set and uniqueness",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:aae9c0f1c6936202",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bbeac64166ede116",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:940e40d23713c3fe",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8afe7830e85d9f72",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0fe06b096c870878",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:79682f8bf95c68aa",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:994fb26462267e25",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:75bb29deb9a211f3",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f56a2a557b0594cc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:468445021ffada59",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:41f0a041d51dad0b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f79d6c1dafad08d9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8c527aa5237def4e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a22310b07f40c39d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a003ec1f9dcec5dd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:44af386a288eaf7a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7590f32d819052ff",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b9532271a91fd90d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:89c5d1ecb6fd0e8d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5605704bd39c8c9f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ee1f4b779cd5583e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:91316303bb93d447",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:65b137a50ae4091c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b922085c0cb0780f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:df7038a90921ec46",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bad57aa5af5ee695",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:420213819f46b818",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e90d28cc8013ef9c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:cbd8f64b2b73b6d3",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7d28dcf5c3299fac",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e35de9cd7c9ea811",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a579b6a5cf4242e4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2daf1850d03fe7b6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7c61fc4db6473c72",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8e4cd95dcb4a8d10",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:05df72554f4b913c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8fc815177a95b970",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:99e09fa3ac671467",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d2da5e482082a1c5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2a62d28eb11f60f4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7765a4a0235479d5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ec9098054605bd4c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:722b147f5891a336",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:be11505c581308a5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:95f8fe969a614236",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:37e960d742fe6e04",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7073f711657f133e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:80d92748e69cc8cc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c5340a359fc4852f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:dcf97e956a5b3c3e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e91a5ed8d3a8a571",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8f4914fd52edc415",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ef38706276730f5e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:36bd0e36877613d8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7ef8a2e75575c5d2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9591737e5a314c87",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3092a9c3b64be7a4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b3919addb32e317d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f1b1a14abdf30e48",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d856926f13e27e07",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a3f48db63afb9554",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:590e0de382afc698",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:747cd83ae495061c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d9b47c236cc401cc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d46d29ce7bd6b12e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:584e261a20ad26b5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e3d0116260e85e76",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3df75a145126fab9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c599ec213a1585b5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2f8b537c7f7b3e9b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f38308b4b309f992",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d0befb3a9a3632ee",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:721e33a9d8055870",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7db42289fb368bae",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d1964a5bb4b02db0",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:65a65e440f437fc2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1c9f02aedb87ecdd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e69b893921d77adf",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:255e584d6f22182a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3eb8053339c6e5be",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:63d8f0d5cd0bff7f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c7d0221dbd50e4df",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e747d981f51bc8e4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8008b3fbb312a086",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:40f37ed39d2bb174",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:265a88488bea352d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fc7def915cf6e27d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bbb304e4dd6f6c99",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1990c8b8a253ce31",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3496460dbfd4906e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:81874afbcbbcbc76",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0211f1179aa680f5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ee89a7e7b00dad14",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:82269dc91b969a6c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7091a54d16e66729",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:af58eaed5fb1ef68",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8b331a204ad4876f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0c779d2c2472b11d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f8081c02eb8d883f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:48b3eab18bb64b0f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2754007ee7c9ed14",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:78534afd71a92907",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:280fa09aa1df8fec",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:eb2ea938be1dc7f7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:854fde907e958779",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:70fb463e165b9ad9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6158f31535befd10",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bd992c90a2ac7ca1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c657e3600f0dc294",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0d3c86f1a5939cc5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:41957a2c413a3e28",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c4b94ead938281c9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:154783348ea3c998",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4bcc30397f65c35c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:783d6d085cfee795",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9ec4fcebaaf52b12",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9612140345311e27",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:72fd688136183598",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8d01eea651bc4e13",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:93c8f7b10e5bd567",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f8fc59ce9461febd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fc4cefe9a58d4dd4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:305bd2956e47c3c8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7da1f4e9ad1a6bc1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:73c15c10668b154f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:002a21cabc15569e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:254dfec4d3b4a92f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b29b5f650d509c49",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:edbf077ce00dd339",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c25a4ec8cd16f84d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0432b571f838f17c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c25e98ba03caaefb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:27ff01ac31bfa818",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7f8025fc84712d8a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1b8be134e716d1ca",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:330fdf8047812632",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9296c84ea69a9ffe",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6b3012dbb5e3896d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8f112e59fc6debcb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2a74c2feb0e2b1a8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e246c436680dd41b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:58fb0c5d97184ef4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1c00da1f3c1d62e1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2b4d828d93b779f1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c8999338f051f0b5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1be281bf73ec1ed4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:df9b818f6934c952",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:009632cb50b26e3d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:adc0de37c63154b7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0851256a2d77c0b8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7b155f44ebac745e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a4315aa9922ecd83",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6e503b4ff8497635",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0db6eed26990ad61",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1bb8a826bbbe0b55",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f938a3a3e9b10544",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:da60c4479e4a668f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:cda843837751c2e1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:56aa785ee2e145ad",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e98da85ddcb40256",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8a4b5ca0375f8e28",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:891114cfd1aecd1e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0e5c34f0bd88f44e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bdf28a12959aa670",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6eec962fc55a985c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6dd0e4493e807a63",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b2007db1a59e7d0d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d5db8f363ebe1035",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:006e9895ef95ccf4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:75c925c036a97bae",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:051268abab1ce031",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:052c511c3f423997",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:df5546a08536a19e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1b49a2602e022708",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b4dcf007330157f6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3b8dd4ccfbf45a2a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3c6f48892335b240",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b744c463ef891127",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6565a57085e69e61",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c58cab230684fe51",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:53bc50646fbac0a5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a19557763cfb8ed9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:151e6f8402332f28",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0cdd32ece7b31403",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:77e30910a8f5bfd4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9f1d6dcf37a2048e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:44b350b027092b53",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c9b2c02eb797fed4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:af733be365376a45",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:84da46a87e6fa085",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a573d23da6adce90",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1aad471cf45a3482",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3fa75d0ea200e0b5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:021d74525e1828ef",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:678d8611424b3447",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:26b5b0d024d1949e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7cdf3d443dfc4828",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ed3d1836ce8e0210",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:68dfd3232f878012",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:df0399d60d88c3f0",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0aa0e8aee63a59f5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7452a7f44a15a929",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b5423ad5aa2cac9e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8f34e57bd42bb303",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b7b2289a45c38e18",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:43455befc196508a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a125da2fec1f7b2a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4420c86ee0f234cf",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ad00e6e83caee308",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:58109a47d920ae97",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0fbfe38dc8e08dda",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d2aa7a092c36d921",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ea87638260bf0064",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3559fa45c192e03f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2e5e68dba144becd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ee28b989e30d3ef1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0a2f67ee75e699e5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b185e8abd1504f13",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d6f77f1074e29fa3",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:81297035b8793da4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6d9234844140fa36",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:51d35a9c20c0166c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8a76e66fc55935b7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:72ae07bf970ed5ec",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d2c527a3d8af3299",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:032dbf6795b389ae",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9512470e93e5307c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:54f10f630d907b9e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8b1161f58f45a7e9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0d03426165b6553c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c7da91df075dcd54",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c5f1ddfea1882076",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:df6f3976e5ce9931",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9e62c5d1585c7c4a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ec06c9532f21c312",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fa96630221cbde28",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3d3ca5ebad61ecd6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4b8fd329f295ea31",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1945f64e4a8a2189",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e6c6359f211e898e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6576de010de5767d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3308b216187a7cee",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4d5c33bcd87c5d96",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:72b1643c484d09ce",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:11ac23e633b2c7c7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:74dca6d18b8685a7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:87244dea83135a93",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6e979469819aec86",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:424f802d38b735b1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3aed3f1816c76d4a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:74eaa42f76948d35",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3bce93b3683723c8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2f92a2e14b12d159",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d741c3bac5834946",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1df880a5fc2faabf",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:70d2321f694c82e1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b28d7a2e01a6d8df",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2fe0eab7873b779d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ce3e1576312e0d4c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e0d8e2e0ada81ba1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:84f8f27e978dd53d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e28d18088158e4ee",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ca8d9a63095763e1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:12fdb7af94d80dda",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c597a6e34c502b6e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fcffffa7a84473de",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8eb12d56af25bb73",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:02a30690098a8c32",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a65ff38e17385b64",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bb3a41e73f8c9961",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:eb3c18b5c80f415e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f066105117ef736a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9795f2080ed102a6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4df688708dead62b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7fd64d575f695213",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f2a8f0ecf156e30d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9e95db3ed533098c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:815717dab722aae2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:65ce96250e1e0836",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:33c3f8db634876b9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c586e0fa0872535e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:98a8e699321f7810",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2701953078b7d1c7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ee5b81e0432fe552",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:83b568fb62740fbf",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6a87c96213954b07",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:48035c52cb12987c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c6e80cef35be8440",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:dca9bcd1ac6ab827",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b084dc50f903e58b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:178be84fc6787bd5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:566c202a305ad079",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ed660cb3c4aa8382",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1865541271d12244",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9071215832bbdd0c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9be35cbabe02c8ba",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a5eff7b7ea8f0cd5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:36ad45c7b87b427b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d8827ee05e8e38da",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fd152c8030d1d770",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:99729fa2a5c98ec4",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d123727aa48fcfc6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6c76a91a0303c720",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:64a8ccfb23966208",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8f9aba8c9b120c89",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:935f5d3c2b0c26a1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:dd12d22f837bf564",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8ace65d954cebe67",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c7d0dfaa0d8dda08",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:05edf8d34dc8ed90",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6e83ee8fd71c0eef",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:311c75ed04dfe646",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3341ca11c71b2347",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:118b4f3e670db779",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:88bb8ec89b02e9dc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e88c5ac8c11f58bb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5441bb52ffa2f453",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:29d1b5a0251879cb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f975d074fb4a3c34",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:08d202dadc88b7c1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0e5addf77940a9c7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f1d9c9148c9303f7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:39e2c8b0b4798541",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a02a1fd322cdec25",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7f0aa899a4868188",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2511f4e212eca4ac",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b20d41ef5b4a0a59",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f6b6a42a64636d03",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6e1c121d286f2ebc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d428dd99f2122ebc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9f85e6972ecc02bd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f2c1c3e9411cb583",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a466d55def9018c1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8dc1fcb7a52f4095",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e8aeb94994634a1d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9f5e430c0f749445",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b8c39604b72e1251",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fce5dda5582cebf9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a6fbcca6f71d8895",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:11d71644312c9913",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fe0d938f201b324a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3125e13e73b13967",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6b49ef32b0db4474",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7d8a615d2d964104",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4b86e204a2447db7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f2a694e87d0d35d3",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2f0cf3f190bcfd73",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d9342d960efd736a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f2c10c9d142b659a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7fce10531f068682",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b17009ef454032a9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:14eb4e3871156c66",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5f264957281e3b1f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:32ec32dd98cf6317",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:73f40e40f7d3d826",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8c4cde222004d24d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:52ac475c3e1a5288",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:dc74d7d3db7ee14f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:eb98b78558a307d8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:303c44f672f0579e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f6ba2be20e6f1a10",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3916aac8d89a5fb6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e87120a5a7afb326",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f8de6cbc04e85dc1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:75eb580eb68c5882",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:13db8df479930852",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ce8af4db9c07f5ad",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:febe7cd8e74ac70c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8faaeb021cbcac8c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7dbcde696dc2508d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:803744e924298d5e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3483e96ef2ebf86b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d36b5c72a45f3b4c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:79aade9dc99cb132",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6d100fecb62d4abb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:782d6e2f9e7116a1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2edfe6d45e721180",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bf408300009df994",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:67b220fa7294efe5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ed18af8b7c0b0289",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9eaca9ada98e6042",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:adbd5ab54976f0ea",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4435dc3a2177fed9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0a7b95df6cbd0099",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:cedf5c104dc53613",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:50d071f534cbfb11",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9f247c12e79f52de",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:56fff3b2c58bba51",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:92d416947d877101",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d40399e38e898b22",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a1d2ba897f006321",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:299f1430bea019ce",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ab7157be8ea48d8a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:24d82eb3ad2f7187",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:47ce8155fc4cae47",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ca0de6878e2c5423",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ae1d339d407dad9a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:833d927c0c2cee5b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4940c137b0f9efa7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b7ac694570f93d4c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d87ff956301de05c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:351775f00b5b4a8c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:26f72efd84f38c08",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a78e4fd83c504429",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:868bb957e447ddc2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e034237ac9c75e5e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4f7133488e4213fb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:94a78d522ebffb47",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a2c3c1015686157e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1477473b05d7c0bd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:ede9f4ccd850ba13",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:17ab62e53e5862aa",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fab5a16163c60f90",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4df55d5746fc4f78",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:af3aaba139d19db7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0f821b1965ba6657",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:75a86b94393d80a1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9efef9b33db5cad8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e168389de5d9e86c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4ff2a71f998d583b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:612398d9c0e33197",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7526d149039b46fa",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:008878f761492d0c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c396292adc82c479",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7c57cfcc356517ea",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d5e2a5a3a7c7ba08",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c59349d1d84beb66",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0616e43c04d8f505",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b80102954d049278",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e29c7d5948d9353d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7b0f3561e120acf6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d559eaddd1ac585c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c733bbe235807153",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0ada501685f9b396",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5d26f96c3995ef11",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:98b70643f7299d10",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c1c1298b4e161902",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9a617de1569e8b32",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f1da34173d1952fc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e95cbef094f2c778",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:150ddea289d50a69",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3aa5bdef302a82d0",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1540ab7c740b69ed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d7d11b76adb6935a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bd85c832a5385e79",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5252852be04d5eaa",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:1b220d760b58a657",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0d6cb84a4bae6215",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:9c760be959bf3683",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2db8f4880ed63983",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a64b6b7a69935739",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:01e5db154ef470bc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a8ff17450e848aeb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:79c5df33f6cb4711",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:52aa5f2c85b7af8f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2e22ad47d08ef06c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d554154e1e5d2fbf",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b2eddac8a6e900ea",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5610c5157ce7de16",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a75421d1607127aa",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:15aab2e06053e8a3",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:cd3d9dd25519c285",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:df5eedd79ee1c39b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4263c4d3d60e468f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f55c099caff2398c",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:290e27462d99622f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7c83ab1bbdbf3253",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:60cd3efb68a5da75",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:cf4c31a2a9a72fbd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d19beeed9ec0eda2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:c0a2fdca7d7bbf99",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:078b88088eccb089",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b8709aad6f1f97a8",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0cf32693862d0e51",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8cf67adb1046a7ad",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d4b605c8a26973be",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a7d45b5ed78ea182",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5218d69d5b43cb8d",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:3649f9c30dbbe39f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:7a6cc61b8ccf5ab6",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:2e4181101ceea1ba",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4a4cc58c1d53e64f",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:792e73869ad9f0c9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f17a3eccd0c5c7e1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e92b93aabe1edcce",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:803860e40df3d3b7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e4f10ec180cc9e83",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:828fb6ae7c99f335",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6bfecd25e2811510",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:76e129063bc7fc82",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e0620adee4adaf59",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:349c8fb987693bc1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:adb2ed2964e98bcb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:48aebb8b6acbc6ac",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:cf3f1e66e78f667e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:93becc1b5b3aafa1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:b7c585d24c1da990",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:f1454b637afcba26",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0d39e180dce95da7",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0d1e4315779f33c0",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:d93c4ee88e5674c9",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e4843168156e7232",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:5d2efdc7e244d3d5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:0c144a012c0840f5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:abc543a1ffabcf95",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:bd802ad48dbff3fc",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:8f497b7756156e9a",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:fe30704b56fbce10",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:e3c0c3b582d9282b",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:4a6dba03afa874e1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:a2621d71940568ae",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:6fb445c6e2660898",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unit identity core-001:unit:31264273bb8cc2f5",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all investigator source reads final",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "complete candidate path set",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "explicit authored notes for all candidate files",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/CLAUDE.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/PACKAGE_README.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/README.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/AttestationMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/CertificatesMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/CryptoMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/DeviceInfoMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/KeyGenerationMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/PinManagementMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/ResetMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Menus/SlotOverviewMenu.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Output/OutputHelpers.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Prompts/DeviceSelector.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Prompts/PinPrompt.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Cli/Prompts/SlotSelector.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Attestation.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Certificates.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Decryption.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/DeviceInfo.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/KeyGeneration.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/PinManagement.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Reset.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/AttestationResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/CertificateResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/DecryptionResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/DeviceInfoResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/KeyGenerationResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/PinOperationResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/ResetResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/SigningResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/SlotInfoResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Results/VerificationResult.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Signing.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/SlotInfo.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivExamples/Verification.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/PivTool.csproj",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/Program.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/examples/PivTool/README.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Authentication/AuthenticationProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Authentication/PinOnlyProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Backends/IBackend.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Backends/SmartCardBackend.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Bio/BioProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/CertificateCompression.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Certificates/CertificateProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/DataObject.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/DataObjects/AdminData.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/DataObjects/CardCapabilityContainer.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/DataObjects/CardholderUniqueId.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/DataObjects/DataObjectProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/DataObjects/KeyHistory.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/DataObjects/TypedDataObjectProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Features.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/IPivSession.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/IYubiKeyExtensions.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/InvalidPinException.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/KeyCreationOptions.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/KeyReference.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/KeyTypeEncoding.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Keys/KeyProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Metadata.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Metadata/MetadataProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/PinOnlyMode.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/PinPolicy.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/PinUtilities.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/PivSession.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/PublicAPI.Shipped.txt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/PublicAPI.Unshipped.txt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Slot.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/SlotMetadataExtensions.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/TouchPolicy.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/UserVerification.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/src/Yubico.YubiKit.Piv.csproj",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivAuthenticationTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCertificateTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCompressedCertTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivCryptoTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDecryptTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivDiscoveryContentionTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivFullWorkflowTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivImportTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivKeyOperationsTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivManagementKeyTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMetadataTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinOnlyWorkflowTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPinRetryTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPolicyTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivPukTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivResetTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSigningAlgorithmTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSlotOverwriteTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/UserPresenceProbeTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/AuditV2/PivAuditReproTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyProtocolTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PinOnlyWorkflowTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Bio/BioProtocolTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/CatalogBehaviorTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/CatalogCapabilityBoundaryTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Certificates/PivCertificateObjectIdTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Cryptography/PrivateKeyOperationsTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/PivDataObjectsTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Keys/KeyProtocolTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Metadata/MetadataProtocolTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivTypesTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SessionConsistencyTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/SlotMetadataExtensionsTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/TouchNotificationTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Sessions/ApplicationSession.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Sessions/SessionCreationOptions.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Credentials/UserPresenceNotification.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Credentials/CredentialReaderOptions.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Utilities/ExchangeGuard.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Utilities/Tlv.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Utilities/TlvHelper.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/README.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Core/CLAUDE.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/usage/user-interaction.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/architecture/raw-access-tiers.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/architecture/applet-public-api.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/architecture/physical-device-model.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/usage/tlv-processing.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/migration/v1-to-v2.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/migration/v1-to-v2-map.yml",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source src/Tests.Shared/CLAUDE.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "unchanged source docs/TESTING.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "source manifest candidate identities",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/plan.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+      "passed": false,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Piv.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-packet-inputs.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/boundary-seeds.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B4.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B6.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/register.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/nist-security-status-excerpt.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/Task-v10.0.0.cs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-source-register.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/qualification-gaps.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/piv.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/investigation.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/hardware/results.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/source-analysis.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/source-manifest.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/followup-manifest.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/nist-sp800-73-4-part1.pdf",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/nist-sp800-73-4-part1.txt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/python-yubikit-piv.py",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/python-ykman-piv.py",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "reused evidence preserved docs/research/documentation-audit/modules/piv/pass-1/piv-001/evidence/vendor-reset-command.txt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "original units carry exact counts",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all eleven inherited original rows exact",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "six local proposals, zero accepted IDs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate IDs/paths CORE-PIV-X001",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate heading CORE-PIV-X001",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate IDs/paths CORE-PIV-X002",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate heading CORE-PIV-X002",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate IDs/paths CORE-PIV-X003",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate heading CORE-PIV-X003",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate IDs/paths CORE-PIV-X004",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate heading CORE-PIV-X004",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate IDs/paths CORE-PIV-X005",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate heading CORE-PIV-X005",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate IDs/paths CORE-PIV-X006",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "candidate heading CORE-PIV-X006",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "twelve exact clean nominees",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "balanced Markdown fences analysis.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces analysis.md '\\u200b'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces analysis.md '\\xa0'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "balanced Markdown fences candidates.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces candidates.md '\\u200b'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces candidates.md '\\xa0'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "balanced Markdown fences oracles-and-verification.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces oracles-and-verification.md '\\u200b'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces oracles-and-verification.md '\\xa0'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "balanced Markdown fences inherited-outcomes.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces inherited-outcomes.md '\\u200b'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces inherited-outcomes.md '\\xa0'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "balanced Markdown fences sources.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces sources.md '\\u200b'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces sources.md '\\xa0'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "balanced Markdown fences execution-notes.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces execution-notes.md '\\u200b'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces execution-notes.md '\\xa0'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "balanced Markdown fences boundary-Piv.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/analysis.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/candidates.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/candidate-index.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/anchors.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/unit-dispositions.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/file-dispositions.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/file-notes.tsv",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/inherited-outcomes.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/inherited-dispositions.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/sources.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/source-manifest.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/oracles-and-verification.md",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/coverage-summary.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/clean-nominees.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/dependency-dispositions.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "local link boundary-Piv.md -> boundaries/Piv/verification.json",
+      "passed": false,
+      "detail": null
+    },
+    {
+      "check": "normal spaces boundary-Piv.md '\\u200b'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "normal spaces boundary-Piv.md '\\xa0'",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "metadata checkpoint unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "no working product changes in Core/Piv",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "execution_credit": {
+    "sdk_builds": 0,
+    "sdk_tests": 0,
+    "native_calls": 0,
+    "device_operations": 0,
+    "cryptographic_probes": 0,
+    "formatters": 0,
+    "subagents": 0
+  },
+  "limits": "Static record identity/consistency checks only. Investigator semantics, independent content/citation review, editing, compilation and hardware remain distinct gates."
+}

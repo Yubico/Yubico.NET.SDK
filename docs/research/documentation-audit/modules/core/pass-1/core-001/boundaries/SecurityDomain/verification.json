@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "failures": [],
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "9d72160375862dfd9d09793538f64a7d4f96e398",
+  "assigned_ids": 193,
+  "source_files": 36,
+  "line_count": 5607,
+  "local_links_checked": 17,
+  "clean_nominees": 7,
+  "inherited_keys": 16,
+  "local_candidates": 8,
+  "product_comparison": "All assigned files equal pin after explicit BOM/newline normalization; raw identities preserved separately",
+  "independent_semantic_review": "NOT PERFORMED; checker is same investigator, mechanically separate script",
+  "sdk_builds": 0,
+  "sdk_tests": 0,
+  "crypto_native_device_executions": 0,
+  "write_scope": "Only boundaries/SecurityDomain/* and boundary-SecurityDomain.md. No global preservation scan or acceptance of other workers claimed."
+}

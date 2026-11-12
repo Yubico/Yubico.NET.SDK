@@ -1,0 +1,6 @@
+{
+  "failure": "Final structural check initially scanned relative links inside fenced original-source excerpts as if they were authored preparation navigation.",
+  "exact_assertion": "('docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/next-required-original-units.md', '../../docs/research/linux-otp-async-lifetime.md')",
+  "correction": "Check authored navigation outside Markdown fences; original excerpt links retain their original source-document context and are literal code-fence text.",
+  "impact": "No source/population/selection/actual-read count change; no content or sampling pass was claimed."
+}

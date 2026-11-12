@@ -33,7 +33,7 @@ CTAP2 tests must be aware of transport differences:
 **USB SmartCard Tests:**
 - Use `ISmartCardConnection` only on firmware 5.8.0+ when the FIDO AID is exposed
 - Prefer HID FIDO for USB CTAP2 coverage unless the test specifically validates the SmartCard APDU path
-- FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; firmware gates use `Feature.IsSupportedByFirmware(...)` so sentinel versions are treated as modern
+- FIDO GetInfo can report a `0.x` sentinel version even when Management reports the real firmware; `Feature.IsSupportedByFirmware(...)` lets major-zero versions pass a permissive SDK policy, not a verified modern-firmware check
 - CTAP2 SmartCard session creation selects the FIDO AID before the firmware gate because firmware comes from CTAP GetInfo over the selected application
 
 ### User Interaction And Coordination Lanes

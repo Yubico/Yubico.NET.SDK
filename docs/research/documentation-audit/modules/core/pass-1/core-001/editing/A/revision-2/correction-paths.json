@@ -1,0 +1,131 @@
+[
+  {
+    "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+    "review_id": "R1",
+    "candidate_ids": [
+      "CORE-A-C010",
+      "CORE-A-C011"
+    ],
+    "proposals": [
+      "FPT-010",
+      "FPT-011"
+    ],
+    "source_pin_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+    "base_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+    "previous_reviewed_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e",
+    "current_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+    "disposition": "EDIT",
+    "noncomment_lines_identical": true,
+    "current_xml_block_boundaries": [
+      {
+        "first_line": 19,
+        "last_line": 39
+      },
+      {
+        "first_line": 50,
+        "last_line": 69
+      },
+      {
+        "first_line": 132,
+        "last_line": 135
+      },
+      {
+        "first_line": 153,
+        "last_line": 162
+      },
+      {
+        "first_line": 180,
+        "last_line": 191
+      },
+      {
+        "first_line": 200,
+        "last_line": 204
+      },
+      {
+        "first_line": 211,
+        "last_line": 211
+      },
+      {
+        "first_line": 217,
+        "last_line": 251
+      },
+      {
+        "first_line": 281,
+        "last_line": 292
+      }
+    ],
+    "review_status": "FOCUSED-REVIEW-PENDING"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+    "review_id": "R1",
+    "candidate_ids": [
+      "CORE-A-C010",
+      "CORE-A-C011"
+    ],
+    "proposals": [
+      "FPT-010",
+      "FPT-011"
+    ],
+    "source_pin_sha256": "d9b6c411a93d0a3600f488a03cc313b8dfe1bfec0ba504c9fa594ae8fc9347f9",
+    "base_sha256": "d9b6c411a93d0a3600f488a03cc313b8dfe1bfec0ba504c9fa594ae8fc9347f9",
+    "previous_reviewed_sha256": "09cb1d140127384964aa370f69c97279e7c1e07d742533d897567ebb8e4a7315",
+    "current_sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03",
+    "disposition": "EDIT",
+    "noncomment_lines_identical": true,
+    "current_xml_block_boundaries": [
+      {
+        "first_line": 21,
+        "last_line": 39
+      },
+      {
+        "first_line": 594,
+        "last_line": 601
+      },
+      {
+        "first_line": 620,
+        "last_line": 627
+      },
+      {
+        "first_line": 644,
+        "last_line": 650
+      },
+      {
+        "first_line": 667,
+        "last_line": 676
+      },
+      {
+        "first_line": 697,
+        "last_line": 707
+      },
+      {
+        "first_line": 736,
+        "last_line": 752
+      }
+    ],
+    "review_status": "FOCUSED-REVIEW-PENDING"
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+    "review_id": "R2",
+    "candidate_ids": [
+      "CORE-A-C009"
+    ],
+    "proposals": [
+      "FPT-009"
+    ],
+    "source_pin_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+    "base_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+    "previous_reviewed_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+    "current_sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c",
+    "disposition": "EDIT",
+    "noncomment_lines_identical": true,
+    "current_xml_block_boundaries": [
+      {
+        "first_line": 21,
+        "last_line": 27
+      }
+    ],
+    "review_status": "FOCUSED-REVIEW-PENDING"
+  }
+]

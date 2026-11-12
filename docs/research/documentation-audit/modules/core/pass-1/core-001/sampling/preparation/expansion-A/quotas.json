@@ -1,0 +1,78 @@
+[
+  {
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "original_eligible_population": 185,
+    "original_full_quota": 19,
+    "original_selected_ids": [
+      "core-001:unit:019eae4efe42d6e5",
+      "core-001:unit:2671911eb64af1aa",
+      "core-001:unit:076b4d4328825902",
+      "core-001:unit:3f972c5207254bdd",
+      "core-001:unit:711e47d18bab0742",
+      "core-001:unit:2d7384815a34e691",
+      "core-001:unit:36956745104ff731",
+      "core-001:unit:3d71e6d3bd862995",
+      "core-001:unit:1fc213103a564722",
+      "core-001:unit:c20e4d6e55c8a0bb",
+      "core-001:unit:6e353becfd918253",
+      "core-001:unit:20c9c91498bfd689",
+      "core-001:unit:35700b4303b7b14b",
+      "core-001:unit:816c2fdd798610af",
+      "core-001:unit:4a3cd5465f24843d",
+      "core-001:unit:fde9854638dd24be",
+      "core-001:unit:d75a3dbb4ec57c42",
+      "core-001:unit:d231181d1329769b",
+      "core-001:unit:0f2b4a412a201ec2"
+    ],
+    "additional_full_quota": 19,
+    "additional_selected_ids": [
+      "core-001:unit:21bef981d5360feb",
+      "core-001:unit:8e7356e172293835",
+      "core-001:unit:2ab1f3fe98ee5ca4",
+      "core-001:unit:c680372cf0dd564e",
+      "core-001:unit:6e6307d613511921",
+      "core-001:unit:d0757dfa453abbeb",
+      "core-001:unit:32032fade9d7fddb",
+      "core-001:unit:f1df5948d71dcc9d",
+      "core-001:unit:d5838c51b4cca87e",
+      "core-001:unit:f713ea0c593064bf",
+      "core-001:unit:44a66dad89e6e9e9",
+      "core-001:unit:b530f2ba7c68da7e",
+      "core-001:unit:a581a1ab8be230d2",
+      "core-001:unit:7045e0544998269f",
+      "core-001:unit:939161b425c3e89f",
+      "core-001:unit:d28709e3276a4138",
+      "core-001:unit:2a47e7cc5a9259e3",
+      "core-001:unit:548bc1460a3f9b8f",
+      "core-001:unit:c5b35440184cef31"
+    ],
+    "original_plus_additional_proposed": 38,
+    "known_missed_original_units": 2,
+    "final_clean_credit": "No additional content verdict; original material misses receive zero credit. Future edited overlaps must be reconciled.",
+    "rank_rule": "Continue exact original fixed-seed SHA256 rank after excluding all original selected IDs and known edited overlaps."
+  },
+  {
+    "owner": "A",
+    "stratum": "enum-values",
+    "original_eligible_population": 32,
+    "original_full_quota": 4,
+    "original_selected_ids": [
+      "core-001:unit:749973e915170867",
+      "core-001:unit:c085f1cd3632e7c2",
+      "core-001:unit:468e384d30b9c33b",
+      "core-001:unit:a124a683e6029d5b"
+    ],
+    "additional_full_quota": 4,
+    "additional_selected_ids": [
+      "core-001:unit:4f7f2feb81045f0f",
+      "core-001:unit:abc48bf7ccf04d19",
+      "core-001:unit:26a01b51fa2d612f",
+      "core-001:unit:f7a53cd9184afd96"
+    ],
+    "original_plus_additional_proposed": 8,
+    "known_missed_original_units": 1,
+    "final_clean_credit": "No additional content verdict; original material misses receive zero credit. Future edited overlaps must be reconciled.",
+    "rank_rule": "Continue exact original fixed-seed SHA256 rank after excluding all original selected IDs and known edited overlaps."
+  }
+]

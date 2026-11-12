@@ -1,0 +1,69 @@
+{
+  "scope": "First successful provisional generation before tightening queued-only versus accepted-plus-queued PGP span attribution. Selection/actual verdicts preserved.",
+  "files": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/accepted-products-at-capture.json",
+      "sha256": "45ca220e401ba48082e14f138d703df0e29a969dd7ae7d5edc89d2ad805075c2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/completed-read-tally.json",
+      "sha256": "1f9df37e4ace67af6a13374a2a487686577713a3efe5da5b92325b8e51009287"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/current-mapping.json",
+      "sha256": "5e1a4bbbea5d9aa53f3eea77327edfc91837666e7f78a582c45157e37d02a449"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/next-required-original-units.md",
+      "sha256": "b474d411a0e0f49648f6cf56aa1fc3089306bf2c0aa77b3e95d6f58e4073195b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/next-required-selection.json",
+      "sha256": "940815a14c0f97327af87ff1845201294947380775c7e32be1dfed10f7ad51b3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/pending-corrections.json",
+      "sha256": "92ea779c0416e7d3d8921034e04dd2e0825b44e47300cf080da051a836556272"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/preamble-screen-evidence.json",
+      "sha256": "72b88981ec8b5db0ea07f719a4fa9a85d1708c04fc3d1543abc4d43e9b6bd1ea"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/preparation-notes.json",
+      "sha256": "d3983dfc2c0ee72c3963e35849ca2ce5195efa44e54656b3d8b459e82d8ff3b2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/preparation.stdout.json",
+      "sha256": "7671ce7b06bc3369687beaabdc5a2bcb8809b2a8736fcdbbd84e074c21f5e0e2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/prepare.py",
+      "sha256": "9aaef3859e75ca8be2f1182adfa052ef7cff43200b179d83eb77c728a3bcdbc2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/read-plan.md",
+      "sha256": "3b36050f9a9b9d8862b0812bbe3fc353903089ccaaf78ec037e398def276f8ed"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/replacement-pool-exclusions.json",
+      "sha256": "d3e8c4e2732f5ec642e734d6a0bd09685848be8a1e5f178dc1185fb16208ec10"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/reviewed-queued-PGP-original-scope.diff",
+      "sha256": "e50885303530c59987567a7d0cfc3cddcf25678b37cd292711041929af280927"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/role-quota-status.json",
+      "sha256": "36b1216b2f50d2003d4f93f92988a868531959024016dfbad5aae2c60d5254ad"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/summary.json",
+      "sha256": "1413ebff7ccbccccf24ca31c547007985c4577712888dfdf70cf0512c1bf969a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/revision-2/history/first-successful-capture/verification.json",
+      "sha256": "41c300ab5d9906983d03a0d43e06a142a02f28be6f4ccd34e5431036fce07787"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+$ dotnet pack src/Management/src/Yubico.YubiKit.Management.csproj -c Release --no-build -o /home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages /p:Version=2.0.0-alpha.2  
+  Successfully created package '/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages/Yubico.YubiKit.Management.2.0.0-alpha.2.nupkg'.
+  Successfully created package '/home/rupicola/Code/y/Yubico.Yubikit.NET/artifacts/packages/Yubico.YubiKit.Management.2.0.0-alpha.2.snupkg'.

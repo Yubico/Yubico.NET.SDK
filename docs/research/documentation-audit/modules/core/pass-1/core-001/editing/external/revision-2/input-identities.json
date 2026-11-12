@@ -1,0 +1,92 @@
+[
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-external/CLAUDE.md",
+    "bytes": 33159,
+    "sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-external/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+    "bytes": 2970,
+    "sha256": "3b01360cf7e973b51e076ef02c3683228d007e96c783915e62a046e34bc8cc71",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-external/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/full-family/map.json",
+    "bytes": 3144981,
+    "sha256": "ee023021f2fd2586b4d75fc0a488cba2e3bdbb1ea7fdb91a793dbbd8bb4a7dd8",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+    "bytes": 15340,
+    "sha256": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/candidates.md",
+    "bytes": 14615,
+    "sha256": "c712120590022d1f74546ea1f91a9173648eb1b13b6ebe4138f3890578d6e815",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/file-evidence.md",
+    "bytes": 26908,
+    "sha256": "b52b5c44c8f083611da06c096706e74462ac5c429857c8571e289bf4756c8a7b",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+    "bytes": 17584,
+    "sha256": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/candidates.md",
+    "bytes": 16916,
+    "sha256": "bb6fe6cbd59cf0d5048799690743c80521bd6f73cbbee3e1bbe7f16365751e8e",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/file-evidence.md",
+    "bytes": 15284,
+    "sha256": "99158aa8925be9d0a3879341b9b76c21a5f3661beea071fed5eef072f49941ab",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B4.md",
+    "bytes": 16679,
+    "sha256": "a6743e926ffdedd3157c80097736048f7ab287b7f5c60a904b804d4f23bf098b",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/candidates.md",
+    "bytes": 39824,
+    "sha256": "826f81471b10f7a213478fc6188e916b041b748307a866f75de2a2b30c61f148",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/file-evidence.md",
+    "bytes": 83861,
+    "sha256": "0770fa80e46a300abf5414d58887add868ad83f38f4f15a5564efa6ea75cf671",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+    "bytes": 310649,
+    "sha256": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+    "bytes": 15838,
+    "sha256": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  },
+  {
+    "path": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/outside-owner-handoffs.json",
+    "bytes": 43067,
+    "sha256": "4888d6f64b07a2b7d3f84301decb1e54fc92c5c2b14307748219386a06eb08af",
+    "scope": "Read-only completed report/referral/instruction, not product-base comparison or independent acceptance"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68",
+    "namespace_declarations": [
+      {
+        "line": 19,
+        "text": "namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+    "sha256": "6a7c5d3ead97b189885e536d0d0a6b7dadfe1a73b4a26c1f13ee4b35d2cc16ab",
+    "namespace_declarations": [
+      {
+        "line": 17,
+        "text": "namespace Yubico.YubiKit.Core.Cryptography"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+    "sha256": "82c326cbf96868e1b7b9b8490534450b81231794dd96fd64881c85daf39f29e9",
+    "namespace_declarations": [
+      {
+        "line": 17,
+        "text": "namespace Yubico.YubiKit.Core.Cryptography;"
+      }
+    ]
+  }
+]

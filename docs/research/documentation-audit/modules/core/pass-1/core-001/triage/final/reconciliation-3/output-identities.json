@@ -1,0 +1,19 @@
+{
+  "state": "BOUNDED-PREFLIGHT-RESPONSE; Astra proposal adjudication/final acceptance pending",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "Only owned reconciliation-3 records and updated handoff, excluding this manifest itself; not a publication/acceptance seal.",
+  "files": {
+    "deferred-findings.md": "1c6f3001b3dbc54b5f31947aba422b6e2d1a85e77975f5f414c16047e30139e4",
+    "triage/final/reconciliation-3/close_preflight.py": "8dc267bd6d41fb591d3515a6483fe12bfd386bafd36dc955f25a9fe1f1a78b8e",
+    "triage/final/reconciliation-3/deferred-findings.reconciliation-2.md.snapshot": "a8ccc447dfe049e4c30ca1fbb68ce08160a7e7455d8c9200fb074b3835228072",
+    "triage/final/reconciliation-3/history-preservation.json": "f86a6eba3d67a604b43af17d8bed3e6e4d92f2508693a262a7af0b2e13c5e60d",
+    "triage/final/reconciliation-3/pf01-sampling-overlay.json": "83aaaaee6c904cf8a38a66565ba38a4952a03857e0af72991fedb9aad2827fc8",
+    "triage/final/reconciliation-3/pf02-direct-links.md": "e81b64edc4c6f0029f148a49765206f73803d49ce2c29362e753bd41927d081e",
+    "triage/final/reconciliation-3/pf02-dispositions.json": "772904facc9f4f629e9c9fe3b00ca940aab5b993b7d684d110da627d0fee3ab4",
+    "triage/final/reconciliation-3/pf02-proposals.json": "03af0ac2544577a4182e1213b86504d166491955b8020b567cf30ab57c09c5d2",
+    "triage/final/reconciliation-3/queued-corrections.json": "4d9c2343b41ee9e4cfa81a8aac5a5f4a3738cee4997864f83689d3c63bddfb8b",
+    "triage/final/reconciliation-3/response.md": "86505e5fb7d130538d970dfbc2c303691bda515c99a579b7a7d44fabb0e242e4",
+    "triage/final/reconciliation-3/validation-state.json": "2bb614471d2d2625164655cce0c4745ddf867f738bda9bdd08b107a2b8991faf",
+    "triage/final/reconciliation-3/verification.json": "34bc161024f46832a44042bc7096321cee33efd2502b837a16d34212c39c7446"
+  }
+}

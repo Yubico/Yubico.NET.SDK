@@ -1,0 +1,121 @@
+[
+  {
+    "owner": "A",
+    "actual_unique_reads": 233,
+    "required_target": 218,
+    "actual_current_supported_candidate_count": 218,
+    "shortfall": 0
+  },
+  {
+    "owner": "B1",
+    "actual_unique_reads": 114,
+    "required_target": 111,
+    "actual_current_supported_candidate_count": 111,
+    "shortfall": 0
+  },
+  {
+    "owner": "B2",
+    "actual_unique_reads": 153,
+    "required_target": 137,
+    "actual_current_supported_candidate_count": 137,
+    "shortfall": 0
+  },
+  {
+    "owner": "B3",
+    "actual_unique_reads": 113,
+    "required_target": 112,
+    "actual_current_supported_candidate_count": 112,
+    "shortfall": 0
+  },
+  {
+    "owner": "B4",
+    "actual_unique_reads": 131,
+    "required_target": 125,
+    "actual_current_supported_candidate_count": 125,
+    "shortfall": 0
+  },
+  {
+    "owner": "B5",
+    "actual_unique_reads": 75,
+    "required_target": 73,
+    "actual_current_supported_candidate_count": 73,
+    "shortfall": 0
+  },
+  {
+    "owner": "B6",
+    "actual_unique_reads": 35,
+    "required_target": 29,
+    "actual_current_supported_candidate_count": 29,
+    "shortfall": 0
+  },
+  {
+    "owner": "C",
+    "actual_unique_reads": 62,
+    "required_target": 62,
+    "actual_current_supported_candidate_count": 62,
+    "shortfall": 0
+  },
+  {
+    "owner": "Ctap2",
+    "actual_unique_reads": 9,
+    "required_target": 9,
+    "actual_current_supported_candidate_count": 9,
+    "shortfall": 0
+  },
+  {
+    "owner": "Management",
+    "actual_unique_reads": 23,
+    "required_target": 23,
+    "actual_current_supported_candidate_count": 23,
+    "shortfall": 0
+  },
+  {
+    "owner": "Oath",
+    "actual_unique_reads": 18,
+    "required_target": 18,
+    "actual_current_supported_candidate_count": 18,
+    "shortfall": 0
+  },
+  {
+    "owner": "OpenPgp",
+    "actual_unique_reads": 31,
+    "required_target": 28,
+    "actual_current_supported_candidate_count": 28,
+    "shortfall": 0
+  },
+  {
+    "owner": "Piv",
+    "actual_unique_reads": 44,
+    "required_target": 40,
+    "actual_current_supported_candidate_count": 40,
+    "shortfall": 0
+  },
+  {
+    "owner": "SecurityDomain",
+    "actual_unique_reads": 15,
+    "required_target": 14,
+    "actual_current_supported_candidate_count": 14,
+    "shortfall": 0
+  },
+  {
+    "owner": "WebAuthn",
+    "actual_unique_reads": 40,
+    "required_target": 34,
+    "actual_current_supported_candidate_count": 34,
+    "shortfall": 0
+  },
+  {
+    "owner": "YubiHsm",
+    "actual_unique_reads": 10,
+    "required_target": 10,
+    "actual_current_supported_candidate_count": 10,
+    "shortfall": 0
+  },
+  {
+    "owner": "YubiOtp",
+    "actual_unique_reads": 28,
+    "required_target": 28,
+    "actual_current_supported_candidate_count": 28,
+    "shortfall": 0
+  }
+]

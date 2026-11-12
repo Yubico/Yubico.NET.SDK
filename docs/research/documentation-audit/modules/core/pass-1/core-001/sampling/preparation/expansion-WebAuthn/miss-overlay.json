@@ -1,0 +1,12 @@
+{
+  "id": "core-001:unit:e29522f04d40349a",
+  "owner": "WebAuthn",
+  "stratum": "tests-and-helpers",
+  "coordinator_finding": "SAMPLE-WA-001",
+  "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+  "coordinator_verdict_text": "**SAMPLE-WA-001 documentation miss:** assertions compare CredentialId/Signature bytes and one backend call, not instance identity or all response fields. Focused patch `d70a50aa\u2026` passed review and remains queued until compilation releases the primary tree. Zero clean credit.",
+  "final_clean_credit": 0,
+  "source_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+  "range_sha256": "d108a6347987883fcc435654d629e8e4f0c605de18f02e60bf9af5e8e96e561c",
+  "correction": "Focused d70a50aa... independently PASS; queued until compile cycle releases primary. No source transfer or content re-review by preparer."
+}

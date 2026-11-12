@@ -1,0 +1,34 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.WebAuthn;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.IntegrationTests;
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
+namespace Audit20261111.DocExamples.Test32;
+public sealed class DocumentationBody32
+{
+private static readonly ILogger Logger = YubiKitLogging.LoggerFactory.CreateLogger<PreviewSignProcessor>();
+internal void CompileOnly(CoseAlgorithm selectedAlgorithm)
+{
+Logger.LogDebug("Selected algorithm: {Algorithm}", selectedAlgorithm);
+}
+}

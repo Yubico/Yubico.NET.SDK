@@ -1,0 +1,255 @@
+{
+  "sample_finding": "SAMPLE-B2-003",
+  "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+  "before_raw_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+  "current_primary_before_raw_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+  "before_source_text": "// Copyright 2026 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing Microsoft.Extensions.Logging;\nusing System.Runtime.InteropServices;\nusing Yubico.YubiKit.Core.Native.Linux.Libc;\nusing Yubico.YubiKit.Core.Native.Linux.Udev;\nusing LibcNativeMethods = Yubico.YubiKit.Core.Native.Linux.Libc.NativeMethods;\nusing UdevNativeMethods = Yubico.YubiKit.Core.Native.Linux.Udev.NativeMethods;\n\nnamespace Yubico.YubiKit.Core.Transports.Hid.Linux;\n\n/// <summary>\n/// Outcome of a single blocking wait on the Linux HID event source.\n/// </summary>\ninternal enum LinuxHidPollOutcome\n{\n    /// <summary>No actionable outcome (EINTR or spurious wake); poll again.</summary>\n    Retry = 0,\n\n    /// <summary>The udev monitor has at least one event ready to receive.</summary>\n    Event,\n\n    /// <summary>The shutdown event fd was signaled; exit the loop cleanly.</summary>\n    ShutdownSignaled,\n\n    /// <summary>The shutdown event fd reported an error condition; the loop cannot be woken reliably.</summary>\n    ShutdownFdError,\n\n    /// <summary>The udev monitor fd reported an error condition; events can no longer be received.</summary>\n    MonitorFdError,\n\n    /// <summary>poll() failed with a non-EINTR error.</summary>\n    PollFailed\n}\n\n/// <summary>\n/// A udev event received from the Linux HID event source, reduced to the fields the\n/// listener needs to construct a <see cref=\"HidDeviceRescanHint\"/>.\n/// </summary>\n/// <param name=\"Action\">The udev action string (\"add\", \"remove\", ...), or null when unavailable.</param>\n/// <param name=\"StableIdentity\">The stable udev/sysfs identity (parent HID device syspath), or null.</param>\n/// <param name=\"DevNode\">The /dev/hidrawN node path, diagnostic only, or null.</param>\ninternal sealed record LinuxHidUdevEvent(string? Action, string? StableIdentity, string? DevNode);\n\n/// <summary>\n/// Abstraction over the native udev monitor, poll(), and shutdown eventfd used by\n/// <see cref=\"LinuxHidDeviceListener\"/>. Enables no-hardware fault-injection tests of the\n/// listener's loop policy (error transitions, hint emission and caller-requested stop).\n/// </summary>\n/// <remarks>\n/// Ownership: the listener session's thread owns the source and disposes it when the loop\n/// exits. <see cref=\"SignalShutdown\"/> may be called concurrently from other threads and\n/// must tolerate a source that is concurrently disposing.\n/// Fake-driven loop-policy and caller-stop tests do not establish native poll completion or a shutdown deadline.\n/// </remarks>\ninternal interface ILinuxHidEventSource : IDisposable\n{\n    /// <summary>\n    /// Creates the udev context, monitor (hidraw subsystem filter, receiving enabled), and\n    /// shutdown event fd. Returns false when any native step fails; the caller disposes the\n    /// source in that case.\n    /// </summary>\n    bool Initialize();\n\n    /// <summary>\n    /// Blocks until the monitor has an event, the shutdown fd is signaled, or an error occurs.\n    /// </summary>\n    LinuxHidPollOutcome WaitForEvent();\n\n    /// <summary>\n    /// Receives one pending udev event. Returns null when the receive fails — which is most\n    /// likely during event storms (for example ENOBUFS after the kernel dropped notifications),\n    /// exactly when a removal may have been lost.\n    /// </summary>\n    LinuxHidUdevEvent? ReceiveEvent();\n\n    /// <summary>\n    /// Attempts a shutdown wake so a thread blocked in <see cref=\"WaitForEvent\"/> can observe cancellation.\n    /// </summary>\n    /// <remarks>\n    /// May be called from any thread and must tolerate concurrent <see cref=\"IDisposable.Dispose\"/>.\n    /// A missing, invalid or concurrently disposed shutdown handle, or a failed signal write, can leave the\n    /// native wait unwoken. A normal return does not acknowledge a wake, loop termination, drain or release.\n    /// </remarks>\n    void SignalShutdown();\n\n    /// <summary>\n    /// Returns true when the hidraw device node exists and can be opened, indicating the node\n    /// is ready for enumeration by discovery rescans.\n    /// </summary>\n    bool IsHidrawReady(string? devNode);\n}\n\n/// <summary>\n/// Production <see cref=\"ILinuxHidEventSource\"/> backed by libudev and libc P/Invoke.\n/// </summary>\ninternal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource\n{\n    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<LinuxUdevHidEventSource>();\n\n    // eventfd writes are nonblocking. Four total attempts tolerate a short interruption burst\n    // while guaranteeing Stop cannot hot-loop forever under persistent EINTR.\n    private const int MaxShutdownWriteAttempts = 4;\n\n    private LinuxUdevSafeHandle? _udevHandle;\n    private LinuxUdevMonitorSafeHandle? _monitorHandle;\n    private LinuxEventFdSafeHandle? _shutdownEventHandle;\n    private LibcNativeMethods.PollFd[]? _pollFds;\n    private bool _disposed;\n\n    /// <inheritdoc />\n    public bool Initialize()\n    {\n        _udevHandle = UdevNativeMethods.udev_new();\n        if (_udevHandle.IsInvalid)\n        {\n            Logger.LogWarning(\"Failed to create udev context\");\n            return false;\n        }\n\n        _monitorHandle = UdevNativeMethods.udev_monitor_new_from_netlink(_udevHandle, UdevNativeMethods.UdevMonitorName);\n        if (_monitorHandle.IsInvalid)\n        {\n            Logger.LogWarning(\"Failed to create udev monitor\");\n            return false;\n        }\n\n        var filterResult = UdevNativeMethods.udev_monitor_filter_add_match_subsystem_devtype(\n            _monitorHandle,\n            UdevNativeMethods.UdevSubsystemName,\n            null);\n        if (filterResult < 0)\n        {\n            Logger.LogWarning(\"Failed to add udev filter: {Result}\", filterResult);\n            return false;\n        }\n\n        var enableResult = UdevNativeMethods.udev_monitor_enable_receiving(_monitorHandle);\n        if (enableResult < 0)\n        {\n            Logger.LogWarning(\"Failed to enable udev receiving: {Result}\", enableResult);\n            return false;\n        }\n\n        _shutdownEventHandle = LibcNativeMethods.EventFd(\n            0,\n            LibcNativeMethods.EFD_CLOEXEC | LibcNativeMethods.EFD_NONBLOCK);\n        if (_shutdownEventHandle.IsInvalid)\n        {\n            Logger.LogWarning(\n                \"Failed to create Linux HID listener shutdown event fd: {Error}\",\n                Marshal.GetLastPInvokeError());\n            return false;\n        }\n\n        var monitorFd = UdevNativeMethods.udev_monitor_get_fd(_monitorHandle);\n        if (!IsValidFileDescriptor(monitorFd))\n        {\n            Logger.LogWarning(\"Failed to get udev monitor fd\");\n            return false;\n        }\n\n        using var shutdownLease = new LinuxDescriptorLease(_shutdownEventHandle);\n        var shutdownFd = shutdownLease.Descriptor;\n        if (shutdownFd < 0)\n        {\n            Logger.LogWarning(\"Invalid Linux HID listener shutdown fd\");\n            return false;\n        }\n\n        var pollFds = new LibcNativeMethods.PollFd[2];\n        pollFds[0].fd = monitorFd;\n        pollFds[0].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);\n        pollFds[1].fd = shutdownFd;\n        pollFds[1].events = (short)(LibcNativeMethods.POLLIN | LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP);\n        _pollFds = pollFds;\n\n        return true;\n    }\n\n    /// <inheritdoc />\n    public LinuxHidPollOutcome WaitForEvent()\n    {\n        var pollFds = _pollFds ?? throw new InvalidOperationException(\"The event source is not initialized.\");\n        // The listener thread owns both handles. Retain them explicitly for this raw-fd\n        // poll. The separate report reactor retains device references across each entire registration.\n        using var shutdownLease = new LinuxDescriptorLease(_shutdownEventHandle\n            ?? throw new InvalidOperationException(\"The shutdown event is not initialized.\"));\n        using var monitorLease = new LinuxDescriptorLease(_monitorHandle\n            ?? throw new InvalidOperationException(\"The monitor is not initialized.\"), pollFds[0].fd);\n\n        var pollResult = LibcNativeMethods.Poll(pollFds, pollFds.Length, -1);\n        if (pollResult < 0)\n        {\n            var error = Marshal.GetLastPInvokeError();\n            if (error == LibcNativeMethods.EINTR)\n            {\n                return LinuxHidPollOutcome.Retry;\n            }\n\n            Logger.LogWarning(\"poll() failed with error: {Error}\", error);\n            return LinuxHidPollOutcome.PollFailed;\n        }\n\n        if ((pollFds[1].revents & LibcNativeMethods.POLLIN) != 0)\n        {\n            DrainShutdownEvent();\n            return LinuxHidPollOutcome.ShutdownSignaled;\n        }\n\n        if ((pollFds[1].revents & (LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP | LibcNativeMethods.POLLNVAL)) != 0)\n        {\n            Logger.LogWarning(\"Linux HID listener shutdown fd reported error: {Revents}\", pollFds[1].revents);\n            return LinuxHidPollOutcome.ShutdownFdError;\n        }\n\n        if ((pollFds[0].revents & LibcNativeMethods.POLLIN) != 0)\n        {\n            return LinuxHidPollOutcome.Event;\n        }\n\n        if ((pollFds[0].revents & (LibcNativeMethods.POLLERR | LibcNativeMethods.POLLHUP | LibcNativeMethods.POLLNVAL)) != 0)\n        {\n            Logger.LogWarning(\"udev monitor fd reported error: {Revents}\", pollFds[0].revents);\n            return LinuxHidPollOutcome.MonitorFdError;\n        }\n\n        return LinuxHidPollOutcome.Retry;\n    }\n\n    /// <inheritdoc />\n    public LinuxHidUdevEvent? ReceiveEvent()\n    {\n        if (_monitorHandle is null || _monitorHandle.IsInvalid)\n        {\n            return null;\n        }\n\n        using var device = UdevNativeMethods.udev_monitor_receive_device(_monitorHandle);\n        if (device.IsInvalid)\n        {\n            return null;\n        }\n\n        var action = PtrToString(UdevNativeMethods.udev_device_get_action(device));\n        var stableIdentity = GetStableUdevIdentity(device);\n        var devNode = PtrToString(UdevNativeMethods.udev_device_get_devnode(device));\n\n        return new LinuxHidUdevEvent(action, stableIdentity, devNode);\n    }\n\n    /// <inheritdoc />\n    public void SignalShutdown()\n    {\n        var handle = _shutdownEventHandle;\n        if (handle is null || handle.IsInvalid)\n        {\n            return;\n        }\n\n        try\n        {\n            var signal = BitConverter.GetBytes(1UL);\n            WriteShutdownSignal(\n                () => LibcNativeMethods.Write(handle, signal, signal.Length),\n                Marshal.GetLastPInvokeError,\n                (result, error) =>\n                {\n                    if (result < 0)\n                    {\n                        Logger.LogDebug(\"Failed to signal Linux HID listener shutdown fd: {Error}\", error);\n                    }\n                    else\n                    {\n                        Logger.LogDebug(\n                            \"Failed to signal Linux HID listener shutdown fd: wrote {BytesWritten} bytes instead of {ExpectedBytes}\",\n                            result,\n                            sizeof(ulong));\n                    }\n                });\n        }\n        catch (ObjectDisposedException)\n        {\n            // The owning thread disposed the source while exiting — nothing left to wake.\n        }\n    }\n\n    /// <inheritdoc />\n    public bool IsHidrawReady(string? devNode)\n    {\n        if (string.IsNullOrEmpty(devNode) || !File.Exists(devNode))\n        {\n            return false;\n        }\n\n        using var handle = LibcNativeMethods.Open(\n            devNode,\n            LibcNativeMethods.OpenFlags.O_RDONLY | LibcNativeMethods.OpenFlags.O_NONBLOCK);\n        return !handle.IsInvalid;\n    }\n\n    /// <inheritdoc />\n    public void Dispose()\n    {\n        if (_disposed)\n        {\n            return;\n        }\n\n        _disposed = true;\n        _pollFds = null;\n\n        _shutdownEventHandle?.Dispose();\n        _shutdownEventHandle = null;\n\n        _monitorHandle?.Dispose();\n        _monitorHandle = null;\n\n        _udevHandle?.Dispose();\n        _udevHandle = null;\n    }\n\n    /// <summary>\n    /// Trims the hidraw-specific suffix from a hidraw syspath so the remaining prefix\n    /// identifies the parent HID device stably across hidraw node renumbering.\n    /// </summary>\n    internal static string TrimHidrawSyspath(string syspath)\n    {\n        const string hidrawSegment = \"/hidraw/\";\n        var hidrawIndex = syspath.LastIndexOf(hidrawSegment, StringComparison.Ordinal);\n        if (hidrawIndex >= 0)\n        {\n            return syspath[..hidrawIndex];\n        }\n\n        const string hidrawDirectorySuffix = \"/hidraw\";\n        return syspath.EndsWith(hidrawDirectorySuffix, StringComparison.Ordinal)\n            ? syspath[..^hidrawDirectorySuffix.Length]\n            : syspath;\n    }\n\n    internal static bool IsValidFileDescriptor(int fileDescriptor) => fileDescriptor >= 0;\n\n    internal static void WriteShutdownSignal(\n        Func<int> write,\n        Func<int> getLastError,\n        Action<int, int> reportFailure)\n    {\n        for (var attempt = 1; attempt <= MaxShutdownWriteAttempts; attempt++)\n        {\n            var result = write();\n            if (result == sizeof(ulong))\n            {\n                return;\n            }\n\n            if (result >= 0)\n            {\n                reportFailure(result, 0);\n                return;\n            }\n\n            var error = getLastError();\n            if (error == LibcNativeMethods.EINTR)\n            {\n                if (attempt < MaxShutdownWriteAttempts)\n                {\n                    continue;\n                }\n\n                reportFailure(result, error);\n                return;\n            }\n\n            if (error != LibcNativeMethods.EAGAIN)\n            {\n                reportFailure(result, error);\n            }\n\n            return;\n        }\n    }\n\n    private void DrainShutdownEvent()\n    {\n        var handle = _shutdownEventHandle;\n        if (handle is null || handle.IsInvalid)\n        {\n            return;\n        }\n\n        var buffer = new byte[sizeof(ulong)];\n        while (true)\n        {\n            var result = LibcNativeMethods.Read(handle, buffer, buffer.Length);\n            if (result > 0)\n            {\n                continue;\n            }\n\n            if (result == 0)\n            {\n                return;\n            }\n\n            var error = Marshal.GetLastPInvokeError();\n            if (error != LibcNativeMethods.EAGAIN && error != LibcNativeMethods.EINTR)\n            {\n                Logger.LogDebug(\"Failed to drain Linux HID listener shutdown fd: {Error}\", error);\n            }\n\n            return;\n        }\n    }\n\n    private static string? GetStableUdevIdentity(LinuxUdevDeviceSafeHandle device)\n    {\n        var parent = UdevNativeMethods.udev_device_get_parent(device);\n        var syspath = parent == IntPtr.Zero\n            ? PtrToString(UdevNativeMethods.udev_device_get_syspath(device))\n            : PtrToString(UdevNativeMethods.udev_device_get_syspath(parent));\n\n        return string.IsNullOrEmpty(syspath) ? null : TrimHidrawSyspath(syspath);\n    }\n\n    private static string? PtrToString(IntPtr value) =>\n        value == IntPtr.Zero ? null : Marshal.PtrToStringAnsi(value);\n}",
+  "before_basis": "Current primary bytes including accepted Linux sampling patch a994; not the older revision-2 Linux source.",
+  "original_selected_unit": {
+    "id": "core-001:unit:82f001f6db22d507",
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+    "range_sha256": "179df7e3823075e5935f005be8da257c76fa909edac2e5ee1f58ef8eae2856ab",
+    "start_character": 3394,
+    "end_character_exclusive": 3712,
+    "first_line": 79,
+    "last_line": 86,
+    "category": "member-contract-and-implementation",
+    "label": "Yubico.YubiKit.Core.Transports.Hid.Linux.ILinuxHidEventSource :: LinuxHidUdevEvent? ReceiveEvent();",
+    "assigned_family": "B",
+    "stage": "B2-linux-lifetimes",
+    "status": "READ-CLEAN",
+    "review_status": "PENDING-INDEPENDENT-REVIEW",
+    "sample_status": "ELIGIBLE-CLEAN-NOMINATION",
+    "scope_rationale": "Complete source/XML/comment/assertion context; declaration ranges include code-only implicit contracts.",
+    "features": {
+      "xml": true,
+      "comments": true,
+      "todo": false,
+      "specification": false,
+      "code_only": false,
+      "tests": false
+    },
+    "assignment_kind": "primary",
+    "candidate_ids": [],
+    "read_scope": "complete original semantic unit and implementation/assertion/lifetime context",
+    "disposition_reason": "Yubico.YubiKit.Core.Transports.Hid.Linux.ILinuxHidEventSource :: LinuxHidUdevEvent? ReceiveEvent();: Reviewed partial initialization ownership, monitor/shutdown retained refs during poll, EINTR retry result, shutdown-first readiness, bounded four-write wake policy, concurrent disposed wake tolerance, copied event fields, borrowed parent scope, descriptor-ready open and source disposal order. Temporary descriptor readiness close is not registered connection claim release. C002 stale future-reactor text.",
+    "exclusion_reason": null,
+    "future_editor_owner": "coordinator-assigned fresh editor",
+    "current_source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+    "current_range_sha256": "179df7e3823075e5935f005be8da257c76fa909edac2e5ee1f58ef8eae2856ab",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "documentation_state": "read-disposition-only",
+    "implementation_state": "UNCHANGED",
+    "compiler_state": "VALID-NOT-CHECKED",
+    "execution_state": "NO-NEW-EXECUTION"
+  },
+  "protected_prior_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+      "sha256": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/example-bodies.json",
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/file-dispositions.json",
+      "sha256": "dcd67fdf4dda350456a2034220b7089dd80fabdd38c6e6155056eea813ece35f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+      "sha256": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/proposal-dispositions.json",
+      "sha256": "c32b2c2b1063becaf4d567b616993aabb5329819755bc2ed9b3d63b97ccf2115"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review-identities.json",
+      "sha256": "94b90c17733559a9a2b5cf77136085ac3844b7bad66091f86a223b32ec176e16"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review.md",
+      "sha256": "090e3f28b303b77839d08e852eced612bc4a785923f73d106f2cc6965bc19812"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/current-path-hashes.json",
+      "sha256": "0d440261ba1d64ab54bc415689a3f42bb8a199703e0c53cf9c3738f52d69f2e5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-bodies.json",
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-identity-check.json",
+      "sha256": "fd3ad6ef4e2147919cf7aeee396996489081f5a083426dcbf2e9b306a68858c9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/file-dispositions.json",
+      "sha256": "b3a1421c894431a33dc88a0674b552f12773cb9238845652c169dfd5212ebed4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-citations.json",
+      "sha256": "1e245be21f9507bb5dc904e8002aafeb6fb4dd2922e16a29571153a81b817b97"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-review-delta.patch",
+      "sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/prior-record-preservation.json",
+      "sha256": "18d3e961e86ae8dcc43fc2ea5f5de83ec39c1fc5d1b40def04d3bdc285395ccb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/proposal-dispositions.json",
+      "sha256": "ba2b3214d65cc416eeebb72c1518c295db5d625b1fa9a2d37a42af4a7e9273ee"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/report.md",
+      "sha256": "69b055e77390877dc5455f90f114dc37b821fd720a0cec293197f0e909ae22ed"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/return-identities.json",
+      "sha256": "2ddcf469145643dd0a825ac8f23aace0cbfab2b61cd0b7f257bde3d34d17d75f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-identities.json",
+      "sha256": "01471d9e9e2558b38b045d8ae6b2257659bb72d3c554e4a835cb21f6943af494"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-inputs.json",
+      "sha256": "9d8b522c7beae4c02746b86534a7c1a7dc5849f2c9af95b3ecfcf302f2fdc741"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review.md",
+      "sha256": "22bfc0b8c83cc6be155eb967348e88af4ae337258f7c37bc574b603ecb2ef64e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/revision-corrections.json",
+      "sha256": "91d813ecff200a43d1f5e9056114e02a8f86e4d9157afee3d82c05950e7362e2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch",
+      "sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/static-preservation.json",
+      "sha256": "9929bb8578289b73ff8ba25cf87bff9750abf785060a48a000f16b87ab2aa49b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/xml-check.json",
+      "sha256": "f8f8477e5116f33e058d833df1bec9cac20a99998eeaad87412f49ea4d365627"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/file-dispositions.json",
+      "sha256": "ae10cc1d379bb43807cfd432969f31249ecdf185c01406a20909ce78174157c4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/finding-dispositions.json",
+      "sha256": "4c7a233f13059315dd7a6873449409cea83ae9344326d11b810cda67522c8357"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/inputs.json",
+      "sha256": "22cb5dc4ba229c5c9b5b443c0d8a3b1371da26cab7683d81c5307ff233f79473"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/original-unit-anchors.json",
+      "sha256": "4c7532c5b16f5ef1a0afd198426cdc38edc89747d93cf0fca37201fe6beeccbf"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/report.md",
+      "sha256": "b57b46c9b81e14385cda3647a7fb8dac763d1437bbdd21086385dcd8afacba49"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/return-identities.json",
+      "sha256": "e721030d7839a8ad9978aeb978786b1ea1a7eca9242fc40c4938a45e994299e7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/review-identities.json",
+      "sha256": "b005a8bf8c5c2dede615638c2ca74b20f636295e2796f295ea2180da340cf281"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/review.md",
+      "sha256": "26d1cb7ad6fc21a8707384db0871976d14e452f558466d4e64f78e4af0f27424"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/source.patch",
+      "sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/static-preservation.json",
+      "sha256": "92eab64ba9f05d06c74b6c49c06845ab6601e95199886a64488f993bc3a29956"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/xml-check.json",
+      "sha256": "3ab4dd23c62d5aa8d1e01e4d7d000966923231b83ca86703f90227e2d8d770f4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/file-disposition.json",
+      "sha256": "b25e34e9c7fdbbc1d2bafd810db83e9eddf384f937cf8d887d19d786f59e4c84"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/inputs.json",
+      "sha256": "e3864651fb063bf3e076b5cef26a82c00b7ac0716c015bd24f91169768048206"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/report.md",
+      "sha256": "98944c867c48c022a69b8c1a10b6b96864715209be0941442bf86e0731f91fe2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/return-identities.json",
+      "sha256": "b34a276ecfd6f09a9752809491e24fbac86861109372192c8b81605348c96e5c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/review-identities.json",
+      "sha256": "165171610122339bc0fc2162aefbe67858686b0bb58eae77458309945696922a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/review.md",
+      "sha256": "fd22eaed272e323d6b7174bd21246692ab8adabadd0db3ce93b411984f986ec9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source-evidence.json",
+      "sha256": "f0eb74f24dd2f2e6721707c85e5764081306a1ea8490503b0942bdd940e4ed82"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source.patch",
+      "sha256": "a097122a13ba002f9126de2e00bbf8d7bd2d73fc2ae4a9d9d890d873083b1206"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/static-preservation.json",
+      "sha256": "8b7bfcdaced6fde11084be77634d2df246b0b4832768f7b481926d2dc0e64412"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source-citations.json",
+      "sha256": "596f27302575eb63b3eca6d7d7bab4658a48fd5ebfd5673fd86b6849c2b0fc09"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/static-preservation.json",
+      "sha256": "629eaf27ce006f955f0fe36f985524266f5f3b89912873d27a0d5505db9eafc4"
+    }
+  ],
+  "unchanged_existing_patch_identities": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch",
+      "sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/source.patch",
+      "sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-macos-seam/source.patch",
+      "sha256": "a097122a13ba002f9126de2e00bbf8d7bd2d73fc2ae4a9d9d890d873083b1206"
+    }
+  ]
+}

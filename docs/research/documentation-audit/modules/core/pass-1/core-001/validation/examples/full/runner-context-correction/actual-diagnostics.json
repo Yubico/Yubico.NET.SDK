@@ -1,0 +1,31 @@
+{
+  "source_log": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-management-first/toolchain/20261112-052456-056-build/02-build-Management.IntegrationTests.log",
+    "bytes": 3420,
+    "sha256": "0f9636e4efcbe1904fb5019841b3b083f669df726da2ed5d6a98ec2b80292eff"
+  },
+  "unique_diagnostics": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-061.cs",
+      "line": "26",
+      "column": "73",
+      "code": "CS0103",
+      "message": "The name 'TestContext' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-061.cs",
+      "line": "30",
+      "column": "28",
+      "code": "CS0103",
+      "message": "The name 'TestContext' does not exist in the current context"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-061.cs",
+      "line": "32",
+      "column": "55",
+      "code": "CS0103",
+      "message": "The name 'TestContext' does not exist in the current context"
+    }
+  ],
+  "classification": "Generated runner-context mismatch: xUnit v3 body in xUnit v2 assembly. No body token, shim or runner package change."
+}

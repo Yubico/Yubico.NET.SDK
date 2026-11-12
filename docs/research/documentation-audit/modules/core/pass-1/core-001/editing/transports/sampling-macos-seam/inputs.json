@@ -1,0 +1,327 @@
+{
+  "sample_finding": "SAMPLE-B3-001",
+  "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+  "before_raw_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+  "primary_accepted_before_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+  "before_source_text": "// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing System.Runtime.Versioning;\nusing Yubico.YubiKit.Core.Native;\nusing Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;\nusing CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;\nusing IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;\n\nnamespace Yubico.YubiKit.Core.Transports.Hid.MacOS;\n\n/// <summary>\n///     The IOKit and CoreFoundation calls that govern the <em>lifetime</em> of a macOS HID connection:\n///     creating the device, opening and closing it, creating and releasing CoreFoundation objects, and\n///     registering or clearing the IOKit callbacks, and OTP feature-report I/O.\n/// </summary>\n/// <remarks>\n///     <para>\n///         This is a seam, not an abstraction layer. It exists so the constructor-failure and disposal\n///         paths of <see cref=\"MacOSHidFeatureReportConnection\" />,\n///         <see cref=\"MacOSHidIOReportConnection\" />, and <see cref=\"MacOSOtpHidConnection\" />\n///         can be tested without macOS hardware — the same\n///         reason <c>IWindowsHidReportAccess</c> exists on the Windows side. It deliberately mirrors the native calls\n///         one-for-one and adds no policy.\n///     </para>\n///     <para>\n///         OTP feature-report I/O and checked close verify that accepted operations drain before the\n///         physical claim is released. FIDO report I/O uses a separate bridge; this seam also exposes\n///         the existing feature-report and callback calls used by the macOS HID connections.\n///     </para>\n/// </remarks>\n[SupportedOSPlatform(\"macos\")]\ninternal interface IIOKitDeviceLifetime\n{\n    /// <summary>\n    ///     Resolves an IO registry entry ID to a retained <c>IOHIDDeviceRef</c>.\n    /// </summary>\n    /// <remarks>\n    ///     The returned handle is a CoreFoundation object owned by the caller and must be passed to\n    ///     <see cref=\"ReleaseCFObject\" /> when it is no longer needed. Closing it with\n    ///     <see cref=\"CloseDevice\" /> is not a substitute for releasing it.\n    /// </remarks>\n    /// <exception cref=\"PlatformApiException\">\n    ///     No registry entry matched, or the device handle could not be created.\n    /// </exception>\n    nint CreateDevice(long entryId);\n\n    /// <summary>\n    ///     Opens the device non-seizing (<c>kIOHIDOptionsTypeNone</c>).\n    /// </summary>\n    /// <exception cref=\"PlatformApiException\">The open failed.</exception>\n    void OpenDevice(nint device);\n\n    // OTP needs the return code: exclusive access still establishes an open that must be closed.\n    // Apple IOHIDDeviceClass.m sets _opened for both success and kIOReturnExclusiveAccess.\n    int OpenDeviceResult(nint device)\n    {\n        OpenDevice(device);\n        return 0;\n    }\n\n    /// <summary>\n    ///     Closes the device. Does not release it; see <see cref=\"ReleaseCFObject\" />.\n    /// </summary>\n    void CloseDevice(nint device);\n\n    // OTP uses the checked result to decide whether its physical claim can be released.\n    bool CloseDeviceChecked(nint device);\n\n    int GetFeatureReport(nint device, byte[] buffer, ref long length);\n\n    int SetFeatureReport(nint device, byte[] buffer);\n\n    /// <summary>\n    ///     Releases a CoreFoundation object previously created by <see cref=\"CreateDevice\" /> or\n    ///     <see cref=\"CreateRunLoopMode\" />.\n    /// </summary>\n    void ReleaseCFObject(nint cfObject);\n\n    /// <summary>\n    ///     Creates a retained <c>CFStringRef</c> used as a run-loop mode name. The caller owns the result\n    ///     and must pass it to <see cref=\"ReleaseCFObject\" />.\n    /// </summary>\n    nint CreateRunLoopMode(string name);\n\n    /// <summary>\n    ///     Reads an integer-typed IOKit property from the device.\n    /// </summary>\n    int GetIntProperty(nint device, string propertyName);\n\n    /// <summary>\n    ///     Registers, or with zero <paramref name=\"callback\" /> and <paramref name=\"context\" /> clears, the\n    ///     input report callback.\n    /// </summary>\n    /// <remarks>\n    ///     This dormant registration seam requires a buffer pinned for the entire native registration and\n    ///     callback drain, plus a rooted context. A call-scoped array pin is insufficient. Active FIDO input\n    ///     instead uses the native bridge's persistent buffer and separate callback-state root.\n    /// </remarks>\n    void RegisterInputReportCallback(nint device, byte[] buffer, int bufferLength, nint callback, nint context);\n\n    /// <summary>\n    ///     Registers, or with zero <paramref name=\"callback\" /> and <paramref name=\"context\" /> clears, the\n    ///     device removal callback.\n    /// </summary>\n    void RegisterRemovalCallback(nint device, nint callback, nint context);\n}\n\n/// <summary>\n///     The production <see cref=\"IIOKitDeviceLifetime\" />: a direct pass-through to IOKit and\n///     CoreFoundation.\n/// </summary>\n[SupportedOSPlatform(\"macos\")]\ninternal sealed class IOKitDeviceLifetime : IIOKitDeviceLifetime\n{\n    public static readonly IOKitDeviceLifetime Instance = new();\n\n    private IOKitDeviceLifetime() { }\n\n    public nint CreateDevice(long entryId)\n    {\n        var deviceEntry = 0;\n        try\n        {\n            var matchingDictionary = IOKitNativeMethods.IORegistryEntryIDMatching((ulong)entryId);\n            deviceEntry = IOKitNativeMethods.IOServiceGetMatchingService(0, matchingDictionary);\n\n            if (deviceEntry == 0)\n                throw new PlatformApiException(\"Failed to find matching device entry in IO registry.\");\n\n            var device = IOKitNativeMethods.IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);\n\n            if (device == IntPtr.Zero) throw new PlatformApiException(\"Failed to create HID device handle.\");\n\n            return device;\n        }\n        finally\n        {\n            if (deviceEntry != 0) _ = IOKitNativeMethods.IOObjectRelease(deviceEntry);\n        }\n    }\n\n    public void OpenDevice(nint device)\n    {\n        // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). SDK exclusivity is enforced\n        // by DeviceConnectionRegistry before native open; seizing would add a platform-wide policy and\n        // prevent other non-seizing clients from opening the interface. The OTP path also passes zero.\n        // Process-local admission and OS access permissions remain separate policies.\n        var result = OpenDeviceResult(device);\n\n        if (result != 0)\n            throw new PlatformApiException(\n                nameof(IOKitNativeMethods.IOHIDDeviceOpen),\n                result,\n                \"Failed to open HID device.\");\n    }\n\n    public int OpenDeviceResult(nint device) => IOKitNativeMethods.IOHIDDeviceOpen(device, 0);\n\n    public void CloseDevice(nint device) => _ = IOKitNativeMethods.IOHIDDeviceClose(device, 0);\n\n    public bool CloseDeviceChecked(nint device) => IOKitNativeMethods.IOHIDDeviceClose(device, 0) == 0;\n\n    public int GetFeatureReport(nint device, byte[] buffer, ref long length) =>\n        IOKitNativeMethods.IOHIDDeviceGetReport(device, IOKitHidConstants.kIOHidReportTypeFeature, 0, buffer, ref length);\n\n    public int SetFeatureReport(nint device, byte[] buffer) =>\n        IOKitNativeMethods.IOHIDDeviceSetReport(device, IOKitHidConstants.kIOHidReportTypeFeature, 0, buffer, buffer.Length);\n\n    public void ReleaseCFObject(nint cfObject) => CFNativeMethods.CFRelease(cfObject);\n\n    public nint CreateRunLoopMode(string name) => CoreFoundationString.Create(name);\n\n    public int GetIntProperty(nint device, string propertyName) =>\n        IOKitHelpers.GetIntPropertyValue(device, propertyName);\n\n    public void RegisterInputReportCallback(\n        nint device,\n        byte[] buffer,\n        int bufferLength,\n        nint callback,\n        nint context) =>\n        IOKitNativeMethods.IOHIDDeviceRegisterInputReportCallback(device, buffer, bufferLength, callback, context);\n\n    public void RegisterRemovalCallback(nint device, nint callback, nint context) =>\n        IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(device, callback, context);\n}\n",
+  "accepted_revision_2_file_decision": {
+    "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "packet": "B3",
+    "disposition": "EDIT",
+    "reason": "Apply source-supported comment/XML facets only. Annotated raw native NotOpen/NotPermitted values and missing enum gaps as implementation findings. Constants and historical numeric logs unchanged. Corrected Nullable.Value exception, absence and lossy/out-of-range zero-result XML. Documented persistent pin/context requirements on dormant registration and active native buffer route. Static generation callback explanation added locally; shared stale delegate guidance deferred.",
+    "local_candidate_ids": [
+      "CORE-B3-C001",
+      "CORE-B3-C003",
+      "CORE-B3-C004"
+    ],
+    "proposal_ids": [
+      "FPT-040",
+      "FPT-042",
+      "FPT-043"
+    ],
+    "base_git_blob": "88e37ab5dc73abf859b12162def0a2c0302491b3",
+    "base_git_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+    "source_pin_git_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+    "inventory_original_sha256": [
+      "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0"
+    ],
+    "current_raw_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+    "current_lf_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+    "current_git_content_blob": "308c3e820c8f45ea9c08ae5990646679f682147f",
+    "base_matches_pin_lf": true,
+    "preservation_noncomment_lines_equal": true,
+    "bom_preserved": true,
+    "final_newline_preserved": true,
+    "original_unit_ids": [
+      "core-001:unit:f8412d69f0903d78",
+      "core-001:unit:8071b5ec542a47bf",
+      "core-001:unit:ce3ce6b7dc587aeb",
+      "core-001:unit:f7d3e3c3336c5853",
+      "core-001:unit:b0c302f97bbe0fad",
+      "core-001:unit:b63489aa81cdbaf2",
+      "core-001:unit:d05179e2062f0bc5",
+      "core-001:unit:b3cc97824e48bda4",
+      "core-001:unit:df744c07ab9ddad1",
+      "core-001:unit:663f44912ef5c3b2",
+      "core-001:unit:e4d2f097d41a34e2",
+      "core-001:unit:0dcb1d0d13e41ad6",
+      "core-001:unit:e488fc621f7266de",
+      "core-001:unit:76b664da02352c87",
+      "core-001:unit:2825905d2877ffbf",
+      "core-001:unit:573ce86308ec45e3",
+      "core-001:unit:2766051dada6b6ce",
+      "core-001:unit:379a7db5fbd00293",
+      "core-001:unit:aeab0caa00048aa6",
+      "core-001:unit:32a5dfa22bb05aa8",
+      "core-001:unit:efe6bb96ea4454cd",
+      "core-001:unit:273d5426376667d2",
+      "core-001:unit:6d0b1f9e231549d0",
+      "core-001:unit:d80b291e55ace9b7",
+      "core-001:unit:3d791472075c564c",
+      "core-001:unit:a67131d7507bb5ce",
+      "core-001:unit:6861fce129a5a2ee",
+      "core-001:unit:dd3d55c644e20a02",
+      "core-001:unit:7d48b120320d1087",
+      "core-001:unit:384ea07b1e434598"
+    ],
+    "investigator_evidence": "CreateDevice consumes matching dictionary via service lookup, finally releases service, transfers CF device reference. Non-seizing0 open; checked close bool. ExclusiveAccess still means open in original Apple implementation. Borrowed native property references are not released. C004 callback seam; unsupported cross-SDK citation retained as gap.",
+    "source_evidence_record": "investigation/B3/file-evidence.md",
+    "review_status": "PENDING-INDEPENDENT-REVIEW",
+    "compiler_status": "VALID-NOT-CHECKED",
+    "execution": "NO-NEW-EXECUTION",
+    "proposal_facet_dispositions": [
+      {
+        "local_id": "CORE-B3-C001",
+        "reason": "Annotated raw native NotOpen/NotPermitted values and missing enum gaps as implementation findings. Constants and historical numeric logs unchanged."
+      },
+      {
+        "local_id": "CORE-B3-C003",
+        "reason": "Corrected Nullable.Value exception, absence and lossy/out-of-range zero-result XML."
+      },
+      {
+        "local_id": "CORE-B3-C004",
+        "reason": "Documented persistent pin/context requirements on dormant registration and active native buffer route. Static generation callback explanation added locally; shared stale delegate guidance deferred."
+      }
+    ]
+  },
+  "original_selected_unit": {
+    "id": "core-001:unit:f8412d69f0903d78",
+    "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "source_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+    "range_sha256": "e1c59ac5aa5c5193f00ec7822e25c9d2a30c2771e4db9fbe93c538fe5ae519ce",
+    "start_character": 0,
+    "end_character_exclusive": 2171,
+    "first_line": 1,
+    "last_line": 43,
+    "category": "source-context-and-explanations",
+    "label": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "assigned_family": "B",
+    "stage": "B3-macos-lifetimes",
+    "status": "READ-CLEAN",
+    "review_status": "PENDING-INDEPENDENT-REVIEW",
+    "sample_status": "ELIGIBLE-AFTER-COORDINATOR-RECONCILIATION",
+    "scope_rationale": "Complete source/XML/comment/assertion context; declaration ranges include code-only implicit contracts.",
+    "features": {
+      "xml": true,
+      "comments": true,
+      "todo": false,
+      "specification": true,
+      "code_only": false,
+      "tests": false
+    },
+    "ownership": "PRIMARY",
+    "candidate_ids": [],
+    "read_scope": "Complete semantic unit plus enclosing owner/helper/assertion context",
+    "read_evidence": "CreateDevice consumes matching dictionary via service lookup, finally releases service, transfers CF device reference. Non-seizing0 open; checked close bool. ExclusiveAccess still means open in original Apple implementation. Borrowed native property references are not released. C004 callback seam; unsupported cross-SDK citation retained as gap.",
+    "current_source_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+    "current_range_sha256": "e1c59ac5aa5c5193f00ec7822e25c9d2a30c2771e4db9fbe93c538fe5ae519ce",
+    "validation_status": "VALID-NOT-CHECKED",
+    "platform_status": "NO-NEW-EXECUTION",
+    "qualification": "Source/assertion read; original OS/shim source and historical machine evidence retain their separate revisions. No universal native or hardware acceptance."
+  },
+  "related_production_class_units": [
+    {
+      "id": "core-001:unit:573ce86308ec45e3",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "source_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+      "range_sha256": "0fa7c0dde932574904015fb12be40443a230d4244c6be7242466976ebdccc745",
+      "start_character": 5124,
+      "end_character_exclusive": 5190,
+      "first_line": 120,
+      "last_line": 121,
+      "category": "type-contract",
+      "label": "Yubico.YubiKit.Core.Transports.Hid.MacOS.IOKitDeviceLifetime",
+      "assigned_family": "B",
+      "stage": "B3-macos-lifetimes",
+      "status": "READ-CLEAN",
+      "review_status": "PENDING-INDEPENDENT-REVIEW",
+      "sample_status": "ELIGIBLE-AFTER-COORDINATOR-RECONCILIATION",
+      "scope_rationale": "Complete source/XML/comment/assertion context; declaration ranges include code-only implicit contracts.",
+      "features": {
+        "xml": false,
+        "comments": false,
+        "todo": false,
+        "specification": false,
+        "code_only": true,
+        "tests": false
+      },
+      "ownership": "PRIMARY",
+      "candidate_ids": [],
+      "read_scope": "Complete semantic unit plus enclosing owner/helper/assertion context",
+      "read_evidence": "CreateDevice consumes matching dictionary via service lookup, finally releases service, transfers CF device reference. Non-seizing0 open; checked close bool. ExclusiveAccess still means open in original Apple implementation. Borrowed native property references are not released. C004 callback seam; unsupported cross-SDK citation retained as gap.",
+      "current_source_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+      "current_range_sha256": "0fa7c0dde932574904015fb12be40443a230d4244c6be7242466976ebdccc745",
+      "validation_status": "VALID-NOT-CHECKED",
+      "platform_status": "NO-NEW-EXECUTION",
+      "qualification": "Source/assertion read; original OS/shim source and historical machine evidence retain their separate revisions. No universal native or hardware acceptance."
+    }
+  ],
+  "protected_prior_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+      "sha256": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/example-bodies.json",
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/file-dispositions.json",
+      "sha256": "dcd67fdf4dda350456a2034220b7089dd80fabdd38c6e6155056eea813ece35f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+      "sha256": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/proposal-dispositions.json",
+      "sha256": "c32b2c2b1063becaf4d567b616993aabb5329819755bc2ed9b3d63b97ccf2115"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review-identities.json",
+      "sha256": "94b90c17733559a9a2b5cf77136085ac3844b7bad66091f86a223b32ec176e16"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review.md",
+      "sha256": "090e3f28b303b77839d08e852eced612bc4a785923f73d106f2cc6965bc19812"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/current-path-hashes.json",
+      "sha256": "0d440261ba1d64ab54bc415689a3f42bb8a199703e0c53cf9c3738f52d69f2e5"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-bodies.json",
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-identity-check.json",
+      "sha256": "fd3ad6ef4e2147919cf7aeee396996489081f5a083426dcbf2e9b306a68858c9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/file-dispositions.json",
+      "sha256": "b3a1421c894431a33dc88a0674b552f12773cb9238845652c169dfd5212ebed4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-citations.json",
+      "sha256": "1e245be21f9507bb5dc904e8002aafeb6fb4dd2922e16a29571153a81b817b97"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-review-delta.patch",
+      "sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/prior-record-preservation.json",
+      "sha256": "18d3e961e86ae8dcc43fc2ea5f5de83ec39c1fc5d1b40def04d3bdc285395ccb"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/proposal-dispositions.json",
+      "sha256": "ba2b3214d65cc416eeebb72c1518c295db5d625b1fa9a2d37a42af4a7e9273ee"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/report.md",
+      "sha256": "69b055e77390877dc5455f90f114dc37b821fd720a0cec293197f0e909ae22ed"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/return-identities.json",
+      "sha256": "2ddcf469145643dd0a825ac8f23aace0cbfab2b61cd0b7f257bde3d34d17d75f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-identities.json",
+      "sha256": "01471d9e9e2558b38b045d8ae6b2257659bb72d3c554e4a835cb21f6943af494"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-inputs.json",
+      "sha256": "9d8b522c7beae4c02746b86534a7c1a7dc5849f2c9af95b3ecfcf302f2fdc741"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review.md",
+      "sha256": "22bfc0b8c83cc6be155eb967348e88af4ae337258f7c37bc574b603ecb2ef64e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/revision-corrections.json",
+      "sha256": "91d813ecff200a43d1f5e9056114e02a8f86e4d9157afee3d82c05950e7362e2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch",
+      "sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/static-preservation.json",
+      "sha256": "9929bb8578289b73ff8ba25cf87bff9750abf785060a48a000f16b87ab2aa49b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/xml-check.json",
+      "sha256": "f8f8477e5116f33e058d833df1bec9cac20a99998eeaad87412f49ea4d365627"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/file-dispositions.json",
+      "sha256": "ae10cc1d379bb43807cfd432969f31249ecdf185c01406a20909ce78174157c4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/finding-dispositions.json",
+      "sha256": "4c7a233f13059315dd7a6873449409cea83ae9344326d11b810cda67522c8357"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/inputs.json",
+      "sha256": "22cb5dc4ba229c5c9b5b443c0d8a3b1371da26cab7683d81c5307ff233f79473"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/original-unit-anchors.json",
+      "sha256": "4c7532c5b16f5ef1a0afd198426cdc38edc89747d93cf0fca37201fe6beeccbf"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/report.md",
+      "sha256": "b57b46c9b81e14385cda3647a7fb8dac763d1437bbdd21086385dcd8afacba49"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/return-identities.json",
+      "sha256": "e721030d7839a8ad9978aeb978786b1ea1a7eca9242fc40c4938a45e994299e7"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/review-identities.json",
+      "sha256": "b005a8bf8c5c2dede615638c2ca74b20f636295e2796f295ea2180da340cf281"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/review.md",
+      "sha256": "26d1cb7ad6fc21a8707384db0871976d14e452f558466d4e64f78e4af0f27424"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/source.patch",
+      "sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/static-preservation.json",
+      "sha256": "92eab64ba9f05d06c74b6c49c06845ab6601e95199886a64488f993bc3a29956"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/xml-check.json",
+      "sha256": "3ab4dd23c62d5aa8d1e01e4d7d000966923231b83ca86703f90227e2d8d770f4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source-citations.json",
+      "sha256": "596f27302575eb63b3eca6d7d7bab4658a48fd5ebfd5673fd86b6849c2b0fc09"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/static-preservation.json",
+      "sha256": "629eaf27ce006f955f0fe36f985524266f5f3b89912873d27a0d5505db9eafc4"
+    }
+  ],
+  "unchanged_existing_patch_identities": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch",
+      "sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/sampling-correction/source.patch",
+      "sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049"
+    }
+  ]
+}

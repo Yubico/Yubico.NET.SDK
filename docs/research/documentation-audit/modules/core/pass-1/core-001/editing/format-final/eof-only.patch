@@ -1,0 +1,2390 @@
+diff --git a/src/Core/src/Abstractions/IApplicationSession.cs b/src/Core/src/Abstractions/IApplicationSession.cs
+--- a/src/Core/src/Abstractions/IApplicationSession.cs
++++ b/src/Core/src/Abstractions/IApplicationSession.cs
+@@ -50,4 +50,4 @@
+     ///     policy; a positive result for an unknown raw-session version is not evidence of device support.
+     /// </remarks>
+     bool IsSupported(Feature feature);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Abstractions/IProtocol.cs b/src/Core/src/Abstractions/IProtocol.cs
+--- a/src/Core/src/Abstractions/IProtocol.cs
++++ b/src/Core/src/Abstractions/IProtocol.cs
+@@ -48,4 +48,4 @@
+ internal interface IProtocol : IDisposable
+ {
+     void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Abstractions/IYubiKey.cs b/src/Core/src/Abstractions/IYubiKey.cs
+--- a/src/Core/src/Abstractions/IYubiKey.cs
++++ b/src/Core/src/Abstractions/IYubiKey.cs
+@@ -233,4 +233,4 @@
+                 "Use ConnectAsync<TConnection>() or an application-specific session extension to choose a transport.")
+         };
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Credentials/ConsoleCredentialReader.cs b/src/Core/src/Credentials/ConsoleCredentialReader.cs
+--- a/src/Core/src/Credentials/ConsoleCredentialReader.cs
++++ b/src/Core/src/Credentials/ConsoleCredentialReader.cs
+@@ -388,4 +388,4 @@
+ 
+     private static void ClearCharBuffer(char[] buffer, int length) =>
+         CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(buffer.AsSpan(0, length)));
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Credentials/CredentialPromptContext.cs b/src/Core/src/Credentials/CredentialPromptContext.cs
+--- a/src/Core/src/Credentials/CredentialPromptContext.cs
++++ b/src/Core/src/Credentials/CredentialPromptContext.cs
+@@ -69,4 +69,4 @@
+     /// establishing a new secret.
+     /// </summary>
+     public bool RequiresConfirmation { get; init; }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Credentials/CredentialReaderOptions.cs b/src/Core/src/Credentials/CredentialReaderOptions.cs
+--- a/src/Core/src/Credentials/CredentialReaderOptions.cs
++++ b/src/Core/src/Credentials/CredentialReaderOptions.cs
+@@ -136,4 +136,4 @@
+         CharacterFilter = static c => char.IsAsciiHexDigit(c) || c is ' ' or ':' or '-'
+     };
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Credentials/ICredentialPrompt.cs b/src/Core/src/Credentials/ICredentialPrompt.cs
+--- a/src/Core/src/Credentials/ICredentialPrompt.cs
++++ b/src/Core/src/Credentials/ICredentialPrompt.cs
+@@ -115,4 +115,4 @@
+     ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+         CredentialPromptContext context,
+         CancellationToken cancellationToken);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Credentials/ISecureCredentialReader.cs b/src/Core/src/Credentials/ISecureCredentialReader.cs
+--- a/src/Core/src/Credentials/ISecureCredentialReader.cs
++++ b/src/Core/src/Credentials/ISecureCredentialReader.cs
+@@ -86,4 +86,4 @@
+     /// </remarks>
+     /// <exception cref="OperationCanceledException">The implementation observes cancellation while reading an entry.</exception>
+     IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options, CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Credentials/UserPresenceIntent.cs b/src/Core/src/Credentials/UserPresenceIntent.cs
+--- a/src/Core/src/Credentials/UserPresenceIntent.cs
++++ b/src/Core/src/Credentials/UserPresenceIntent.cs
+@@ -116,4 +116,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Credentials/UserPresenceNotification.cs b/src/Core/src/Credentials/UserPresenceNotification.cs
+--- a/src/Core/src/Credentials/UserPresenceNotification.cs
++++ b/src/Core/src/Credentials/UserPresenceNotification.cs
+@@ -203,4 +203,4 @@
+             throw;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/AesUtilities.cs b/src/Core/src/Cryptography/AesUtilities.cs
+--- a/src/Core/src/Cryptography/AesUtilities.cs
++++ b/src/Core/src/Cryptography/AesUtilities.cs
+@@ -231,4 +231,4 @@
+         public static byte[] AesCbcDecrypt(byte[] decryptionKey, byte[] iv, ReadOnlySpan<byte> ciphertext) =>
+             AesCbcDecrypt(decryptionKey.AsSpan(), iv.AsSpan(), ciphertext).ToArray();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/AlgorithmInfo.cs b/src/Core/src/Cryptography/AlgorithmInfo.cs
+--- a/src/Core/src/Cryptography/AlgorithmInfo.cs
++++ b/src/Core/src/Cryptography/AlgorithmInfo.cs
+@@ -156,4 +156,4 @@
+         hash.Add(Derivation);
+         return hash.ToHashCode();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/ArkgPrimitives.cs b/src/Core/src/Cryptography/ArkgPrimitives.cs
+--- a/src/Core/src/Cryptography/ArkgPrimitives.cs
++++ b/src/Core/src/Cryptography/ArkgPrimitives.cs
+@@ -44,4 +44,4 @@
+     /// </para>
+     /// </remarks>
+     public static IArkgPrimitives Create() => new ArkgPrimitivesOpenSsl();
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs b/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs
+--- a/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs
++++ b/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs
+@@ -731,4 +731,4 @@
+ 
+         public override bool IsInvalid => handle == IntPtr.Zero;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs b/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs
+--- a/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs
++++ b/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs
+@@ -383,4 +383,4 @@
+                 : "Invalid PKCS#8 private key format: unexpected version");
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs b/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs
+--- a/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs
++++ b/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs
+@@ -290,4 +290,4 @@
+ 
+         return writer.Encode();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs b/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs
+--- a/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs
++++ b/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs
+@@ -134,4 +134,4 @@
+ 
+         return ECPublicKey.CreateFromParameters(ecParams);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/AsnUtilities.cs b/src/Core/src/Cryptography/AsnUtilities.cs
+--- a/src/Core/src/Cryptography/AsnUtilities.cs
++++ b/src/Core/src/Cryptography/AsnUtilities.cs
+@@ -335,4 +335,4 @@
+             ? data.Length - 1 // return last byte position
+             : startIndex; // return first non-zero byte position
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs b/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs
+--- a/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs
++++ b/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs
+@@ -294,4 +294,4 @@
+         CmacBlockCipherAlgorithm.Aes256 => 16,
+         _ => throw new ArgumentOutOfRangeException("ExceptionMessages.InvalidCmacInput")
+     };
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs b/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs
+--- a/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs
++++ b/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs
+@@ -61,4 +61,4 @@
+     /// RSASSA-PKCS1-v1_5 with SHA-256
+     /// </summary>
+     Rs256 = -257,
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/Cose/CoseEcCurve.cs b/src/Core/src/Cryptography/Cose/CoseEcCurve.cs
+--- a/src/Core/src/Cryptography/Cose/CoseEcCurve.cs
++++ b/src/Core/src/Cryptography/Cose/CoseEcCurve.cs
+@@ -77,4 +77,4 @@
+         /// <summary>brainpoolP512r1, IANA COSE curve 259 (ISO/IEC 18013-5).</summary>
+         BrainpoolP512r1 = 259
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/Cose/CoseKeyType.cs b/src/Core/src/Cryptography/Cose/CoseKeyType.cs
+--- a/src/Core/src/Cryptography/Cose/CoseKeyType.cs
++++ b/src/Core/src/Cryptography/Cose/CoseKeyType.cs
+@@ -49,4 +49,4 @@
+     /// Symmetric keys
+     /// </summary>
+     Symmetric = 4,
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/CryptographyProviders.cs b/src/Core/src/Cryptography/CryptographyProviders.cs
+--- a/src/Core/src/Cryptography/CryptographyProviders.cs
++++ b/src/Core/src/Cryptography/CryptographyProviders.cs
+@@ -303,4 +303,4 @@
+         // /// </summary>
+         // public static Func<string, HMAC> HmacCreator { get; set; } = HMAC.Create;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/Curve25519PrivateKey.cs b/src/Core/src/Cryptography/Curve25519PrivateKey.cs
+--- a/src/Core/src/Cryptography/Curve25519PrivateKey.cs
++++ b/src/Core/src/Cryptography/Curve25519PrivateKey.cs
+@@ -140,4 +140,4 @@
+     /// <exception cref="ArgumentException">Thrown if <paramref name="keyType"/> is not X25519 or Ed25519, or if <paramref name="privateKey"/> is not exactly 32 bytes.</exception>
+     public static Curve25519PrivateKey CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType) => new(privateKey, keyType);
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/Curve25519PublicKey.cs b/src/Core/src/Cryptography/Curve25519PublicKey.cs
+--- a/src/Core/src/Cryptography/Curve25519PublicKey.cs
++++ b/src/Core/src/Cryptography/Curve25519PublicKey.cs
+@@ -115,4 +115,4 @@
+ 
+         return new Curve25519PublicKey(publicPoint, keyInfo);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/ECParametersExtensions.cs b/src/Core/src/Cryptography/ECParametersExtensions.cs
+--- a/src/Core/src/Cryptography/ECParametersExtensions.cs
++++ b/src/Core/src/Cryptography/ECParametersExtensions.cs
+@@ -57,4 +57,4 @@
+         }
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/ECPrivateKey.cs b/src/Core/src/Cryptography/ECPrivateKey.cs
+--- a/src/Core/src/Cryptography/ECPrivateKey.cs
++++ b/src/Core/src/Cryptography/ECPrivateKey.cs
+@@ -292,4 +292,4 @@
+             return ECDiffieHellman.Create(Parameters);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/ECPublicKey.cs b/src/Core/src/Cryptography/ECPublicKey.cs
+--- a/src/Core/src/Cryptography/ECPublicKey.cs
++++ b/src/Core/src/Cryptography/ECPublicKey.cs
+@@ -193,4 +193,4 @@
+         using var ecdh = ECDiffieHellman.Create(Parameters);
+         return ecdh.PublicKey;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/IArkgPrimitives.cs b/src/Core/src/Cryptography/IArkgPrimitives.cs
+--- a/src/Core/src/Cryptography/IArkgPrimitives.cs
++++ b/src/Core/src/Cryptography/IArkgPrimitives.cs
+@@ -79,4 +79,4 @@
+         ReadOnlySpan<byte> pkKem,
+         ReadOnlySpan<byte> ikm,
+         ReadOnlySpan<byte> ctx);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/IEcdhPrimitives.cs b/src/Core/src/Cryptography/IEcdhPrimitives.cs
+--- a/src/Core/src/Cryptography/IEcdhPrimitives.cs
++++ b/src/Core/src/Cryptography/IEcdhPrimitives.cs
+@@ -34,4 +34,4 @@
+     /// shared-secret array and must clear it after use; provider disposal does not clear that result.
+     /// </remarks>
+     byte[] ComputeSharedSecret(ECParameters localPrivateKey, ECParameters remotePublicKey);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/IPrivateKeyExtensions.cs b/src/Core/src/Cryptography/IPrivateKeyExtensions.cs
+--- a/src/Core/src/Cryptography/IPrivateKeyExtensions.cs
++++ b/src/Core/src/Cryptography/IPrivateKeyExtensions.cs
+@@ -48,4 +48,4 @@
+     /// </remarks>
+     public static T Cast<T>(this IPrivateKey key) where T : class, IPrivateKey =>
+         key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/PrivateKey.cs b/src/Core/src/Cryptography/PrivateKey.cs
+--- a/src/Core/src/Cryptography/PrivateKey.cs
++++ b/src/Core/src/Cryptography/PrivateKey.cs
+@@ -75,4 +75,4 @@
+             throw new ObjectDisposedException(GetType().Name);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/PrivateKeyConsistency.cs b/src/Core/src/Cryptography/PrivateKeyConsistency.cs
+--- a/src/Core/src/Cryptography/PrivateKeyConsistency.cs
++++ b/src/Core/src/Cryptography/PrivateKeyConsistency.cs
+@@ -117,4 +117,4 @@
+     private const int MaxEcdsaSignatureLength = 144;
+ 
+     private static BigInteger ToBigInteger(byte[] value) => new(value, isUnsigned: true, isBigEndian: true);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/RSAParametersExtensions.cs b/src/Core/src/Cryptography/RSAParametersExtensions.cs
+--- a/src/Core/src/Cryptography/RSAParametersExtensions.cs
++++ b/src/Core/src/Cryptography/RSAParametersExtensions.cs
+@@ -134,4 +134,4 @@
+         CryptographicOperations.ZeroMemory(parameters.InverseQ);
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/RSAPrivateKey.cs b/src/Core/src/Cryptography/RSAPrivateKey.cs
+--- a/src/Core/src/Cryptography/RSAPrivateKey.cs
++++ b/src/Core/src/Cryptography/RSAPrivateKey.cs
+@@ -165,4 +165,4 @@
+         RSAParameters parameters,
+         Action<RSAParameters>? parametersCopied) =>
+         new(parameters, parametersCopied);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/RSAPublicKey.cs b/src/Core/src/Cryptography/RSAPublicKey.cs
+--- a/src/Core/src/Cryptography/RSAPublicKey.cs
++++ b/src/Core/src/Cryptography/RSAPublicKey.cs
+@@ -114,4 +114,4 @@
+         AsnPublicKeyDecoder
+             .CreatePublicKey(subjectPublicKeyInfo)
+             .Cast<RSAPublicKey>();
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Cryptography/X963Kdf.cs b/src/Core/src/Cryptography/X963Kdf.cs
+--- a/src/Core/src/Cryptography/X963Kdf.cs
++++ b/src/Core/src/Cryptography/X963Kdf.cs
+@@ -79,4 +79,4 @@
+ 
+         return result;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/CompositeDeviceMerger.cs b/src/Core/src/Devices/CompositeDeviceMerger.cs
+--- a/src/Core/src/Devices/CompositeDeviceMerger.cs
++++ b/src/Core/src/Devices/CompositeDeviceMerger.cs
+@@ -464,4 +464,4 @@
+         ConnectionType.HidOtp => 2,
+         _ => 3
+     };
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/CompositeMetadataReader.cs b/src/Core/src/Devices/CompositeMetadataReader.cs
+--- a/src/Core/src/Devices/CompositeMetadataReader.cs
++++ b/src/Core/src/Devices/CompositeMetadataReader.cs
+@@ -93,4 +93,4 @@
+         return null;
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/ConnectionType.cs b/src/Core/src/Devices/ConnectionType.cs
+--- a/src/Core/src/Devices/ConnectionType.cs
++++ b/src/Core/src/Devices/ConnectionType.cs
+@@ -34,4 +34,4 @@
+     SmartCard = 8,
+     /// <summary>All modeled connection filters; use a concrete type to open a connection.</summary>
+     All = Hid | HidFido | HidOtp | SmartCard
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DeviceCapabilities.cs b/src/Core/src/Devices/DeviceCapabilities.cs
+--- a/src/Core/src/Devices/DeviceCapabilities.cs
++++ b/src/Core/src/Devices/DeviceCapabilities.cs
+@@ -62,4 +62,4 @@
+     ///     This mask describes the enum, rather than a particular device's enabled applications or future bits.
+     /// </summary>
+     All = Otp | U2f | OpenPgp | Piv | Oath | HsmAuth | Fido2
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DeviceChange.cs b/src/Core/src/Devices/DeviceChange.cs
+--- a/src/Core/src/Devices/DeviceChange.cs
++++ b/src/Core/src/Devices/DeviceChange.cs
+@@ -47,4 +47,4 @@
+ /// <remarks>Emitted once per subscription that starts while the monitor is running, after the initial replay and
+ /// including when the replay is empty. A subscription started after disposal ends without any notification.</remarks>
+ /// <param name="Revision">The revision of the replayed snapshot.</param>
+-public sealed record SnapshotComplete(long Revision) : DeviceChange(Revision);
++public sealed record SnapshotComplete(long Revision) : DeviceChange(Revision);
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DeviceChangeFeed.cs b/src/Core/src/Devices/DeviceChangeFeed.cs
+--- a/src/Core/src/Devices/DeviceChangeFeed.cs
++++ b/src/Core/src/Devices/DeviceChangeFeed.cs
+@@ -175,4 +175,4 @@
+ 
+         public void Dispose() => owner.Unsubscribe(this);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DeviceFlags.cs b/src/Core/src/Devices/DeviceFlags.cs
+--- a/src/Core/src/Devices/DeviceFlags.cs
++++ b/src/Core/src/Devices/DeviceFlags.cs
+@@ -50,4 +50,4 @@
+     ///     </para>
+     /// </remarks>
+     TouchEject = 0x80
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DeviceInfo.cs b/src/Core/src/Devices/DeviceInfo.cs
+--- a/src/Core/src/Devices/DeviceInfo.cs
++++ b/src/Core/src/Devices/DeviceInfo.cs
+@@ -408,4 +408,4 @@
+             ? (DeviceCapabilities)appData.Span[0]
+             : (DeviceCapabilities)BinaryPrimitives.ReadInt16BigEndian(appData.Span);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DeviceInfoReader.cs b/src/Core/src/Devices/DeviceInfoReader.cs
+--- a/src/Core/src/Devices/DeviceInfoReader.cs
++++ b/src/Core/src/Devices/DeviceInfoReader.cs
+@@ -198,4 +198,4 @@
+         // Return data without CRC: [length][TLV data...].
+         return response[..(response.Span[0] + 1)].ToArray();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DiscoveryBudgets.cs b/src/Core/src/Devices/DiscoveryBudgets.cs
+--- a/src/Core/src/Devices/DiscoveryBudgets.cs
++++ b/src/Core/src/Devices/DiscoveryBudgets.cs
+@@ -29,4 +29,4 @@
+     /// <summary>The arithmetic sum of the enumeration, one identity-attempt, and metadata wait budgets.</summary>
+     /// <remarks>Retries, backoff, scan-lock queueing, synchronous topology work, and logging lie outside this sum.</remarks>
+     internal static TimeSpan ScanUpperBound => Enumeration + IdentityRead + MetadataRead;
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs b/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs
+--- a/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs
++++ b/src/Core/src/Devices/DiscoveryDeviceInfoReader.cs
+@@ -128,4 +128,4 @@
+             throw;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DiscoveryIdentityReader.cs b/src/Core/src/Devices/DiscoveryIdentityReader.cs
+--- a/src/Core/src/Devices/DiscoveryIdentityReader.cs
++++ b/src/Core/src/Devices/DiscoveryIdentityReader.cs
+@@ -113,4 +113,4 @@
+         }
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DiscoveryReadScope.cs b/src/Core/src/Devices/DiscoveryReadScope.cs
+--- a/src/Core/src/Devices/DiscoveryReadScope.cs
++++ b/src/Core/src/Devices/DiscoveryReadScope.cs
+@@ -116,4 +116,4 @@
+ {
+     internal DiscoveryReadSkippedException Superseded() =>
+         new(InterfaceId, DiscoveryReadSkipCause.SupersededByTransportActivity);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/DiscoveryReadSkippedException.cs b/src/Core/src/Devices/DiscoveryReadSkippedException.cs
+--- a/src/Core/src/Devices/DiscoveryReadSkippedException.cs
++++ b/src/Core/src/Devices/DiscoveryReadSkippedException.cs
+@@ -60,4 +60,4 @@
+ {
+     /// <summary>The specific reason the read was skipped.</summary>
+     public DiscoveryReadSkipCause Cause { get; } = cause;
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/Feature.cs b/src/Core/src/Devices/Feature.cs
+--- a/src/Core/src/Devices/Feature.cs
++++ b/src/Core/src/Devices/Feature.cs
+@@ -56,4 +56,4 @@
+ 
+         return firmwareVersion.IsAlphaOrBeta || firmwareVersion >= Version;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/FindYubiKeys.cs b/src/Core/src/Devices/FindYubiKeys.cs
+--- a/src/Core/src/Devices/FindYubiKeys.cs
++++ b/src/Core/src/Devices/FindYubiKeys.cs
+@@ -541,4 +541,4 @@
+ 
+     // Only successful metadata reads are cached, so Info is always present.
+     private readonly record struct MetadataCacheEntry(DeviceInfo Info, IReadOnlyList<string> InterfaceIds);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/FirmwareVersion.cs b/src/Core/src/Devices/FirmwareVersion.cs
+--- a/src/Core/src/Devices/FirmwareVersion.cs
++++ b/src/Core/src/Devices/FirmwareVersion.cs
+@@ -261,4 +261,4 @@
+     public static readonly FirmwareVersion V5_7_2 = new(5, 7, 2);
+     public static readonly FirmwareVersion V5_8_0 = new(5, 8);
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/FormFactor.cs b/src/Core/src/Devices/FormFactor.cs
+--- a/src/Core/src/Devices/FormFactor.cs
++++ b/src/Core/src/Devices/FormFactor.cs
+@@ -60,4 +60,4 @@
+     ///     The YubiKey is a USB-C key-chain device with a biometric (fingerprint) sensor.
+     /// </summary>
+     UsbCBiometricKeychain = 7
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/HotplugSignals.cs b/src/Core/src/Devices/HotplugSignals.cs
+--- a/src/Core/src/Devices/HotplugSignals.cs
++++ b/src/Core/src/Devices/HotplugSignals.cs
+@@ -125,4 +125,4 @@
+ }
+ 
+ /// <summary>Pairs a transport hint with its listener factory.</summary>
+-internal readonly record struct ListenerSource(ConnectionType Transport, Func<IDeviceChangeListener> Create);
++internal readonly record struct ListenerSource(ConnectionType Transport, Func<IDeviceChangeListener> Create);
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/IDeviceTopologyResolver.cs b/src/Core/src/Devices/IDeviceTopologyResolver.cs
+--- a/src/Core/src/Devices/IDeviceTopologyResolver.cs
++++ b/src/Core/src/Devices/IDeviceTopologyResolver.cs
+@@ -75,4 +75,4 @@
+         SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows
+             ? new WindowsDeviceTopologyResolver(new WindowsTopologyNativeOps())
+             : NullDeviceTopologyResolver.Instance;
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/ProtocolDeviceInfo.cs b/src/Core/src/Devices/ProtocolDeviceInfo.cs
+--- a/src/Core/src/Devices/ProtocolDeviceInfo.cs
++++ b/src/Core/src/Devices/ProtocolDeviceInfo.cs
+@@ -54,4 +54,4 @@
+             protocol.Dispose();
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/SharedDeviceInfoRead.cs b/src/Core/src/Devices/SharedDeviceInfoRead.cs
+--- a/src/Core/src/Devices/SharedDeviceInfoRead.cs
++++ b/src/Core/src/Devices/SharedDeviceInfoRead.cs
+@@ -349,4 +349,4 @@
+                 DeviceConnectionRegistry.TryMarkUnrecovered(lease, failure);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/VersionQualifier.cs b/src/Core/src/Devices/VersionQualifier.cs
+--- a/src/Core/src/Devices/VersionQualifier.cs
++++ b/src/Core/src/Devices/VersionQualifier.cs
+@@ -102,4 +102,4 @@
+         Iteration == other.Iteration;
+ 
+     public override int GetHashCode() => HashCode.Combine(FirmwareVersion, Type, Iteration);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs b/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs
+--- a/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs
++++ b/src/Core/src/Devices/WindowsDeviceTopologyResolver.cs
+@@ -101,4 +101,4 @@
+             && !string.IsNullOrEmpty(instanceId)
+             && nativeOps.TryGetContainerIdByInstanceId(instanceId, out containerId);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/WindowsTopologyNativeOps.cs b/src/Core/src/Devices/WindowsTopologyNativeOps.cs
+--- a/src/Core/src/Devices/WindowsTopologyNativeOps.cs
++++ b/src/Core/src/Devices/WindowsTopologyNativeOps.cs
+@@ -108,4 +108,4 @@
+             return false;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/YubiKeyManager.cs b/src/Core/src/Devices/YubiKeyManager.cs
+--- a/src/Core/src/Devices/YubiKeyManager.cs
++++ b/src/Core/src/Devices/YubiKeyManager.cs
+@@ -148,4 +148,4 @@
+     /// <exception cref="PlatformInteropException">A requested platform API fails during the first scan.</exception>
+     public static Task<YubiKeyMonitor> CreateMonitorAsync(CancellationToken cancellationToken = default) =>
+         YubiKeyMonitor.CreateAsync(cancellationToken);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Devices/YubiKeyMonitor.cs b/src/Core/src/Devices/YubiKeyMonitor.cs
+--- a/src/Core/src/Devices/YubiKeyMonitor.cs
++++ b/src/Core/src/Devices/YubiKeyMonitor.cs
+@@ -214,4 +214,4 @@
+         _feed.Complete();
+         Logger.LogDebug("Device monitoring stopped");
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs b/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs
+--- a/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs
++++ b/src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs
+@@ -103,4 +103,4 @@
+     [LibraryImport(Libraries.CoreFoundation)]
+     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+     public static partial void CFRunLoopStop(IntPtr runLoop);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs b/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs
+--- a/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs
++++ b/src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs
+@@ -352,4 +352,4 @@
+         IntPtr device, // IOHIDDeviceRef
+         IntPtr callback, // IOHIDCallback (void*, IOResult, void*) -> void
+         IntPtr context); // void* (optional)
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs b/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs
+--- a/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs
++++ b/src/Core/src/Protocols/Fido/Hid/CtapConstants.cs
+@@ -41,4 +41,4 @@
+ 
+     // Bit masks
+     public const byte InitPacketMask = 0x80;    // Bit 7 set for init packets
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs b/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs
+--- a/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs
++++ b/src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs
+@@ -562,4 +562,4 @@
+             _disposed = true;
+         });
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs b/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
+--- a/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
++++ b/src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
+@@ -68,4 +68,4 @@
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The received packet (64 bytes).</returns>
+     Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs b/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
+--- a/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
++++ b/src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
+@@ -64,4 +64,4 @@
+     /// the CTAPHID protocol version and CTAP specification edition.
+     /// </summary>
+     FirmwareVersion? FirmwareVersion { get; }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs b/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs
+--- a/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs
++++ b/src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs
+@@ -73,4 +73,4 @@
+     /// Gets the firmware version reported during protocol initialization.
+     /// </summary>
+     FirmwareVersion? FirmwareVersion { get; }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs b/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs
+--- a/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs
++++ b/src/Core/src/Protocols/Otp/Hid/OtpConstants.cs
+@@ -107,4 +107,4 @@
+     /// Write device info command.
+     /// </summary>
+     public const byte CmdYk4SetDeviceInfo = 0x15;
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs b/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs
+--- a/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs
++++ b/src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs
+@@ -632,4 +632,4 @@
+         await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+         _disposed = true;
+     });
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs b/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs
+@@ -104,4 +104,4 @@
+     // NOTE: record struct auto-generates Equals/GetHashCode over all properties.
+     // ReadOnlyMemory<byte> uses reference equality (pointer + offset + length), not content equality.
+     // Do not use ApduCommand in Dictionary, HashSet, or == comparisons that expect content-based equality.
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs b/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs
+@@ -143,4 +143,4 @@
+ 
+         return new ApduException(message) { SW = sw };
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs b/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs
+@@ -68,4 +68,4 @@
+         return buffer.ToArray();
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs b/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs
+@@ -57,4 +57,4 @@
+     public Memory<byte> Format(ApduCommand apdu) =>
+         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs b/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
+@@ -102,4 +102,4 @@
+     /// data, including status bytes, never the caller's source. Repeated clearing is harmless.
+     /// </remarks>
+     public void Clear() => CryptographicOperations.ZeroMemory(_rawData);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs b/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs
+@@ -66,4 +66,4 @@
+             throw;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs b/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs
+@@ -78,4 +78,4 @@
+ 
+     public void Dispose() => (apduTransmitter as IDisposable)?.Dispose();
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs b/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
+@@ -46,4 +46,4 @@
+ 
+     Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
+         CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs b/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs
+@@ -28,4 +28,4 @@
+     /// <value>The override instruction, or null. A default protocol starts with 0xC0.</value>
+     /// <remarks>Follow-ups use CLA, P1, P2, and API Le zero rather than copying the original header or SW2.</remarks>
+     public byte? InsSendRemaining { get; init; }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs b/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs
+@@ -33,4 +33,4 @@
+ 
+     /// <summary>Maximum command-data bytes per short APDU fragment, distinct from a complete-command ceiling.</summary>
+     public const int ShortApduMaxChunkSize = 255;
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs b/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs
+--- a/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs
++++ b/src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs
+@@ -284,4 +284,4 @@
+             _ => sw >= 0 ? $"Unknown status word (SW=0x{sw:X4})" : $"Unknown success code (SW=0x{sw:X4})"
+         }
+     };
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs b/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs
+@@ -24,4 +24,4 @@
+ /// </remarks>
+ /// <param name="data">The data to encrypt.</param>
+ /// <returns>The encrypted data.</returns>
+-public delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);
++public delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs b/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs
+@@ -50,4 +50,4 @@
+     ///     Returns a string representation of this key reference.
+     /// </summary>
+     public override string ToString() => $"KeyRef{{kid=0x{Kid:X2}, kvn=0x{Kvn:X2}}}";
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs b/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs
+@@ -142,4 +142,4 @@
+         }
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs b/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs
+@@ -65,4 +65,4 @@
+             _disposed = true;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs b/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs
+@@ -131,4 +131,4 @@
+             throw new ArgumentException(
+                 $"Invalid SCP11 KID: 0x{kid:X2}. Must be 0x11 (SCP11a), 0x13 (SCP11b), or 0x15 (SCP11c).");
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs b/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
+@@ -246,4 +246,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs b/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs
+@@ -207,4 +207,4 @@
+             throw;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs b/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs
+@@ -30,4 +30,4 @@
+     public KeyReference KeyReference { get; protected init; }
+ 
+     public abstract void Dispose();
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs b/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs
+@@ -39,4 +39,4 @@
+     ///     in both agreements. Replay and authorization restrictions depend on the applicable device profile.
+     /// </summary>
+     public const byte SCP11c = 0x15;
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs b/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
+@@ -198,4 +198,4 @@
+         CancellationToken cancellationToken = default)
+         => TransmitAsync(command, useScp, true, cancellationToken);
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs b/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
+@@ -319,4 +319,4 @@
+             ? throw new InvalidOperationException("CBC encryption failed")
+             : encrypted;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs b/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
+@@ -99,4 +99,4 @@
+ 
+         return (new ScpState(sessionKeys, new byte[16]), hostCryptogramBytes.ToArray());
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs b/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
+@@ -193,4 +193,4 @@
+                 throw ApduException.FromResponse(resp, certCommand, "SCP11 PERFORM SECURITY OPERATION failed");
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs b/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs
+@@ -110,4 +110,4 @@
+         _disposed = true;
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs b/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs
+--- a/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs
+@@ -190,4 +190,4 @@
+             CryptographicOperations.ZeroMemory(mac);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Sessions/ApplicationSession.cs b/src/Core/src/Sessions/ApplicationSession.cs
+--- a/src/Core/src/Sessions/ApplicationSession.cs
++++ b/src/Core/src/Sessions/ApplicationSession.cs
+@@ -574,4 +574,4 @@
+         ConnectionSessionGuard.Detach(Connection, this);
+         return true;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Sessions/ConnectionSessionGuard.cs b/src/Core/src/Sessions/ConnectionSessionGuard.cs
+--- a/src/Core/src/Sessions/ConnectionSessionGuard.cs
++++ b/src/Core/src/Sessions/ConnectionSessionGuard.cs
+@@ -102,4 +102,4 @@
+     {
+         public object? Session { get; set; }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Sessions/RawCtapHidSession.cs b/src/Core/src/Sessions/RawCtapHidSession.cs
+--- a/src/Core/src/Sessions/RawCtapHidSession.cs
++++ b/src/Core/src/Sessions/RawCtapHidSession.cs
+@@ -85,4 +85,4 @@
+             UserPresenceNotification.None,
+             cancellationToken);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Sessions/RawOtpHidSession.cs b/src/Core/src/Sessions/RawOtpHidSession.cs
+--- a/src/Core/src/Sessions/RawOtpHidSession.cs
++++ b/src/Core/src/Sessions/RawOtpHidSession.cs
+@@ -81,4 +81,4 @@
+         ThrowIfDisposed();
+         return OtpProtocol.SendAndReceiveAsync(command, payload, cancellationToken);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Sessions/RawSmartCardSession.cs b/src/Core/src/Sessions/RawSmartCardSession.cs
+--- a/src/Core/src/Sessions/RawSmartCardSession.cs
++++ b/src/Core/src/Sessions/RawSmartCardSession.cs
+@@ -180,4 +180,4 @@
+         SmartCardProtocol.Configure(firmwareVersion, configuration);
+         FirmwareVersion = firmwareVersion;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Sessions/SessionCreationOptions.cs b/src/Core/src/Sessions/SessionCreationOptions.cs
+--- a/src/Core/src/Sessions/SessionCreationOptions.cs
++++ b/src/Core/src/Sessions/SessionCreationOptions.cs
+@@ -82,4 +82,4 @@
+             FirmwareVersionOverride = FirmwareVersionOverride,
+             UserPresencePrompt = UserPresencePrompt
+         };
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Transport.cs b/src/Core/src/Transport.cs
+--- a/src/Core/src/Transport.cs
++++ b/src/Core/src/Transport.cs
+@@ -26,4 +26,4 @@
+     Nfc = 2,
+     /// <summary>Both modeled transport categories.</summary>
+     All = Usb | Nfc
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Transports/Hid/FindHidInterfaces.cs b/src/Core/src/Transports/Hid/FindHidInterfaces.cs
+--- a/src/Core/src/Transports/Hid/FindHidInterfaces.cs
++++ b/src/Core/src/Transports/Hid/FindHidInterfaces.cs
+@@ -107,4 +107,4 @@
+     /// <summary>Creates a one-shot interface finder with the supplied logger or a no-op logger.</summary>
+     public static FindHidInterfaces Create(ILogger<FindHidInterfaces>? logger = null) =>
+         new(logger ?? NullLogger<FindHidInterfaces>.Instance);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs b/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs
+--- a/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs
++++ b/src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs
+@@ -194,4 +194,4 @@
+ 
+     public void RegisterRemovalCallback(nint device, nint callback, nint context) =>
+         IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(device, callback, context);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs b/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
+--- a/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
++++ b/src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs
+@@ -106,4 +106,4 @@
+             if (stringRef != IntPtr.Zero) NativeMethods.CFRelease(stringRef);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs b/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs
+--- a/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs
++++ b/src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs
+@@ -438,4 +438,4 @@
+ {
+     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<MacOSHidListenerNative>();
+     internal static void Log(Exception ex) => Logger.LogDebug(ex, "Failed to read macOS HID registry entry ID");
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs b/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs
+--- a/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs
++++ b/src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs
+@@ -51,4 +51,4 @@
+     public void Dispose() => _connection.Dispose();
+ 
+     public ValueTask DisposeAsync() => _connection.DisposeAsync();
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs b/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
+--- a/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
++++ b/src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
+@@ -70,4 +70,4 @@
+     public void Dispose() => _connection.Dispose();
+ 
+     public ValueTask DisposeAsync() => _connection.DisposeAsync();
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/BerLength.cs b/src/Core/src/Utilities/BerLength.cs
+--- a/src/Core/src/Utilities/BerLength.cs
++++ b/src/Core/src/Utilities/BerLength.cs
+@@ -54,4 +54,4 @@
+                 return 1;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs b/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs
+--- a/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs
++++ b/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs
+@@ -87,4 +87,4 @@
+         ArrayPool<byte>.Shared.Return(_rentedBuffer, clearArray: true);
+         _rentedBuffer = null;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/DisposableBufferHandle.cs b/src/Core/src/Utilities/DisposableBufferHandle.cs
+--- a/src/Core/src/Utilities/DisposableBufferHandle.cs
++++ b/src/Core/src/Utilities/DisposableBufferHandle.cs
+@@ -54,4 +54,4 @@
+     {
+         Dispose();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/DisposableTlvList.cs b/src/Core/src/Utilities/DisposableTlvList.cs
+--- a/src/Core/src/Utilities/DisposableTlvList.cs
++++ b/src/Core/src/Utilities/DisposableTlvList.cs
+@@ -89,4 +89,4 @@
+     /// </summary>
+     /// <returns>A span containing all TLV objects in the collection.</returns>
+     public ReadOnlySpan<Tlv> AsSpan() => CollectionsMarshal.AsSpan(_tlvs);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/ExchangeGuard.cs b/src/Core/src/Utilities/ExchangeGuard.cs
+--- a/src/Core/src/Utilities/ExchangeGuard.cs
++++ b/src/Core/src/Utilities/ExchangeGuard.cs
+@@ -137,4 +137,4 @@
+ 
+         drained?.TrySetResult();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/MemoryExtensions.cs b/src/Core/src/Utilities/MemoryExtensions.cs
+--- a/src/Core/src/Utilities/MemoryExtensions.cs
++++ b/src/Core/src/Utilities/MemoryExtensions.cs
+@@ -40,4 +40,4 @@
+         span = ReadOnlySpan<TValue>.Empty;
+         return false;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/Tlv.cs b/src/Core/src/Utilities/Tlv.cs
+--- a/src/Core/src/Utilities/Tlv.cs
++++ b/src/Core/src/Utilities/Tlv.cs
+@@ -278,4 +278,4 @@
+     /// </remarks>
+     public override string ToString() =>
+         $"Tlv(0x{Tag:X}, {Length}, {Convert.ToHexString(Value.Span)})";
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/Utilities/TlvHelper.cs b/src/Core/src/Utilities/TlvHelper.cs
+--- a/src/Core/src/Utilities/TlvHelper.cs
++++ b/src/Core/src/Utilities/TlvHelper.cs
+@@ -274,4 +274,4 @@
+                 tlv?.Dispose();
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/src/YubiKitLogging.cs b/src/Core/src/YubiKitLogging.cs
+--- a/src/Core/src/YubiKitLogging.cs
++++ b/src/Core/src/YubiKitLogging.cs
+@@ -79,4 +79,4 @@
+             _restore = null;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/src/IManagementSession.cs b/src/Management/src/IManagementSession.cs
+--- a/src/Management/src/IManagementSession.cs
++++ b/src/Management/src/IManagementSession.cs
+@@ -137,4 +137,4 @@
+     ///     </code>
+     /// </example>
+     Task ResetDeviceAsync(CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/src/ManagementSession.cs b/src/Management/src/ManagementSession.cs
+--- a/src/Management/src/ManagementSession.cs
++++ b/src/Management/src/ManagementSession.cs
+@@ -245,4 +245,4 @@
+                 $"The protocol type {protocol.GetType().Name} is not supported by ManagementSession.")
+         };
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs b/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs
+--- a/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs
++++ b/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs
+@@ -438,4 +438,4 @@
+         },
+         preferredConnection: state.ConnectionType);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs b/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs
+--- a/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs
++++ b/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs
+@@ -235,4 +235,4 @@
+ 
+         return null;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs b/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs
+--- a/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs
++++ b/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs
+@@ -230,4 +230,4 @@
+         Assert.Equal(expected.NfcSupported, actual.NfcSupported);
+         Assert.Equal(expected.NfcEnabled, actual.NfcEnabled);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs
+@@ -428,4 +428,4 @@
+ 
+     private static string Describe(IReadOnlyList<IYubiKey> devices) =>
+         string.Join("; ", devices.Select(d => $"{d.DeviceId}({d.AvailableConnections})"));
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs
+@@ -212,4 +212,4 @@
+ 
+         throw new InvalidOperationException("The subscription ended before SnapshotComplete.");
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs
+@@ -202,4 +202,4 @@
+         output.WriteLine(Timeline());
+         output.WriteLine("watcher pump completed normally after owned monitor disposal");
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs
+@@ -83,4 +83,4 @@
+ 
+         throw new InvalidOperationException($"Device change stream ended before a {typeof(TChange).Name} arrived.");
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs
+@@ -197,4 +197,4 @@
+ 
+         public void WriteLine(string text) => Inner.WriteLine(text);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
+@@ -182,4 +182,4 @@
+ 
+         public void Dispose() { }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
+@@ -202,4 +202,4 @@
+     }
+ 
+     private static string Head(string text) => text.Length <= 300 ? text : text[..300];
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs
+@@ -108,4 +108,4 @@
+ 
+         return bytes;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs
+@@ -570,4 +570,4 @@
+     }
+ 
+     #endregion
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs
+@@ -550,4 +550,4 @@
+     }
+ 
+     #endregion
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs
+@@ -263,4 +263,4 @@
+ 
+         Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs
+@@ -332,4 +332,4 @@
+     }
+ 
+     #endregion
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs
+@@ -101,4 +101,4 @@
+         Assert.Single(first.Applicability);
+         Assert.All(typeof(AlgorithmInfo).GetProperties(), property => Assert.False(property.CanWrite));
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs
+@@ -56,4 +56,4 @@
+         y.CopyTo(point, 1 + x.Length);
+         return point;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs
+@@ -77,4 +77,4 @@
+         catch (PlatformNotSupportedException) { Assert.Skip($"Host provider does not implement curve {curveOid}."); }
+         catch (CryptographicException) { Assert.Skip($"Host provider cannot generate curve {curveOid}."); }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs
+@@ -453,4 +453,4 @@
+         writer.PopSequence();
+         return writer.Encode();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs
+@@ -208,4 +208,4 @@
+ 
+     private static IReadOnlyList<string> InterfaceIdsOf(IYubiKey device) =>
+         Assert.IsType<YubiKeyDevice>(device).InterfaceIds;
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs
+@@ -792,4 +792,4 @@
+ 
+         public ConnectionType ConnectionType { get; } = connection;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs
+@@ -382,4 +382,4 @@
+ 
+         public void Dispose() { }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs
+@@ -129,4 +129,4 @@
+         new(0x02, [0x01, 0x02, 0x03, 0x04]),
+         .. additionalTlvs
+     ]);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs
+@@ -96,4 +96,4 @@
+         public void FailConnect() =>
+             _connect.TrySetException(new InvalidOperationException("Released after timeout assertion."));
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs
+@@ -935,4 +935,4 @@
+             CancellationToken cancellationToken) =>
+             OpenRawConnectionAsync(connectionType, cancellationToken);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs
+@@ -273,4 +273,4 @@
+     {
+         public string ReaderName { get; } = readerName;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs
+@@ -323,4 +323,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs
+@@ -1061,4 +1061,4 @@
+             Exceptions.Add(exception);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs
+@@ -103,4 +103,4 @@
+             return ValueTask.CompletedTask;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs
+@@ -439,4 +439,4 @@
+         public ValueTask DisposeAsync() => default;
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs
+@@ -489,4 +489,4 @@
+         Assert.Throws<ObjectDisposedException>(() => cmac.AppendData([0x01]));
+         Assert.Throws<ObjectDisposedException>(() => cmac.GetHashAndReset());
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs
+@@ -811,4 +811,4 @@
+ 
+         public void Dispose() => DisposeCount++;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs
+@@ -116,4 +116,4 @@
+         "7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A", // Intermediate cert
+         "6B90028800909F9FFCD641346933242748FBE9AD" // Legacy root label; does not match the PEM root serial.
+     ];
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs
+@@ -254,4 +254,4 @@
+         return certs;
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs
+@@ -304,4 +304,4 @@
+         using var ecdh = ECDiffieHellman.Create(parameters);
+         return ecdh.PublicKey;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
+@@ -83,4 +83,4 @@
+ 
+     private static ScpState CreateZeroedScpState() =>
+         new(new SessionKeys(new byte[16], new byte[16], new byte[16]), new byte[16]);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
+@@ -222,4 +222,4 @@
+         // This conditional check only excludes the firmware threshold if the exception has this type.
+         if (ex is NotSupportedException notSupported) Assert.DoesNotContain("5.7.2", notSupported.Message);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs
+@@ -169,4 +169,4 @@
+             return ValueTask.CompletedTask;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs
+@@ -169,4 +169,4 @@
+         Assert.Equal(new byte[] { 0x00, 0xA1, 0x00, 0x00, 0x00 }, api.TransmitBuffers[0]);
+         Assert.Equal(new byte[] { 0x00, 0xC0, 0x00, 0x00, 0x00 }, api.TransmitBuffers[1]);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs
+@@ -186,4 +186,4 @@
+         {
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs
+@@ -220,4 +220,4 @@
+         Assert.All(first.AsSpan().ToArray(), static b => Assert.Equal(0, b));
+         Assert.All(sensitiveLater.AsSpan().ToArray(), static b => Assert.Equal(0, b));
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs b/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs
+--- a/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs
++++ b/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs
+@@ -366,4 +366,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/Infrastructure/AllowList.cs b/src/Tests.Shared/Infrastructure/AllowList.cs
+--- a/src/Tests.Shared/Infrastructure/AllowList.cs
++++ b/src/Tests.Shared/Infrastructure/AllowList.cs
+@@ -84,4 +84,4 @@
+     /// <returns>True if the serial number is allowed; otherwise, false.</returns>
+     public bool IsDeviceAllowed(int? serialNumber) =>
+         serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs b/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs
+--- a/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs
++++ b/src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs
+@@ -149,4 +149,4 @@
+             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+             .Build();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/Infrastructure/OperatorCue.cs b/src/Tests.Shared/Infrastructure/OperatorCue.cs
+--- a/src/Tests.Shared/Infrastructure/OperatorCue.cs
++++ b/src/Tests.Shared/Infrastructure/OperatorCue.cs
+@@ -85,4 +85,4 @@
+ 
+         return info;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/Infrastructure/TestCategories.cs b/src/Tests.Shared/Infrastructure/TestCategories.cs
+--- a/src/Tests.Shared/Infrastructure/TestCategories.cs
++++ b/src/Tests.Shared/Infrastructure/TestCategories.cs
+@@ -96,4 +96,4 @@
+     /// select the attended hotplug ceremonies, or exclude it to select the unattended discovery checks.
+     /// </summary>
+     public const string Discovery = "Discovery";
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs b/src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs
+--- a/src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs
++++ b/src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs
+@@ -309,4 +309,4 @@
+         }
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/IYubiKeyFilter.cs b/src/Tests.Shared/IYubiKeyFilter.cs
+--- a/src/Tests.Shared/IYubiKeyFilter.cs
++++ b/src/Tests.Shared/IYubiKeyFilter.cs
+@@ -75,4 +75,4 @@
+     /// </summary>
+     /// <returns>A description of the filter criteria.</returns>
+     string GetDescription();
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/RecordingSmartCardConnection.cs b/src/Tests.Shared/RecordingSmartCardConnection.cs
+--- a/src/Tests.Shared/RecordingSmartCardConnection.cs
++++ b/src/Tests.Shared/RecordingSmartCardConnection.cs
+@@ -84,4 +84,4 @@
+         {
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Tests.Shared/YubiKeyTestState.cs b/src/Tests.Shared/YubiKeyTestState.cs
+--- a/src/Tests.Shared/YubiKeyTestState.cs
++++ b/src/Tests.Shared/YubiKeyTestState.cs
+@@ -499,4 +499,4 @@
+             return [.. s_devices.Values];
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/src/Cryptography/PrivateKeyOperations.cs b/src/Piv/src/Cryptography/PrivateKeyOperations.cs
+--- a/src/Piv/src/Cryptography/PrivateKeyOperations.cs
++++ b/src/Piv/src/Cryptography/PrivateKeyOperations.cs
+@@ -463,4 +463,4 @@
+             _ => throw new ArgumentException("Unsupported public key type", nameof(publicKey))
+         };
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/src/IPivSession.cs b/src/Piv/src/IPivSession.cs
+--- a/src/Piv/src/IPivSession.cs
++++ b/src/Piv/src/IPivSession.cs
+@@ -695,4 +695,4 @@
+         ReadOnlyMemory<byte> newKey,
+         bool requireTouch = false,
+         CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/src/IYubiKeyExtensions.cs b/src/Piv/src/IYubiKeyExtensions.cs
+--- a/src/Piv/src/IYubiKeyExtensions.cs
++++ b/src/Piv/src/IYubiKeyExtensions.cs
+@@ -69,4 +69,4 @@
+                 .ConfigureAwait(false);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/src/Keys/KeyProtocol.cs b/src/Piv/src/Keys/KeyProtocol.cs
+--- a/src/Piv/src/Keys/KeyProtocol.cs
++++ b/src/Piv/src/Keys/KeyProtocol.cs
+@@ -505,4 +505,4 @@
+ 
+         return RSAPublicKey.CreateFromParameters(parameters);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/src/PivSession.cs b/src/Piv/src/PivSession.cs
+--- a/src/Piv/src/PivSession.cs
++++ b/src/Piv/src/PivSession.cs
+@@ -1133,4 +1133,4 @@
+         if (!Enum.IsDefined(slot))
+             throw new ArgumentOutOfRangeException(nameof(slot), "Unknown PIV asymmetric key reference.");
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs
+@@ -189,4 +189,4 @@
+             return Task.FromResult(new ApduResponse([], unchecked((short)0x9000)));
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
+@@ -775,4 +775,4 @@
+         ];
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs
+@@ -133,4 +133,4 @@
+             Directory.Delete(directory, recursive: true);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs
+@@ -80,4 +80,4 @@
+             Assert.Equal(storedObject, readBack.ToArray());
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs
+--- a/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs
++++ b/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs
+@@ -113,4 +113,4 @@
+ 
+         return null;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Ctap2/src/Backend/HidBackend.cs b/src/Ctap2/src/Backend/HidBackend.cs
+--- a/src/Ctap2/src/Backend/HidBackend.cs
++++ b/src/Ctap2/src/Backend/HidBackend.cs
+@@ -118,4 +118,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Ctap2/src/Backend/SmartCardBackend.cs b/src/Ctap2/src/Backend/SmartCardBackend.cs
+--- a/src/Ctap2/src/Backend/SmartCardBackend.cs
++++ b/src/Ctap2/src/Backend/SmartCardBackend.cs
+@@ -150,4 +150,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Ctap2/src/Ctap2Session.cs b/src/Ctap2/src/Ctap2Session.cs
+--- a/src/Ctap2/src/Ctap2Session.cs
++++ b/src/Ctap2/src/Ctap2Session.cs
+@@ -485,4 +485,4 @@
+             "For older USB-connected YubiKeys, use IFidoHidConnection instead.");
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/Ctap2/src/ICtap2Session.cs b/src/Ctap2/src/ICtap2Session.cs
+--- a/src/Ctap2/src/ICtap2Session.cs
++++ b/src/Ctap2/src/ICtap2Session.cs
+@@ -251,4 +251,4 @@
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>The next assertion response.</returns>
+     Task<GetAssertionResponse> GetNextAssertionAsync(CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/SecurityDomain/src/ISecurityDomainSession.cs b/src/SecurityDomain/src/ISecurityDomainSession.cs
+--- a/src/SecurityDomain/src/ISecurityDomainSession.cs
++++ b/src/SecurityDomain/src/ISecurityDomainSession.cs
+@@ -347,4 +347,4 @@
+     ///     The original failure is preserved as InnerException.
+     /// </exception>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/SecurityDomain/src/IYubiKeyExtensions.cs b/src/SecurityDomain/src/IYubiKeyExtensions.cs
+--- a/src/SecurityDomain/src/IYubiKeyExtensions.cs
++++ b/src/SecurityDomain/src/IYubiKeyExtensions.cs
+@@ -93,4 +93,4 @@
+             return await session.ListKeyInformationAsync(cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/SecurityDomain/src/SecurityDomainSession.cs b/src/SecurityDomain/src/SecurityDomainSession.cs
+--- a/src/SecurityDomain/src/SecurityDomainSession.cs
++++ b/src/SecurityDomain/src/SecurityDomainSession.cs
+@@ -959,4 +959,4 @@
+             base.Dispose(disposing);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs b/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
+--- a/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
++++ b/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
+@@ -214,4 +214,4 @@
+             await state.ResetSecurityDomainAsync(ct);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs b/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
+--- a/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
++++ b/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
+@@ -193,4 +193,4 @@
+             scpKeyParams: Scp03KeyParameters.Default,
+             configuration: new ProtocolConfiguration { ForceShortApdus = true },
+             cancellationToken: CancellationTokenSource.Token);
+-}
++}
+\ No newline at end of file
+diff --git a/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs b/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs
+--- a/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs
++++ b/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs
+@@ -181,4 +181,4 @@
+         var tlv = Tlv.Create(skiExtension.RawData);
+         return tlv.Value;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Oath/src/Credentials/OathCredentialOptions.cs b/src/Oath/src/Credentials/OathCredentialOptions.cs
+--- a/src/Oath/src/Credentials/OathCredentialOptions.cs
++++ b/src/Oath/src/Credentials/OathCredentialOptions.cs
+@@ -37,4 +37,4 @@
+         MinLength = 1,
+         MaxLength = 128
+     };
+-}
++}
+\ No newline at end of file
+diff --git a/src/Oath/src/IOathSession.cs b/src/Oath/src/IOathSession.cs
+--- a/src/Oath/src/IOathSession.cs
++++ b/src/Oath/src/IOathSession.cs
+@@ -374,4 +374,4 @@
+         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+         CancellationToken cancellationToken = default);
+ #pragma warning restore RS0026
+-}
++}
+\ No newline at end of file
+diff --git a/src/Oath/src/IYubiKeyExtensions.cs b/src/Oath/src/IYubiKeyExtensions.cs
+--- a/src/Oath/src/IYubiKeyExtensions.cs
++++ b/src/Oath/src/IYubiKeyExtensions.cs
+@@ -106,4 +106,4 @@
+             return await session.CalculateAllAsync(timestamp, cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs
+--- a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs
+@@ -664,4 +664,4 @@
+ 
+         Assert.Empty(result);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs
+--- a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs
+@@ -123,4 +123,4 @@
+         }
+         public ValueTask DisposeAsync() { Dispose(); return ValueTask.CompletedTask; }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
+--- a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
+@@ -752,4 +752,4 @@
+             Task.FromResult((connection as TConnection)!);
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiHsm/src/HsmAuthRetryException.cs b/src/YubiHsm/src/HsmAuthRetryException.cs
+--- a/src/YubiHsm/src/HsmAuthRetryException.cs
++++ b/src/YubiHsm/src/HsmAuthRetryException.cs
+@@ -68,4 +68,4 @@
+     {
+         RetriesRemaining = retriesRemaining;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiHsm/src/HsmAuthSession.cs b/src/YubiHsm/src/HsmAuthSession.cs
+--- a/src/YubiHsm/src/HsmAuthSession.cs
++++ b/src/YubiHsm/src/HsmAuthSession.cs
+@@ -994,4 +994,4 @@
+     /// </summary>
+     private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
+         ThrowOnRetryFailure(response, command, "Invalid credential password");
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiHsm/src/IHsmAuthSession.cs b/src/YubiHsm/src/IHsmAuthSession.cs
+--- a/src/YubiHsm/src/IHsmAuthSession.cs
++++ b/src/YubiHsm/src/IHsmAuthSession.cs
+@@ -385,4 +385,4 @@
+         string label,
+         ReadOnlyMemory<byte> newPassword,
+         CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiOtp/src/Backend/HidBackend.cs b/src/YubiOtp/src/Backend/HidBackend.cs
+--- a/src/YubiOtp/src/Backend/HidBackend.cs
++++ b/src/YubiOtp/src/Backend/HidBackend.cs
+@@ -141,4 +141,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiOtp/src/IYubiKeyExtensions.cs b/src/YubiOtp/src/IYubiKeyExtensions.cs
+--- a/src/YubiOtp/src/IYubiKeyExtensions.cs
++++ b/src/YubiOtp/src/IYubiKeyExtensions.cs
+@@ -159,4 +159,4 @@
+     private static readonly ConnectionType[] YubiOtpTransportOrder =
+         [ConnectionType.SmartCard, ConnectionType.HidOtp];
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiOtp/src/IYubiOtpSession.cs b/src/YubiOtp/src/IYubiOtpSession.cs
+--- a/src/YubiOtp/src/IYubiOtpSession.cs
++++ b/src/YubiOtp/src/IYubiOtpSession.cs
+@@ -341,4 +341,4 @@
+         Slot slot,
+         ReadOnlyMemory<byte> challenge,
+         CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs b/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
+--- a/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
++++ b/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
+@@ -177,4 +177,4 @@
+ 
+         return scanCodes;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs b/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs
+--- a/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs
++++ b/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs
+@@ -1071,4 +1071,4 @@
+         Assert.NotEqual(crc1, crc2);
+     }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/Backend/OpenPgpBackend.cs b/src/OpenPgp/src/Backend/OpenPgpBackend.cs
+--- a/src/OpenPgp/src/Backend/OpenPgpBackend.cs
++++ b/src/OpenPgp/src/Backend/OpenPgpBackend.cs
+@@ -92,4 +92,4 @@
+         // It is an effective compatibility value, not evidence that the device runs version 1.0.0.
+         return new FirmwareVersion(1, 0, 0);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs b/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs
+--- a/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs
++++ b/src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs
+@@ -59,4 +59,4 @@
+         MinLength = 8,
+         MaxLength = 127
+     };
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/IOpenPgpSession.cs b/src/OpenPgp/src/IOpenPgpSession.cs
+--- a/src/OpenPgp/src/IOpenPgpSession.cs
++++ b/src/OpenPgp/src/IOpenPgpSession.cs
+@@ -685,4 +685,4 @@
+     /// </remarks>
+     Task ResetAsync(
+         CancellationToken cancellationToken = default);
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/IYubiKeyExtensions.cs b/src/OpenPgp/src/IYubiKeyExtensions.cs
+--- a/src/OpenPgp/src/IYubiKeyExtensions.cs
++++ b/src/OpenPgp/src/IYubiKeyExtensions.cs
+@@ -82,4 +82,4 @@
+                     cancellationToken)
+                 .ConfigureAwait(false);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/Kdf.cs b/src/OpenPgp/src/Kdf.cs
+--- a/src/OpenPgp/src/Kdf.cs
++++ b/src/OpenPgp/src/Kdf.cs
+@@ -358,4 +358,4 @@
+             InitialHashUser = data.TryGetValue(0x87, out var hu) ? hu : null,     // init setter clones
+             InitialHashAdmin = data.TryGetValue(0x88, out var ha) ? ha : null,    // init setter clones
+         };
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/OpenPgpSession.Config.cs b/src/OpenPgp/src/OpenPgpSession.Config.cs
+--- a/src/OpenPgp/src/OpenPgpSession.Config.cs
++++ b/src/OpenPgp/src/OpenPgpSession.Config.cs
+@@ -252,4 +252,4 @@
+ 
+         return result;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/OpenPgpSession.cs b/src/OpenPgp/src/OpenPgpSession.cs
+--- a/src/OpenPgp/src/OpenPgpSession.cs
++++ b/src/OpenPgp/src/OpenPgpSession.cs
+@@ -422,4 +422,4 @@
+             base.Dispose(disposing);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/OpenPgpSession.Keys.cs b/src/OpenPgp/src/OpenPgpSession.Keys.cs
+--- a/src/OpenPgp/src/OpenPgpSession.Keys.cs
++++ b/src/OpenPgp/src/OpenPgpSession.Keys.cs
+@@ -274,4 +274,4 @@
+             .ConfigureAwait(false);
+         _updatedUifs.Clear();
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/OpenPgpSession.Reset.cs b/src/OpenPgp/src/OpenPgpSession.Reset.cs
+--- a/src/OpenPgp/src/OpenPgpSession.Reset.cs
++++ b/src/OpenPgp/src/OpenPgpSession.Reset.cs
+@@ -97,4 +97,4 @@
+ 
+         _logger.LogDebug("PIN P2=0x{P2:X2} exhausted {Count} attempts", p2, remainingAttempts);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/PrivateKeyImport.cs b/src/OpenPgp/src/PrivateKeyImport.cs
+--- a/src/OpenPgp/src/PrivateKeyImport.cs
++++ b/src/OpenPgp/src/PrivateKeyImport.cs
+@@ -193,4 +193,4 @@
+ 
+         return span;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/src/PrivateKeyTemplate.cs b/src/OpenPgp/src/PrivateKeyTemplate.cs
+--- a/src/OpenPgp/src/PrivateKeyTemplate.cs
++++ b/src/OpenPgp/src/PrivateKeyTemplate.cs
+@@ -245,4 +245,4 @@
+ 
+         return [new Tlv(0x92, PrivateKey.Span)];
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs b/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs
+--- a/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs
++++ b/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs
+@@ -169,4 +169,4 @@
+                 // Verify the new PIN works
+                 await session.VerifyPinAsync(newPin);
+             });
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs b/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs
+--- a/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs
++++ b/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs
+@@ -81,4 +81,4 @@
+                 await action(session).ConfigureAwait(false);
+             }, cancellationToken);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs b/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
+--- a/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
++++ b/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
+@@ -113,4 +113,4 @@
+             }
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs b/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs
+--- a/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs
++++ b/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs
+@@ -48,4 +48,4 @@
+     /// </summary>
+     public static DeviceInfoResult Failed(string error) =>
+         new() { Success = false, ErrorMessage = error };
+-}
++}
+\ No newline at end of file
+diff --git a/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs b/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs
+--- a/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs
++++ b/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs
+@@ -40,4 +40,4 @@
+ 
+         return 0;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs b/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
+--- a/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
++++ b/src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs
+@@ -27,4 +27,4 @@
+     /// <summary>Finds an eligible YubiKey, preferring FIDO HID when multiple devices cannot be prompted for.</summary>
+     public static Task<DeviceSelection?> SelectDeviceAsync(CancellationToken cancellationToken = default) =>
+         Selector.SelectDeviceAsync(cancellationToken);
+-}
++}
+\ No newline at end of file
+diff --git a/src/Cli.Shared/src/Device/DeviceSelector.cs b/src/Cli.Shared/src/Device/DeviceSelector.cs
+--- a/src/Cli.Shared/src/Device/DeviceSelector.cs
++++ b/src/Cli.Shared/src/Device/DeviceSelector.cs
+@@ -245,4 +245,4 @@
+         public bool LiveReadAttempted { get; set; }
+         public int? SerialNumber => Device.SerialNumber ?? Info?.SerialNumber;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Cli.Shared/src/Device/FormFactorFormatter.cs b/src/Cli.Shared/src/Device/FormFactorFormatter.cs
+--- a/src/Cli.Shared/src/Device/FormFactorFormatter.cs
++++ b/src/Cli.Shared/src/Device/FormFactorFormatter.cs
+@@ -40,4 +40,4 @@
+             FormFactor.UsbCBiometricKeychain => "Bio (USB-C)",
+             _ => "Unknown"
+         };
+-}
++}
+\ No newline at end of file
+diff --git a/src/Cli.Shared/src/Output/PinPrompt.cs b/src/Cli.Shared/src/Output/PinPrompt.cs
+--- a/src/Cli.Shared/src/Output/PinPrompt.cs
++++ b/src/Cli.Shared/src/Output/PinPrompt.cs
+@@ -113,4 +113,4 @@
+                && CryptographicOperations.FixedTimeEquals(
+                    credential.Memory.Span, confirmation.Memory.Span);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Cli.Shared/src/Output/SecureCredential.cs b/src/Cli.Shared/src/Output/SecureCredential.cs
+--- a/src/Cli.Shared/src/Output/SecureCredential.cs
++++ b/src/Cli.Shared/src/Output/SecureCredential.cs
+@@ -366,4 +366,4 @@
+             buffer[length++] = (byte)value;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs b/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs
+--- a/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs
++++ b/src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs
+@@ -136,4 +136,4 @@
+ 
+         return OutputHelpers.ConfirmDangerous(action);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs b/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs
+--- a/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs
++++ b/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs
+@@ -116,4 +116,4 @@
+ 
+         return transport is not null;
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/Cli.Commands/src/Otp/OtpCommands.cs b/src/Cli.Commands/src/Otp/OtpCommands.cs
+--- a/src/Cli.Commands/src/Otp/OtpCommands.cs
++++ b/src/Cli.Commands/src/Otp/OtpCommands.cs
+@@ -807,4 +807,4 @@
+             CryptographicOperations.ZeroMemory(accessCode);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs b/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
+--- a/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
++++ b/src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs
+@@ -231,4 +231,4 @@
+             ? Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex)
+             : MapCtapStatusToWebAuthnError(ex);
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/WebAuthn/src/Client/WebAuthnClient.cs b/src/WebAuthn/src/Client/WebAuthnClient.cs
+--- a/src/WebAuthn/src/Client/WebAuthnClient.cs
++++ b/src/WebAuthn/src/Client/WebAuthnClient.cs
+@@ -125,4 +125,4 @@
+             owner.Dispose();
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs
+--- a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs
++++ b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs
+@@ -152,4 +152,4 @@
+             return default;
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
+--- a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
++++ b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs
+@@ -441,4 +441,4 @@
+ 
+         await _backend.Received(1).GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs
+--- a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs
++++ b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs
+@@ -531,4 +531,4 @@
+         Assert.NotNull(response);
+         Assert.Equal(credentialId, response.CredentialId.ToArray());
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs
+--- a/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs
++++ b/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs
+@@ -204,4 +204,4 @@
+     }
+ 
+     private sealed class ConnectProbeException : Exception;
+-}
++}
+\ No newline at end of file
+diff --git a/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs b/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs
+--- a/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs
++++ b/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs
+@@ -58,4 +58,4 @@
+             !parameters[^1].HasDefaultValue)
+             violations.Add($"{member} lacks a final defaulted CancellationToken");
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs b/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs
+--- a/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs
++++ b/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs
+@@ -191,4 +191,4 @@
+             !cancellationToken.IsOptional || cancellationToken.RawDefaultValue is not null)
+             violations.Add($"{displayName} does not end with CancellationToken cancellationToken = default");
+     }
+-}
++}
+\ No newline at end of file

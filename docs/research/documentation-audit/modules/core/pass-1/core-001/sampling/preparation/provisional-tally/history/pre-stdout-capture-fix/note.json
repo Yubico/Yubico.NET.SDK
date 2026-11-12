@@ -1,0 +1,16 @@
+{
+  "issue": "Generator enumerated preparation.stdout.json while shell redirection still held the file open; its receipt entry captured the pre-print empty bytes. Unit joins, selection and source identities were unaffected. No content/clean-quota acceptance claimed.",
+  "correction": "Exclude the live stdout capture from generator output enumeration; bind its completed bytes in the separate final structural-check receipt.",
+  "preserved": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/history/pre-stdout-capture-fix/verification.json",
+      "bytes": 25585,
+      "sha256": "357a3cf96554c0799b4052707f80232902406087a52699d50a90fa4d66b3c2a2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/provisional-tally/history/pre-stdout-capture-fix/prepare.py",
+      "bytes": 46962,
+      "sha256": "c3ee8f5242fc0c0ec96a2bff55ba8043289409935d3d8f8220c215640979e5cd"
+    }
+  ]
+}

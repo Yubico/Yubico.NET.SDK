@@ -1,0 +1,7 @@
+//         ///   00 || 02 || PS || 00 || input data
+//         ///
+//         ///   where PS consists of non-zero random bytes
+//         ///   that is:
+//         ///
+//         ///   00 || 02 || non-zero random bytes || 00 || input data
+//         /// 

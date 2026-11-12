@@ -1,0 +1,790 @@
+{
+  "scope": "Static finite owning-project helper/import and exact all-source preservation only; no SDK build/test/capture execution.",
+  "changed_source_ids": [
+    "FULL-302",
+    "FULL-303",
+    "FULL-306"
+  ],
+  "generated_prefix_directives_added": 3,
+  "selected_sources": 300,
+  "test_sources_checked": 56,
+  "all_accepted_bodies_directives_and_nonprefix_bytes_exact": true,
+  "all_context_and_project_membership_unchanged": true,
+  "helper_import_classifications": [
+    {
+      "id": "FULL-010",
+      "context": "Ctap2.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-011",
+      "context": "Ctap2.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-030",
+      "context": "Ctap2.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-012",
+      "context": "Ctap2.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-026",
+      "context": "Ctap2.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithCtap2SessionAsync"
+          ],
+          "import_present": true,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-027",
+      "context": "Ctap2.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-032",
+      "context": "WebAuthn.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-037",
+      "context": "WebAuthn.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs",
+          "namespace": "Yubico.YubiKit.WebAuthn.IntegrationTests",
+          "symbols": [
+            "WebAuthnTestHelpers"
+          ],
+          "import_present": true,
+          "kind": "static-helper"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-060",
+      "context": "Core.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-142",
+      "context": "Core.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-204",
+      "context": "Core.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-205",
+      "context": "Core.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-211",
+      "context": "Core.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-133",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-134",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-135",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-137",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-138",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-241",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-242",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-243",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-244",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-252",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-253",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-254",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-255",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-256",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-257",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-258",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-259",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-260",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-261",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-262",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-288",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-289",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-206",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-210",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-215",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-216",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-227",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-230",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-232",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-233",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-235",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-240",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-241",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-242",
+      "context": "Management.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-212",
+      "context": "Core.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+          "namespace": "Yubico.YubiKit.Core.IntegrationTests",
+          "symbols": [
+            "IntegrationTestBase"
+          ],
+          "import_present": true,
+          "kind": "base-class"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-239",
+      "context": "Core.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+          "namespace": "Yubico.YubiKit.Core.IntegrationTests",
+          "symbols": [
+            "IntegrationTestBase"
+          ],
+          "import_present": true,
+          "kind": "base-class"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-302",
+      "context": "SecurityDomain.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": true,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-303",
+      "context": "SecurityDomain.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "ResetSecurityDomainAsync",
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": true,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-306",
+      "context": "SecurityDomain.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": true,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-231",
+      "context": "SecurityDomain.IntegrationTests",
+      "provider_requirements": [
+        {
+          "provider_path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+          "namespace": "Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions",
+          "symbols": [
+            "WithSecurityDomainSessionAsync"
+          ],
+          "import_present": true,
+          "kind": "extension"
+        }
+      ],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-375",
+      "context": "Piv.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "EXT-204",
+      "context": "Oath.IntegrationTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    },
+    {
+      "id": "FULL-061",
+      "context": "Management.UnitTests",
+      "provider_requirements": [],
+      "missing_namespaces": []
+    }
+  ],
+  "test_runner_classifications": [
+    {
+      "id": "FULL-010",
+      "context": "Ctap2.UnitTests",
+      "runner": "v3",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-011",
+      "context": "Ctap2.UnitTests",
+      "runner": "v3",
+      "uses_test_context": true
+    },
+    {
+      "id": "FULL-030",
+      "context": "Ctap2.UnitTests",
+      "runner": "v3",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-012",
+      "context": "Ctap2.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-026",
+      "context": "Ctap2.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-027",
+      "context": "Ctap2.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-032",
+      "context": "WebAuthn.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-037",
+      "context": "WebAuthn.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-060",
+      "context": "Core.UnitTests",
+      "runner": "v3",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-142",
+      "context": "Core.UnitTests",
+      "runner": "v3",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-204",
+      "context": "Core.UnitTests",
+      "runner": "v3",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-205",
+      "context": "Core.UnitTests",
+      "runner": "v3",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-211",
+      "context": "Core.UnitTests",
+      "runner": "v3",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-133",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-134",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-135",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-137",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-138",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-241",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-242",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-243",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-244",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-252",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-253",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-254",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-255",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-256",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-257",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-258",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-259",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-260",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-261",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-262",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-288",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-289",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-206",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-210",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-215",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-216",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-227",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-230",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-232",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-233",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-235",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-240",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-241",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-242",
+      "context": "Management.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-212",
+      "context": "Core.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-239",
+      "context": "Core.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-302",
+      "context": "SecurityDomain.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-303",
+      "context": "SecurityDomain.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-306",
+      "context": "SecurityDomain.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-231",
+      "context": "SecurityDomain.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-375",
+      "context": "Piv.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "EXT-204",
+      "context": "Oath.IntegrationTests",
+      "runner": "v2",
+      "uses_test_context": false
+    },
+    {
+      "id": "FULL-061",
+      "context": "Management.UnitTests",
+      "runner": "v3",
+      "uses_test_context": true
+    }
+  ],
+  "negative_cases_rejected": [
+    "removed-import",
+    "ancestor-namespace",
+    "wrong-module-namespace"
+  ],
+  "actual_helper_source_already_in_failed_compile_items": true,
+  "all_five_diagnostics_generated_context": true,
+  "true_body_or_api_defects": [],
+  "accepted_checkpoint_shas": [
+    "e044ba23cd4a0a55caa6cf0679716c6aba98c15f82adc292e05361bdf186c357",
+    "9ff6235c1c8c077d7767f14f2a53f125b9b591a074eca42ace60725652d77e8a",
+    "097d83207ee0bd098cd42fb862b2f91fa318f955ff762e24d1f8880c08d637c8",
+    "b71ca5bf04c566fc4d556b9ff935489bd194094557124777d7b4d207da774a58",
+    "90e664c4a4f15dfdd732280616a341a405c9e6d59e558e87fbd12d610f15d17f",
+    "768ce039c766a566c306cb4b64139ab9a1efa4ee0187d34d8677d06373140355"
+  ],
+  "accepted_body_occurrences": 291,
+  "retained_prior_output_files": 113,
+  "failed_attempt_identities_preserved": 29,
+  "qualification": "Finite helper-family scan is not general C# binding. Six accepted checkpoints stay on original profiles; new SD compiler proof and four later contexts remain coordinator-owned."
+}

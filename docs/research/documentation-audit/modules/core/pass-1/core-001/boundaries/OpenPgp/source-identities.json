@@ -1,0 +1,80 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/source-manifest.json",
+    "sha256": "d1b5ec84fdc63cefed1e663435bb3cf12695e89eaee30d5593f935e66b6e1ecb",
+    "bytes": 3949,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/openpgp-card-3.4.pdf",
+    "sha256": "2d2652a2bd690a6784c733ba6d88539e2af1f6e075f3a3d0af81eb5f68432782",
+    "bytes": 1156819,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/openpgp-card-3.4.txt",
+    "sha256": "1cf55026521edd672e98d23ddfedb5c424e5349d2a4c37ac8b5a28af3733177a",
+    "bytes": 175807,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/ykman-yubikit-openpgp.py",
+    "sha256": "bcd266e53411a9611ee133ed5f33e2907294fbe374aa56a19672a151e86a2926",
+    "bytes": 60103,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/evidence/vendor-attestation.html",
+    "sha256": "77da864a47a8ed09c62a61c8981b7ebfbc9f79ee930cffe108fc7344a46c1683",
+    "bytes": 29224,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+    "sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+    "bytes": 709753,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-OpenPgp.json",
+    "sha256": "ff2f148e86a7dc6902ec63ffd20eae955f076d7c775e8b1b8c9770dc3ea1d0f6",
+    "bytes": 23726,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-source-register.md",
+    "sha256": "6f3edcfba098920dd43e3e2a6db59c03108e39bfbb4ab81373e87d2c74731727",
+    "bytes": 8174,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+    "sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+    "bytes": 4161,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/context.md",
+    "sha256": "68694ce44329e1d16d56f048cfe4f1c1ad6c7d12152f92f703e1c8b3671d9ba7",
+    "bytes": 7589,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/openpgp.md",
+    "sha256": "0b4fffaf2c05b87ca5cce68811ae6b00be4d98be79e2543eff794b010f97330d",
+    "bytes": 7027,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+    "sha256": "76b85dd1b3248326c451ad3884a4fa16ecdc64c595bf95a9d6913897b3b2dac0",
+    "bytes": 10636,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/hardware/results.md",
+    "sha256": "97e9e60072ecb142987524503ebe5f6ad5c4cbd48566a258681ca87763689496",
+    "bytes": 8687,
+    "scope": "Reused retained original or source-run register/handoff; actual reading limits are in sources.md, not inferred from hash."
+  }
+]

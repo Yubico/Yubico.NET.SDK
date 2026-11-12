@@ -1,0 +1,77 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/candidate-decisions.json",
+    "bytes": 3952953,
+    "sha256": "fb3d4e3cdbef96d88f1e14912995faf5985ab40008a54d9f1299556e68a79e72"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/edit-external-revision-2.md",
+    "bytes": 13379,
+    "sha256": "1d0f2a686bd9cf0c765f054b7d779d009b80f74f2012f52eb3ff4db972c8da0a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/example-bodies.json",
+    "bytes": 290568,
+    "sha256": "9dd8d13ac9144cc1505e1b590d46759f7f26c98ea3651616963bc3c26cbb1109"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/expanded-allowlist.json",
+    "bytes": 19746,
+    "sha256": "f5f8128fbe43c3c4ee20d37296cb0238c09c3e5070d9f5b1294cc43945da1ec2"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/final-checks.json",
+    "bytes": 6273,
+    "sha256": "21ddb51dd5a26385c0b1c2eb00050ab52a73859e65446f8ca59ea3c7a82978fe"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/full-successor-candidate-decisions.json",
+    "bytes": 5529934,
+    "sha256": "a089953241799102e7c4ed4ea48fe66246e4edcb97a284efdb235c524ff90260"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/full-successor-path-decisions.json",
+    "bytes": 4722892,
+    "sha256": "32d8147725a97213ece64b12e48e72a2555d3158e06fe42a4b6538f038fd0d4d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/history-preservation.json",
+    "bytes": 187513,
+    "sha256": "b58bf463feb89f10671e4b43783653fdc99e677fdbefe346e43bee49ebde674a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/input-identities.json",
+    "bytes": 5663,
+    "sha256": "b586cac22067e937abf06d61418b6a4bfd86d259e91331a0cf727e03687ca849"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/path-decisions.json",
+    "bytes": 4038498,
+    "sha256": "06c290e448a043f33a62ed27c616625521161fb6cf3264e5da76210e3a7bf5c0"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/record.py",
+    "bytes": 14511,
+    "sha256": "4de86716e9d858c48d94eab4bd3184dafc24747d71c963e728b4a8a262f73b0d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/remaining-referrals.json",
+    "bytes": 723301,
+    "sha256": "69da37c1024d1ee9afa7e64fccf4933afe4fab7206f94383f2155ecf958fca2a"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/semantic-decisions.json",
+    "bytes": 26279,
+    "sha256": "5dac4542e142f338e499c5df89b73c06cd8a523875fd31b5da1be954978bf2fb"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/static-preservation.json",
+    "bytes": 16404,
+    "sha256": "508ca6d3385005b1f9ee2433684a4dc7df4066fe3a241319ea7b27974b6fa4b3"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/revision-2/successor-source.patch",
+    "bytes": 82660,
+    "sha256": "f4ed4fc218300b64b2adb8595230a035a8b785a9a036de53ea9310596429e4e3"
+  }
+]

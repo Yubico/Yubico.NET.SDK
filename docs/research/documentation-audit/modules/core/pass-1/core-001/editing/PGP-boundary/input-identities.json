@@ -1,0 +1,54 @@
+[
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/candidate-index.json",
+    "sha256": "6bc36562bd79504b82b40dab94699856734be35a4a205f9d948dd269846d8c15"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/file-dispositions.json",
+    "sha256": "cc83410c4a8405b5f1b99d743ab2430f13b6b43a2ca4f7ce35ff6660ce166e44"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/unchanged-paths.json",
+    "sha256": "a29531c35d09dfd9a8a74411db67578e0e3f0c1bcf0a0e7ff9035e187eb75505"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/example-dispositions.json",
+    "sha256": "9acc128cd22f22846cb013f32ee9d5e4477a9d9bbaccd49a9647ae044b88911f"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/source-identities.json",
+    "sha256": "9114923258e034dd08cd681ac01f775f5b8f93ea95b45244127c5f500f7bfde8"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/sources.md",
+    "sha256": "685a8ee90035cfd845d47df1e08b28e5066cbd42292f013f11792dd4b9ffe26b"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/flow-and-verification.md",
+    "sha256": "2e1dc2b851d9f56e5a0f44e417e0fcc26924a3f07c0c4fa1d48f1ed899374030"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/inherited-dispositions.json",
+    "sha256": "e8620822e827edab1cbdd698f4e628604aaf14bd09dc9ce3ed3feae8c3e9f60c"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/documentation-dependencies.json",
+    "sha256": "c209a52145ba59195c8db5739c3f082ad625b668e1b2bc161afff5fe27f17a14"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/applet-findings-dispositions.json",
+    "sha256": "b0532da72355a9b68bb8a1c3b45fb0e7c175c9f329838b73df02352d72e17a56"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-OpenPgp.md",
+    "sha256": "c0e9a4cef2a1d60f6105e19d6c415b2d6c8186e1878f24480378fb0b997b68b4"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+    "sha256": "6ea0a2f4eeff0fa9dae1cf9d67e77ca22f0b27bef3bccd649c7f2dd970ae009e"
+  },
+  {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/triage-full-family.md",
+    "sha256": "6b8ac53e144eacbed43e0a508c1786b7096d01246b32454e7e05c61ba074e422"
+  }
+]

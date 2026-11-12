@@ -91,6 +91,9 @@ Yubico documents factory SCP03 restoration after last-set deletion; do not exten
 mixed-key/firmware guarantee. Retained SCP parameters can fail reauthentication. Reinitialization currently
 omits the original configuration/version and clears the explicit-version indicator; a fresh session with
 the required options is the workaround, not a claim that losing them is intended policy.
+SCP11 can fail Core's local 5.7.2 gate during reinitialization because the omitted override becomes 5.3.0.
+Raw attempts bypass the guard and can mutate state before flags clear. Await the entire reset, then
+dispose/reopen after uncertainty; old readiness/authentication values are not recovery evidence.
 
 #### Writing Tests
 
@@ -125,7 +128,15 @@ key reference and trusted device public key; SCP11a/c also take the OCE private 
 host certificate chain. SCP11b authenticates the device, not the host, so `IsAuthenticated` is not a
 management-authorization check. See the [README role table](README.md#understand-scp11ac-provisioning-roles):
 the device certificate store is not OCE-chain provisioning. Keep caller-owned parameters alive through
-session disposal, and do not infer unverified deep ownership rules from the retained `_scpKeyParams` reference.
+session disposal. StaticKeys copies sources, while SCP03 parameters retain/dispose that same owner.
+SCP11 parameters copy the certificate collection but retain/dispose its certificate objects and the
+private-key wrapper; record clones share them. Give these contained objects one lifetime owner and
+clear original secret arrays separately. The supplied SD public key is not disposed by parameters.
+
+Inherited IsAuthenticated records Core setup. The SCP11 v1.3.0.13 Public Review draft (August 2023),
+§4.3, includes a/c's first correct-MAC command after setup in OCE authentication to the SD. Keep this
+draft-specific phase and b's device-only authentication separate from administrative permissions;
+final SCP11 1.4 and the complete YubiKey profile remain unverified.
 
 ### Session Initialization Pattern
 
@@ -134,6 +145,8 @@ asynchronous initialization. The constructor retains the connection and SCP para
 takes configuration, firmware version, then cancellation token. It prepares the protocol, selects the SD
 through `SecurityDomainBackend.SelectApplicationAsync`, and configures it with the supplied version or
 5.3.0 fallback. If configuration returns a different protocol, the backend is rebuilt for that protocol.
+SCP11 creation therefore requires a known supported override (normally 5.7.2+), independently of the
+optional local GenerateKey gate. An override does not skip SELECT or establish actual device support.
 
 `ProtocolFactory`, `IProtocol`, and `ISmartCardProtocol` are not consumer extension points. External low-level
 code should use `RawSmartCardSession`; SecurityDomain uses these types only as friend-assembly implementation
@@ -145,6 +158,15 @@ Initialization wraps `ApduException`, `BadResponseException`, or `NotSupportedEx
 `ConfigureProtocolAsync` only when SCP parameters were supplied. Preparation and app selection precede
 that catch; cancellation is rethrown unchanged. Later operation failures retain their original types.
 `SecureChannelException.StatusWord` copies only an immediate `ApduException` status, not a nested one.
+A local version-gate failure is not a card rejection. Core's CLA-not-supported translation can put an
+APDU status inside a nested NotSupportedException, leaving the immediate StatusWord null. Provider and
+missing-DEK InvalidOperationException failures are outside this selected catch. Inspect provenance before
+deciding recovery; logged exception text can include provider-defined detail and is not universally redacted.
+
+The facade returns response.Data without exposing the ApduResponse owner. The view survives session
+disposal, but caller-copy cleanup cannot reach that owner. Core's supported Clear method also clears
+status bytes, so inspect status first if a future owned-response path adopts it. Earlier transport,
+fragment and decrypted temporaries have separate lifetimes. Public metadata alone needs no secret zeroing.
 
 ## GlobalPlatform Command Structure
 
@@ -216,6 +238,6 @@ management. `GenerateKeyAsync` locally gates SCP11 only when an exact version wa
 
 ## Related Modules
 
-- **Core.SmartCard.Scp**: Base SCP protocol implementations
-- **Core.Cryptography**: ECPrivateKey, ECPublicKey, StaticKeys
+- **Core.Protocols.SmartCard.Scp**: Base SCP protocol implementations and `StaticKeys`
+- **Core.Cryptography**: `ECPrivateKey` and `ECPublicKey`
 - **Tests.Shared**: YubiKeyTestState, test infrastructure

@@ -1,0 +1,8 @@
+RESULT: FAILED  (dotnet toolchain.cs -- build --project Audit20261111.DocCheck --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✗ build                      3.6s  `dotnet build docs/research/documentation-audit/modules/core/pass-1/core-001/validation/checker/src/Yubico.YubiKit.Audit20261111.DocCheck.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-000014-870-build/02-build-Audit20261111.DocCheck.log
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261112-000014-870-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

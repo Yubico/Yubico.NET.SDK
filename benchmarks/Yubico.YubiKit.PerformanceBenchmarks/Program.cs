@@ -73,6 +73,11 @@ internal sealed class YubiKitBenchmarkConfig : ManualConfig
     }
 }
 
+/// <summary>
+/// Selects the first discovered view exposing the requested connection. The fixture does not enforce
+/// a serial allow list or a firmware version; discovery can probe other attached devices first.
+/// Use a dedicated test rig and record the actual selected fixture with benchmark results.
+/// </summary>
 public abstract class YubiKeyHardwareBenchmarkBase
 {
     protected IYubiKey Device { get; private set; } = null!;

@@ -72,14 +72,15 @@ dispose and create a new one instead of restarting. Last-known metadata is not l
 
 `IYubiKey` represents a physical key when discovery has enough evidence to
 group its interfaces. `SerialNumber` and the tri-state `SameDeviceAs` help you
-correlate references; when the evidence is ambiguous, discovery splits
-interfaces rather than guessing.
+correlate references. Ambiguity often splits interfaces, but complementary partial observations from
+same-PID keys can satisfy the grouping heuristic and produce a cross-key composite. Use the
+[discovery bounds](architecture/device-discovery-guarantees.md#g2-the-epistemic-bound) for identity-sensitive work.
 
 Within your process, a grouped physical key admits one live connection, and
 that connection one live session. Conflicting acquisition throws
 `ConnectionInUseException` before another applet or transport can disrupt work
-already in progress. Another process holding the same interface still surfaces
-an ordinary platform `SCardException`.
+already in progress, within its known-member scope. Cross-process access follows the OS sharing policy;
+built-in strict-exclusive PC/SC maps a sharing violation to `ConnectionInUseException`.
 
 ## One session grammar across applets
 
@@ -119,9 +120,11 @@ x64, and Linux x64. Deeper Management, PIV, and device-monitoring runtime
 evidence is currently macOS-only; the remaining applets are link-verified but
 not yet runtime-exercised under Native AOT.
 
-Stable deployments are not a single standalone binary: ship the complete
-publish output, which includes the platform-specific `Yubico.NativeShims`
-native library.
+Ship the complete publish output. With NativeShims 1.18.1, Native AOT links the RID-specific static
+shim archive and removes the separate shared shim; non-AOT deployment retains the shared library.
+System libraries and permissions remain deployment prerequisites. The
+[Native AOT guide](NATIVE-AOT.md) separates historical execution, current compatibility metadata,
+native producer/ABI qualification, and remaining protocol/device gaps.
 
 ## Why v2 breaks so much, on purpose
 

@@ -1,0 +1,3104 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "eof_diagnostics": [
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 464,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "fb1f5d1c0c952e7aae43c120ffe261d95e0445c1e13170c0b90513a858e63d08",
+      "baseline_sha256": "2e373a04174e82f0ebc714d168be409e98cfaa2bf52b16afa98f3977fec2cded",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 431,
+      "virtual_whitespace_line_shift": 33,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        return output.Trim();\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        return output.Trim();\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "report": {
+        "LineNumber": 256,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "3970aa710e5fe538bc871459e7eaa9c1636275247e634d2d500a4862aea0615f",
+      "baseline_sha256": "10b528c73f9a235a4ecb5535eee1f96124cd9dcd62ab876f3db855a9513dafc0",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 256,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        return info.SerialNumber ?? 0;\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        return info.SerialNumber ?? 0;\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "scripts/toolchain/Process.cs",
+      "report": {
+        "LineNumber": 170,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "84fe870fabdf44a6033c514722bcc256f73a5cf7ef9268c6b0e5c433be4cf133",
+      "baseline_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 170,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        Exec.RunOrFail(\"bash\", $\"\\\"{relativePath}\\\"\", Exec.Display.Stream, workingDirectory: repoRoot);\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        Exec.RunOrFail(\"bash\", $\"\\\"{relativePath}\\\"\", Exec.Display.Stream, workingDirectory: repoRoot);\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "scripts/toolchain/Results.cs",
+      "report": {
+        "LineNumber": 162,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "90a595695e19a88a1f0e55a60708ffebcae8ee12a2753662b5444b3fecf48abe",
+      "baseline_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 162,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        return null;\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        return null;\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "report": {
+        "LineNumber": 294,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "b257b57172bbd9967b7ec46754deffdaa3f044f2288ea7d22ed3f3b3c7593337",
+      "baseline_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 294,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        return true;\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        return true;\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+      "report": {
+        "LineNumber": 470,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "cb814522ab3ce7212d2848b3f8cbb201bd4878f223ebc0d491967331f57e0ce3",
+      "baseline_sha256": "ef15f0b2a8d6b0907bf2f506846505c783b51ead3025d06995ba21d2e5301290",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 470,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        Assert.Null(SecureCredential.FromConsoleKeysForTesting(keys));\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        Assert.Null(SecureCredential.FromConsoleKeysForTesting(keys));\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "report": {
+        "LineNumber": 65,
+        "CharNumber": 68,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "baseline_sha256": "f9bbf5907ba6bb7af56a0865d6b2c66c8122f017b1e244f9b5ae8b19e93eefda",
+      "baseline_terminal_lf": false,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 65,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "[JsonSerializable(typeof(Evidence))]\n",
+        "[JsonSourceGenerationOptions(WriteIndented = true)]\n",
+        "internal sealed partial class EvidenceJson : JsonSerializerContext;\n"
+      ],
+      "baseline_last_lines": [
+        "[JsonSerializable(typeof(Evidence))]\n",
+        "[JsonSourceGenerationOptions(WriteIndented = true)]\n",
+        "internal sealed partial class EvidenceJson : JsonSerializerContext;"
+      ],
+      "classification": "introduced terminal LF; propose delete exactly one byte"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "report": {
+        "LineNumber": 134,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "baseline_sha256": "d437ca74350a4220c03e982bdbda61df3091b51ed341064bc2ea37f17bdf507d",
+      "baseline_terminal_lf": false,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 134,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}"
+      ],
+      "classification": "introduced terminal LF; propose delete exactly one byte"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 420,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "baseline_sha256": "034c49d0bac2720125e27cb09e1f7208b1d08e6f482b32418725d82a5eec0b1b",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 384,
+      "virtual_whitespace_line_shift": 36,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        return output.Trim();\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        return output.Trim();\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/MacOSHidInputVerification/Program.cs",
+      "report": {
+        "LineNumber": 262,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "ef4c55ace3a7ab0185b678de84d8d276c9adb5d819ae952dc03c2939ca621963",
+      "baseline_sha256": "36dc079ac1db86bf0a02a190c24721dc9e85b3108e50f6057b94813d1d07a7e0",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 262,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "report": {
+        "LineNumber": 431,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "baseline_sha256": "8461d982f45f29814dfe662bbe98724331524c76119c2494b7a72b573307bc4e",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 431,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/Program.cs",
+      "report": {
+        "LineNumber": 384,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "d5b99076bac9be69231db6de26f9ba69f27d4f33027de7a246edf226545f4a2b",
+      "baseline_sha256": "5b2b55ae1e76c301c44b0a220f566db9eae641e2bfcdf29c38e214130276f440",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 384,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        Console.WriteLine($\"borrowed session={use} idle DisposeAsync completedMs={timer.Elapsed.TotalMilliseconds:F3}\");\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        Console.WriteLine($\"borrowed session={use} idle DisposeAsync completedMs={timer.Elapsed.TotalMilliseconds:F3}\");\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "report": {
+        "LineNumber": 90,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "109ae75b5018807486140d4bf0fb144075484b2971b9a3724d44d7fedf975272",
+      "baseline_sha256": "6889802fda2097eb22e698eb2c9045d86d020fd8e56f5c2a5eea54d44455daac",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 90,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        await ((IAsyncDisposable)transaction).DisposeAsync();\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        await ((IAsyncDisposable)transaction).DisposeAsync();\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/NativeAotVerification/Program.cs",
+      "report": {
+        "LineNumber": 446,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "a4ccfef7152cc440c2eba998e7225cfc7e9f3932d66fe17eeafd9434857e39fb",
+      "baseline_sha256": "2f130b2a20c77ed2e03cc6208e8ffb53f9f9d8000af146c0fadb729095220425",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 446,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "        }\n",
+        "    }\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/Program.cs",
+      "report": {
+        "LineNumber": 87,
+        "CharNumber": 2,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "bec35657a48d4f1ad104cf043797b83a9f7e75ce1919b28612d604e8222bbee8",
+      "baseline_sha256": "18e7dfca9d2dc170b111cad732800ca9bd98c4d52c1c7e434d6d23d924eb875a",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 87,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "    if (!condition)\n",
+        "        throw new InvalidOperationException(message);\n",
+        "}\n"
+      ],
+      "baseline_last_lines": [
+        "    if (!condition)\n",
+        "        throw new InvalidOperationException(message);\n",
+        "}\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+      "report": {
+        "LineNumber": 194,
+        "CharNumber": 44,
+        "DiagnosticId": "FINALNEWLINE",
+        "FormatDescription": "Fix final newline. Delete 1 characters."
+      },
+      "current_sha256": "ebca9ba8179574d90066a152d778a02bd8f7e3d35f0902be6a57d28ddf4b9e09",
+      "baseline_sha256": "6948323a4efa38377c61b40a0075e6b30d76aa05ae3152ba35279bdbc3d10c2f",
+      "baseline_terminal_lf": true,
+      "current_terminal_lf": true,
+      "current_actual_last_line": 194,
+      "virtual_whitespace_line_shift": 0,
+      "report_eof_position_matches_virtual_whitespace_reflow": true,
+      "current_last_lines": [
+        "delegate byte[] SharedSecret(ReadOnlySpan<byte> scalar, ReadOnlySpan<byte> point);\n",
+        "delegate void SpanInput(ReadOnlySpan<byte> bytes);\n",
+        "delegate void SpanOutput(Span<byte> bytes);\n"
+      ],
+      "baseline_last_lines": [
+        "delegate byte[] SharedSecret(ReadOnlySpan<byte> scalar, ReadOnlySpan<byte> point);\n",
+        "delegate void SpanInput(ReadOnlySpan<byte> bytes);\n",
+        "delegate void SpanOutput(Span<byte> bytes);\n"
+      ],
+      "classification": "baseline terminal LF; preserve unchanged"
+    }
+  ],
+  "whitespace_diagnostics": [
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 133,
+        "CharNumber": 30,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            shippingDiffUnavailableReason = string.IsNullOrWhiteSpace(untracked) ? null : \"untracked source files exist\",\n",
+        "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+        "                manifestSha512 = nativeLibrary.Name is null ? null : nativeLibrary.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            shippingDiffUnavailableReason = string.IsNullOrWhiteSpace(untracked) ? null : \"untracked source files exist\",\n",
+        "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+        "                manifestSha512 = nativeLibrary.Name is null ? null : nativeLibrary.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 133,
+        "CharNumber": 32,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            shippingDiffUnavailableReason = string.IsNullOrWhiteSpace(untracked) ? null : \"untracked source files exist\",\n",
+        "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+        "                manifestSha512 = nativeLibrary.Name is null ? null : nativeLibrary.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            shippingDiffUnavailableReason = string.IsNullOrWhiteSpace(untracked) ? null : \"untracked source files exist\",\n",
+        "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+        "                manifestSha512 = nativeLibrary.Name is null ? null : nativeLibrary.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 133,
+        "CharNumber": 41,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            shippingDiffUnavailableReason = string.IsNullOrWhiteSpace(untracked) ? null : \"untracked source files exist\",\n",
+        "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+        "                manifestSha512 = nativeLibrary.Name is null ? null : nativeLibrary.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            shippingDiffUnavailableReason = string.IsNullOrWhiteSpace(untracked) ? null : \"untracked source files exist\",\n",
+        "            nativeShims = new { version, versionUnavailableReason = version is null ? \"not present in executing dependency manifest\" : null,\n",
+        "                manifestSha512 = nativeLibrary.Name is null ? null : nativeLibrary.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 143,
+        "CharNumber": 80,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                deployedShimHashUnavailableReason = File.Exists(nativeFile) ? null : \"deployed native binary unavailable for runtime identifier\",\n",
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 140,
+      "baseline_line": "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                deployedShimHashUnavailableReason = File.Exists(nativeFile) ? null : \"deployed native binary unavailable for runtime identifier\",\n",
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 144,
+        "CharNumber": 26,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 141,
+      "baseline_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 144,
+        "CharNumber": 28,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 141,
+      "baseline_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 144,
+        "CharNumber": 67,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 141,
+      "baseline_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                deployedShimPath = File.Exists(nativeFile) ? nativeAsset : null },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 145,
+        "CharNumber": 66,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                runtime = RuntimeInformation.FrameworkDescription },\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 142,
+      "baseline_line": "                runtime = RuntimeInformation.FrameworkDescription },\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 146,
+        "CharNumber": 26,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 143,
+      "baseline_line": "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 146,
+        "CharNumber": 28,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 143,
+      "baseline_line": "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 146,
+        "CharNumber": 36,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 143,
+      "baseline_line": "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription },\n",
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 147,
+        "CharNumber": 85,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 144,
+      "baseline_line": "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            fixture = new { serial, firmwareVersion = samples.FirstOrDefault(s => s.FirmwareVersion is not null)?.FirmwareVersion,\n",
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 148,
+        "CharNumber": 33,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+        "        };\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 145,
+      "baseline_line": "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+        "        };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 148,
+        "CharNumber": 54,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+        "        };\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 145,
+      "baseline_line": "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+        "        };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 148,
+        "CharNumber": 64,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+        "        };\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 145,
+      "baseline_line": "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                firmwareVersionUnavailableReason = \"not read by this raw FIDO route\" },\n",
+        "            sampleCount = count, timeoutMs = timeout, scenario, samples\n",
+        "        };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 158,
+        "CharNumber": 37,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        {\n",
+        "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+        "        };\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 155,
+      "baseline_line": "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        {\n",
+        "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+        "        };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 158,
+        "CharNumber": 68,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        {\n",
+        "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+        "        };\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 155,
+      "baseline_line": "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        {\n",
+        "            UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true\n",
+        "        };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 185,
+        "CharNumber": 40,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                Phase = progress.Phase, InvocationReturnMs = progress.ReturnMs,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            {\n",
+        "                Phase = progress.Phase, InvocationReturnMs = progress.ReturnMs,\n",
+        "                FailureType = progress.ErrorType,\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 182,
+      "baseline_line": "                Phase = progress.Phase, InvocationReturnMs = progress.ReturnMs,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            {\n",
+        "                Phase = progress.Phase, InvocationReturnMs = progress.ReturnMs,\n",
+        "                FailureType = progress.ErrorType,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 187,
+        "CharNumber": 73,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                ProcessAllocatedBytesAtReturn = progress.AllocatedBytes, ProcessThreadCountAtReturn = progress.ThreadCount\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                FailureType = progress.ErrorType,\n",
+        "                ProcessAllocatedBytesAtReturn = progress.AllocatedBytes, ProcessThreadCountAtReturn = progress.ThreadCount\n",
+        "            };\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 184,
+      "baseline_line": "                ProcessAllocatedBytesAtReturn = progress.AllocatedBytes, ProcessThreadCountAtReturn = progress.ThreadCount\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                FailureType = progress.ErrorType,\n",
+        "                ProcessAllocatedBytesAtReturn = progress.AllocatedBytes, ProcessThreadCountAtReturn = progress.ThreadCount\n",
+        "            };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 197,
+        "CharNumber": 37,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                Phase = state.Phase, InvocationReturnMs = state.ReturnMs,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            {\n",
+        "                Phase = state.Phase, InvocationReturnMs = state.ReturnMs,\n",
+        "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 194,
+      "baseline_line": "                Phase = state.Phase, InvocationReturnMs = state.ReturnMs,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            {\n",
+        "                Phase = state.Phase, InvocationReturnMs = state.ReturnMs,\n",
+        "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 198,
+        "CharNumber": 51,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                Phase = state.Phase, InvocationReturnMs = state.ReturnMs,\n",
+        "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n",
+        "                ProcessAllocatedBytesAtReturn = state.AllocatedBytes, ProcessThreadCountAtReturn = state.ThreadCount\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 195,
+      "baseline_line": "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                Phase = state.Phase, InvocationReturnMs = state.ReturnMs,\n",
+        "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n",
+        "                ProcessAllocatedBytesAtReturn = state.AllocatedBytes, ProcessThreadCountAtReturn = state.ThreadCount\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 199,
+        "CharNumber": 70,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                ProcessAllocatedBytesAtReturn = state.AllocatedBytes, ProcessThreadCountAtReturn = state.ThreadCount\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n",
+        "                ProcessAllocatedBytesAtReturn = state.AllocatedBytes, ProcessThreadCountAtReturn = state.ThreadCount\n",
+        "            };\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 196,
+      "baseline_line": "                ProcessAllocatedBytesAtReturn = state.AllocatedBytes, ProcessThreadCountAtReturn = state.ThreadCount\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                TaskTerminalMs = state.TerminalMs, FailureType = state.ErrorType,\n",
+        "                ProcessAllocatedBytesAtReturn = state.AllocatedBytes, ProcessThreadCountAtReturn = state.ThreadCount\n",
+        "            };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 214,
+        "CharNumber": 31,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                return Empty(scenario, \"malformed_child_output\", watch.Elapsed.TotalMilliseconds, 0, serial);\n",
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 211,
+      "baseline_line": "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                return Empty(scenario, \"malformed_child_output\", watch.Elapsed.TotalMilliseconds, 0, serial);\n",
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 214,
+        "CharNumber": 33,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                return Empty(scenario, \"malformed_child_output\", watch.Elapsed.TotalMilliseconds, 0, serial);\n",
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 211,
+      "baseline_line": "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                return Empty(scenario, \"malformed_child_output\", watch.Elapsed.TotalMilliseconds, 0, serial);\n",
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 214,
+        "CharNumber": 78,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                return Empty(scenario, \"malformed_child_output\", watch.Elapsed.TotalMilliseconds, 0, serial);\n",
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 211,
+      "baseline_line": "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                return Empty(scenario, \"malformed_child_output\", watch.Elapsed.TotalMilliseconds, 0, serial);\n",
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 215,
+        "CharNumber": 37,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n",
+        "                ProcessThreadCountAtReturn = state.ThreadCount };\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 212,
+      "baseline_line": "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            return sample with { ElapsedMs = watch.Elapsed.TotalMilliseconds, ChildExitCode = 0,\n",
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n",
+        "                ProcessThreadCountAtReturn = state.ThreadCount };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 216,
+        "CharNumber": 63,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                ProcessThreadCountAtReturn = state.ThreadCount };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n",
+        "                ProcessThreadCountAtReturn = state.ThreadCount };\n",
+        "        }\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 213,
+      "baseline_line": "                ProcessThreadCountAtReturn = state.ThreadCount };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                Phase = state.Phase, ProcessAllocatedBytesAtReturn = state.AllocatedBytes,\n",
+        "                ProcessThreadCountAtReturn = state.ThreadCount };\n",
+        "        }\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 267,
+        "CharNumber": 55,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 264,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 267,
+        "CharNumber": 57,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 264,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 267,
+        "CharNumber": 76,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 264,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 267,
+        "CharNumber": 83,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 264,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "    {\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 268,
+        "CharNumber": 23,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n",
+        "            processThreadCount = Process.GetCurrentProcess().Threads.Count }));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 265,
+      "baseline_line": "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        Console.WriteLine(JsonSerializer.Serialize(new { kind = \"progress\", phase, durationMs = durationMs ?? watch.Elapsed.TotalMilliseconds,\n",
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n",
+        "            processThreadCount = Process.GetCurrentProcess().Threads.Count }));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "report": {
+        "LineNumber": 269,
+        "CharNumber": 75,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            processThreadCount = Process.GetCurrentProcess().Threads.Count }));\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n",
+        "            processThreadCount = Process.GetCurrentProcess().Threads.Count }));\n",
+        "        Console.Out.Flush();\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 266,
+      "baseline_line": "            processThreadCount = Process.GetCurrentProcess().Threads.Count }));\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            errorType, processAllocatedBytes = GC.GetTotalAllocatedBytes(false),\n",
+        "            processThreadCount = Process.GetCurrentProcess().Threads.Count }));\n",
+        "        Console.Out.Flush();\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "report": {
+        "LineNumber": 53,
+        "CharNumber": 47,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 2 characters with '\\n\\n'."
+      },
+      "current_line": "        using var cmac = new AesCmac(TestKey);\n",
+      "current_span_text": "\n\n",
+      "removed_character_count": 2,
+      "current_context": [
+        "    {\n",
+        "        using var cmac = new AesCmac(TestKey);\n",
+        "\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 53,
+      "baseline_line": "        using var cmac = new AesCmac(TestKey);\n",
+      "baseline_span_text": "\n\n",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "    {\n",
+        "        using var cmac = new AesCmac(TestKey);\n",
+        "\n"
+      ],
+      "classification": "baseline byte span/statement under conditional compilation; preserve context"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "report": {
+        "LineNumber": 59,
+        "CharNumber": 5,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Insert '\\s\\s\\s\\s'."
+      },
+      "current_line": "    // This release branch makes no subkey assertion; the separate RFC cases check full MAC values.\n",
+      "current_span_text": "",
+      "removed_character_count": 0,
+      "current_context": [
+        "#else\n",
+        "    // This release branch makes no subkey assertion; the separate RFC cases check full MAC values.\n",
+        "    Assert.True(true);\n"
+      ],
+      "current_leading_spaces": 4,
+      "baseline_line_numbers": [
+        59,
+        60
+      ],
+      "baseline_lines": [
+        "    // In release builds, skip internal validation\n",
+        "    // RFC vectors provide end-to-end verification\n"
+      ],
+      "baseline_leading_spaces": [
+        4,
+        4
+      ],
+      "reported_line_and_removed_span_exact_at_pin": false,
+      "leading_indentation_inherited_exactly": true,
+      "classification": "updated ordinary-comment prose with inherited four-space release-branch indentation; conditional-context finding, not identical comment text"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "report": {
+        "LineNumber": 60,
+        "CharNumber": 5,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Insert '\\s\\s\\s\\s'."
+      },
+      "current_line": "    Assert.True(true);\n",
+      "current_span_text": "",
+      "removed_character_count": 0,
+      "current_context": [
+        "    // This release branch makes no subkey assertion; the separate RFC cases check full MAC values.\n",
+        "    Assert.True(true);\n",
+        "#endif\n"
+      ],
+      "current_leading_spaces": 4,
+      "baseline_line_number": 61,
+      "baseline_line": "    Assert.True(true);\n",
+      "baseline_span_text": "",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "    // RFC vectors provide end-to-end verification\n",
+        "    Assert.True(true);\n",
+        "#endif\n"
+      ],
+      "classification": "baseline byte span/statement under conditional compilation; preserve context"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 97,
+        "CharNumber": 31,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var propsPath = Path.Combine(runnerSource, \"Directory.Build.props\");\n",
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 92,
+      "baseline_line": "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var propsPath = Path.Combine(runnerSource, \"Directory.Build.props\");\n",
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 97,
+        "CharNumber": 33,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var propsPath = Path.Combine(runnerSource, \"Directory.Build.props\");\n",
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 92,
+      "baseline_line": "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var propsPath = Path.Combine(runnerSource, \"Directory.Build.props\");\n",
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 97,
+        "CharNumber": 62,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var propsPath = Path.Combine(runnerSource, \"Directory.Build.props\");\n",
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 92,
+      "baseline_line": "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var propsPath = Path.Combine(runnerSource, \"Directory.Build.props\");\n",
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 98,
+        "CharNumber": 41,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+        "        var selectedCommit = await GitAsync(root, \"rev-parse\", \"HEAD\");\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 93,
+      "baseline_line": "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+        "        var selectedCommit = await GitAsync(root, \"rev-parse\", \"HEAD\");\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 98,
+        "CharNumber": 68,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+        "        var selectedCommit = await GitAsync(root, \"rev-parse\", \"HEAD\");\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 93,
+      "baseline_line": "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),\n",
+        "            program = Hash(programPath), selfTest = Hash(testsPath) };\n",
+        "        var selectedCommit = await GitAsync(root, \"rev-parse\", \"HEAD\");\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 124,
+        "CharNumber": 26,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var filename = Path.Combine(output, $\"comparison-v2-{variant}-{DateTimeOffset.UtcNow:yyyyMMddTHHmmssfffZ}.json\");\n",
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 119,
+      "baseline_line": "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var filename = Path.Combine(output, $\"comparison-v2-{variant}-{DateTimeOffset.UtcNow:yyyyMMddTHHmmssfffZ}.json\");\n",
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 124,
+        "CharNumber": 28,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var filename = Path.Combine(output, $\"comparison-v2-{variant}-{DateTimeOffset.UtcNow:yyyyMMddTHHmmssfffZ}.json\");\n",
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 119,
+      "baseline_line": "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var filename = Path.Combine(output, $\"comparison-v2-{variant}-{DateTimeOffset.UtcNow:yyyyMMddTHHmmssfffZ}.json\");\n",
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 124,
+        "CharNumber": 72,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var filename = Path.Combine(output, $\"comparison-v2-{variant}-{DateTimeOffset.UtcNow:yyyyMMddTHHmmssfffZ}.json\");\n",
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 119,
+      "baseline_line": "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var filename = Path.Combine(output, $\"comparison-v2-{variant}-{DateTimeOffset.UtcNow:yyyyMMddTHHmmssfffZ}.json\");\n",
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 125,
+        "CharNumber": 43,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            sourceCommit = selectedCommit, sourceRoot = root,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n",
+        "            shippingDiffSha256 = HashText(diff), checkoutNativeVersion,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 120,
+      "baseline_line": "            sourceCommit = selectedCommit, sourceRoot = root,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        var dataset = new { schema = \"macos-hid-boundary-comparison/2\", variant,\n",
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n",
+        "            shippingDiffSha256 = HashText(diff), checkoutNativeVersion,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 126,
+        "CharNumber": 49,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            shippingDiffSha256 = HashText(diff), checkoutNativeVersion,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n",
+        "            shippingDiffSha256 = HashText(diff), checkoutNativeVersion,\n",
+        "            runnerSourceSha256 = runnerHashes,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 121,
+      "baseline_line": "            shippingDiffSha256 = HashText(diff), checkoutNativeVersion,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            sourceCommit = selectedCommit, sourceRoot = root,\n",
+        "            shippingDiffSha256 = HashText(diff), checkoutNativeVersion,\n",
+        "            runnerSourceSha256 = runnerHashes,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 129,
+        "CharNumber": 37,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            runnerAssemblySha256 = Hash(typeof(Program).Assembly.Location),\n",
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 124,
+      "baseline_line": "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            runnerAssemblySha256 = Hash(typeof(Program).Assembly.Location),\n",
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 129,
+        "CharNumber": 60,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            runnerAssemblySha256 = Hash(typeof(Program).Assembly.Location),\n",
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 124,
+      "baseline_line": "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            runnerAssemblySha256 = Hash(typeof(Program).Assembly.Location),\n",
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 130,
+        "CharNumber": 13,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Delete 1 characters."
+      },
+      "current_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "current_leading_spaces": 13,
+      "baseline_line_number": 125,
+      "baseline_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 130,
+        "CharNumber": 31,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "current_leading_spaces": 13,
+      "baseline_line_number": 125,
+      "baseline_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 130,
+        "CharNumber": 33,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "current_leading_spaces": 13,
+      "baseline_line_number": 125,
+      "baseline_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 130,
+        "CharNumber": 66,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "current_leading_spaces": 13,
+      "baseline_line_number": 125,
+      "baseline_line": "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            coreSha256 = Hash(core), coreSourcePath = core, loadedCorePath = typeof(YubiKeyManager).Assembly.Location,\n",
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 131,
+        "CharNumber": 45,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 126,
+      "baseline_line": "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 131,
+        "CharNumber": 80,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 126,
+      "baseline_line": "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "             nativeShims = new { version = expectedNativeVersion, manifestSha512 = native.Value.GetProperty(\"sha512\").GetString(),\n",
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 132,
+        "CharNumber": 50,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 127,
+      "baseline_line": "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 132,
+        "CharNumber": 112,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 127,
+      "baseline_line": "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                packageSha256 = packageHash, deployedNativeSha256 = nativeHash, deployedNativePath = nativeFile,\n",
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 133,
+        "CharNumber": 26,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 128,
+      "baseline_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 133,
+        "CharNumber": 28,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 128,
+      "baseline_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 133,
+        "CharNumber": 67,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 128,
+      "baseline_line": "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                loadedNativePath = (string?)null, loadedNativePathUnavailableReason = \"not observed in process\" },\n",
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 134,
+        "CharNumber": 66,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 129,
+      "baseline_line": "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 134,
+        "CharNumber": 69,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n"
+      ],
+      "current_leading_spaces": 16,
+      "baseline_line_number": 129,
+      "baseline_line": "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            machine = new { os = RuntimeInformation.OSDescription, architecture = RuntimeInformation.OSArchitecture,\n",
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 135,
+        "CharNumber": 34,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 135,
+        "CharNumber": 102,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 135,
+        "CharNumber": 125,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 135,
+        "CharNumber": 145,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 135,
+        "CharNumber": 168,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 135,
+        "CharNumber": 176,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 130,
+      "baseline_line": "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "                runtime = RuntimeInformation.FrameworkDescription }, fixtureSerial = Serial,\n",
+        "            lifecycleWarmups = 2, warmupKind = \"fresh-child cold starts (not in-process JIT warmup)\", lifecycleSamples = 10, noInputSamples = 1, timeoutMs = TimeoutMs, samples };\n",
+        "        await File.WriteAllTextAsync(filename, JsonSerializer.Serialize(dataset, Json));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 213,
+        "CharNumber": 55,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 208,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 213,
+        "CharNumber": 57,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 208,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 213,
+        "CharNumber": 64,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 208,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 213,
+        "CharNumber": 102,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "current_leading_spaces": 8,
+      "baseline_line_number": 208,
+      "baseline_line": "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        using var process = Process.GetCurrentProcess();\n",
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 214,
+        "CharNumber": 63,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n",
+        "            processCpuMs = process.TotalProcessorTime.TotalMilliseconds }));\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 209,
+      "baseline_line": "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "        Console.WriteLine(JsonSerializer.Serialize(new { phase, ms = watch.Elapsed.TotalMilliseconds, errorType,\n",
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n",
+        "            processCpuMs = process.TotalProcessorTime.TotalMilliseconds }));\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "report": {
+        "LineNumber": 215,
+        "CharNumber": 72,
+        "DiagnosticId": "WHITESPACE",
+        "FormatDescription": "Fix whitespace formatting. Replace 1 characters with '\\n\\s\\s\\s\\s\\s\\s\\s\\s'."
+      },
+      "current_line": "            processCpuMs = process.TotalProcessorTime.TotalMilliseconds }));\n",
+      "current_span_text": " ",
+      "removed_character_count": 1,
+      "current_context": [
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n",
+        "            processCpuMs = process.TotalProcessorTime.TotalMilliseconds }));\n",
+        "        Console.Out.Flush();\n"
+      ],
+      "current_leading_spaces": 12,
+      "baseline_line_number": 210,
+      "baseline_line": "            processCpuMs = process.TotalProcessorTime.TotalMilliseconds }));\n",
+      "baseline_span_text": " ",
+      "reported_line_and_removed_span_exact_at_pin": true,
+      "baseline_context": [
+        "            allocatedBytes = GC.GetTotalAllocatedBytes(false), threadCount = process.Threads.Count,\n",
+        "            processCpuMs = process.TotalProcessorTime.TotalMilliseconds }));\n",
+        "        Console.Out.Flush();\n"
+      ],
+      "classification": "baseline executable-code whitespace; preserve"
+    }
+  ],
+  "source_import_directive_namespace_proofs": [
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+      "baseline_sha256": "2e373a04174e82f0ebc714d168be409e98cfaa2bf52b16afa98f3977fec2cded",
+      "current_sha256": "fb1f5d1c0c952e7aae43c120ffe261d95e0445c1e13170c0b90513a858e63d08",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using System.IO.Compression;",
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using System.Text.Json;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "        using var depsJson = JsonDocument.Parse(await File.ReadAllTextAsync(deps));",
+        "                using var archive = ZipFile.OpenRead(availablePackage);",
+        "                    using var stream = entry.Open();",
+        "        using var process = new Process();",
+        "        using var deadline = new CancellationTokenSource(timeoutMs);",
+        "                using var json = JsonDocument.Parse(line);",
+        "                    using var blocker = new ManualResetEventSlim();",
+        "        using var git = new Process();"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using System.IO.Compression;",
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using System.Text.Json;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "        using var depsJson = JsonDocument.Parse(await File.ReadAllTextAsync(deps));",
+        "                using var archive = ZipFile.OpenRead(availablePackage);",
+        "                    using var stream = entry.Open();",
+        "        using var process = new Process();",
+        "        using var deadline = new CancellationTokenSource(timeoutMs);",
+        "                using var json = JsonDocument.Parse(line);",
+        "                    using var blocker = new ManualResetEventSlim();",
+        "        using var git = new Process();"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "baseline_sha256": "0915db50cd6c497e48eaf6cdbbcfb9a88804c0a0c53eb8bc2f7e9096c7229942",
+      "current_sha256": "3479ebe650269decdc16377febf1f1ee32ba2ce886269cd46094bb317e00d3ea",
+      "baseline_imports": [
+        "using System.Security.Cryptography;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac1 = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac1 = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var freshCmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var expectedCmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac1 = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);"
+      ],
+      "current_imports": [
+        "using System.Security.Cryptography;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac1 = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac1 = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var freshCmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var expectedCmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac1 = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac2 = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);",
+        "        using var cmac = new AesCmac(TestKey);"
+      ],
+      "baseline_directives": [
+        "#if DEBUG",
+        "#else",
+        "#endif"
+      ],
+      "current_directives": [
+        "#if DEBUG",
+        "#else",
+        "#endif"
+      ],
+      "baseline_namespaces": [
+        "namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;"
+      ],
+      "current_namespaces": [
+        "namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;"
+      ]
+    },
+    {
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "baseline_sha256": "034c49d0bac2720125e27cb09e1f7208b1d08e6f482b32418725d82a5eec0b1b",
+      "current_sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using System.IO.Compression;",
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using System.Text.Json;",
+        "using System.Text.RegularExpressions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "        using var dependencies = JsonDocument.Parse(await File.ReadAllTextAsync(",
+        "        using var archive = ZipFile.OpenRead(package);",
+        "        using var asset = entry.Open();",
+        "        using var child = new Process();",
+        "        using var deadline = new CancellationTokenSource(timeoutMs);",
+        "                using var json = JsonDocument.Parse(line);",
+        "        using var process = Process.GetCurrentProcess();",
+        "        using var before = JsonDocument.Parse(File.ReadAllText(beforePath));",
+        "        using var after = JsonDocument.Parse(File.ReadAllText(afterPath));",
+        "        using var before = JsonDocument.Parse(File.ReadAllText(beforePath));",
+        "        using var after = JsonDocument.Parse(File.ReadAllText(afterPath));",
+        "        using var git = new Process();"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using System.IO.Compression;",
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using System.Text.Json;",
+        "using System.Text.RegularExpressions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "        using var dependencies = JsonDocument.Parse(await File.ReadAllTextAsync(",
+        "        using var archive = ZipFile.OpenRead(package);",
+        "        using var asset = entry.Open();",
+        "        using var child = new Process();",
+        "        using var deadline = new CancellationTokenSource(timeoutMs);",
+        "                using var json = JsonDocument.Parse(line);",
+        "        using var process = Process.GetCurrentProcess();",
+        "        using var before = JsonDocument.Parse(File.ReadAllText(beforePath));",
+        "        using var after = JsonDocument.Parse(File.ReadAllText(afterPath));",
+        "        using var before = JsonDocument.Parse(File.ReadAllText(beforePath));",
+        "        using var after = JsonDocument.Parse(File.ReadAllText(afterPath));",
+        "        using var git = new Process();"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "baseline_sha256": "10b528c73f9a235a4ecb5535eee1f96124cd9dcd62ab876f3db855a9513dafc0",
+      "current_sha256": "3970aa710e5fe538bc871459e7eaa9c1636275247e634d2d500a4862aea0615f",
+      "baseline_imports": [
+        "using BenchmarkDotNet.Attributes;",
+        "using BenchmarkDotNet.Columns;",
+        "using BenchmarkDotNet.Configs;",
+        "using BenchmarkDotNet.Diagnosers;",
+        "using BenchmarkDotNet.Environments;",
+        "using BenchmarkDotNet.Exporters;",
+        "using BenchmarkDotNet.Exporters.Csv;",
+        "using BenchmarkDotNet.Exporters.Json;",
+        "using BenchmarkDotNet.Jobs;",
+        "using BenchmarkDotNet.Reports;",
+        "using BenchmarkDotNet.Running;",
+        "using BenchmarkDotNet.Validators;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.Hid;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;",
+        "using Yubico.YubiKit.Management;"
+      ],
+      "current_imports": [
+        "using BenchmarkDotNet.Attributes;",
+        "using BenchmarkDotNet.Columns;",
+        "using BenchmarkDotNet.Configs;",
+        "using BenchmarkDotNet.Diagnosers;",
+        "using BenchmarkDotNet.Environments;",
+        "using BenchmarkDotNet.Exporters;",
+        "using BenchmarkDotNet.Exporters.Csv;",
+        "using BenchmarkDotNet.Exporters.Json;",
+        "using BenchmarkDotNet.Jobs;",
+        "using BenchmarkDotNet.Reports;",
+        "using BenchmarkDotNet.Running;",
+        "using BenchmarkDotNet.Validators;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.Hid;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;",
+        "using Yubico.YubiKit.Management;"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "scripts/toolchain/Process.cs",
+      "baseline_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+      "current_sha256": "84fe870fabdf44a6033c514722bcc256f73a5cf7ef9268c6b0e5c433be4cf133",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using System.Text;",
+        "using System.Text.RegularExpressions;",
+        "using static Output;",
+        "        using var log = logPath is null ? null : new StreamWriter(logPath, append: false) { AutoFlush = true };",
+        "        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($\"Failed to start {fileName}\");",
+        "        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException(\"Failed to start dotnet process\");"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using System.Text;",
+        "using System.Text.RegularExpressions;",
+        "using static Output;",
+        "        using var log = logPath is null ? null : new StreamWriter(logPath, append: false) { AutoFlush = true };",
+        "        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($\"Failed to start {fileName}\");",
+        "        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException(\"Failed to start dotnet process\");"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "scripts/toolchain/Results.cs",
+      "baseline_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+      "current_sha256": "90a595695e19a88a1f0e55a60708ffebcae8ee12a2753662b5444b3fecf48abe",
+      "baseline_imports": [
+        "using System.Text.RegularExpressions;",
+        "using static Output;"
+      ],
+      "current_imports": [
+        "using System.Text.RegularExpressions;",
+        "using static Output;"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "baseline_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "current_sha256": "b257b57172bbd9967b7ec46754deffdaa3f044f2288ea7d22ed3f3b3c7593337",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using System.Text.RegularExpressions;",
+        "using static Output;"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using System.Text.RegularExpressions;",
+        "using static Output;"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Output/SecureCredentialTests.cs",
+      "baseline_sha256": "ef15f0b2a8d6b0907bf2f506846505c783b51ead3025d06995ba21d2e5301290",
+      "current_sha256": "cb814522ab3ce7212d2848b3f8cbb201bd4878f223ebc0d491967331f57e0ce3",
+      "baseline_imports": [
+        "using System.Buffers;",
+        "using System.Text;",
+        "using Yubico.YubiKit.Cli.Shared.Output;",
+        "        using var credential = SecureCredential.FromUtf8String(\"123456\");",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(\"alpha\\r\\nbeta\\r\\n\"));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(\"\\r\\n\"));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(\"1234567\\r\\n\"));",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys, maxByteLength: 128);",
+        "        using var credential = SecureCredential.FromUtf8String(\"123456\");"
+      ],
+      "current_imports": [
+        "using System.Buffers;",
+        "using System.Text;",
+        "using Yubico.YubiKit.Cli.Shared.Output;",
+        "        using var credential = SecureCredential.FromUtf8String(\"123456\");",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(\"alpha\\r\\nbeta\\r\\n\"));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(\"\\r\\n\"));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));",
+        "        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(\"1234567\\r\\n\"));",
+        "        using var credential = SecureCredential.FromConsoleKeysForTesting(keys, maxByteLength: 128);",
+        "        using var credential = SecureCredential.FromUtf8String(\"123456\");"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [
+        "namespace Yubico.YubiKit.Cli.Shared.UnitTests.Output;"
+      ],
+      "current_namespaces": [
+        "namespace Yubico.YubiKit.Cli.Shared.UnitTests.Output;"
+      ]
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "baseline_sha256": "f9bbf5907ba6bb7af56a0865d6b2c66c8122f017b1e244f9b5ae8b19e93eefda",
+      "current_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using System.Runtime.InteropServices;",
+        "using System.Text.Json;",
+        "using System.Text.Json.Serialization;"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using System.Runtime.InteropServices;",
+        "using System.Text.Json;",
+        "using System.Text.Json.Serialization;"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [
+        "namespace LinuxHidRouteVerification;"
+      ],
+      "current_namespaces": [
+        "namespace LinuxHidRouteVerification;"
+      ]
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "baseline_sha256": "d437ca74350a4220c03e982bdbda61df3091b51ed341064bc2ea37f17bdf507d",
+      "current_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Credentials;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.Hid.Linux;",
+        "using Yubico.YubiKit.Ctap2;",
+        "        using var operation = new CancellationTokenSource();",
+        "        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(60));"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Credentials;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.Hid.Linux;",
+        "using Yubico.YubiKit.Ctap2;",
+        "        using var operation = new CancellationTokenSource();",
+        "        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(60));"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [
+        "namespace LinuxHidRouteVerification;"
+      ],
+      "current_namespaces": [
+        "namespace LinuxHidRouteVerification;"
+      ]
+    },
+    {
+      "path": "verification/MacOSHidInputVerification/Program.cs",
+      "baseline_sha256": "36dc079ac1db86bf0a02a190c24721dc9e85b3108e50f6057b94813d1d07a7e0",
+      "current_sha256": "ef4c55ace3a7ab0185b678de84d8d276c9adb5d819ae952dc03c2939ca621963",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using System.Runtime.CompilerServices;",
+        "using System.Runtime.InteropServices;",
+        "                using Process child = new();"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using System.Runtime.CompilerServices;",
+        "using System.Runtime.InteropServices;",
+        "                using Process child = new();"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "baseline_sha256": "8461d982f45f29814dfe662bbe98724331524c76119c2494b7a72b573307bc4e",
+      "current_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "baseline_imports": [
+        "using System.Globalization;",
+        "using System.Runtime.CompilerServices;",
+        "using System.Runtime.InteropServices;",
+        "using Yubico.YubiKit.Core;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Transports.Hid;",
+        "using Yubico.YubiKit.Core.Transports.Hid.MacOS;",
+        "        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(4));",
+        "        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromMilliseconds(150));"
+      ],
+      "current_imports": [
+        "using System.Globalization;",
+        "using System.Runtime.CompilerServices;",
+        "using System.Runtime.InteropServices;",
+        "using Yubico.YubiKit.Core;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Transports.Hid;",
+        "using Yubico.YubiKit.Core.Transports.Hid.MacOS;",
+        "        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(4));",
+        "        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromMilliseconds(150));"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/Program.cs",
+      "baseline_sha256": "5b2b55ae1e76c301c44b0a220f566db9eae641e2bfcdf29c38e214130276f440",
+      "current_sha256": "d5b99076bac9be69231db6de26f9ba69f27d4f33027de7a246edf226545f4a2b",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using System.Globalization;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.Hid;",
+        "using Yubico.YubiKit.Ctap2;",
+        "using var child = new Process();",
+        "            using var cancelled = new CancellationTokenSource();"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using System.Globalization;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.Hid;",
+        "using Yubico.YubiKit.Ctap2;",
+        "using var child = new Process();",
+        "            using var cancelled = new CancellationTokenSource();"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "baseline_sha256": "6889802fda2097eb22e698eb2c9045d86d020fd8e56f5c2a5eea54d44455daac",
+      "current_sha256": "109ae75b5018807486140d4bf0fb144075484b2971b9a3724d44d7fedf975272",
+      "baseline_imports": [
+        "using System.Diagnostics;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;",
+        "using Yubico.YubiKit.Management;"
+      ],
+      "current_imports": [
+        "using System.Diagnostics;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;",
+        "using Yubico.YubiKit.Management;"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "verification/NativeAotVerification/Program.cs",
+      "baseline_sha256": "2f130b2a20c77ed2e03cc6208e8ffb53f9f9d8000af146c0fadb729095220425",
+      "current_sha256": "a4ccfef7152cc440c2eba998e7225cfc7e9f3932d66fe17eeafd9434857e39fb",
+      "baseline_imports": [
+        "using System.Globalization;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Ctap2;",
+        "using Yubico.YubiKit.Management;",
+        "using Yubico.YubiKit.OpenPgp;",
+        "using Yubico.YubiKit.Oath;",
+        "using Yubico.YubiKit.Piv;",
+        "using Yubico.YubiKit.SecurityDomain;",
+        "using Yubico.YubiKit.WebAuthn.Client;",
+        "using Yubico.YubiKit.YubiHsm;",
+        "using Yubico.YubiKit.YubiOtp;"
+      ],
+      "current_imports": [
+        "using System.Globalization;",
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Ctap2;",
+        "using Yubico.YubiKit.Management;",
+        "using Yubico.YubiKit.OpenPgp;",
+        "using Yubico.YubiKit.Oath;",
+        "using Yubico.YubiKit.Piv;",
+        "using Yubico.YubiKit.SecurityDomain;",
+        "using Yubico.YubiKit.WebAuthn.Client;",
+        "using Yubico.YubiKit.YubiHsm;",
+        "using Yubico.YubiKit.YubiOtp;"
+      ],
+      "baseline_directives": [
+        "#pragma warning disable CA1031 // A stale marker must not abort the protocol.",
+        "#pragma warning restore CA1031"
+      ],
+      "current_directives": [
+        "#pragma warning disable CA1031 // A stale marker must not abort the protocol.",
+        "#pragma warning restore CA1031"
+      ],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/Program.cs",
+      "baseline_sha256": "18e7dfca9d2dc170b111cad732800ca9bd98c4d52c1c7e434d6d23d924eb875a",
+      "current_sha256": "bec35657a48d4f1ad104cf043797b83a9f7e75ce1919b28612d604e8222bbee8",
+      "baseline_imports": [
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using System.Text.Json;"
+      ],
+      "current_imports": [
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using System.Text.Json;"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+      "baseline_sha256": "6948323a4efa38377c61b40a0075e6b30d76aa05ae3152ba35279bdbc3d10c2f",
+      "current_sha256": "ebca9ba8179574d90066a152d778a02bd8f7e3d35f0902be6a57d28ddf4b9e09",
+      "baseline_imports": [
+        "using System.Reflection;",
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using Yubico.YubiKit.Core.Cryptography;",
+        "using (var cmac = (IDisposable)Activator.CreateInstance(cmacType, nonPublic: true)!)",
+        "    using var context = (SafeHandle)establish[1]!;",
+        "    using var invalid = (SafeHandle)Activator.CreateInstance(contextType, [bogus])!;",
+        "    using var card = (SafeHandle)connect[4]!;"
+      ],
+      "current_imports": [
+        "using System.Reflection;",
+        "using System.Runtime.InteropServices;",
+        "using System.Security.Cryptography;",
+        "using Yubico.YubiKit.Core.Cryptography;",
+        "using (var cmac = (IDisposable)Activator.CreateInstance(cmacType, nonPublic: true)!)",
+        "    using var context = (SafeHandle)establish[1]!;",
+        "    using var invalid = (SafeHandle)Activator.CreateInstance(contextType, [bogus])!;",
+        "    using var card = (SafeHandle)connect[4]!;"
+      ],
+      "baseline_directives": [],
+      "current_directives": [],
+      "baseline_namespaces": [],
+      "current_namespaces": []
+    }
+  ],
+  "qualification": "Direct source-pin evidence; no pinned formatter replay; preserve 14 baseline EOFs and all 73 baseline/context-sensitive whitespace findings."
+}

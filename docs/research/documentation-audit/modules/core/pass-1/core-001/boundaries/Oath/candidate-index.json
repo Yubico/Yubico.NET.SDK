@@ -1,0 +1,226 @@
+[
+  {
+    "id": "CORE-OATH-X001",
+    "accepted_core_id": null,
+    "anchors": [
+      {
+        "path": "src/Oath/src/IOathSession.cs",
+        "first_line": 19,
+        "last_line": 60
+      },
+      {
+        "path": "src/Oath/src/OathSession.cs",
+        "first_line": 45,
+        "last_line": 55
+      }
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:97fca7f3c584547f",
+      "core-001:unit:fba9492f64795a01"
+    ],
+    "all_facets_and_exact_secondary_reopening_map": "candidates.md#core-oath-x001",
+    "documentation": "CANDIDATE",
+    "runtime": "Separate facet/secondary ownership; no implementation authorized",
+    "decision": "Maintainer/coordinator triage pending",
+    "qualification": "No fresh SDK/native/device execution",
+    "independent_content_review": "PENDING",
+    "product_files": "UNCHANGED"
+  },
+  {
+    "id": "CORE-OATH-X002",
+    "accepted_core_id": null,
+    "anchors": [
+      {
+        "path": "src/Oath/README.md",
+        "first_line": 203,
+        "last_line": 246
+      },
+      {
+        "path": "src/Oath/CLAUDE.md",
+        "first_line": 164,
+        "last_line": 183
+      },
+      {
+        "path": "src/Oath/src/OathSession.cs",
+        "first_line": 397,
+        "last_line": 528
+      },
+      {
+        "path": "src/Oath/src/OathSession.cs",
+        "first_line": 577,
+        "last_line": 639
+      },
+      {
+        "path": "src/Oath/src/OathSession.cs",
+        "first_line": 844,
+        "last_line": 911
+      }
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:87b1b0d38bfa944e",
+      "core-001:unit:c0de009d85dd89bc",
+      "core-001:unit:0ce6e7f8c33d5017",
+      "core-001:unit:3596c0d57c40bc09",
+      "core-001:unit:43c79220322fb406",
+      "core-001:unit:39be13c817eeab8d",
+      "core-001:unit:c2e020d7a79ca946",
+      "core-001:unit:fa89267c9587ee99",
+      "core-001:unit:3b8f05b0810af477"
+    ],
+    "all_facets_and_exact_secondary_reopening_map": "candidates.md#core-oath-x002",
+    "documentation": "CANDIDATE",
+    "runtime": "Separate facet/secondary ownership; no implementation authorized",
+    "decision": "Maintainer/coordinator triage pending",
+    "qualification": "No fresh SDK/native/device execution",
+    "independent_content_review": "PENDING",
+    "product_files": "UNCHANGED"
+  },
+  {
+    "id": "CORE-OATH-X003",
+    "accepted_core_id": null,
+    "anchors": [
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs",
+        "first_line": 76,
+        "last_line": 108
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+        "first_line": 27,
+        "last_line": 28
+      }
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:702e06bc73154bec",
+      "core-001:unit:bb87dde69e784784",
+      "core-001:unit:84809cef3d6b6b37",
+      "core-001:unit:a96e431c698e9096",
+      "core-001:unit:dfb6b5633c3365b1"
+    ],
+    "all_facets_and_exact_secondary_reopening_map": "candidates.md#core-oath-x003",
+    "documentation": "CANDIDATE",
+    "runtime": "Separate facet/secondary ownership; no implementation authorized",
+    "decision": "Maintainer/coordinator triage pending",
+    "qualification": "No fresh SDK/native/device execution",
+    "independent_content_review": "PENDING",
+    "product_files": "UNCHANGED"
+  },
+  {
+    "id": "CORE-OATH-X004",
+    "accepted_core_id": null,
+    "anchors": [
+      {
+        "path": "src/Oath/src/Credentials/OathCredentialOptions.cs",
+        "first_line": 19,
+        "last_line": 33
+      }
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:89b8e7a302de740a"
+    ],
+    "all_facets_and_exact_secondary_reopening_map": "candidates.md#core-oath-x004",
+    "documentation": "CANDIDATE",
+    "runtime": "Separate facet/secondary ownership; no implementation authorized",
+    "decision": "Maintainer/coordinator triage pending",
+    "qualification": "No fresh SDK/native/device execution",
+    "independent_content_review": "PENDING",
+    "product_files": "UNCHANGED"
+  },
+  {
+    "id": "CORE-OATH-X005",
+    "accepted_core_id": null,
+    "anchors": [
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+        "first_line": 115,
+        "last_line": 186
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+        "first_line": 628,
+        "last_line": 646
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+        "first_line": 609,
+        "last_line": 623
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/AuditV2/OathAuditReproTests.cs",
+        "first_line": 16,
+        "last_line": 68
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathPasswordChangeTests.cs",
+        "first_line": 37,
+        "last_line": 65
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathPasswordChangeTests.cs",
+        "first_line": 122,
+        "last_line": 137
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathHashAlgorithmTests.cs",
+        "first_line": 155,
+        "last_line": 213
+      },
+      {
+        "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathSessionTests.cs",
+        "first_line": 145,
+        "last_line": 193
+      }
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:0f94581dc23c729a",
+      "core-001:unit:ba1d05ef33258a39",
+      "core-001:unit:14cb09ac0c0e18a0",
+      "core-001:unit:72d8b0c9491db247",
+      "core-001:unit:c4ecdf3746a6729e",
+      "core-001:unit:d2bf6e6612d7e12f",
+      "core-001:unit:f949dc6e160b8b21",
+      "core-001:unit:e15462dfa80d037d"
+    ],
+    "all_facets_and_exact_secondary_reopening_map": "candidates.md#core-oath-x005",
+    "documentation": "CANDIDATE",
+    "runtime": "Separate facet/secondary ownership; no implementation authorized",
+    "decision": "Maintainer/coordinator triage pending",
+    "qualification": "No fresh SDK/native/device execution",
+    "independent_content_review": "PENDING",
+    "product_files": "UNCHANGED"
+  },
+  {
+    "id": "CORE-OATH-X006",
+    "accepted_core_id": null,
+    "anchors": [
+      {
+        "path": "src/Oath/src/IYubiKeyExtensions.cs",
+        "first_line": 41,
+        "last_line": 44
+      },
+      {
+        "path": "src/Oath/README.md",
+        "first_line": 39,
+        "last_line": 61
+      },
+      {
+        "path": "src/Oath/README.md",
+        "first_line": 228,
+        "last_line": 264
+      }
+    ],
+    "assigned_unit_ids": [
+      "core-001:unit:b185bbf4805f5024",
+      "core-001:unit:0ce6e7f8c33d5017",
+      "core-001:unit:ddb141f5d2fce6e3",
+      "core-001:unit:2e70a5a0e235b986"
+    ],
+    "all_facets_and_exact_secondary_reopening_map": "candidates.md#core-oath-x006",
+    "documentation": "CANDIDATE",
+    "runtime": "Separate facet/secondary ownership; no implementation authorized",
+    "decision": "Maintainer/coordinator triage pending",
+    "qualification": "No fresh SDK/native/device execution",
+    "independent_content_review": "PENDING",
+    "product_files": "UNCHANGED"
+  }
+]

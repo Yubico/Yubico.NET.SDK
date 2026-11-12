@@ -34,6 +34,12 @@ public static class IYubiKeyExtensions
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>An initialized PIV session.</returns>
+        /// <remarks>
+        /// The returned session owns its hidden SmartCard connection; dispose it with <c>await using</c>.
+        /// Creation selects SmartCard once and does not retry another transport after failure. Failed creation
+        /// also cleans up the hidden connection. SCP parameters are borrowed through factory completion;
+        /// the caller-owned presence prompt remains alive through all session operations and callbacks.
+        /// </remarks>
         /// <exception cref="NotSupportedException">If the YubiKey does not support PIV or SmartCard connections.</exception>
         public async Task<PivSession> CreatePivSessionAsync(
             SessionCreationOptions? options = null,

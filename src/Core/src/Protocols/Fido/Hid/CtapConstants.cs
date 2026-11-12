@@ -13,7 +13,7 @@ internal static class CtapConstants
     public const byte CtapHidCbor = 0x10;       // CTAP2 CBOR encoded message
     public const byte CtapHidInit = 0x06;       // Initialize channel
     public const byte CtapHidPing = 0x01;       // Echo data through local processing
-    public const byte CtapHidCancel = 0x11;     // Cancel outstanding request
+    public const byte CtapHidCancel = 0x11;     // Cancel active CBOR work; no response to CANCEL itself
     public const byte CtapHidError = 0x3F;      // Error response
     public const byte CtapHidKeepAlive = 0x3B;  // Processing status notification
     public const byte KeepAliveStatusUpNeeded = 0x02;
@@ -25,7 +25,7 @@ internal static class CtapConstants
     public const byte CtapReadConfig = 0xC2;           // 0x80 | 0x42
     public const byte CtapWriteConfig = 0xC3;          // 0x80 | 0x43
 
-    // Packet Structure
+    // This SDK uses 64-byte reports; CTAPHID also permits descriptor-defined report sizes.
     public const int PacketSize = 64;
     public const int MaxPayloadSize = 7609;     // 64 - 7 + 128 * (64 - 5)
 

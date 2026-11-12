@@ -1,0 +1,35 @@
+{
+  "status": "Original eight-unit replacement proposal retained byte-exact as history; only four SW provisional choices superseded here.",
+  "original_count": 8,
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_selection": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/family-replacements/replacement-selection.json",
+  "original_selection_sha256": "cabc60baa0a2fa5ef4eff1cee8e4ac33baef20785e8569ed82c9ff8d14fee77c",
+  "original_quota_sha256": "604e6e0df814f6fdeead8ff19c6c1f047317ba06234c4324abebca0eda791ee9",
+  "original_overlay_sha256": "9ce3779fb98d0545bc1df791ad3345eaede94f4bd1b69c52d491ae378f7bf96b",
+  "original_receipt_sha256": "e29ad5adc404bf6dbdb0d99ef69d8ef01279e41e714abd8b9358f96927845ba8",
+  "retired_provisional_ids": [
+    "core-001:unit:3ad8b9f956a4e672",
+    "core-001:unit:aa9d6d49701b178d",
+    "core-001:unit:a3d37dc1aed22b2f",
+    "core-001:unit:f39183b2d438d21d"
+  ],
+  "supersession": [
+    {
+      "old_id": "core-001:unit:3ad8b9f956a4e672",
+      "new_id": "core-001:unit:d41ecdd3d18d0e91"
+    },
+    {
+      "old_id": "core-001:unit:aa9d6d49701b178d",
+      "new_id": "core-001:unit:035ae50978ce88d7"
+    },
+    {
+      "old_id": "core-001:unit:a3d37dc1aed22b2f",
+      "new_id": "core-001:unit:9cd17279b86d5878"
+    },
+    {
+      "old_id": "core-001:unit:f39183b2d438d21d",
+      "new_id": "core-001:unit:62ede839d51aa516"
+    }
+  ],
+  "unchanged_original_rows": 4
+}

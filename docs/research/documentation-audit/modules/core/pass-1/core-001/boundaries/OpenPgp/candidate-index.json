@@ -1,0 +1,394 @@
+[
+  {
+    "id": "CORE-PGP-X001",
+    "title": "Own the complete factory and disposal scopes",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "Explain actual sync/async KDF cleanup order and factory scopes.",
+    "implementation": "Retain PGP-IMP-003 alias/replacement/reset disposal; extend B5-C006 caller applicability.",
+    "policy": "Choose KDF ownership and complete-operation lifetime policy.",
+    "qualification": "No held derivation/asynchronous owned-close failure evidence.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.cs",
+        "first_line": 399,
+        "last_line": 415
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:1ad5fb54424fe6c1"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/CLAUDE.md",
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/src/IOpenPgpSession.cs",
+      "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "src/OpenPgp/src/Kdf.cs",
+      "src/OpenPgp/src/OpenPgpSession.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs"
+    ],
+    "detail": "candidates.md#core-pgp-x001--own-the-complete-factory-and-disposal-scopes"
+  },
+  {
+    "id": "CORE-PGP-X002",
+    "title": "Separate reader units, credential identity and authorization",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "Name UTF-16 reader units and actual provided-string bypass.",
+    "implementation": "Preserve PGP-IMP-001/002/018/019; no source fix closes identity.",
+    "policy": "Allocate UTF-8/card-profile validation and classified error mapping.",
+    "qualification": "Historical serial103 distinct-salt failure remains, not rerun.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+        "first_line": 19,
+        "last_line": 60
+      },
+      {
+        "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+        "first_line": 93,
+        "last_line": 123
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+        "first_line": 24,
+        "last_line": 39
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+        "first_line": 241,
+        "last_line": 323
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:ef65fd7ff47bf416",
+      "core-001:unit:79be0b9d818a8d2b",
+      "core-001:unit:c5a51089a077dba4",
+      "core-001:unit:cc48b8e7cdd5bcb9",
+      "core-001:unit:fda639e5328ecd8d",
+      "core-001:unit:f8736f94dc5acbbe",
+      "core-001:unit:8a258631e223db8f",
+      "core-001:unit:e7c7d7a6f45dc979"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "src/OpenPgp/src/Credentials/OpenPgpCredentialOptions.cs",
+      "src/OpenPgp/src/IOpenPgpSession.cs",
+      "src/OpenPgp/src/Kdf.cs",
+      "src/OpenPgp/src/OpenPgpInvalidPinException.cs",
+      "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+      "src/OpenPgp/src/Pw.cs",
+      "src/OpenPgp/src/PwStatus.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs"
+    ],
+    "detail": "candidates.md#core-pgp-x002--separate-reader-units,-credential-identity-and-authorization"
+  },
+  {
+    "id": "CORE-PGP-X003",
+    "title": "Follow each secret copy through APDU and TLV producers",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "Name each source/encoding/response/fragment owner and Card Le table.",
+    "implementation": "Extend PGP-IMP-003 actual extra F9 encoding/dictionary/response copies; refer C/B6 nonadditively.",
+    "policy": "Choose explicit sensitive producer ownership and error cleanup.",
+    "qualification": "ISO exact clauses/SCP profile/native producer gaps remain.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/src/Kdf.cs",
+        "first_line": 76,
+        "last_line": 90
+      },
+      {
+        "path": "src/OpenPgp/src/Kdf.cs",
+        "first_line": 285,
+        "last_line": 328
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+        "first_line": 190,
+        "last_line": 205
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:fa021f7ca5de319f",
+      "core-001:unit:c7f6e1d2ceeaf478",
+      "core-001:unit:b6d14c8627896276",
+      "core-001:unit:5de1ebcd2ff6c2a6"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/src/Kdf.cs",
+      "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+      "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+      "src/OpenPgp/src/OpenPgpSession.cs",
+      "src/OpenPgp/src/PrivateKeyImport.cs",
+      "src/OpenPgp/src/PrivateKeyTemplate.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs"
+    ],
+    "detail": "candidates.md#core-pgp-x003--follow-each-secret-copy-through-apdu-and-tlv-producers"
+  },
+  {
+    "id": "CORE-PGP-X004",
+    "title": "Guard exchanges and await whole public workflows",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "State per-exchange versus complete-public-task lifetime.",
+    "implementation": "Retain mutation/cache and abandoned Attest certificate on resolution failure; reuse B5/C.",
+    "policy": "Choose operation admission/reentrancy and result-resolution boundary.",
+    "qualification": "No whole-workflow/native-interruption/certificate-cleanup acceptance.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "first_line": 24,
+        "last_line": 33
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+        "first_line": 28,
+        "last_line": 146
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+        "first_line": 150,
+        "last_line": 183
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+        "first_line": 25,
+        "last_line": 108
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "first_line": 465,
+        "last_line": 476
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "first_line": 73,
+        "last_line": 77
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:1fb0d71b4430795c",
+      "core-001:unit:cf6e0c62fd64aa67",
+      "core-001:unit:3aa9b0e2b3fa4ed4",
+      "core-001:unit:2dad1157169ce7bf",
+      "core-001:unit:7f310388c1ce9ef7",
+      "core-001:unit:b9ccb934a556e940",
+      "core-001:unit:a8bc9fbc3897465b",
+      "core-001:unit:410695b7ea0a3016",
+      "core-001:unit:160ed412a3675094"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/CLAUDE.md",
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/src/IOpenPgpSession.cs",
+      "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+      "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+      "src/OpenPgp/src/OpenPgpSession.Keys.cs",
+      "src/OpenPgp/src/OpenPgpSession.Pin.cs",
+      "src/OpenPgp/src/OpenPgpSession.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs"
+    ],
+    "detail": "candidates.md#core-pgp-x004--guard-exchanges-and-await-whole-public-workflows"
+  },
+  {
+    "id": "CORE-PGP-X005",
+    "title": "Reset and reopen with explicit channel provenance",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "Describe retained secure graph/plain reselect and no handshake.",
+    "implementation": "Retain PGP-IMP-005; refer B6-C003 actual reset caller.",
+    "policy": "Decide terminal reset versus supported secure reinitialization.",
+    "qualification": "Plain-reset/helper history supplies no SCP-reset evidence.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+        "first_line": 25,
+        "last_line": 97
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "first_line": 478,
+        "last_line": 499
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:3ef39bdd96327565",
+      "core-001:unit:cf477a3b3eaee17f",
+      "core-001:unit:1621a94fe21797c6"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/CLAUDE.md",
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+      "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "src/OpenPgp/src/IOpenPgpSession.cs",
+      "src/OpenPgp/src/OpenPgpSession.Reset.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs"
+    ],
+    "detail": "candidates.md#core-pgp-x005--reset-and-reopen-with-explicit-channel-provenance"
+  },
+  {
+    "id": "CORE-PGP-X006",
+    "title": "Preserve detected, fallback, metadata and effective versions",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "Correct fallback scope and preserve detected/effective/metadata provenance.",
+    "implementation": "Broad non-OK/short-success fallback can conceal unrelated cause; source observation only.",
+    "policy": "Choose version fallback/development/framing policy separately.",
+    "qualification": "Old-family/commercial source thresholds/NFC and SCP profiles remain bounded.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+        "first_line": 67,
+        "last_line": 92
+      },
+      {
+        "path": "src/OpenPgp/CLAUDE.md",
+        "first_line": 53,
+        "last_line": 58
+      },
+      {
+        "path": "src/OpenPgp/README.md",
+        "first_line": 19,
+        "last_line": 35
+      },
+      {
+        "path": "src/OpenPgp/src/OpenPgpSession.cs",
+        "first_line": 130,
+        "last_line": 154
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:56ca6d471d2eae29",
+      "core-001:unit:5fab2dd447b49782",
+      "core-001:unit:8386cb5e6e981363",
+      "core-001:unit:775e815e6b94ea67"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/CLAUDE.md",
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/src/Backend/OpenPgpBackend.cs",
+      "src/OpenPgp/src/IOpenPgpSession.cs",
+      "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "src/OpenPgp/src/OpenPgpSession.Certificates.cs",
+      "src/OpenPgp/src/OpenPgpSession.Config.cs",
+      "src/OpenPgp/src/OpenPgpSession.cs",
+      "src/OpenPgp/src/PrivateKeyImport.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs"
+    ],
+    "detail": "candidates.md#core-pgp-x006--preserve-detected,-fallback,-metadata-and-effective-versions"
+  },
+  {
+    "id": "CORE-PGP-X007",
+    "title": "Keep protocol representation separate from Core capability",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "Reconcile incomplete PutKey supported-curve XML with actual representations.",
+    "implementation": "Preserve X25519/ATT/NEO/ROCA/parser engineering identities.",
+    "policy": "Keep Core catalog separate from applet slot/profile support.",
+    "qualification": "Exact provider wire vectors add no card/hardware acceptance.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/src/IOpenPgpSession.cs",
+        "first_line": 303,
+        "last_line": 315
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:2c0639d2ac386d86"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/CLAUDE.md",
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/src/AlgorithmAttributes.cs",
+      "src/OpenPgp/src/Crt.cs",
+      "src/OpenPgp/src/IOpenPgpSession.cs",
+      "src/OpenPgp/src/KeyRef.cs",
+      "src/OpenPgp/src/OpenPgpKeyInfo.cs",
+      "src/OpenPgp/src/PrivateKeyImport.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs"
+    ],
+    "detail": "candidates.md#core-pgp-x007--keep-protocol-representation-separate-from-core-capability"
+  },
+  {
+    "id": "CORE-PGP-X008",
+    "title": "Keep test and sample evidence within its actual oracle",
+    "status": "PROPOSED-FOR-COORDINATOR-TRIAGE",
+    "documentation": "Retain accurate test/sample limitations; qualify weak unverify causal oracle.",
+    "implementation": "Preserve PGP-IMP-015/016 and exported/private/certificate fixture cleanup.",
+    "policy": "Decide stronger meaningful controls and input/tool policy separately.",
+    "qualification": "All execution remains historical or unrun; no fresh SDK result.",
+    "anchors": [
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+        "first_line": 60,
+        "last_line": 87
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+        "first_line": 185,
+        "last_line": 204
+      },
+      {
+        "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+        "first_line": 109,
+        "last_line": 127
+      }
+    ],
+    "unit_ids": [
+      "core-001:unit:b5de721234b80137",
+      "core-001:unit:7107add80611d002",
+      "core-001:unit:2a864b48811ddb2a",
+      "core-001:unit:3fe11919ebeb7f19"
+    ],
+    "candidate_associated_unchanged_paths": [
+      "src/OpenPgp/CLAUDE.md",
+      "src/OpenPgp/README.md",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangeAdminPinCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessChangePinCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetResetCodeCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessSetRetriesCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/AccessUnblockPinCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesDeleteCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesExportCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/CertificatesImportCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/InfoCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysAttestCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysGenerateCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysImportCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/KeysSetTouchCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/OpenPgpCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Commands/ResetCommand.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Output/OutputHelpers.cs",
+      "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/DeviceSelector.cs",
+      "src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj",
+      "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+      "src/OpenPgp/tests/CLAUDE.md",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpAdvancedTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpDecryptTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpKeyImportTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpMultiCurveTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpPinManagementTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/OpenPgpSessionTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/TestExtensions/OpenPgpTestStateExtensions.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/ApplicationRelatedDataTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AuditV2/OpenPgpAuditReproTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/BcdHelperTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/DigestInfoTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/KdfTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpAidTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpCollectionContractTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpInvalidPinExceptionTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PrivateKeyTemplateTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/PwStatusTests.cs",
+      "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj"
+    ],
+    "detail": "candidates.md#core-pgp-x008--keep-test-and-sample-evidence-within-its-actual-oracle"
+  }
+]

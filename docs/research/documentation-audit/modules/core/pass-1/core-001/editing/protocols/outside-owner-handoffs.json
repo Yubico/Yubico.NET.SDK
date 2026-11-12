@@ -1,0 +1,822 @@
+{
+  "direct_candidate_paths": [
+    {
+      "path": "CLAUDE.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B6-C002",
+        "CORE-B6-C015"
+      ],
+      "proposal_ids": [
+        "FPT-068",
+        "FPT-081"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/MEMORY-MANAGEMENT.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C005"
+      ],
+      "proposal_ids": [
+        "FPT-062"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/SDK-HOUSE-STYLE.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001",
+        "CORE-B5-C006"
+      ],
+      "proposal_ids": [
+        "FPT-058",
+        "FPT-063"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001",
+        "CORE-B5-C002",
+        "CORE-B5-C003",
+        "CORE-B5-C004",
+        "CORE-B5-C006",
+        "CORE-B5-C007",
+        "CORE-B5-C008",
+        "CORE-B6-C001",
+        "CORE-B6-C003",
+        "CORE-B6-C007",
+        "CORE-B6-C015"
+      ],
+      "proposal_ids": [
+        "FPT-058",
+        "FPT-059",
+        "FPT-060",
+        "FPT-061",
+        "FPT-063",
+        "FPT-064",
+        "FPT-065",
+        "FPT-067",
+        "FPT-069",
+        "FPT-073",
+        "FPT-081"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/migration/v1-to-v2-changelog.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C009"
+      ],
+      "proposal_ids": [
+        "FPT-066"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B6-C007",
+        "CORE-B6-C009",
+        "CORE-B6-C010",
+        "CORE-B6-C015"
+      ],
+      "proposal_ids": [
+        "FPT-073",
+        "FPT-075",
+        "FPT-076",
+        "FPT-081"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C009"
+      ],
+      "proposal_ids": [
+        "FPT-066"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001",
+        "CORE-B5-C006",
+        "CORE-B6-C007",
+        "CORE-B6-C015"
+      ],
+      "proposal_ids": [
+        "FPT-058",
+        "FPT-063",
+        "FPT-073",
+        "FPT-081"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C005",
+        "CORE-B5-C006"
+      ],
+      "proposal_ids": [
+        "FPT-062",
+        "FPT-063"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001"
+      ],
+      "proposal_ids": [
+        "FPT-058"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "docs/v2-highlights.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001"
+      ],
+      "proposal_ids": [
+        "FPT-058"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001",
+        "CORE-B5-C002",
+        "CORE-B5-C004",
+        "CORE-B5-C006",
+        "CORE-B5-C008",
+        "CORE-B6-C001",
+        "CORE-B6-C002",
+        "CORE-B6-C007",
+        "CORE-B6-C009",
+        "CORE-B6-C012",
+        "CORE-B6-C015"
+      ],
+      "proposal_ids": [
+        "FPT-058",
+        "FPT-059",
+        "FPT-061",
+        "FPT-063",
+        "FPT-065",
+        "FPT-067",
+        "FPT-068",
+        "FPT-073",
+        "FPT-075",
+        "FPT-078",
+        "FPT-081"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/Core/README.md",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001",
+        "CORE-B5-C002",
+        "CORE-B5-C003",
+        "CORE-B5-C004",
+        "CORE-B5-C006",
+        "CORE-B5-C008",
+        "CORE-B6-C001",
+        "CORE-B6-C002",
+        "CORE-B6-C003",
+        "CORE-B6-C007",
+        "CORE-B6-C009",
+        "CORE-B6-C015"
+      ],
+      "proposal_ids": [
+        "FPT-058",
+        "FPT-059",
+        "FPT-060",
+        "FPT-061",
+        "FPT-063",
+        "FPT-065",
+        "FPT-067",
+        "FPT-068",
+        "FPT-069",
+        "FPT-073",
+        "FPT-075",
+        "FPT-081"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C004",
+        "CORE-B5-C005"
+      ],
+      "proposal_ids": [
+        "FPT-061",
+        "FPT-062"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C002",
+        "CORE-B5-C005"
+      ],
+      "proposal_ids": [
+        "FPT-059",
+        "FPT-062"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/Management/src/ManagementSession.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001"
+      ],
+      "proposal_ids": [
+        "FPT-058"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C009"
+      ],
+      "proposal_ids": [
+        "FPT-066"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C009"
+      ],
+      "proposal_ids": [
+        "FPT-066"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C001"
+      ],
+      "proposal_ids": [
+        "FPT-058"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C002"
+      ],
+      "proposal_ids": [
+        "FPT-059"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    },
+    {
+      "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+      "decision": "hold-for-owner",
+      "local_ids": [
+        "CORE-B5-C005",
+        "CORE-B5-C007"
+      ],
+      "proposal_ids": [
+        "FPT-062",
+        "FPT-064"
+      ],
+      "follow_up": "Reconcile the mapped candidate's exact caller/guide claim, ownership, firmware/profile and evidence conditions; retain historical bytes. No edit authorized to this editor."
+    }
+  ],
+  "inherited_boundary_records_preserved": {
+    "B5": [
+      {
+        "key": "oath-pilot-and-fixes-wave-002:IMP-010",
+        "group": "oath-terminal-reset",
+        "original_state_preserved": "resolved-source-physical-gap",
+        "original_conclusion": "OATH successful reset disposes its session rather than reselecting/reusing old SCP state. A direct session still borrows its connection. Plain-channel historical reset passed; SCP attempts ended at INITIALIZE UPDATE, before RESET.",
+        "b5_observation": "Confirmed Core terminal disposal/borrowed connection mechanics and narrow OATH Reset success call site; historical serial1256A88 stopped before RESET. OATH boundary retains full reset qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Oath/README.md",
+          "src/Oath/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/Oath/src/IOathSession.cs",
+          "src/Oath/src/IYubiKeyExtensions.cs",
+          "src/Oath/src/OathSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/Oath/examples/OathTool/Program.cs",
+          "src/Oath/tests/CLAUDE.md"
+        ],
+        "trigger": "## IMP-010 \u2014 Handle reset's post-command refresh failure\n\n- **Source:** OATH-003-F07.\n- **State:** closed by the user-approved terminal-reset contract in `d74cdd44`, integrated in `57e0fa4d`. Successful RESET ends plain/SCP sessions without SELECT or recovery; caller closes/reopens. Required caller/helper migrations and documentation passed fresh independent reviews. Live plain-channel terminal reset passed on125; live SCP remains unverified because initialization returns6A88 beforeRESET.\n- **Proposed owner:** OATH session maintainer.\n- **Observation:** destructive RESET can succeed before a separate SELECT is cancelled or fails, leaving device data erased while session salt/identity/state remain stale.\n- **Needed work:** decide session invalidation/recovery and error reporting after refresh failure. Investigate reset under SCP from primary/vendor/device evidence; another SDK's re-establishment is a lead, not proof of failure here.\n- **Verification:** cancellation between exchanges, SELECT failure/malformed initialization after reset, subsequent session use, and supported secure-channel reset behavior.\n- **Documentation dependency:** reset failure is not rollback; a short factual partial-success note is permissible now. Re-review reset/session recovery guidance and CLI failure output after implementation.\n",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "oath-pilot-and-fixes-wave-002:DEC-007",
+        "group": "scp-effective-version",
+        "original_state_preserved": "policy-known-rationale-gap",
+        "original_conclusion": "OATH's effective 5.6.3 policy has pinned Python corroboration for 5.0.0 <= version < 5.6.3. Core's SCP03 5.3.0 and SCP11 5.7.2 gates are separate. Earliest physical support/workaround rationale remains bounded evidence debt.",
+        "b5_observation": "Confirmed raw/effective/unknown/assumed distinctions and major-zero policy. SD reset omits config/version; raw HID inherited version remains0. C001 plus A-C003/C017/C021. B6 owns SCP floors/wire; applets own policy.",
+        "reopen_paths": [
+          "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Oath/README.md",
+          "src/Oath/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/Oath/src/IOathSession.cs",
+          "src/Oath/src/IYubiKeyExtensions.cs",
+          "src/Oath/src/OathSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/Oath/examples/OathTool/Program.cs",
+          "src/Oath/tests/CLAUDE.md"
+        ],
+        "trigger": "## DEC-007 \u2014 Establish OATH secure-channel gate provenance\n\n- **Source:** OATH-004-F12.\n- **State:** actual source gate confirmed; hardware/policy rationale unresolved; deferred to closeout.\n- **Proposed owner:** SDK maintainer with vendor/firmware input.\n- **Observation:** OATH enforces effective firmware5.6.3 for any SCP parameters. Core gates SCP03at5.3.0 and SCP11at5.7.2. Published vendor material gives generic5.3.0 SCP03 support without explaining an OATH-specific5.6.3 floor.\n- **Evidence:** [technical manual](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html), [legacy SDK SCP guide](https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/secure-channel-protocol.html), OathSession/ScpInitializer source. Legacy example syntax is not v2 API authority.\n- **Decision:** hardware minimum, workaround, or inherited SDK policy; define supported compatibility before changing the gate. Do not lower it based on generic support prose alone.\n- **Documentation dependency:** distinguish device requirements from SDK/effective-version gates now; update factory/version guidance if the policy later changes. Remove unnecessary NEO physical-firmware shorthand rather than inventing a supported NEO contract.\n\n**New direction/evidence:** The user authorizes Python sibling-SDK firmware checks as the policy reference. At local revision `4ca60f706af930459138d8dc0f0f953480e1c7a4`, `yubikit/oath.py:279\u2013282` rejects SCP for `5.0.0 <= version < 5.6.3`, and rename requires5.3.1 at438. This establishes the reference policy for supported YubiKey5 devices. The shallow clone does not establish historical hardware rationale, and this policy is not proof of earliest physical support. Implementation review will preserve the distinction and Core's separate SCP gates.\n",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "security-domain-001:SD-DEP-003",
+        "group": "scp-effective-version",
+        "original_state_preserved": "changed-source-review-pending",
+        "original_conclusion": "The current readiness completion boundary is centralized. SD's omitted reset configuration/explicit version was a local SD-IMP-005 question; compare reset callback arguments separately before calling options preserved.",
+        "b5_observation": "Confirmed raw/effective/unknown/assumed distinctions and major-zero policy. SD reset omits config/version; raw HID inherited version remains0. C001 plus A-C003/C017/C021. B6 owns SCP floors/wire; applets own policy.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/SecurityDomain/README.md",
+          "src/SecurityDomain/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/SecurityDomain/src/ISecurityDomainSession.cs",
+          "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+          "src/SecurityDomain/src/SecurityDomainSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/SecurityDomain/tests/CLAUDE.md"
+        ],
+        "trigger": "| SD-DEP-003 | ApplicationSession/Feature effective firmware/configuration after reset; local omitted arguments and explicit-version flag | Feature/reset/version contracts, SD-IMP-005 |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "security-domain-001:SD-DEP-004",
+        "group": "shared-exchange-ownership",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "A direct factory borrows its connection; protocol exchange admission/drain is distinct from a whole multi-command workflow. APDU response copies and Le formatting need the SD GetData call-site trace.",
+        "b5_observation": "Full Core bind/borrow/own/disposal/notification trace complete. Guard drains logical exchanges, not complete public workflows; C004/C005/C006/C008. Each applet retains its own response/profile/cleanup and physical qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/SecurityDomain/README.md",
+          "src/SecurityDomain/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/SecurityDomain/src/ISecurityDomainSession.cs",
+          "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+          "src/SecurityDomain/src/SecurityDomainSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/SecurityDomain/tests/CLAUDE.md"
+        ],
+        "trigger": "| SD-DEP-004 | Session/connection lease, cancellation, response-memory lifetime and APDU Le semantics; factory/OwnConnection/GetData call sites | Factory/connection and raw-data contracts |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "yubiotp-001:OTP-DEP-001",
+        "group": "shared-exchange-ownership",
+        "original_state_preserved": "changed-source-review-pending",
+        "original_conclusion": "Owned Linux typed HID opens now transfer grouped claims before native acquisition. Current ApplicationSession owns protocol disposal and only convenience factories own hidden connections. Recheck YubiOTP selection/failure cleanup with these routes.",
+        "b5_observation": "Full Core bind/borrow/own/disposal/notification trace complete. Guard drains logical exchanges, not complete public workflows; C004/C005/C006/C008. Each applet retains its own response/profile/cleanup and physical qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Devices/YubiKeyDevice.cs",
+          "src/Core/src/Devices/HidConnectionSlot.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiOtp/README.md",
+          "src/YubiOtp/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/YubiOtp/src/IYubiKeyExtensions.cs",
+          "src/YubiOtp/src/IYubiOtpSession.cs",
+          "src/YubiOtp/src/YubiOtpSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/YubiOtp/examples/OtpTool/Program.cs",
+          "src/YubiOtp/tests/CLAUDE.md"
+        ],
+        "trigger": "| OTP-DEP-001 / D001 | ApplicationSession/device helpers physical lease, initialization failure cleanup, selected transport/no fallback and disposal | Factory/extension/README ownership, OtpTool creation, migration and architecture |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "yubiotp-001:OTP-DEP-002",
+        "group": "otp-hid-framing",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "OTP HID builds outbound CRC, polls programming sequence and resets after abandonment; inbound CRC belongs to the consuming command. Report length assumptions and failed-reset/reuse behavior need custom as well as typed Linux route checks.",
+        "b5_observation": "Full framing/assertion review supports outbound64+slot+CRC+filler, status progseq, one abort and reset latch; C005/C007/C008 retain received-copy, malformed/custom/cadence and oracle qualifications.",
+        "reopen_paths": [
+          "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiOtp/README.md",
+          "src/YubiOtp/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/YubiOtp/src/IYubiKeyExtensions.cs",
+          "src/YubiOtp/src/IYubiOtpSession.cs",
+          "src/YubiOtp/src/YubiOtpSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/YubiOtp/examples/OtpTool/Program.cs",
+          "src/YubiOtp/tests/CLAUDE.md"
+        ],
+        "trigger": "| OTP-DEP-002 / D002 | OTP HID status-length invariant, protocol framing/CRC/progseq, cancellation/reset/drain/reuse | HID backend/initialization/cancellation/malformed-response explanations and IMP005 |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "yubiotp-001:OTP-DEP-003",
+        "group": "shared-exchange-ownership",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "SmartCard admitted exchange uses uncancellable constituent work. UserPresence fallback cannot reclaim a sensitive result after transfer if resolution throws; applet producer owns resolution-before-transfer and cleanup.",
+        "b5_observation": "Full Core bind/borrow/own/disposal/notification trace complete. Guard drains logical exchanges, not complete public workflows; C004/C005/C006/C008. Each applet retains its own response/profile/cleanup and physical qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+          "src/Core/src/Credentials/UserPresenceNotification.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiOtp/README.md",
+          "src/YubiOtp/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/YubiOtp/src/IYubiKeyExtensions.cs",
+          "src/YubiOtp/src/IYubiOtpSession.cs",
+          "src/YubiOtp/src/YubiOtpSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/YubiOtp/examples/OtpTool/Program.cs",
+          "src/YubiOtp/tests/CLAUDE.md"
+        ],
+        "trigger": "| OTP-DEP-003 / D003 | SmartCard admitted cancellation/drain, serialized-copy lifetime and notification exception/cleanup guarantees | Response/input ownership, README cancellation, backend comments/shared interaction and IMP003 |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "yubiotp-001:OTP-DEP-004",
+        "group": "scp-effective-version",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "Feature admits major-zero development firmware; applet raw status, metadata and effective override remain separate. Initial OTP protocol indexes report bytes before returning status; exact route invariants require review.",
+        "b5_observation": "Confirmed raw/effective/unknown/assumed distinctions and major-zero policy. SD reset omits config/version; raw HID inherited version remains0. C001 plus A-C003/C017/C021. B6 owns SCP floors/wire; applets own policy.",
+        "reopen_paths": [
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiOtp/README.md",
+          "src/YubiOtp/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/YubiOtp/src/IYubiKeyExtensions.cs",
+          "src/YubiOtp/src/IYubiOtpSession.cs",
+          "src/YubiOtp/src/YubiOtpSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/YubiOtp/examples/OtpTool/Program.cs",
+          "src/YubiOtp/tests/CLAUDE.md"
+        ],
+        "trigger": "| OTP-DEP-004 / D004 | FirmwareVersion alpha/beta/override, HID status normalization and raw/effective mismatch | Firmware/status/presence docs and IMP004/006 |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "yubihsm-001:HSM-DEP-001",
+        "group": "scp-effective-version",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "Core Feature major-zero acceptance explains a compatibility query, not raw applet/metadata identity. Recheck HSM SELECT fallback, override and reset version retention locally.",
+        "b5_observation": "Confirmed raw/effective/unknown/assumed distinctions and major-zero policy. SD reset omits config/version; raw HID inherited version remains0. C001 plus A-C003/C017/C021. B6 owns SCP floors/wire; applets own policy.",
+        "reopen_paths": [
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiHsm/README.md",
+          "src/YubiHsm/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/YubiHsm/src/HsmAuthSession.cs",
+          "src/YubiHsm/src/IHsmAuthSession.cs",
+          "src/YubiHsm/src/IYubiKeyExtensions.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+          "src/YubiHsm/tests/CLAUDE.md"
+        ],
+        "trigger": "| HSM-DEP-001 | ApplicationSession/Feature/FirmwareVersion effective development/override semantics versus metadata filtering and applet SELECT | Feature table/XML, reset version policy, old-firmware and development qualification |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "yubihsm-001:HSM-DEP-002",
+        "group": "shared-exchange-ownership",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "Connection/prompt borrowing and admitted native drain need the CALCULATE path. Historical 6982/Failed plus fresh-session recovery is measured outcome, not proof of native cancellation or timeout causality.",
+        "b5_observation": "Full Core bind/borrow/own/disposal/notification trace complete. Guard drains logical exchanges, not complete public workflows; C004/C005/C006/C008. Each applet retains its own response/profile/cleanup and physical qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Credentials/UserPresenceNotification.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/YubiHsm/README.md",
+          "src/YubiHsm/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/YubiHsm/src/HsmAuthSession.cs",
+          "src/YubiHsm/src/IHsmAuthSession.cs",
+          "src/YubiHsm/src/IYubiKeyExtensions.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+          "src/YubiHsm/tests/CLAUDE.md"
+        ],
+        "trigger": "| HSM-DEP-002 | SmartCard admitted cancellation/drain and connection/prompt ownership; public outcomes versus native guarantees | Factory/README ownership, cancellation/presence guidance, shared interaction and touch-test explanations |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "openpgp-001:PGP-CORE-002",
+        "group": "shared-exchange-ownership",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "Core async session disposal dispatches DisposeAsyncCore then derived Dispose(bool) in finally; connection ownership remains borrowed unless transferred. OpenPGP KDF cache alias/disposal and SCP applicability need separate applet verification.",
+        "b5_observation": "Full Core bind/borrow/own/disposal/notification trace complete. Guard drains logical exchanges, not complete public workflows; C004/C005/C006/C008. Each applet retains its own response/profile/cleanup and physical qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/OpenPgp/README.md",
+          "src/OpenPgp/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/OpenPgp/src/IOpenPgpSession.cs",
+          "src/OpenPgp/src/IYubiKeyExtensions.cs",
+          "src/OpenPgp/src/OpenPgpSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+          "src/OpenPgp/tests/CLAUDE.md"
+        ],
+        "trigger": "| PGP-CORE-002 | Factory/connection ownership, async disposal dispatch, SCP applicability and KDF cache cleanup boundaries (C003/C021). | Factory/GetKdf/disposal/borrowed-connection guide |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "openpgp-001:PGP-CORE-003",
+        "group": "scp-effective-version",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "Keep raw 0.0.1, device metadata 5.8 beta and effective override distinct; Feature major-zero bypass is a host compatibility policy, not physical-firmware proof.",
+        "b5_observation": "Confirmed raw/effective/unknown/assumed distinctions and major-zero policy. SD reset omits config/version; raw HID inherited version remains0. C001 plus A-C003/C017/C021. B6 owns SCP floors/wire; applets own policy.",
+        "reopen_paths": [
+          "src/Core/src/Devices/Feature.cs",
+          "src/Core/src/Devices/FirmwareVersion.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/OpenPgp/README.md",
+          "src/OpenPgp/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/OpenPgp/src/IOpenPgpSession.cs",
+          "src/OpenPgp/src/IYubiKeyExtensions.cs",
+          "src/OpenPgp/src/OpenPgpSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+          "src/OpenPgp/tests/CLAUDE.md"
+        ],
+        "trigger": "| PGP-CORE-003 | Effective firmware/development/override policy, raw applet 0.0.1 versus metadata5.8beta and protocol framing (C010/C021). | Firmware constants/factory/requirements and old-family qualifications |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "openpgp-001:PGP-CORE-004",
+        "group": "shared-exchange-ownership",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "Exchange serialization and session disposal do not alone prove whole PIN/key/reset workflow atomicity. Preserve 6600/Failed and fresh-session recovery without native-interruption claims.",
+        "b5_observation": "Full Core bind/borrow/own/disposal/notification trace complete. Guard drains logical exchanges, not complete public workflows; C004/C005/C006/C008. Each applet retains its own response/profile/cleanup and physical qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Utilities/ExchangeGuard.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/OpenPgp/README.md",
+          "src/OpenPgp/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/OpenPgp/src/IOpenPgpSession.cs",
+          "src/OpenPgp/src/IYubiKeyExtensions.cs",
+          "src/OpenPgp/src/OpenPgpSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+          "src/OpenPgp/tests/CLAUDE.md"
+        ],
+        "trigger": "| PGP-CORE-004 | SmartCard admitted cancellation, session serialization, operation drain and prompt ownership/outcome (C008/C012). | Crypto/presence/cancellation/resource guidance and actual ceremony tests |",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "piv-001:PIVCORE-002",
+        "group": "shared-exchange-ownership",
+        "original_state_preserved": "source-mapped-review-pending",
+        "original_conclusion": "Check multi-APDU authentication/recovery/reset overlap beyond individual protocol exchange guards. The session has no in-flight operation admission lease; disposal may race a larger workflow between exchanges.",
+        "b5_observation": "Full Core bind/borrow/own/disposal/notification trace complete. Guard drains logical exchanges, not complete public workflows; C004/C005/C006/C008. Each applet retains its own response/profile/cleanup and physical qualification.",
+        "reopen_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Utilities/ExchangeGuard.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md",
+          "src/Piv/README.md",
+          "src/Piv/CLAUDE.md"
+        ],
+        "xml_reopen_paths": [
+          "src/Piv/src/IPivSession.cs",
+          "src/Piv/src/IYubiKeyExtensions.cs",
+          "src/Piv/src/PivSession.cs"
+        ],
+        "sample_test_reopen_paths": [
+          "src/Piv/examples/PivTool/Program.cs",
+          "src/Piv/examples/PivTool/README.md"
+        ],
+        "trigger": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found.",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      },
+      {
+        "key": "audit-v2-20261022-20261031:consideration-3",
+        "group": "fido-config-initialization",
+        "original_state_preserved": "resolved-source-for-exact-scope",
+        "original_conclusion": "FidoHidProtocol.Configure logs local setup; InitializeAsync owns awaited channel exchange and ApplicationSession prepares it. Raw lazy initialization retains its separate contract. OTP Configure still synchronously initializes and needs its own review.",
+        "b5_observation": "Confirmed exact local Configure/awaited Prepare INIT separation; raw lazy initialization and latent OTP sync Configure remain distinct. No runtime execution.",
+        "reopen_paths": [
+          "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+          "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/README.md",
+          "src/Core/CLAUDE.md",
+          "docs/architecture/raw-access-tiers.md",
+          "docs/migration/v1-to-v2.md"
+        ],
+        "xml_reopen_paths": [],
+        "sample_test_reopen_paths": [
+          "src/Core/tests/CLAUDE.md"
+        ],
+        "trigger": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found.",
+        "status": "CORE-MECHANISM-READ; BOUNDARY/B6-DEPENDENCIES-REMAIN",
+        "fresh_runtime": false
+      }
+    ],
+    "B6": [
+      {
+        "key": "audit-v2-20261022-20261031:#23",
+        "aliases": [
+          "YESDK-1631",
+          "169d3694",
+          "668f8217",
+          "77bee74a"
+        ],
+        "recommendation": "Preserve resolved-source-for-exact-scope",
+        "evidence": "ScpState.Unmac rejects length<8 before allocation; complete CoreScpAuditReproTests child exit/success marker, typed1..7 and no-replay assertions read. Source only, no fresh run.",
+        "remaining": "C002/C005/C006/C009/C013 are distinct cleanup/phase/profile/oracle scopes; no universal malformed-input closure."
+      },
+      {
+        "key": "audit-v2-20261022-20261031:N2",
+        "aliases": [
+          "db301466"
+        ],
+        "recommendation": "Preserve resolved ordinary-command bare-success and malformed-init scopes; record C005 separately",
+        "evidence": "ScpProcessor rejects empty9000/62xx/63xx exceptINS82; ScpEmptyResponseTests and malformed init tests read completely.",
+        "remaining": "LaterINS82 phase exemption, protected chaining/profile oracle, warning hardware qualification. No fresh tampering probe."
+      },
+      {
+        "key": "audit-v2-20261022-20261031:consideration-5",
+        "aliases": [
+          "d1559f7d"
+        ],
+        "recommendation": "Preserve exact partial-certificate-load cleanup resolution; boundary reviewer retains full test/flow verification",
+        "evidence": "SecurityDomainSession.GetCertificatesAsync303..339 narrow read confirms loaded list disposal in catch and successful transfer; Scp11 parameter certificate refs/disposal are independent.",
+        "remaining": "Actual bundle tests and all applet trust/validity/order scopes belong to SecurityDomain boundary, not a reopened generic leak claim."
+      },
+      {
+        "key": "management-001:MGMT-IMP-004",
+        "aliases": [],
+        "recommendation": "Core containment mechanism confirmed; Management call-site disposition remains boundary-owned",
+        "evidence": "StaticKeys clones source; Scp03KeyParameters owns retained exact Keys; fresh Default allocates disposable arrays. Session borrows parameter reference.",
+        "remaining": "Current Management tests/restoration ordering were not completely read by B6. Preserve original ledger IDs and desired restoration/zeroing distinction."
+      },
+      {
+        "key": "piv-001:PIVCORE-003",
+        "aliases": [],
+        "recommendation": "Core response-owner rule confirmed; complete PIV transfer/copy/clear path remains boundary-owned",
+        "evidence": "Full ApduResponse and ownership test read; Clear zeroes private raw/data/status aliases without changing source. Extra transport/formatter/chaining/plaintext copies C002 remain separate.",
+        "remaining": "PIV private-operation/caller results and physical touch/hotplug/cancellation remain user-deferred/boundary-owned."
+      },
+      {
+        "key": "security-domain-001:SD-DEP-001",
+        "aliases": [],
+        "recommendation": "Core SCP mechanism plus narrow auth-publication read supplied to B5/SecurityDomain boundary",
+        "evidence": "Full initializer/processor/wrapper read; ApplicationSession307..397 publishes auth after SCP success and readiness after full callback. Recovery callback marks PcscProtocol failure but does not update public auth flag.",
+        "remaining": "B5 owns lifecycle/workflow; SecurityDomain owns wrapping/reset/authority. SCP11b device auth is not host-management authority."
+      },
+      {
+        "key": "security-domain-001:SD-DEP-002",
+        "aliases": [],
+        "recommendation": "Core contained-object alias/disposal source confirmed; fresh ownership XML/examples proposed as C007/C009",
+        "evidence": "StaticKeys source clones; Scp03 parameters retain/dispose Keys; Scp11 copies only collection, retains private/public/cert objects, disposes private/certs. Narrow EC wrapper constructors confirm separate cloned parameter arrays.",
+        "remaining": "Record clones alias disposable owners; reset-retained params/app-specific imports and complete examples need boundary review. No caller buffer is cleared by containment disposal."
+      },
+      {
+        "key": "yubihsm-001:HSM-DEP-003",
+        "aliases": [],
+        "recommendation": "Core copied-response/formatter cleanup source supplied; HSM reachable results remain boundary-owned",
+        "evidence": "Response Clear/alias test exact scope and C002 independent transport/formatter/chaining/plaintext copies.",
+        "remaining": "C owns TLV semantics. HSM SessionKeys/ZeroApduResponse inputs/results remain actual boundary tracing. HSM-IMP-00856-vs48 remains applet profile and adds no Core bug."
+      }
+    ]
+  }
+}

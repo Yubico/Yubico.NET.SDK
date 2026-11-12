@@ -1,0 +1,4 @@
+        using (UserPresenceIntent.BeginScope("approve the transfer"))
+        {
+            await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);
+        }

@@ -1,0 +1,664 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of73 pinned B5 units; final eligibility/current mapping pending",
+  "reading_sha256": "9b9a51ba75478c81d42c281e2e35eebf72749b54eb6c1b297b970a8d9070d344",
+  "units": [
+    {
+      "id": "core-001:unit:971739df4dbce461",
+      "path": "src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "range_sha256": "e381809beb3c8486711365970ac5fe9111de73fb1af7f00198752b9b5488fd64",
+      "current_file_sha256": "704f758a7a63bd48de1cd9c07b20b24fc882c49f85867a5acea167517fe69e39",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:1430eb9373891ea4",
+      "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+      "range_sha256": "dbd0d2a511860ae217f4dc0f42ef03381ce5c4b56e44d789a817b510b507c7fa",
+      "current_file_sha256": "b4a20c0c7ee06b04c61e158be99afab1fff6ae476eb56adb298f025707db02bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:31fae25215752be4",
+      "path": "src/Core/src/Protocols/Otp/Hid/ChecksumUtils.cs",
+      "range_sha256": "9b5bc0b417087a908af1afca646a7b74f29c73db8ca0a2b8f16b8e3d4272ca13",
+      "current_file_sha256": "a6bc1d809b48ea9422f73b12ee666bc65793e87cb3d0ed23767738447e7b3451",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:95d7c83254104597",
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+      "range_sha256": "c5ac6596f8127425d2401eee044465032692c7452ff2d8199ee7d61f0684a6ae",
+      "current_file_sha256": "21c650a1b07398ba9abb5847cdf2f93b1d11e482fe09e6f49e011f2e91feda00",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:be9a9bc376b46500",
+      "path": "src/Core/src/Protocols/ProtocolFactory.cs",
+      "range_sha256": "c22e7dad760c30e8e3c80ab353761e274ddba7917e25b64b714f3a48804d243d",
+      "current_file_sha256": "4a45f172706a618b4126289aa7f2fcd55f826362fffabd2bb64423910b087757",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:e0f280ed806713e7",
+      "path": "src/Core/src/Sessions/ApplicationSession.cs",
+      "range_sha256": "3408c8f672e51760b8b87fda653e00d10205eb38f33392f56fb5b0fb9848ae97",
+      "current_file_sha256": "75c65e859d7404aa3cb9255507b061ea43dbc5eba1b19b3c0c8b57313e9bb754",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:e0af29983be3ad4c",
+      "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+      "range_sha256": "4335fc6411ad7f12328c1504140f5ae74669fd58685df51cdf08a81c61414df5",
+      "current_file_sha256": "e0d4fed1f37089581c13f60bf66767664fbb1adbcb96f6622bd44b5c3da1c213",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:3dc28415274d2715",
+      "path": "src/Core/src/Abstractions/IConnection.cs",
+      "range_sha256": "85271eec1ae528266eddbda1957dd6fb21a479c8ac355e37ed86fe8fe7911285",
+      "current_file_sha256": "3f0082b1471f4fc8904580375f1429201d747d2057706044e790aa703e294daa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:e04bd130212e9058",
+      "path": "src/Core/src/Protocols/Fido/Hid/FidoHidConnection.cs",
+      "range_sha256": "c9fdbbf267a015b210293e9a7fbc53c3d9842b251ce6cf5fcdf047c3d77c9cda",
+      "current_file_sha256": "960807ea73d08a7c9e4e211b63faea08a14329c0dc0b851336ee54824d556f44",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:ffe87a0dc122f066",
+      "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "range_sha256": "2191370bfacd68820748e3257ded43373139cd0b83fc764f8052784853e637d5",
+      "current_file_sha256": "2c2b0b6b0ba3d92a3ffe49039e9e88e64b6bc69f2dd49efed2632691261e2804",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:14fe4ebef38d1ed0",
+      "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "range_sha256": "126f7e5f12d5801aae809fe1ac26551f411cc7206b9168d4abb1e348cef49b17",
+      "current_file_sha256": "2c2b0b6b0ba3d92a3ffe49039e9e88e64b6bc69f2dd49efed2632691261e2804",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:accb5a8244e081d6",
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "range_sha256": "1e2c7b74f3921ce195171acf9131661ceced573e411af3efa8006ec1765ab182",
+      "current_file_sha256": "ac5bda03907f4a65beda4e8d60753df05d522fdc428704606a96aa19b1b39e4d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:f54885613567a25d",
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "range_sha256": "114a75d49f35b1c63fa0483bb0ee95c9c4ca9c7e388ab00c33d7d03554278715",
+      "current_file_sha256": "ac5bda03907f4a65beda4e8d60753df05d522fdc428704606a96aa19b1b39e4d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:7a5b8a3b94cca491",
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "range_sha256": "2e0142745aa2fd8159c2184968a0d12ab0f5295cafa0a54fd2b28267c9aa902f",
+      "current_file_sha256": "ac5bda03907f4a65beda4e8d60753df05d522fdc428704606a96aa19b1b39e4d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:1ffab427759120b0",
+      "path": "src/Core/src/Sessions/ApplicationIds.cs",
+      "range_sha256": "f97641bcd847cdd8af82bd67e98207f28f3ff9d01b50ac1ba6cb0b9001eff690",
+      "current_file_sha256": "8ff75ec9fdb495654b01a3347badfd0f7223fcdc4ef6a7ca98d81ab07979c160",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:80a2e5151f5d45e8",
+      "path": "src/Core/src/Sessions/ApplicationIds.cs",
+      "range_sha256": "1778369fca27a76dcd599e683936b549609a21ff758b32f292f6b0ea07078c96",
+      "current_file_sha256": "8ff75ec9fdb495654b01a3347badfd0f7223fcdc4ef6a7ca98d81ab07979c160",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:e7371b49389c4918",
+      "path": "src/Core/src/Sessions/ApplicationIds.cs",
+      "range_sha256": "a424ff40914939bf0fbc781ab0a45697eac442d6bf54d1bfa9b995e20eb9713e",
+      "current_file_sha256": "8ff75ec9fdb495654b01a3347badfd0f7223fcdc4ef6a7ca98d81ab07979c160",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:282f8f4de8569fc5",
+      "path": "src/Core/src/Sessions/ApplicationIds.cs",
+      "range_sha256": "9b9ff4abc7059211a1df88e56402859ac0b38bba7c769745615d9711d0f8e2b7",
+      "current_file_sha256": "8ff75ec9fdb495654b01a3347badfd0f7223fcdc4ef6a7ca98d81ab07979c160",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:5dc687764c3b8497",
+      "path": "src/Core/src/Sessions/ApplicationSession.cs",
+      "range_sha256": "4d312a6a24c48d64ebad98d9d6ad5e720c7d6efa06f4cf5aba73c6ab1e0a39fd",
+      "current_file_sha256": "75c65e859d7404aa3cb9255507b061ea43dbc5eba1b19b3c0c8b57313e9bb754",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:22756bb8361b62c6",
+      "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+      "range_sha256": "1e68fb47064ace6c16f55806d42db4592976787282e6f09bf5beabd08396cc44",
+      "current_file_sha256": "e0d4fed1f37089581c13f60bf66767664fbb1adbcb96f6622bd44b5c3da1c213",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:7e1d5b20f31edc04",
+      "path": "docs/architecture/raw-access-tiers.md",
+      "range_sha256": "d70fed8f37d53b1c12534fdbfa271f5733770e4fb76adcb888f4bf975a2134d1",
+      "current_file_sha256": "7ecaf86bafda5516a810a34ac5b09b170bf774d487421b2d34c2ce2a2ba91fc1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Whole mixed Before/After fragment read: obsolete protocol access is historical; current After raw session is independently eligible in a borrowed-connection context. No compilation inferred."
+    },
+    {
+      "id": "core-001:unit:ddf5b4cb930d2fa5",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "range_sha256": "9d55d489c854d1e908d088b9dd3e877e6673a300faaf783bbb279915bc1549b4",
+      "current_file_sha256": "d07b2786c2201ce46ea2b6f06e92bb9cfd03ce18c70d9e57162920f7b0649618",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:c4787e6e83d209e3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "range_sha256": "d643c7ed59326af7369a6796832f6420e3277060aff8c945468734018d119f57",
+      "current_file_sha256": "d07b2786c2201ce46ea2b6f06e92bb9cfd03ce18c70d9e57162920f7b0649618",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:7321fe1e15184a10",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "954885616d99058e7e8d61f590895add7eab7f76e51f8e5bd9c7cb1e2b6a3ac4",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:5369991596726ada",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "e4c05e1cebeef023b62c61c943a03332782b06ece2389be0929620f69f3c43b8",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Leading extracted KEEPALIVE_CANCEL comment belongs to preceding0x2D declaration; currentNoCredentials0x27 declaration is not mislabeled in actual source."
+    },
+    {
+      "id": "core-001:unit:28d11837d607f4aa",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "4514a75ddbd280482b95e8729db0dcf8aae642187b410332997cb233282e761b",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:13551f225e5bb1f2",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "ae9707624fa709bc3197c07676182491e58659440c0bd0329d02486f726e77dc",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:8c552de5da184e67",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "604f7053dc5d22bb5f3750bffdd42cf79c8cba387e4a6ce9760be43895f68a2e",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:373adeddffa5ed68",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "857dae569e716ed3718213286ad1066619bcc829a4474e795f1d353c008d62b1",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:a6409df9890388c9",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "bc4ebf81ecd7ee125638107fa818ee5d7f8495cb9b7b5db3c9e43587b36dc6fe",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:a8c19d826d96991d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "range_sha256": "25a6118c0d45f5fa8a2c9d93af0c03d9ddfbe45861900d253675841531336ac5",
+      "current_file_sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:a38082b8b32d418b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolConcurrencyTests.cs",
+      "range_sha256": "d7b10503209822cb38aefc57ac29a2760677b33dee340f7d0162ceaa132679e6",
+      "current_file_sha256": "3725b4d92260302b51f3a5ec5eab0537eb876e799b0688ca860b3e695a2e9ebe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:95c29f78c32cee7d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolConcurrencyTests.cs",
+      "range_sha256": "02e03f41f8d0146ac26c5e8bcf76375b5acfe43f2655c06724aa258b9b3aac59",
+      "current_file_sha256": "3725b4d92260302b51f3a5ec5eab0537eb876e799b0688ca860b3e695a2e9ebe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:84a633fd9be55a84",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+      "range_sha256": "862c1713b51bde94d744439216e8dd14f0a663bd48abf2562bb40c8befd65a0b",
+      "current_file_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:1c9c6d64e4945a01",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+      "range_sha256": "ad26ef168eda9ba728d101a968e0a40d0f3e2473b4dbce80471f2e9366aa0b99",
+      "current_file_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Assertions establish requested reset report, callback/error and notification behavior on scripted connection, not a physical reset postcondition."
+    },
+    {
+      "id": "core-001:unit:57678adc5582df43",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+      "range_sha256": "265af394d94eea4ca94d41a137f3e7f8ee5b346f4024b24dfa5f8a993f1aee75",
+      "current_file_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Assertions establish requested reset report, callback/error and notification behavior on scripted connection, not a physical reset postcondition."
+    },
+    {
+      "id": "core-001:unit:dc0f21427d29a65c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+      "range_sha256": "e9691a52574d6c939cd11cfdadec3df61d5d7f882cd7fc74eb68aaaa84fb4a8b",
+      "current_file_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:7b6fa526bc4a6aa0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+      "range_sha256": "4be58937bd0e86e00e0a46a0b8123e829fd31a0ded1b79b8ce6b5e525e9916cf",
+      "current_file_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:3631aef26af6b769",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "range_sha256": "55be1dbb27fd204a201814e9b3ccadb784222cb1686b393931e8a714ea86956b",
+      "current_file_sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:c99301c915f20513",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "range_sha256": "53bebbc12e70241406c54155572f8477b65966f17b2d4847e7c68e802d08812b",
+      "current_file_sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:ddd57563894b9645",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "range_sha256": "8ccb9a842ce730eaedf8a7d967a3a85dd8656529e5eaf4cc272527662ee45d03",
+      "current_file_sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:738bb07041058b8c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolFactoryTests.cs",
+      "range_sha256": "a29c30a6d9f476999bf7e97f68f12ce49cb00e3bc371d7eae72c205bf0de09ec",
+      "current_file_sha256": "476aa9aa857fcebd94f58127c04e500b961521df7d3bcf202d3186fde22b82cf",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:a30850a5a85e6f4a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolFactoryTests.cs",
+      "range_sha256": "1022f01e032ba7f322f7d6d58670afcab36731678ee00fef2a6a20c252a166e3",
+      "current_file_sha256": "476aa9aa857fcebd94f58127c04e500b961521df7d3bcf202d3186fde22b82cf",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:c7319c1c1182a4be",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationIdsTests.cs",
+      "range_sha256": "3175b0a745ba27daa52a5adba196c441ccb072b71565ee1fdc768b72924cbc18",
+      "current_file_sha256": "36daee6e9c6f6c910706edfde90c82a6656355870b4084d60f43ac8b37d70177",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "License/imports/namespace only, no substantive declaration or explanation; exclude clean quota and replace if required."
+    },
+    {
+      "id": "core-001:unit:5fc487677b35ab28",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationIdsTests.cs",
+      "range_sha256": "f0e7e6a96a81906c9ac1618c3e5bccb242a7eb742518e5b5ead0d71033343625",
+      "current_file_sha256": "36daee6e9c6f6c910706edfde90c82a6656355870b4084d60f43ac8b37d70177",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:2dd4265675872883",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationIdsTests.cs",
+      "range_sha256": "f6e5bf4826e0617396919db1802466265f1a60cd63386400ae229d4d550460b2",
+      "current_file_sha256": "36daee6e9c6f6c910706edfde90c82a6656355870b4084d60f43ac8b37d70177",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:5bcf834655fef594",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "a0157353a96b61e88bee47866710e61e3eb7f7de1d4bc4deba4414c49da8bf4e",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "License/imports/namespace only, no substantive declaration or explanation; exclude clean quota and replace if required."
+    },
+    {
+      "id": "core-001:unit:bef6ce6dc7566d2b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "f847e3ab3f121c01542804bc229ffe8e31b74da0e0f53958e59ae5512f8dea55",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:37c38232c3e94180",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "5c04602ee702151b1e5249611a7bb03bbf333f633a539b4ece537febaca4fc96",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:ab707f00fedfc8e6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "bedff61641aab7b3d22ca3d21928be01f97c181aa41264bfcbdba687330cc8f9",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:c4c984606fade307",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "83d81f7b7070ab5d908c26ff216bc3c7d4db50678947150ab40ac0d1190fb4d0",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:d08a207938a4d4fd",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "8bf740f5ab14e038632c28d21b43673e5413f24c8d4b67f9977063451a7d7f7c",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Construct-based binding rationale agrees with actual factory path; directly constructed probe disposal counters do not independently prove detachment."
+    },
+    {
+      "id": "core-001:unit:40c60fb8b4d02780",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "af373e12e11f4a8b82aabf0c2839a68b3872c1f10ef68927e56fd73278d3efb3",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:fefa3dfcb51c8048",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "49f50aba2779ae2879462302d8393daafbf525d5f3ca0061995aa6051bf73864",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:ae29023d98d446cd",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "f26ef89f70236f3e0aa60c248ed6b5ad1d9ae60052168d5ed31a6b2f2ba97c69",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:e3bb2586dc5120b7",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "d997e9e29cf19d4330b1a2118ce06caa2683792f38c7734669e49e14805d8042",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:3b564994b3457b22",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "ae5181a03dcfa8b43cb428b3b6831f71242769909d2051a519f988c3410c3718",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:d4ffb9d87b207fdb",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "49b8a2302472cfab35733dcaabb5a68ca6da06d97bd9254462926992b1650406",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:a0767c592da2a882",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "75e9f69e9f01e65fcfbd5f44e297c5e1f6b65491f9cf86fdaeba96ee96b65e03",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:a943d9ad06221eb1",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+      "range_sha256": "4d800780d4916ebfffdae969d6b3f28b25b4a9377eaeae41fad26516ec78c813",
+      "current_file_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:12fed26282d091eb",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "range_sha256": "abbacbcfed79f0821d0258685e909370ae06a40422a28e34c6fca5cd6fedc285",
+      "current_file_sha256": "2cba79d85a56d031cccb3190a80da9db59e30316ef6cfb12f706e8ef1e21a859",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:b72162c065486e80",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionConstructionFailureTests.cs",
+      "range_sha256": "931e1d6180631e8ee730d090ee54fd8c25d65b3a9052a2233988990ce5e972ec",
+      "current_file_sha256": "6a23d3d98244799c3632e3a2305afa83d38f80c14a7cb737c31bf48500bbbf47",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:f58ce9eb55ed24f4",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionConstructionFailureTests.cs",
+      "range_sha256": "8705e9952138566e4af5e9276dcd6f1ecfd83d44bcde4808e457a78d516137ad",
+      "current_file_sha256": "6a23d3d98244799c3632e3a2305afa83d38f80c14a7cb737c31bf48500bbbf47",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:cf7a795602b142eb",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionConstructionFailureTests.cs",
+      "range_sha256": "1f1716ada60b001d854ca4405b92e2274bd88ac1df7bc355ba9b2f3d8193399a",
+      "current_file_sha256": "6a23d3d98244799c3632e3a2305afa83d38f80c14a7cb737c31bf48500bbbf47",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:343220c27faae036",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionYubiKeyExtensionsTests.cs",
+      "range_sha256": "93e054014f1b5847d2213839664e41f237f6811f4dca0553c523efd90ba84a4a",
+      "current_file_sha256": "dbf533cb517cb1f69605d2e559ef43ceeb92e45caa93331736be6c3b3ebe7a41",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:139af565330d0bd8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "range_sha256": "dc5e3cf32802b71e9bea3d86b57269d9d681a25001d7f233ec486285b3e58d7b",
+      "current_file_sha256": "d4e0973e0eaa5864f603876404656d19f06cf0f09e946dd1f0f0ad50370f4806",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Held fake PCSC transmit, overlap refusal, disposal wait and sequential borrowed reuse are explicitly asserted; finally releases transmit before raw disposal. Not real native/device execution."
+    },
+    {
+      "id": "core-001:unit:a10092607196bea8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardSessionTests.cs",
+      "range_sha256": "15b7cb0038a5a1fd5f94c1afd96e0358fc05f6f8a6f7f7d8b26254cf3b1e1644",
+      "current_file_sha256": "17665fa97aaae168f6e89a08ed989ded1541f19e523ad69439d60f66e39b62af",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:c28fdc0c1ced3cdd",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+      "range_sha256": "eb5da634125d13361e6910fddb287e540d1230d83bda03ea43e46f4c6e495ab8",
+      "current_file_sha256": "163ad7c64d6cfd2429c5fb264ab9e9a982f18fcbca89469b52e777150282320f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:f72a718d07e9a370",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+      "range_sha256": "68e2639639f75b2e8f164e53e9a54ab803832452042f27ddb82b9c0f75e59525",
+      "current_file_sha256": "f082f2fb5630e1dee6c8549ee6676823e1b601239b118c43bf6aa5781c60325a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:a0d008f7add4778f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+      "range_sha256": "d8638d4797a1c6fb868301d9dda2ca7174d1fd0159f6342ba2d714fc2f90e1d7",
+      "current_file_sha256": "f082f2fb5630e1dee6c8549ee6676823e1b601239b118c43bf6aa5781c60325a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:b3b9e834ec15a544",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+      "range_sha256": "a614db85dc8d8fa558775ae892c5a7a19fa78ac39bc8031cea9441fc87165229",
+      "current_file_sha256": "f082f2fb5630e1dee6c8549ee6676823e1b601239b118c43bf6aa5781c60325a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:7449f0b2fc818733",
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AppletSessionShapeTests.cs",
+      "range_sha256": "4475c3b88ef7d7b7c114e9250b91af75ffcae27a2008188ddb0cdbe0d859bf4d",
+      "current_file_sha256": "5fedd8f87d52517e0dab33cfdd76a00f7535ca74594fb024a2416a45e1414c28",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    },
+    {
+      "id": "core-001:unit:4018a6fd33733c9c",
+      "path": "src/Core/src/Abstractions/IConnection.cs",
+      "range_sha256": "bdbb81fb21756ba5022c71d60c563e53f4df6f98abe8760aeedb63822a494e84",
+      "current_file_sha256": "3f0082b1471f4fc8904580375f1429201d747d2057706044e790aa703e294daa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local protocol/ownership or exact fake/assertion scope supported. No physical state reset, native interruption, conformance or untested erasure proof inferred."
+    }
+  ]
+}

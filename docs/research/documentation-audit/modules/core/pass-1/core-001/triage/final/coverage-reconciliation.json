@@ -1,0 +1,153 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "populations": {
+    "A": {
+      "unit_count": 2006,
+      "dispositions": {
+        "READ-CLEAN": 1855,
+        "CANDIDATE": 151
+      }
+    },
+    "B1": {
+      "unit_count": 1204,
+      "dispositions": {
+        "READ-CLEAN": 1104,
+        "READ-CANDIDATE": 99,
+        "READ-EXCLUSION": 1
+      }
+    },
+    "B2": {
+      "unit_count": 1219,
+      "dispositions": {
+        "READ-CLEAN": 1187,
+        "READ-CANDIDATE": 31,
+        "READ-EXCLUSION": 1
+      }
+    },
+    "B3": {
+      "unit_count": 1144,
+      "dispositions": {
+        "READ-CANDIDATE": 57,
+        "READ-CLEAN": 1087
+      }
+    },
+    "B4": {
+      "unit_count": 2350,
+      "dispositions": {
+        "READ-CANDIDATE": 574,
+        "READ-CLEAN": 1246,
+        "READ-SOURCE-QUALIFIED": 1,
+        "READ-RELATED-CONTEXT": 371,
+        "READ-HISTORICAL-QUALIFIED": 158
+      }
+    },
+    "B5": {
+      "unit_count": 932,
+      "dispositions": {
+        "READ-CLEAN": 716,
+        "READ-CANDIDATE": 212,
+        "READ-EXCLUSION": 4
+      }
+    },
+    "B6": {
+      "unit_count": 684,
+      "dispositions": {
+        "READ-CONTEXT": 267,
+        "READ-CANDIDATE": 137,
+        "READ-CLEAN": 278,
+        "READ-HISTORICAL-CONTEXT": 2
+      }
+    },
+    "C": {
+      "unit_count": 1562,
+      "dispositions": {
+        "READ-CANDIDATE": 305,
+        "READ-CANDIDATE-CONTEXT": 639,
+        "READ-CLEAN": 611,
+        "READ-HISTORICAL-EXCLUSION": 3,
+        "READ-HISTORICAL-CONTEXT": 4
+      }
+    },
+    "BOUNDARY-Management": {
+      "unit_count": 331,
+      "dispositions": {
+        "READ-CANDIDATE-CONTEXT": 127,
+        "READ-CLEAN": 204
+      }
+    },
+    "BOUNDARY-Ctap2": {
+      "unit_count": 590,
+      "dispositions": {
+        "READ-CANDIDATE": 6,
+        "READ-CANDIDATE-CONTEXT": 492,
+        "READ-CLEAN": 91,
+        "READ-EXCLUSION": 1
+      }
+    },
+    "BOUNDARY-SecurityDomain": {
+      "unit_count": 193,
+      "dispositions": {
+        "READ-CLEAN": 108,
+        "READ-CANDIDATE": 74,
+        "READ-CONTEXT": 11
+      }
+    },
+    "BOUNDARY-Oath": {
+      "unit_count": 239,
+      "dispositions": {
+        "READ-CLEAN": 158,
+        "READ-CANDIDATE": 28,
+        "READ-CONTEXT": 53
+      }
+    },
+    "BOUNDARY-WebAuthn": {
+      "unit_count": 265,
+      "dispositions": {
+        "READ-CLEAN": 177,
+        "READ-CANDIDATE": 7,
+        "READ-RELATED-CANDIDATE-CONTEXT": 80,
+        "READ-EXCLUSION": 1
+      }
+    },
+    "BOUNDARY-YubiOtp": {
+      "unit_count": 324,
+      "dispositions": {
+        "READ-CLEAN": 269,
+        "READ-CANDIDATE": 55
+      }
+    },
+    "BOUNDARY-YubiHsm": {
+      "unit_count": 160,
+      "dispositions": {
+        "READ-CANDIDATE": 8,
+        "READ-CONTEXT": 73,
+        "READ-CLEAN": 79
+      }
+    },
+    "BOUNDARY-OpenPgp": {
+      "unit_count": 328,
+      "dispositions": {
+        "READ-CLEAN": 209,
+        "READ-CANDIDATE": 34,
+        "READ-RELATED-CONTEXT": 85
+      }
+    },
+    "BOUNDARY-Piv": {
+      "unit_count": 513,
+      "dispositions": {
+        "READ-CLEAN": 384,
+        "READ-CANDIDATE": 46,
+        "READ-CONTEXT": 83
+      }
+    }
+  },
+  "core_family_units": 11101,
+  "boundary_units": 2943,
+  "total_distinct_assigned_units": 14044,
+  "Core_local_candidates": 103,
+  "boundary_local_candidates": 82,
+  "total_original_candidates": 185,
+  "facet_dimension_records": 740,
+  "read_scope": "B4 105 full-file reads plus one qualified API snapshot reconciliation retained; boundary context/snapshot exclusions retained.",
+  "acceptance": "Source disposition coverage only; no new review/implementation/execution or Pass-1 closure."
+}

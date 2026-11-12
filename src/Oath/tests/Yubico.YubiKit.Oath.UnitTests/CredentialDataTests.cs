@@ -609,7 +609,8 @@ public class CredentialDataTests
     [Fact]
     public void ParseBase32Key_StandardPadded_DecodesCorrectly()
     {
-        // "JBSWY3DPEHPK3PXP" encodes "Hello!0xDE0xAD0xBE0xEF"
+        // This unpadded input only checks that decoding returns nonempty storage. Exact byte/shape
+        // vectors are covered separately in OathInputTests and Core Base32Tests.
         byte[] result = CredentialData.ParseBase32Key("JBSWY3DPEHPK3PXP");
 
         try

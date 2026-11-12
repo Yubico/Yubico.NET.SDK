@@ -1,0 +1,17 @@
+{
+  "scope": "Reviewed removal of two audit-introduced terminal LF bytes; baseline formatter findings remain qualified",
+  "patch_sha256": "f5c82111cb86e52a8c5a0de620f487efff3f934d28e529389243aa5c5105e818",
+  "product_files": [
+    {
+      "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+      "previous_sha256": "fc15c91ff84b283ed5f3d1ca9e4d6690f40dc1b8ecd390a77060a64d9da53ce5",
+      "sha256": "faba33e119d3ea2361dd390943adc57fbb36ae1741a31283c817c56658d476a1"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+      "previous_sha256": "c648272a8b935f508fb9880fe16e9e5938a1dad962050c7575305cfdc84a712e",
+      "sha256": "194b29775d29323ae1ce2d94ccc35abbf162ac15de858ca58a63295c90e4652d"
+    }
+  ],
+  "review": "editing/format-final/external-scope/review.md"
+}

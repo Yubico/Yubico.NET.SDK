@@ -1,0 +1,34 @@
+{
+  "focused_patch_sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049",
+  "focused_patch_bytes": 3124,
+  "source_scope": [
+    "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs"
+  ],
+  "primary_before_bytes_match": true,
+  "accepted_revision_2_before_hashes_match": true,
+  "protected_prior_records_byte_exact": 27,
+  "xml_syntax": "PASS",
+  "final_fresh_checks": {
+    "result": "PASS",
+    "errors": [],
+    "two_before_files_match_primary_and_accepted_revision_2": true,
+    "primary_two_files_still_accepted_before_bytes": true,
+    "comment_only_delta": true,
+    "noncomment_lines_unchanged": true,
+    "bom_and_final_newline_preserved": true,
+    "well_formed_xml_comment_blocks": 29,
+    "no_example_changes": true,
+    "other_eligible_source_files_byte_unchanged": 211,
+    "all_prior_transport_records_and_reviews_byte_exact": 27,
+    "accepted_full_patch_sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+    "focused_patch_sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049",
+    "git_diff_check": "PASS; fresh scoped command exit 0",
+    "focused_patch_reverse_apply_check": "PASS; fresh read-only command exit 0",
+    "cached_diff_empty": true,
+    "head_unchanged": "da66f5d01ba594993974ddd26723e8c300c0a454",
+    "limits": "Static comment/text/hash/XML/JSON and read-only Git checks only; no compilation, tests, formatter, native/device/SDK crypto execution or independent content acceptance. Sampler owns edited-overlap zero-credit and XML-category expansion."
+  },
+  "runtime_native_device_crypto_build_test_formatter_execution": "NOT-RUN",
+  "independent_review": "PENDING"
+}

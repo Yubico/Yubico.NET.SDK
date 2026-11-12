@@ -35,6 +35,12 @@ examples below explicitly select OTP HID; this is the supported USB recipe, not 
 
 Session creation discovers firmware and slot status before constructing its operational backend. SmartCard
 programming-sequence validation starts from the value returned by OTP selection, including when SCP is enabled.
+On OTP HID, Core reads a first report for protocol firmware, performs the NEO refresh when needed, then
+reads a second report for cached status. SmartCard probes Management on both USB CCID and NFC, then
+selects OTP; when OTP's major version is three it uses the higher Management/OTP version. A caller override
+is applied afterward to session policy. Cached `ConfigState` still uses raw OTP status, so its gates and
+the SmartCard touch heuristic can differ from effective session feature checks. Major-zero acceptance
+is optimistic SDK policy, not proof of device/command support.
 
 ## Installation
 
@@ -240,7 +246,9 @@ replay policy. The SDK returns bytes; it does not decrypt, verify, format an OTP
 
 ### Program a static password
 
-The YubiKey emits HID scan codes and types correctly only under the same layout; `KeyboardLayout.ModHex` is neutral.
+The YubiKey emits HID scan codes interpreted by the host's active layout. Select that layout;
+`KeyboardLayout.ModHex` uses characters shared by supported layouts, not a universal layout guarantee.
+Verify actual output under the intended host layout and input state.
 
 ```csharp
 {
@@ -319,14 +327,23 @@ notification resolves as cancelled. The reset is not a rollback of commands alre
 fails, dispose the session and connection rather than reusing them. SmartCard operations already
 admitted run to completion even if the caller cancels their token.
 
+OTP HID's local checks use a one-second write-ready window with a 5 ms busy delay, a three-second
+readiness window without an explicit busy delay, and 250 ms touch polling with a local 14-second
+threshold. These checks occur between awaited calls; a held native GET/SET can exceed them. Only the
+classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are failures.
+
 ## Constraints
 
-- A physical YubiKey admits one live connection and one session per connection; a second attempt throws
-  `ConnectionInUseException`. Whoever opens a connection disposes it.
+- Within this process, grouped views admit one live connection across known member IDs, and each connection
+  admits one session. Disjoint scoped views remain uncoordinated. Whoever opens a connection disposes it;
+  see [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
 - A session from `device.CreateYubiOtpSessionAsync(...)` owns the connection it opened;
   `YubiOtpSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
 - Override the transport with `new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }`; one
   transport is selected and a connection failure propagates instead of falling back.
+- Await the entire public task before another operation or disposal, keeping configurations, borrowed
+  memory and prompt resources alive. Write/status fallback, CRC validation and notification callbacks
+  extend beyond Core's individual guarded exchanges.
 - `PutConfigurationAsync`, `UpdateConfigurationAsync`, `SwapSlotsAsync`, `DeleteSlotAsync`, `SetScanMapAsync`, and
   `SetNdefConfigurationAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
 - Firmware-gated operations throw `NotSupportedException`; `ConfigState` accessors throw `InvalidOperationException`.
@@ -356,6 +373,10 @@ admitted run to completion even if the caller cancels their token.
 - Successful calculation output belongs to you even though it is exposed as `ReadOnlyMemory<byte>`.
   The examples use `MemoryMarshal.AsMemory` only to clear these documented, caller-owned SDK outputs.
   Do not use that technique on arbitrary borrowed read-only memory. Consume first, then clear in `finally`.
+  The one-shot HMAC helper transfers only after hidden-session teardown succeeds. If teardown throws
+  after calculation, its task faults without exposing or clearing that result. An explicit session lets
+  you retain the calculation result before teardown and clear it in an enclosing `finally`; this does
+  not erase separate incoming-report, APDU, decrypted-response or transport staging copies.
 - Normal write cleanup clears assembled configuration/payload copies, but invalid access-code preflight
   currently has cleanup gaps. No-I/O validation does not imply erasure of every temporary allocation.
   None of these measures promises erasure of all heap copies. Never log keys, passwords, codes, or responses.
@@ -383,6 +404,12 @@ dotnet run --project src/YubiOtp/examples/OtpTool/OtpTool.csproj
 ```
 
 ## Related
+
+Use Management's `GetDeviceInfoAsync` for device metadata and `SetDeviceConfigAsync` for modern TLV
+configuration (effective 5.0.0 write gate). These are not a typed OTP FIPS-mode query or the legacy
+mode/timeout/eject mutator: v2 exposes no typed `QueryFipsMode`, `SetLegacyDeviceConfig` or `SetMode` API.
+FIPS metadata/approval fields do not answer that legacy operating-mode question. Raw command access is
+an expert tier, not a relocated typed implementation; see [raw access tiers](../../docs/architecture/raw-access-tiers.md).
 
 - [../Core/README.md](../Core/README.md) - device discovery, connections, and session plumbing.
 - [../Oath/README.md](../Oath/README.md) - TOTP and HOTP credential storage.

@@ -121,8 +121,9 @@ public class AsnUtilitiesTests
     #region Curve resolution
 
     /// <summary>
-    /// Key/operation OIDs that must not be resolved as ordinary EC named curves, even when key
-    /// curves. Resolving through it would hand back a coordinate size for a non-EC algorithm.
+    /// Key/operation OIDs that must not be resolved as ordinary EC named-curve identifiers, even
+    /// when a catalog key has the same stored width. The 25519 key algorithm OIDs identify different
+    /// constructions, rather than ordinary short-Weierstrass named curves.
     /// </summary>
     public static TheoryData<string> NonEcCurveOids => new()
     {

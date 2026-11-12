@@ -1,0 +1,1364 @@
+[
+  {
+    "local_id": "CORE-A-C001",
+    "proposal_id": "FPT-001",
+    "facets": [
+      "D"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/VersionQualifier.cs",
+        "disposition": "EDIT",
+        "base_sha256": "156df98ca4c9621ed13f8e89906ef13f9bdd338bcacc346939919d34feb1455b",
+        "previous_reviewed_sha256": "49e4da583adf701744ae22c473ebe6b64067c5ef6f1a358dcad42e297c0ec39d",
+        "current_sha256": "49e4da583adf701744ae22c473ebe6b64067c5ef6f1a358dcad42e297c0ec39d",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "previous_reviewed_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "current_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [],
+    "held_facet_trigger": "Reopen after accepted range or wire decoding changes; compile corrected reference examples later.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C001",
+      "original_unit_ids": [
+        "core-001:unit:b9a3dae1aa08d90e"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C002",
+    "proposal_id": "FPT-002",
+    "facets": [
+      "D",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/ConnectionType.cs",
+        "disposition": "EDIT",
+        "base_sha256": "c260e803d107b002e46a7fd7ad4487a1e79f831df55aedfef95db887ab499eb7",
+        "previous_reviewed_sha256": "a2c8ad1644c0f3f62c70121556d7db18a29f5fa10a6fcacfaad3075f18c65e37",
+        "current_sha256": "a2c8ad1644c0f3f62c70121556d7db18a29f5fa10a6fcacfaad3075f18c65e37",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+        "disposition": "EDIT",
+        "base_sha256": "a6b7f49f9475daf5c026a8eb372e19fab10e7435213f504795b9c5a86f9ed1ac",
+        "previous_reviewed_sha256": "411eba67b0dc877cfd7aa8697fa6743ed85d5ec442fceac3000fb62e3aa565f3",
+        "current_sha256": "411eba67b0dc877cfd7aa8697fa6743ed85d5ec442fceac3000fb62e3aa565f3",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceFlags.cs",
+        "disposition": "EDIT",
+        "base_sha256": "38f1220a2521543f5515272a7474998ce34fd0298ff8ca291e5b30cf9dfbfe00",
+        "previous_reviewed_sha256": "7f8985ff2a8a8d0317d4821a4df80307a82bd5fabb667fba030905bf16c7d884",
+        "current_sha256": "7f8985ff2a8a8d0317d4821a4df80307a82bd5fabb667fba030905bf16c7d884",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+        "previous_reviewed_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/Feature.cs",
+        "disposition": "EDIT",
+        "base_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+        "previous_reviewed_sha256": "40e111b46516aa81eca2d53cbfc9b890f39d4c659d7c75a9ca983779dae38318",
+        "current_sha256": "40e111b46516aa81eca2d53cbfc9b890f39d4c659d7c75a9ca983779dae38318",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Transport.cs",
+        "disposition": "EDIT",
+        "base_sha256": "c66914c8e99337754566657e7814450e49118575324838ab50db18c6469f39da",
+        "previous_reviewed_sha256": "77deae45f285c6449f27eaf098975c5b9a709a8b7136db90955d6973333794f7",
+        "current_sha256": "77deae45f285c6449f27eaf098975c5b9a709a8b7136db90955d6973333794f7",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "previous_reviewed_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "current_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PhysicalYubiKeyTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+        "previous_reviewed_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+        "current_sha256": "0200e8fc642f07da02f6874f755dddc4c17f7c592666096a326d806d48e0a696",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md",
+      "docs/usage/device-discovery.md",
+      "src/Management/src/IManagementSession.cs"
+    ],
+    "held_facet_trigger": "Review field-specific contracts and ownership caveat before claiming stable snapshots.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C002",
+      "original_unit_ids": [
+        "core-001:unit:01ce5b3a0b489677",
+        "core-001:unit:071280608bad6795",
+        "core-001:unit:098d0b070b926eba",
+        "core-001:unit:0a5d5e271de8afd8",
+        "core-001:unit:0b63ee20399d9881",
+        "core-001:unit:0c5e80df9981394d",
+        "core-001:unit:119cb7d68c97d75e",
+        "core-001:unit:1c3df9afba1f0126",
+        "core-001:unit:1c91f9f6b1efe7ff",
+        "core-001:unit:26974ca5a5c57e29",
+        "core-001:unit:2cbbd9ef35588eb8",
+        "core-001:unit:33520210cb43507b",
+        "core-001:unit:37c88caf3d1f32be",
+        "core-001:unit:3b2859e4c875d4e8",
+        "core-001:unit:3e3558eca3c07138",
+        "core-001:unit:3f65245502136a8c",
+        "core-001:unit:41f8184c68563233",
+        "core-001:unit:437ee9cb64ba68e8",
+        "core-001:unit:46d30272c4274c1f",
+        "core-001:unit:4702a87493a60ac9",
+        "core-001:unit:47a1bcdbfb45f38d",
+        "core-001:unit:491d13dbaf7b6a90",
+        "core-001:unit:4be0ccdcae968277",
+        "core-001:unit:4ce6eca337b9667b",
+        "core-001:unit:4dae1006f914743c",
+        "core-001:unit:57e85235170234c7",
+        "core-001:unit:5bdc61ce959c597d",
+        "core-001:unit:5c7d6fa104790d09",
+        "core-001:unit:5dab9adc0969d3bb",
+        "core-001:unit:750519c8490542a9",
+        "core-001:unit:751f3c5d7487d28b",
+        "core-001:unit:7e904228452c30b7",
+        "core-001:unit:7fb684729ff24fcb",
+        "core-001:unit:922f5a4c9bacb503",
+        "core-001:unit:94f421961bdee75e",
+        "core-001:unit:9631b57dbe34ebfa",
+        "core-001:unit:9959fe1d5a088f6a",
+        "core-001:unit:9d47b7f26da9db0a",
+        "core-001:unit:9d59c02b7266db9e",
+        "core-001:unit:a7a4e1e5b001de55",
+        "core-001:unit:ac6ce328277596b7",
+        "core-001:unit:af79e3435046483a",
+        "core-001:unit:afd2e3f4c2097d53",
+        "core-001:unit:b199e9e7b21cc74e",
+        "core-001:unit:b7bc05b48ddedab4",
+        "core-001:unit:bb6d80ecfb5b5709",
+        "core-001:unit:bcadc24fc18d1330",
+        "core-001:unit:bdb3590352d6b93f",
+        "core-001:unit:bdb4d5faba9438bc",
+        "core-001:unit:c3c175fc24a5cc19",
+        "core-001:unit:c45be6f0b2db1007",
+        "core-001:unit:c732a485cb3c1cf5",
+        "core-001:unit:c80d879f4c4e6c4c",
+        "core-001:unit:cacc2dcd40803f50",
+        "core-001:unit:cb3e7008fc018580",
+        "core-001:unit:cb7d1444cc4f94f1",
+        "core-001:unit:d1128ab7b4f84732",
+        "core-001:unit:d270b79ba63f4a70",
+        "core-001:unit:e06c34ac35be69b8",
+        "core-001:unit:e2013b08aa6cc14b",
+        "core-001:unit:e2438ab9db0791c1",
+        "core-001:unit:eb7850de4fe5d2b4",
+        "core-001:unit:eb8009a5460eb87d",
+        "core-001:unit:eea72125e84ae0c9",
+        "core-001:unit:f63c88cb51c2ab5d",
+        "core-001:unit:f88d15d3abdc5ac9",
+        "core-001:unit:fcb18dacdb59e057",
+        "core-001:unit:fde002a9f75eb879"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C003",
+    "proposal_id": "FPT-003",
+    "facets": [
+      "D",
+      "E",
+      "P",
+      "M",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "disposition": "EDIT",
+        "base_sha256": "3ba053c772725075a827c7f0ab83362f4a4d20cddbb1901bc094c71b248fbe5a",
+        "previous_reviewed_sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+        "current_sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+        "previous_reviewed_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+        "disposition": "EDIT",
+        "base_sha256": "75f07413d79f617a6a4be26081d02840abb6a57caabeb69a25e438718d43fa70",
+        "previous_reviewed_sha256": "b997455d9083553111e134ff972f439356e1271b5837edcd89d6e61c18eda350",
+        "current_sha256": "b997455d9083553111e134ff972f439356e1271b5837edcd89d6e61c18eda350",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "e83a6dc1758df5b10472c7e54c1f8dd6d7c9550069b10db0fbf94788eb95f73d",
+        "previous_reviewed_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+        "current_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+        "previous_reviewed_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+        "current_sha256": "43e6d7e76ad1524646d231c92844d585d1f60d86cd1369b7e9854f317f8ec078",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "src/Core/README.md",
+      "docs/usage/device-discovery.md",
+      "docs/architecture/physical-device-model.md"
+    ],
+    "held_facet_trigger": "A-E01: compare bytes/hash before and after TLV disposal and caller mutation; decide scalar/copy versus explicit borrowing before stability wording.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C003",
+      "original_unit_ids": [
+        "core-001:unit:0c5e80df9981394d",
+        "core-001:unit:754294fa1cb68532",
+        "core-001:unit:813d918bbba7dddf",
+        "core-001:unit:a6f48f999e63cf51"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C004",
+    "proposal_id": "FPT-004",
+    "facets": [
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "inherited_aliases": [
+      "management-001:MGMT-XREF-001",
+      "audit-v2-20261022-20261031:deviceinfo-FIPS-residual"
+    ],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+        "previous_reviewed_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+        "previous_reviewed_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+        "current_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "e83a6dc1758df5b10472c7e54c1f8dd6d7c9550069b10db0fbf94788eb95f73d",
+        "previous_reviewed_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+        "current_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "src/Tests.Shared/YubiKeyTestState.cs",
+      "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "src/Management/README.md"
+    ],
+    "held_facet_trigger": "A-E02 nonzero FIPS vectors; obtain authoritative tag 14/15 widths/mapping before wire-contract wording.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C004",
+      "original_unit_ids": [
+        "core-001:unit:23540f2a3719ceef",
+        "core-001:unit:3cdb5d09e36a0715",
+        "core-001:unit:a6f48f999e63cf51",
+        "core-001:unit:b7dcedcfc1d1a0d7",
+        "core-001:unit:cadb3749c30da942",
+        "core-001:unit:d2bd5c409c43487e",
+        "core-001:unit:f0917a43f6328019",
+        "core-001:unit:fb21e3fafb05b1af"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C005",
+    "proposal_id": "FPT-005",
+    "facets": [
+      "D",
+      "P",
+      "M",
+      "B"
+    ],
+    "inherited_aliases": [
+      "management-001:MGMT-XREF-002"
+    ],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+        "previous_reviewed_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/FormFactor.cs",
+        "disposition": "EDIT",
+        "base_sha256": "fcacadc8201154fa09c4b579ebed7f6738651523294b32742d87a7b5d6a327ab",
+        "previous_reviewed_sha256": "928557d20487d2a3f8b72ba42d0f399fda94be87508817b74bb0bbd25c0488ad",
+        "current_sha256": "928557d20487d2a3f8b72ba42d0f399fda94be87508817b74bb0bbd25c0488ad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "e83a6dc1758df5b10472c7e54c1f8dd6d7c9550069b10db0fbf94788eb95f73d",
+        "previous_reviewed_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+        "current_sha256": "4dce339fc69129c9f4a34a181a32c365fec701c94038aeb2d60290a2b5e7ab56",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "src/Cli.Shared/src/Device/FormFactorFormatter.cs",
+      "src/Management/README.md"
+    ],
+    "held_facet_trigger": "A-E02 81/41 and unknown vectors; reopen after representation/filter decision.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C005",
+      "original_unit_ids": [
+        "core-001:unit:745fdc12dbdf006c",
+        "core-001:unit:7763bb573994e2c7",
+        "core-001:unit:862fc95d749442b6",
+        "core-001:unit:a6f48f999e63cf51",
+        "core-001:unit:eb6bc0bf1a37f5bf",
+        "core-001:unit:f02cf7591c7c444e",
+        "core-001:unit:f29113c2b0e913e8",
+        "core-001:unit:f46a2bf81d3f8a40",
+        "core-001:unit:fb3874e2c3692c1a",
+        "core-001:unit:ff3e1f4f3cb98afa"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C006",
+    "proposal_id": "FPT-006",
+    "facets": [
+      "P",
+      "M",
+      "Q",
+      "B"
+    ],
+    "inherited_aliases": [
+      "audit-v2-20261022-20261031:deviceinfo-wide-app-bits"
+    ],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+        "disposition": "EDIT",
+        "base_sha256": "a6b7f49f9475daf5c026a8eb372e19fab10e7435213f504795b9c5a86f9ed1ac",
+        "previous_reviewed_sha256": "411eba67b0dc877cfd7aa8697fa6743ed85d5ec442fceac3000fb62e3aa565f3",
+        "current_sha256": "411eba67b0dc877cfd7aa8697fa6743ed85d5ec442fceac3000fb62e3aa565f3",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+        "previous_reviewed_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CapabilityMapperTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+        "previous_reviewed_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+        "current_sha256": "67b6247c7fdf75af69d3e51430955e0de2727c61352407d17c22496c9cb20a74",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "previous_reviewed_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "current_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "src/Tests.Shared/YubiKeyTestState.cs",
+      "src/Management/README.md"
+    ],
+    "held_facet_trigger": "A-E02 00 00 10/80 00; decide supported width/raw preservation and source authority.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C006",
+      "original_unit_ids": [
+        "core-001:unit:23540f2a3719ceef",
+        "core-001:unit:2772da826a68df31",
+        "core-001:unit:8a7cbb7bf298616d",
+        "core-001:unit:d2bd5c409c43487e",
+        "core-001:unit:fb21e3fafb05b1af"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C007",
+    "proposal_id": "FPT-007",
+    "facets": [
+      "D"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "disposition": "EDIT",
+        "base_sha256": "3ba053c772725075a827c7f0ab83362f4a4d20cddbb1901bc094c71b248fbe5a",
+        "previous_reviewed_sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+        "current_sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DeviceChange.cs",
+        "disposition": "EDIT",
+        "base_sha256": "f507e6a513cbfe90f35f05119deba0fa2c32191fc88075d533b0a356bec80690",
+        "previous_reviewed_sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+        "current_sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/YubiKeyManager.cs",
+        "disposition": "EDIT",
+        "base_sha256": "23d965dbe0ed71a1ef857815ad366e6b8d4d6d29707cadf7f91da42f907b8090",
+        "previous_reviewed_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+        "current_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+        "disposition": "EDIT",
+        "base_sha256": "1145218451f56567275d848d9bdfd04082a557fd49e88f2d2c536c08d01c83f1",
+        "previous_reviewed_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+        "current_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceIdentityContractTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+        "previous_reviewed_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+        "current_sha256": "9883de566756b2092df8215621fbd16d0b3eb6eee17f7c11651e2adf90c61ac2",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SnapshotDiffTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+        "previous_reviewed_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+        "current_sha256": "62f2f95c2c6966ccd78eb108fd2a6ffe9d5d9d45bebd4d767fd28781c1f0bfcc",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/physical-device-model.md"
+    ],
+    "held_facet_trigger": "Reopen after serial/update/retention or connection-bit behavior changes.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C007",
+      "original_unit_ids": [
+        "core-001:unit:2fe4d022b7d3b3aa",
+        "core-001:unit:7e884d3cf8e27cb5",
+        "core-001:unit:813d918bbba7dddf",
+        "core-001:unit:85bd7c2dbe8ac01e",
+        "core-001:unit:f0aafb9b6e9c9963",
+        "core-001:unit:f6a0dc189510a13f"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C008",
+    "proposal_id": "FPT-008",
+    "facets": [
+      "D",
+      "Q"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/CompositeMetadataReader.cs",
+        "disposition": "EDIT",
+        "base_sha256": "71ce0cba0b61925cc24a2dc005b96ad26debfa2daf44f4d832273e222c3874c6",
+        "previous_reviewed_sha256": "da79a689b7796657916a063cafcae3f42780ebdd75460bd0c8f9c823e7d392ec",
+        "current_sha256": "da79a689b7796657916a063cafcae3f42780ebdd75460bd0c8f9c823e7d392ec",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DiscoveryBudgets.cs",
+        "disposition": "EDIT",
+        "base_sha256": "d93fcb438b491d975f5ba1d4fe53ee08363bb560c8cbba7ad15adc550b388da7",
+        "previous_reviewed_sha256": "c9c644d13dec23e08b732e01024e8b239ea6c9c5f6b327b674588e5106ccf6e2",
+        "current_sha256": "c9c644d13dec23e08b732e01024e8b239ea6c9c5f6b327b674588e5106ccf6e2",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+        "disposition": "EDIT",
+        "base_sha256": "cbacefb90b7d52085b981ebf911fdf60e5eaabdf9abfef60212d130b2b673423",
+        "previous_reviewed_sha256": "aa1dcb809f31374d15236b35bb0fa12069a228cbf019314d2d8eaa7996a7e640",
+        "current_sha256": "aa1dcb809f31374d15236b35bb0fa12069a228cbf019314d2d8eaa7996a7e640",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+        "disposition": "EDIT",
+        "base_sha256": "70b233fec5bc94cbdb12785c776130206d764ebbab42991b7b0fd1c5f8daf163",
+        "previous_reviewed_sha256": "1d7ee756959e44f2067332c3282ec0d3f8700aa8d045d14dff442671451215d9",
+        "current_sha256": "1d7ee756959e44f2067332c3282ec0d3f8700aa8d045d14dff442671451215d9",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/DiscoveryReadScope.cs",
+        "disposition": "EDIT",
+        "base_sha256": "cdd9ab546d01806a15af19fcd60f11eea17493046200699c5923cea469046f61",
+        "previous_reviewed_sha256": "07545c692d1b70ef6534fb45db9af115aa55c9095a0559d256411e3fb347b776",
+        "current_sha256": "07545c692d1b70ef6534fb45db9af115aa55c9095a0559d256411e3fb347b776",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "9bb5821dd74c14252ac73e53be8901ec05d98090489929023500d13778dd906a",
+        "previous_reviewed_sha256": "c6b19c10e85e53bd57929b1118c7d555fe38db9a75e5b4c779e4f94493699f58",
+        "current_sha256": "c6b19c10e85e53bd57929b1118c7d555fe38db9a75e5b4c779e4f94493699f58",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+        "disposition": "EDIT",
+        "base_sha256": "0fd928454eac72d56b199eb23e92a4539a88b6814c8e7fef624267d9a1d28d70",
+        "previous_reviewed_sha256": "aa7bdd0872f1558de3fe53ed7a92d92e1420b2816a3a15c38f0566f624412838",
+        "current_sha256": "aa7bdd0872f1558de3fe53ed7a92d92e1420b2816a3a15c38f0566f624412838",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+        "disposition": "EDIT",
+        "base_sha256": "1145218451f56567275d848d9bdfd04082a557fd49e88f2d2c536c08d01c83f1",
+        "previous_reviewed_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+        "current_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "073feb03b5fed675b1a42e02839a62204d51f54bc99afb4d1cad27110790de05",
+        "previous_reviewed_sha256": "7fb638eb701db765ada5fbd04796f272baa78fae19cb213e7c4f7cf66c5957c2",
+        "current_sha256": "7fb638eb701db765ada5fbd04796f272baa78fae19cb213e7c4f7cf66c5957c2",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryReadSchedulingTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856",
+        "previous_reviewed_sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856",
+        "current_sha256": "23a9ac8fc87669edbecc7f70d0642b4b4b02c7aaf7de808b87a3847b37fad856",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoverySingleFlightTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+        "previous_reviewed_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+        "current_sha256": "38b9013d2348b708c22a03447c2b8932e7ee7b0a668e90c6aaaaaf82f3dbadd6",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "1ed0d5eca00f1c69cbe5109cb2cebce251a5406c621cdad75a3e2e08317e4f25",
+        "previous_reviewed_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+        "current_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysScopeTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+        "previous_reviewed_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+        "current_sha256": "9ea0ccc4a851aa7915fb62055d602f705eca88b87db0fb264cc6ad26ad8d2351",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Infrastructure/TransientScanRetryTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d",
+        "previous_reviewed_sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d",
+        "current_sha256": "333fbb1eed46c7f7d66ed9d71ca11ed6c0fb0073bda570f55b89fb7be0e3a51d",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/event-driven-device-discovery.md"
+    ],
+    "held_facet_trigger": "Completed B1-B4 supply source handoffs; stronger logger resilience still requires A-E03 or selected implementation work.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C008",
+      "original_unit_ids": [
+        "core-001:unit:6f62636a92cfe27b",
+        "core-001:unit:7314b570419e513e",
+        "core-001:unit:7bb4228b0d9cd00f",
+        "core-001:unit:818ff32e6ed41698",
+        "core-001:unit:983a62a26becc62e",
+        "core-001:unit:eb73c678681d722c",
+        "core-001:unit:f7fed895096a5339"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C009",
+    "proposal_id": "FPT-009",
+    "facets": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+        "disposition": "EDIT",
+        "base_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+        "previous_reviewed_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e",
+        "current_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+        "review_status": "FOCUSED-REVIEW-PENDING"
+      },
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "disposition": "EDIT",
+        "base_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+        "previous_reviewed_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+        "current_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+        "disposition": "EDIT",
+        "base_sha256": "b27a0d9655f85a3b154ed90390e651cab4a3c24fa196ca98a401a1b5b8f414bd",
+        "previous_reviewed_sha256": "9c0a8df4166168199c8d84b26c72c2af015ee141beed01480d5ae827fd1b8d63",
+        "current_sha256": "9c0a8df4166168199c8d84b26c72c2af015ee141beed01480d5ae827fd1b8d63",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+        "disposition": "EDIT",
+        "base_sha256": "bd88e4c665bc58a7f983ddaf8b5fb7bffbc19bcf4d466a851a861278fb35a35a",
+        "previous_reviewed_sha256": "5f71a78c58e7781bb0cbf7c905e905813cb6185f171db4c86c79ebd0857ea56a",
+        "current_sha256": "5f71a78c58e7781bb0cbf7c905e905813cb6185f171db4c86c79ebd0857ea56a",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+        "disposition": "EDIT",
+        "base_sha256": "6a06eb32ddccf3a30ce104a342356ef308689840424a1c4b742b44a38a8b02ad",
+        "previous_reviewed_sha256": "cb499bcf262c92f001179ddbd561ba3063ef81bbe838beef32ac7a1ee7c2b102",
+        "current_sha256": "cb499bcf262c92f001179ddbd561ba3063ef81bbe838beef32ac7a1ee7c2b102",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+        "previous_reviewed_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+        "current_sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c",
+        "review_status": "FOCUSED-REVIEW-PENDING"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "held_facet_trigger": "B4 source is complete; current topology/ABI conditions can be documented. Native evidence and the future user-ready Windows delta are separate qualifications.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C009",
+      "original_unit_ids": [
+        "core-001:unit:4953a16ea41f624e",
+        "core-001:unit:4faa4e04fffac537",
+        "core-001:unit:9330107ef863401f",
+        "core-001:unit:d117780b4119b8ce"
+      ]
+    },
+    "revision_2_corrections": [
+      "R2"
+    ]
+  },
+  {
+    "local_id": "CORE-A-C010",
+    "proposal_id": "FPT-010",
+    "facets": [
+      "D"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+        "disposition": "EDIT",
+        "base_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+        "previous_reviewed_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e",
+        "current_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+        "review_status": "FOCUSED-REVIEW-PENDING"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "73041fea1e611a5e7720f26da78aaf37a618836315933d32e85a344b09a2bffd",
+        "previous_reviewed_sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159",
+        "current_sha256": "767abdf0cde7dda2d97fdfc0f512414bf25bc5eb94bd0e52fd92612600051159",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "d9b6c411a93d0a3600f488a03cc313b8dfe1bfec0ba504c9fa594ae8fc9347f9",
+        "previous_reviewed_sha256": "09cb1d140127384964aa370f69c97279e7c1e07d742533d897567ebb8e4a7315",
+        "current_sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03",
+        "review_status": "FOCUSED-REVIEW-PENDING"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/device-discovery-guarantees.md"
+    ],
+    "held_facet_trigger": "Reopen after merge policy or test oracle changes; preserve method names and assertions.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C010",
+      "original_unit_ids": [
+        "core-001:unit:3c805cd8fe5a65bc",
+        "core-001:unit:898e52ebac911265",
+        "core-001:unit:8c152b9383026722",
+        "core-001:unit:8f107ba15e11c8c6",
+        "core-001:unit:a793e3448845b351",
+        "core-001:unit:ae9c4e9b8c53e1dd",
+        "core-001:unit:f61c042958f16802"
+      ]
+    },
+    "revision_2_corrections": [
+      "R1"
+    ]
+  },
+  {
+    "local_id": "CORE-A-C011",
+    "proposal_id": "FPT-011",
+    "facets": [
+      "D"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+        "disposition": "EDIT",
+        "base_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+        "previous_reviewed_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e",
+        "current_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+        "review_status": "FOCUSED-REVIEW-PENDING"
+      },
+      {
+        "path": "src/Core/src/Devices/YubiKeyManager.cs",
+        "disposition": "EDIT",
+        "base_sha256": "23d965dbe0ed71a1ef857815ad366e6b8d4d6d29707cadf7f91da42f907b8090",
+        "previous_reviewed_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+        "current_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "d9b6c411a93d0a3600f488a03cc313b8dfe1bfec0ba504c9fa594ae8fc9347f9",
+        "previous_reviewed_sha256": "09cb1d140127384964aa370f69c97279e7c1e07d742533d897567ebb8e4a7315",
+        "current_sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03",
+        "review_status": "FOCUSED-REVIEW-PENDING"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/architecture/physical-device-model.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "held_facet_trigger": "Reopen after grouping, serial-slot binding or post-merge verification changes.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C011",
+      "original_unit_ids": [
+        "core-001:unit:012b1757081afa83",
+        "core-001:unit:178a49f3fcbde939",
+        "core-001:unit:4170a6821c923af4"
+      ]
+    },
+    "revision_2_corrections": [
+      "R1"
+    ]
+  },
+  {
+    "local_id": "CORE-A-C012",
+    "proposal_id": "FPT-012",
+    "facets": [
+      "D",
+      "P",
+      "Q",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/DeviceChange.cs",
+        "disposition": "EDIT",
+        "base_sha256": "f507e6a513cbfe90f35f05119deba0fa2c32191fc88075d533b0a356bec80690",
+        "previous_reviewed_sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+        "current_sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/YubiKeyManager.cs",
+        "disposition": "EDIT",
+        "base_sha256": "23d965dbe0ed71a1ef857815ad366e6b8d4d6d29707cadf7f91da42f907b8090",
+        "previous_reviewed_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+        "current_sha256": "48ad52332624a321c8ce9636bbb39ad0ae7cfecf1fd0e86680c8c1bf149bd92a",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+        "disposition": "EDIT",
+        "base_sha256": "1145218451f56567275d848d9bdfd04082a557fd49e88f2d2c536c08d01c83f1",
+        "previous_reviewed_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+        "current_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "d768e34541472ea6c346cecab3d76beb8724338df1ca8e202ef52d6473e43157",
+        "previous_reviewed_sha256": "ce5c091da33607cde9717174c4fee9092ce393dcffd09895ea4ad1fca47ee408",
+        "current_sha256": "ce5c091da33607cde9717174c4fee9092ce393dcffd09895ea4ad1fca47ee408",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+        "previous_reviewed_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+        "current_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "6d4a0a3c36cb62fbe06965e430cb01e6602d7f899f4c2d2d3b4ce00ec6bc1de9",
+        "previous_reviewed_sha256": "5ba047b54e86ebcc66b12a6b314d2ed7ce305337f06e21551ffee251b2aaab0f",
+        "current_sha256": "5ba047b54e86ebcc66b12a6b314d2ed7ce305337f06e21551ffee251b2aaab0f",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "e76d8046728e3a162524a6276c615c2669c41264de8097db4b57af1fad6598a8",
+        "previous_reviewed_sha256": "2725180d951f0eaadc3635379f97d5eddfdd595dcc1818e7f43d93f882664115",
+        "current_sha256": "2725180d951f0eaadc3635379f97d5eddfdd595dcc1818e7f43d93f882664115",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "09ae4b338ff25c37ca28f91377481be0fbcd756d580f5fb8900f38df0d29c2b3",
+        "previous_reviewed_sha256": "36daf0fd92f19d386d3d43d22b48a262ebd1014530427e40c70207566eeb06af",
+        "current_sha256": "36daf0fd92f19d386d3d43d22b48a262ebd1014530427e40c70207566eeb06af",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "9c684e4e91480e3daf2e295463f711a8bafa3d3b46010243bda6504e57b6e19c",
+        "previous_reviewed_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+        "current_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/architecture/device-identity.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "held_facet_trigger": "New exact OS/device run or separately scoped harness/assertion repair; retain failure-path drain questions.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C012",
+      "original_unit_ids": [
+        "core-001:unit:03dfc1975ff56563",
+        "core-001:unit:22708a9deb9ca8f4",
+        "core-001:unit:35c69b1c32299845",
+        "core-001:unit:65c4bb66d0798fa0",
+        "core-001:unit:97e7e3374a5bd0a6",
+        "core-001:unit:990ff5651c081eb1",
+        "core-001:unit:9e26b4a878706408",
+        "core-001:unit:a1683fb2241f1261",
+        "core-001:unit:c9e20afd256d620e"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C013",
+    "proposal_id": "FPT-013",
+    "facets": [
+      "D",
+      "B"
+    ],
+    "inherited_aliases": [
+      "management-001:MGMT-XREF-003"
+    ],
+    "paths": [],
+    "out_of_scope_reopening_paths": [
+      "src/Tests.Shared/CLAUDE.md",
+      "src/Tests.Shared/README.md",
+      "src/Tests.Shared/IYubiKeyFilter.cs",
+      "src/Tests.Shared/YubiKeyTestState.cs"
+    ],
+    "held_facet_trigger": "Reopen shared fixture and authorization prose after gate/cache/binding changes; preserve resolved old prose scope.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C013",
+      "original_unit_ids": [
+        "core-001:unit:152de45877baf309",
+        "core-001:unit:4f3c7b5aad361aa3",
+        "core-001:unit:95aea68013140589",
+        "core-001:unit:a208d0ef2f4384b9"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C014",
+    "proposal_id": "FPT-014",
+    "facets": [
+      "M",
+      "B"
+    ],
+    "inherited_aliases": [
+      "management-001:MGMT-IMP-009"
+    ],
+    "paths": [],
+    "out_of_scope_reopening_paths": [
+      "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "src/Tests.Shared/README.md",
+      "src/Management/tests/CLAUDE.md"
+    ],
+    "held_facet_trigger": "Choose strict versus ignored malformed criteria; recheck two-component caller and coverage descriptions.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C014",
+      "original_unit_ids": [
+        "core-001:unit:3b280b8e14f64097"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C015",
+    "proposal_id": "FPT-015",
+    "facets": [
+      "D",
+      "M",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+        "previous_reviewed_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/Feature.cs",
+        "disposition": "EDIT",
+        "base_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+        "previous_reviewed_sha256": "40e111b46516aa81eca2d53cbfc9b890f39d4c659d7c75a9ca983779dae38318",
+        "current_sha256": "40e111b46516aa81eca2d53cbfc9b890f39d4c659d7c75a9ca983779dae38318",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/FirmwareVersion.cs",
+        "disposition": "EDIT",
+        "base_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+        "previous_reviewed_sha256": "8dcf389cde5f6f6f2e1d3ddc9960a1aa972cd33f21ff5b2d729a3a71658cb822",
+        "current_sha256": "8dcf389cde5f6f6f2e1d3ddc9960a1aa972cd33f21ff5b2d729a3a71658cb822",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "9c684e4e91480e3daf2e295463f711a8bafa3d3b46010243bda6504e57b6e19c",
+        "previous_reviewed_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+        "current_sha256": "1e728585dfe06bb265be84a091328c3ee4c8f87341978c4469c37981183e28be",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FeatureTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e",
+        "previous_reviewed_sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e",
+        "current_sha256": "07655011e4341026899836c52fb99c5e566f7727409e4adb9da6eacce144121e",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "src/Core/README.md",
+      "src/Core/CLAUDE.md"
+    ],
+    "held_facet_trigger": "Reopen after effective-version/gate policy changes; each applet verifies its actual gate.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C015",
+      "original_unit_ids": [
+        "core-001:unit:5d6fd1703cc269d6",
+        "core-001:unit:d459cd62ca366276"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C016",
+    "proposal_id": "FPT-016",
+    "facets": [
+      "M",
+      "P",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/DeviceInfo.cs",
+        "disposition": "EDIT",
+        "base_sha256": "ee39c986928191e044c9869ca6cc787212e425cdd40396fdba208ea7d5dd4b00",
+        "previous_reviewed_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "current_sha256": "794cb99ce63cbe87e6804191cfc319cf17a0df69a963c4d4b0829b9059569cad",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoFieldLengthTests.cs",
+        "disposition": "RETAIN",
+        "base_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "previous_reviewed_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "current_sha256": "10ba60fee7432cb5be94e3495d7c02ca25ea1fbf42812605ecaf19e0f5a4070e",
+        "review_status": "SUPPORTED-PREDECESSOR-RETAIN"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "src/Management/src/IManagementSession.cs",
+      "docs/usage/device-discovery.md"
+    ],
+    "held_facet_trigger": "Decide metadata raw escape hatch, duplicate/error contract and equality impact before API wording.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C016",
+      "original_unit_ids": [
+        "core-001:unit:23540f2a3719ceef",
+        "core-001:unit:a6f48f999e63cf51"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C017",
+    "proposal_id": "FPT-017",
+    "facets": [
+      "D",
+      "E",
+      "P",
+      "M"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "disposition": "EDIT",
+        "base_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+        "previous_reviewed_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+        "current_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "1ed0d5eca00f1c69cbe5109cb2cebce251a5406c621cdad75a3e2e08317e4f25",
+        "previous_reviewed_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+        "current_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/physical-device-model.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "held_facet_trigger": "A-E04 stable interface ID/two FIDO ProductIds with hotplug control; reopen cache-validity prose after policy choice.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C017",
+      "original_unit_ids": [
+        "core-001:unit:1fdb6fe6c7821f02",
+        "core-001:unit:53f09e22a16aa4a5",
+        "core-001:unit:654964ede5c2706e",
+        "core-001:unit:765edbf523cfd3fc",
+        "core-001:unit:76d2b97705c15504",
+        "core-001:unit:7ffd140877cf7153",
+        "core-001:unit:bec6b7b3a269e3f9"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C018",
+    "proposal_id": "FPT-018",
+    "facets": [
+      "D",
+      "E",
+      "Q"
+    ],
+    "inherited_aliases": [],
+    "paths": [],
+    "out_of_scope_reopening_paths": [
+      "scripts/toolchain/TestTargets.cs",
+      "TOOLCHAIN.md",
+      "docs/TESTING.md"
+    ],
+    "held_facet_trigger": "A-E05 pure translation plus tiny pinned xUnit 3.0.0 match-list probe before same-kind AND/OR wording.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C018",
+      "original_unit_ids": [
+        "core-001:unit:52af7eae6baa9477",
+        "core-001:unit:e7fd63e54b233a7b",
+        "core-001:unit:f1de9ba9c113de18"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C019",
+    "proposal_id": "FPT-019",
+    "facets": [
+      "D",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [],
+    "out_of_scope_reopening_paths": [
+      "TOOLCHAIN.md",
+      "src/Tests.Shared/Infrastructure/TestCategories.cs"
+    ],
+    "held_facet_trigger": "Reopen after discovery layout or owning applet reset policy changes; preserve trait strings.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C019",
+      "original_unit_ids": [
+        "core-001:unit:280d07f19a0ec1cf",
+        "core-001:unit:2f413d848711837a",
+        "core-001:unit:a90ace2dd73cb9ee"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C020",
+    "proposal_id": "FPT-020",
+    "facets": [
+      "D",
+      "Q",
+      "B"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+        "disposition": "EDIT",
+        "base_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+        "previous_reviewed_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e",
+        "current_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+        "review_status": "FOCUSED-REVIEW-PENDING"
+      },
+      {
+        "path": "src/Core/src/Devices/CompositeMetadataReader.cs",
+        "disposition": "EDIT",
+        "base_sha256": "71ce0cba0b61925cc24a2dc005b96ad26debfa2daf44f4d832273e222c3874c6",
+        "previous_reviewed_sha256": "da79a689b7796657916a063cafcae3f42780ebdd75460bd0c8f9c823e7d392ec",
+        "current_sha256": "da79a689b7796657916a063cafcae3f42780ebdd75460bd0c8f9c823e7d392ec",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/device-identity.md",
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/research/native-aot-readiness-data.md",
+      "docs/research/native-aot-readiness.md"
+    ],
+    "held_facet_trigger": "Obtain original repository/full 7d7a7455 pin and original artifacts or exact new watcher-host run before measured claims.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C020",
+      "original_unit_ids": [
+        "core-001:unit:11fed183b9a82b24",
+        "core-001:unit:54294a105f5d36f3",
+        "core-001:unit:63268ff8bf3849a8",
+        "core-001:unit:ca906a2b38ebf548"
+      ]
+    },
+    "revision_2_corrections": []
+  },
+  {
+    "local_id": "CORE-A-C021",
+    "proposal_id": "FPT-021",
+    "facets": [
+      "D",
+      "E",
+      "P",
+      "M"
+    ],
+    "inherited_aliases": [],
+    "paths": [
+      {
+        "path": "src/Core/src/Abstractions/IYubiKey.cs",
+        "disposition": "EDIT",
+        "base_sha256": "3ba053c772725075a827c7f0ab83362f4a4d20cddbb1901bc094c71b248fbe5a",
+        "previous_reviewed_sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+        "current_sha256": "93618845b4d2ba4ee48dbd505924523eaaf277a8ea5eddcaa3615e0ed5f6b022",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/src/Devices/FindYubiKeys.cs",
+        "disposition": "EDIT",
+        "base_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+        "previous_reviewed_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+        "current_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+        "disposition": "EDIT",
+        "base_sha256": "1ed0d5eca00f1c69cbe5109cb2cebce251a5406c621cdad75a3e2e08317e4f25",
+        "previous_reviewed_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+        "current_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+        "review_status": "ACCEPTED-PREDECESSOR-EDITED-HASH"
+      }
+    ],
+    "out_of_scope_reopening_paths": [
+      "docs/architecture/device-discovery-guarantees.md",
+      "docs/usage/device-discovery.md"
+    ],
+    "held_facet_trigger": "A-E06 count opens across successful serial-less scans with activity control; decide successful-observation expiry.",
+    "review": "Predecessor review remains at its exact hashes and limits. Revision-2 R1/R2 wording awaits focused review; no experiment, implementation-facet closure or whole-batch acceptance.",
+    "original_evidence_reference": {
+      "path": "editing/A/candidate-dispositions.json",
+      "sha256": "b8bc912dcb45158002cab50c18d992762cd0077ec80b1404253ab50b085245a1",
+      "local_id": "CORE-A-C021",
+      "original_unit_ids": [
+        "core-001:unit:178a49f3fcbde939",
+        "core-001:unit:35a8b4441222950f",
+        "core-001:unit:d2a43f02be6641cd"
+      ]
+    },
+    "revision_2_corrections": []
+  }
+]

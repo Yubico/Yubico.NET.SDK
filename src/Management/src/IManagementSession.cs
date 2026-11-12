@@ -24,6 +24,8 @@ namespace Yubico.YubiKit.Management;
 ///     Await each operation before starting the next. Overlapping exchanges are refused rather than queued.
 ///     A device-information read can span several exchanges; it is not an atomic snapshot, and concurrent
 ///     disposal does not guarantee completion of the whole read.
+///     Await the complete public task before disposing the session or clearing borrowed inputs; the
+///     Core guard drains an admitted exchange, not every page or post-exchange step in a workflow.
 ///     Cancellation is transport-specific: SmartCard checks cancellation before admitting an exchange,
 ///     then drains the admitted exchange without interrupting it. HID protocols have their own cancellation
 ///     signaling during device waits. Cancellation never rolls back configuration already sent to the device.
@@ -36,6 +38,11 @@ public interface IManagementSession : IApplicationSession
     ///     serial number are optional and depend on the device and transport. Firmware 4.1.0 or later is
     ///     supported; this method does not enforce that minimum before sending the request. Unsupported
     ///     devices can instead fail during communication or response parsing.
+    ///     Later reads use the firmware captured during initialization as the decoder's default, which
+    ///     takes precedence over the ordinary firmware tag; a non-final version qualifier can replace it.
+    ///     A firmware override controls session policy, not this returned value. Neither this read nor a
+    ///     configuration write updates the device's discovery snapshot. The current DeviceInfo value
+    ///     contains memory-backed timeout data: copying it does not create independent timeout storage.
     ///     Device, transport, and parsing errors propagate from their respective layers.
     /// </remarks>
     /// <param name="cancellationToken">A token requesting cancellation, subject to the transport's exchange boundaries.</param>
@@ -65,6 +72,7 @@ public interface IManagementSession : IApplicationSession
     ///     Lock-code memory remains caller-owned: keep it valid and unchanged until completion, then clear
     ///     it when no longer needed, including on failure or cancellation. The session clears its encoded
     ///     configuration buffer after the backend write completes, including failure or cancellation.
+    ///     That cleanup covers this encoding, not every formatter, transport, or secure-response copy.
     ///     </para>
     ///     <para>
     ///     A requested reboot can disconnect the key; dispose stale sessions and rediscover/reopen it.
@@ -98,6 +106,8 @@ public interface IManagementSession : IApplicationSession
     ///     <see cref="Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride" /> applies.
     ///     The SDK does not check the product family; passing the firmware check does not establish support.
     ///     HID FIDO and HID OTP sessions are rejected without sending a reset command.
+    ///     Success does not refresh metadata, invalidate the managed session, or establish a new secure
+    ///     channel. End the old session/connection scopes and rediscover the intended key before further use.
     /// </remarks>
     /// <param name="cancellationToken">A token checked before exchange admission; it does not interrupt an admitted SmartCard reset or undo it.</param>
     /// <returns>A task representing the asynchronous reset operation.</returns>

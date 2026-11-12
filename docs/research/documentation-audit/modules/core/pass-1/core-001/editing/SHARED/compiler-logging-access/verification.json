@@ -1,0 +1,24 @@
+{
+  "only_product_delta": [
+    "CLAUDE.md"
+  ],
+  "exactly_one_bullet_changed": true,
+  "other_26_current_product_paths_unchanged": true,
+  "prior_artifacts_preserved": 100,
+  "root_complete_fences_unchanged": 17,
+  "unclosed_fences": 0,
+  "link_targets_unchanged": true,
+  "static_checks": {
+    "diff-whitespace": {
+      "exit": 0,
+      "output": ""
+    },
+    "focused-patch": {
+      "exit": 0,
+      "output": ""
+    }
+  },
+  "index_unchanged": true,
+  "sdk_build_test_formatter_compiler_native_crypto_device": "NOT RUN",
+  "focused_independent_review": "pending"
+}

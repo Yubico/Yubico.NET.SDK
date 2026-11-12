@@ -1,0 +1,375 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "Content-reviewed protocol documentation transfer; combined compiler validation pending",
+  "patch_sha256": "7d2f50621bddf029cc3b494a256552ea9169d3a2d142caeb101a72d7ebd50b5e",
+  "product_files": [
+    {
+      "path": "src/Core/src/Abstractions/IApplicationSession.cs",
+      "sha256": "c00e90d5217233ea9e7063815e5f65725ce6b1405a83a147e9ed49404e8517bd"
+    },
+    {
+      "path": "src/Core/src/Abstractions/IProtocol.cs",
+      "sha256": "f71931ea7ef4a2df862fb51c819ed1d2e5da5ae6d2f2b5afee5e0270067fd432"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/CtapConstants.cs",
+      "sha256": "704f758a7a63bd48de1cd9c07b20b24fc882c49f85867a5acea167517fe69e39"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "sha256": "2c2b0b6b0ba3d92a3ffe49039e9e88e64b6bc69f2dd49efed2632691261e2804"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+      "sha256": "91a6c0cb7521bf610a867a681be0dc28e9592d634ca1f1e4361ccd6bd77f37c1"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+      "sha256": "b4a20c0c7ee06b04c61e158be99afab1fff6ae476eb56adb298f025707db02bd"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+      "sha256": "68d4857bf19e25b6ec7cd16c8903351846a964128d6f3d31a446ef1fa6030318"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+      "sha256": "21c650a1b07398ba9abb5847cdf2f93b1d11e482fe09e6f49e011f2e91feda00"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "sha256": "ac5bda03907f4a65beda4e8d60753df05d522fdc428704606a96aa19b1b39e4d"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "sha256": "eebd95ddec5391e6de801e08cb92f14d0ef02f0caf200505e5d2141b87787a21"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "sha256": "749263a8472ce616903867e57973d708a7541552103a7f6e7174d0955e60bd32"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+      "sha256": "0079223fc932ce772326f80a6836517d610756bbb7689fc923962bf1d21d10c0"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+      "sha256": "8fb261a5183bde0702bf1f652f4bbe1e440be43e1d262e04fb67d03ae6719974"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "sha256": "750dca027db182a40edcccb2be7ae80af7feeca38ac952c8dba21b8ed66b888f"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+      "sha256": "72d3f9381e2650ca736827933ff5b6b1ffeb29ec2761eb94d98978ce79bd5789"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+      "sha256": "cb0d5714544b2c2f1bee244244d5a5132c59d089b743517b0a278cecac9ece69"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+      "sha256": "0dad810df61c74ad362c01c5475b44a1024ff571fdddd4c1ae800bf9af1ac4d1"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+      "sha256": "6d621aaf43155e7a6e979aa67a6358cc968ce97d5f5dbea800222a3a3e8af296"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+      "sha256": "71bdb6b8015535fc288e30ce9dd413e899efcca9b57e3f8e1b3cb7c3d7a1348d"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+      "sha256": "86a0ec43837c8b6bac713426d484ce6b90252ffe061582b08b59d525f52d2336"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+      "sha256": "940c10773225b5db09d6860f9600a4db005c6ec9be5d27fc8741eaa7d038f273"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "sha256": "d388a3328c180bf8774b8982aab17cf5045879816595e8888cc4df6347269195"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+      "sha256": "f53a867d24a594dcdd86509e353c653d8216834a60f953980082a5a824a751d6"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+      "sha256": "b7abba893759a13f358e16d35c718318e509cb589d39eab99ad52fb8423dc605"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+      "sha256": "a05ab92661982b550969ae49696668d15cf48a1d72f2d0979a1d83afc6551fdb"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+      "sha256": "f20d7c53ac2c7955b26a0a0ad1ca850e6eaf17d4acf60c01ec99915d6da487be"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+      "sha256": "59f205664fdca77193513177f6f725f8f07d7c45784b85d23b5b6c97b0dff87a"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "sha256": "c8d49b216c963eaade43fcd638d938140fae87d5d7e9002a28a0ca5a3c5727fa"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "sha256": "77694a8ee3a9ed292cfc2efb30f60c5a05216722bd9c565b18efc280c2c35b03"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+      "sha256": "511ca690c1df8a4a6b662c1f18fab9a093d2d0a40eeb8b38c5ae59917a08d919"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+      "sha256": "b06462cebcbe708c0d8508e0116b02404308272a0293df87969d057234f0c0a5"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "sha256": "39c27442ce9667fc4282b41a8c5d09926fe6bc7b6d66f009e69baa4d5e501c6d"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "sha256": "1d7bbee6d20260c060836e5fce23d418db7c21bd7d822353f2c857342d4e9688"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+      "sha256": "4910574b13ba81aec0fe886e6e2a3c49c10c09ae2043f634f7ddc5896f098a52"
+    },
+    {
+      "path": "src/Core/src/Sessions/ApplicationSession.cs",
+      "sha256": "75c65e859d7404aa3cb9255507b061ea43dbc5eba1b19b3c0c8b57313e9bb754"
+    },
+    {
+      "path": "src/Core/src/Sessions/ConnectionSessionGuard.cs",
+      "sha256": "64336dc4e4c91dab83932c3f313495e0d9edddc2deda71436d822bbd3800cdec"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+      "sha256": "c323c5801cb53f54317247aa9aabcbb734f5eaed5a443eeb427847c54a6e1eb8"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+      "sha256": "08ee917ada2b0dd6274f78a89110b3322d03a9209935a0c96de00440917ac605"
+    },
+    {
+      "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+      "sha256": "e0d4fed1f37089581c13f60bf66767664fbb1adbcb96f6622bd44b5c3da1c213"
+    },
+    {
+      "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+      "sha256": "9393cbf2d5f5ee0628fd75ec248b97497b525daa768abb6feccd42549db55eb3"
+    },
+    {
+      "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+      "sha256": "568935c28ac2b809f59c0097664397bfccbb0fa145bed894b94df038e86aa41a"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "sha256": "fe0f0337ed59109a259590a1497320c7a4e7e233db07911c0ad6b21b04a47556"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+      "sha256": "d07b2786c2201ce46ea2b6f06e92bb9cfd03ce18c70d9e57162920f7b0649618"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+      "sha256": "29aef8df8d1f49dab5acb6a1675ef90a6d1517a53a81737c4c0cc5a576005890"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "sha256": "0f1a4eff327d3d87ab02e9b6f6a6fd69df1be586881f66409b6912b1c2789bf3"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "sha256": "0309afaef1dd32bc103b3aa064effdcdf8fb8a747c8f3273731defa804303494"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "sha256": "366f2813be1a73df6e0c9fcfafd415260da0910f8e7b2421c4b4e8ab47f17240"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+      "sha256": "e86dd2e2d88973d0bec0419a293e721c693502681ca2048e4977cd20e76b49f2"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+      "sha256": "006dbb8a4760392d01988703709a6e0c74cf441c9bf359c4f9dc196af51c1013"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+      "sha256": "6db4dcab6ef539a976e76e032de5004970e71caaa565bad4ceef9877763c7c58"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+      "sha256": "6ba679af8ed31428777fc5872a9355f3b602c784b482481999366e67293d760d"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+      "sha256": "a6fcce466e6c12262dbe9c4d7fe6b856993e9f6aa6ebb7e1beca66774ca59bc1"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "sha256": "2cba79d85a56d031cccb3190a80da9db59e30316ef6cfb12f706e8ef1e21a859"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+      "sha256": "d4e0973e0eaa5864f603876404656d19f06cf0f09e946dd1f0f0ad50370f4806"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+      "sha256": "163ad7c64d6cfd2429c5fb264ab9e9a982f18fcbca89469b52e777150282320f"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/edit-protocols.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-protocols.md",
+      "bytes": 14032,
+      "sha256": "5084a4637a0005d1f8053e2ddb41fb102227d41aad570b12d77fd9b92a95683c"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/write-return.py",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/write-return.py",
+      "bytes": 13386,
+      "sha256": "07b02e261056386f8d28d6c537e31e76a1c64c8b92fb624a5afcb8fa8ec13733"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/path-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/path-decisions.json",
+      "bytes": 204293,
+      "sha256": "691127ced67913859f5ddc2a469dbbda17a6b4f22f602777094d46128671fda0"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/candidate-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/candidate-decisions.json",
+      "bytes": 98538,
+      "sha256": "3f67aade37e54e741e44461a2480d610542b89c91ed9d949f9a9ef0276cf4fb6"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/examples.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/examples.json",
+      "bytes": 3488,
+      "sha256": "03f6a50201591bcdd0df192e2ee544764ec206a5afec9760861bf792594a9366"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/outside-owner-handoffs.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/outside-owner-handoffs.json",
+      "bytes": 43067,
+      "sha256": "4888d6f64b07a2b7d3f84301decb1e54fc92c5c2b14307748219386a06eb08af"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/full-product.diff",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/full-product.diff",
+      "bytes": 131041,
+      "sha256": "4a89837083fd34826639a55d1bd988574565bc8a4da508975820e0acfa3755d1"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/receipt.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/receipt.json",
+      "bytes": 1070,
+      "sha256": "1dee31f152c73c6b6dd806cc93751308823909e135e7e59e6c54e3d13259d1ce"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/citations.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/citations.md",
+      "bytes": 6552,
+      "sha256": "3e5a693f3905b4a7fa1f2cd4b88221045aa47dad67a089e7a5a17f9a46c0b626"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/artifact-manifest.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/artifact-manifest.json",
+      "bytes": 1824,
+      "sha256": "f8cfe65e3725c2d73bc72480f33b2bb990ee080440fedba4ad34cedb9f3b96a4"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/review.md",
+      "bytes": 16526,
+      "sha256": "5f831b0ca0b48c7ffbb068719b51c58e86b3e1e41e390674d2ad45adae64ab79"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/review-identities.json",
+      "bytes": 5955,
+      "sha256": "53c1df7dd500fdb3d61856a2408c0b11d2734f546e75948f44b9b0e3fb4a5bc2"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/reviewed-input.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/reviewed-input.json",
+      "bytes": 738171,
+      "sha256": "297b3425611e47fc6abb8c6916578eded2544e6d6393b6b924730c83eb0ed4a9"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/citations.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/citations.md",
+      "bytes": 5843,
+      "sha256": "5fd27a20a195f0775039e259cfd08987f24258b869c0e415d442fe9590073d55"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/report.md",
+      "bytes": 5487,
+      "sha256": "debece57ab9b490c9762e106b551880f3f1606d191ae73123e5bbad7a1b963ac"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/path-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/path-decisions.json",
+      "bytes": 214009,
+      "sha256": "89d65f56a53382e40117c61bbb19b678e80d246944518b98d84a979247730f4e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/candidate-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/candidate-decisions.json",
+      "bytes": 102593,
+      "sha256": "1af8cf3d6c4b91e61c8db0a55cd65538066d7fb3dbeea0e07a6b3e318b7a56dd"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/full-transfer.diff",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/full-transfer.diff",
+      "bytes": 136044,
+      "sha256": "7d2f50621bddf029cc3b494a256552ea9169d3a2d142caeb101a72d7ebd50b5e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/correction.diff",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/correction.diff",
+      "bytes": 14747,
+      "sha256": "86e72eb988961fca3b8241905c548056316ce858b108e2530de7f9215812628e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/receipt.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/receipt.json",
+      "bytes": 4872,
+      "sha256": "ebf4621dc57dc1090222193b9a3474a03fd93e1b071b502c07730e3cff9fc1a4"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/artifact-manifest.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/artifact-manifest.json",
+      "bytes": 1715,
+      "sha256": "72a8f019f101f641c967f35d74d5170bb3156480a8d3223a9282ef83125635d8"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/review.md",
+      "bytes": 8588,
+      "sha256": "947be655247a5708f0a27c66e3b05289895b2a50bb41a3b426c781ecab8a6823"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-protocols/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/review-identities.json",
+      "bytes": 6087,
+      "sha256": "748a702a0c2cb87ffbada53b9bcdde1b286a0514f2bb8260996b96e19e5102d2"
+    }
+  ]
+}

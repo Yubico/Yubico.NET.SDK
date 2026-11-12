@@ -1,0 +1,38 @@
+[
+  {
+    "path": "src/Core/src/YubiKitLogging.cs",
+    "sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "relevant_line_range": [
+      24,
+      47
+    ],
+    "access": "read-only"
+  },
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "relevant_line_range": [
+      109,
+      109
+    ],
+    "access": "read-only"
+  },
+  {
+    "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+    "sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+    "relevant_line_range": [
+      28,
+      145
+    ],
+    "access": "read-only"
+  },
+  {
+    "path": "Directory.Packages.props",
+    "sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+    "relevant_line_range": [
+      12,
+      14
+    ],
+    "access": "read-only"
+  }
+]

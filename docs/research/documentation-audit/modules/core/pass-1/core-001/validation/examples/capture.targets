@@ -1,0 +1,33 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)../../../../../../../../../Directory.Build.targets" />
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocExamples'">
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+    <SkipCompilerExecution>false</SkipCompilerExecution>
+    <UseSharedCompilation>false</UseSharedCompilation>
+  </PropertyGroup>
+  <Target Name="DocExamplesBefore" BeforeTargets="CoreCompile"
+          DependsOnTargets="GenerateSourceLinkFile;_SetEmbeddedFilesFromSourceControlManagerUntrackedFiles"
+          Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocExamples'">
+    <WriteLinesToFile File="$(DocExamplesCapture)/sources.txt" Lines="@(Compile->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/references.txt" Lines="@(ReferencePathWithRefAssemblies->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/analyzers.txt" Lines="@(Analyzer->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/configs.txt" Lines="@(EditorConfigFiles->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/other.txt" Lines="$(SourceLink);@(EmbeddedFiles->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/policy.txt" Lines="Project=$(MSBuildProjectFullPath);SDK=$(NETCoreSdkVersion);SDKPath=$(MSBuildSDKsPath);Version=$(Version);TFM=$(TargetFramework);Configuration=$(Configuration);WarningsAsErrors=$(TreatWarningsAsErrors);Analyzers=$(RunAnalyzersDuringBuild);AnalysisMode=$(AnalysisMode);AnalysisLevel=$(AnalysisLevel);SkipCompiler=$(SkipCompilerExecution);SharedCompiler=$(UseSharedCompilation);ProvideArgs=$(ProvideCommandLineArgs);Assets=$(ProjectAssetsFile);TargetPath=$(TargetPath);SourceLink=$(SourceLink)" Overwrite="true" />
+    <Exec Command="python3 -B &quot;$(MSBuildThisFileDirectory)capture.py&quot; before &quot;$(DocExamplesCapture)&quot;" />
+  </Target>
+  <Target Name="DocExamplesCompiler" AfterTargets="CoreCompile"
+          Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocExamples'">
+    <WriteLinesToFile File="$(DocExamplesCapture)/csc.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/sources-actual.txt" Lines="@(Compile->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/references-actual.txt" Lines="@(ReferencePathWithRefAssemblies->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/analyzers-actual.txt" Lines="@(Analyzer->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/configs-actual.txt" Lines="@(EditorConfigFiles->'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(DocExamplesCapture)/other-actual.txt" Lines="$(SourceLink);@(EmbeddedFiles->'%(FullPath)')" Overwrite="true" />
+    <Exec Command="python3 -B &quot;$(MSBuildThisFileDirectory)capture.py&quot; compiler &quot;$(DocExamplesCapture)&quot;" />
+  </Target>
+  <Target Name="DocExamplesFinish" AfterTargets="Build"
+          Condition="'$(MSBuildProjectName)' == 'Yubico.YubiKit.Audit20261111.DocExamples'">
+    <Exec Command="python3 -B &quot;$(MSBuildThisFileDirectory)capture.py&quot; finish &quot;$(DocExamplesCapture)&quot;" />
+  </Target>
+</Project>

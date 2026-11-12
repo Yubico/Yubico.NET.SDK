@@ -1,0 +1,1222 @@
+[
+  {
+    "id": "core-001:unit:001c58b1d1862d76",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "path": "CLAUDE.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:05df3298e65aae44",
+    "owner": "OpenPgp",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/OpenPgp/CLAUDE.md",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:076b4d4328825902",
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:094e7f926bf428c5",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-otp-async-lifetime.md",
+    "reasons": [
+      "actual-context-adjudication-retained"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:0b2135f2f301e2c1",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-read-reactor.md",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:0b5f8163f489c670",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/usage/device-discovery.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:0d6f20d8f98638b4",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/architecture/event-driven-device-discovery.md",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:10653b759a2209f8",
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+    "reasons": [
+      "actual-Astra-source-observation"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:13971cb61434ba4c",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/architecture/device-discovery-guarantees.md",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:25126819583ba58d",
+    "owner": "B3",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "verification/MacOSHidInputVerification/Program.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:280fa09aa1df8fec",
+    "owner": "Piv",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/Piv/examples/PivTool/README.md",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:2825905d2877ffbf",
+    "owner": "B3",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:287e6410db16f0e7",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/TESTING.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:297e68004991d4a8",
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpInfoCommand.cs",
+    "reasons": [
+      "actual-Astra-protected-output-qualification"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:2ab3cc1db2ed4269",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:324f820f04c26c44",
+    "owner": "B3",
+    "stratum": "type-declarations",
+    "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:375f9953080e728a",
+    "owner": "A",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "path": "src/Core/src/Devices/HotplugSignals.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:3c7f0585447bd6d1",
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:3ccf06e816f277d2",
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs",
+    "reasons": [
+      "actual-Astra-source-observation"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:4089aedab94d4e23",
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "reasons": [
+      "actual-Astra-known-implementation-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:4330e60d07cd5417",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-native-acceptance.md",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:4c955b22a2de68df",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-native-acceptance.md",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:53f3eee8233f9a20",
+    "owner": "B6",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:5605704bd39c8c9f",
+    "owner": "Piv",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/Piv/README.md",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:59c33b8c7c8f294c",
+    "owner": "B6",
+    "stratum": "tests-and-helpers",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.rsp",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:5bcf834655fef594",
+    "owner": "B5",
+    "stratum": "tests-and-helpers",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:5c0f333d06ef9126",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:5f18c0d67c2c7815",
+    "owner": "B6",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:606c7462df485c41",
+    "owner": "OpenPgp",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/OpenPgp/src/PrivateKeyImport.cs",
+    "reasons": [
+      "actual-Astra-known-implementation-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:659c57bc7870f8f0",
+    "owner": "B2",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "verification/LinuxHidRouteVerification/OperatorScenarios.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:6612f3e188e74e2b",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-native-report-access.md",
+    "reasons": [
+      "actual-context-adjudication-retained"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:7070cc291aec3e7e",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/Core/CLAUDE.md",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:710814862611f595",
+    "owner": "OpenPgp",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/OpenPgp/CLAUDE.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:711e47d18bab0742",
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Devices/HotplugSignals.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:79340850e7d0f3c2",
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:7a90c15f7fb4a767",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:7b5daf3c140bfbc6",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/migration/v1-to-v2-changelog.md",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:7d5377d0944da659",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/usage/device-discovery.md",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:7fe08c46f10afee5",
+    "owner": "WebAuthn",
+    "stratum": "tests-and-helpers",
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:82f001f6db22d507",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:89c5d1ecb6fd0e8d",
+    "owner": "Piv",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/Piv/README.md",
+    "reasons": [
+      "actual-Astra-edited-overlap",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:8b2a95f01db9bf2c",
+    "owner": "OpenPgp",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/OpenPgp/src/OpenPgpSession.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:8e9040753e759723",
+    "owner": "B6",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:8fc815177a95b970",
+    "owner": "Piv",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+    "reasons": [
+      "actual-Astra-known-implementation-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:904b3b5f639d073d",
+    "owner": "B3",
+    "stratum": "type-declarations",
+    "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:95ad4b56865f1456",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-fido-async-lifetime.md",
+    "reasons": [
+      "actual-context-adjudication-retained"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:9715fd23161cbcd7",
+    "owner": "B1",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:9ea1794bce816ec8",
+    "owner": "B4",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "scripts/toolchain/Output.cs",
+    "reasons": [
+      "actual-Astra-protected-output-qualification"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:a579b6a5cf4242e4",
+    "owner": "Piv",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+    "reasons": [
+      "actual-Astra-known-implementation-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:a9e434874ba55d57",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/v1-to-v2-comparison.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:aab8416295947346",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/usage/device-discovery.md",
+    "reasons": [
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:b0c0d59299e1e832",
+    "owner": "B6",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:b37c3e449550734a",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-managed-acceptance.md",
+    "reasons": [
+      "actual-context-adjudication-retained"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:be11505c581308a5",
+    "owner": "Piv",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+    "reasons": [
+      "actual-Astra-known-implementation-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:c085f1cd3632e7c2",
+    "owner": "A",
+    "stratum": "enum-values",
+    "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:c2de2d6f26065229",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/Core/README.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:c513baa056d9161c",
+    "owner": "B2",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:c6719030f9881ef4",
+    "owner": "WebAuthn",
+    "stratum": "tests-and-helpers",
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TestPinUvAuthProtocol.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:c7319c1c1182a4be",
+    "owner": "B5",
+    "stratum": "tests-and-helpers",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationIdsTests.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:c7edeed9fe6d2e6c",
+    "owner": "B2",
+    "stratum": "native-interop-contracts",
+    "path": "src/Core/src/Native/Linux/Libc/LibcFcntlConstants.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:c8377e0a58dac11c",
+    "owner": "WebAuthn",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/WebAuthn/CLAUDE.md",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:cf1e2081af8b8ac4",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/architecture/event-driven-device-discovery.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:cf330b6a639970cd",
+    "owner": "B2",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+    "reasons": [
+      "actual-Astra-edited-overlap",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:cf3538431462d4ab",
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs",
+    "reasons": [
+      "actual-Astra-known-implementation-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:cfea2933573b757f",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-native-acceptance.md",
+    "reasons": [
+      "actual-context-adjudication-retained"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:d27f5051f8d21199",
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "reasons": [
+      "actual-Astra-known-implementation-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:e29522f04d40349a",
+    "owner": "WebAuthn",
+    "stratum": "tests-and-helpers",
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:e7354a1214c8ba41",
+    "owner": "B6",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:e7b21994e1483471",
+    "owner": "B1",
+    "stratum": "lifetime-protocol-internal-contracts",
+    "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:e8625f30588244a1",
+    "owner": "B2",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:ebf81d7eeea93827",
+    "owner": "B2",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/research/linux-otp-async-lifetime.md",
+    "reasons": [
+      "actual-context-adjudication-retained"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:ed3e115f81fd126c",
+    "owner": "SecurityDomain",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f1d4372202bdaa9b",
+    "owner": "B1",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "reasons": [
+      "actual-context-adjudication-retained"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f24674b7449e617e",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/migration/v1-to-v2-changelog.md",
+    "reasons": [
+      "actual-Astra-source-evidence-qualified"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f3504065f8d80ef8",
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "path": "docs/architecture/sdk-architecture-diagrams.md",
+    "reasons": [
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f5a358ec89b4c4ce",
+    "owner": "B4",
+    "stratum": "narrative-examples-and-maps",
+    "path": "src/Core/CLAUDE.md",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f73aeff9fe81d1ef",
+    "owner": "B3",
+    "stratum": "implementation-state-and-internal-contracts",
+    "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f7fc274baa684518",
+    "owner": "WebAuthn",
+    "stratum": "tests-and-helpers",
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/ExtensionSessionTests.cs",
+    "reasons": [
+      "actual-Astra-specific-ineligible"
+    ],
+    "actually_sampled": true,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f8412d69f0903d78",
+    "owner": "B3",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+    "reasons": [
+      "actual-Astra-documentation-miss",
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:f9c6bf50db8d00e7",
+    "owner": "A",
+    "stratum": "XML-contracts",
+    "path": "src/Core/src/Devices/HotplugSignals.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap",
+      "changed-range-or-exact-metadata-unavailable"
+    ],
+    "actually_sampled": false,
+    "original_selected": false,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  },
+  {
+    "id": "core-001:unit:fc1fb9627bba154a",
+    "owner": "B2",
+    "stratum": "type-declarations",
+    "path": "verification/LinuxHidRouteVerification/Evidence.cs",
+    "reasons": [
+      "accepted-current-exact-original-span-overlap",
+      "combined-AFTER-queued-exact-original-span-overlap"
+    ],
+    "actually_sampled": true,
+    "original_selected": true,
+    "candidate_unchanged_eligibility": "WITHHELD",
+    "conservative_quota_population_delta": 0,
+    "known_changed_or_adjudicated_delta_not_silent_history_rewrite": true
+  }
+]

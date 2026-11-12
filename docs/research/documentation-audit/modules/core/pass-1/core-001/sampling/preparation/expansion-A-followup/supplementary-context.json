@@ -1,0 +1,10 @@
+{
+  "id": "core-001:unit:3c7f0585447bd6d1",
+  "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+  "first_line": 109,
+  "last_line": 122,
+  "purpose": "Supplementary DeviceChangeFeed.Complete source context only; not an original selected unit",
+  "primary_sample_increment": 0,
+  "clean_credit": 0,
+  "authority": "Coordinator task handoff; accepted-sampling-A.json preserves the focused completion comment correction"
+}

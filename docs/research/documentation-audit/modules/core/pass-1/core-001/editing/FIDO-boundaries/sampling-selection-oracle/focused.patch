@@ -1,0 +1,21 @@
+diff --git i/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs
+index 5b5b8593f..2d9ca07fc 100644
+--- i/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs
++++ w/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs
+@@ -152,7 +152,8 @@ public async Task GetAssertion_MatchedCredential_SelectAsync_IsIdempotent()
+         var response1 = await matched.SelectAsync(TestContext.Current.CancellationToken);
+         var response2 = await matched.SelectAsync(TestContext.Current.CancellationToken);
+ 
+-        // Assert - same instance or value-equal
++        // Repeated selections have equal CredentialId and Signature bytes;
++        // the fixture observes one backend GetAssertion call in total.
+         Assert.Equal(response1.CredentialId.ToArray(), response2.CredentialId.ToArray());
+         Assert.Equal(response1.Signature.ToArray(), response2.Signature.ToArray());
+ 
+@@ -530,4 +531,4 @@ public async Task MatchedCredential_SelectAsync_HonorsCancellationToken()
+         Assert.NotNull(response);
+         Assert.Equal(credentialId, response.CredentialId.ToArray());
+     }
+-}
+\ No newline at end of file
++}

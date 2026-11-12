@@ -1,0 +1,84 @@
+{
+  "status": "ARCHIVAL_PASS_FINAL_ADMISSION_BLOCKED",
+  "scope": "Only preserved snapshots/immutable validation records/retained output copies checked. No inspection or polling of live primary transfer progress; no product/body/wrapper/manifest/profile/tool/policy mutation.",
+  "archival_checks": {
+    "scope": "Archival snapshots/immutable records/retained checkpoint files only; no live primary polling, transfer admission, compiler or test execution.",
+    "original_generated_sources": 300,
+    "original_authority_records": 703,
+    "accepted_contexts": 9,
+    "accepted_body_occurrences": 298,
+    "accepted_distinct_compilations": 297,
+    "retained_local_files": 169,
+    "failed_wa_record_identities": 27,
+    "diagnostic": "CS1929: TRUE FULL-032 documentation access defect, not wrapper context.",
+    "wa_document_alias_rows": 8,
+    "compiled_source_document_alias_rows": 2,
+    "shared_authority_and_review_identity_rows": 47,
+    "same_body_or_compilation_aliases_of_FULL032": 0,
+    "original_manifest_and_profiles_untouched": true,
+    "no_body_wrapper_profile_or_qualified_tool_change": true,
+    "final_admission": "Blocked until explicit completed known-transfer acceptance covering queued patches, reviewed EOF patch, WA body/prose/root bullet and formatter qualifications.",
+    "qualification": "EOF outside-body placement and the 299 unchanged-body matches remain future verification requirements, not established by this archival check."
+  },
+  "predecessor_profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-helper-imports-fixed.json",
+    "bytes": 713786,
+    "sha256": "52234498f7d167899c296daadec96dd0a543d9dbbd3f72c72007d1983fc099e7"
+  },
+  "preservation": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/preservation.json",
+    "bytes": 1862722,
+    "sha256": "e8c260f9b9a57b424119f115bc87f57982fb17d751facd30a7ce1891854d1a52"
+  },
+  "generated_source_snapshot": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/generated-sources.before.json.snapshot",
+    "bytes": 515398,
+    "sha256": "edb717475039169a7871f3f068484ce67bc7963f6e2529ba618d50fc12bb65cb"
+  },
+  "before_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/before/manifest-helper-imports-fixed.json.snapshot",
+    "bytes": 2308887,
+    "sha256": "1d89859816e601d620eb6a9951b94241799c545648416e1e8a463774d34d94ff"
+  },
+  "before_pilot_manifest": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/before/pilot-manifest.json.snapshot",
+    "bytes": 87165,
+    "sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60"
+  },
+  "compilation_index": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/compilation-index.before.json",
+    "bytes": 690491,
+    "sha256": "70078eaed755551fd5290fc793f357d08210415d97852b307b43e4abaf85c0ee"
+  },
+  "authority_alias_map": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/authority-alias-map.before.json",
+    "bytes": 36382,
+    "sha256": "930144990f1fda4fa285835f7fba7a8b3ee4e027c3a30d86beb1c8c7640e2e2b"
+  },
+  "diagnostic_to_authority": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/diagnostic-to-authority.json",
+    "bytes": 5203,
+    "sha256": "0e5515c7ef17a426037b386d4db605d0f148e2513f4834007e71237ce4b297f7"
+  },
+  "pending_admission": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/pending-admission.json",
+    "bytes": 5878,
+    "sha256": "8a795540fa9fd433ae35660c30e987e4257487be0cc17ad3d582d5736f288d43"
+  },
+  "handoff": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/handoff.md",
+    "bytes": 7780,
+    "sha256": "1afffca5765934f56bbc6c6b71f05f63e1c934160dded5c5bbd07cdb50d9a2d4"
+  },
+  "blocked_on": [
+    "five queued reviewed patches",
+    "239 EOF-only C# patch",
+    "WebAuthn logging body and prose",
+    "root logging bullet",
+    "formatter source-pin qualifications"
+  ],
+  "raw_body_change_not_admitted": true,
+  "no_new_profile": true,
+  "no_build_test_capture_replay_native_device_git_or_subagents": true,
+  "next_action": "Return preservation/diagnostic readiness now; wait for explicit completed known-transfer acceptance. No polling and no automatic continuation."
+}

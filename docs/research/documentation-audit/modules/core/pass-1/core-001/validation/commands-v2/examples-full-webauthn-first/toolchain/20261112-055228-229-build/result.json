@@ -1,0 +1,31 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- build --project Yubico.YubiKit.WebAuthn.IntegrationTests --clean",
+  "started": "2026-11-12T05:52:28.2291974+01:00",
+  "durationSeconds": 8.1,
+  "runDirectory": "artifacts/toolchain/runs/20261112-055228-229-build",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "failed",
+      "durationSeconds": 8,
+      "error": "`dotnet build src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-055228-229-build/02-build-WebAuthn.IntegrationTests.log"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/plan.md",
+    "sha256": "234b11acc54a9e0e0ebe0c37c848f2d64f21cb6a4f0367ecadbef16fe2f73a8e"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/triage/editing-release.md",
+    "sha256": "3b01360cf7e973b51e076ef02c3683228d007e96c783915e62a046e34bc8cc71"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/triage/full-family/map.json",
+    "sha256": "ee023021f2fd2586b4d75fc0a488cba2e3bdbb1ea7fdb91a793dbbd8bb4a7dd8"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/shared-sections.json",
+    "sha256": "148a865f7883cd0bde059226553c6cb31b7ea80506bd9669d3e60da0ffabdd0e"
+  },
+  {
+    "path": "docs/research/documentation-audit/workflow.md",
+    "sha256": "2b17428a08cc10046142bfc4866eeaf36fdf0698de8b8d1433b022e827aaf881"
+  },
+  {
+    "path": "docs/research/documentation-audit/records/style.md",
+    "sha256": "2b8882adb75b18d67adcd71d38a6c70fb4aa7c44ec3211c0d45455ab94e9ca15"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+    "sha256": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+    "sha256": "2dcfa9c987390940ad44e90298d91ebcccd4ad009ccea473a2995c9f67e8bc4d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+    "sha256": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+    "sha256": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B4.md",
+    "sha256": "a6743e926ffdedd3157c80097736048f7ab287b7f5c60a904b804d4f23bf098b"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+    "sha256": "5c9b80dcf2351d22bf179584c9fd8a105f897a33efeebfff34e1cfd72e7ab186"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B6.md",
+    "sha256": "146bd5a53f6f1ca3971c8ea8151b6aaee980295e730f5ebfb5c723e55817fdc9"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+    "sha256": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34"
+  }
+]

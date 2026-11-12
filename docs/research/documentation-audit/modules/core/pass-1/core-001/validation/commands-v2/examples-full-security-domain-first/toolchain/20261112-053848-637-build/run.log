@@ -1,0 +1,46 @@
+# dotnet toolchain.cs -- build --project Yubico.YubiKit.SecurityDomain.IntegrationTests --clean
+# started:   2026-11-12 05:38:48 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ da66f5d01 (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: build  (log: artifacts/toolchain/runs/20261112-053848-637-build/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261112-053848-637-build/01-clean-SecurityDomain.IntegrationTests.log
+▶ RUN dotnet build src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261112-053848-637-build/02-build-SecurityDomain.IntegrationTests.log
+  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-306.cs(30,17): error CS1061: 'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?) [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj]
+  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-302.cs(30,17): error CS1061: 'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?) [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj]
+  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-303.cs(33,21): error CS1061: 'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?) [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj]
+  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-303.cs(39,21): error CS1061: 'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?) [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj]
+  /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-303.cs(52,21): error CS1061: 'YubiKeyTestState' does not contain a definition for 'ResetSecurityDomainAsync' and no accessible extension method 'ResetSecurityDomainAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?) [/home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj]
+✗ build: `dotnet build src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-053848-637-build/02-build-SecurityDomain.IntegrationTests.log
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- build --project Yubico.YubiKit.SecurityDomain.IntegrationTests --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✗ build                      7.0s  `dotnet build src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj -c Release --no-incremental` exited with code 1; full output: artifacts/toolchain/runs/20261112-053848-637-build/02-build-SecurityDomain.IntegrationTests.log
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261112-053848-637-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

@@ -1,0 +1,127 @@
+{
+  "scope": "Independently reviewed queued correction transferred after compiler sequence stopped; previous checkpoints retained",
+  "admission_note": "Initial preflight expected b/ patch header and rejected the accepted WA w/ header before any file mutation; exact patch hashes and safe stripped paths were then verified.",
+  "patch_sha256": "27a8d85cda33ec95f3e309a8d1d5665ec9f3cd6403d3a75acdf501aebae31c33",
+  "product_files": [
+    {
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "previous_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "previous_sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+      "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/report.md",
+      "sha256": "ab032b64e54ffd7fde429ed79df9195630a965e8c243aae25cccc498012def91",
+      "bytes": 4877
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/before-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/before-identities.json",
+      "sha256": "0df3f81b2f9ce3e1bc70cd74e6ace550fcb74efaf704a25bfda5bcf1849b1a29",
+      "bytes": 511
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/product-before-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/product-before-identities.json",
+      "sha256": "f91917b1405c1f8afbbb0c60376fc8a42d80087b5de2f5a11af4fc2bf913b301",
+      "bytes": 3502
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/preserved-record-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/preserved-record-identities.json",
+      "sha256": "ccb0a7c0eb9ece31bc226a1cccacd2241e42918433e6a0b916d885712c98fa45",
+      "bytes": 12425
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/image-before-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/image-before-identities.json",
+      "sha256": "406c6a198eb4fb5f2e36409ae20460ac5b8b82a4b69a40bc0fc8c474b22ace10",
+      "bytes": 2282
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/source-evidence.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/source-evidence.json",
+      "sha256": "38c623ec948ef9b0acc45e71e2e4928bf1baa01420946024cd9a8439991e6982",
+      "bytes": 122615
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/product.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/product.patch",
+      "sha256": "27a8d85cda33ec95f3e309a8d1d5665ec9f3cd6403d3a75acdf501aebae31c33",
+      "bytes": 4284
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/changed-path-sha256.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/changed-path-sha256.json",
+      "sha256": "ba79134aad63ae5deeffeca0574ec272ad96ba3c547a7cba69b1950ceafbc643",
+      "bytes": 1041
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/example-bodies.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/example-bodies.json",
+      "sha256": "b38275e7436e02b490f5bc44dec96d9e4b3e5a9caeab570acf60ba80dcf777ff",
+      "bytes": 23841
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/map-checker.log",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/map-checker.log",
+      "sha256": "c302f4b5c27c3b30bea950b3f418452e3d614954f8b11b513a13d7d089c9ae20",
+      "bytes": 123
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/verification.json",
+      "sha256": "db0ab91a47ba1381018c28157e3b3db13d35f99360057a1af23878e2d7ba0fe8",
+      "bytes": 1178
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/output-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/output-identities.json",
+      "sha256": "42a8ade753dda4c785be7f2017d0da4f47253701e10616ecec1589acdb88e590",
+      "bytes": 1952
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/review.md",
+      "sha256": "069e3e26b492ccef2998f4522cbdfbfd6b2c5457879c801224145fc3b7f74acc",
+      "bytes": 7150
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/review-identities.json",
+      "sha256": "b49769272012f27040da1f36ee093034aedf218aba34d3318a0eb8525a79ed4e",
+      "bytes": 5438
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/before/sdk-architecture-map.yml",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/before/sdk-architecture-map.yml",
+      "sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+      "bytes": 9508
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/before/sdk-architecture-diagrams.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/before/sdk-architecture-diagrams.md",
+      "sha256": "b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c",
+      "bytes": 21003
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/after/sdk-architecture-map.yml",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/after/sdk-architecture-map.yml",
+      "sha256": "5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21",
+      "bytes": 9920
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/after/sdk-architecture-diagrams.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/architecture-map-closeout/after/sdk-architecture-diagrams.md",
+      "sha256": "71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359",
+      "bytes": 22011
+    }
+  ]
+}

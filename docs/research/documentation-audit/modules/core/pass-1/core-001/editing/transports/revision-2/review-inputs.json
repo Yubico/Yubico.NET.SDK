@@ -1,0 +1,1136 @@
+{
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "reviewed_full_patch_sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6",
+  "protected_records": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+      "sha256": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/example-bodies.json",
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/file-dispositions.json",
+      "sha256": "dcd67fdf4dda350456a2034220b7089dd80fabdd38c6e6155056eea813ece35f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+      "sha256": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/proposal-dispositions.json",
+      "sha256": "c32b2c2b1063becaf4d567b616993aabb5329819755bc2ed9b3d63b97ccf2115"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review-identities.json",
+      "sha256": "94b90c17733559a9a2b5cf77136085ac3844b7bad66091f86a223b32ec176e16"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review.md",
+      "sha256": "090e3f28b303b77839d08e852eced612bc4a785923f73d106f2cc6965bc19812"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source-citations.json",
+      "sha256": "596f27302575eb63b3eca6d7d7bab4658a48fd5ebfd5673fd86b6849c2b0fc09"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/static-preservation.json",
+      "sha256": "629eaf27ce006f955f0fe36f985524266f5f3b89912873d27a0d5505db9eafc4"
+    }
+  ],
+  "reviewed_213_path_hashes": [
+    {
+      "path": "src/Core/src/Devices/ConnectionInUseException.cs",
+      "sha256": "9eda3e03a195d18bbd3cd4f2e66a9a7836a17323b6fb089b21b5c20fa27a54e1",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "sha256": "19a6ff2836c687491016f0ba3d51eeef5641fa773cba4f92ce58ce298274b720",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Devices/DisposalGate.cs",
+      "sha256": "0cdfe89e05eaea96cf64525bfd3675de0179b65705f1bffc2719ccde6f3336c4",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "sha256": "016e4d3b76e1e099d584b084047221d0699767aa9b10deb46395591c5ae1b63b",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Devices/PcscConnectionSlot.cs",
+      "sha256": "3e5a04199d228468ab0ca5b661ebaf2dded78ff3db75956d03250d0b7d0df9d1",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Devices/RegisteredConnections.cs",
+      "sha256": "f8d8b39cb29a4225cd933ca868fd39d20d588c03fdde2ee485db3c153d5cb8e0",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Devices/UnrecoveredConnectionException.cs",
+      "sha256": "cb9923bc84993e76c60cc39a5a82f03dbfb20cc46d692ffaa6591f6580ae4ec6",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "sha256": "beed8d6754ed94be3c939e80c56d4bed83c4d91aad52d5ad6e842d7770d0b32c",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Exceptions.cs",
+      "sha256": "1d9a8899928ee17b860bb9e63a1f54918205e2d0d12b64a97661a8e037e53231",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCard.Interop.cs",
+      "sha256": "09370f2c2e610c860387a08fdc49c91d087a63ffb46319380b5eb9b9b2f160f7",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardCardHandle.cs",
+      "sha256": "78f8e4e5a3e2e85021e45803b42dff018964f173770d1454d193d367e3792b75",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardContext.cs",
+      "sha256": "e5014a9eb24db2394804c7b4eda92527a1b25f3b35834e2192f68c10c5068331",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardDisposition.cs",
+      "sha256": "c4461eb8efd584d55753cbac9179efec60221b05348001889c25f040c57b7078",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardException.cs",
+      "sha256": "25c39edce657b4d7d18fbff92e6ae0a221a7b64e676490ebe2f9ac634e81b7b0",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardIORequest.cs",
+      "sha256": "36b67f4191b6cf590736865575f37356c7a70df9ecd741b57238fc73eb80293e",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardProtocol.cs",
+      "sha256": "d98eaad86428065bd7148f71457207c0ec7d797a5017b08728335b5eeca9d10e",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStateExtensions.cs",
+      "sha256": "7459cf196731d11e5331011c414ea5d548afb91d542732e4dc4c3f051e9837f1",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+      "sha256": "382d46e09439844c5b3ae5e74ce7fe5d4ab72b8b07dd2271afa92928d1eefc07",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardScope.cs",
+      "sha256": "85b88d1b9a3fdc56b8cd8e30adc42a263bc30698311c11b777da80f9c7c59b8d",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardShare.cs",
+      "sha256": "77fcc5da58938edfc90238f4744212a3ac7ced210d4ea86179de31b7db5c8693",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardState.cs",
+      "sha256": "998ff18f922bf0e0d82ba5a1bb93ec7fb5b59783377a857af052072af40f7cb2",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardStatus.cs",
+      "sha256": "2d5bdb905d18d2d9b224cd91ca096ee9cb40285012123650fe9effb76a44a8a5",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Libraries.cs",
+      "sha256": "228bace3632e2e8ed98f27db908f2001bc0d328d1e7f92c198ee2a7769176214",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/Libc.Interop.cs",
+      "sha256": "98ede15c0e2ea60928c77b61de8c4016592b1951d2c1d27288989daa007fdee3",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LibcFcntlConstants.cs",
+      "sha256": "8b9f23386e009c0bbd35291aee55906d4084f1f6b0d080b9878ebbfc4a8f8b1a",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LibcHelpers.cs",
+      "sha256": "1b80af3a2803150847567c54137ca7ba088783e3f6d5d159f6466d699041c2c9",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+      "sha256": "6926589e3b9bdbb6ad07796f1e95d5ea33f360dfd574dc99102e0cff971f93c4",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LinuxEventFdSafeHandle.cs",
+      "sha256": "6ff7e293ccc0b69f0770ceb1aec54289f85d4921fb0e9dd5a1b74d8c5c63d150",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LinuxFileSafeHandle.cs",
+      "sha256": "a02fdcae45642475cdfc2382f93a2cd5a5bc7b612c0f4de48bce30ce6a4ee7d4",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Linux.Libraries.cs",
+      "sha256": "bf9848eafe4dc95596c76852c639ef419443942058530a832e5887dc4fe4811e",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/LinuxUnmanagedDynamicLibrary.cs",
+      "sha256": "5a70741d60e5b668505c66db952fcc85ac4acde1c8794492308c71cd85f6a9b0",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdev.cs",
+      "sha256": "1defd8c603435de12ae2777200f51c5a23f9b73872c2a45165363f8fbf1b1144",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdevDeviceSafeHandle.cs",
+      "sha256": "dc2aa43c98d03655a187a8ee64ab1dd9745272a2d3c58d40c2a74a2bb5a1d293",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdevEnumerateSafeHandle.cs",
+      "sha256": "54707ff14934c4aa71cc654ecf064d38caf929c10a39149e3fc770968f327cdd",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdevMonitorSafeHandle.cs",
+      "sha256": "1d134b744c8572611ffc303319e65964e0b37f49539ee29d2da3ac9507b62651",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdevSafeHandle.cs",
+      "sha256": "e472a91ec29afc1b1a806d1374c7e9979846140e91fd6288e858e556a91f286d",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/LinuxUdevScan.cs",
+      "sha256": "965ca5a92f13e6915f55a66f3cfe5250521963eaa4371ff48b307efda9c536b0",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "sha256": "59ec90d1127cfdfeeb7ae52d440526643694a6dbeeff2089b74191fe246df30f",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+      "sha256": "ad4e0a5761fad445d329b7c6b36fb1056e7583f64e3f5f178b06e98a20119132",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/HidInput/HidInput.Interop.cs",
+      "sha256": "970893fde52cde25baa670fafda287f94be1c3b0876b39663689751dc835fc22",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHidConstants.cs",
+      "sha256": "11b1af9b5e161d6dbd8f887d2ea7ea53c3c856d0084297cb204b2a2a9abcd63e",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/Interop.Libraries.cs",
+      "sha256": "ba52cdb556ca15d6bd1c782a006d08de9cdbd588994a8d77efa98ad958ea8a40",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/MacOSUnmanagedDynamicLibrary.cs",
+      "sha256": "6e73a133d9d960acc9aaa5da6b02ea66341f0e7633ed07f07bf7bdbddca70255",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/NativeMethods.cs",
+      "sha256": "00f56a5b00d35f5ebc60516b664295b081dcdf1078a7741492f43ff7e2919167",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/PlatformApiException.cs",
+      "sha256": "84cf37aa7ed011470303a44a0946727519bf2619845c5c4b11722074f61a6d03",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/SafeLibraryHandle.cs",
+      "sha256": "8aa7e52a227b70ba37628837c94f5d16110e56f893d4daa0c7941f270ea272ba",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/SdkPlatform.cs",
+      "sha256": "622cf7b4c0eb2481fd996628631c963fe11c9b177ae590ced683cfffbf208ce1",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/SdkPlatformInfo.cs",
+      "sha256": "7e39b186cb6bb50a153b555624fdf7870c495b7687d4d1671b4c9f2fb1b2c181",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/UnmanagedDynamicLibrary.cs",
+      "sha256": "346b40085678d2cee542ba7d8785089ee84ffcb41bac7f17d24a41c90d900e72",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.DeviceProperties.cs",
+      "sha256": "bd7b8c612cc2dd47fbc3786338ebc013f694b22a7b0b0deaa14dcdf6e206869e",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+      "sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmDevice.cs",
+      "sha256": "4382ccc72ed8db4bcd2987243f1dee0e6b8a2b27e9cfe01b73935d5a7c25593b",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmDeviceProperty.cs",
+      "sha256": "c9c5fe3bbd451de4849a056102da80caa10063db62a433dde04a250b3fc841fa",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmInterfaceGuid.cs",
+      "sha256": "3a9a61ff22d7f35b7b26c585c8b5639f3468957f4fbaae855dce88e3b0a81cf4",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/CmPropertyAccessHelper.cs",
+      "sha256": "efb041a7501f8210d2e43179e848678c67b7ede7e5088f2b18f168c6c6ad6191",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "sha256": "ab0e190ddf0adf7a17333516bb0c84a220a8edc0f72017c85aee36f2a61716f7",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "sha256": "8c7dfabb8b3d011317912b1c71dc6374b2a15318cb49918d40acb125da5bbd21",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "sha256": "ce3fa7f7dfe85620c761b20cbb2fabfbbabb51c452f41a06d7f4c4f7c285e62a",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Interop.Libraries.cs",
+      "sha256": "700f5dcca7939442c98b7197b7a4118ea4bba88f09fd49d4f622c29e569eaaf5",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/WinSCard/WinSCard.Interop.cs",
+      "sha256": "aea659a17b7e754e4486ee8071a966af540d838cb85eff96809f5b67d429eef8",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/WindowsUnmanagedDynamicLibrary.cs",
+      "sha256": "7ccecec739bccda1c8d30eaf12021732861a79cdc79aba6bcb23389fefb4f803",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/ServiceLocator.cs",
+      "sha256": "1a56af874d020260085c5b1c374c109ac60448b6acd2bd2436fe28b76b04130d",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+      "sha256": "05659dd5b10e5df0ecca4ac123d4c01f7f570a496ba36372710476928b8b71c6",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidConstants.cs",
+      "sha256": "2b643689268d3762ed3c01321c1bdee6632b58237ef631d7bceeaeff3cb1ecd8",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDescriptorInfo.cs",
+      "sha256": "85db44055bfab0358be9da0e5b1b9668b69d9d98cb96ec8b98253186e5df962a",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDeviceChangeKind.cs",
+      "sha256": "182f29d10eb30d432bb5f1cb8fa6c61093a1dc3eae65dc184eb93abfe472b0d0",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+      "sha256": "b36df078091dcbab835c2a9245f1e52908a60970c4b82dfa72cc109a981628cf",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDeviceRescanHint.cs",
+      "sha256": "1349c9efa406758ff5939b8a0b412b953ff1004c971eade10fd89b1c92cda77a",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidInterfaceClassifier.cs",
+      "sha256": "7747646b872cbfeebb6248efcf6e59877bb6b5d77932c34541374002c8eeb5e2",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidInterfaceType.cs",
+      "sha256": "d9f86c6ab4c4d64b702f1fc4c7c719bed3c114cdbd7e59f5497582de737da353",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidReportDescriptorReader.cs",
+      "sha256": "c3ae8800dc34fd6118768ef608fbc40e84a06ece45ff9b4aa3f6de09c50eb264",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidReportType.cs",
+      "sha256": "6b53d74fb98a4d703b84439ed5a01a3ec1cfdf0376f66344ca9a77277d384d57",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/IHidConnection.cs",
+      "sha256": "5f611f99e26910690b40bbddc68875a22084b9e11462fc7407eaffacc8952f2c",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/IHidInterface.cs",
+      "sha256": "242c8d2e14eb75965c91ff550d55b2df449e105ab20b8c9e2c618f34fd1fb799",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+      "sha256": "fe9e2e88d6657dd21e15a335fde9f679d1a2f9025e1f65df24d35b06accb78cf",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+      "sha256": "1658f4b211f4f2c97901bf73d816ce5e1f4235a2eb7883018c5cc9f9b1f6cfdb",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+      "sha256": "21b93e6a95b7ee7182c5697381be0ef54131e8be0266c55a51b979307ec96dcc",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.de_DE.cs",
+      "sha256": "1021617c0fcd66702ec8fd98d7cfefa1cb31543e5061060f518e75109de50338",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.en_UK.cs",
+      "sha256": "559ac0cfbb2242fd25e62719cbd7b82a8badd3b5a65b3273ae6c085be1b0c967",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.en_US.cs",
+      "sha256": "64a1e550620a4b1e1bd6e73569047c604d64e10ad162b435077f12061692166c",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs",
+      "sha256": "297c7f2a0452cad079e92b54a829566d1503555172fedf78a4ad2a681d68e003",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.fr_FR.cs",
+      "sha256": "7e2a8855870845062e7de34955452a18977f35b61a91053ae1b7d616b92ad625",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.it_IT.cs",
+      "sha256": "c632fbf6a21c6d65b9a88e5d2585fcb1604d171b635d87d396da77d06430d616",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs",
+      "sha256": "cac8382f45a045c4475a85bbbfd8604c108fbc0a25a001f3cd78d0d62296b428",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+      "sha256": "c5d18e19be6baa9823c7cd6bcdeea1375d02f9b1d062a99e9cf8796401326964",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs",
+      "sha256": "0991c7b8b52cee0019202cdb2cfbe6a0bfac1c73606395e2ab945e833282ff3e",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+      "sha256": "5a16c7924d5c04e26007f4087e67f487b5d506609345d91183c15afd455bbf6d",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidConnection.cs",
+      "sha256": "4d5479f8295369c67a74f838c335410be84315543986d61aab20dc7e4f104736",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+      "sha256": "1a59f4c9ee3c5582787977467be560c5fa8e1f6a1b1c23bc3362e26072e42ec2",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs",
+      "sha256": "c69601befd66580de9a6762012f31ff0221058d6689c44f48711f97f6a2a7c09",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "sha256": "5a3faea74b7cd54edc036a01dcaa749585c5193f9fd5b36ba96df7c7d0118559",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+      "sha256": "ac9a1c896f82d766b28ab456e2ae511e9ac326b983df57012e4cfe82335633d0",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidNativeApi.cs",
+      "sha256": "635dda35188825fdb0ff8867c264b7cb4f2d9bc10ff256da9207fb7b03960985",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadinessNative.cs",
+      "sha256": "7920c455e70e2cd6f9d6ea0df99f9e727db3dae559ec63dae3463723dcb9e0a2",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReportApi.cs",
+      "sha256": "f140a69fa754d417d8df118b633d75259ee9f7ba76f0c2c0fc0f3fbd2f7616e1",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReportSizes.cs",
+      "sha256": "79653a3d9356264fb79ad5b5338d9848802bad03ac740bfaaa0689d6a6b1603c",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+      "sha256": "be5207547d332a77dabeafa9d0f0e7106c9f9c3b122b948367bd2b8d882621be",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+      "sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/CoreFoundationString.cs",
+      "sha256": "d1369de65218342f3a86837ad9562a6b8e4cea4690f5dfc7f1fe3a7fbdd2c8a6",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "sha256": "eddb9d35404dc8cb00fda38577ac8e0772c7ed0448d469599cc8cafb4a397c63",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "sha256": "3510a3ff0a1ed360bad0b9eb44fbe8bc0c53820644c1b542a990c2ff567dcf4e",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "sha256": "9f586abba719425f246bf3731a854163c21a533dc472e9de7bf6486250f09cfa",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs",
+      "sha256": "77c6bb05a10a56196c3236ba0b3ff60c8d25fa1a3e4f47906dc7e6896921bfd6",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "sha256": "dc4ce0f2d9aa5943a902022d3ff166b9e9cc4ccc4e67e864b845faa8a56d6eaf",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+      "sha256": "4ca6b498e4f7254873bc205f879fe829aac9a5e58220f02bfedc58a73b436bdb",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "sha256": "510af458af29afaa8d1f2cadfc1fea54380836ac96d639cdd0d9cbe5251d4e0d",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidInterface.cs",
+      "sha256": "a8ef95e05b2dfb58b30df839f73234130a5b082cf0fe822404367d99238ce1e6",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/IDeviceChangeListener.cs",
+      "sha256": "fd9ad294ec6d199f7044289834b1f0be752eb203f6aa068e86f0a87aa70ea1a5",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+      "sha256": "d079f655a8c0261c32f9687bf26e8a09f8d2eecc5242d8d45545c7b184a28b7b",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+      "sha256": "6112c337e3b701da891c2ca39de8be270bb94a49c27c5b64f64fad05e9e47053",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISCardApi.cs",
+      "sha256": "46bd33abd503244e3c6f9efbf09fe9e470d38475b017d8fb461a81714ed2ed45",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs",
+      "sha256": "20d7373e88426adc7b14a5f366abb321108716b603fb0ca229a873a6c0d605b5",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+      "sha256": "53395c3f41bb3d12aa31142c365d47407f01b380fc4d7d1d67194b70460420a0",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionKindDetector.cs",
+      "sha256": "293e9bd7ecff86e2dcfcf9671ff21f714bdc86d3763c852286a204de2e3d3067",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "sha256": "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscDevice.cs",
+      "sha256": "f595126876d68dbc2ebc463db37bd9c49de97fad3c7af159d21e86072529a590",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "sha256": "e0d25805f1b42b4eb0666f7ffa22674e5f173cbc28c04a8887564522075aa817",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PscsConnectionKind.cs",
+      "sha256": "fcc7f832428d6551d324de7db4d42794bc57a9c452507470b8cbc9d0c1771dfa",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "sha256": "3cd87b0435f55032d75613d1b1adacd505a40628d9a0dccdb81e873c104545e6",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+      "sha256": "1bc88cbc1d76f0c5d13ec6a563231fefb2178af776783798682c6038a0a38136",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+      "sha256": "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/FidoHidOwnershipIntegrationTests.cs",
+      "sha256": "a780ea911ad43397492dbe0f5eacae130cc8c272a4343a09de8bb4f4733d296d",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+      "sha256": "bb7f9ca65d4e78bcc1a0bf9464ace85ab2ddfa4eecc71bf6269c8c6268f597c0",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs",
+      "sha256": "47e92b43da068107fb7ca2415a6c88b8b61b2a04fd45d920e7fb79505d1f9c06",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidEnumerationTests.cs",
+      "sha256": "a874d29ea319ad0f50ccdff5557e1d3a28a61bff60323d09592422e40bfdec30",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/PcscLifetimeIntegrationTests.cs",
+      "sha256": "5fe303262aa38f87025e80bef2196dff94e392679b89b4a7cd857630ecd84a9e",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs",
+      "sha256": "7a7316cf12935d66c42fa013f9245fdb2a92a4a40447cfa68d7aa08c1e20c420",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/ChildProcessTestRunner.cs",
+      "sha256": "6c9b1302795903c9880e619c12e05d1bb7353781d0372cac7e549dc69ac2ff99",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreAuditReproTests.cs",
+      "sha256": "926ce7b360e09e8e42479962eaedbfabcb6aa8da46cfccccee088f6a8d305feb",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "sha256": "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs",
+      "sha256": "7b2849955ecfd57c61ad61c438994615b680445b6abee350a861ef7955a148c5",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+      "sha256": "e46904fcfd3b69e78358de905917bac4fc5796e89aee5ef277b47ccc4fe242cb",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryManifest.cs",
+      "sha256": "49ac596611527a2d57b83ee3fad39fb44c77381c451faa1ccf90ed6754c7a1f7",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs",
+      "sha256": "e9f5a1ef0e80aff32cba6d3d75d5625d95937d7ae14508c64a7126de5091d33b",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/CrossLayerAcceptanceTests.cs",
+      "sha256": "a775510040aff92d84baf5ff427161ad4ed2921344f6d3aa7a0ab42c2de0870c",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+      "sha256": "958a5e4783b1f5d9a0a7a2102e9f65c8fcfca71d7da971aa331e838ef190ffdb",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+      "sha256": "9337124408a09f1a0470f15f1f35f56b5bdff60129039875e85f6214a41816cc",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+      "sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "sha256": "a4adb44b77ba49b91f3bc6311130e627fe25d96c8d059cd33f3f3254576e4bf3",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionOwnershipTests.cs",
+      "sha256": "30990ad0c384418386558e0b6ae7b1de2d019c98a7c620f8e739b3a1d3cc1bc4",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceConnectionRegistryTests.cs",
+      "sha256": "0dbcecbc4b6606d9e901f768c0a8e259f531dbfaa60b354e379aff250b5ccf28",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HeldExceptionPropagationTests.cs",
+      "sha256": "701241dd20f11f931bff67b8178b81231d4e3f6a936e961fa3c4324f58c7a6ae",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/HidConnectionSlotTests.cs",
+      "sha256": "245278271407b9a8bbb45625d5b4755ad6f4ff1603bc73a7e38c0be0a331c1d4",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/LinuxHidRoutingTests.cs",
+      "sha256": "fc0af8e6de8e1f360580a95abee1b6ae539f00e68c768dee3e8d2fb246a7c5ff",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscConnectionSlotTests.cs",
+      "sha256": "982b55764b21b769aafc7863f2da2ce5efe9890c86feba3915c4dbed883faa5b",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/PcscDiscoveryLifetimeTests.cs",
+      "sha256": "1e3ed0e21ad843e5ec980cd3a3277e60dd7b0bf9ecd9c61e3003347286eddd4b",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ResolvePreferredConnectionTests.cs",
+      "sha256": "c1ef66ab44a1a914fa77c7ed9b5c5a30af31db33f5d715e6df798bf721703eb4",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/SessionTransportTests.cs",
+      "sha256": "5a6b87b37aea98564c0e073022e55fb69ad0667015eb308e6fe9be16b448fe7e",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Native/Windows/CfgMgr32InteropTests.cs",
+      "sha256": "117a95d2925e465c3971a7172284a1d4701216a2090e9579b50226a03958d07a",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/RuntimeResilience/RuntimeResilienceStaticScanTests.cs",
+      "sha256": "0c22f9586d74e7e9d46c8feb6f6da0eeef882563f7f9e8d458881dbe4f766752",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/CoreFoundationStringTests.cs",
+      "sha256": "adc61a0e5b4c6e882a8bee2c714d6cc6f27962bae43fb24bae38fe1eb4f6a4e2",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/FindHidInterfacesBoundaryTests.cs",
+      "sha256": "2b4c17d56ab72d2a22c0e1c82d91c3d823e36f7fce38eb73fed6d2a5b3203b2d",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs",
+      "sha256": "f7ddfe4cf0c5cb08c62c4044121286192c639d990ea32697533122dd11d97318",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidInterfaceClassifierTests.cs",
+      "sha256": "83e7f8999f42f2bec87b154d39f69dd572fe1de40889a6a63126378ec7995f03",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDescriptorCloseTests.cs",
+      "sha256": "f3c0c925f65437e65d33b9a9f2eb84940f60afffa7bdcc509a97aed885596f58",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDirectFacadeAcceptanceTests.cs",
+      "sha256": "c3d6e7f173a0affe60f4127304c5c199d4c90f6f6a8310d00bbe32d2ce8c5538",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxDiscoveryAdmissionTests.cs",
+      "sha256": "1463c0c2e7c56fc830d8a0cde3ef974963373ae5b2bb57da3195dd5416c1c397",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoHidConnectionTests.cs",
+      "sha256": "50731b914229e48d1cdaafc620e054737aa377a7391d29c2854314a63fd21ae8",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxFidoWorkerFailureTests.cs",
+      "sha256": "cbdee9f5b0ac6ca1cc1f1b90ec2e2ebe066f9f24044e83e29017367f93f54faa",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.Native.cs",
+      "sha256": "5e5589c0453d60bfac21a3fa97bd49490d746cf3b0f09db46c62e116d03ce4b3",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReadReactorTests.cs",
+      "sha256": "d614d59ee542bf53c343b2b3cd0da1e7f2d5aa748141bd9465a127c32be73338",
+      "disposition": "HOLD"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxHidReportApiTests.cs",
+      "sha256": "ae7e3ec195ea7e547328399199f9fa225abac4e69f401d61745eadd3637e72be",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxNativeAbiTests.cs",
+      "sha256": "17d0da987a8ba9c3a85c1515166cc81276bbc4113821dc6e9b19bcbac1758f36",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpHidConnectionTests.cs",
+      "sha256": "ce3589dd134e0112e6033e7d32d6d89ea481bc66346fadffc6c503aaa4f3fa92",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpRecoveryTests.cs",
+      "sha256": "bdece8baba7e33e16e1f07ed23815ed331c54f069e10b12e8fa3fb14ced3c4b6",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxOtpWorkerFailureTests.cs",
+      "sha256": "007a6ff3a9102a557ff55bca692fd3fe901460cedf4debb0fc0255023f41527a",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxReportConnectionTests.cs",
+      "sha256": "290c8a6b70fca49984fe0f91a914cc3615d00348ed43952ee814339f082036ed",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Linux/LinuxWorkerFailureTestSetup.cs",
+      "sha256": "b32b87ea5b60df26e8ee9f70ea8f9d8ed5093bc5193b3ff4b253bbef5e80ce9b",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDescriptorParsingTests.cs",
+      "sha256": "e4988b8f8dc3251631fd83b882e61a515f73c4044e55fe518d7802ed81f83a5f",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs",
+      "sha256": "847161f049abad6bd489351014998ee2a56a539510387515ac18cc28da71a05d",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxUdevHidEventSourceTests.cs",
+      "sha256": "8829b2d0b190b7446813c1e12bd3c76be7494b5a9014178d8560c48217b6dbc4",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+      "sha256": "a66c5b5b9cd8cb9ec0fbdc86c1b4dd913a1012c7b585d91cfdbccdad3d07286e",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+      "sha256": "2dd0b7d3c711a468f95600ccad7225326845db99d487f8b49324b87582083286",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+      "sha256": "70e323c35bd061f2bc9c39359b0f689ffd221fab288218dccdc055fe05019ed6",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+      "sha256": "1d132cbbaf5b3805ff1e3f02f61b0b968c72ef36b1931ce52d28e85571f44b87",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "sha256": "cb28f7961c93d35e7ea170dbc78a64ca7c5effe005b5982973bf5054f8d83774",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+      "sha256": "3230dab40cee0644453240b0f70e7b94647f844d1d683647c5a46fc3994a0848",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRecoveryTests.cs",
+      "sha256": "219bad77cbe41d3d0e362d681e0453d86032e7f6c7d68134673ae18e52ed375b",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+      "sha256": "dd668b4da846830cb54d956177bfaad3f08c347c77e0e3fcc8f6aaece1c41be0",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidDeviceListenerTests.cs",
+      "sha256": "5543e24c877c3e4afa1dcca1d0f1cfddabf7372dac07929228b8bf5678baf3a3",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs",
+      "sha256": "0bc79209f2fac5db4c4f63b456bd9265c154a6e148b48f5d869bb55889692879",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerSCardErrorTests.cs",
+      "sha256": "a309aee019947c76d1cc6859a53c2f00b6393d9201b025562ccca4762d04dafb",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/ControlledSCardConnectionApi.cs",
+      "sha256": "29de34cb39f881d87f172270e2fdd30d423de6571b24c37db441ed143b5b19eb",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscCleanupFailureProbe.cs",
+      "sha256": "f40aef9938191650ff06385f7e668e15f8dd3479550ecb2e15d3e1e88f63102e",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscIsolatedProbe.cs",
+      "sha256": "4b1f2a13d5d4f9365f418b2306bc3459c1191945af830befd239882df8a997d0",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscTestDevices.cs",
+      "sha256": "73e74870b193b11c7e78cefa860291fb6d3ac89d15b0deb8e008783f70fd06ac",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/SmartCardConnectionFactoryFakes.cs",
+      "sha256": "d9849f0b37612840ba3069c12729f786f43d4b49dce643d8bebdb910b2ebee4a",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/FindPcscDevicesTests.cs",
+      "sha256": "e36b3fb438020e7420e5f60c470cc9e760421ab995097c1e82bd14fcc8cb2e20",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionKindDetectorTests.cs",
+      "sha256": "463c7e31d458fe026e31ca74449f6a76c35a0b8877b06b6dbadde8e00cddb776",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "sha256": "d592c70ef9ce35b70d6fa1cdb87201398573896ecf3bb7329f88ece79089f550",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscContextIsolationTests.cs",
+      "sha256": "9d9c082a3743a318fd8a77714338a9a4f37bfb8381ac40f403cd79274282e92f",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscReaderNameOwnershipTests.cs",
+      "sha256": "4e44922b4dffd3ee8f4c7251affd8a67cb3d0ee8907c9a77e1c64b458d056bb6",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardConnectionFactoryTests.cs",
+      "sha256": "0dbbe9f65607812416a55e7315266a3a017b751fd1cc417fc6580988771d49e2",
+      "disposition": "RETAIN"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "sha256": "a17c5ca5567636e3f32ab0e203843377a8cb02e5328f21c1f1c7dc83ef51f215",
+      "disposition": "EDIT"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/UsbSmartCardConnectionTests.cs",
+      "sha256": "fc0a8caa5175b9ab844d45cc288de744f95cd30bb55707a46faa19768c28a4a2",
+      "disposition": "RETAIN"
+    }
+  ],
+  "affected_reviewed_source": [
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "sha256": "eddb9d35404dc8cb00fda38577ac8e0772c7ed0448d469599cc8cafb4a397c63",
+      "text": "// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing System.Globalization;\nusing Yubico.YubiKit.Core.Native;\nusing NativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;\n\nnamespace Yubico.YubiKit.Core.Transports.Hid.MacOS;\n\n/// <summary>\n///     Utility methods for interacting with macOS IOKit framework.\n/// </summary>\ninternal static class IOKitHelpers\n{\n    /// <summary>\n    ///     Gets an integer-typed property value from a device.\n    /// </summary>\n    /// <param name=\"device\">\n    ///     The previously opened device against which the property should be queried.\n    /// </param>\n    /// <param name=\"propertyName\">\n    ///     The name of the property to query for.\n    /// </param>\n    /// <returns>\n    ///     The value of the property.\n    /// </returns>\n    /// <exception cref=\"PlatformApiException\">\n    ///     The type requested and the type returned by IOKit do not match.\n    /// </exception>\n    /// <exception cref=\"InvalidOperationException\">\n    ///     The property is absent, so the nullable result has no value.\n    /// </exception>\n    public static int GetIntPropertyValue(IntPtr device, string propertyName)\n    {\n        var propertyValue = GetNullableIntPropertyValue(device, propertyName);\n\n        // We want to rely on Nullable<T>'s null checking and subsequent exception.\n        // Rather than duplicate the messaging and exception ourselves, let's just\n        // use theirs.\n#pragma warning disable CS8629\n        return propertyValue.Value;\n#pragma warning restore CS8629\n    }\n\n    /// <summary>\n    ///     Gets a nullable integer-typed property value from a device.\n    /// </summary>\n    /// <param name=\"device\">\n    ///     The previously opened device against which the property should be queried.\n    /// </param>\n    /// <param name=\"propertyName\">\n    ///     The name of the property to query for.\n    /// </param>\n    /// <returns>\n    ///     The signed 32-bit property value, null when absent, or zero when CFNumberGetValue reports a\n    ///     lossy or out-of-range conversion. Zero therefore does not distinguish a stored zero from conversion failure.\n    /// </returns>\n    /// <exception cref=\"PlatformApiException\">\n    ///     The type requested and the type returned by IOKit do not match.\n    /// </exception>\n    public static int? GetNullableIntPropertyValue(IntPtr device, string propertyName)\n    {\n        const int kCFNumberTypeSignedInt = 3;\n\n        var stringRef = IntPtr.Zero;\n\n        try\n        {\n            stringRef = CoreFoundationString.Create(propertyName);\n\n            var propertyRef =\n                Native.MacOS.IOKitFramework.NativeMethods.IOHIDDeviceGetProperty(device, stringRef);\n\n            if (propertyRef == IntPtr.Zero) return null;\n\n            var propertyType = NativeMethods.CFGetTypeID(propertyRef);\n            var numberType = NativeMethods.CFNumberGetTypeID();\n            if (propertyType != numberType)\n                throw new PlatformApiException(\n                    string.Format(\n                        CultureInfo.CurrentCulture,\n                        \"ExceptionMessages.IOKitTypeMismatch\",\n                        numberType,\n                        propertyType));\n\n            var numberBytes = new byte[sizeof(int)];\n            if (!NativeMethods.CFNumberGetValue(propertyRef, kCFNumberTypeSignedInt, numberBytes)) return 0;\n\n            return BitConverter.ToInt32(numberBytes, 0);\n        }\n        finally\n        {\n            if (stringRef != IntPtr.Zero) NativeMethods.CFRelease(stringRef);\n        }\n    }\n}\n"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "sha256": "ce3fa7f7dfe85620c761b20cbb2fabfbbabb51c452f41a06d7f4c4f7c285e62a",
+      "text": "﻿// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing Microsoft.Win32.SafeHandles;\nusing System.Runtime.InteropServices;\n\nnamespace Yubico.YubiKit.Core.Native.Windows.HidD;\n\n/// <summary>Owns synchronous Windows metadata, input/output, and feature-report handle access.</summary>\n/// <remarks>\n///     ReadFile/WriteFile use a normal handle and null OVERLAPPED storage. Calls can block the invoking thread;\n///     the typed compatibility adapters do not add native cancellation. A synchronous import retains the handle\n///     through native return, so concurrent Dispose can return before the last native borrow releases it.\n///     Callers must finish report work before disposal; this owner exposes no checked native-close outcome.\n///     Report-ID-prefixed staging arrays are separate from typed-adapter copies and returned payload arrays.\n///     Clearing an adapter copy does not clear this owner's staging, which is currently left for GC.\n/// </remarks>\ninternal sealed class WindowsHidReportAccess : IWindowsHidReportAccess\n{\n    private const int ErrorAccessDenied = 5;\n    private const string WindowsHidAccessDeniedGuidance =\n        \"Windows denied access to the HID interface. The interface may be held exclusively by another process, \" +\n        \"or this environment may require running the process elevated as Administrator to open YubiKey HID reports.\";\n    private SafeFileHandle _handle;\n    private bool _disposed;\n\n    public WindowsHidReportAccess(string devicePath)\n    {\n        DevicePath = devicePath;\n\n        _handle = OpenHandleForMetadata(out var capabilities);\n\n        Usage = capabilities.Usage;\n        UsagePage = capabilities.UsagePage;\n        InputReportByteLength = capabilities.InputReportByteLength;\n        OutputReportByteLength = capabilities.OutputReportByteLength;\n        FeatureReportByteLength = capabilities.FeatureReportByteLength;\n    }\n\n\n    public string DevicePath { get; }\n    public short Usage { get; }\n    public short UsagePage { get; }\n    public short InputReportByteLength { get; }\n    public short OutputReportByteLength { get; }\n    public short FeatureReportByteLength { get; }\n\n    // Keep desired access specific to the report operation: ReadFile/WriteFile need read/write access,\n    // while the feature path requests none. Availability still depends on the collection, ACL and driver.\n\n    /// <summary>\n    ///     Opens the handle used for input/output reports (FIDO).\n    /// </summary>\n    /// <remarks>\n    ///     Requires GENERIC_READ | GENERIC_WRITE because this path really does use ReadFile/WriteFile\n    ///     (see <see cref=\"GetInputReport\" /> and <see cref=\"SetOutputReport\" />), unlike the feature path.\n    ///     A zero-access fallback cannot supply the access required by these file calls. Access denied can\n    ///     reflect collection restrictions, ACLs, another handle's sharing policy, or host token policy;\n    ///     elevation is an environment-specific troubleshooting step, not a universal FIDO prerequisite.\n    /// </remarks>\n    public void OpenIOConnection()\n        => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |\n                                Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);\n\n    /// <summary>\n    ///     Opens the handle used for feature reports (OTP), with no desired access.\n    /// </summary>\n    /// <remarks>\n    ///     <para>\n    ///         OTP feature-report I/O uses HidD_GetFeature/HidD_SetFeature rather than ReadFile/WriteFile.\n    ///         This path requests zero desired access so it does not request keyboard input/output access\n    ///         that it will not use. The collection, ACL, driver, and existing handle sharing still determine\n    ///         whether open and feature transfer succeed.\n    ///     </para>\n    ///     <para>\n    ///         The constructor's metadata probe checks open with zero access and capability retrieval\n    ///         (CreateFile + HidD_GetPreparsedData/HidP_GetCaps), not HidD_GetFeature/HidD_SetFeature.\n    ///         Historical hardware results have their own source,\n    ///         host, and device scope and do not qualify every deployment of this implementation.\n    ///     </para>\n    ///     <para>\n    ///         The separate open methods choose access from the operation instead of trying read/write first\n    ///         and degrading on failure. Both request FILE_SHARE.ALL, which allows compatible OS opens but\n    ///         does not override another handle's sharing restrictions or acquire a process-local SDK claim.\n    ///     </para>\n    /// </remarks>\n    public void OpenFeatureConnection()\n        => OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);\n\n    public byte[] GetFeatureReport()\n    {\n        EnsureOpenHandle();\n\n        var buffer = new byte[FeatureReportByteLength];\n\n        if (!NativeMethods.HidD_GetFeature(_handle, buffer, buffer.Length))\n        {\n            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());\n        }\n\n        // Windows includes the report ID byte; the SDK exposes only report payload bytes.\n        var returnBuf = new byte[FeatureReportByteLength - 1];\n        Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);\n\n        return returnBuf;\n    }\n\n    public void SetFeatureReport(byte[] buffer)\n    {\n        EnsureOpenHandle();\n\n        if (buffer.Length != FeatureReportByteLength - 1)\n        {\n            throw new ArgumentException(\n                $\"The HID feature report buffer length is invalid. Expected {FeatureReportByteLength - 1} bytes, but got {buffer.Length}.\",\n                nameof(buffer));\n        }\n\n        // Windows expects the report ID byte before the report payload.\n        var sendBuf = new byte[buffer.Length + 1];\n        Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);\n\n        if (!NativeMethods.HidD_SetFeature(_handle, sendBuf, sendBuf.Length))\n        {\n            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());\n        }\n    }\n\n    public byte[] GetInputReport()\n    {\n        EnsureOpenHandle();\n\n        var buffer = new byte[InputReportByteLength];\n        if (!Kernel32.NativeMethods.ReadFile(_handle, buffer, buffer.Length, out var bytesRead, IntPtr.Zero)\n            || bytesRead != buffer.Length)\n        {\n            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());\n        }\n\n        // Windows includes the report ID byte; the SDK exposes only report payload bytes.\n        var returnBuf = new byte[InputReportByteLength - 1];\n        Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);\n\n        return returnBuf;\n    }\n\n    public void SetOutputReport(byte[] buffer)\n    {\n        EnsureOpenHandle();\n\n        if (buffer.Length != OutputReportByteLength - 1)\n        {\n            throw new ArgumentException(\n                $\"The HID output report buffer length is invalid. Expected {OutputReportByteLength - 1} bytes, but got {buffer.Length}.\",\n                nameof(buffer));\n        }\n\n        // Windows expects the report ID byte before the report payload.\n        var sendBuf = new byte[buffer.Length + 1];\n        Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);\n\n        if (!Kernel32.NativeMethods.WriteFile(_handle, sendBuf, sendBuf.Length, out var bytesWritten, IntPtr.Zero)\n            || bytesWritten != sendBuf.Length)\n        {\n            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());\n        }\n    }\n\n\n    private static NativeMethods.HIDP_CAPS GetCapabilities(SafeFileHandle safeHandle)\n    {\n        NativeMethods.HIDP_CAPS capabilities = new();\n\n        if (!NativeMethods.HidD_GetPreparsedData(safeHandle, out var preparsedData))\n        {\n            ThrowHidDWin32Failure(nameof(NativeMethods.HidD_GetPreparsedData), \"Failed to get HID preparsed data.\");\n        }\n\n        try\n        {\n            var result = NativeMethods.HidP_GetCaps(preparsedData, ref capabilities);\n            return result == NativeMethods.HidpStatusSuccess\n                ? capabilities\n                : throw new PlatformApiException(nameof(NativeMethods.HidP_GetCaps), result,\n                    \"Failed to get HID capabilities.\");\n        }\n        finally\n        {\n            _ = NativeMethods.HidD_FreePreparsedData(preparsedData);\n        }\n    }\n\n    private SafeFileHandle OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS desiredAccess)\n    {\n        var handle = Kernel32.NativeMethods.CreateFile(\n            DevicePath,\n            desiredAccess,\n            Kernel32.NativeMethods.FILE_SHARE.ALL,\n            IntPtr.Zero,\n            Kernel32.NativeMethods.CREATION_DISPOSITION.OPEN_EXISTING,\n            Kernel32.NativeMethods.FILE_FLAG.NORMAL,\n            IntPtr.Zero\n        );\n\n        if (handle.IsInvalid)\n        {\n            var error = Marshal.GetLastWin32Error();\n            if (error == ErrorAccessDenied)\n            {\n                throw new UnauthorizedAccessException(\n                    $\"Access denied opening HID device '{DevicePath}'. {WindowsHidAccessDeniedGuidance}\");\n            }\n\n            throw new PlatformApiException(nameof(Kernel32.NativeMethods.CreateFile), error,\n                $\"Failed to open HID device '{DevicePath}'.\");\n        }\n\n        return handle;\n    }\n\n    private SafeFileHandle OpenHandleForMetadata(out NativeMethods.HIDP_CAPS capabilities)\n    {\n        try\n        {\n            var handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);\n            try\n            {\n                capabilities = GetCapabilities(handle);\n                return handle;\n            }\n            catch\n            {\n                handle.Dispose();\n                throw;\n            }\n        }\n        catch (Exception ex) when (RequiresReadWriteMetadataHandle(ex))\n        {\n            var handle = OpenReadWriteHandle();\n            try\n            {\n                capabilities = GetCapabilities(handle);\n                return handle;\n            }\n            catch\n            {\n                handle.Dispose();\n                throw;\n            }\n        }\n    }\n\n    private void OpenReportConnection(Kernel32.NativeMethods.DESIRED_ACCESS desiredAccess)\n    {\n        var handle = OpenHandleWithAccess(desiredAccess);\n        _handle.Dispose();\n        _handle = handle;\n    }\n\n    private SafeFileHandle OpenReadWriteHandle()\n        => OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |\n                                Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);\n\n    private static bool RequiresReadWriteMetadataHandle(Exception exception)\n        => exception is UnauthorizedAccessException;\n\n    private static void ThrowHidDWin32Failure(string source, string message)\n    {\n        var error = Marshal.GetLastWin32Error();\n        if (error == ErrorAccessDenied)\n        {\n            throw new UnauthorizedAccessException($\"{message} {WindowsHidAccessDeniedGuidance}\");\n        }\n\n        throw new PlatformApiException(source, error, message);\n    }\n\n    private void EnsureOpenHandle()\n    {\n        ObjectDisposedException.ThrowIf(_disposed, this);\n\n        if (_handle.IsInvalid || _handle.IsClosed)\n        {\n            throw new InvalidOperationException($\"The HID device handle for '{DevicePath}' is not open.\");\n        }\n    }\n\n    public void Dispose()\n    {\n        if (_disposed)\n        {\n            return;\n        }\n\n        _handle.Dispose();\n        _disposed = true;\n    }\n\n}"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+      "sha256": "b36df078091dcbab835c2a9245f1e52908a60970c4b82dfa72cc109a981628cf",
+      "text": "// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Core.Native;\n\nnamespace Yubico.YubiKit.Core.Transports.Hid;\n\n/// <summary>\n/// Abstract base class for platform-specific HID device listeners.\n/// Monitors for HID device arrival and removal events using OS-level notifications.\n/// </summary>\n/// <remarks>\n/// Listeners do not auto-start. Call <see cref=\"Start\"/> after setting up <see cref=\"Changed\"/>\n/// callback. The listener establishes baseline state during <see cref=\"Start\"/> to avoid\n/// duplicate events for devices already present.\n/// </remarks>\npublic abstract class HidDeviceListener : IDeviceChangeListener\n{\n    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidDeviceListener>();\n\n    private bool _disposed;\n    private volatile DeviceListenerStatus _status = DeviceListenerStatus.Stopped;\n\n    /// <summary>\n    /// Callback invoked when a HID listener observes a topology change.\n    /// </summary>\n    /// <remarks>\n    /// The callback is a rescan hint only, never authoritative YubiKey arrival or removal state.\n    /// Do not call <see cref=\"Stop\"/> or <see cref=\"Dispose()\"/> from inside the callback.\n    /// </remarks>\n    public Action? Changed { get; set; }\n\n    /// <summary>\n    /// Gets the current status of the listener.\n    /// </summary>\n    /// <remarks>\n    /// The status is written by platform listener threads and may be read from any thread;\n    /// reads and writes use volatile semantics. It is diagnostic state, not a synchronization\n    /// primitive.\n    /// </remarks>\n    public DeviceListenerStatus Status\n    {\n        get => _status;\n        protected set => _status = value;\n    }\n\n    /// <summary>\n    /// Starts the listener. Establishes baseline of currently connected devices,\n    /// then begins monitoring for changes. Only fires events for subsequent changes.\n    /// </summary>\n    /// <remarks>\n    /// This method should be called after setting <see cref=\"Changed\"/> callback.\n    /// Calling Start() on an already started listener has no effect.\n    /// </remarks>\n    public abstract void Start();\n\n    /// <summary>\n    /// Stops the listener and releases monitoring resources.\n    /// </summary>\n    /// <remarks>\n    /// <para>\n    /// After successful shutdown, a listener may be restarted with <see cref=\"Start\"/> if its platform\n    /// implementation has completed cleanup. Retained or uncertain native state can prevent restart.\n    /// Calling Stop() on an already stopped listener has no effect.\n    /// </para>\n    /// <para>\n    /// Do not call <see cref=\"Stop\"/> or <see cref=\"Dispose()\"/> from within the\n    /// <see cref=\"Changed\"/> callback. Native unregister and thread joins can wait for that callback,\n    /// causing a deadlock or consuming the shutdown wait budget. A timeout or failed unregister\n    /// does not prove that native callbacks have drained.\n    /// </para>\n    /// </remarks>\n    public abstract void Stop();\n\n    /// <summary>\n    /// Creates a platform-specific HID device listener.\n    /// </summary>\n    /// <returns>A <see cref=\"HidDeviceListener\"/> appropriate for the current operating system.</returns>\n    /// <exception cref=\"PlatformNotSupportedException\">\n    /// Thrown when the current platform is not supported.\n    /// </exception>\n    public static HidDeviceListener Create() =>\n        SdkPlatformInfo.OperatingSystem switch\n        {\n            SdkPlatform.Windows => new Windows.WindowsHidDeviceListener(),\n            SdkPlatform.MacOS => new MacOS.MacOSHidDeviceListener(),\n            SdkPlatform.Linux => new Linux.LinuxHidDeviceListener(),\n            _ => throw new PlatformNotSupportedException(\n                $\"HID device listening is not supported on platform: {SdkPlatformInfo.OperatingSystem}\")\n        };\n\n    /// <summary>\n    /// Signals that a device event has occurred.\n    /// </summary>\n    /// <param name=\"hint\">The diagnostic rescan hint to log before notifying subscribers.</param>\n    private protected void OnDeviceEvent(HidDeviceRescanHint hint)\n    {\n        ArgumentNullException.ThrowIfNull(hint);\n\n        try\n        {\n            Logger.LogTrace(\n                \"Received HID rescan hint: {Kind}, {PlatformDeviceId}, {DevicePath}\",\n                hint.ChangeKind,\n                hint.PlatformDeviceId,\n                hint.DevicePath);\n            Changed?.Invoke();\n        }\n        catch (Exception ex)\n        {\n            Logger.LogWarning(ex, \"Exception in Changed callback\");\n        }\n    }\n\n    /// <summary>\n    /// Disposes of the listener and releases all resources.\n    /// </summary>\n    /// <param name=\"disposing\">True if called from Dispose(), false if from finalizer.</param>\n    protected virtual void Dispose(bool disposing)\n    {\n        if (_disposed)\n        {\n            return;\n        }\n\n        if (disposing)\n        {\n            Changed = null;\n            Status = DeviceListenerStatus.Stopped;\n        }\n\n        _disposed = true;\n    }\n\n    /// <inheritdoc />\n    /// <remarks>\n    /// Do not call from within the <see cref=\"Changed\"/> callback; see <see cref=\"Stop\"/>.\n    /// </remarks>\n    public void Dispose()\n    {\n        Dispose(disposing: true);\n        GC.SuppressFinalize(this);\n    }\n}"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "sha256": "dc4ce0f2d9aa5943a902022d3ff166b9e9cc4ccc4e67e864b845faa8a56d6eaf",
+      "text": "// Copyright 2025 Yubico AB\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\").\n// You may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n\nusing Microsoft.Extensions.Logging;\nusing System.Diagnostics;\nusing System.Runtime.InteropServices;\nusing Yubico.YubiKit.Core.Native.Windows.Cfgmgr32;\n\nnamespace Yubico.YubiKit.Core.Transports.Hid.Windows;\n\n/// <summary>\n/// Windows implementation of HID device listener using CM_Register_Notification.\n/// </summary>\n/// <remarks>\n/// The listener does not auto-start. Call <see cref=\"Start\"/> after setting up <see cref=\"HidDeviceListener.Changed\"/>\n/// callback.\n/// </remarks>\ninternal sealed class WindowsHidDeviceListener : HidDeviceListener\n{\n    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<WindowsHidDeviceListener>();\n\n    /// <summary>\n    /// GUID for the HID device interface class.\n    /// </summary>\n    private static readonly Guid GuidDevinterfaceHid = new(\"4D1E55B2-F16F-11CF-88CB-001111000030\");\n\n    /// <summary>\n    /// Offset in CM_NOTIFY_EVENT_DATA where the SymbolicLink string begins (after FilterType, Reserved, ClassGuid).\n    /// </summary>\n    private const int SymbolicLinkOffset = 24;\n\n    private readonly Lock _syncLock = new();\n    private GCHandle _marshalableThisPtr;\n    private NativeMethods.CM_NOTIFY_CALLBACK? _callbackDelegate;\n    private IntPtr _notificationHandle;\n    private bool _disposed;\n\n    /// <summary>\n    /// Creates a new instance. The listener does not start automatically - call <see cref=\"Start\"/>\n    /// after setting up the <see cref=\"HidDeviceListener.Changed\"/> callback.\n    /// </summary>\n    public WindowsHidDeviceListener()\n    {\n        // Lazy start - do nothing in constructor\n    }\n\n    /// <inheritdoc />\n    public override void Start()\n    {\n        lock (_syncLock)\n        {\n            if (Status == DeviceListenerStatus.Started)\n            {\n                return;\n            }\n\n            try\n            {\n                // Keep callback delegate alive for the duration of the listener\n                _callbackDelegate = NotificationCallback;\n\n                // Deliberately Weak, not Normal: a strong handle would self-root the listener,\n                // making the finalizer unreachable while registered — an owner that drops the\n                // listener without Dispose() would leak the native registration forever and keep\n                // pumping events into an abandoned object graph. The Weak handle keeps the\n                // finalizer reachable so it can attempt unregister. Successful unregister drains callbacks;\n                // the current paths discard its status, so invocation alone supplies no drain proof.\n                // During explicit use the caller must keep the listener alive through shutdown.\n                _marshalableThisPtr = GCHandle.Alloc(this, GCHandleType.Weak);\n\n                // Build the notification filter for HID device interfaces\n                var filterSize = Marshal.SizeOf<NativeMethods.CM_NOTIFY_FILTER>();\n                Debug.Assert(filterSize == NativeMethods.CmNotifyFilterSize);\n                var filter = new NativeMethods.CM_NOTIFY_FILTER\n                {\n                    cbSize = filterSize,\n                    Flags = 0,\n                    FilterType = NativeMethods.CM_NOTIFY_FILTER_TYPE.DEVINTERFACE,\n                    ClassGuid = GuidDevinterfaceHid\n                };\n\n                var filterPtr = Marshal.AllocHGlobal(filterSize);\n                try\n                {\n                    Marshal.StructureToPtr(filter, filterPtr, false);\n\n                    var result = NativeMethods.CM_Register_Notification(\n                        filterPtr,\n                        GCHandle.ToIntPtr(_marshalableThisPtr),\n                        _callbackDelegate,\n                        out _notificationHandle);\n\n                    if (result != NativeMethods.CmErrorCode.CR_SUCCESS)\n                    {\n                        Logger.LogWarning(\"Failed to register HID notification: {Result}\", result);\n                        Status = DeviceListenerStatus.Error;\n                        ClearRegistrationState();\n                        return;\n                    }\n\n                    Status = DeviceListenerStatus.Started;\n                }\n                finally\n                {\n                    Marshal.FreeHGlobal(filterPtr);\n                }\n            }\n            catch (Exception ex)\n            {\n                Logger.LogError(ex, \"Failed to start Windows HID listener\");\n                Status = DeviceListenerStatus.Error;\n                ClearRegistrationState();\n            }\n        }\n    }\n\n    /// <inheritdoc />\n    public override void Stop()\n    {\n        lock (_syncLock)\n        {\n            if (Status == DeviceListenerStatus.Stopped)\n            {\n                return;\n            }\n\n            // Unregister the notification\n            if (_notificationHandle != IntPtr.Zero)\n            {\n                _ = NativeMethods.CM_Unregister_Notification(_notificationHandle);\n                _notificationHandle = IntPtr.Zero;\n            }\n\n            ClearRegistrationState();\n\n            Status = DeviceListenerStatus.Stopped;\n        }\n    }\n\n    private static int NotificationCallback(IntPtr hNotify, IntPtr context, NativeMethods.CM_NOTIFY_ACTION action, IntPtr eventData, int eventDataSize)\n    {\n        // Recover the listener instance from the GCHandle\n        if (context == IntPtr.Zero)\n        {\n            return 0;\n        }\n\n        var handle = GCHandle.FromIntPtr(context);\n        if (!handle.IsAllocated || handle.Target is not WindowsHidDeviceListener listener)\n        {\n            // Weak handle target collected (listener dropped without Dispose); the finalizer\n            // will unregister the native notification. Drop the hint until then.\n            Logger.LogDebug(\"HID notification received for a collected listener; ignoring\");\n            return 0;\n        }\n\n        try\n        {\n            listener.HandleNotification(action, eventData, eventDataSize);\n        }\n        catch (Exception ex)\n        {\n            Logger.LogWarning(ex, \"Exception in HID notification callback\");\n        }\n\n        return 0; // ERROR_SUCCESS\n    }\n\n    private void HandleNotification(NativeMethods.CM_NOTIFY_ACTION action, IntPtr eventData, int eventDataSize)\n    {\n        switch (action)\n        {\n            case NativeMethods.CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL:\n                HandleDeviceArrival(eventData, eventDataSize);\n                break;\n            case NativeMethods.CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL:\n                HandleDeviceRemoval(eventData, eventDataSize);\n                break;\n        }\n    }\n\n    private void HandleDeviceArrival(IntPtr eventData, int eventDataSize)\n    {\n        try\n        {\n            var devicePath = ReadSymbolicLink(eventData, eventDataSize);\n            if (devicePath is null)\n            {\n                OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Added));\n                return;\n            }\n\n            Logger.LogDebug(\"HID device arrived: {DevicePath}\", devicePath);\n            OnDeviceEvent(CreateHint(HidDeviceChangeKind.Added, devicePath));\n        }\n        catch (Exception ex)\n        {\n            Logger.LogWarning(ex, \"Failed to process device arrival\");\n            OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Added));\n        }\n    }\n\n    private void HandleDeviceRemoval(IntPtr eventData, int eventDataSize)\n    {\n        try\n        {\n            var devicePath = ReadSymbolicLink(eventData, eventDataSize);\n            if (devicePath is null)\n            {\n                OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));\n                return;\n            }\n\n            Logger.LogDebug(\"HID device removed: {DevicePath}\", devicePath);\n            OnDeviceEvent(CreateHint(HidDeviceChangeKind.Removed, devicePath));\n        }\n        catch (Exception ex)\n        {\n            Logger.LogWarning(ex, \"Failed to process device removal\");\n            OnDeviceEvent(new HidDeviceRescanHint(HidDeviceChangeKind.Removed));\n        }\n    }\n\n    // Internal for unit testing: pure memory parsing with no P/Invoke, so the\n    // bounds behavior is verifiable on any platform.\n    internal static string? ReadSymbolicLink(IntPtr eventData, int eventDataSize)\n    {\n        if (eventData == IntPtr.Zero)\n        {\n            return null;\n        }\n\n        if (eventDataSize < SymbolicLinkOffset + sizeof(char))\n        {\n            Logger.LogDebug(\n                \"HID notification event data too small for symbolic link: {EventDataSize}\",\n                eventDataSize);\n            return null;\n        }\n\n        // The symbolic link (device path) starts at offset 24 in CM_NOTIFY_EVENT_DATA.\n        // Windows NUL-terminates the string within eventDataSize, but never trust native\n        // sizes blindly: bound the read to the event payload and trim at the first NUL.\n        var symbolicLinkPtr = IntPtr.Add(eventData, SymbolicLinkOffset);\n        var maxChars = (eventDataSize - SymbolicLinkOffset) / sizeof(char);\n        var buffer = Marshal.PtrToStringUni(symbolicLinkPtr, maxChars);\n        var nulIndex = buffer.IndexOf('\\0');\n        var devicePath = nulIndex >= 0 ? buffer[..nulIndex] : buffer;\n        return string.IsNullOrEmpty(devicePath) ? null : devicePath;\n    }\n\n    private static HidDeviceRescanHint CreateHint(HidDeviceChangeKind changeKind, string devicePath) =>\n        new(changeKind, NormalizeSymbolicLink(devicePath), devicePath);\n\n    private static string NormalizeSymbolicLink(string devicePath) =>\n        devicePath.ToUpperInvariant();\n\n    private void ClearRegistrationState()\n    {\n        if (_marshalableThisPtr.IsAllocated)\n        {\n            _marshalableThisPtr.Free();\n        }\n\n        _callbackDelegate = null;\n        _notificationHandle = IntPtr.Zero;\n    }\n\n    protected override void Dispose(bool disposing)\n    {\n        if (_disposed)\n        {\n            base.Dispose(disposing);\n            return;\n        }\n\n        _disposed = true;\n\n        if (disposing)\n        {\n            Stop();\n        }\n        else\n        {\n            // Finalizer path - minimal cleanup\n            if (_notificationHandle != IntPtr.Zero)\n            {\n                _ = NativeMethods.CM_Unregister_Notification(_notificationHandle);\n                _notificationHandle = IntPtr.Zero;\n            }\n\n            if (_marshalableThisPtr.IsAllocated)\n            {\n                _marshalableThisPtr.Free();\n            }\n        }\n\n        base.Dispose(disposing);\n    }\n\n    ~WindowsHidDeviceListener()\n    {\n        Dispose(disposing: false);\n    }\n}"
+    }
+  ]
+}

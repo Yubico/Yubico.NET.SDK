@@ -1,0 +1,4 @@
+
+//         ///   00 00 00 00 00 00 00 00 || digest || salt
+//         ///   eight 00 bytes, then the digest, then digest length bytes of salt
+//         /// 

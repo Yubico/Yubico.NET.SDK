@@ -1,0 +1,38 @@
+{
+  "focused_patch_sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049",
+  "independent_review": "PENDING",
+  "records": [
+    {
+      "path": "file-dispositions.json",
+      "sha256": "ae10cc1d379bb43807cfd432969f31249ecdf185c01406a20909ce78174157c4"
+    },
+    {
+      "path": "finding-dispositions.json",
+      "sha256": "4c7a233f13059315dd7a6873449409cea83ae9344326d11b810cda67522c8357"
+    },
+    {
+      "path": "inputs.json",
+      "sha256": "22cb5dc4ba229c5c9b5b443c0d8a3b1371da26cab7683d81c5307ff233f79473"
+    },
+    {
+      "path": "original-unit-anchors.json",
+      "sha256": "4c7532c5b16f5ef1a0afd198426cdc38edc89747d93cf0fca37201fe6beeccbf"
+    },
+    {
+      "path": "report.md",
+      "sha256": "b57b46c9b81e14385cda3647a7fb8dac763d1437bbdd21086385dcd8afacba49"
+    },
+    {
+      "path": "source.patch",
+      "sha256": "a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049"
+    },
+    {
+      "path": "static-preservation.json",
+      "sha256": "92eab64ba9f05d06c74b6c49c06845ab6601e95199886a64488f993bc3a29956"
+    },
+    {
+      "path": "xml-check.json",
+      "sha256": "3ab4dd23c62d5aa8d1e01e4d7d000966923231b83ca86703f90227e2d8d770f4"
+    }
+  ]
+}

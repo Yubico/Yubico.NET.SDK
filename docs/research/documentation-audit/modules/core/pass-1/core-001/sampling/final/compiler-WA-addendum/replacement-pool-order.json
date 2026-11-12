@@ -1,0 +1,332 @@
+[
+  {
+    "id": "core-001:unit:c8377e0a58dac11c",
+    "original_rank": 1,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "## Documentation Maintenance",
+    "excluded_reason": "Already actually read; retracted or supported readings are never counted as new reads.",
+    "eligible_for_new_unread_proposal": false,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:546f13cbc632a4a1",
+    "original_rank": 2,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Cancellation and failures",
+    "excluded_reason": "Already actually read; retracted or supported readings are never counted as new reads.",
+    "eligible_for_new_unread_proposal": false,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:bf53e9ad2aa19caf",
+    "original_rank": 3,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Evaluate PRF inputs deliberately",
+    "excluded_reason": "Already actually read; retracted or supported readings are never counted as new reads.",
+    "eligible_for_new_unread_proposal": false,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:4886f819fa316d28",
+    "original_rank": 4,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "## Logging",
+    "excluded_reason": "Already actually read; retracted or supported readings are never counted as new reads.",
+    "eligible_for_new_unread_proposal": false,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:aeadc0996d07ac60",
+    "original_rank": 5,
+    "path": "src/WebAuthn/README.md",
+    "label": "## RP authorization belongs to the application",
+    "excluded_reason": "Already actually read; retracted or supported readings are never counted as new reads.",
+    "eligible_for_new_unread_proposal": false,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:9b2b20dfbae1bf78",
+    "original_rank": 6,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "## Peer Module Pointers",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:761f1552c9ab4aaf",
+    "original_rank": 7,
+    "path": "src/WebAuthn/README.md",
+    "label": "## Related",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:6afae0cb3a2a58c7",
+    "original_rank": 8,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Request protection and blob storage",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:9dc7ab5953064c3f",
+    "original_rank": 9,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "### Extension Processing",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:13efa480557b5601",
+    "original_rank": 10,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "## Security Boundary",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:7efbf6cb5c9c091a",
+    "original_rank": 11,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "### User Verification Decision",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:88a2a3c44157eccf",
+    "original_rank": 12,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "## previewSign Extension",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:88aa5776f8847ece",
+    "original_rank": 13,
+    "path": "src/WebAuthn/README.md",
+    "label": "## Migration from earlier v2 development builds",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:2a6071b02a7ab8bb",
+    "original_rank": 14,
+    "path": "src/WebAuthn/README.md",
+    "label": "## Getting started",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:e01b8f6074a85877",
+    "original_rank": 15,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Evaluate experimental signing",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:769859e6b5d210b6",
+    "original_rank": 16,
+    "path": "src/WebAuthn/README.md",
+    "label": "## Installation",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:6ad41fdaa3317dd9",
+    "original_rank": 17,
+    "path": "src/WebAuthn/README.md",
+    "label": "## Requirements",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:0cbe9e97499b776c",
+    "original_rank": 18,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "### Credential Prompting",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:c98b0fd3f9f450f8",
+    "original_rank": 19,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Registration transport hints",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:7616cf4561420ae9",
+    "original_rank": 20,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "## Known Gotchas",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:ba95739fd9292e26",
+    "original_rank": 21,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Application-service validator",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:ea4254b670022117",
+    "original_rank": 22,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Client checks do not replace RP-server checks",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:bc86ea13aef518dd",
+    "original_rank": 23,
+    "path": "src/WebAuthn/README.md",
+    "label": "## Security notes",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:e4e6d25f71a1f9d5",
+    "original_rank": 24,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "## Module Context",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:2618c79188df3e24",
+    "original_rank": 25,
+    "path": "src/WebAuthn/PACKAGE_README.md",
+    "label": "## Documentation",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:3bdbd8bc61269591",
+    "original_rank": 26,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Choose an authentication response",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:7f21d081d59e31d1",
+    "original_rank": 27,
+    "path": "src/WebAuthn/README.md",
+    "label": "# Yubico.YubiKit.WebAuthn",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:de1e8b502592fa01",
+    "original_rank": 28,
+    "path": "src/WebAuthn/README.md",
+    "label": "## Use extensions",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:f359a9f5657f5d91",
+    "original_rank": 29,
+    "path": "src/WebAuthn/PACKAGE_README.md",
+    "label": "## Installation",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:e132a9715ed0cf59",
+    "original_rank": 30,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "### Integration Tests",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:5dd7c9866beaf64c",
+    "original_rank": 31,
+    "path": "src/WebAuthn/PACKAGE_README.md",
+    "label": "# Yubico.YubiKit.WebAuthn",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:f1c02ff89212630e",
+    "original_rank": 32,
+    "path": "src/WebAuthn/README.md",
+    "label": "### Complete registration and sign-in with your RP",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  },
+  {
+    "id": "core-001:unit:23d1cb9fa229fd5e",
+    "original_rank": 33,
+    "path": "src/WebAuthn/CLAUDE.md",
+    "label": "### Extension policy and result-lifetime limitations",
+    "excluded_reason": null,
+    "eligible_for_new_unread_proposal": true,
+    "pool_only_no_denominator_change": true,
+    "preparer_content_verdict": null
+  }
+]

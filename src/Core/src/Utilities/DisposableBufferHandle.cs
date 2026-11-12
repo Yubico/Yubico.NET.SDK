@@ -24,8 +24,9 @@ namespace Yubico.YubiKit.Core.Utilities;
 ///     The buffer is zeroed via <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/>
 ///     when <see cref="Dispose"/> is called. Callers must not read from or write to
 ///     the original <paramref name="data"/> after disposing this handle.
-///     Always pass a freshly-allocated or rented buffer — never wrap caller-held memory
-///     that must survive beyond the scope of this handle.
+///     Pass storage whose contents may be cleared at the end of this scope. This handle does not
+///     copy the memory or return a rented array to its pool. A pool rental needs a separate return
+///     owner; use <see cref="DisposableArrayPoolBuffer"/> when clearing and pool return belong together.
 /// </remarks>
 public class DisposableBufferHandle(Memory<byte> data) : IDisposable
 {

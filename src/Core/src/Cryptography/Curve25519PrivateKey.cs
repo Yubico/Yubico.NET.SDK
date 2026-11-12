@@ -112,11 +112,14 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// </exception>
     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
     /// <remarks>
-    /// This method accepts version 0 PKCS#8 <c>PrivateKeyInfo</c>. RFC 5958 version value 1
-    /// <c>OneAsymmetricKey</c>, which may carry a <c>publicKey</c> field, is valid but unsupported:
-    /// this type holds no public value, because a supplied one cannot be checked against the private key
-    /// (.NET provides no Ed25519/X25519 primitives). Read the public key from the device after import.
+    /// This method accepts an attribute-free version-0 PKCS#8 <c>PrivateKeyInfo</c> subset with absent
+    /// algorithm parameters. RFC 5958 defines version value 1 for <c>OneAsymmetricKey</c> with a public
+    /// key; the decoder rejects that version before validating the remaining fields. This wrapper holds
+    /// only private bytes and provides no Ed25519/X25519 public/private consistency operation.
+    /// Parsing does not uniformly reject top-level or nested trailing data. Obtain the public value
+    /// through the consuming applet's API when that workflow requires it.
     /// </remarks>
+    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
     public static Curve25519PrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         (var privateKey, var keyType) = AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(pkcs8EncodedKey);

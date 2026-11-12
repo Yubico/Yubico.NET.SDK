@@ -1,0 +1,262 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "bytes": 33159
+  },
+  {
+    "path": "Directory.Packages.props",
+    "sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+    "bytes": 3227
+  },
+  {
+    "path": "docs/SDK-HOUSE-STYLE.md",
+    "sha256": "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20",
+    "bytes": 12612
+  },
+  {
+    "path": "docs/TESTING.md",
+    "sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "bytes": 25690
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/candidates.md",
+    "sha256": "d719f307b97710eef252790cc4efe289a2935b670188903a05609b5766f4f759",
+    "bytes": 24750
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/followup-B4-B6.json",
+    "sha256": "4551f252d1771f37aca561b754bd91383e01e9ae659dcddf21ccef784822edc1",
+    "bytes": 20591
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/followup-B4-B6.md",
+    "sha256": "5bb19dd111642976aae6f446ccd0625bf01720fe7bc45169ad3b8deae9e8c4fd",
+    "bytes": 17077
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/sources.md",
+    "sha256": "305da241be6897c52720778529a7e83b37023c5197473e4203fa95d51be6d216",
+    "bytes": 10383
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/traces.md",
+    "sha256": "27bc9cb867fb3b63c97cb6e001e5a960823e88d737c106cc7917a8d8353280db",
+    "bytes": 18091
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/ByteArrayOrderingRule-v7.0.0.cs",
+    "sha256": "6d9b2ac3c0565b8b76862d091493b212e83398224b89a0f60f405de78628e3de",
+    "bytes": 709
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/FluentAssertions-objectgraphs-v7.0.0.md",
+    "sha256": "9836fed1ccefa3a30fac5c4852e83fee32ab7532ae36fc261365405df9922b21",
+    "bytes": 17408
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/ReadOnlyMemory-v10.0.0.cs",
+    "sha256": "c19b25038fdf0abf70658aed8979dd83e9ca11e27f5b3df68950e8ecb40d879e",
+    "bytes": 19770
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/Task-v10.0.0.cs",
+    "sha256": "5b0d6892267269233dcf5c6191f357b0ba6c4257d1e757ca4d2fe93272b29d9b",
+    "bytes": 389364
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/captures.json",
+    "sha256": "ebbc203154394245506ddaaec0742329e64e31930f0841f1f50f5d6b4632ca84",
+    "bytes": 2031
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/preview-sign-v4.html",
+    "sha256": "29359265d3b0f3dbc738482d4a33865beeb5c698e38651d2d12f14b7b5e6d86c",
+    "bytes": 2834409
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/sources/webauthn3.html",
+    "sha256": "157030c980d44a3ce4b1ec5bcfaa16790c7dfefac20709af6ed2b11c7120970b",
+    "bytes": 2739242
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Ctap2.md",
+    "sha256": "35fe15e38608882555a619b1cd79a41d89a86cbc90c412b50836d9aa660f6005",
+    "bytes": 9704
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/boundary-seeds.md",
+    "sha256": "9ed51a236bbe615c1afdfb4c92958eaa63c299b0be5546b8d7410951924c4ed3",
+    "bytes": 12918
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+    "sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+    "bytes": 709753
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-packet-inputs.json",
+    "sha256": "8b4d36bda7feddb24af4df42f0160d79e300cd945421abc9515686dba6c4d881",
+    "bytes": 42398
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-routing.json",
+    "sha256": "6da8ae5538df16ed9d623986a32f77091ad1a8f0a741ee1298900ad13715326b",
+    "bytes": 146812
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-WebAuthn.json",
+    "sha256": "25e426f06bb8dd19af1053a62644133c45f7e997f2ee7dd6dfc055292de92979",
+    "bytes": 27477
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+    "sha256": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256",
+    "bytes": 40551
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+    "sha256": "2dcfa9c987390940ad44e90298d91ebcccd4ad009ccea473a2995c9f67e8bc4d",
+    "bytes": 26371
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+    "sha256": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d",
+    "bytes": 15340
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+    "sha256": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de",
+    "bytes": 17584
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B4.md",
+    "sha256": "a6743e926ffdedd3157c80097736048f7ab287b7f5c60a904b804d4f23bf098b",
+    "bytes": 16679
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+    "sha256": "5c9b80dcf2351d22bf179584c9fd8a105f897a33efeebfff34e1cfd72e7ab186",
+    "bytes": 13553
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B6.md",
+    "sha256": "146bd5a53f6f1ca3971c8ea8151b6aaee980295e730f5ebfb5c723e55817fdc9",
+    "bytes": 12998
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+    "sha256": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "bytes": 19154
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/sources/notes.md",
+    "sha256": "1dde48d8718d7138eae9ab4da79f12d477f8dd0c298f88d1b909bd2dd4f47c29",
+    "bytes": 7909
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/register.md",
+    "sha256": "1a097ffde77d801b498ff45b87994712a7a6ac9d082f8b9235e838806727187d",
+    "bytes": 8976
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/register.md",
+    "sha256": "8b43f39c93010768aaa6df2939a61415fbcc6055f67d49feb1c4458882e46269",
+    "bytes": 8712
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/register.md",
+    "sha256": "260ed909a8c3f4db3556b404118a956be9a78577e3b52d9f5ca63a6d25008c10",
+    "bytes": 9881
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/sources/register.md",
+    "sha256": "2befee4bdc5b00b65fd599a5d15893ab7527426496cb60766e0497032f466b5e",
+    "bytes": 17097
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap20.html",
+    "sha256": "2294baef2eb10827fc07ab031632269bfc61192e3e23395aa9355afb98cce58e",
+    "bytes": 332424
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap21.html",
+    "sha256": "9273020f60376b746d27cb5af840ecf7586bb35ab3f5c60e4373019df11aad61",
+    "bytes": 1059428
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap23.html",
+    "sha256": "c8d8100f8b9153ce4daf5eba0fdfc663975e82ac6e18bfb899884f14e8c60722",
+    "bytes": 1372350
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/register.md",
+    "sha256": "64fd3a505c69cf88f12481f4afe02c0bd52d170087d7f8e716d5db4d82b53ccc",
+    "bytes": 12112
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/final-source-register.md",
+    "sha256": "6f3edcfba098920dd43e3e2a6db59c03108e39bfbb4ab81373e87d2c74731727",
+    "bytes": 8174
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/final-source-register.md",
+    "sha256": "6078fe5116d94de6ae580797220f0e190bc322a6a4b0b8c6817626e5630fb23e",
+    "bytes": 13576
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/plan.md",
+    "sha256": "234b11acc54a9e0e0ebe0c37c848f2d64f21cb6a4f0367ecadbef16fe2f73a8e",
+    "bytes": 8882
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/g/boundary-originals.md",
+    "sha256": "1f775eead1bc5e28c1bc386f4b8932f64015679cdcfffd77c9cddce52b60d3bc",
+    "bytes": 10767
+  },
+  {
+    "path": "docs/research/documentation-audit/records/runs/webauthn-001/investigation-a.md",
+    "sha256": "2d1070d3dc12f60aba50446fcb2b548b60c44dffd5f6aebd80ef501fe8a5cd9a",
+    "bytes": 49492
+  },
+  {
+    "path": "docs/research/documentation-audit/records/runs/webauthn-001/investigation-b.md",
+    "sha256": "1be5bb219f3684f523fc141a40c87cd203a60d39a03dca6712d8494164df56df",
+    "bytes": 59812
+  },
+  {
+    "path": "docs/research/documentation-audit/records/style.md",
+    "sha256": "2b8882adb75b18d67adcd71d38a6c70fb4aa7c44ec3211c0d45455ab94e9ca15",
+    "bytes": 6322
+  },
+  {
+    "path": "docs/research/documentation-audit/workflow.md",
+    "sha256": "2b17428a08cc10046142bfc4866eeaf36fdf0698de8b8d1433b022e827aaf881",
+    "bytes": 15163
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "bytes": 63937
+  },
+  {
+    "path": "src/Core/tests/CLAUDE.md",
+    "sha256": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "bytes": 2944
+  },
+  {
+    "path": "src/Ctap2/CLAUDE.md",
+    "sha256": "869a983d27287cbbf1bb4524877264e2587bf1ea1eb7b234b773643114e962fc",
+    "bytes": 34228
+  },
+  {
+    "path": "src/Ctap2/tests/CLAUDE.md",
+    "sha256": "b93c7a963573e93380ef82181baebce2b106b62ea4237d16efad1b0de602d266",
+    "bytes": 10267
+  },
+  {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "sha256": "1d47c824d5c7eb16e7e0ec18f64300c621f542a7bd19d9d2d4bdeea8495918e9",
+    "bytes": 35460
+  }
+]

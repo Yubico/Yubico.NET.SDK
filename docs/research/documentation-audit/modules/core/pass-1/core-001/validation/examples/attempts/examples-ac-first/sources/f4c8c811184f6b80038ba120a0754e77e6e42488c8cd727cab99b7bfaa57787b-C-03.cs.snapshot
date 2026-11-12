@@ -1,0 +1,22 @@
+using System;
+using System.Buffers;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Utilities;
+namespace Audit20261111.DocExamples;
+internal static class ExampleC03
+{
+    internal static async Task AuthenticateAsync(
+        Yubico.YubiKit.WebAuthn.Client.WebAuthnClient client,
+        Yubico.YubiKit.WebAuthn.Client.Authentication.PublicKeyCredentialRequestOptions requestOptions,
+        CancellationToken cancellationToken)
+    {
+        using (UserPresenceIntent.BeginScope("approve the transfer"))
+        {
+            await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);
+        }
+    }
+}

@@ -22,7 +22,9 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// <remarks>
 /// This class encapsulates the parameters specific to RSA private keys 
 /// and provides factory methods for creating instances from RSA parameters
-/// or DER-encoded data.
+/// or DER-encoded data. Construction selects catalog metadata from twice the DP storage width before
+/// checking selected RSA algebraic relations. A shorter CRT exponent can therefore fail size admission
+/// before consistency checking; these checks are not a complete RSA key-validation procedure.
 /// </remarks>
 public sealed class RSAPrivateKey : PrivateKey
 {
@@ -108,10 +110,16 @@ public sealed class RSAPrivateKey : PrivateKey
     /// <exception cref="NotSupportedException">
     /// When the RSA key length is not supported.
     /// </exception>
+    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
+    /// <remarks>
+    /// Accepts the typed decoder's attribute-free, version-0 PKCS#8 subset and version-0 RSA components.
+    /// AlgorithmIdentifier consumption and selected algebraic relations are distinct from complete
+    /// outer/nested input exhaustion and full mathematical key validation.
+    /// </remarks>
     public static RSAPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
         => CreateFromPkcs8(encodedKey, parametersDecoded: null);
 
-    // Test observation hook. The callback must not retain or mutate the decoded private arrays.
+    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
     internal static RSAPrivateKey CreateFromPkcs8(
         ReadOnlyMemory<byte> encodedKey,
         Action<RSAParameters>? parametersDecoded)
@@ -152,7 +160,7 @@ public sealed class RSAPrivateKey : PrivateKey
     /// </exception>
     public static RSAPrivateKey CreateFromParameters(RSAParameters parameters) => new(parameters);
 
-    // Test observation hook. The callback must not retain or mutate the copied arrays.
+    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
     internal static RSAPrivateKey CreateFromParameters(
         RSAParameters parameters,
         Action<RSAParameters>? parametersCopied) =>

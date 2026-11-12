@@ -25,7 +25,9 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 /// <remarks>
 ///     Implementations admit one full logical exchange at a time. An overlapping operation throws
 ///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
-///     in flight runs to completion to avoid stranding the device mid-frame.
+///     in flight retains admission through response handling or cleanup. Touch cancellation, local poll
+///     deadlines, transport failures, and a failed-reset refusal have separate outcomes; the guard alone
+///     supplies no completion deadline or inbound CRC authentication.
 /// </remarks>
 internal interface IOtpHidProtocol : IProtocol
 {

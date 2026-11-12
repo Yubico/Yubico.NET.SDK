@@ -1,0 +1,98 @@
+[
+  {
+    "id": "core-001:unit:1691897ea7ce1ee1",
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/AlgorithmAttributesTests.cs",
+    "first_line": 130,
+    "last_line": 144,
+    "source_sha256": "cf9ba41f61564f69291c3b068d5fd1577af000d6eec6b4f62cd507730d0fd0b4",
+    "range_sha256": "d06ac2ed2a4ff1ab350a30a86b1b773a7b20620a8d4e1836e9c8b8e1821f1fd2",
+    "label": "Yubico.YubiKit.OpenPgp.UnitTests.AlgorithmAttributesTests :: [Theory] [InlineData(\"122A8648CE3D030107FF\", 0x12)] [InlineData(\"132A8648CE3D030107FF\", 0x13)] [InlineData(\"162A8648CE3D030107FF\", 0x16)] public void EcAttributes_Parse_PreservesReceivedAlgorithmAndFormat(string wireHex, int algor",
+    "reason": "Literal RSA wire fields, EC constructor ID choices, parse preservation and non-EC rejection are checked. Roundtrips share production encoder/decoder; exact independent literals have stronger wire identity scope. The X25519 Aut factory case proves identifier selection, not supported card slot. No crypto operation or hardware proof follows.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  },
+  {
+    "id": "core-001:unit:944cf663eab9a67d",
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+    "first_line": 20,
+    "last_line": 44,
+    "source_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "range_sha256": "a859b61bb51fbeb942064b10589f11fa9e96b25841197cb6b20e2956e3769851",
+    "label": "Yubico.YubiKit.OpenPgp.UnitTests.OpenPgpKeyInfoTests :: [Theory] [InlineData(KeyType.P256, \"1.2.840.10045.3.1.7\", \"2A8648CE3D030107\")] [InlineData(KeyType.P384, \"1.3.132.0.34\", \"2B81040022\")] [InlineData(KeyType.P521, \"1.3.132.0.35\", \"2B81040023\")] [InlineData(KeyType.Secp256k1, \"1.3.1",
+    "reason": "Independent dotted OID/value-octet literals cover all nine EC representations, lookup None rejection, optional RSA/symmetric metadata and RFC8410 distinction. These exact representation assertions are substantive and stay separate from provider execution, firmware/slot support and X25519 agreement.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  },
+  {
+    "id": "core-001:unit:e7e83c4b5175ed90",
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+    "first_line": 52,
+    "last_line": 64,
+    "source_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "range_sha256": "d38bfea724567a06be8ac7de26d0c324abb2fecda4aa885e9ccad3e0ac32ddfd",
+    "label": "Yubico.YubiKit.OpenPgp.UnitTests.OpenPgpKeyInfoTests :: [Fact] public void Metadata_IsOptionalAndDoesNotAdvertiseEveryCoreRsaSize() ",
+    "reason": "Independent dotted OID/value-octet literals cover all nine EC representations, lookup None rejection, optional RSA/symmetric metadata and RFC8410 distinction. These exact representation assertions are substantive and stay separate from provider execution, firmware/slot support and X25519 agreement.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  },
+  {
+    "id": "core-001:unit:c1edfc286bc5f451",
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpPutKeyWireTests.cs",
+    "first_line": 188,
+    "last_line": 222,
+    "source_sha256": "7c6efd3849e17bae1e82c6b2e553898b04913c34dee71737036ad9a43da948fa",
+    "range_sha256": "7f6d0764ec2ad165fb14f9e3feb6f6ef75d97322d9eeea6ea4868aeddc006009",
+    "label": "Yubico.YubiKit.OpenPgp.UnitTests.OpenPgpPutKeyWireTests :: [Theory] [InlineData(KeyType.Secp256k1, 32, \"132B8104000A\")] [InlineData(KeyType.BrainpoolP256r1, 32, \"132B2403030208010107\")] [InlineData(KeyType.BrainpoolP384r1, 48, \"132B240303020801010B\")] [InlineData(KeyType.BrainpoolP512r1, ",
+    "reason": "Complete helpers reassemble outgoing APDU chunks, parse4D/7F48/5F48 and compare requested ordinary CRT/component bytes. Exponent rejection precedes wire; nonchangeable attrs branch is explicit. Named non-NIST scalar1 tests compare literal attributes/template and require a host provider with skip on unsupported curves. Source code checks no ATT or decipher flow, complete cryptographic import result or secret-producer cleanup.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  },
+  {
+    "id": "core-001:unit:8d3e100e77293f01",
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpSessionWireTests.cs",
+    "first_line": 195,
+    "last_line": 213,
+    "source_sha256": "3dcdc1931cdcf47673e14f63a71745b38c30abf77f86bdc685e16a978c8e3501",
+    "range_sha256": "0981bde2eef67ee3ebd33c8181f896a319b537398b1e6bf445de330787badb9a",
+    "label": "Yubico.YubiKit.OpenPgp.UnitTests.OpenPgpSessionWireTests :: [Theory] [InlineData(0x6A88)] [InlineData(0x6982)] public async Task GetCertificateAsync_SelectionFailure_PropagatesWithoutReading(int status) ",
+    "reason": "Complete synthetic responses, queue/command/prompt helpers and all bodies were read. UIF/cache/request-failure/pre-admission cancel/status paths are explicit. Signature helpers retain actual arrays for successful transfer and failure erasure; Decrypt resolution only checks exception/outcome. Cached-KDF disposal checks an aliased salt after async disposal, while throwing-KDF test checks sync detach. No held whole-workflow, native release, SCP reset, F9 replacement-disposal or certificate-resolution-failure oracle exists.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  },
+  {
+    "id": "core-001:unit:b401b9375e40cc81",
+    "path": "src/OpenPgp/README.md",
+    "first_line": 222,
+    "last_line": 244,
+    "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "range_sha256": "48ef092fd1937fafd6a63ef9cd876f4946324aa32c4bbd41fcbd28e8b4df6f83",
+    "label": "## Inspect key representation metadata",
+    "reason": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  },
+  {
+    "id": "core-001:unit:89ce289860876d3a",
+    "path": "src/OpenPgp/README.md",
+    "first_line": 359,
+    "last_line": 396,
+    "source_sha256": "480a8b6c66cba1cc147e369dffb1f678a04648ad93d3a841da4c39c84d3f1d72",
+    "range_sha256": "cd9fb983579aa04a371030de0bb42e124eb062508d7959e988a339b766aec2fe",
+    "label": "## Decipher an RSA block or derive an ECDH secret",
+    "reason": "All complete task bodies were read with imports and enclosing resources: device convenience factories own hidden connections; direct creation borrows; PIN inputs/DER/private keys remain caller-owned; KDF provisioning retains outer objects and clears caller arrays; verifier/certificate/result lifetimes are explicit. Sequential-operation advice is useful. Add precise exchange-versus-workflow and effective-version/SCP-reset conditions only where needed. Existing historical defect, ATT exception, ROCA, trust and sample caveats remain substantive rather than evidence of repaired behavior.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  },
+  {
+    "id": "core-001:unit:d50333b34ee95a20",
+    "path": "src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/OpenPgpKeyInfoTests.cs",
+    "first_line": 64,
+    "last_line": 75,
+    "source_sha256": "12b48ef9a3d5375927b4592433a30a2e01166be76b18a6427e2698bd64289757",
+    "range_sha256": "9bcf5a6525964bfda862a3db0dede9846f915cc43a6fb394e49bf00c5b98366a",
+    "label": "Yubico.YubiKit.OpenPgp.UnitTests.OpenPgpKeyInfoTests :: [Theory] [InlineData(KeyType.X25519, \"1.3.101.110\", \"1.3.6.1.4.1.3029.1.5.1\")] [InlineData(KeyType.Ed25519, \"1.3.101.112\", \"1.3.6.1.4.1.11591.15.1\")] public void Curve25519_OpenPgpOidIsNotAsn1KeyAlgorithm(KeyType keyType, string k",
+    "reason": "Independent dotted OID/value-octet literals cover all nine EC representations, lookup None rejection, optional RSA/symmetric metadata and RFC8410 distinction. These exact representation assertions are substantive and stay separate from provider execution, firmware/slot support and X25519 agreement.",
+    "status": "NOMINATED-UNSAMPLED",
+    "condition": "Remove later edited overlap; read full original unit and containing helper/caller/assertion context. No runtime gate is implied."
+  }
+]

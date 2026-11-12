@@ -1,0 +1,2222 @@
+diff --git a/src/Core/src/Credentials/ConsoleCredentialReader.cs b/src/Core/src/Credentials/ConsoleCredentialReader.cs
+index 0418d7391a09c38c3d86d844a09848b0207b9406..3909b22cb07ea4959ced1b7c29a1a41782d1eee0 100644
+--- a/src/Core/src/Credentials/ConsoleCredentialReader.cs
++++ b/src/Core/src/Credentials/ConsoleCredentialReader.cs
+@@ -29,21 +29,23 @@ namespace Yubico.YubiKit.Core.Credentials;
+ /// (e.g., in a pipeline or with redirected input).
+ /// </para>
+ /// <para>
+-/// <b>Security Features:</b>
+-/// <list type="bullet">
+-/// <item>Never allocates credential data as managed strings</item>
+-/// <item>Returns <see cref="IMemoryOwner{T}"/> that zeros memory on disposal</item>
+-/// <item>Uses timing-safe comparison for credential confirmation</item>
+-/// <item>Clears intermediate buffers on all code paths</item>
+-/// </list>
++/// Interactive input uses a pooled character buffer that is cleared and returned after reading.
++/// Redirected input uses <c>ReadLine</c>, which creates a managed string that this reader cannot clear.
++/// Dispose the returned <see cref="IMemoryOwner{T}"/> to clear its independent credential bytes.
++/// Confirmation compares byte lengths and then uses a fixed-time byte comparison.
+ /// </para>
+ /// <para>
+-/// <b>Platform Limitations:</b>
+-/// <list type="bullet">
+-/// <item>Windows: Full support for masked input</item>
+-/// <item>Linux/macOS: Requires TTY; masked input may not work over SSH without PTY</item>
+-/// <item>Non-interactive mode: Input is not masked (warning displayed)</item>
+-/// </list>
++/// Interactive input requires console key access; remote terminals may require a pseudo-terminal.
++/// Disallowed or excess UTF-16 code units are ignored, and Backspace removes one code unit.
++/// Redirected text instead rejects a whole line that violates the text policy. Redirected hex input
++/// checks hex syntax and decoded byte length without applying the text length or character filter.
++/// The selected encoding determines text conversion; the default UTF-8 encoding replaces malformed
++/// surrogate input. These input options do not replace the consuming operation's applet-specific checks.
++/// </para>
++/// <para>
++/// Cancellation is checked while waiting for an interactive key. Queued keys and redirected line reads
++/// do not check the token. Empty input that reaches result allocation currently throws because the
++/// pooled byte owner requires a positive size; use a positive minimum and a positive expected hex length.
+ /// </para>
+ /// </remarks>
+ public sealed class ConsoleCredentialReader : ISecureCredentialReader
+@@ -176,7 +178,7 @@ private void WriteNonInteractiveWarning() =>
+         }
+         finally
+         {
+-            // Can't zero a managed string, but we minimize exposure
++            // Dropping this reference does not erase the managed string's contents.
+             line = null;
+         }
+     }
+@@ -217,7 +219,7 @@ private bool SatisfiesPolicy(ReadOnlySpan<char> input, CredentialReaderOptions o
+         {
+             while (true)
+             {
+-                // Wait for key availability with cancellation support
++                // Poll cancellation while waiting; already queued keys bypass this wait.
+                 while (!_console.KeyAvailable)
+                 {
+                     cancellationToken.ThrowIfCancellationRequested();
+@@ -386,4 +388,4 @@ private bool SatisfiesPolicy(ReadOnlySpan<char> input, CredentialReaderOptions o
+ 
+     private static void ClearCharBuffer(char[] buffer, int length) =>
+         CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(buffer.AsSpan(0, length)));
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Credentials/CredentialPromptContext.cs b/src/Core/src/Credentials/CredentialPromptContext.cs
+index 43bf24070ab35f67861f5f0183204e9388b1aac9..be2b8c4c4a0fc174ec055f453d6ee92ba6252c4b 100644
+--- a/src/Core/src/Credentials/CredentialPromptContext.cs
++++ b/src/Core/src/Credentials/CredentialPromptContext.cs
+@@ -21,6 +21,9 @@ namespace Yubico.YubiKit.Core.Credentials;
+ /// This is a non-positional record so that optional properties can be added in
+ /// later releases without breaking implementations or callers. Implementations
+ /// should ignore properties they do not use.
++/// The minimum counts Unicode code points and the maximum counts encoded bytes. These units differ
++/// from <see cref="CredentialReaderOptions"/>, whose console input limits count UTF-16 code units;
++/// adapters must apply the requested units rather than copying the limits directly.
+ /// </remarks>
+ public record CredentialPromptContext
+ {
+@@ -66,4 +69,4 @@ public record CredentialPromptContext
+     /// establishing a new secret.
+     /// </summary>
+     public bool RequiresConfirmation { get; init; }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Credentials/CredentialReaderOptions.cs b/src/Core/src/Credentials/CredentialReaderOptions.cs
+index 31a445a3c16e2eca0d8e5545abf3d9b4b02e06ce..48ab57abfafc2ff3bc939485f13e7c849d3a1827 100644
+--- a/src/Core/src/Credentials/CredentialReaderOptions.cs
++++ b/src/Core/src/Credentials/CredentialReaderOptions.cs
+@@ -25,8 +25,11 @@ namespace Yubico.YubiKit.Core.Credentials;
+ /// or <see cref="ForHexKey"/> to create pre-configured options for common credential types.
+ /// </para>
+ /// <para>
+-/// For module-specific presets (FIDO2, OpenPGP, OATH), see the credential options classes
+-/// in each module's <c>Credentials</c> namespace.
++/// These are input presets, rather than applet validation rules. Select options appropriate to
++/// the operation's character, encoded-byte, and credential requirements.
++/// In the console reader, interactive limits include hex separators and count UTF-16 code units.
++/// Redirected hex input bypasses MinLength, MaxLength, and CharacterFilter, then checks hex syntax
++/// and ExpectedByteLength. ExpectedByteLength counts decoded bytes, excluding separators.
+ /// </para>
+ /// </remarks>
+ public sealed record CredentialReaderOptions
+@@ -42,12 +45,12 @@ public sealed record CredentialReaderOptions
+     public string ConfirmPrompt { get; init; } = "Confirm credential: ";
+ 
+     /// <summary>
+-    /// Gets or sets the minimum allowed credential length.
++    /// Gets or sets the minimum input length in UTF-16 code units before text encoding.
+     /// </summary>
+     public int MinLength { get; init; } = 1;
+ 
+     /// <summary>
+-    /// Gets or sets the maximum allowed credential length.
++    /// Gets or sets the maximum input length in UTF-16 code units before text encoding.
+     /// </summary>
+     public int MaxLength { get; init; } = 128;
+ 
+@@ -58,13 +61,14 @@ public sealed record CredentialReaderOptions
+ 
+     /// <summary>
+     /// Gets or sets a filter function that determines which characters are allowed.
+-    /// Returns <c>true</c> to accept the character, <c>false</c> to reject it.
++    /// Returns <c>true</c> to accept a UTF-16 code unit. The console reader ignores disallowed
++    /// interactive characters but rejects a redirected text line containing one.
+     /// </summary>
+     public Func<char, bool>? CharacterFilter { get; init; }
+ 
+     /// <summary>
+     /// Gets or sets the encoding used to convert characters to bytes.
+-    /// Defaults to UTF-8.
++    /// Defaults to UTF-8 with replacement fallback for malformed surrogate input.
+     /// </summary>
+     public Encoding Encoding { get; init; } = Encoding.UTF8;
+ 
+@@ -77,7 +81,8 @@ public sealed record CredentialReaderOptions
+ 
+     /// <summary>
+     /// Gets or sets the expected byte length when <see cref="IsHexMode"/> is <c>true</c>.
+-    /// A value of <c>null</c> means any length is accepted.
++    /// A value of <c>null</c> skips the decoded-length check. Empty decoded input currently fails
++    /// when the console reader allocates its positive-sized result owner.
+     /// </summary>
+     public int? ExpectedByteLength { get; init; }
+ 
+@@ -131,4 +136,4 @@ public sealed record CredentialReaderOptions
+         CharacterFilter = static c => char.IsAsciiHexDigit(c) || c is ' ' or ':' or '-'
+     };
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Credentials/ICredentialPrompt.cs b/src/Core/src/Credentials/ICredentialPrompt.cs
+index e4a88d963c05b5ab43fff6e431fa43a975c45d8b..43732a961c31039260e737e2f058e5e55e03fd7c 100644
+--- a/src/Core/src/Credentials/ICredentialPrompt.cs
++++ b/src/Core/src/Credentials/ICredentialPrompt.cs
+@@ -68,23 +68,24 @@ namespace Yubico.YubiKit.Core.Credentials;
+ /// </list>
+ /// <para><b>Example</b></para>
+ /// <code>
+-/// internal sealed class DialogPrompt : ICredentialPrompt
++/// // The application supplies a nonblocking async callback that transfers an owned byte array.
++/// internal sealed class DialogPrompt(
++///     Func&lt;CredentialPromptContext, CancellationToken, ValueTask&lt;byte[]?&gt;&gt; acquire) : ICredentialPrompt
+ /// {
+ ///     public async ValueTask&lt;IMemoryOwner&lt;byte&gt;?&gt; RequestSecretAsync(
+ ///         CredentialPromptContext context, CancellationToken cancellationToken)
+ ///     {
+-///         var title = context.IsRetry
+-///             ? $"Incorrect PIN - {context.RetriesRemaining} attempts remaining"
+-///             : $"Enter PIN for {context.Scope}";
+-///
+-///         byte[]? entered = await ShowPinDialogAsync(title, cancellationToken);
++///         byte[]? entered = await acquire(context, cancellationToken);
+ ///         if (entered is null)
+ ///         {
++///             cancellationToken.ThrowIfCancellationRequested();
+ ///             return null;
+ ///         }
+ ///
+ ///         try
+ ///         {
++///             cancellationToken.ThrowIfCancellationRequested();
++///             // This example requires a nonempty secret; the pooled owner rejects an empty source.
+ ///             return DisposableArrayPoolBuffer.CreateFromSpan(entered);
+ ///         }
+ ///         finally
+@@ -114,4 +115,4 @@ public interface ICredentialPrompt
+     ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+         CredentialPromptContext context,
+         CancellationToken cancellationToken);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Credentials/ISecureCredentialReader.cs b/src/Core/src/Credentials/ISecureCredentialReader.cs
+index fc38cc5e41de2683c0e042e205f3058a15fa975e..a50c315a789da23280d0088d47255ccc3a2d9756 100644
+--- a/src/Core/src/Credentials/ISecureCredentialReader.cs
++++ b/src/Core/src/Credentials/ISecureCredentialReader.cs
+@@ -17,13 +17,13 @@
+ namespace Yubico.YubiKit.Core.Credentials;
+ 
+ /// <summary>
+-/// Provides secure credential input that never exposes sensitive data as strings.
++/// Reads credential bytes into a disposable memory owner.
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// All credential data is returned as <see cref="IMemoryOwner{T}"/> which automatically
+-/// zeros sensitive memory when disposed. Callers should use the <c>using</c> pattern
+-/// to ensure credentials are cleared as soon as possible.
++/// Dispose each returned <see cref="IMemoryOwner{T}"/> to clear its credential bytes.
++/// Input storage depends on the implementation: <see cref="ConsoleCredentialReader"/> uses
++/// pooled characters interactively, but redirected input passes through a managed string.
+ /// </para>
+ /// <para>
+ /// This is a synchronous, application-initiated terminal input helper with display and encoding
+@@ -31,15 +31,19 @@ namespace Yubico.YubiKit.Core.Credentials;
+ /// SDK-to-application callback carrying protocol context for secrets requested during an operation.
+ /// </para>
+ /// <para>
+-/// Example usage:
++/// This method borrows an open PIV session. The credential owner remains alive until verification
++/// completes and is then cleared, including on failure. The caller retains session ownership.
+ /// <code>
+-/// var reader = new ConsoleCredentialReader();
+-/// using var credential = reader.ReadCredential(CredentialReaderOptions.ForPin());
+-/// if (credential is not null)
++/// static async Task ReadAndVerifyPinAsync(
++///     Yubico.YubiKit.Piv.IPivSession pivSession, CancellationToken cancellationToken)
+ /// {
+-///     // Use credential.Memory.Span to access the PIN bytes
+-///     pivSession.VerifyPin(credential.Memory.Span);
+-/// } // Memory is automatically zeroed here
++///     var reader = new ConsoleCredentialReader();
++///     using var credential = reader.ReadCredential(CredentialReaderOptions.ForPin(), cancellationToken);
++///     if (credential is not null)
++///     {
++///         await pivSession.VerifyPinAsync(credential.Memory, cancellationToken);
++///     }
++/// }
+ /// </code>
+ /// </para>
+ /// </remarks>
+@@ -52,13 +56,13 @@ public interface ISecureCredentialReader
+     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+     /// <returns>
+     /// An <see cref="IMemoryOwner{T}"/> containing the credential bytes, or <c>null</c>
+-    /// if the user cancelled the input (e.g., pressed Escape).
++    /// if input is declined. The console reader also returns null on end of input or rejected input.
+     /// </returns>
+     /// <remarks>
+     /// The returned memory owner automatically zeros its contents when disposed.
+     /// Callers must dispose the result to ensure sensitive data is cleared.
+     /// </remarks>
+-    /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
++    /// <exception cref="OperationCanceledException">The implementation observes cancellation. The console reader checks while waiting for an interactive key, rather than during redirected reads.</exception>
+     IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options, CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+@@ -68,17 +72,18 @@ public interface ISecureCredentialReader
+     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+     /// <returns>
+     /// An <see cref="IMemoryOwner{T}"/> containing the credential bytes if both entries
+-    /// matched, or <c>null</c> if the user cancelled or entries did not match.
++    /// matched, or <c>null</c> if an entry was declined, rejected, unavailable, or did not match.
+     /// </returns>
+     /// <remarks>
+     /// <para>
+     /// Uses timing-safe comparison to verify the credentials match.
+     /// </para>
+     /// <para>
+-    /// The first entry buffer is always zeroed before the second prompt,
+-    /// and both buffers are zeroed if they don't match.
++    /// The console reader retains the first entry while acquiring the second. It disposes the second
++    /// entry after comparison, transfers the first to the caller on a match, and disposes the first
++    /// on every other exit. The caller must dispose the successful result.
+     /// </para>
+     /// </remarks>
+-    /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
++    /// <exception cref="OperationCanceledException">The implementation observes cancellation while reading an entry.</exception>
+     IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options, CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Credentials/UserPresenceIntent.cs b/src/Core/src/Credentials/UserPresenceIntent.cs
+index 853dbd8965dca128ee423079f7f2d0561341bd5a..0d376d7d2a77a33dd42da83b26f8b9c8950e5364 100644
+--- a/src/Core/src/Credentials/UserPresenceIntent.cs
++++ b/src/Core/src/Credentials/UserPresenceIntent.cs
+@@ -65,7 +65,8 @@ public static class UserPresenceIntent
+     /// <param name="intent">
+     ///     Display text describing why the user is performing the operation, written as a lowercase verb phrase such as
+     ///     <c>"approve the transfer"</c> so it reads naturally after "Touch your YubiKey to". It is passed to the prompt
+-    ///     unchanged and is never logged by the SDK.
++    ///     unchanged. Keep secrets out of this display text: an application callback can include it in
++    ///     an exception, and callback failures may be passed to logging providers.
+     /// </param>
+     /// <returns>An object that ends the scope when disposed.</returns>
+     /// <exception cref="ArgumentException"><paramref name="intent" /> is empty or whitespace.</exception>
+@@ -115,4 +116,4 @@ public void Dispose()
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Credentials/UserPresenceNotification.cs b/src/Core/src/Credentials/UserPresenceNotification.cs
+index a9704b1ed619b31ccda8ff49fbae6397e0521baf..a71f70af73da71cdcfa60f2b25e01b43be41ef16 100644
+--- a/src/Core/src/Credentials/UserPresenceNotification.cs
++++ b/src/Core/src/Credentials/UserPresenceNotification.cs
+@@ -25,7 +25,8 @@ namespace Yubico.YubiKit.Core.Credentials;
+ ///     the immutable, shared no-op instance used when no prompt or context was supplied. A successful request is
+ ///     emitted at most once, and only that request can be resolved. A request callback exception propagates and
+ ///     terminally disables the handle without emitting resolution. A resolution callback exception propagates when
+-///     there is no primary operation exception; otherwise it is logged and the primary exception is preserved.
++///     there is no primary operation exception; otherwise the application-supplied exception object is logged
++///     and the primary exception is preserved. Providers may render its message and associated details.
+ /// </remarks>
+ internal sealed class UserPresenceNotification
+ {
+@@ -202,4 +203,4 @@ private async ValueTask RequestCoreAsync(
+             throw;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/AesUtilities.cs b/src/Core/src/Cryptography/AesUtilities.cs
+index ddab9d2097f78703bded278a991807c41f3764df..4a9b6df26fe7be76a2665c4b65c5961acf11176b 100644
+--- a/src/Core/src/Cryptography/AesUtilities.cs
++++ b/src/Core/src/Cryptography/AesUtilities.cs
+@@ -16,6 +16,15 @@
+ 
+ namespace Yubico.YubiKit.Core.Cryptography
+ {
++    /// <summary>Internal raw AES helpers; callers supply protocol-specific integrity protection.</summary>
++    /// <remarks>
++    /// Inputs remain borrowed and returned arrays are independent. The finally blocks clear local
++    /// key copies and, in the CBC paths, IV copies once their protected scopes are entered. In either
++    /// CBC path, failure while allocating the IV copy can leave the preceding key copy uncleared.
++    /// BlockCipher has one key-copy allocation before try, followed directly by its protected scope.
++    /// Plaintext input copies and MemoryStream storage have separate lifetimes and are not explicitly
++    /// cleared here. Disposing the crypto objects therefore does not establish all-buffer erasure.
++    /// </remarks>
+     internal static class AesUtilities
+     {
+         public const int BlockSizeBytes = 16;
+@@ -89,7 +98,7 @@ public static byte[] BlockCipher(byte[] encryptionKey, ReadOnlySpan<byte> plaint
+         /// </remarks>
+         /// <param name="encryptionKey">16-byte AES128 key</param>
+         /// <param name="iv">16-byte initialization vector (IV)</param>
+-        /// <param name="plaintext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
++        /// <param name="plaintext">Empty input or complete 16-byte blocks.</param>
+         /// <returns>Ciphertext of the same length as the plaintext</returns>
+         public static ReadOnlyMemory<byte> AesCbcEncrypt(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> plaintext)
+         {
+@@ -159,7 +168,7 @@ public static byte[] AesCbcEncrypt(byte[] encryptionKey, byte[] iv, ReadOnlySpan
+         /// </remarks>
+         /// <param name="decryptionKey">16-byte AES128 key</param>
+         /// <param name="iv">16-byte initialization vector (IV)</param>
+-        /// <param name="ciphertext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
++        /// <param name="ciphertext">Empty input or complete 16-byte blocks.</param>
+         /// <returns>Plaintext of the same length as the ciphertext</returns>
+         public static ReadOnlyMemory<byte> AesCbcDecrypt(ReadOnlySpan<byte> decryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> ciphertext)
+         {
+@@ -222,4 +231,4 @@ public static ReadOnlyMemory<byte> AesCbcDecrypt(ReadOnlySpan<byte> decryptionKe
+         public static byte[] AesCbcDecrypt(byte[] decryptionKey, byte[] iv, ReadOnlySpan<byte> ciphertext) =>
+             AesCbcDecrypt(decryptionKey.AsSpan(), iv.AsSpan(), ciphertext).ToArray();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/AlgorithmInfo.cs b/src/Core/src/Cryptography/AlgorithmInfo.cs
+index ae6ad77ad6d79f42823c57b8d99cf20cd8e602e1..83abfa7e5a213cbf0a2ccd0e2070095580cf00ba 100644
+--- a/src/Core/src/Cryptography/AlgorithmInfo.cs
++++ b/src/Core/src/Cryptography/AlgorithmInfo.cs
+@@ -106,6 +106,8 @@ internal AlgorithmInfo(string algorithmId, string displayName, CryptographicOper
+     /// <remarks>
+     /// Protocol parameter/security requirements still apply. In particular COSE AES-CBC requires
+     /// RFC 9459's PKCS#7 padding and companion integrity protection; a CBC mapping is not a codec.
++    /// Structural applicability on a curve does not establish that COSE permits that curve with this
++    /// identifier. Validate the complete key/algorithm pairing under the consuming protocol profile.
+     /// </remarks>
+     public int? CoseAlgorithmId { get; }
+     /// <summary>A separately selected hash, or null when not separately parameterized.</summary>
+@@ -154,4 +156,4 @@ public override int GetHashCode()
+         hash.Add(Derivation);
+         return hash.ToHashCode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/ArkgPrimitives.cs b/src/Core/src/Cryptography/ArkgPrimitives.cs
+index 84531811290437132786f178e1fd930b47aad40e..cf0249ee18aa75c31c0c0713c0cdbeb92979322b 100644
+--- a/src/Core/src/Cryptography/ArkgPrimitives.cs
++++ b/src/Core/src/Cryptography/ArkgPrimitives.cs
+@@ -37,10 +37,11 @@ internal static class ArkgPrimitives
+     /// is stateless and thread-safe.
+     /// </para>
+     /// <para>
+-    /// For testing or custom implementations, applications can replace the
+-    /// default factory by setting the <c>ArkgPrimitivesCreator</c> property
+-    /// in <see cref="CryptographyProviders"/>.
++    /// SDK tests can replace the internal <c>ArkgPrimitivesCreator</c> delegate in
++    /// <see cref="CryptographyProviders"/>. It is not a public application extension point.
++    /// NativeShims loading, export availability, and provider behavior depend on the deployed artifact;
++    /// constructing this managed wrapper alone establishes none of those qualifications.
+     /// </para>
+     /// </remarks>
+     public static IArkgPrimitives Create() => new ArkgPrimitivesOpenSsl();
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs b/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs
+index 3b19dc377dc0647dae2b8424be656fd2689ff8fb..4e648127afc2fe69062c2a94961dce25d7a190d7 100644
+--- a/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs
++++ b/src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs
+@@ -29,9 +29,16 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ /// <remarks>
+ /// Provides the security-critical primitives required by the ARKG-P256
+ /// algorithm: on-curve point validation, ECDH shared-secret computation,
+-/// and the full draft-bradleylundberg-cfrg-arkg-09 derivation. Point math
++/// and derivation targeting draft-bradleylundberg-cfrg-arkg-09. That July 7, 2025
++/// Internet-Draft had intended Informational status and expired January 8, 2026;
++/// it is a work-in-progress reference, rather than a final standard. Point math
+ /// goes through Yubico.NativeShims (OpenSSL); scalar reduction uses
+ /// <see cref="System.Numerics.BigInteger"/>.
++/// Secret-derived BigInteger values are variable-time and cannot be explicitly cleared. Several
++/// scalar, hash, and native-marshalling arrays also remain uncleared; the explicit clearing scopes
++/// below cover only their named buffers. SafeHandle disposal frees native objects, but the point
++/// wrapper uses ordinary free rather than a clear-free operation. Actual NativeShims exports and
++/// provider cleanup require qualification against the deployed binary.
+ /// </remarks>
+ internal sealed partial class ArkgPrimitivesOpenSsl : IArkgPrimitives
+ {
+@@ -73,9 +80,7 @@ public bool IsPointOnCurve(ReadOnlySpan<byte> point)
+         using SafeBigNum xBn = NativeMethods.BnBinaryToBigNum(xBytes);
+         using SafeBigNum yBn = NativeMethods.BnBinaryToBigNum(yBytes);
+ 
+-        // EC_POINT_set_affine_coordinates returns 0 for an off-curve point on
+-        // most modern OpenSSL builds; fall through to the explicit on-curve
+-        // check so the answer is unambiguous regardless of OpenSSL version.
++        // Require successful coordinate assignment before asking the provider's on-curve check.
+         int setResult = NativeMethods.EcPointSetAffineCoordinates(group, sslPoint, xBn, yBn);
+         if (setResult != 1)
+         {
+@@ -105,7 +110,7 @@ public byte[] ComputeEcdhSharedSecret(ReadOnlySpan<byte> privateScalar, ReadOnly
+         }
+ 
+         // Perform ECDH using OpenSSL: compute privateScalar * publicPoint.
+-        // Per RFC, the shared secret is the X coordinate of the resulting point.
++        // The ARKG draft's ECDH sub-KEM uses the X coordinate of the resulting point.
+         using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(415);
+         using SafeEcPoint pubPoint = SecToPoint(group, publicPoint);
+         using SafeEcPoint sharedPoint = NativeMethods.EcPointNew(group);
+@@ -726,4 +731,4 @@ protected override bool ReleaseHandle()
+ 
+         public override bool IsInvalid => handle == IntPtr.Zero;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs b/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs
+index cb12eb699b8c519dfcebba438874de9e4695c972..b678d646aa02f4a17e6f31b0998b53aa8d20611f 100644
+--- a/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs
++++ b/src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs
+@@ -22,6 +22,14 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ /// <summary>
+ /// A class that converts ASN.1 DER encoded private keys to parameters and values.
+ /// </summary>
++/// <remarks>
++/// The typed decoders accept an attribute-free PKCS#8 version-0 subset. They fully consume the
++/// AlgorithmIdentifier, but do not uniformly check outer or nested trailing data. The EC inner key
++/// uses BER parsing and skips unrecognized optional fields; its inner curve parameters are not compared
++/// with the outer named curve. These parsing checks are distinct from key shape and mathematical checks.
++/// Malformed ASN.1 can raise <see cref="AsnContentException"/>; explicit version and format checks use
++/// <see cref="CryptographicException"/>, with algorithm errors documented by the typed entry points.
++/// </remarks>
+ internal class AsnPrivateKeyDecoder
+ {
+     private const string Rfc5958Version1UnsupportedMessage =
+@@ -95,7 +103,7 @@ public static Curve25519PrivateKey CreateCurve25519Key(ReadOnlyMemory<byte> pkcs
+     public static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+         GetCurve25519PrivateKeyData(pkcs8EncodedKey, privateKeyDecoded: null);
+ 
+-    // Test observation hook. The callback must not retain or mutate the decoded private value.
++    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+     internal static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(
+         ReadOnlyMemory<byte> pkcs8EncodedKey,
+         Action<byte[]>? privateKeyDecoded)
+@@ -218,8 +226,8 @@ public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedK
+                 if (tag.IsConstructed)
+                 {
+                     // RFC 5915 defines publicKey as EXPLICIT [1] BIT STRING, so the constructed
+-                    // [1] wrapper holds a universal BIT STRING. This is what every standards
+-                    // compliant producer, including .NET, emits.
++                    // [1] wrapper holds a universal BIT STRING. Read and exhaust that wrapper
++                    // separately from the surrounding ECPrivateKey fields.
+                     var seqPublicKey = seqEcPrivateKey.ReadSequence(tag);
+                     publicKeyBytes = seqPublicKey.ReadBitString(out unusedBits);
+                     seqPublicKey.ThrowIfNotEmpty();
+@@ -284,7 +292,7 @@ public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedK
+     public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+         CreateRSAParameters(pkcs8EncodedKey, parametersDecoded: null);
+ 
+-    // Test observation hook. The callback must not retain or mutate the decoded private arrays.
++    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+     internal static RSAParameters CreateRSAParameters(
+         ReadOnlyMemory<byte> pkcs8EncodedKey,
+         Action<RSAParameters>? parametersDecoded)
+@@ -375,4 +383,4 @@ private static void ReadAndValidatePkcs8Version(AsnReader privateKeyInfo)
+                 : "Invalid PKCS#8 private key format: unexpected version");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs b/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs
+index 4ddd0fd3941e3662b797dd548a87d7b0724f15c1..00ce2a021472cb8677b0a157fe0126839ed5608b 100644
+--- a/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs
++++ b/src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs
+@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ /// <summary>
+ /// A class that converts private key parameters to ASN.1 DER encoding.
+ /// </summary>
++/// <remarks>
++/// Returns caller-owned, unencrypted PKCS#8 version-0 encodings; clear them after use. Inputs remain
++/// borrowed. Explicit INTEGER and nested encoding temporaries have local clearing owners. AsnWriter
++/// storage is separate: Encode copies it, and these paths do not Reset the writers to clear that storage.
++/// </remarks>
+ internal static class AsnPrivateKeyEncoder
+ {
+     /// <summary>
+@@ -214,11 +219,13 @@ private static byte[] EncodeECKey(
+         // Private key
+         ecKeyWriter.WriteOctetString(privateKey.Span);
+ 
+-        // [0] parameters (optional) - omitted since we include the OID in the AlgorithmIdentifier
++        // The inner [0] parameters are omitted; the outer AlgorithmIdentifier carries the curve OID.
++        // Although the ASN.1 field is OPTIONAL, RFC 5915 §3 requires conforming implementations to
++        // include it. This encoding therefore differs from that requirement.
+ 
+         // [1] Public key (optional). RFC 5915 uses EXPLICIT tags, so this is a constructed [1]
+-        // wrapper around a universal BIT STRING. An implicitly tagged BIT STRING here is rejected
+-        // by standards-compliant importers, including ECDsa.ImportPkcs8PrivateKey.
++        // wrapper around a universal BIT STRING. The primitive legacy form differs from that schema;
++        // the encoder tests cover the explicit wrapper and selected BCL import scenarios.
+         if (publicPoint.HasValue)
+         {
+             var publicKeyTag = new Asn1Tag(TagClass.ContextSpecific, 1, isConstructed: true);
+@@ -283,4 +290,4 @@ private static byte[] EncodeCurve25519Key(ReadOnlySpan<byte> privateKey, string
+ 
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs b/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs
+index 2e4595414e314123b224f324a9922806a2f0969e..60185fff11375679da29a2f3da27a7ca855a4ab6 100644
+--- a/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs
++++ b/src/Core/src/Cryptography/AsnPublicKeyDecoder.cs
+@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ /// <summary>
+ /// A class that converts ASN.1 DER encoded X.509 SubjectPublicKeyInfo to instances of IPublicKey.
+ /// </summary>
++/// <remarks>
++/// AlgorithmIdentifier exhaustion is checked for supported algorithms. Outer SPKI, top-level, and
++/// nested RSA-reader exhaustion are separate and are not all checked here. Point framing and component
++/// widths do not establish full mathematical validity. Inputs remain borrowed and outputs own copies.
++/// </remarks>
+ internal class AsnPublicKeyDecoder
+ {
+     /// <summary>
+@@ -34,7 +39,8 @@ internal class AsnPublicKeyDecoder
+     /// A new instance of <see cref="IPublicKey"/>.
+     /// </returns>
+     /// <exception cref="CryptographicException">Thrown if public key does not match expected format.</exception>
+-    /// <exception cref="InvalidOperationException">Thrown if the algorithm is not supported</exception>
++    /// <exception cref="AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
++    /// <exception cref="NotSupportedException">The algorithm or named curve is not modeled.</exception>
+     public static IPublicKey CreatePublicKey(ReadOnlyMemory<byte> subjectPublicKeyInfo)
+     {
+         var reader = new AsnReader(subjectPublicKeyInfo, AsnEncodingRules.DER);
+@@ -128,4 +134,4 @@ private static ECPublicKey CreateECPublicKey(string curveOid, byte[] subjectPubl
+ 
+         return ECPublicKey.CreateFromParameters(ecParams);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/AsnUtilities.cs b/src/Core/src/Cryptography/AsnUtilities.cs
+index 43000550dcb268bfc913e0a24f6d9567d50a1767..83c983813d501e9f87c537f32158a74e91e193a6 100644
+--- a/src/Core/src/Cryptography/AsnUtilities.cs
++++ b/src/Core/src/Cryptography/AsnUtilities.cs
+@@ -79,7 +79,7 @@ public static EcPointDefect InspectUncompressedEcPoint(ReadOnlySpan<byte> point,
+     /// <see cref="CryptographicException"/>, never an argument exception.
+     /// </summary>
+     /// <exception cref="CryptographicException">
+-    /// The point is not a valid uncompressed point, or the curve is not a supported prime curve.
++    /// The point has unsupported framing or width, or the curve is not a modeled ordinary short-Weierstrass curve.
+     /// </exception>
+     public static void ValidateDecodedEcPoint(ReadOnlySpan<byte> point, string curveOid)
+     {
+@@ -97,7 +97,7 @@ public static void ValidateDecodedEcPoint(ReadOnlySpan<byte> point, string curve
+     /// <see cref="ArgumentException"/>, never a <see cref="CryptographicException"/>.
+     /// </summary>
+     /// <exception cref="ArgumentException">
+-    /// The point is not a valid uncompressed point, or the curve is not a supported prime curve.
++    /// The point has unsupported framing or width, or the curve is not a modeled ordinary short-Weierstrass curve.
+     /// </exception>
+     public static void ValidateEcPointArgument(ReadOnlySpan<byte> point, string curveOid, string paramName)
+     {
+@@ -130,7 +130,7 @@ public static void ValidateEcPointArgument(ReadOnlySpan<byte> point, string curv
+     /// an oversized X paired with an undersized Y produces a correctly sized but silently wrong point.
+     /// </remarks>
+     /// <exception cref="ArgumentException">
+-    /// A coordinate does not match the curve, or the curve is not a supported prime curve.
++    /// A coordinate has the wrong width, or the curve is not a modeled ordinary short-Weierstrass curve.
+     /// </exception>
+     public static byte[] BuildUncompressedEcPoint(
+         ReadOnlySpan<byte> xCoordinate,
+@@ -182,9 +182,10 @@ public static Span<byte> TrimLeadingZeroes(Span<byte> data)
+     /// The scalar of an RFC 5915 <c>ECPrivateKey</c> is a fixed-width, left-padded integer of the
+     /// curve's subgroup-order width. Any other width contradicts the curve parameter sitting in the same
+     /// structure. The message reports lengths only: the value being rejected is key material.
++    /// This checks the encoded width, rather than proving that the scalar is in the valid mathematical range.
+     /// </remarks>
+     /// <exception cref="ArgumentException">
+-    /// The scalar does not match the curve, or the curve is not a supported prime curve.
++    /// The scalar has the wrong width, or the curve is not a modeled ordinary short-Weierstrass curve.
+     /// </exception>
+     public static void ValidateEcPrivateScalarArgument(
+         ReadOnlySpan<byte> privateScalar,
+@@ -215,7 +216,7 @@ public static void ValidateEcPrivateScalarArgument(
+     /// exception type, so the throwing branch is a backstop that no production caller reaches. See
+     /// the remarks on <see cref="InspectUncompressedEcPoint"/>.
+     /// </remarks>
+-    /// <exception cref="CryptographicException">The curve is not a supported prime curve.</exception>
++    /// <exception cref="CryptographicException">The curve is not a modeled ordinary short-Weierstrass curve.</exception>
+     public static int GetDecodedCoordinateLengthBytes(string curveOid) =>
+         TryGetCoordinateLengthBytes(curveOid, out var coordinateLengthBytes)
+             ? coordinateLengthBytes
+@@ -224,14 +225,14 @@ public static int GetDecodedCoordinateLengthBytes(string curveOid) =>
+     /// <summary>
+     /// Resolves the coordinate size for a curve OID supplied by a caller of an encoder.
+     /// </summary>
+-    /// <exception cref="ArgumentException">The curve is not a supported prime curve.</exception>
++    /// <exception cref="ArgumentException">The curve is not a modeled ordinary short-Weierstrass curve.</exception>
+     private static int GetCoordinateLengthBytesArgument(string curveOid, string paramName) =>
+         TryGetCoordinateLengthBytes(curveOid, out var coordinateLengthBytes)
+             ? coordinateLengthBytes
+             : throw new ArgumentException(UnsupportedCurveMessage(curveOid), paramName);
+ 
+     /// <summary>
+-    /// Resolves the coordinate size of one of the EC prime curves this SDK supports.
++    /// Resolves the coordinate size of a modeled ordinary short-Weierstrass named curve.
+     /// </summary>
+     /// <remarks>
+     /// Only the named-curve index is consulted. A key algorithm or CBC operation OID must never
+@@ -334,4 +335,4 @@ private static int GetLeadingZeroCount(ReadOnlySpan<byte> data)
+             ? data.Length - 1 // return last byte position
+             : startIndex; // return first non-zero byte position
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs b/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs
+index f7238272f0c0f2b5fc556022e589eb5b30dd8902..70bfad7d0a46cdf0d29d274064e75468e4d2b122 100644
+--- a/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs
++++ b/src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs
+@@ -98,7 +98,7 @@ public static int CmacEvpMacFinal(SafeEvpCmacCtx ctx, byte[] output, int outputS
+ public enum CmacBlockCipherAlgorithm
+ {
+     /// <summary>
+-    ///     Use this enum value in order to specify CMAC with AES-128.
++    ///     Local sentinel for an unspecified algorithm. KeyLength and MacLength reject it; select Aes128 explicitly.
+     /// </summary>
+     Unknown = 0,
+ 
+@@ -159,9 +159,13 @@ protected override bool ReleaseHandle()
+ }
+ 
+ /// <summary>
+-///     An OpenSSL implementation of the ICmacPrimitives interface, exposing CMAC
+-///     primitives to the SDK.
++///     Retained OpenSSL CMAC helper. The active ICmacPrimitives default uses the AesCmac helper with runtime AES-128.
+ /// </summary>
++/// <remarks>
++///     Disposal frees the native context. CmacFinal's managed output staging is a separate array
++///     that is not explicitly cleared, including on failure. Clear caller-owned MAC output according
++///     to its use; native context disposal does not clear that output or establish provider-wide erasure.
++/// </remarks>
+ internal sealed class CmacPrimitivesOpenSsl : IDisposable
+ {
+     private readonly SafeEvpCmacCtx _cmacCtx;
+@@ -290,4 +294,4 @@ public static class CmacBlockCipherAlgorithmExtensions
+         CmacBlockCipherAlgorithm.Aes256 => 16,
+         _ => throw new ArgumentOutOfRangeException("ExceptionMessages.InvalidCmacInput")
+     };
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs b/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs
+index 4aa393100a1fc18314787f5199f93b4319994698..4703f7ae815c1b5a39ef21b534be5d5c5e08e2b2 100644
+--- a/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs
++++ b/src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs
+@@ -18,6 +18,8 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
+ /// Represents a COSE algorithm identifier.
+ /// <remarks>
+ /// This enumeration is based on the IANA COSE Algorithms registry.
++/// Registered identity does not establish a valid key/algorithm pairing or provider/applet support.
++/// Registry recommendation status is separate from the identifiers required by a protocol profile.
+ /// <para>
+ /// https://www.iana.org/assignments/cose/cose.xhtml#algorithms
+ /// </para>
+@@ -26,7 +28,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
+ public enum CoseAlgorithmIdentifier
+ {
+     /// <summary>
+-    /// No algorithm specified.
++    /// Local sentinel for no selected algorithm. Zero is reserved in the IANA registry.
+     /// </summary>
+     None = 0,
+ 
+@@ -59,4 +61,4 @@ public enum CoseAlgorithmIdentifier
+     /// RSASSA-PKCS1-v1_5 with SHA-256
+     /// </summary>
+     Rs256 = -257,
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/Cose/CoseEcCurve.cs b/src/Core/src/Cryptography/Cose/CoseEcCurve.cs
+index 61dab4694ff9ee8be85e2535d8360b9c3854fe07..6acb31a8ccd0e34f8bbd1018690061eb9f3df054 100644
+--- a/src/Core/src/Cryptography/Cose/CoseEcCurve.cs
++++ b/src/Core/src/Cryptography/Cose/CoseEcCurve.cs
+@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose
+     public enum CoseEcCurve
+     {
+         /// <summary>
+-        /// The EC curve could not be determined.
++        /// Local sentinel for an undetermined curve. Zero is reserved in the IANA registry.
+         /// </summary>
+         Unknown = 0,
+ 
+@@ -77,4 +77,4 @@ public enum CoseEcCurve
+         /// <summary>brainpoolP512r1, IANA COSE curve 259 (ISO/IEC 18013-5).</summary>
+         BrainpoolP512r1 = 259
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/Cose/CoseKeyType.cs b/src/Core/src/Cryptography/Cose/CoseKeyType.cs
+index d3b0994744b10e8855e8051efac2342392b1d31e..48c5bd4a40275f1390053118db1ded87568646cd 100644
+--- a/src/Core/src/Cryptography/Cose/CoseKeyType.cs
++++ b/src/Core/src/Cryptography/Cose/CoseKeyType.cs
+@@ -17,7 +17,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
+ /// <summary>
+ /// An enumeration of the key families supported by COSE.
+ /// <remarks>
+-/// This enumeration is based on the IANA COSE Key Common Parameters registry.
++/// This enumeration is based on the IANA COSE Key Types registry.
+ /// <para>
+ /// https://www.iana.org/assignments/cose/cose.xhtml#key-type
+ /// </para>
+@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
+ public enum CoseKeyType
+ {
+     /// <summary>
+-    /// The type could not be determined.
++    /// Local sentinel for an undetermined type. Zero is reserved in the IANA registry.
+     /// </summary>
+     Unknown = 0,
+ 
+@@ -49,4 +49,4 @@ public enum CoseKeyType
+     /// Symmetric keys
+     /// </summary>
+     Symmetric = 4,
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/CryptographyProviders.cs b/src/Core/src/Cryptography/CryptographyProviders.cs
+index f36c37c382e00109951d622dce42721e18b5c34a..2b4cd5d2d145a4dd727bfa58006f94dbdc1e9961 100644
+--- a/src/Core/src/Cryptography/CryptographyProviders.cs
++++ b/src/Core/src/Cryptography/CryptographyProviders.cs
+@@ -20,10 +20,10 @@ namespace Yubico.YubiKit.Core.Cryptography
+     /// This class contains properties that specify cryptographic providers.
+     /// </summary>
+     /// <remarks>
+-    /// During the course of operations, the SDK will need to perform
+-    /// cryptographic operations, such as random number generation, HMAC,
+-    /// Triple-DES encryption, and so on. Any SDK operation that needs crypto
+-    /// will get it from this class.
++    /// These delegates configure the call sites that explicitly use them. Other SDK paths call
++    /// runtime APIs directly, including EC providers, HKDF, HMAC, and static hash methods.
++    /// Configure public delegates once at startup, before concurrent SDK use. Replacement affects
++    /// subsequent delegate calls, rather than existing objects or every operation of that algorithm.
+     /// <para>
+     /// The properties in this class are delegates. They are functions that can
+     /// build objects that will perform the required crypto. The reason these
+@@ -36,13 +36,10 @@ namespace Yubico.YubiKit.Core.Cryptography
+     /// SDK is done with it.
+     /// </para>
+     /// <para>
+-    /// This class will return default implementations, but can be replaced. That
+-    /// is, if you do nothing, the SDK will use default C# cryptography. If you
+-    /// want the SDK to use your own implementations, you can do so. See the
+-    /// User's Manual entry on
+-    /// <xref href="UsersManualAlternateCrypto"> alternate crypto implementations</xref>
+-    /// for a detailed description of replacing the defaults. Generally, you will
+-    /// simply need to set the appropriate property with a new function.
++    /// Each replacement must return a fresh compatible object whose ownership transfers to the
++    /// invoker. Dispose objects obtained by directly invoking a creator in application code.
++    /// Disposal releases that object's resources; caller-owned arrays and other copies need their
++    /// own cleanup. Internal ARKG, ECDH, and CMAC creators are SDK seams rather than public extension points.
+     /// </para>
+     /// <para>
+     /// Most applications will not replace the defaults, but for those that want
+@@ -53,11 +50,11 @@ namespace Yubico.YubiKit.Core.Cryptography
+     public static class CryptographyProviders
+     {
+         /// <summary>
+-        /// This property is a delegate (function pointer). The method loaded
++        /// This property is a factory delegate. The method assigned
+         /// will return an instance of <c>RandomNumberGenerator</c>.
+         /// </summary>
+         /// <remarks>
+-        /// When an SDK operation needs random numbers it will generate them
++        /// When an SDK operation calls this creator for random numbers it will generate them
+         /// using an implementation of the
+         /// <c>System.Security.Cryptography.RandomNumberGenerator</c> abstract
+         /// class. However, when it needs the RNG class, it will ask this
+@@ -74,30 +71,28 @@ public static class CryptographyProviders
+         /// with a method that will build and return an instance of the C#
+         /// default implementation. For example, it could be used as follows.
+         /// <code language="csharp">
+-        ///   RandomNumberGenerator randomObject =
+-        ///       CryptographyProviders.RngCreator();
++        ///   using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
++        ///   {
++        ///       // Use the RNG within this disposal scope.
++        ///   }
+         /// </code>
+         /// </para>
+         /// <para>
+-        /// If you want to replace the implementation, you will likely do
+-        /// something like this in your application.
++        /// This startup fragment explicitly selects the runtime default; supply a compatible
++        /// factory instead when replacing it.
+         /// <code language="csharp">
+-        ///     CryptographyProviders.RngCreator = () =>
+-        ///     {
+-        ///         Handle rngHandle = RngImpl.GetRngHandle();
+-        ///         return RngImpl.GetRandomObject(rngHandle);
+-        ///     };
++        ///     CryptographyProviders.RngCreator = RandomNumberGenerator.Create;
+         /// </code>
+         /// </para>
+         /// </remarks>
+         public static Func<RandomNumberGenerator> RngCreator { get; set; } = RandomNumberGenerator.Create;
+ 
+         /// <summary>
+-        /// This property is a delegate (function pointer). The method loaded
++        /// This property is a factory delegate. The method assigned
+         /// will return an instance of <c>SHA1</c>.
+         /// </summary>
+         /// <remarks>
+-        /// When an SDK operation needs to digest data using SHA-1, it will do so
++        /// When an SDK operation calls this creator to digest data using SHA-1, it will do so
+         /// using an implementation of the
+         /// <c>System.Security.Cryptography.SHA1</c> abstract class. However,
+         /// when it needs the SHA1 class, it will ask this delegate to build an
+@@ -113,29 +108,28 @@ public static class CryptographyProviders
+         /// with a method that will build and return an instance of the C#
+         /// default implementation. For example, it could be used as follows.
+         /// <code language="csharp">
+-        ///   SHA1 sha1Object = CryptographyProviders.Sha1Creator();
++        ///   using (SHA1 sha1Object = CryptographyProviders.Sha1Creator())
++        ///   {
++        ///       // Use the hash object within this disposal scope.
++        ///   }
+         /// </code>
+         /// </para>
+         /// <para>
+-        /// If you want to replace the implementation, you will likely do
+-        /// something like this in your application.
++        /// This startup fragment selects the runtime default. A replacement factory must
++        /// return a fresh compatible object on each invocation.
+         /// <code language="csharp">
+-        ///     CryptographyProviders.Sha1Creator = () =>
+-        ///     {
+-        ///         Handle sha1Handle = Sha1Impl.GetSha1Handle();
+-        ///         return Sha1Impl.GetSha1Object(sha1Handle);
+-        ///     };
++        ///     CryptographyProviders.Sha1Creator = SHA1.Create; // Runtime default.
+         /// </code>
+         /// </para>
+         /// </remarks>
+         public static Func<SHA1> Sha1Creator { get; set; } = SHA1.Create;
+ 
+         /// <summary>
+-        /// This property is a delegate (function pointer). The method loaded
++        /// This property is a factory delegate. The method assigned
+         /// will return an instance of <c>SHA256</c>.
+         /// </summary>
+         /// <remarks>
+-        /// When an SDK operation needs to digest data using SHA-256, it will do
++        /// When an SDK operation calls this creator to digest data using SHA-256, it will do
+         /// so using an implementation of the
+         /// <c>System.Security.Cryptography.SHA256</c> abstract class. However,
+         /// when it needs the SHA256 class, it will ask this delegate to build an
+@@ -151,29 +145,28 @@ public static class CryptographyProviders
+         /// with a method that will build and return an instance of the C#
+         /// default implementation. For example, it could be used as follows.
+         /// <code language="csharp">
+-        ///   SHA256 sha256Object = CryptographyProviders.Sha256Creator();
++        ///   using (SHA256 sha256Object = CryptographyProviders.Sha256Creator())
++        ///   {
++        ///       // Use the hash object within this disposal scope.
++        ///   }
+         /// </code>
+         /// </para>
+         /// <para>
+-        /// If you want to replace the implementation, you will likely do
+-        /// something like this in your application.
++        /// This startup fragment selects the runtime default. A replacement factory must
++        /// return a fresh compatible object on each invocation.
+         /// <code language="csharp">
+-        ///     CryptographyProviders.Sha256Creator = () =>
+-        ///     {
+-        ///         Handle sha256Handle = Sha256Impl.GetSha256Handle();
+-        ///         return Sha256Impl.GetSha256Object(sha256Handle);
+-        ///     };
++        ///     CryptographyProviders.Sha256Creator = SHA256.Create; // Runtime default.
+         /// </code>
+         /// </para>
+         /// </remarks>
+         public static Func<SHA256> Sha256Creator { get; set; } = SHA256.Create;
+ 
+         /// <summary>
+-        /// This property is a delegate (function pointer). The method loaded
++        /// This property is a factory delegate. The method assigned
+         /// will return an instance of <c>SHA384</c>.
+         /// </summary>
+         /// <remarks>
+-        /// When an SDK operation needs to digest data using SHA-384, it will do
++        /// When an SDK operation calls this creator to digest data using SHA-384, it will do
+         /// so using an implementation of the
+         /// <c>System.Security.Cryptography.SHA384</c> abstract class. However,
+         /// when it needs the SHA384 class, it will ask this delegate to build an
+@@ -189,29 +182,28 @@ public static class CryptographyProviders
+         /// with a method that will build and return an instance of the C#
+         /// default implementation. For example, it could be used as follows.
+         /// <code language="csharp">
+-        ///   SHA384 sha384Object = CryptographyProviders.Sha384Creator();
++        ///   using (SHA384 sha384Object = CryptographyProviders.Sha384Creator())
++        ///   {
++        ///       // Use the hash object within this disposal scope.
++        ///   }
+         /// </code>
+         /// </para>
+         /// <para>
+-        /// If you want to replace the implementation, you will likely do
+-        /// something like this in your application.
++        /// This startup fragment selects the runtime default. A replacement factory must
++        /// return a fresh compatible object on each invocation.
+         /// <code language="csharp">
+-        ///     CryptographyProviders.Sha384Creator = () =>
+-        ///     {
+-        ///         Handle sha384Handle = Sha384Impl.GetSha384Handle();
+-        ///         return Sha384Impl.GetSha384Object(sha384Handle);
+-        ///     };
++        ///     CryptographyProviders.Sha384Creator = SHA384.Create; // Runtime default.
+         /// </code>
+         /// </para>
+         /// </remarks>
+         public static Func<SHA384> Sha384Creator { get; set; } = SHA384.Create;
+ 
+         /// <summary>
+-        /// This property is a delegate (function pointer). The method loaded
++        /// This property is a factory delegate. The method assigned
+         /// will return an instance of <c>SHA512</c>.
+         /// </summary>
+         /// <remarks>
+-        /// When an SDK operation needs to digest data using SHA-512, it will do
++        /// When an SDK operation calls this creator to digest data using SHA-512, it will do
+         /// so using an implementation of the
+         /// <c>System.Security.Cryptography.SHA512</c> abstract class. However,
+         /// when it needs the SHA512 class, it will ask this delegate to build an
+@@ -227,34 +219,33 @@ public static class CryptographyProviders
+         /// with a method that will build and return an instance of the C#
+         /// default implementation. For example, it could be used as follows.
+         /// <code language="csharp">
+-        ///   SHA512 sha512Object = CryptographyProviders.Sha512Creator();
++        ///   using (SHA512 sha512Object = CryptographyProviders.Sha512Creator())
++        ///   {
++        ///       // Use the hash object within this disposal scope.
++        ///   }
+         /// </code>
+         /// </para>
+         /// <para>
+-        /// If you want to replace the implementation, you will likely do
+-        /// something like this in your application.
++        /// This startup fragment selects the runtime default. A replacement factory must
++        /// return a fresh compatible object on each invocation.
+         /// <code language="csharp">
+-        ///     CryptographyProviders.Sha512Creator = () =>
+-        ///     {
+-        ///         Handle sha512Handle = Sha512Impl.GetSha512Handle();
+-        ///         return Sha512Impl.GetSha512Object(sha512Handle);
+-        ///     };
++        ///     CryptographyProviders.Sha512Creator = SHA512.Create; // Runtime default.
+         /// </code>
+         /// </para>
+         /// </remarks>
+         public static Func<SHA512> Sha512Creator { get; set; } = SHA512.Create;
+ 
+         /// <summary>
+-        /// This property is a delegate (function pointer). The method loaded
+-        /// will return an instance of <c>AES</c>.
++        /// This property is a factory delegate. The method assigned
++        /// will return an instance of <c>Aes</c>.
+         /// </summary>
+         /// <remarks>
+-        /// When an SDK operation needs to encrypt or decrypt data using
++        /// When an SDK operation calls this creator to encrypt or decrypt data using
+         /// AES, it will do so using an implementation of the
+-        /// <c>System.Security.Cryptography.AES</c> abstract class.
++        /// <c>System.Security.Cryptography.Aes</c> abstract class.
+         /// However, when it needs the AES class, it will ask this delegate to
+         /// build an object, rather than ask for an object itself. This has to do
+-        /// with the fact that the <c>AES</c> class implements
++        /// with the fact that the <c>Aes</c> class implements
+         /// <c>IDisposable</c>. In order to avoid the complex problem of
+         /// ownership of an object that will be disposed once it goes out of
+         /// scope, the SDK will create a new object each time one is needed. This
+@@ -265,25 +256,24 @@ public static class CryptographyProviders
+         /// with a method that will build and return an instance of the C#
+         /// default implementation. For example, it could be used as follows.
+         /// <code language="csharp">
+-        ///   AES aesObject = CryptographyProviders.AesCreator();
++        ///   using (Aes aesObject = CryptographyProviders.AesCreator())
++        ///   {
++        ///       // Use the cipher within this disposal scope.
++        ///   }
+         /// </code>
+         /// </para>
+         /// <para>
+-        /// If you want to replace the implementation, you will likely do
+-        /// something like this in your application.
++        /// This startup fragment selects the runtime default. A replacement factory must
++        /// return a fresh compatible object on each invocation.
+         /// <code language="csharp">
+-        ///     CryptographyProviders.AesCreator = () =>
+-        ///     {
+-        ///         Handle aesHandle = GetHandle();
+-        ///         return AesImpl.GetAesObject(aesHandle);
+-        ///     };
++        ///     CryptographyProviders.AesCreator = Aes.Create; // Runtime default.
+         /// </code>
+         /// </para>
+         /// </remarks>
+         public static Func<Aes> AesCreator { get; set; } = Aes.Create;
+ 
+         /// <summary>
+-        /// This property is a delegate (function pointer). The method loaded
++        /// This property is a factory delegate. The method assigned
+         /// will return an instance of ARKG-P256 cryptographic primitives.
+         /// </summary>
+         /// <remarks>
+@@ -297,14 +287,7 @@ public static class CryptographyProviders
+         /// OpenSSL-backed implementation.
+         /// </para>
+         /// <para>
+-        /// If you want to replace the implementation, you will likely do
+-        /// something like this in your application.
+-        /// <code language="csharp">
+-        ///     CryptographyProviders.ArkgPrimitivesCreator = () =>
+-        ///     {
+-        ///         return ArkgImpl.GetArkgObject();
+-        ///     };
+-        /// </code>
++        /// This creator is internal. Applications cannot replace it through the public SDK API.
+         /// </para>
+         /// </remarks>
+         internal static Func<IArkgPrimitives> ArkgPrimitivesCreator { get; set; } = ArkgPrimitives.Create;
+@@ -320,4 +303,4 @@ public static class CryptographyProviders
+         // /// </summary>
+         // public static Func<string, HMAC> HmacCreator { get; set; } = HMAC.Create;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/Curve25519PrivateKey.cs b/src/Core/src/Cryptography/Curve25519PrivateKey.cs
+index 5be13f6a0cd61cd0c9297275b656830ceb7114c2..1ace1c7a3e0f3c602758b16b43986bed56e1a59c 100644
+--- a/src/Core/src/Cryptography/Curve25519PrivateKey.cs
++++ b/src/Core/src/Cryptography/Curve25519PrivateKey.cs
+@@ -112,11 +112,14 @@ public override byte[] ExportPkcs8PrivateKey()
+     /// </exception>
+     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
+     /// <remarks>
+-    /// This method accepts version 0 PKCS#8 <c>PrivateKeyInfo</c>. RFC 5958 version value 1
+-    /// <c>OneAsymmetricKey</c>, which may carry a <c>publicKey</c> field, is valid but unsupported:
+-    /// this type holds no public value, because a supplied one cannot be checked against the private key
+-    /// (.NET provides no Ed25519/X25519 primitives). Read the public key from the device after import.
++    /// This method accepts an attribute-free version-0 PKCS#8 <c>PrivateKeyInfo</c> subset with absent
++    /// algorithm parameters. RFC 5958 defines version value 1 for <c>OneAsymmetricKey</c> with a public
++    /// key; the decoder rejects that version before validating the remaining fields. This wrapper holds
++    /// only private bytes and provides no Ed25519/X25519 public/private consistency operation.
++    /// Parsing does not uniformly reject top-level or nested trailing data. Obtain the public value
++    /// through the consuming applet's API when that workflow requires it.
+     /// </remarks>
++    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
+     public static Curve25519PrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> pkcs8EncodedKey)
+     {
+         (var privateKey, var keyType) = AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(pkcs8EncodedKey);
+@@ -137,4 +140,4 @@ public static Curve25519PrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> pkcs8Enc
+     /// <exception cref="ArgumentException">Thrown if <paramref name="keyType"/> is not X25519 or Ed25519, or if <paramref name="privateKey"/> is not exactly 32 bytes.</exception>
+     public static Curve25519PrivateKey CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType) => new(privateKey, keyType);
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/Curve25519PublicKey.cs b/src/Core/src/Cryptography/Curve25519PublicKey.cs
+index 02b8a89c40589800a73ea1dc61c357f7f9b65a2d..6017f771dcd75e7cf967425f0208b960dd844274 100644
+--- a/src/Core/src/Cryptography/Curve25519PublicKey.cs
++++ b/src/Core/src/Cryptography/Curve25519PublicKey.cs
+@@ -45,7 +45,8 @@ public sealed class Curve25519PublicKey : PublicKey
+     /// </summary>
+     /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes.</returns>
+     /// <remarks>
+-    /// The public key is represented as a byte array, which is the raw public key data.
++    /// This is a borrowed view of the copied key-owned storage. Construction checks the 32-byte
++    /// representation width, rather than validating a point's mathematical or protocol suitability.
+     /// </remarks>
+     public ReadOnlyMemory<byte> PublicPoint => _publicPoint;
+ 
+@@ -80,6 +81,8 @@ public override byte[] ExportSubjectPublicKeyInfo() =>
+     /// <exception cref="CryptographicException">
+     /// Thrown if the subjectPublicKeyInfo is invalid.
+     /// </exception>
++    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
++    /// <remarks>The shared decoder checks AlgorithmIdentifier fields, rather than complete outer-input exhaustion.</remarks>
+     public static Curve25519PublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+         AsnPublicKeyDecoder
+             .CreatePublicKey(subjectPublicKeyInfo)
+@@ -112,4 +115,4 @@ public static Curve25519PublicKey CreateFromValue(ReadOnlyMemory<byte> publicPoi
+ 
+         return new Curve25519PublicKey(publicPoint, keyInfo);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/ECParametersExtensions.cs b/src/Core/src/Cryptography/ECParametersExtensions.cs
+index 0afab7557bff89dbcdacaeacbf9284e4dd538939..1baca985d9ae2e4a229c526224fdad6c1b6255be 100644
+--- a/src/Core/src/Cryptography/ECParametersExtensions.cs
++++ b/src/Core/src/Cryptography/ECParametersExtensions.cs
+@@ -25,9 +25,9 @@ public static class ECParametersExtensions
+     extension(ECParameters original)
+     {
+         /// <summary>
+-        ///     Performs a deep copy of the EC parameters.
++        ///     Copies the D and Q coordinate arrays while retaining the curve descriptor.
+         /// </summary>
+-        /// <returns>A new ECParameters with the same values as the original.</returns>
++        /// <returns>Parameters with independent D and Q arrays. Explicit arrays within Curve remain shared.</returns>
+         public ECParameters DeepCopy()
+         {
+             var copy = new ECParameters
+@@ -57,4 +57,4 @@ public byte[] ToUncompressedPoint()
+         }
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/ECPrivateKey.cs b/src/Core/src/Cryptography/ECPrivateKey.cs
+index b8caaefb00a693f30f8459be42d74af67adeff04..51b5af380f93f059b474193b744661248b169cdd 100644
+--- a/src/Core/src/Cryptography/ECPrivateKey.cs
++++ b/src/Core/src/Cryptography/ECPrivateKey.cs
+@@ -116,10 +116,16 @@ public override void Clear()
+         /// <exception cref="CryptographicException">
+         /// Thrown if the private key is invalid.
+         /// </exception>
++        /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
++        /// <remarks>
++        /// Accepts the typed decoder's attribute-free, version-0 PKCS#8 subset. AlgorithmIdentifier
++        /// consumption is checked separately from outer and nested trailing-data admission. Scalar-width
++        /// checking does not prove range; consistency checking runs when both public coordinates are present.
++        /// </remarks>
+         public static ECPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+             => CreateFromPkcs8(encodedKey, parametersDecoded: null);
+ 
+-        // Test observation hook. The callback must not retain or mutate the decoded private value.
++        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+         internal static ECPrivateKey CreateFromPkcs8(
+             ReadOnlyMemory<byte> encodedKey,
+             Action<ECParameters>? parametersDecoded)
+@@ -152,7 +158,7 @@ internal static ECPrivateKey CreateFromPkcs8(
+         /// </exception>
+         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
+ 
+-        // Test observation hook. The callback must not retain or mutate the copied private value.
++        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+         internal static ECPrivateKey CreateFromParameters(
+             ECParameters parameters,
+             Action<ECParameters>? parametersCopied) =>
+@@ -175,7 +181,7 @@ internal static ECPrivateKey CreateFromParameters(
+         public static ECPrivateKey CreateFromEcdh(ECDiffieHellman ecdh)
+             => CreateFromEcdh(ecdh, parametersExported: null);
+ 
+-        // Test observation hook. The callback must not retain or mutate the exported private value.
++        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+         internal static ECPrivateKey CreateFromEcdh(
+             ECDiffieHellman ecdh,
+             Action<ECParameters>? parametersExported)
+@@ -204,10 +210,11 @@ internal static ECPrivateKey CreateFromEcdh(
+         /// are cleared.
+         /// </para>
+         /// <para>
+-        /// On macOS the runtime's own derivation keeps a copy of the scalar that it does not clear. This
+-        /// is a runtime behaviour, not one the SDK can reach. Supplying the public point yourself through
+-        /// <see cref="CreateFromParameters(ECParameters)"/> does not avoid it, because the SDK checks that the point
+-        /// belongs to the scalar by signing with the same runtime path.
++        /// The inspected .NET v10.0.0 macOS D-only import route derives the public point and creates a
++        /// runtime-owned managed scalar copy whose cleanup is not exposed to this SDK. Supplying both
++        /// public coordinates through <see cref="CreateFromParameters(ECParameters)"/> skips that extraction
++        /// route in the inspected revision. Provider-owned copies and native erasure still require separate
++        /// qualification for the runtime actually used; clearing SDK arrays alone establishes neither.
+         /// </para>
+         /// </remarks>
+         /// <param name="privateValue">
+@@ -224,7 +231,7 @@ public static ECPrivateKey CreateFromValue(
+             KeyType keyType)
+             => CreateFromValue(privateValue, keyType, parametersCreated: null);
+ 
+-        // Test observation hook. The callback must not retain or mutate the temporary private values.
++        // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+         internal static ECPrivateKey CreateFromValue(
+             ReadOnlyMemory<byte> privateValue,
+             KeyType keyType,
+@@ -285,4 +292,4 @@ public ECDiffieHellman ToECDiffieHellman()
+             return ECDiffieHellman.Create(Parameters);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/ECPublicKey.cs b/src/Core/src/Cryptography/ECPublicKey.cs
+index 19691729572232b6d94f431e7a85c6f15dc05f35..ddea81f68c7ca03d0787d693b7411ae541e22acc 100644
+--- a/src/Core/src/Cryptography/ECPublicKey.cs
++++ b/src/Core/src/Cryptography/ECPublicKey.cs
+@@ -20,9 +20,10 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ ///     Represents an Elliptic Curve (EC) public key.
+ /// </summary>
+ /// <remarks>
+-///     This class encapsulates EC public key parameters and provides cryptographic operations
+-///     for modeled short-Weierstrass curves and provides factory methods for creating instances from EC parameters or DER-encoded
+-///     data.
++///     This class stores parameters for modeled short-Weierstrass curves. Parameter and raw-point
++///     factories check coordinate widths and uncompressed-point framing, rather than on-curve validity.
++///     The SubjectPublicKeyInfo factory imports through the runtime provider and checks full input
++///     consumption. Provider acceptance and applet/profile requirements are separate from catalog membership.
+ /// </remarks>
+ public class ECPublicKey : PublicKey
+ {
+@@ -62,6 +63,10 @@ private ECPublicKey(ECParameters parameters)
+     ///     An <see cref="ECParameters" /> structure containing the curve parameters, key, and other
+     ///     cryptographic elements needed for EC operations.
+     /// </value>
++    /// <remarks>
++    ///     The coordinate arrays are key-owned mutable aliases. Leave them unchanged: the cached
++    ///     <see cref="PublicPoint"/> is a separate copy and would no longer agree after mutation.
++    /// </remarks>
+     public ECParameters Parameters { get; }
+ 
+     /// <summary>
+@@ -188,4 +193,4 @@ public ECDiffieHellmanPublicKey ToECDiffieHellmanPublicKey()
+         using var ecdh = ECDiffieHellman.Create(Parameters);
+         return ecdh.PublicKey;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/IArkgPrimitives.cs b/src/Core/src/Cryptography/IArkgPrimitives.cs
+index 32279a6aa8e0ffc3775b2c267ed6498314b66ea1..fe3144c12db0ce1f2d28ffc5f294474983141f0f 100644
+--- a/src/Core/src/Cryptography/IArkgPrimitives.cs
++++ b/src/Core/src/Cryptography/IArkgPrimitives.cs
+@@ -47,8 +47,8 @@ internal interface IArkgPrimitives
+     /// </summary>
+     /// <remarks>
+     /// <para>
+-    /// This method implements the ARKG-P256 key derivation algorithm as specified
+-    /// in the previewSign WebAuthn extension. Given the blinding and KEM public
++    /// This method targets ARKG-P256 from draft-bradleylundberg-cfrg-arkg-09 for use by
++    /// the previewSign WebAuthn extension. Given the blinding and KEM public
+     /// keys from the YubiKey, along with application-provided input keying material
+     /// and context, it derives a new public key.
+     /// </para>
+@@ -59,9 +59,8 @@ internal interface IArkgPrimitives
+     /// YubiKey during signing operations.
+     /// </para>
+     /// <para>
+-    /// The context string allows multiple independent public keys to be derived
+-    /// from the same generated key material. Each unique context produces a
+-    /// unique derived key pair.
++    /// The context bytes domain-separate derivations from the same input keying material.
++    /// Distinct contexts are not a mathematical guarantee of distinct outputs in a finite key space.
+     /// </para>
+     /// </remarks>
+     /// <param name="pkBl">The blinding public key in uncompressed SEC1 format.</param>
+@@ -71,11 +70,13 @@ internal interface IArkgPrimitives
+     /// <returns>
+     /// A tuple containing the derived public key (in uncompressed SEC1 format)
+     /// and the ARKG key handle (to be passed to the YubiKey during signing).
+-    /// Both returned arrays are owned by the caller and should be zeroed after use.
++    /// Both returned arrays are caller-owned. The derived point is public; the handle contains an
++    /// authentication tag and ephemeral public point. Clear retained output when its application
++    /// meaning requires it. Secret inputs and intermediate material have independent cleanup scopes.
+     /// </returns>
+     (byte[] derivedPk, byte[] arkgKeyHandle) Derive(
+         ReadOnlySpan<byte> pkBl,
+         ReadOnlySpan<byte> pkKem,
+         ReadOnlySpan<byte> ikm,
+         ReadOnlySpan<byte> ctx);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/IEcdhPrimitives.cs b/src/Core/src/Cryptography/IEcdhPrimitives.cs
+index 98f469d96695294fae459d7cba25a682fbacb4b8..bffd75fccc714f7d0d561c8abb6e23e63b727df9 100644
+--- a/src/Core/src/Cryptography/IEcdhPrimitives.cs
++++ b/src/Core/src/Cryptography/IEcdhPrimitives.cs
+@@ -28,9 +28,10 @@ internal interface IEcdhPrimitives
+     /// <remarks>
+     /// <paramref name="localPrivateKey"/> must contain a private value (<see cref="ECParameters.D"/>) and a
+     /// public point (<see cref="ECParameters.Q"/>) that correspond to the same key pair, such as the value
+-    /// returned by exporting an existing key's parameters with its private component included. Passing a
+-    /// public point that does not correspond to the private value produces an invalid shared secret and may
+-    /// be rejected by some platform crypto backends.
++    /// returned by exporting an existing key's parameters with its private component included. The default
++    /// implementation imports through the runtime provider; rejection of inconsistent components depends
++    /// on that provider. Inputs are borrowed. The caller owns the returned
++    /// shared-secret array and must clear it after use; provider disposal does not clear that result.
+     /// </remarks>
+     byte[] ComputeSharedSecret(ECParameters localPrivateKey, ECParameters remotePublicKey);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/IPrivateKeyExtensions.cs b/src/Core/src/Cryptography/IPrivateKeyExtensions.cs
+index b187ee0b22039b1c1a6dd87ddb043fc2f17f1b24..cc30ccd1d2e6609c190652c555eaff4af895e357 100644
+--- a/src/Core/src/Cryptography/IPrivateKeyExtensions.cs
++++ b/src/Core/src/Cryptography/IPrivateKeyExtensions.cs
+@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ public static class IPrivateKeyExtensions
+ {
+     /// <summary>
+-    /// Safely casts an <see cref="IPrivateKey"/> instance to a specific derived type.
++    /// Casts an <see cref="IPrivateKey"/> instance to a specific derived type with a contextual error.
+     /// </summary>
+     /// <typeparam name="T">The target type that implements <see cref="IPrivateKey"/>.</typeparam>
+     /// <param name="key">The private key instance to cast.</param>
+@@ -32,15 +32,20 @@ public static class IPrivateKeyExtensions
+     /// </exception>
+     /// <example>
+     /// <code>
+-    /// IPrivateKey genericKey = GetPrivateKey();
+-    /// RsaPrivateKey rsaKey = genericKey.Cast&lt;RsaPrivateKey&gt;();
+-    /// // throws InvalidCastException if genericKey is not an RsaPrivateKey
++    /// static void InspectRsaKey(ReadOnlyMemory&lt;byte&gt; encodedKey)
++    /// {
++    ///     // encodedKey is borrowed; its caller remains responsible for clearing it.
++    ///     using var owner = RSAPrivateKey.CreateFromPkcs8(encodedKey);
++    ///     IPrivateKey genericKey = owner;
++    ///     RSAPrivateKey rsaKey = genericKey.Cast&lt;RSAPrivateKey&gt;();
++    ///     // rsaKey and genericKey alias owner; only owner manages disposal.
++    /// }
+     /// </code>
+     /// </example>
+     /// <remarks>
+     /// This method provides a more explicit alternative to direct casting with clearer error messages.
+-    /// Prefer this over unsafe casting operations when type safety is critical for cryptographic operations.
++    /// Like an ordinary checked reference cast, this neither converts the key nor creates a new owner.
+     /// </remarks>
+     public static T Cast<T>(this IPrivateKey key) where T : class, IPrivateKey =>
+         key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/PrivateKey.cs b/src/Core/src/Cryptography/PrivateKey.cs
+index 1374023b917d492b45cc9535e44fde6dab43118c..1d80e88bf06b97014c2e884498a8b5ef4fa10233 100644
+--- a/src/Core/src/Cryptography/PrivateKey.cs
++++ b/src/Core/src/Cryptography/PrivateKey.cs
+@@ -18,8 +18,10 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ /// Abstract base class for private key implementations.
+ /// </summary>
+ /// <remarks>
+-/// This class implements the standard .NET disposal pattern to ensure secure cleanup
+-/// of sensitive cryptographic material and provides disposal state checking for derived classes.
++/// Disposal calls the implementation's <see cref="Clear"/> method and marks the wrapper disposed
++/// after it returns. Dispose keys explicitly;
++/// this base class has no finalizer. Caller inputs, exported arrays, and runtime/provider copies have
++/// separate lifetimes and are not cleared by disposing this wrapper.
+ /// <para>
+ /// Concrete implementations include <see cref="ECPrivateKey"/>, <see cref="RSAPrivateKey"/> and <see cref="Curve25519PrivateKey"/>,
+ /// each providing algorithm-specific key handling and cryptographic operations.
+@@ -73,4 +75,4 @@ protected void ThrowIfDisposed()
+             throw new ObjectDisposedException(GetType().Name);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/PrivateKeyConsistency.cs b/src/Core/src/Cryptography/PrivateKeyConsistency.cs
+index 038948c96705c0907293cd80b0f68cd53a34e435..472188d29b55bdbb332c7df6329a684a2ac73898 100644
+--- a/src/Core/src/Cryptography/PrivateKeyConsistency.cs
++++ b/src/Core/src/Cryptography/PrivateKeyConsistency.cs
+@@ -38,7 +38,7 @@ internal static class PrivateKeyConsistency
+     ///     Verifies that <c>Q = d·G</c> by signing a fixed digest with the key as supplied and verifying
+     ///     with a public-only key built from the same <c>Q</c>. A signature made with <c>d</c> verifies
+     ///     under <c>Q</c> only if they match; an off-curve <c>Q</c> fails the same way. No D-only key is
+-    ///     ever imported, so no public point is derived by the runtime.
++    ///     ever imported by this helper. Provider admission and internal storage remain platform-specific.
+     /// </summary>
+     /// <exception cref="CryptographicException">The point does not match the scalar, or is invalid.</exception>
+     public static void ThrowIfPublicPointDoesNotMatch(in ECParameters parameters)
+@@ -49,9 +49,8 @@ public static void ThrowIfPublicPointDoesNotMatch(in ECParameters parameters)
+         bool matches;
+         try
+         {
+-            // Some platforms (OpenSSL) already refuse a mismatched import here; others (CNG, SecKey)
+-            // accept it and re-derive Q, which the verify step below catches. Either way the caller sees
+-            // one exception type.
++            // Import validation differs by provider. Verify against the separately imported public
++            // point as well, and present import/signature failures through one exception type.
+             using var signer = ECDsa.Create(parameters);
+             using var verifier = ECDsa.Create(new ECParameters { Curve = parameters.Curve, Q = parameters.Q });
+ 
+@@ -75,9 +74,9 @@ public static void ThrowIfPublicPointDoesNotMatch(in ECParameters parameters)
+     ///     <c>e·d ≡ 1 (mod lcm(p−1, q−1))</c>.
+     /// </summary>
+     /// <remarks>
+-    ///     Uses <see cref="BigInteger" />, which is neither constant-time nor zeroable. The private values
+-    ///     already exist in the caller-supplied managed arrays, so this adds no exposure the import does not
+-    ///     already have.
++    ///     Uses <see cref="BigInteger" />, which is neither constant-time nor explicitly clearable.
++    ///     Its private-value temporaries have lifetimes independent of the caller's arrays. These selected
++    ///     relations do not establish primality, distinct odd primes, or every RSA component range.
+     /// </remarks>
+     /// <exception cref="CryptographicException">A component is missing or a relation does not hold.</exception>
+     public static void ThrowIfInconsistent(in RSAParameters parameters)
+@@ -118,4 +117,4 @@ parameters.P is null || parameters.Q is null || parameters.DP is null ||
+     private const int MaxEcdsaSignatureLength = 144;
+ 
+     private static BigInteger ToBigInteger(byte[] value) => new(value, isUnsigned: true, isBigEndian: true);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/RSAParametersExtensions.cs b/src/Core/src/Cryptography/RSAParametersExtensions.cs
+index ca82e1c2b4a4b3e928508dac10c598e5c0ef7bd4..cb5f173b2c597cbfc3a709868315784b6a5a28b4 100644
+--- a/src/Core/src/Cryptography/RSAParametersExtensions.cs
++++ b/src/Core/src/Cryptography/RSAParametersExtensions.cs
+@@ -22,7 +22,7 @@ public static class RSAParametersExtensions
+     /// Performs a deep copy of the RSA parameters.
+     /// </summary>
+     /// <param name="original">The original RSAParameters to copy.</param>
+-    /// <returns>A new RSAParameters with the same values as the original.</returns>
++    /// <returns>Parameters with independent arrays. The caller must clear copied private components after use.</returns>
+     public static RSAParameters DeepCopy(this RSAParameters original)
+     {
+         var copy = new RSAParameters
+@@ -41,18 +41,17 @@ public static RSAParameters DeepCopy(this RSAParameters original)
+     }
+ 
+     /// <summary>
+-    /// Normalizes the RSA parameters to ensure consistent cross-platform behavior:
+-    /// - If D is present, it must have the same length as Modulus
+-    /// - If D is present, P, Q, DP, DQ, and InverseQ are required and must have half the length of Modulus (rounded up)
+-    /// 
+-    /// This ensures compatibility with stricter platforms like Windows BCrypt while preserving the original key data.
++    /// Copies the parameters and, when all private components and Modulus are present, left-pads
++    /// shorter D to the modulus width and shorter CRT components to half that width (rounded up).
++    /// Oversized arrays are preserved. Missing components leave the copy unpadded; this helper does
++    /// not establish mathematical validity or acceptance by every platform provider.
+     /// </summary>
+     /// <param name="parameters">The RSA parameters to normalize</param>
+     /// <returns>A new (copied) RSAParameters with normalized values</returns>
+     internal static RSAParameters NormalizeParameters(this RSAParameters parameters) =>
+         NormalizeParameters(parameters, parametersCopied: null);
+ 
+-    // Test observation hook. The callback must not retain or mutate the copied arrays.
++    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+     internal static RSAParameters NormalizeParameters(
+         this RSAParameters parameters,
+         Action<RSAParameters>? parametersCopied)
+@@ -135,4 +134,4 @@ private static void ClearPrivateParameters(RSAParameters parameters)
+         CryptographicOperations.ZeroMemory(parameters.InverseQ);
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/RSAPrivateKey.cs b/src/Core/src/Cryptography/RSAPrivateKey.cs
+index d529b4a0ecbc44fb7c29b823885adc6a7f100637..96ba89c39b1d8e897bc8bdf46d95e490332ac9e8 100644
+--- a/src/Core/src/Cryptography/RSAPrivateKey.cs
++++ b/src/Core/src/Cryptography/RSAPrivateKey.cs
+@@ -22,7 +22,9 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ /// <remarks>
+ /// This class encapsulates the parameters specific to RSA private keys 
+ /// and provides factory methods for creating instances from RSA parameters
+-/// or DER-encoded data.
++/// or DER-encoded data. Construction selects catalog metadata from twice the DP storage width before
++/// checking selected RSA algebraic relations. A shorter CRT exponent can therefore fail size admission
++/// before consistency checking; these checks are not a complete RSA key-validation procedure.
+ /// </remarks>
+ public sealed class RSAPrivateKey : PrivateKey
+ {
+@@ -108,10 +110,16 @@ public override void Clear()
+     /// <exception cref="NotSupportedException">
+     /// When the RSA key length is not supported.
+     /// </exception>
++    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
++    /// <remarks>
++    /// Accepts the typed decoder's attribute-free, version-0 PKCS#8 subset and version-0 RSA components.
++    /// AlgorithmIdentifier consumption and selected algebraic relations are distinct from complete
++    /// outer/nested input exhaustion and full mathematical key validation.
++    /// </remarks>
+     public static RSAPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+         => CreateFromPkcs8(encodedKey, parametersDecoded: null);
+ 
+-    // Test observation hook. The callback must not retain or mutate the decoded private arrays.
++    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+     internal static RSAPrivateKey CreateFromPkcs8(
+         ReadOnlyMemory<byte> encodedKey,
+         Action<RSAParameters>? parametersDecoded)
+@@ -152,9 +160,9 @@ internal static RSAPrivateKey CreateFromPkcs8(
+     /// </exception>
+     public static RSAPrivateKey CreateFromParameters(RSAParameters parameters) => new(parameters);
+ 
+-    // Test observation hook. The callback must not retain or mutate the copied arrays.
++    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
+     internal static RSAPrivateKey CreateFromParameters(
+         RSAParameters parameters,
+         Action<RSAParameters>? parametersCopied) =>
+         new(parameters, parametersCopied);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/RSAPublicKey.cs b/src/Core/src/Cryptography/RSAPublicKey.cs
+index e1750bd88ef81daef77303b7ad5ad5482872a700..fc9e8d5af2a7b36dda517772e682cd1d7fe1dba3 100644
+--- a/src/Core/src/Cryptography/RSAPublicKey.cs
++++ b/src/Core/src/Cryptography/RSAPublicKey.cs
+@@ -26,14 +26,15 @@ namespace Yubico.YubiKit.Core.Cryptography;
+ public sealed class RSAPublicKey : PublicKey
+ {
+     /// <summary>
+-    /// Gets the RSA cryptographic parameters required for the private key operations.
++    /// Gets the RSA modulus and public exponent.
+     /// </summary>
+     /// <value>
+-    /// A structure containing RSA parameters, including Modulus, Exponent, D, P, Q, DP, DQ, and InverseQ values.
++    /// A parameter structure containing Modulus and Exponent, with no private components.
+     /// </value>
+     /// <remarks>
+-    /// This property provides access to the fundamental mathematical components needed for RSA private key operations.
+-    /// The parameters are used in cryptographic operations such as decryption and digital signature creation.
++    /// The structure contains references to key-owned mutable arrays. Treat them as borrowed and leave
++    /// them unchanged; copying the structure does not copy the arrays. Construction copies the supplied
++    /// arrays and selects a modeled modulus storage width, rather than performing full mathematical validation.
+     /// </remarks>
+     public RSAParameters Parameters { get; }
+ 
+@@ -104,8 +105,13 @@ parameters.InverseQ is not null
+     /// <exception cref="CryptographicException">
+     /// Thrown if the public key is invalid.
+     /// </exception>
++    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
++    /// <remarks>
++    /// The shared decoder checks the RSA component sequence and AlgorithmIdentifier; it does not
++    /// uniformly check surrounding reader exhaustion or perform full RSA mathematical validation.
++    /// </remarks>
+     public static RSAPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+         AsnPublicKeyDecoder
+             .CreatePublicKey(subjectPublicKeyInfo)
+             .Cast<RSAPublicKey>();
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Cryptography/X963Kdf.cs b/src/Core/src/Cryptography/X963Kdf.cs
+index 797c41f9ba9d08c965e71dfbf22ebcd8a2d74c85..aaf124311428ca96c68d2cbbfc7334c45c84b085 100644
+--- a/src/Core/src/Cryptography/X963Kdf.cs
++++ b/src/Core/src/Cryptography/X963Kdf.cs
+@@ -27,6 +27,11 @@ internal static class X963Kdf
+     /// <param name="sharedInfo">Optional shared information (can be empty)</param>
+     /// <param name="keyDataLength">Desired output length in bytes</param>
+     /// <returns>Derived key material of exactly keyDataLength bytes</returns>
++    /// <remarks>
++    /// Inputs are borrowed. Clear the returned secret-derived array after use. This helper does not
++    /// explicitly clear its stack hash or a partially populated result when hashing fails; those
++    /// intermediate lifetimes are distinct from the caller's successful result owner.
++    /// </remarks>
+     /// <exception cref="ArgumentException">Thrown if keyDataLength is invalid</exception>
+     internal static byte[] DeriveKeyMaterial(
+         ReadOnlySpan<byte> z,
+@@ -74,4 +79,4 @@ internal static byte[] DeriveKeyMaterial(
+ 
+         return result;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Utilities/BerLength.cs b/src/Core/src/Utilities/BerLength.cs
+index c05a16b7ce25e588150e30dffcfb3f98f51891a0..3622940e089a128384dac67263524da944e307be 100644
+--- a/src/Core/src/Utilities/BerLength.cs
++++ b/src/Core/src/Utilities/BerLength.cs
+@@ -15,8 +15,9 @@
+ namespace Yubico.YubiKit.Core.Utilities;
+ 
+ /// <summary>
+-/// Utility for BER-TLV length encoding and decoding.
++/// Sizes and writes definite BER-TLV lengths from 0 through 65535.
+ /// </summary>
++/// <remarks>Validate that the length is nonnegative before calling; these helpers do not reject negative inputs.</remarks>
+ public static class BerLength
+ {
+     /// <summary>
+@@ -53,4 +54,4 @@ public static int Write(Span<byte> destination, int length)
+                 return 1;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs b/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs
+index 1da9ea9e1a665dd7a9b87d2a5e1f894cd015c8c2..16c0fbd1d7f867b8a1a6f317530e033467da8fa2 100644
+--- a/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs
++++ b/src/Core/src/Utilities/DisposableArrayPoolBuffer.cs
+@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Utilities;
+ /// A disposable buffer backed by <see cref="ArrayPool{T}"/> that securely clears memory on disposal.
+ /// Implements <see cref="IMemoryOwner{T}"/> for compatibility with async APIs.
+ /// </summary>
++/// <remarks>
++/// The exposed memory is sliced to the requested size. Disposal clears the entire rental and returns
++/// it to the pool. Finish all uses before disposal, including uses through previously obtained views:
++/// those views still reference storage that the pool may lend to another caller.
++/// </remarks>
+ public sealed class DisposableArrayPoolBuffer : IMemoryOwner<byte>
+ {
+     private byte[]? _rentedBuffer;
+@@ -82,4 +87,4 @@ public void Dispose()
+         ArrayPool<byte>.Shared.Return(_rentedBuffer, clearArray: true);
+         _rentedBuffer = null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Utilities/DisposableBufferHandle.cs b/src/Core/src/Utilities/DisposableBufferHandle.cs
+index 167259880ac7ecfdcb1f9056653750e7d10bd7c6..6e401f08ea7174b400d38ad91102a78c7f6aad53 100644
+--- a/src/Core/src/Utilities/DisposableBufferHandle.cs
++++ b/src/Core/src/Utilities/DisposableBufferHandle.cs
+@@ -24,8 +24,9 @@ namespace Yubico.YubiKit.Core.Utilities;
+ ///     The buffer is zeroed via <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/>
+ ///     when <see cref="Dispose"/> is called. Callers must not read from or write to
+ ///     the original <paramref name="data"/> after disposing this handle.
+-///     Always pass a freshly-allocated or rented buffer — never wrap caller-held memory
+-///     that must survive beyond the scope of this handle.
++///     Pass storage whose contents may be cleared at the end of this scope. This handle does not
++///     copy the memory or return a rented array to its pool. A pool rental needs a separate return
++///     owner; use <see cref="DisposableArrayPoolBuffer"/> when clearing and pool return belong together.
+ /// </remarks>
+ public class DisposableBufferHandle(Memory<byte> data) : IDisposable
+ {
+@@ -53,4 +54,4 @@ public void Dispose()
+     {
+         Dispose();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Utilities/DisposableTlvList.cs b/src/Core/src/Utilities/DisposableTlvList.cs
+index be52ffee70fff054c4cc9c6fae5068a1d7d68227..0a43275319e8398b5a4b3074a7c2b566816e5947 100644
+--- a/src/Core/src/Utilities/DisposableTlvList.cs
++++ b/src/Core/src/Utilities/DisposableTlvList.cs
+@@ -21,8 +21,9 @@ namespace Yubico.YubiKit.Core.Utilities;
+ ///     A disposable collection of TLV objects that ensures all contained TLVs are properly disposed.
+ /// </summary>
+ /// <remarks>
+-///     This class is used to manage the lifetime of multiple TLV objects, ensuring that sensitive
+-///     cryptographic data is properly zeroed out when no longer needed.
++///     Construction copies the collection, while retaining the same <see cref="Tlv"/> objects.
++///     Disposing the list clears those objects' encodings, including views held elsewhere. Source
++///     buffers used to construct the TLVs and independently returned encodings have separate owners.
+ /// </remarks>
+ public sealed class DisposableTlvList : IDisposable, IReadOnlyList<Tlv>
+ {
+@@ -88,4 +89,4 @@ public void Dispose()
+     /// </summary>
+     /// <returns>A span containing all TLV objects in the collection.</returns>
+     public ReadOnlySpan<Tlv> AsSpan() => CollectionsMarshal.AsSpan(_tlvs);
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Utilities/MemoryExtensions.cs b/src/Core/src/Utilities/MemoryExtensions.cs
+index 7dc2f7280c477988f7d5c5767b181a7453296199..60c99cc788e83513f3f94752d0ae08163da556e2 100644
+--- a/src/Core/src/Utilities/MemoryExtensions.cs
++++ b/src/Core/src/Utilities/MemoryExtensions.cs
+@@ -14,16 +14,20 @@
+ 
+ namespace Yubico.YubiKit.Core.Utilities;
+ 
++/// <summary>Looks up borrowed views of dictionary values without copying their storage.</summary>
+ public static class MemoryExtensions
+ {
++    /// <summary>Returns the stored memory view, or empty memory when the key is absent.</summary>
+     public static ReadOnlyMemory<TValue> GetMemory<TKey, TValue>(
+         this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary,
+         TKey key) =>
+         dictionary.TryGetValue(key, out var memory) ? memory : ReadOnlyMemory<TValue>.Empty;
+ 
++    /// <summary>Returns a span over the stored value. The dictionary indexer throws when the key is absent.</summary>
+     public static ReadOnlySpan<TValue> GetSpan<TKey, TValue>(this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary,
+         TKey key) => dictionary[key].Span;
+ 
++    /// <summary>Returns a stored span and true on a match, or an empty span and false when the key is absent.</summary>
+     public static bool TryGetSpan<TKey, TValue>(this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary, TKey key,
+         out ReadOnlySpan<TValue> span)
+     {
+@@ -36,4 +40,4 @@ public static bool TryGetSpan<TKey, TValue>(this IDictionary<TKey, ReadOnlyMemor
+         span = ReadOnlySpan<TValue>.Empty;
+         return false;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Utilities/Tlv.cs b/src/Core/src/Utilities/Tlv.cs
+index 829915a09524ed713edf97b5bea18f77582f2449..b239975b632346d04a4c63b7ad601b891d1c5add 100644
+--- a/src/Core/src/Utilities/Tlv.cs
++++ b/src/Core/src/Utilities/Tlv.cs
+@@ -19,9 +19,14 @@
+ namespace Yubico.YubiKit.Core.Utilities;
+ 
+ /// <summary>
+-///     Tag, length, Value structure that helps to parse APDU response data.
+-///     This class handles BER-TLV encoded data with determinate length.
++///     Owns a copied tag-length-value encoding for definite-length smart-card data.
+ /// </summary>
++/// <remarks>
++///     Parsing recognizes one tag octet, or two when the first octet's low five bits are 1F.
++///     Use tags supported by the consuming protocol; this bounded helper does not follow arbitrary
++///     BER tag continuations or validate every constructor tag for BER round-trip compatibility.
++///     Dispose the object to clear its encoding; caller-owned source buffers require separate cleanup.
++/// </remarks>
+ public sealed class Tlv : IDisposable
+ {
+     private byte[]? _bytes;
+@@ -37,7 +42,7 @@ public sealed class Tlv : IDisposable
+     ///     This constructor creates a BER-TLV encoded structure where:
+     ///     - The tag is encoded in the minimum number of bytes needed
+     ///     - The length is encoded according to BER-TLV rules
+-    ///     - The value is stored as provided
++    ///     - The value is copied into the owned encoding
+     /// </remarks>
+     public Tlv(int tag, ReadOnlySpan<byte> value)
+     {
+@@ -60,8 +65,9 @@ public Tlv(int tag, ReadOnlyMemory<byte> value) : this(tag, value.Span) { }
+     public int Tag { get; private set; }
+ 
+     /// <summary>
+-    ///     Returns a copy of the value.
++    ///     Returns a read-only view of the owned value bytes.
+     /// </summary>
++    /// <remarks>Previously obtained views observe clearing when this object is disposed.</remarks>
+     public ReadOnlyMemory<byte> Value => _bytes.AsMemory(_offset, Length);
+ 
+     /// <summary>
+@@ -76,7 +82,7 @@ public Tlv(int tag, ReadOnlyMemory<byte> value) : this(tag, value.Span) { }
+ 
+ 
+     /// <summary>
+-    ///     Dispose the object and clears its buffers
++    ///     Clears the owned encoding and resets the tag and value length.
+     /// </summary>
+     public void Dispose()
+     {
+@@ -151,14 +157,14 @@ private static void WriteMinimalBigEndianBytes(Span<byte> destination, uint valu
+     }
+ 
+     /// <summary>
+-    ///     Retrieves the internal byte array of the TLV object as a Memory&lt;byte&gt;>.
++    ///     Returns a read-only view of the complete owned encoding.
+     /// </summary>
+     /// <returns>
+-    ///     A Memory&lt;byte&gt; instance representing the underlying data of the TLV object.
++    ///     A <see cref="ReadOnlyMemory{T}"/> view containing the tag, length, and value.
+     /// </returns>
+     /// <remarks>
+-    ///     This method provides a view of the TLV's internal data, allowing for efficient
+-    ///     access and manipulation of the bytes without copying the data.
++    ///     No copy is made. Disposal clears this storage, including previously obtained views.
++    ///     This method remains callable after disposal and exposes the cleared encoding.
+     /// </remarks>
+     public ReadOnlyMemory<byte> AsMemory() => _bytes.AsMemory();
+ 
+@@ -178,7 +184,7 @@ private static void WriteMinimalBigEndianBytes(Span<byte> destination, uint valu
+     /// <summary>
+     ///     Parse a Tlv from a BER-TLV encoded byte array.
+     /// </summary>
+-    /// <param name="data">A byte array containing the TLV encoded data (and nothing more).</param>
++    /// <param name="data">Input beginning with a supported definite-length TLV. Trailing bytes are not checked.</param>
+     /// <returns>The parsed Tlv</returns>
+     public static Tlv Create(ReadOnlySpan<byte> data)
+     {
+@@ -202,7 +208,7 @@ internal static (int Tag, int Length, byte[] Value) ParseData(ref ReadOnlySpan<b
+         int tag = buffer[0];
+ 
+         // Determine if the tag is in long form.
+-        // Long form tags have more than one byte, starting with 0x1F.
++        // A low-five-bit value of 1F selects this helper's two-octet tag path.
+         if ((buffer[0] & 0x1F) == 0x1F)
+         {
+             // Ensure there is enough data for a long form tag.
+@@ -272,4 +278,4 @@ internal static (int Tag, int Length, byte[] Value) ParseData(ref ReadOnlySpan<b
+     /// </remarks>
+     public override string ToString() =>
+         $"Tlv(0x{Tag:X}, {Length}, {Convert.ToHexString(Value.Span)})";
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/Utilities/TlvHelper.cs b/src/Core/src/Utilities/TlvHelper.cs
+index 0d415f18d4fb5d5f345b0e08cd99ee5a76c7f314..df0e37f31fba1db792318cda667446be35b29739 100644
+--- a/src/Core/src/Utilities/TlvHelper.cs
++++ b/src/Core/src/Utilities/TlvHelper.cs
+@@ -29,7 +29,7 @@ public static class TlvHelper
+     /// <returns>A disposable collection of <see cref="Tlv" /> objects that must be disposed to securely clear sensitive data.</returns>
+     /// <remarks>
+     ///     The returned collection must be disposed using a <c>using</c> declaration to ensure
+-    ///     all TLV objects are properly disposed and their sensitive data is securely zeroed.
++    ///     all contained TLV encodings are cleared. The input is borrowed and remains caller-owned.
+     /// </remarks>
+     public static DisposableTlvList DecodeList(ReadOnlySpan<byte> tlvData)
+     {
+@@ -76,6 +76,11 @@ public static DisposableTlvList DecodeList(ReadOnlySpan<byte> tlvData)
+     /// </summary>
+     /// <param name="tlvData">Sequence of TLV encoded data</param>
+     /// <returns>Dictionary of Tag-Value pairs</returns>
++    /// <remarks>
++    ///     Values are independent copies exposed through read-only views, without a disposable clearing
++    ///     owner. For sensitive sequences, prefer <see cref="DecodeList(ReadOnlySpan{byte})"/> and dispose
++    ///     its result. Dictionary decoding does not clear discarded duplicates or partial results on failure.
++    /// </remarks>
+     public static IDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlySpan<byte> tlvData)
+     {
+         var tlvs = new Dictionary<int, ReadOnlyMemory<byte>>();
+@@ -201,6 +206,9 @@ public static Memory<byte> GetValue(int expectedTag, ReadOnlySpan<byte> tlvData)
+     /// <remarks>
+     ///     When this method returns <see langword="true" />, <paramref name="value" /> is a caller-owned buffer.
+     ///     The caller must securely clear it when it contains sensitive data.
++    ///     This clears only the returned copy. The current search also allocates intermediate value
++    ///     copies that it leaves uncleared; for sensitive sequences, prefer <see cref="DecodeList(ReadOnlySpan{byte})"/>
++    ///     and dispose the returned list. The input remains caller-owned in either case.
+     /// </remarks>
+     public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value)
+     {
+@@ -266,4 +274,4 @@ public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tl
+                 tlv?.Dispose();
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/src/YubiKitLogging.cs b/src/Core/src/YubiKitLogging.cs
+index f6642bd38e1bcdcf9fd1da1151e8efba292a3817..2f047df10fbb9989b29bb1d5db2a7d41dede7f3e 100644
+--- a/src/Core/src/YubiKitLogging.cs
++++ b/src/Core/src/YubiKitLogging.cs
+@@ -17,10 +17,18 @@
+ 
+ namespace Yubico.YubiKit.Core;
+ 
++/// <summary>Configures the factory used to create SDK loggers.</summary>
++/// <remarks>
++/// Configure logging before first SDK use. Replacing the factory affects newly created loggers;
++/// SDK static logger fields keep previously created instances. The application owns supplied factories and must
++/// keep them alive while their loggers are in use. This class neither disposes factories nor redacts
++/// payloads or exception text; choose providers, levels, and retention appropriate to their contents.
++/// </remarks>
+ public static class YubiKitLogging
+ {
+     private static readonly Lock _lock = new();
+ 
++    /// <summary>Gets or sets the process-wide factory for subsequently created loggers.</summary>
+     public static ILoggerFactory LoggerFactory
+     {
+         get
+@@ -47,8 +55,13 @@ public static void Configure(ILoggerFactory? loggerFactory) =>
+         LoggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
+ 
+     /// <summary>
+-    /// Temporarily replaces the LoggerFactory. Dispose to restore. Useful for testing.
++    /// Temporarily replaces the process-wide factory and restores the captured factory on disposal.
+     /// </summary>
++    /// <remarks>
++    /// Use only with coordinated, non-overlapping scopes. Restoration does not reconfigure existing
++    /// loggers or dispose either factory; concurrent replacement or out-of-order disposal can restore
++    /// a stale factory.
++    /// </remarks>
+     public static IDisposable UseTemporary(ILoggerFactory factory)
+     {
+         var original = LoggerFactory;
+@@ -66,4 +79,4 @@ public void Dispose()
+             _restore = null;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs
+index 75727f73480aa814b75c836c977f7e78938045ea..9b592071f42a007e4294f1e49323323b788f3e83 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs
+@@ -44,15 +44,15 @@ public void YESDK1634_NonInteractivePinViolatingPolicy_IsRejected(string line)
+ 
+     /// <summary>
+     ///     h) If the confirmation read is cancelled, the already-read first credential must still be
+-    ///     disposed (zeroed), per the class contract "Clears intermediate buffers on all code paths".
+-    ///     The first credential's backing array is identified by pre-seeding this thread's
+-    ///     <see cref="ArrayPool{T}.Shared" /> slot with a sentinel-filled array.
++    ///     disposed and cleared. The sentinel probe relies on shared-pool reuse; its precondition
++    ///     observes sentinel mutation, rather than proving the rented array's identity. It does not
++    ///     establish portable pool reuse or erasure of unobserved input/runtime storage.
+     /// </summary>
+     [Fact]
+     [Trait("Audit", "YESDK-1634")]
+     public void YESDK1634_ConfirmationCancelled_FirstCredentialIsCleared()
+     {
+-        // Seed: the next Rent(6) on this thread returns this exact array (thread-local bucket 16).
++        // Seed a likely reusable bucket; shared-pool reuse is an assumption of this probe, not a guarantee.
+         var seeded = ArrayPool<byte>.Shared.Rent(16);
+         seeded.AsSpan().Fill(0xEE);
+         ArrayPool<byte>.Shared.Return(seeded);
+@@ -197,4 +197,4 @@ public void Write(string text)
+ 
+         public void WriteLine(string text) => Inner.WriteLine(text);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
+index 6aa12208b48596184c566b63f638d2f3e1703c6f..b8f8c4734f4f3bcecdc180cfe26ed4bbfe397b00 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs
+@@ -54,8 +54,8 @@ public async Task YESDK1633_DeviceInfoAlwaysMoreData_StopsWithBadResponseWithinP
+     // ---- #25 e) and #20: Tlv long-form length decoding ----------------------------------------
+ 
+     /// <summary>
+-    ///     A five-byte length (85 01 00 00 00 01) overflows the 32-bit accumulator to 1, so the parser
+-    ///     silently accepts a TLV whose declared length is 2^32 + 1.
++    ///     Regression for a declared length of 2^32 + 1 that formerly wrapped a 32-bit accumulator.
++    ///     The parser now rejects values above Int32.MaxValue before slicing the value.
+     /// </summary>
+     [Fact]
+     [Trait("Audit", "YESDK-1633")]
+@@ -67,8 +67,8 @@ public void YESDK1633_TlvFiveByteLengthOverflow_Rejected()
+     }
+ 
+     /// <summary>
+-    ///     Guard: 84 FF FF FF FF decodes to -1, which is rejected today via span slicing
+-    ///     (ArgumentOutOfRangeException, an ArgumentException subtype).
++    ///     The unsigned length FF FF FF FF exceeds Int32.MaxValue and reaches the explicit range
++    ///     guard. The assertion allows any ArgumentException subtype rather than a slicing failure.
+     /// </summary>
+     [Fact]
+     [Trait("Audit", "YESDK-1633")]
+@@ -119,8 +119,8 @@ public void YESDK1633_TlvLeadingZeroLengthOctets_Accepted()
+     // ---- #25 f) TlvHelper.EncodeDictionary ----------------------------------------------------
+ 
+     /// <summary>
+-    ///     The size estimate assumes 1-byte tag + 1-byte length. A 2-byte tag or a long-form length
+-    ///     overflows the rented buffer once the estimate lands exactly on an ArrayPool bucket size.
++    ///     Regression inputs exceed the former one-byte-tag/one-byte-length estimate. Encoding now
++    ///     sizes from each TLV's exact TotalLength; the assertion compares the complete encoded bytes.
+     /// </summary>
+     [Theory]
+     [Trait("Audit", "YESDK-1633")]
+@@ -182,4 +182,4 @@ public void Configure(FirmwareVersion version, ProtocolConfiguration? configurat
+ 
+         public void Dispose() { }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs
+index 017143c836abda75c8c177bf885b7f0650cc80cf..c93674b60c5b3a4f7aa6c4fd623f4a6188dd0dd6 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs
+@@ -19,15 +19,16 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
+ 
+ /// <summary>
+ /// KAT (Known Answer Tests) for ARKG-P256 derivation.
+-/// Vectors generated from the Rust reference implementation in
+-/// cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs
+-/// (see /tmp/gen_kat for the generator program). Vector A also matches the
+-/// embedded `arkg.rs::tests::test_arkg_derive_key` expected output.
++/// The retained provenance names cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs
++/// and /tmp/gen_kat, but supplies no immutable source revision or retained generator. These literals
++/// therefore provide finite regression expectations, rather than an independently reproducible oracle
++/// or full draft-conformance proof. A checks the derived point and handle; B and C check derived
++/// points for selected IKM/context changes, without comparing their handles.
+ /// </summary>
+ public class ArkgP256Tests
+ {
+-    // Both vectors share these seeds, derived from ikm_bl=0x00..1F and
+-    // ikm_kem=0x20..3F via the Rust reference's BL/KEM key-generation paths.
++    // A, B, and C share these public keys. Retained provenance attributes their derivation to
++    // ikm_bl=0x00..1F and ikm_kem=0x20..3F through the unpinned Rust BL/KEM paths.
+     private static readonly byte[] PkBl = HexToBytes(
+         "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
+         "65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");
+@@ -107,4 +108,4 @@ private static byte[] HexToBytes(string hex)
+ 
+         return bytes;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs
+index 38cf94692aa117c3ee460a49160599be19b29f19..be45234077deceac2c6cb985eb749c549c2f571c 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs
+@@ -117,6 +117,8 @@ private static byte[] BuildEcPkcs8(
+         return writer.Encode();
+     }
+ 
++    // The message classifies the version value. The early version guard does not validate the
++    // following fields or establish that this all-zero private fixture is a valid mathematical key.
+     [Fact]
+     public void CreateECParameters_Pkcs8VersionOne_ThrowsValidButUnsupportedCryptographicException()
+     {
+@@ -568,4 +570,4 @@ public void GetCurve25519PrivateKeyData_InnerKeyWrongLength_ThrowsCryptographicE
+     }
+ 
+     #endregion
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs
+index 7b80316618483c1a17b1dcdd79e1874e3055bc88..7ad0766375ba09ec4e66bebbb858eed93459ba66 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs
+@@ -464,6 +464,8 @@ public void EncodeToPkcs8_RawEcKeyPublicPointWrongPrefix_ThrowsArgumentException
+             AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], point, KeyType.P256));
+     }
+ 
++    // P-256 cases isolate point width. P-384/P-521 also supply a 32-byte scalar, so those cases
++    // reach scalar-width rejection first and do not independently cover point-length validation.
+     [Theory]
+     [InlineData(KeyType.P256, 64)] // one byte short
+     [InlineData(KeyType.P256, 66)] // one byte long
+@@ -548,4 +550,4 @@ public void EncodeToPkcs8_Rfc7748X25519AliceKey_MatchesOpenSslPkcs8Vector()
+     }
+ 
+     #endregion
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs
+index 4a18ca842ffb9d447e7e54fa6bd62ed019dfc359..77789d29caa2c79f98559de084950f3b542194ce 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs
+@@ -246,7 +246,7 @@ public void EncodeToSubjectPublicKeyInfo_EcParametersMissingY_ThrowsArgumentExce
+     /// <summary>
+     /// The curve OID is caller-supplied. X25519 has a 32-byte key definition, so a general OID
+     /// lookup would accept P-256 sized coordinates and emit them as an id-ecPublicKey key on a
+-    /// curve that is not an EC prime curve at all.
++    /// key algorithm OID that is not an ordinary short-Weierstrass named-curve identifier.
+     /// </summary>
+     [Theory]
+     [InlineData(Oids.X25519)]
+@@ -263,4 +263,4 @@ public void EncodeToSubjectPublicKeyInfo_EcParametersNotASupportedPrimeCurve_Thr
+ 
+         Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs
+index 3e0adccf0e057efa37e29acc307762668eaa9d27..707bfc36014dd247cac34a1d6ae4b302ab589bb2 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs
+@@ -121,8 +121,9 @@ public void TrimLeadingZeroes_Span_EmptyInput_ReturnsEmpty()
+     #region Curve resolution
+ 
+     /// <summary>
+-    /// Key/operation OIDs that must not be resolved as ordinary EC named curves, even when key
+-    /// curves. Resolving through it would hand back a coordinate size for a non-EC algorithm.
++    /// Key/operation OIDs that must not be resolved as ordinary EC named-curve identifiers, even
++    /// when a catalog key has the same stored width. The 25519 key algorithm OIDs identify different
++    /// constructions, rather than ordinary short-Weierstrass named curves.
+     /// </summary>
+     public static TheoryData<string> NonEcCurveOids => new()
+     {
+@@ -331,4 +332,4 @@ public void GetIntegerBytes_LeadingZeroesThenHighBitSet_TrimsThenPrependsOneZero
+     }
+ 
+     #endregion
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs
+index c3bfd0eacdcd47ca6ee8333253b456ee6fa05644..92968cc6da1fa126336c48ddbfbe5e62c30f814c 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs
+@@ -48,7 +48,8 @@ public void P256_HasMultipleOperationsButNoIntrinsicAlgorithm()
+         Assert.DoesNotContain(Algorithms.Ed25519, algorithms);
+         Assert.DoesNotContain(Algorithms.RsaPssSha256, algorithms);
+         Assert.DoesNotContain(Algorithms.Aes256Cbc, algorithms);
+-        // ES256 describes a hash/signature construction, not a P-256-only profile.
++        // These assertions check structural applicability and the stored -7 mapping separately.
++        // They do not establish that COSE or a consuming profile permits every listed curve/alg pair.
+         Assert.Contains(Algorithms.EcdsaSha256, Algorithms.FindForKey(Keys.P384));
+         Assert.Contains(Algorithms.EcdsaSha256, Algorithms.FindForKey(Keys.Secp256k1));
+         Assert.Equal(-7, Algorithms.EcdsaSha256.CoseAlgorithmId);
+@@ -100,4 +101,4 @@ public void ApplicabilityCollections_AreImmutableAndComparedByValue()
+         Assert.Single(first.Applicability);
+         Assert.All(typeof(AlgorithmInfo).GetProperties(), property => Assert.False(property.CanWrite));
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs
+index e3854095d69131d395d23c48a3d436f28ff209cd..39fbbcb2f6bf1ee39aeb708f44991b5ccb67ab56 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs
+@@ -36,9 +36,9 @@ internal static class EcTestSupport
+     };
+ 
+     /// <summary>
+-    /// The coordinate size of each supported prime curve, restated from the curve definitions rather
++    /// The coordinate size of the P-256/P-384/P-521 fixtures, restated from the curve definitions rather
+     /// than looked up through <c>CryptographicDefinitions</c>, for the same reason as
+-    /// <see cref="UncompressedPoint"/>. The private scalar is the same width.
++    /// <see cref="UncompressedPoint"/>. The private scalar uses the same byte width for these curves.
+     /// </summary>
+     public static int CoordinateSize(string curveOid) => curveOid switch
+     {
+@@ -56,4 +56,4 @@ public static byte[] UncompressedPoint(byte[] x, byte[] y)
+         y.CopyTo(point, 1 + x.Length);
+         return point;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs
+index 0c4df05f03c0fdd27108b0f0430134de18a58b9a..55430288d5ffe0a7eb411debfc0407733cb6077c 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs
+@@ -19,8 +19,9 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
+ 
+ public class NamedCurveCatalogVectorsTests
+ {
+-    // d=1, Q=G from SEC 2 v2 §2.4.1 and RFC 5639 §3.4-3.6. OpenSSL ecparam independently
+-    // confirms these published generator points. Prefixes below are independent DER SPKI vectors.
++    // d=1, Q=G from the retrieved SEC 2 v2.0 §2.4.1 copy (with Draft page headers) and
++    // RFC 5639 §§3.4, 3.6, 3.7. These published points are distinct from the assembled DER SPKI
++    // prefixes. Provider-backed assertions below are conditional on RequireHostCurve.
+     [Theory]
+     [InlineData(KeyType.Secp256k1, "1.3.132.0.10", 32, "3056301006072A8648CE3D020106052B8104000A034200",
+         "0479BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8")]
+@@ -76,4 +77,4 @@ private static void RequireHostCurve(string curveOid)
+         catch (PlatformNotSupportedException) { Assert.Skip($"Host provider does not implement curve {curveOid}."); }
+         catch (CryptographicException) { Assert.Skip($"Host provider cannot generate curve {curveOid}."); }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs
+index 02698e21192e175651c22be4a675339be43d9f85..8bd4ea714b66159bc4c14b71eae9587e83001acb 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs
+@@ -293,6 +293,8 @@ public void ECPrivateKey_CreateFromValue_ZeroesAllTemporaryPrivateValues()
+         }
+     }
+ 
++    // The extra NULL is inside PrivateKeyInfo after privateKey, not after the top-level value
++    // or within the nested private OCTET STRING. Only the captured decoded scalar is observed.
+     [Fact]
+     public void GetCurve25519PrivateKeyData_TrailingDataThrowsAndZeroesDecodedScalar()
+     {
+@@ -451,4 +453,4 @@ private static byte[] BuildCurve25519Pkcs8(byte[] privateKey)
+         writer.PopSequence();
+         return writer.Encode();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs
+index 02905759f50b8a2a7ef2ee7f117b941d69a74bdb..b3cda3494473e8e127c8c0453204ee323edb2bc7 100644
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs
+@@ -95,7 +95,7 @@ public void ParseData_WithIndefiniteLength0x80_Throws()
+     {
+         // Arrange: Tag 0x5A, length 0x80 (indefinite - unsupported), no content
+         var input = new byte[] { 0x5A, 0x80 };
+-        // Act + Assert: slicing should fail due to insufficient data
++        // The parser explicitly rejects indefinite length before value slicing; this assertion accepts any exception.
+         Assert.ThrowsAny<Exception>(() => ParseDataOrThrow(input));
+     }
+ 
+@@ -111,7 +111,7 @@ public void ParseData_WithOversizedLength_Throws()
+     [Fact]
+     public void Create_WithNonMinimalLongFormLength_ParsesSuccessfully()
+     {
+-        // Arrange: Tag 0x5A, length 0x81 0x7F (127, but should be short-form)
++        // Arrange: Tag 0x5A, length 0x81 0x7F (127 in redundant long form, permitted by BER).
+         var value = new byte[127];
+         for (var i = 0; i < value.Length; i++) value[i] = (byte)i;
+         var input = new byte[3 + value.Length];
+@@ -220,4 +220,4 @@ public void EncodeAndDisposeList_WithNullElement_DisposesAllNonNullTlvs()
+         Assert.All(first.AsSpan().ToArray(), static b => Assert.Equal(0, b));
+         Assert.All(sensitiveLater.AsSpan().ToArray(), static b => Assert.Equal(0, b));
+     }
+-}
+\ No newline at end of file
++}

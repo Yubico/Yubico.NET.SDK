@@ -58,14 +58,22 @@ Configure once at application startup:
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 
-YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
+using var loggerFactory = LoggerFactory.Create(builder =>
 {
     builder.AddConsole();
     builder.SetMinimumLevel(LogLevel.Information);
 });
+YubiKitLogging.Configure(loggerFactory);
+// Keep this outer scope alive through all SDK operations and resource disposal.
 ```
 
 If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` once during startup: `YubiKitLogging.Configure(serviceProvider.GetRequiredService<ILoggerFactory>())`.
+
+The application owns the supplied factory. Configure before first SDK use: static logger instances
+retain the factory's earlier loggers after replacement. Temporary configuration is process-global,
+not async-flow or parallel-test isolation. Ordinary APDU trace templates log headers/lengths, while
+SELECT logs supplied identifier bytes and exception objects carry their own text. There is no central
+redactor; review payload provenance and provider destinations rather than promising global secrecy.
 
 ## Critical Patterns
 
@@ -107,7 +115,11 @@ An absent `HashAlgorithm` is not proof of a generic operation: Ed25519 has intri
 
 `CoseKeyInfo` in `Core.Cryptography.Cose` contains kty/crv, never an intrinsic alg. Only verified IANA mappings
 are present (secp256k1 = 8; Brainpool P256/P384/P512 = 256/258/259). Active `Ctap2.Cose.CoseKey` remains open-valued and preserves
-unknown wire metadata/opaque bytes; PIN/UV profile checks remain strict. OpenPGP-specific legacy 25519 OIDs,
+unknown wire metadata/opaque bytes. PIN/UV key agreement has a separate required protocol profile:
+the current peer helper checks byte-array coordinates and their 32-byte lengths, forces P-256 import,
+and delegates point acceptance to the provider. It does not validate the peer's required kty/crv/alg
+labels or optional-label restrictions. This is a validation gap, not intended forward compatibility;
+correct labels on the platform-generated key do not validate the peer. OpenPGP-specific legacy 25519 OIDs,
 RSA sizes and slot choices live in OpenPgp; Core must never depend on that module.
 
 To add a variant, append an explicit `KeyType` ID, add curve/key data and relationships, and registered COSE
@@ -309,7 +321,11 @@ downstream APIs or create competing lifecycle owners.
 
 ### APDU Processing Pipeline
 
-The APDU processing pipeline uses the decorator pattern:
+The APDU processing pipeline composes transmit and response processors. Short mode splits data into
+255-byte chunks; extended mode uses `ApduTransmitter` with the configured complete-command ceiling.
+The current formatters append Le, including zero; zero is not an absent-Le representation. Response
+continuations use the configured remaining instruction and fixed zero CLA/P1/P2/Le. There is no
+automatic `6Cxx` corrected-length retry.
 
 ```
 ApduCommand
@@ -318,7 +334,7 @@ ApduCommand
     ↓
 [ApduFormatterShort/Extended]  ← Formats for wire protocol
     ↓
-ISmartCardConnection.TransmitAsync()
+ISmartCardConnection.TransmitAndReceiveAsync()
     ↓
 [ChainedResponseReceiver]   ← Reassembles chained responses
     ↓
@@ -346,16 +362,21 @@ Core owns SCP key-parameter types, handshake processing, and the secure PC/SC pr
 Applet session factories accept the key parameters and establish the channel through the internal
 `PcscProtocol.InitializeScpAsync` capability; consumers cannot construct the decorator directly.
 
-```csharp
-// SCP03 - Symmetric keys
-var scp03Params = new Scp03KeyParameters(keyRef, staticKeys);
+Parameters retain contained owners. `StaticKeys` clones its source spans; `Scp03KeyParameters` retains
+and disposes that exact object. `Scp11KeyParameters` copies the certificate collection but retains its
+key/certificate objects, disposing the OCE private key and certificates while leaving the SD public
+wrapper intact. Record `with` copies share these owners. Keep parameters alive through initialization
+and any reset reuse, and clear source buffers independently. See the complete scoped
+[SCP example](README.md#use-a-secure-channel).
 
-// SCP11b - Public key only (YubiKey authenticates to host)
-var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey);
-
-// SCP11a/c - Mutual authentication with certificates
-var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oceKeyRef, certChain);
-```
+The implementation uses a fixed P-256/AES-128 SCP11 profile. Constructor admission alone establishes
+neither a complete profile/trust check nor applet authorization. `IsAuthenticated` reflects protocol
+setup; SCP11b is card-to-host authentication, and a/c setup completion is distinct from the device's
+first protected-command phase. Keep cited editions exact: SCP03 1.1.2 Public Release is distinct from
+1.1.2.6 Public Review, and the inspected SCP11 1.3.0.13 Public Review is distinct from final 1.4.
+Synthetic wire tests do not close empty-command, protected-error/continuation, final-edition, or vendor
+profile qualification. Raw SELECT after SCP remains plain while retaining the graph; use applet
+factories for selection before channel setup, not raw reselect as recovery.
 
 **Key files:**
 - `Protocols/SmartCard/Scp/` - SCP implementations
@@ -407,17 +428,9 @@ if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
     // Windows-specific code
 }
 
-// Safe handles for native resources
-using var handle = new SafeLibraryHandle(libraryPath);
-
-// Platform-specific factory
-var scanner = SdkPlatformInfo.OperatingSystem switch
-{
-    SdkPlatform.Windows => new WindowsDeviceScanner(),
-    SdkPlatform.MacOS => new MacOSDeviceScanner(),
-    SdkPlatform.Linux => new LinuxDeviceScanner(),
-    _ => throw new PlatformNotSupportedException()
-};
+// Internal contributor fragment: load through the platform-specific library owner.
+using var library = UnmanagedDynamicLibrary.Open(libraryPath);
+// Resolve and finish all calls through its delegates before this scope ends.
 ```
 
 #### `LibraryImport`, not `DllImport`
@@ -439,6 +452,12 @@ internal static partial int Foo(string name, [MarshalAs(UnmanagedType.U1)] bool 
 ```
 
 Why it matters here, beyond style:
+
+Generated marshalling still depends on correct native declarations. Match the exact backend header,
+architecture, pointer carrier, and Boolean width; source generation cannot infer the intended ABI.
+Keep Windows LPGUID/PULONG/BOOLEAN issues and Linux LP64 PC/SC PCI qualification separate from the
+choice of import mechanism. A successful build establishes neither installed-producer identity nor
+successful native execution.
 
 - The marshalling stub is **generated C# you can read and step through**, not IL synthesised by the
   runtime. Native AOT and trimming see real code — `docs/NATIVE-AOT.md` support depends on it.
@@ -485,14 +504,12 @@ reappearance as a regression, not as legacy debt:
 grep -rn "\[DllImport(\|static extern" --include="*.cs" src/ benchmarks/ verification/   # must be empty
 ```
 
-Two macOS IOKit callback registrations (`IOHIDManagerRegisterDeviceMatchingCallback`,
-`IOHIDManagerRegisterDeviceRemovalCallback`) take the callback as a bare `IntPtr` rather than a
-function pointer, because their caller `Transports/Hid/MacOS/MacOSHidDeviceListener.cs` keeps
-per-instance delegates alive in fields (`_arrivedCallbackDelegate`, `_removedCallbackDelegate`,
-`_abandonedCallbackDelegates`) and passes `Marshal.GetFunctionPointerForDelegate(...)`. That is
-deliberate: the listener's context pointer is `IntPtr.Zero`, so an `[UnmanagedCallersOnly]` static
-would have nowhere to recover `this` from. The delegate fields are load-bearing — the function
-pointer dies with the delegate. Do not inline them.
+The macOS listener passes static `[UnmanagedCallersOnly]` Cdecl addresses through the `nint` callback
+parameters of the IOKit registrations. Its nonzero context identifies a rooted listener generation;
+callbacks recover that generation through `GCHandle`, not retained per-instance delegate fields.
+Generation cleanup requires actual run-loop/callback exit. A timed-out stop retains its generation;
+partial startup without a worker has separate unresolved cleanup paths. Keep callback acknowledgment,
+root lifetime, and native release distinct when changing this seam.
 
 The `SYSLIB1054` analyzer that suggests this conversion is informational and is **not** configured as
 an error in `.editorconfig`. A clean build does not mean you used `LibraryImport`.
@@ -515,12 +532,21 @@ Connections are created via factories:
 ```csharp
 // SmartCard connection
 var connectionFactory = new SmartCardConnectionFactory();
-using var connection = await connectionFactory.CreateAsync(reader, cancellationToken);
+await using (var connection = await connectionFactory.CreateAsync(reader, cancellationToken))
+{
+    // Finish all borrowed SmartCard work before leaving this scope.
+}
 
-// HID connection
-var hidFactory = new HidConnectionFactory();
-using var connection = await hidFactory.CreateAsync(device, cancellationToken);
+// Typed HID connection, after the SmartCard scope ends.
+await using (var connection = await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken))
+{
+    // Finish all borrowed FIDO work before leaving this scope.
+}
 ```
+
+This fragment assumes an enumerated `IPcscDevice reader` and `IYubiKey yubiKey`. Direct SmartCard
+factory opens bypass grouped registration: coordinate discovery/monitoring and other connections for
+that entire scope. Prefer typed `IYubiKey.ConnectAsync<TConnection>` for the managed member guard.
 
 ### Physical Device Model
 
@@ -533,13 +559,21 @@ one transport via a documented default order plus an optional `SessionCreationOp
 initialization failure does not try another interface. Read-only metadata types (`DeviceInfo`, `FormFactor`,
 `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, `VersionQualifierType`) are Core-owned
 (`Yubico.YubiKit.Core.Devices`); mutating operations stay in Management. Full reference:
-[Physical Device Model](../../docs/architecture/physical-device-model.md). What grouping of a physical key's interfaces does and does not guarantee - per platform, with every guarantee pinned to a named test - is in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md). Read it before changing `CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver: the merge tiers are an evidence hierarchy that never guesses, and several conservative-looking outcomes are documented bounds with pinning tests, not defects.
+[Physical Device Model](../../docs/architecture/physical-device-model.md). Read
+[Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md) before changing
+`CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver. It distinguishes managed evidence
+rules, complementary-partial cross-key grouping, implementation-only topology choices, and actual
+native/physical qualification. Repeated scans have no expiry that forces ambiguous grouping to heal.
 
 The change feed retains a published object only while its interface and connection sets remain unchanged and
 fresh known serial evidence does not contradict it. A different known serial on the same interface set proves
 substitution and emits `DeviceRemoved` for the predecessor followed by `DeviceAdded` for a new successor object. Unknown
 serials never trigger identity-based republication. If no listener event invalidates discovery caches and no scan
 observes absence, same-interface substitution remains unknowable from cached evidence.
+
+PID-completeness grouping also has a complementary-partials bound: two same-PID keys can contribute
+different slots to one composite. Path-bound opening does not verify each slot against that composite's
+serial. Do not equate the grouping heuristic with physical identity attestation.
 
 `IYubiKey.CachedDeviceInfo` exposes the existing nullable Core `DeviceInfo` snapshot without I/O; its default
 interface implementation returns `null` for custom implementations. `YubiKeyDevice` delegates directly to
@@ -551,6 +585,11 @@ the live-read API and does not promise to update discovery metadata. The indepen
 and identity contract remain unchanged, even if a newer metadata snapshot omits its serial. No-hardware
 coverage is in `YubiKeyDeviceTests` (no connection on access, snapshot replacement, default implementations,
 serial independence) and `SnapshotDiffTests` (retention and replacement isolation).
+
+Snapshot replacement preserves previously returned scalar fields, but `ChallengeResponseTimeout` currently
+aliases an input TLV's memory. Read-only access is not independent ownership or post-clear stability.
+Successful serial-less metadata can remain cached; unchanged scans need not retry it. Identity-cache
+PID checks do not extend to the separate metadata cache's member-ID keyed entries.
 
 Use `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)` when absence is exceptional and
 `FindFirstOrDefaultAsync` when it is not. They select after one independent fresh `FindAllAsync` operation;
@@ -720,7 +759,9 @@ consumers do not need to preflight them. Major-zero development versions retain 
 
 Applet factories snapshot `SessionCreationOptions` without retaining the options object. Secure-channel parameters
 remain borrowed. A session retains the caller-owned `UserPresencePrompt` service reference for its lifetime but
-never disposes it; this is the sole retained-service exception.
+never disposes it. Actual applet adoption still matters: Security Domain retains SCP parameters for
+reset; Management and Security Domain do not retain their unused presence prompt. Do not infer the same retained state from the
+shared options shape for every applet.
 
 ## Test Infrastructure
 
@@ -748,20 +789,19 @@ tests/
 Use `FakeSmartCardConnection` for unit tests:
 
 ```csharp
-var fakeConnection = new FakeSmartCardConnection();
+using var fakeConnection = new FakeSmartCardConnection();
 
 // Queue expected responses
-fakeConnection.QueueResponse([0x90, 0x00]); // Success
-fakeConnection.QueueResponse([0x69, 0x82]); // Security status not satisfied
+fakeConnection.EnqueueResponse(new byte[] { 0x90, 0x00 }); // Success
 
 // Create protocol with fake
-var protocol = new PcscProtocol(fakeConnection);
+using var protocol = new PcscProtocol(fakeConnection);
 
 // Test
 var result = await protocol.SelectAsync(ApplicationIds.Piv, CancellationToken.None);
 
 // Verify commands sent
-Assert.Single(fakeConnection.SentCommands);
+Assert.Single(fakeConnection.TransmittedCommands);
 ```
 
 ### Discovery hardware contracts
@@ -786,8 +826,8 @@ public class MyTests : IntegrationTestBase
     [WithYubiKey]
     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
     {
-        // state.YubiKey is available
-        await using var connection = await state.YubiKey.ConnectAsync<ISmartCardConnection>();
+        // The placeholder row binds lazily to its first matching device.
+        await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
         // Test logic
     }
 }
@@ -802,11 +842,9 @@ public class MyTests : IntegrationTestBase
 await using var connection = await connectionFactory.CreateAsync(reader, ct);
 await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, ct);
 
-// Select application
-await raw.SelectAsync(ApplicationIds.Piv, ct);
-
 // Configure for firmware
 raw.Configure(firmwareVersion);
+await raw.SelectAsync(ApplicationIds.Piv, ct);
 ```
 
 ### Sending APDUs
@@ -823,11 +861,19 @@ var command = new ApduCommand
 };
 var responseData = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
 
-// Sensitive command (PIN, key material) — caller zeroes source buffer after transmission
+// Separate sensitive-command fragment: caller clears the source even on failure.
 // ApduCommand is a readonly record struct: it stores a reference, not a clone.
-var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
-var response = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
-CryptographicOperations.ZeroMemory(pinnedPin); // zeroes what command.Data referenced
+try
+{
+    var verify = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
+    var response = await raw.TransmitAndReceiveAsync(verify, throwOnError: false, cancellationToken: ct);
+    try { Console.WriteLine($"SW={response.SW:X4}"); }
+    finally { response.Clear(); }
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pinnedPin);
+}
 ```
 
 ### Error Handling
@@ -835,13 +881,13 @@ CryptographicOperations.ZeroMemory(pinnedPin); // zeroes what command.Data refer
 ```csharp
 try
 {
-    var response = await protocol.TransmitAndReceiveAsync(command, ct);
+    var response = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
 }
-catch (ApduException ex) when (ex.StatusWord == 0x6982)
+catch (ApduException ex) when (ex.SW == 0x6982)
 {
     // Security status not satisfied - need to authenticate
 }
-catch (ApduException ex) when (ex.StatusWord == 0x6A82)
+catch (ApduException ex) when (ex.SW == 0x6A82)
 {
     // Application/file not found
 }
@@ -849,40 +895,25 @@ catch (ApduException ex) when (ex.StatusWord == 0x6A82)
 
 ## Firmware Version Considerations
 
-```csharp
-// APDU size limits
-if (firmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
-{
-    // Extended APDUs supported
-    MaxApduSize = SmartCardMaxApduSizes.Yubikey4;
-}
-else
-{
-    // Short APDUs only
-    MaxApduSize = SmartCardMaxApduSizes.Neo;
-}
+`PcscProtocol.Configure` combines firmware policy, the connection's extended-APDU support, and
+`ProtocolConfiguration.ForceShortApdus`. It uses complete-command constants `Neo`, `Yk4`, and `Yk43`,
+not a 254/2048-byte data rule. Session feature queries describe known-version compatibility; enabled
+capabilities, authorization, provisioning, and actual command success remain applet-specific.
 
-// Feature checks
-if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_3_0))
-{
-    // SCP support available
-}
-
-if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
-{
-    // SCP11 protocols available
-}
-```
+Major-zero versions, including `0.0.0`, pass optimistic feature checks. Raw HID sessions currently
+retain inherited `0.0.0` even after protocol discovery. A detected, assumed, or overridden effective
+version is not interchangeable with a hardware report, and overrides do not uniformly bypass applet probes.
 
 ## Concurrency Model
 
 Behavior added by the discovery/session concurrency hardening (see `ExchangeGuard`, `DeviceConnectionRegistry`):
 
 - **Protocols refuse overlapping logical exchanges.** `PcscProtocol` (+ SCP wrapper), `FidoHidProtocol`, and `OtpHidProtocol` run each full logical exchange through `ExchangeGuard`. A second operation throws `InvalidOperationException` immediately; sequential awaited operations are unchanged. Disposal atomically closes the guard to new admissions, drains an admitted exchange, and only then tears down protocol/SCP state and any owned connection. Prefer async disposal; synchronous disposal blocks for the same drain and must never be called from inside that operation.
-- **Cancellation is checked at entry only.** Once an exchange claims the guard, constituent transmits use `CancellationToken.None` so chained APDU, CTAP/OTP frame, and SCP state cannot be stranded.
+- **Constituent I/O is shielded after admission.** SmartCard cancellation is checked at entry; admitted transmits use `CancellationToken.None`. FIDO can request CANCEL after a keep-alive and drain the original response; OTP touch-wait cancellation can attempt a reset. Neither supplies rollback, a completion deadline, or native release proof.
+- **Whole workflows remain caller-owned.** Await complete public operations before another operation or disposal. The guard drains an exchange, not later exchanges, parsing/cache work, or detached callbacks. Never dispose from a callback that the operation must await.
 - **The guard is protocol-instance scoped.** An SCP wrapper shares its base PC/SC guard, but independently created raw protocol instances over one connection are not coordinated. The supported contract prevents that shape by admitting one `ApplicationSession` per connection; connection-wide raw protocol ownership is a separate API decision.
-- **Discovery/connection ownership is atomic.** A connection to a grouped physical key claims every known stable member interface ID before native open. A second connection through any member throws `ConnectionInUseException` immediately. Claims are sorted, deduplicated, rolled back on failure, and released only after physical teardown. Standalone records use one-element scopes when discovery cannot prove grouping. Discovery remains per-interface and nonblocking; connections may wait cancellably for active discovery, while waiting connections retain priority. One level down, `ConnectionSessionGuard` allows one live `ApplicationSession` per connection and supports sequential reuse. In-process only — cross-process contention is not covered.
-- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently within one finder. A finder owns one atomic evidence epoch containing identity cache, metadata cache, and read scope; transport activity terminally retires that scope and replaces the whole evidence object, so stale completion writes only into unreachable caches and a successor monitor cannot join its predecessor's reads. Superseded reads that have not yet opened their interface fail fast, including queued admission waits behind hung workers. Cache entries also record the PID observed at read time so a hit under a different PID is a miss. Eviction is deliberately not transport-scoped because a composite swap's events can arrive on one transport first, and retained sibling evidence would mix two keys. Within a monitor, absent listener hints degrade staleness detection to scan-observed absence. Public Find calls instead use fresh evidence per invocation and retire their scope on exit — see `docs/architecture/device-discovery-guarantees.md`.
+- **Grouped connection claims are acquired incrementally before native open.** Member IDs are sorted and deduplicated, then claimed one at a time. An active discovery lease on an earlier member can delay checking a later member held by a live connection; cancellation can end that wait first. Encountering a live holder refuses acquisition with `ConnectionInUseException`, and failure rolls back earlier claims in reverse order. This is not a whole-set atomic preflight or an invocation-time refusal guarantee. Built-in PC/SC and macOS/Linux native owners require their route-specific release proof; Windows/custom compatibility disposal does not automatically prove physical teardown. Standalone records use one-element scopes. Discovery remains per-interface and nonblocking, with waiting connections retaining priority. `ConnectionSessionGuard` separately allows one live session per connection and sequential reuse. These are in-process claims, not cross-process exclusion.
+- **Discovery caller waits are budgeted and reads are single-flight.** Identity reads use two seconds per attempt; composite metadata uses three seconds. Underlying work can continue after that wait. One finder owns an atomic evidence epoch containing identity cache, metadata cache, and read scope. Hotplug invalidation replaces the whole epoch and retires queued admissions; active work keeps its native ownership and writes only into the old caches. Identity entries validate the observed PID; successful metadata entries instead use member IDs and lack the equivalent PID check. Successful serial-less metadata can remain cached. Without listener hints, same-slot substitution can stay stale until observed absence. Public Find uses fresh per-call evidence and retires its scope on exit. See [discovery guarantees](../../docs/architecture/device-discovery-guarantees.md).
 - **Potentially sibling discovery reads do not overlap.** Before worker admission, USB reads take a process-wide PID gate; an unknown USB PID takes all known PID gates atomically. Eligibility checks, complete grants, and releases share one short lock. Ineligible requests await a release notification without reserving any gates, so a pending unknown-PID request cannot spread a held PID's stall to unrelated PIDs, even in a live finder after its caller's budget expires. This conservative policy also serializes distinct same-PID keys, but known different PIDs and NFC remain independent. It changes no merge evidence or public connection claims. `FindYubiKeys` registers in-scope candidates in its read scope for both identity and metadata reads. The granted admission transfers to the discovery registry lease before native open and follows native release, including retained/quarantined built-in owners. Never release it at a bounded wait, cancellation, scope retirement, or merely because failed native disposal completed its task. Queued admission observes epoch retirement without occupying a native worker. `DiscoveryReadSchedulingTests` pins disposal, abandonment, retirement, and independent-PID progress with a live unknown-PID waiter; `PcscDiscoveryLifetimeTests` pins failed native-release retention.
 - **The monitor is a single owned lifetime with one producer.** `YubiKeyMonitor` owns listeners and sequential
   scans/publications; `DeviceChangeFeed` owns membership, identity retention, and isolated subscriptions.
@@ -892,7 +923,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 
 ## Known Gotchas
 
-1. **APDU Size Limits**: YubiKey Neo uses 254-byte max; YubiKey 4+ uses extended APDUs up to 2048 bytes
+1. **APDU Size Limits**: complete-command constants are `Neo = 1390`, `Yk4 = 2038`, and `Yk43 = 3062`; short-mode data chunks are 255 bytes. These are different units. Transport support and configuration also select framing.
 2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; best-effort native finalization is not a substitute for deterministic disposal.
 3. **SCP Key Zeroing**: Always zero SCP keys after use; `StaticKeys` implements `IDisposable`
 4. **TLV Disposal**: `Tlv` and `DisposableTlvList` must be disposed

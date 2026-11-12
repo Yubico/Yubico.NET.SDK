@@ -1,0 +1,958 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "state": "PROPOSED-POLICY-AND-SELECTION; COORDINATOR-ADJUDICATION/FINAL-DIFF-FREEZE-PENDING; NO CONTENT APPROVAL",
+  "original_assigned_units": 14044,
+  "original_READ_CLEAN": 9763,
+  "eligibility_counts": {
+    "excluded-original-disposition": 4281,
+    "candidate-eligible": 9352,
+    "provisionally-excluded-pending-edit-overlap": 112,
+    "excluded-administrative-preamble": 160,
+    "excluded-accepted-edited-overlap": 111,
+    "excluded-derived-rendering": 14,
+    "excluded-API-support": 3,
+    "excluded-historical": 11
+  },
+  "candidate_population_after_accepted_edits_only": 9464,
+  "candidate_population_after_known_pending_edit_overlaps": 9352,
+  "candidate_global_minimum": 936,
+  "proposed_selected": 983,
+  "candidate_policy_options": {
+    "recommended": "Broad meaningful declaration/state/assertion contracts including code-only, private/internal/test and large units; exclude exact administrative preambles only.",
+    "restore_all_160_preamble_exclusions": {
+      "population": 9512,
+      "minimum_10_percent": 952,
+      "note": "Coordinator may restore borderline preambles; regenerate owner/role quotas and preserve previous selection before changes."
+    },
+    "exclude_code_only": "Not recommended wholesale: 6,218 candidate units carry declaration/state/assertion contracts. Any narrower policy needs unit-specific claim-scope reasons and coordinator adjudication."
+  },
+  "eligible_by_owner_category": {
+    "B2": {
+      "member-contract-and-implementation": 931,
+      "type-contract": 98,
+      "enum-value": 16,
+      "narrative-section-with-complete-examples": 58,
+      "source-context-and-explanations": 59,
+      "configuration-data-or-support-contract": 6
+    },
+    "SecurityDomain": {
+      "member-contract-and-implementation": 71,
+      "narrative-section-with-complete-examples": 35
+    },
+    "B4": {
+      "member-contract-and-implementation": 681,
+      "narrative-section-with-complete-examples": 40,
+      "source-context-and-explanations": 55,
+      "enum-value": 265,
+      "type-contract": 113,
+      "configuration-data-or-support-contract": 20
+    },
+    "B1": {
+      "type-contract": 119,
+      "member-contract-and-implementation": 896,
+      "narrative-section-with-complete-examples": 9,
+      "source-context-and-explanations": 40,
+      "enum-value": 12
+    },
+    "Management": {
+      "member-contract-and-implementation": 172,
+      "type-contract": 9,
+      "narrative-section-with-complete-examples": 17,
+      "configuration-data-or-support-contract": 4,
+      "source-context-and-explanations": 1
+    },
+    "B5": {
+      "member-contract-and-implementation": 584,
+      "type-contract": 73,
+      "source-context-and-explanations": 26,
+      "narrative-section-with-complete-examples": 6,
+      "structured-map-entry": 1
+    },
+    "A": {
+      "type-contract": 200,
+      "member-contract-and-implementation": 1335,
+      "enum-value": 32,
+      "source-context-and-explanations": 76,
+      "narrative-section-with-complete-examples": 73,
+      "structured-map-entry": 6
+    },
+    "Piv": {
+      "member-contract-and-implementation": 346,
+      "narrative-section-with-complete-examples": 21,
+      "configuration-data-or-support-contract": 4,
+      "source-context-and-explanations": 1
+    },
+    "C": {
+      "source-context-and-explanations": 51,
+      "member-contract-and-implementation": 448,
+      "type-contract": 67,
+      "enum-value": 29
+    },
+    "B3": {
+      "member-contract-and-implementation": 890,
+      "type-contract": 76,
+      "source-context-and-explanations": 18,
+      "enum-value": 67,
+      "configuration-data-or-support-contract": 4,
+      "narrative-section-with-complete-examples": 1
+    },
+    "OpenPgp": {
+      "narrative-section-with-complete-examples": 15,
+      "member-contract-and-implementation": 174,
+      "source-context-and-explanations": 2,
+      "type-contract": 7
+    },
+    "Ctap2": {
+      "narrative-section-with-complete-examples": 15,
+      "source-context-and-explanations": 30,
+      "member-contract-and-implementation": 24,
+      "configuration-data-or-support-contract": 4,
+      "type-contract": 2
+    },
+    "Oath": {
+      "member-contract-and-implementation": 133,
+      "narrative-section-with-complete-examples": 20,
+      "type-contract": 3
+    },
+    "B6": {
+      "member-contract-and-implementation": 248,
+      "source-context-and-explanations": 13,
+      "configuration-data-or-support-contract": 1,
+      "narrative-section-with-complete-examples": 2
+    },
+    "YubiOtp": {
+      "member-contract-and-implementation": 180,
+      "type-contract": 15,
+      "source-context-and-explanations": 40,
+      "narrative-section-with-complete-examples": 17,
+      "configuration-data-or-support-contract": 4
+    },
+    "WebAuthn": {
+      "member-contract-and-implementation": 79,
+      "source-context-and-explanations": 41,
+      "narrative-section-with-complete-examples": 33,
+      "configuration-data-or-support-contract": 3,
+      "type-contract": 6
+    },
+    "YubiHsm": {
+      "member-contract-and-implementation": 67,
+      "narrative-section-with-complete-examples": 12
+    }
+  },
+  "selected_by_owner_category": {
+    "C": {
+      "member-contract-and-implementation": 47,
+      "type-contract": 6,
+      "source-context-and-explanations": 6,
+      "enum-value": 3
+    },
+    "B5": {
+      "member-contract-and-implementation": 61,
+      "source-context-and-explanations": 5,
+      "type-contract": 6,
+      "narrative-section-with-complete-examples": 1
+    },
+    "A": {
+      "type-contract": 28,
+      "member-contract-and-implementation": 131,
+      "source-context-and-explanations": 5,
+      "structured-map-entry": 2,
+      "narrative-section-with-complete-examples": 6,
+      "enum-value": 4
+    },
+    "B1": {
+      "source-context-and-explanations": 5,
+      "member-contract-and-implementation": 90,
+      "type-contract": 13,
+      "narrative-section-with-complete-examples": 1,
+      "enum-value": 2
+    },
+    "B4": {
+      "member-contract-and-implementation": 73,
+      "source-context-and-explanations": 5,
+      "type-contract": 11,
+      "enum-value": 27,
+      "narrative-section-with-complete-examples": 4,
+      "configuration-data-or-support-contract": 1
+    },
+    "YubiOtp": {
+      "type-contract": 4,
+      "member-contract-and-implementation": 17,
+      "source-context-and-explanations": 5,
+      "narrative-section-with-complete-examples": 2
+    },
+    "B2": {
+      "member-contract-and-implementation": 95,
+      "type-contract": 10,
+      "configuration-data-or-support-contract": 2,
+      "narrative-section-with-complete-examples": 6,
+      "source-context-and-explanations": 5,
+      "enum-value": 2
+    },
+    "B3": {
+      "enum-value": 7,
+      "member-contract-and-implementation": 92,
+      "configuration-data-or-support-contract": 1,
+      "type-contract": 6,
+      "source-context-and-explanations": 3,
+      "narrative-section-with-complete-examples": 1
+    },
+    "Ctap2": {
+      "member-contract-and-implementation": 1,
+      "source-context-and-explanations": 5,
+      "narrative-section-with-complete-examples": 2,
+      "configuration-data-or-support-contract": 1
+    },
+    "Piv": {
+      "member-contract-and-implementation": 35,
+      "narrative-section-with-complete-examples": 3,
+      "configuration-data-or-support-contract": 2
+    },
+    "Management": {
+      "member-contract-and-implementation": 18,
+      "narrative-section-with-complete-examples": 2,
+      "configuration-data-or-support-contract": 1,
+      "type-contract": 2
+    },
+    "Oath": {
+      "member-contract-and-implementation": 15,
+      "narrative-section-with-complete-examples": 2,
+      "type-contract": 1
+    },
+    "B6": {
+      "member-contract-and-implementation": 24,
+      "configuration-data-or-support-contract": 1,
+      "source-context-and-explanations": 3,
+      "narrative-section-with-complete-examples": 1
+    },
+    "OpenPgp": {
+      "member-contract-and-implementation": 19,
+      "type-contract": 1,
+      "narrative-section-with-complete-examples": 2
+    },
+    "YubiHsm": {
+      "member-contract-and-implementation": 8,
+      "narrative-section-with-complete-examples": 2
+    },
+    "WebAuthn": {
+      "source-context-and-explanations": 5,
+      "member-contract-and-implementation": 7,
+      "narrative-section-with-complete-examples": 4,
+      "type-contract": 2,
+      "configuration-data-or-support-contract": 1
+    },
+    "SecurityDomain": {
+      "narrative-section-with-complete-examples": 2,
+      "member-contract-and-implementation": 10
+    }
+  },
+  "owner_minimums": {
+    "A": {
+      "eligible": 1722,
+      "minimum": 3,
+      "ten_percent": 173,
+      "selected": 176
+    },
+    "B1": {
+      "eligible": 1076,
+      "minimum": 3,
+      "ten_percent": 108,
+      "selected": 111
+    },
+    "B2": {
+      "eligible": 1168,
+      "minimum": 3,
+      "ten_percent": 117,
+      "selected": 120
+    },
+    "B3": {
+      "eligible": 1056,
+      "minimum": 3,
+      "ten_percent": 106,
+      "selected": 110
+    },
+    "B4": {
+      "eligible": 1174,
+      "minimum": 3,
+      "ten_percent": 118,
+      "selected": 121
+    },
+    "B5": {
+      "eligible": 690,
+      "minimum": 3,
+      "ten_percent": 69,
+      "selected": 73
+    },
+    "B6": {
+      "eligible": 264,
+      "minimum": 3,
+      "ten_percent": 27,
+      "selected": 29
+    },
+    "C": {
+      "eligible": 595,
+      "minimum": 3,
+      "ten_percent": 60,
+      "selected": 62
+    },
+    "Ctap2": {
+      "eligible": 75,
+      "minimum": 3,
+      "ten_percent": 8,
+      "selected": 9
+    },
+    "Management": {
+      "eligible": 203,
+      "minimum": 3,
+      "ten_percent": 21,
+      "selected": 23
+    },
+    "Oath": {
+      "eligible": 156,
+      "minimum": 3,
+      "ten_percent": 16,
+      "selected": 18
+    },
+    "OpenPgp": {
+      "eligible": 198,
+      "minimum": 3,
+      "ten_percent": 20,
+      "selected": 22
+    },
+    "Piv": {
+      "eligible": 372,
+      "minimum": 3,
+      "ten_percent": 38,
+      "selected": 40
+    },
+    "SecurityDomain": {
+      "eligible": 106,
+      "minimum": 3,
+      "ten_percent": 11,
+      "selected": 12
+    },
+    "WebAuthn": {
+      "eligible": 162,
+      "minimum": 3,
+      "ten_percent": 17,
+      "selected": 19
+    },
+    "YubiHsm": {
+      "eligible": 79,
+      "minimum": 3,
+      "ten_percent": 8,
+      "selected": 10
+    },
+    "YubiOtp": {
+      "eligible": 256,
+      "minimum": 3,
+      "ten_percent": 26,
+      "selected": 28
+    }
+  },
+  "eligibility_by_owner": {
+    "A": {
+      "candidate-eligible": 1722,
+      "excluded-original-disposition": 151,
+      "excluded-accepted-edited-overlap": 70,
+      "excluded-derived-rendering": 2,
+      "excluded-administrative-preamble": 24,
+      "provisionally-excluded-pending-edit-overlap": 35,
+      "excluded-historical": 2
+    },
+    "B1": {
+      "candidate-eligible": 1076,
+      "excluded-original-disposition": 100,
+      "excluded-administrative-preamble": 9,
+      "excluded-historical": 4,
+      "provisionally-excluded-pending-edit-overlap": 13,
+      "excluded-derived-rendering": 2
+    },
+    "B2": {
+      "candidate-eligible": 1168,
+      "provisionally-excluded-pending-edit-overlap": 2,
+      "excluded-original-disposition": 32,
+      "excluded-administrative-preamble": 16,
+      "excluded-historical": 1
+    },
+    "B3": {
+      "candidate-eligible": 1056,
+      "excluded-administrative-preamble": 25,
+      "excluded-original-disposition": 57,
+      "excluded-historical": 3,
+      "provisionally-excluded-pending-edit-overlap": 3
+    },
+    "B4": {
+      "candidate-eligible": 1174,
+      "excluded-original-disposition": 1104,
+      "excluded-administrative-preamble": 38,
+      "provisionally-excluded-pending-edit-overlap": 23,
+      "excluded-derived-rendering": 10,
+      "excluded-API-support": 1
+    },
+    "B5": {
+      "candidate-eligible": 690,
+      "excluded-original-disposition": 216,
+      "excluded-accepted-edited-overlap": 17,
+      "excluded-administrative-preamble": 4,
+      "provisionally-excluded-pending-edit-overlap": 4,
+      "excluded-historical": 1
+    },
+    "B6": {
+      "excluded-original-disposition": 406,
+      "candidate-eligible": 264,
+      "excluded-accepted-edited-overlap": 13,
+      "provisionally-excluded-pending-edit-overlap": 1
+    },
+    "C": {
+      "candidate-eligible": 595,
+      "excluded-original-disposition": 951,
+      "excluded-accepted-edited-overlap": 4,
+      "excluded-administrative-preamble": 11,
+      "provisionally-excluded-pending-edit-overlap": 1
+    },
+    "Ctap2": {
+      "excluded-original-disposition": 499,
+      "candidate-eligible": 75,
+      "excluded-administrative-preamble": 16
+    },
+    "Management": {
+      "excluded-original-disposition": 127,
+      "candidate-eligible": 203,
+      "excluded-API-support": 1
+    },
+    "Oath": {
+      "candidate-eligible": 156,
+      "excluded-original-disposition": 81,
+      "provisionally-excluded-pending-edit-overlap": 2
+    },
+    "OpenPgp": {
+      "candidate-eligible": 198,
+      "provisionally-excluded-pending-edit-overlap": 11,
+      "excluded-original-disposition": 119
+    },
+    "Piv": {
+      "candidate-eligible": 372,
+      "excluded-original-disposition": 129,
+      "provisionally-excluded-pending-edit-overlap": 11,
+      "excluded-API-support": 1
+    },
+    "SecurityDomain": {
+      "candidate-eligible": 106,
+      "excluded-original-disposition": 85,
+      "provisionally-excluded-pending-edit-overlap": 2
+    },
+    "WebAuthn": {
+      "excluded-original-disposition": 88,
+      "candidate-eligible": 162,
+      "excluded-accepted-edited-overlap": 7,
+      "excluded-administrative-preamble": 8
+    },
+    "YubiHsm": {
+      "excluded-original-disposition": 81,
+      "candidate-eligible": 79
+    },
+    "YubiOtp": {
+      "candidate-eligible": 256,
+      "excluded-original-disposition": 55,
+      "excluded-administrative-preamble": 9,
+      "provisionally-excluded-pending-edit-overlap": 4
+    }
+  },
+  "included_code_only": 6218,
+  "eligible_by_stratum": {
+    "implementation-state-and-internal-contracts": 900,
+    "XML-contracts": 1148,
+    "native-interop-contracts": 570,
+    "tests-and-helpers": 4629,
+    "narrative-examples-and-maps": 356,
+    "lifetime-protocol-internal-contracts": 1203,
+    "enum-values": 421,
+    "type-declarations": 125
+  },
+  "selected_by_stratum": {
+    "XML-contracts": 123,
+    "lifetime-protocol-internal-contracts": 124,
+    "tests-and-helpers": 472,
+    "type-declarations": 19,
+    "native-interop-contracts": 58,
+    "enum-values": 45,
+    "implementation-state-and-internal-contracts": 99,
+    "narrative-examples-and-maps": 43
+  },
+  "total_patch_paths": 337,
+  "patch_path_conflicts": {},
+  "mapped_selected_files": 456,
+  "selected_whole_unit_characters": 551307,
+  "nominees": {
+    "sources": {
+      "A": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/sampling-nominees.json",
+        "matched_original_IDs": 4
+      },
+      "C": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/clean-nominees.json",
+        "matched_original_IDs": 207
+      },
+      "B4": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/clean-nominees.json",
+        "matched_original_IDs": 7
+      },
+      "B5": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/clean-nominees.json",
+        "matched_original_IDs": 13
+      },
+      "B6": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/clean-nominees.json",
+        "matched_original_IDs": 16
+      },
+      "Management": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/clean-nominees.json",
+        "matched_original_IDs": 4
+      },
+      "Ctap2": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/clean-nominees.json",
+        "matched_original_IDs": 9
+      },
+      "SecurityDomain": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/clean-nominees.json",
+        "matched_original_IDs": 7
+      },
+      "Oath": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/clean-nominees.json",
+        "matched_original_IDs": 16
+      },
+      "WebAuthn": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/clean-nominees.json",
+        "matched_original_IDs": 14
+      },
+      "YubiOtp": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/clean-nominees.json",
+        "matched_original_IDs": 7
+      },
+      "YubiHsm": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/clean-nominees.json",
+        "matched_original_IDs": 17
+      },
+      "OpenPgp": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/clean-nominees.json",
+        "matched_original_IDs": 8
+      },
+      "Piv": {
+        "record": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/clean-nominees.json",
+        "matched_original_IDs": 12
+      }
+    },
+    "total_matched": 341,
+    "eligible": 338,
+    "selected": 36,
+    "unselected_eligible_ids": [
+      "core-001:unit:0020bcadd875fffe",
+      "core-001:unit:008878f761492d0c",
+      "core-001:unit:009154470ceb40e2",
+      "core-001:unit:024802ba2a87491d",
+      "core-001:unit:02543c1a6b12f796",
+      "core-001:unit:04a99daa108b7f13",
+      "core-001:unit:05f87442e5dc682c",
+      "core-001:unit:06db99843093fc81",
+      "core-001:unit:0762b8913d819244",
+      "core-001:unit:07dba2ace3845574",
+      "core-001:unit:083540026f113034",
+      "core-001:unit:08fa2a06930cf383",
+      "core-001:unit:091b8d287555adc1",
+      "core-001:unit:0970d5271e2aceaf",
+      "core-001:unit:0a09203f92c46b80",
+      "core-001:unit:0ace641342c51711",
+      "core-001:unit:0b5157388994282f",
+      "core-001:unit:0c144a012c0840f5",
+      "core-001:unit:0c265c5a1740f21b",
+      "core-001:unit:0c8447415526c503",
+      "core-001:unit:0d18dc2e0e554141",
+      "core-001:unit:0de2614c7b631c78",
+      "core-001:unit:0e8edb2c87402a03",
+      "core-001:unit:0ff7055a72a411eb",
+      "core-001:unit:11d41e0760b9cd97",
+      "core-001:unit:12f5977f6defc930",
+      "core-001:unit:15042402e458be8c",
+      "core-001:unit:152206115148f590",
+      "core-001:unit:155af6fd2ec119d8",
+      "core-001:unit:1568591f062880de",
+      "core-001:unit:157007c3c30138da",
+      "core-001:unit:1691897ea7ce1ee1",
+      "core-001:unit:16a08acaa31c3479",
+      "core-001:unit:185b05e89df6570e",
+      "core-001:unit:186860eadeaa30ae",
+      "core-001:unit:194207772cab5be6",
+      "core-001:unit:1a23ce6072e9aac9",
+      "core-001:unit:1b06e575053885fb",
+      "core-001:unit:1b565768f458e12f",
+      "core-001:unit:1c6d42e19b0c9c1e",
+      "core-001:unit:1c77fb9b164724ca",
+      "core-001:unit:1c899a31ab371eec",
+      "core-001:unit:1cf92b10cd6ac6dc",
+      "core-001:unit:1f17722f63b95423",
+      "core-001:unit:2222cbc2ecce3b10",
+      "core-001:unit:225f0aa44d55f65c",
+      "core-001:unit:22bc1100c7f2e1e1",
+      "core-001:unit:23c6b77c26150d0a",
+      "core-001:unit:2556a2c5137782f2",
+      "core-001:unit:26c688582eb59718",
+      "core-001:unit:27518325ca37d82b",
+      "core-001:unit:29892e576c435e6f",
+      "core-001:unit:2a27976de4957faf",
+      "core-001:unit:2c00745a92a32066",
+      "core-001:unit:2d35b945da2e59da",
+      "core-001:unit:2eec90b8474dc73a",
+      "core-001:unit:2efcc7f8ae90292e",
+      "core-001:unit:2fff450a4eacf0fb",
+      "core-001:unit:31321beb19407856",
+      "core-001:unit:315ded47734427f4",
+      "core-001:unit:316522cef697d88b",
+      "core-001:unit:324787c9b71910c6",
+      "core-001:unit:32979693d037a215",
+      "core-001:unit:32cf859f510562b0",
+      "core-001:unit:335bcece90474aec",
+      "core-001:unit:33a5c377fb3707c8",
+      "core-001:unit:342322c9f3132830",
+      "core-001:unit:343e662286326996",
+      "core-001:unit:34d46c059c1d7d4e",
+      "core-001:unit:34ebad430ead9e78",
+      "core-001:unit:35b6741cf9c46b76",
+      "core-001:unit:374e15ec3e29cb8b",
+      "core-001:unit:39342a05c77c88d6",
+      "core-001:unit:3c29b0babcb30a6f",
+      "core-001:unit:3e422831631348c1",
+      "core-001:unit:4053faf8223edb2c",
+      "core-001:unit:41277ac2ed951c1c",
+      "core-001:unit:4435dc3a2177fed9",
+      "core-001:unit:460d19c60d6458ba",
+      "core-001:unit:464826953cc8f921",
+      "core-001:unit:472944894c54d855",
+      "core-001:unit:487e3a4543d9b618",
+      "core-001:unit:48f2a9e01d4e1ad0",
+      "core-001:unit:4934850f7b076b3e",
+      "core-001:unit:49d60e7a26a89c82",
+      "core-001:unit:4a99ea2717cc43fb",
+      "core-001:unit:4b65fa560becb272",
+      "core-001:unit:4c09b48be35d0f61",
+      "core-001:unit:4ca965dc462c1c85",
+      "core-001:unit:4daa990411acbfd1",
+      "core-001:unit:4fa1860789231a58",
+      "core-001:unit:508b143a06729fac",
+      "core-001:unit:52467afc34736ceb",
+      "core-001:unit:52c46bed2ec7d440",
+      "core-001:unit:541eeef338934275",
+      "core-001:unit:543769ea2315facb",
+      "core-001:unit:546bab42e8ba1d84",
+      "core-001:unit:54d67b5912c52616",
+      "core-001:unit:55873ac75ea37e66",
+      "core-001:unit:5605704bd39c8c9f",
+      "core-001:unit:566a4dca6e5e1756",
+      "core-001:unit:56feefbf41dc37c4",
+      "core-001:unit:5811593fac53bef3",
+      "core-001:unit:58172ff4d770bcd1",
+      "core-001:unit:5a555279e11c1fc3",
+      "core-001:unit:5a86181e0f09e47c",
+      "core-001:unit:5cb383d7e8d3b26c",
+      "core-001:unit:5d8037853539d56a",
+      "core-001:unit:5dd03e538ce23d2c",
+      "core-001:unit:5e8416e550934536",
+      "core-001:unit:5f83132458e42cd4",
+      "core-001:unit:6014afdd997025b8",
+      "core-001:unit:6059b9db1740aa4e",
+      "core-001:unit:617cf55eb5f80992",
+      "core-001:unit:618325296e7023d9",
+      "core-001:unit:6196affe1731488a",
+      "core-001:unit:623ab74f6a9acd4d",
+      "core-001:unit:623f9c39d6aaf71e",
+      "core-001:unit:626af9b7b6fd0fe8",
+      "core-001:unit:62caffb17e65db48",
+      "core-001:unit:62f26e8620075766",
+      "core-001:unit:62fddc5f24d221dd",
+      "core-001:unit:639ea6570ea78623",
+      "core-001:unit:63a157d63b97e619",
+      "core-001:unit:645d1754c2f7fac3",
+      "core-001:unit:653075e29d96ad82",
+      "core-001:unit:655309d30e95220e",
+      "core-001:unit:6556f321d499229a",
+      "core-001:unit:657cd68bf09a1351",
+      "core-001:unit:66c2da57fb3d6820",
+      "core-001:unit:678b266776feac67",
+      "core-001:unit:67a2df596ddf1fd8",
+      "core-001:unit:67d8b8b276780c53",
+      "core-001:unit:6bd8d1c88fa87fb9",
+      "core-001:unit:6ce7c2bab08575fa",
+      "core-001:unit:6d357c42b13dca40",
+      "core-001:unit:6dc312a633545c51",
+      "core-001:unit:70c1ba3c44df9082",
+      "core-001:unit:70e9c3eb1db1eb9d",
+      "core-001:unit:71f52803e6af83f0",
+      "core-001:unit:72130f50ddc88850",
+      "core-001:unit:722ec60e413741d8",
+      "core-001:unit:726726c063586cd8",
+      "core-001:unit:72c63427268b7afb",
+      "core-001:unit:72d2b5900edbce92",
+      "core-001:unit:735efaadc99b0e5b",
+      "core-001:unit:73e83bc954975061",
+      "core-001:unit:7526d149039b46fa",
+      "core-001:unit:75a86b94393d80a1",
+      "core-001:unit:76bb6fc56f855368",
+      "core-001:unit:77d2b864dd822ac9",
+      "core-001:unit:78decc8da84b9010",
+      "core-001:unit:7d55b42f494524b2",
+      "core-001:unit:7d64d4398accfad4",
+      "core-001:unit:8106baf642df71f8",
+      "core-001:unit:8289d17c1ec1938e",
+      "core-001:unit:82e69a02a4d40048",
+      "core-001:unit:84239adbd9f58bbd",
+      "core-001:unit:84da46a87e6fa085",
+      "core-001:unit:85a739bc738f33ee",
+      "core-001:unit:87837e198cce6441",
+      "core-001:unit:87ef60aeb0f61a18",
+      "core-001:unit:88ac6fa5dc854c95",
+      "core-001:unit:88dce92378d7df16",
+      "core-001:unit:8d36a172ec4bf9cf",
+      "core-001:unit:8d3e100e77293f01",
+      "core-001:unit:8d4b22a05ae71aec",
+      "core-001:unit:8e0d4c9161a75f73",
+      "core-001:unit:8e2c83df186e5f3e",
+      "core-001:unit:8e426308ee634f59",
+      "core-001:unit:8ea97b73005fa724",
+      "core-001:unit:8ecfc121b6237de2",
+      "core-001:unit:905aa9fa170c6c5b",
+      "core-001:unit:91ef69b68409adc1",
+      "core-001:unit:935c26654a3cc382",
+      "core-001:unit:93f15f446e18cfec",
+      "core-001:unit:944cf663eab9a67d",
+      "core-001:unit:9657fcbb2f548504",
+      "core-001:unit:97bbbe0f64c7af42",
+      "core-001:unit:982be8e7f147990c",
+      "core-001:unit:994dcb53eeb3ca78",
+      "core-001:unit:99ea8261ce613339",
+      "core-001:unit:9b6474fc1d4af8c2",
+      "core-001:unit:9b6e960fa937439b",
+      "core-001:unit:9b95a812279deba5",
+      "core-001:unit:9be3ba3b2a029842",
+      "core-001:unit:9c0a7858647604ac",
+      "core-001:unit:9ca5cd142fceaf42",
+      "core-001:unit:9d7014da06668379",
+      "core-001:unit:9de1c82ca86b784a",
+      "core-001:unit:9df2a1654c179c92",
+      "core-001:unit:9e8236bcb2a6e0d7",
+      "core-001:unit:9e97f25b58ed0c3c",
+      "core-001:unit:9f2a57a59d59871b",
+      "core-001:unit:9f8ea0501d3dd12b",
+      "core-001:unit:a1290e98599379a5",
+      "core-001:unit:a1585aa97563d863",
+      "core-001:unit:a40e91a90b7cb4e3",
+      "core-001:unit:a44a8cae7fac2494",
+      "core-001:unit:a74442a6cc6e0835",
+      "core-001:unit:a791b5ae1d430f97",
+      "core-001:unit:aa6d02c22a70d020",
+      "core-001:unit:aab4dd2b372765ff",
+      "core-001:unit:abacae5474828a44",
+      "core-001:unit:ac8ed9a859c531f5",
+      "core-001:unit:ad20dab8aea15de5",
+      "core-001:unit:ae4a35d29cae2bbe",
+      "core-001:unit:aeadc0996d07ac60",
+      "core-001:unit:af786785263c0cfc",
+      "core-001:unit:af7d27492626a438",
+      "core-001:unit:b03cdb5e042f3661",
+      "core-001:unit:b0802a12b8e9559f",
+      "core-001:unit:b3a4e2c9e4dc1f4e",
+      "core-001:unit:b45d0341baeb074c",
+      "core-001:unit:b4bcd131944b9425",
+      "core-001:unit:b61acf57afd6cf33",
+      "core-001:unit:b6f09be1a82bb17a",
+      "core-001:unit:b6f2f47dc485e27f",
+      "core-001:unit:b70207c72c63ce7a",
+      "core-001:unit:b749094f6352bbce",
+      "core-001:unit:b7e247fbfb1b882f",
+      "core-001:unit:b828b70ee8293e96",
+      "core-001:unit:b901f2fbde357c41",
+      "core-001:unit:b939f57aa6fb5010",
+      "core-001:unit:b962e78340ce77a7",
+      "core-001:unit:b9c2cf36e32a14d9",
+      "core-001:unit:baa2617c08d34aa0",
+      "core-001:unit:beddbb946521ed32",
+      "core-001:unit:c1edfc286bc5f451",
+      "core-001:unit:c28d1be2543b53d8",
+      "core-001:unit:c2ce872fba34a5bc",
+      "core-001:unit:c315018b4589f765",
+      "core-001:unit:c709b96e9252e2c8",
+      "core-001:unit:c86a7a8e0676dd3a",
+      "core-001:unit:c8dce98070bcc061",
+      "core-001:unit:c8f6a856ede6bd58",
+      "core-001:unit:c91c7e937153edf5",
+      "core-001:unit:c98b0fd3f9f450f8",
+      "core-001:unit:c9a11939b5be28d9",
+      "core-001:unit:c9b42cc2625b1a7e",
+      "core-001:unit:cb864b5a26048897",
+      "core-001:unit:cdd2ee428a658158",
+      "core-001:unit:cde40bd93e69fbaa",
+      "core-001:unit:ce3e1576312e0d4c",
+      "core-001:unit:ce658ff16d008027",
+      "core-001:unit:ceddba86243abd3f",
+      "core-001:unit:cf02c1448d3d7d19",
+      "core-001:unit:cf1ea391e65d7996",
+      "core-001:unit:cfa10b8a0d588259",
+      "core-001:unit:d077e45353d18caa",
+      "core-001:unit:d0adfe5276c95575",
+      "core-001:unit:d1e8595a020a1e82",
+      "core-001:unit:d1f1edf2dfdba67a",
+      "core-001:unit:d229e26bbf19cfc9",
+      "core-001:unit:d242219d8c58a253",
+      "core-001:unit:d310cd20b8654b2e",
+      "core-001:unit:d40399e38e898b22",
+      "core-001:unit:d42708df6cbf5f75",
+      "core-001:unit:d50333b34ee95a20",
+      "core-001:unit:d5af36dbdbc074c1",
+      "core-001:unit:d759f0a7884644db",
+      "core-001:unit:d79b8001979699fb",
+      "core-001:unit:d7dd3dc5cf1116eb",
+      "core-001:unit:d8436528beec446a",
+      "core-001:unit:d88ad9fa6dfbfb56",
+      "core-001:unit:d9731a34089c6aae",
+      "core-001:unit:d9f1625f161a7cb0",
+      "core-001:unit:da2102665082918d",
+      "core-001:unit:db871f698406d15e",
+      "core-001:unit:de94a2dfad62ce2a",
+      "core-001:unit:de9d48abdf1759d5",
+      "core-001:unit:deeec6b40ca0719a",
+      "core-001:unit:dfa7422afebc263a",
+      "core-001:unit:e02d864f4df46ecc",
+      "core-001:unit:e0b045533c1a36c1",
+      "core-001:unit:e0f1a96905d2b215",
+      "core-001:unit:e19a0eeb78c8f878",
+      "core-001:unit:e4896d0f9ae33d14",
+      "core-001:unit:e496e59b826a88f7",
+      "core-001:unit:e5e1020f290bcd26",
+      "core-001:unit:e7182c006c715df1",
+      "core-001:unit:e7e83c4b5175ed90",
+      "core-001:unit:e8dead7545d852f4",
+      "core-001:unit:e8e0819afa2ab34f",
+      "core-001:unit:eb6a270f52814505",
+      "core-001:unit:ede3ab507cbc60d4",
+      "core-001:unit:eee93845073acc35",
+      "core-001:unit:f05a5af925dc2de5",
+      "core-001:unit:f0a6d2c8bef6573b",
+      "core-001:unit:f0b915bd468e554b",
+      "core-001:unit:f140a1c56dbf5f7d",
+      "core-001:unit:f17a3eccd0c5c7e1",
+      "core-001:unit:f25726f00414a916",
+      "core-001:unit:f409a7a2d4317c53",
+      "core-001:unit:f40c8d0e7bcd1697",
+      "core-001:unit:f4a2bd7e759c54d1",
+      "core-001:unit:f850b489dc52a4d0",
+      "core-001:unit:f952a6db7aa67162",
+      "core-001:unit:fab93bc1d63af27a",
+      "core-001:unit:fcb152e84fb0fe2d",
+      "core-001:unit:fe8c78eb256acf38",
+      "core-001:unit:ff6ddc30e8dba403"
+    ],
+    "meaning": "Supplementary nominations only; deterministic population/stratum selection ignores nominee flags."
+  },
+  "known_pending_batches": [
+    "transports",
+    "SHARED",
+    "five-applets",
+    "OpenPgp",
+    "Piv",
+    "external"
+  ],
+  "external_state": "Completed 19-path commentary patch provisionally indexed; acceptance/integration and final candidate-retain dispositions pending.",
+  "original_administrative_and_outside_scope_counts": {
+    "OUT-OF-SCOPE": 7140,
+    "ADMINISTRATIVE-CONTEXT": 4544
+  },
+  "final_denominator": null,
+  "finalization": [
+    "Astra adjudicates broad code/declaration contract eligibility and administrative preamble exclusions.",
+    "Freeze final accepted combined product diff including all pending batches and external commentary; recompute exact original-range overlaps.",
+    "Freeze every candidate-associated unchanged-path edit/retain/hold decision and independent correction/re-review; reopen eligible neighbors if dependencies change.",
+    "Reconcile current source/comment mappings and rerun deterministic selection, preserving this preparation/history before any successor.",
+    "Astra actually reads selected complete units/context and consequential originals; record verdicts, expand affected strata after material misses, then recompute final sampling gate."
+  ],
+  "selection_policy": "SHA256 fixed-seed rank independently in every owner x structural claim-role stratum; ceil(10%) each nonempty stratum, at least three per owner where available. Enum strata do not replace lifetime/native/tests/narrative/XML strata.",
+  "insertion_policy": "Removed/replaced original lines intersect half-open source-character ranges. Pure insertions conservatively attach to both adjacent unit boundaries. Diff context lines never exclude units.",
+  "no_semantic_sampling_performed": true,
+  "no_execution": "No SDK/test/formatter/native/device/crypto/Git mutation/subagent",
+  "input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/prepare.py": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/coverage-progress.json": "45b4799d9eb5773f6ca8a4475ccf6187f9ab0b4ef0975e367b45e1a59d2f09ce",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/shared-sections.json": "148a865f7883cd0bde059226553c6cb31b7ea80506bd9669d3e60da0ffabdd0e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/A.json": "427fd5833a9a57057a01b556277caf71f5a043820adbe63b0c37485f52712a0c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B.json": "7c8797fc25c763c9921f09ce084c21b217a8cb148186f7d1f8ba438f6c0ea1fe",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Ctap2.json": "1869ddeaed02256155eb155ea16d9985ced562b6a759388d845de5b3fecefc6a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Management.json": "c688144c377edc718aa530296747c13b17695e52ee0140822fbf0612e4e964d8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Oath.json": "b2fe34eeacfa3afe3930a1093061ab5313832aee8e3db47772a1d0d5b6d0d7a5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-OpenPgp.json": "ff2f148e86a7dc6902ec63ffd20eae955f076d7c775e8b1b8c9770dc3ea1d0f6",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Piv.json": "c1b2ff7c1be8c3129eb5626b48cdeee37f9cef6d209617c7b17931436374b6cb",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-SecurityDomain.json": "164948e7c21a85786ce6770c7c550574370b1d9a9fafbb587b460ef68bc1e0d9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-WebAuthn.json": "25e426f06bb8dd19af1053a62644133c45f7e997f2ee7dd6dfc055292de92979",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-YubiHsm.json": "21d6b36b4f0bbc366c8d829dcb057450d71f9bd3e836f896ae6c40e8096a1305",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-YubiOtp.json": "45202ed35f53b78220ab3013ff671d34d044e5de28ce80a9ce0d615867de6691",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/C.json": "9ba1809d37186d462f6c554f85766284702e1382fe1b8e9e1cbd4db88d0860d4",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/EXTERNAL.json": "4bca2f06d453b32c879f194b345f8be0a1a6c7367f1a9e0de824e13ccfc1a546",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/SHARED.json": "aeb36d019cc02df35595eb5f097f1116d3c55894bd3c43a1a7da0c2daefcfd17",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B1-portable-lifetimes.json": "55656e7b59892bf30d766322209b62360d65049eabd258a651661f4367139621",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B2-linux-lifetimes.json": "aa364f6920bfd967cd976327bcf0d836c865e98317652d2402ebbcade28e01ea",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B3-macos-lifetimes.json": "87f2675195fdf101b58055c1353da0d2a8b4e0b57c69293665823a408d7bef2b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B4-windows-support.json": "5591684535811520dc9cf6e62e32614e66a77cac9ea5353c31ca428920021244",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B5-session-framing.json": "a35ef40d4e7057660e4a71d00981d6db7f2c0499ceafb08f4f339283666a3a4e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/B6-wire-scp.json": "1efb5b24e8e63bf5e5883e053821e0e065ffc48d8d4d0b1ec9a9aa3642487cb6",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/unit-results.json": "23cd7105b3ca3b63c36cd6f5c3233a2bd12916be199fc5f15524cf8a6c6c5fcf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/unit-dispositions.json": "e32aa192931eea2c19830f60ce54f589f26b481ef0b0e14f6cb07412cab26bae",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/unit-dispositions.json": "f66eb0888a76c16e610625dd31c92abe65099d87bc100e02182f4bb71b9d45e7",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/unit-dispositions.json": "c4663bd4871568df5e9fd6bace72eb90b62262ed170de9f39c1cff3d78291e8d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/unit-dispositions.json": "40522cf0ef56757479134d8ddd47396347fb3c9fce31ade3ddda4ce4a63d504b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/unit-dispositions.json": "4b874f8ba40acb4dd708fceba380ad273be0df102b1de197ff7c11dc9ecd004f",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/unit-dispositions.json": "47ba17e274069f53077ef80b214b69711e601fa07ebd0b4709d47615f80e57d4",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/unit-dispositions.json": "4ec5a8a99f14da57ef0fa10897702ad86acb653f58f1cf8f76423f7aa024e52e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/unit-dispositions.json": "5c327d24b29181363295a43fa5f4767b101447641d724f143b28c265868a5788",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/unit-dispositions.json": "49a22ea23bd2c6090e67b51e74989d02f330f96f90956126317203e8db6872d5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/unit-dispositions.json": "e7cdb34d90ac1d3c148b75c786f4ea46990f894a1580bab4401a3835f1f0ce02",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/unit-dispositions.json": "362cb1a1b7481bbf53f0fe08ed0afe24c89f5f1a153a8b25492eb9b15b2c7400",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/unit-dispositions.json": "e6b94e16c251fcc08f27b226444584db17115c29b66f63b7f91328a1134c1063",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/unit-dispositions.json": "694c3ee51080cbf7f767f13ae4c65fee03c140d3a60e7c20cafda7084de0ca55",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/unit-dispositions.json": "ef9898627c3eb00aa348b285a7258f68df54004a88d0c704ff46b2bcb03749e8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/unit-dispositions.json": "ecbb1792f9154480c1a06aeaae089c3076d26a770c9587da91ef4f28d10fa78d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/unit-dispositions.json": "6d0b5f47c2ea327c464bf9a74ba1cfdc60199561b2cf230621a87dcc3809e9e2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/A/sampling-nominees.json": "46b9e629f826888945fb2c8c568f988dd27d77e49171b41627fa2b7e04562a11",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/clean-nominees.json": "5593db4f1e12f76b7219a8a89040c0cfe85ffef96ea70c5f4ea72f8330039db4",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/clean-nominees.json": "0722a86ef8f2de0995133f2050487be66e09149a7e1a8659f3199e13d52ec6a4",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/clean-nominees.json": "05f05fed36356383ea037cde7956c3070b467dba8925453197f72b28a66391b3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/clean-nominees.json": "f909c1255e29a1bfda84fa0d98e22d1d7d30c445ccf3a69cba85becea8c51890",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Management/clean-nominees.json": "c0b2b85762a251bb4125bcad90862e21b8e68e1e33f0a8f4d827ca2c6cae889d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/clean-nominees.json": "0b5cd6d0edbf09f1ece5e9c25e8fbc26575b1846d9e267152c5c07d7332804bd",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/SecurityDomain/clean-nominees.json": "758401790197e8514e4596a3b0d2dd065cff29eace120260ec3426ece804c1f1",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Oath/clean-nominees.json": "6e47b0c2d1dcafe180beba0c7ca1bc1d11cb7d6b4774ec299117fe8600dbe5d6",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/WebAuthn/clean-nominees.json": "0ee2c13d0d33eaa58a1d2d7fe35763512db49b88bf00814e864ef8590aef7058",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiOtp/clean-nominees.json": "cdb593eea593527a6f79c133d06e3f580b09f5e258471ad610ba74c29894e7de",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/clean-nominees.json": "3a94c9134bbdb94fcf4c3b3d7dd935cbf71d58506e9ad0b9fc0f252dcf931344",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/OpenPgp/clean-nominees.json": "e223b1ff0aa9468156b5a687394a0ec7c06b4891da3e72c0febebc3dffd07213",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Piv/clean-nominees.json": "e9687a30dfd612a37b8499ba07c30a866a98f321f54365396fcd91a91db6aa33",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-A-C.json": "ab02275eeac6cf721239b8965ebb5ac0c841df9e65fffab8fb3f0eafc082daa2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/A/revision-2/product.patch": "028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/product.patch": "159a59af1d631f1199e60510f0f85319c3ff58230c168d2a842058096d7b2047",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-protocols.json": "3cad8f595449bab9c38fe4e017a0f2b212010639c1bff7862161f535d5a6cab0",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/protocols/revision-2/full-transfer.diff": "7d2f50621bddf029cc3b494a256552ea9169d3a2d142caeb101a72d7ebd50b5e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-FIDO.json": "141942e73ebf22918e2cbb03ef24f17fc48e59c959e2faf08c2fc98c0c0ccea3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/product.patch": "8f34ede47c7e39c70a021393150b3a4c4fc4ae9cdc3d761f2de9444273b9740c",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/static-preservation.json": "9929bb8578289b73ff8ba25cf87bff9750abf785060a48a000f16b87ab2aa49b",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/verification.json": "0d6c4a878415b2abe6727e7113512cea7a2407670bbbb2f8c92c7a7e6d5385da",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-guides/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/product.patch": "3267ab5d547b281f19c28b3b709ef509a7cd54ee82439b6386b33a842030b937",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/static-checks.json": "52b96a60e1f28e247901b67800bde4e70d78f8fac365de7b08de7958a2c615f2",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/product.diff": "6c3797572fc9dcc7cb7fff70f4f1122f2736101462a43289ff95f7085a71a568",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/static-verification.json": "b98b8f3571aeb4780b1f9c715eb95a6e9689bb98e1880658535ae8c7134c8715",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PGP-boundary/product.patch": "dac49659e9357569fd836922bd2f52fe9622a6f7794fcabe320d84d29933134a",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/static-verification.json": "a756ece203e2ab7699b0477b48ab56558e472e4286c1751dbec135b70896c617",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-pgp-piv/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/product.patch": "5a442195caab2674e3162a35bdffe9d4ab58e54ad72d7f33f6beeb20ab1ae3dd",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-external/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/static-preservation.json": "a8bb41c818554e68087dff50a5edbfb6155a56d62e925a8bbd02e75b1b08985e",
+    "/home/rupicola/Code/y/yubikit-core-docs-edit-external/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/external/source.patch": "ec6997bd2b14af3f2ad82988d60487fe4e542dbaccf38e1e96e026892ac03727"
+  }
+}

@@ -1,0 +1,548 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of 60 complete pinned units plus relevant contexts; final overlap/current mapping reconciliation pending",
+  "reading_file": "read-002.md",
+  "reading_sha256": "d1fb4a0772011d8b26b3f4ec66765c233197fb0f4fe6ec3536bee93d7c073688",
+  "units": [
+    {
+      "id": "core-001:unit:468e384d30b9c33b",
+      "path": "src/Core/src/Devices/RescanScheduler.cs",
+      "range_sha256": "12b61f994034bf529707879c500515656b5d0ed60a7c83d61e451cbf0a2fdf8f",
+      "current_file_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:749973e915170867",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "range_sha256": "6aeb1d28bac9c38de8bff86c4b0c3bc37c4b50288152f864e1d0e18220fa1a94",
+      "current_file_sha256": "74002b598f2ab0f84e885c27a85b7778ebbb27a82b4643f8c92cc86cc3569c1f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:a124a683e6029d5b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorTests.cs",
+      "range_sha256": "4de66ceda6f3bff691bbc9c761a26d98d5aba9d4642f07282e3efb5beef6c0bc",
+      "current_file_sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:1780289b48616248",
+      "path": "scripts/toolchain/Discovery.cs",
+      "range_sha256": "d7f3a2eed4839f4c1d67983cd8caf6972a4e9dcb8b8ff591423b181a58ffb125",
+      "current_file_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:2b3cc1caf0dfec3f",
+      "path": "src/Cli.Commands/src/HsmAuth/HsmAuthCommands.cs",
+      "range_sha256": "fa9bc0ce689c7fc018851a64e83b96c903ce656d6e4f9442313d764c7c4fea31",
+      "current_file_sha256": "2a1ab704610840b24227bf449c07ea636bbf97a6c19742c8aca122fb388a7c12",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:d46b1ef7a44e6284",
+      "path": "src/Cli.Commands/src/HsmAuth/HsmAuthCommands.cs",
+      "range_sha256": "7f5088d7c2968899ea0ffb5ff612d2afd3019dda5d0ec1eae4b27d9d12140c9c",
+      "current_file_sha256": "2a1ab704610840b24227bf449c07ea636bbf97a6c19742c8aca122fb388a7c12",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:05c27da3274a61c3",
+      "path": "src/Cli.Commands/src/Management/ManagementInfoCommand.cs",
+      "range_sha256": "b083ecf3966b1705b56ca8b339c3bfab298525ea88b809069bb079a3e6a33e23",
+      "current_file_sha256": "dbc4927e310e729ed0a080596c81d4e34aad90a912148ed670bb1bbec9b2ddf7",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:2d775717e74d6f32",
+      "path": "src/Cli.Commands/src/Oath/OathCommands.cs",
+      "range_sha256": "206080ef68465f932b181e80af98f344092d26848380318412d996e14b979a30",
+      "current_file_sha256": "eaae8ea1efeae7f6634d2ca068aca06e3ca29621b4b942e96dd452ab3511668c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:3fb51ea489737870",
+      "path": "src/Cli.Commands/src/OpenPgp/OpenPgpAccessCommands.cs",
+      "range_sha256": "3eeddbe9b4139f94cd6a034459d9b8e7554e5eb76043cd66ae1a6688a6722f7d",
+      "current_file_sha256": "46ebfecf9d717522ae0c602c3fe0c6c2b60ccb5e05da6a9dda6509762570dec6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:10653b759a2209f8",
+      "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+      "range_sha256": "b01709e374ade5884fc4700be4accffe81fa78cf8ec190023158c5bb677291d1",
+      "current_file_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+      "original_unit_present_in_current": true,
+      "verdict": "DEFERRED-SOURCE-OBSERVATION",
+      "note": "SAMPLE-A004: attestation command receives a newly constructed X509Certificate2 but lacks deterministic disposal. No permanent leak or native runtime reproduction claimed; implementation remains unchanged."
+    },
+    {
+      "id": "core-001:unit:34cf0693a537f0df",
+      "path": "src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "range_sha256": "c6bc7951e0122d9e5b88ed5985fb9647c6f852573ce159d0d5353459d54ac94e",
+      "current_file_sha256": "b96f8bb765a5a8f60052c1bba193f93352fa7cf3597e0aca217699f218c22c70",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:010596d531cf6d98",
+      "path": "src/Core/src/ProductAtrs.cs",
+      "range_sha256": "7dc8d19196492cd4c514a9893f304a86176771a738a7cdf161a37c0b4cf70d91",
+      "current_file_sha256": "956b7fc7c32868563625a757b2326d790a882ff352af1b55bd639b857b265c55",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:d73e12e719d3fff0",
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "range_sha256": "6773c943c52d67f06c8f4e6e6b186f4e7019da2842ccea00adce890793d5b5c3",
+      "current_file_sha256": "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:7573e895ff24c450",
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "range_sha256": "52c834103160a40b56ddfe3042b1ec16dfcb07753ab7d779ebdc9a89216581f1",
+      "current_file_sha256": "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:fffbb1e91e795937",
+      "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "range_sha256": "335107d6921cfa5e27019543162e1c7cb31ac35e9345a3e7e7b68eb73cae68e5",
+      "current_file_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:bf32732f3b6ebcda",
+      "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "range_sha256": "4615b001f79ec5cbf8660d18c55c438c99042f9f0359dd555558ea927e413907",
+      "current_file_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:60dd6f6febeebdd8",
+      "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+      "range_sha256": "40c1eb066b682ff68c771a6d22be37aed1208374e6f2105477677c66c0c49a24",
+      "current_file_sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:896dd543e29befc7",
+      "path": "src/Core/src/Devices/DeviceChange.cs",
+      "range_sha256": "88f2a95d52b2e01a207a9a6835be47bba4e9fb4af15722571011c8d187113b2c",
+      "current_file_sha256": "3da616de45c4eb6957924e539dc5deb88f8689c32eec11faa8c3bc510a414a46",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:a6706ccc51c5b8b2",
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "range_sha256": "d4ad7b01b6bc0a735bfe4b989f05a4a35b59e9411fc5854b2be59d3bdde844a7",
+      "current_file_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:0345a4013ca4230b",
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "range_sha256": "0cb104a3a489f3871bc5077051c122131688e58d7de8df7759d053fa6ee89ed1",
+      "current_file_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:25aa4af785e881de",
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "range_sha256": "179fd2985898b88f5647653658ca2408c7f09e5e8b5780ed402d47974bac957b",
+      "current_file_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:c1935efa8b55d4fd",
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "range_sha256": "d970b90334c986afb594245abe8c4b4a9aef6aac3038a3a057ab77226c049ad9",
+      "current_file_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:441ecd53f2034d3a",
+      "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+      "range_sha256": "cf1d5a1ccb1cbf0185e7b0688584a6eac30c3f3518a9fd5ffb30f36ce2d1ecaa",
+      "current_file_sha256": "b997455d9083553111e134ff972f439356e1271b5837edcd89d6e61c18eda350",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:e321afb584ee7490",
+      "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+      "range_sha256": "84b07add1129747469882132861104e737dc0ee6863e18c9ad428cf2c331c480",
+      "current_file_sha256": "b997455d9083553111e134ff972f439356e1271b5837edcd89d6e61c18eda350",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:461949ca0e95ac25",
+      "path": "src/Core/src/Devices/DiscoveryBudgets.cs",
+      "range_sha256": "6d2ced8923112ceea035aead71b6dbf9c4c2d2ac4e52071a38d806aacafa4d20",
+      "current_file_sha256": "c9c644d13dec23e08b732e01024e8b239ea6c9c5f6b327b674588e5106ccf6e2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:1577e5d955f076e7",
+      "path": "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+      "range_sha256": "e99c79635edda935fa727c76c95437d711e3d1378ff4f8c9bf5f7032dc163a81",
+      "current_file_sha256": "aa1dcb809f31374d15236b35bb0fa12069a228cbf019314d2d8eaa7996a7e640",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:01a6cfa0b7c38940",
+      "path": "src/Core/src/Devices/DiscoveryReadAdmission.cs",
+      "range_sha256": "7e688a80ef6eda69d4586bab34a4705213fd58a411d5d1bcf528a46ca38269f6",
+      "current_file_sha256": "abbb245f2cc4f77f0edd2c59954aa2a3fc4196f2f1042762ff8ab58196051150",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:55cd5be1cd4ebf76",
+      "path": "src/Core/src/Devices/DiscoveryReadAdmission.cs",
+      "range_sha256": "9206bc4d6a50cb38cd4056edf187ae91e6f238a69549fe6312cb02a3cc0af867",
+      "current_file_sha256": "abbb245f2cc4f77f0edd2c59954aa2a3fc4196f2f1042762ff8ab58196051150",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:8347f3486ba80697",
+      "path": "src/Core/src/Devices/DiscoveryWorkerAdmission.cs",
+      "range_sha256": "472dc73c7e414a680f9c3e5c5abfbc450cccba581d67e0a548625be8e42d7284",
+      "current_file_sha256": "491a9a218172ebb220ad4989a11eae2b4e88c71acd6da53125a2204ea549ae50",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:353f089f75aa1ae7",
+      "path": "src/Core/src/Devices/FindYubiKeys.cs",
+      "range_sha256": "c10ae0e6cfc84c1c1d88f1774ba1404e5460c428cb9bb959c80bd877e43e7311",
+      "current_file_sha256": "bc8fbd214cd1c36be1cdd0fa17040aa8547f03394c7ffec254e6f5e256a4a376",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:3582bbf6b676e34c",
+      "path": "src/Core/src/Devices/FirmwareVersion.cs",
+      "range_sha256": "ecfe4bf8a108915a4c6987d22484a414e31bd9b2977daeb8cc6b00b942842d0f",
+      "current_file_sha256": "8dcf389cde5f6f6f2e1d3ddc9960a1aa972cd33f21ff5b2d729a3a71658cb822",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:52bcea037a7afb20",
+      "path": "src/Core/src/Devices/FirmwareVersion.cs",
+      "range_sha256": "0cce45eea03384626555e9e2875e70afcfd77b105f42761184f77c2aebcae6e5",
+      "current_file_sha256": "8dcf389cde5f6f6f2e1d3ddc9960a1aa972cd33f21ff5b2d729a3a71658cb822",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:942a063a6ba4b64c",
+      "path": "src/Core/src/Devices/RescanScheduler.cs",
+      "range_sha256": "17a9f21dd76ce73aa09fceaacd14f8b499dc6a4952e7fa1735a51059d34affbc",
+      "current_file_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:1aa9379b97a656a3",
+      "path": "src/Core/src/Devices/RescanScheduler.cs",
+      "range_sha256": "37bd2500b75ec023288619b5de042baf48e856959eca01fd4f41b5700c75cf3e",
+      "current_file_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:a8576919fc5ca1ac",
+      "path": "src/Core/src/Devices/RescanScheduler.cs",
+      "range_sha256": "69ae5f3955aa971985d159a12a2cfbc0c44027b1295f7c0922f9f87e9a4e24d7",
+      "current_file_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:704bec4f7f9cbcc7",
+      "path": "src/Core/src/Devices/RescanScheduler.cs",
+      "range_sha256": "c829df3a3b04f93a39475d29416a065d1b645f947ab8026fa58a3c0175008249",
+      "current_file_sha256": "b020afac7b0472018fa1a268cd7fe409c1fd43e615d2129eec61a9fc1d737c54",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:bc1ab2f42466f2f4",
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "range_sha256": "a8abd46ce8ec66126dbd41d12ecb95f23ed98c272ab991b44dc8a96af080f5fd",
+      "current_file_sha256": "aa7bdd0872f1558de3fe53ed7a92d92e1420b2816a3a15c38f0566f624412838",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:06b9b030214228fd",
+      "path": "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+      "range_sha256": "783a77f96558be455f5a948b00c6fb3e34818ce8b8bc99768db1481397a5cf6e",
+      "current_file_sha256": "cb499bcf262c92f001179ddbd561ba3063ef81bbe838beef32ac7a1ee7c2b102",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:dc379bca80113a80",
+      "path": "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+      "range_sha256": "aa716f8f25deadca17719916c69666561f563a41e36e2d871b2e825d110efa19",
+      "current_file_sha256": "cb499bcf262c92f001179ddbd561ba3063ef81bbe838beef32ac7a1ee7c2b102",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:9c98c412616de662",
+      "path": "src/Core/src/Devices/YubiKeyDevice.cs",
+      "range_sha256": "38ce94eae7cfe471ba1b6397121e7baca1175bf9e9c882942a9f709d1654e7d8",
+      "current_file_sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:e6ca5d7aa8b2f21d",
+      "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+      "range_sha256": "7ec0dbc5a428b5103b7944b04ee6499abd90d781c2b8e2f631b6b8b602ca6b07",
+      "current_file_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:af296d4153432a33",
+      "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+      "range_sha256": "aaaac1bf8138b02ddf3cd583cfccf8a9cf89c218e68307ea0a0247c0ff021da5",
+      "current_file_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:3fed58fa1f83f08d",
+      "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+      "range_sha256": "3922b2169eb534cf221e9b161acdf466d648cd7fae294fba2b24190775566ecb",
+      "current_file_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:ce4ac427cb0cef28",
+      "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+      "range_sha256": "867c63705f86a877a92d973f89d2695935863623bfa4717c9827431c3fd1b49f",
+      "current_file_sha256": "23513b1d1b43b8e16504de38ee5c5fbefd8c5617a7aeeee3df9941ac3fe2dd7b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:22ce88df9daddd31",
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "range_sha256": "a12f635b3c7b7548e170dc01c667ccace86c8bfbb17f512b41fd807d51302ec0",
+      "current_file_sha256": "c4e33e77acd4e1727750a8d458a0a282f356757dc00e23094c1fe8c3897ce5dd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:cf1e2081af8b8ac4",
+      "path": "docs/architecture/event-driven-device-discovery.md",
+      "range_sha256": "54530cfe088e7bdfd9ccc6f78c181be3b03c88df9f002a9b602de34866ffa547",
+      "current_file_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-A001/A003: unconditional listener cleanup and normal completion of every active subscription need the actual best-effort/healthy-versus-faulted qualification; SHARED correction assigned."
+    },
+    {
+      "id": "core-001:unit:a84e2cc173ca0753",
+      "path": "docs/architecture/event-driven-device-discovery.md",
+      "range_sha256": "5f2268e1792dd805e7a7071c81a764d69d93c41cd435f6d6b082af86256371e3",
+      "current_file_sha256": "4c841d4992e626de8d504ca8c776d696c3145fc818d1cc93e9082cd98bd2bc60",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:cb2232cff0d50f0d",
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "range_sha256": "3fe0b6995ff76bef7e669ec3ee710808a119d5e4ad2dace558bcc5dadb1a67ad",
+      "current_file_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:b77ef6f0677fffbf",
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "range_sha256": "73810f6c04a07f00350bdc104eea07d767bd5f2879fd694567b8c13ad83563ec",
+      "current_file_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:b97af2e9d8692339",
+      "path": "docs/migration/v1-to-v2.md",
+      "range_sha256": "ba093c58c1ff2199fd27df9f42db906a62328a76e99d3f462da0581b4efbf01e",
+      "current_file_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:689d848fe4e3b5fb",
+      "path": "docs/usage/device-discovery.md",
+      "range_sha256": "041b831dfa5e7c6fd98f816dbf172480e0060052299c25264ac9bbc27407c612",
+      "current_file_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:c7ac3ec8651f40bf",
+      "path": "docs/usage/device-discovery.md",
+      "range_sha256": "8d4f2dbe821bd14ba5b8f373489c47c33c183be7c5a5426f7579f943d3360398",
+      "current_file_sha256": "ecdacb7a7453d8f1d2214124fbb9830cad7d2124accb08b7bf54c7d52215136f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:f799935177b672e5",
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Device/ConnectionTypeFormatterTests.cs",
+      "range_sha256": "d8b6671a52fc5a0a49c92d898c4ef1e1392fd9f27f029cb9c97694348be83c95",
+      "current_file_sha256": "99b403eab17ded3591cce266abdd71b50a6a554c602c1522e23703261a29f2a5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:ae6fac7719619268",
+      "path": "src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Device/ConnectionTypeFormatterTests.cs",
+      "range_sha256": "4a85f0ae88e9c7214a35acf88dde564057a112445ebd04665b0ab48f8984a14b",
+      "current_file_sha256": "99b403eab17ded3591cce266abdd71b50a6a554c602c1522e23703261a29f2a5",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:7ea29e97c9a024e8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryRetentionTests.cs",
+      "range_sha256": "374343d54f98cc1ee5e0ae20088edd52788ada46e50a8bdbeb488acf48ed9c1f",
+      "current_file_sha256": "b8e506334e88c425decbe04ff0200d48f95d8d347822577aa9f36739105e097f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:bf27ed1d1811391d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryRetentionTests.cs",
+      "range_sha256": "76dadacc93ed2ad938892aa88d4c2513eda584e98ed2e80b7806fdff92e09de6",
+      "current_file_sha256": "b8e506334e88c425decbe04ff0200d48f95d8d347822577aa9f36739105e097f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:6d7b5fd78fd2e972",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryRetentionTests.cs",
+      "range_sha256": "ac58f10ad841f19ca91f53edcfedeb3546e3c0f5caf5d6df3bcacf6388fcfeaa",
+      "current_file_sha256": "b8e506334e88c425decbe04ff0200d48f95d8d347822577aa9f36739105e097f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:d2b1387699593935",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs",
+      "range_sha256": "75d8ca2b243f8be57edd60e5289660db9190308c717f93a2b2ea0c7e61ba0057",
+      "current_file_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:a9ee526a01572633",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs",
+      "range_sha256": "252a3d1b2d072d239e77e91d18f32122c6c912ff684de46c6b1cb85378441b2a",
+      "current_file_sha256": "d428031809c88b680202554426d293ec78dbd8e87ee8b695d19253b34dcbf113",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    },
+    {
+      "id": "core-001:unit:d8900ebff4499887",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+      "range_sha256": "ec7262466e3ef41ce1d0a348985d8fbdc30f6c2e42d709383fc0f94ddf5b8c04",
+      "current_file_sha256": "5ba047b54e86ebcc66b12a6b314d2ed7ce305337f06e21551ffee251b2aaab0f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete unit read by Astra; no additional false documentation claim found within the declared member/role scope. No runtime/native conformance inferred."
+    }
+  ]
+}

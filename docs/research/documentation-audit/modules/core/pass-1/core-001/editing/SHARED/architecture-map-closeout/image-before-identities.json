@@ -1,0 +1,62 @@
+[
+  {
+    "path": "docs/architecture/images/L0-context.svg",
+    "sha256": "2edb2dc9a9630ff0280dd7e440e0d70a4e597d57ef9e041491a3473cd6f2b1ab"
+  },
+  {
+    "path": "docs/architecture/images/L1-assembly-deps.svg",
+    "sha256": "f286b4fe2a51864b1cca02433e8ae878eda9560f3b94b88bcbcf0d4ad4187763"
+  },
+  {
+    "path": "docs/architecture/images/L2-layered-stack.svg",
+    "sha256": "ad43de95fbcc62aca2b7c715bdd6f8e526d95d7c745dc81cddd1bd86cf314ec3"
+  },
+  {
+    "path": "docs/architecture/images/L3-apdu-sequence.svg",
+    "sha256": "ee4e01847dd20fb3dd3d444df9167c67cc9e0e646cf7412a7eb0b68810cffa50"
+  },
+  {
+    "path": "docs/architecture/images/L3b-fido2-ctap-sequence.svg",
+    "sha256": "339ab23dd5bb4c84fca35ba937bed79066afe8036956a6be81a85bcc2244d20b"
+  },
+  {
+    "path": "docs/architecture/images/L4-connection.svg",
+    "sha256": "ac1542fc3913539549ceee67589ea2eb8d35f5f613ae53fa0cf8c7b0307c9713"
+  },
+  {
+    "path": "docs/architecture/images/L4-discovery.svg",
+    "sha256": "5f8d81bc74d0dae16d7ece84c8ad399bec2529514fbfa696eb873355f24f9575"
+  },
+  {
+    "path": "docs/architecture/images/image-manifest.txt",
+    "sha256": "af1a531bd5b60514162d0da3573803c631e3ddd72cbdfb486fa79d4115d48d59"
+  },
+  {
+    "path": "docs/architecture/images/png/L0-context.png",
+    "sha256": "3930f1c2a2436db8ff1d6e424ab909069620ac1781659e6d282fa3e264fad5a2"
+  },
+  {
+    "path": "docs/architecture/images/png/L1-assembly-deps.png",
+    "sha256": "d73935e67bbfca807bb6ba8b240be9a895cb3c1a367ce072630421986791757c"
+  },
+  {
+    "path": "docs/architecture/images/png/L2-layered-stack.png",
+    "sha256": "0aff328433833ca33445b6411e3e485f4070bc145f07b528a86fb1a127f95f7c"
+  },
+  {
+    "path": "docs/architecture/images/png/L3-apdu-sequence.png",
+    "sha256": "6cb539a8cf7bea2f52649329cd7e86b72b75e7a5d640965d77190065cf5905a2"
+  },
+  {
+    "path": "docs/architecture/images/png/L3b-fido2-ctap-sequence.png",
+    "sha256": "259cd79a6503bd6d21222799f746390c436e7e90eda38ea58eb451cb843c9a36"
+  },
+  {
+    "path": "docs/architecture/images/png/L4-connection.png",
+    "sha256": "fbc9615db7f1f5a235abf02f17ca557310f51519e990d4ae842ccf0b6ebe9cdc"
+  },
+  {
+    "path": "docs/architecture/images/png/L4-discovery.png",
+    "sha256": "08f312977ea6247018486d087af1db9048dd1aca064a9ff0bf0ffa8be04afe71"
+  }
+]

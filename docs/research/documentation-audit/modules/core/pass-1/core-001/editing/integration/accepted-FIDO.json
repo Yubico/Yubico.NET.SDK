@@ -1,0 +1,231 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "Content-reviewed FIDO documentation transfer; combined validation pending",
+  "patch_sha256": "8f34ede47c7e39c70a021393150b3a4c4fc4ae9cdc3d761f2de9444273b9740c",
+  "product_files": [
+    {
+      "path": "src/Ctap2/CLAUDE.md",
+      "sha256": "00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17"
+    },
+    {
+      "path": "src/Ctap2/README.md",
+      "sha256": "78da8838a98ddb4110d82b5f07a7188adb90cc4a932236f64738d0c766230891"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "sha256": "6e59a89acffe19912d0a8432fd313deba0ac0fcb18f43eb3189f767c07f8f29b"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/HidBackend.cs",
+      "sha256": "149367792f1fe0fb5b9c1389cd77dcc5dfc709daeee14e9c581df0bee7444f50"
+    },
+    {
+      "path": "src/Ctap2/src/Backend/SmartCardBackend.cs",
+      "sha256": "447797997e8f407d97bc30bec29c428d80c4c5f20370c23bcdc53a02b622a7df"
+    },
+    {
+      "path": "src/Ctap2/src/Ctap2Session.cs",
+      "sha256": "d2bf4fe2344bb17b49892fc97dbd824c1381f570ec882ba6a4f1ef16e4f14ff9"
+    },
+    {
+      "path": "src/Ctap2/src/ICtap2Session.cs",
+      "sha256": "30640a8723290b03020cf3448fe3e54d331510975854b79258974282d0c99dc3"
+    },
+    {
+      "path": "src/Ctap2/tests/CLAUDE.md",
+      "sha256": "2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8"
+    },
+    {
+      "path": "src/WebAuthn/CLAUDE.md",
+      "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+    },
+    {
+      "path": "src/WebAuthn/README.md",
+      "sha256": "fbfe9912165f654cedc40e72ab5a868d7b5c6b171de63d5a7fb9bb29e4dc7a5a"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "sha256": "78f359a17f9743cda2fd9ab11e599219241a36ac10e414354c5d903ea04915e7"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "sha256": "50e087309ced66d0fba57b6e9fb924e5995d0155c2f71082104672c45f4750ca"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "sha256": "6e7831adf4b8e067d1f08687f0d0ca00ba848d05bbd11232935a710bca822e3f"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "sha256": "543741db31d0b1aad86a96012f6d9a75cde6c613e33425242a6868f5022fff7a"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "sha256": "11d3038d26597aac1a85b5ee9bec85cd8d34b1f7d64e9131626e92a24441c187"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/edit-FIDO-boundaries.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-FIDO-boundaries.md",
+      "bytes": 5598,
+      "sha256": "2ee4a28350bbc0921cfabbc788cc5a1b406ae61291c8d12af22bfdf6a328ad4d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/record.py",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/record.py",
+      "bytes": 16863,
+      "sha256": "a4b457c5b421d57c1e1a82e9ad2f6bb99cec12e31b5f8b13aa7e59817295b993"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/input-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/input-identities.json",
+      "bytes": 7219,
+      "sha256": "ddf335d17068299b9c9cede01645d0129dfc3595f0e0ea8dd7a43b6096f2ab32"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/path-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/path-decisions.json",
+      "bytes": 410365,
+      "sha256": "132f77440148d27dde89cc515ed4f6befad5697583d1ed7bbe5e5f84c323772e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/candidate-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/candidate-decisions.json",
+      "bytes": 87707,
+      "sha256": "acd089d5a5306892bc00414cb82495905b03564d5a9b3d7ed14e54f3ab4e3a84"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/examples.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/examples.json",
+      "bytes": 53200,
+      "sha256": "f45ec00c6bb423644b75ea5dffb2a13ab0941f4fff9c5675b43b84cd2373d5ab"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/link-check.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/link-check.json",
+      "bytes": 6392,
+      "sha256": "0d2535711051bfd68fcba48ff747a8caba842aff1cf19c9cbd646251da30f8cf"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/product.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/product.patch",
+      "bytes": 31675,
+      "sha256": "904ab905bc35609168302a65edd118cc1395bafe016b5d1bca15a3d191e3e78f"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/verification.json",
+      "bytes": 4049,
+      "sha256": "78ad734be0aaccb93332acd3e327e1c05e3b5c639b4383c11642d228d44802e8"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/citations-and-handoff.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/citations-and-handoff.md",
+      "bytes": 12614,
+      "sha256": "eb262fac144ab0408d29e355561f26515e23b364c343b342a5d440e0ac1267c6"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/review.md",
+      "bytes": 14339,
+      "sha256": "13370b70854f61a61e96caeb805e274d19eecf61ed3cbdca3e1acd3962504c9e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/review-identities.json",
+      "bytes": 7859,
+      "sha256": "2e40054960030646fbe6d836608ee770cd8f235d1e7bd79adf7efd695fb4118d"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/preserved-inputs.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/preserved-inputs.json",
+      "bytes": 58313,
+      "sha256": "83e13e40c0443c238b04f91d3f05ab4e1bbe63a18be0d25c3a87ed6ce5878d06"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/before-1.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/before-1.snapshot",
+      "bytes": 23616,
+      "sha256": "24db84d846cc06b4c4a1b18694c210d368d169e37bb6b8c1afb4a9f316bd433e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/before-2.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/before-2.snapshot",
+      "bytes": 9886,
+      "sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/before-3.snapshot",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/before-3.snapshot",
+      "bytes": 23764,
+      "sha256": "7d866ccce2cd3db28dd022cf132f7eb53b9e378167b6909f734c3ade9c5c2c8b"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/source-correction-report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/source-correction-report.md",
+      "bytes": 6677,
+      "sha256": "1d4e52257fc6e564098c92271899d9d9d9e1f20262a68b87f0e600c2eeb0f9fc"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/corrections.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/corrections.patch",
+      "bytes": 3631,
+      "sha256": "fe5de6ae61ec5d2c43db75c9ef8c438a4b4219608f172880802e48c5abf9af01"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/path-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/path-decisions.json",
+      "bytes": 412034,
+      "sha256": "341495341b518f659afafe934f92e668520cc5da871e04bf112d9cb233a49b09"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/candidate-decisions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/candidate-decisions.json",
+      "bytes": 88254,
+      "sha256": "ab52e9dd455ba6c3e3bf2823b06183d00ef450cd79aa01ac95cd250497d93a7b"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/examples.json",
+      "bytes": 54694,
+      "sha256": "e68d2ec8610d36e57fd02638351b5a357d63baadf2ee1fb5cf6b6cc19d1cdd8a"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/product.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/product.patch",
+      "bytes": 35173,
+      "sha256": "8f34ede47c7e39c70a021393150b3a4c4fc4ae9cdc3d761f2de9444273b9740c"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/changed-files.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/changed-files.json",
+      "bytes": 11447,
+      "sha256": "c0967717233888bcbbff0f53ae91346fd490a095ac7658c09e6c097ad6714655"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/source-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/source-identities.json",
+      "bytes": 2688,
+      "sha256": "eae23e54a3cffddd5c803394c03c6a51a752f08b438b79d4b6f8294e839010c8"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/verification.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/verification.json",
+      "bytes": 1906,
+      "sha256": "0bb9f7f8f422f99322b95b4bae993a5171c737f3b3d33b3aa980e0d75bd9d2ae"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+      "bytes": 7385,
+      "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-fido-boundaries/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review-identities.json",
+      "bytes": 7008,
+      "sha256": "2972441e086fe94701f562e543eddbd410ba30a54f7e612c0d8ce08d61a7d4bb"
+    }
+  ]
+}

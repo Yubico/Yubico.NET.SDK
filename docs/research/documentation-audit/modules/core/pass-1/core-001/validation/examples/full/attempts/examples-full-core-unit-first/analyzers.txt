@@ -1,0 +1,14 @@
+/home/rupicola/.nuget/packages/microsoft.codeanalysis.analyzers/5.3.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.Analyzers.dll
+/home/rupicola/.nuget/packages/microsoft.codeanalysis.analyzers/5.3.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.Analyzers.dll
+/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
+/home/rupicola/.nuget/packages/microsoft.codeanalysis.netanalyzers/9.0.0/analyzers/dotnet/cs/Microsoft.CodeAnalysis.NetAnalyzers.dll
+/home/rupicola/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Logging.Generators.dll
+/home/rupicola/.nuget/packages/microsoft.extensions.options/10.0.2/analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Options.SourceGeneration.dll
+/home/rupicola/.nuget/packages/xunit.analyzers/1.23.0/analyzers/dotnet/cs/xunit.analyzers.dll
+/home/rupicola/.nuget/packages/xunit.analyzers/1.23.0/analyzers/dotnet/cs/xunit.analyzers.fixes.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll
+/home/rupicola/.local/share/mise/dotnet-root/packs/Microsoft.NETCore.App.Ref/10.0.15/analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll

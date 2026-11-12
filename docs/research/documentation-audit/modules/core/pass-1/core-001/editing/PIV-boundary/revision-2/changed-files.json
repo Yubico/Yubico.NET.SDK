@@ -1,0 +1,525 @@
+[
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "before_sha256": "2e99713c84804abd7b28cf05ac1495a2f5ef488cb18c85478aa1784e5fe28ce3",
+    "after_sha256": "de79b8e299566ab1260fe758bb5fff3dd42da89bb3ef69524cfdf7a47f75577a",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 79,
+        "before_count": 0,
+        "after_start": 79,
+        "after_count": 13
+      },
+      {
+        "before_start": 213,
+        "before_count": 0,
+        "after_start": 226,
+        "after_count": 5
+      },
+      {
+        "before_start": 230,
+        "before_count": 1,
+        "after_start": 248,
+        "after_count": 3
+      }
+    ],
+    "predecessor_sha256": "de79b8e299566ab1260fe758bb5fff3dd42da89bb3ef69524cfdf7a47f75577a",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/README.md",
+    "before_sha256": "d62600bc7ffa804d9ea11b91d2ab7b9e762482eedd7ac5df2e9e9b7ddf653e9f",
+    "after_sha256": "4d5af3e8939230a5c2247821f97742a33182d1a53d6d25ce1adfab4f7e00a05f",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004",
+      "CORE-PIV-X006"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 28,
+        "before_count": 0,
+        "after_start": 28,
+        "after_count": 6
+      },
+      {
+        "before_start": 64,
+        "before_count": 0,
+        "after_start": 70,
+        "after_count": 20
+      },
+      {
+        "before_start": 97,
+        "before_count": 0,
+        "after_start": 123,
+        "after_count": 7
+      },
+      {
+        "before_start": 150,
+        "before_count": 0,
+        "after_start": 183,
+        "after_count": 2
+      },
+      {
+        "before_start": 151,
+        "before_count": 2,
+        "after_start": 186,
+        "after_count": 0
+      },
+      {
+        "before_start": 155,
+        "before_count": 0,
+        "after_start": 188,
+        "after_count": 1
+      },
+      {
+        "before_start": 188,
+        "before_count": 0,
+        "after_start": 222,
+        "after_count": 2
+      },
+      {
+        "before_start": 189,
+        "before_count": 2,
+        "after_start": 225,
+        "after_count": 0
+      },
+      {
+        "before_start": 193,
+        "before_count": 0,
+        "after_start": 227,
+        "after_count": 1
+      },
+      {
+        "before_start": 211,
+        "before_count": 0,
+        "after_start": 246,
+        "after_count": 5
+      },
+      {
+        "before_start": 313,
+        "before_count": 0,
+        "after_start": 353,
+        "after_count": 4
+      },
+      {
+        "before_start": 343,
+        "before_count": 0,
+        "after_start": 387,
+        "after_count": 7
+      },
+      {
+        "before_start": 398,
+        "before_count": 0,
+        "after_start": 449,
+        "after_count": 4
+      },
+      {
+        "before_start": 424,
+        "before_count": 0,
+        "after_start": 479,
+        "after_count": 8
+      }
+    ],
+    "predecessor_sha256": "c3ef3a2cbc1fabde7177e3c7255558a7b2bb38098c94c96ee08ea9be8bf046c6",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 183,
+        "before_count": 0,
+        "after_start": 183,
+        "after_count": 2
+      },
+      {
+        "before_start": 184,
+        "before_count": 2,
+        "after_start": 186,
+        "after_count": 0
+      },
+      {
+        "before_start": 188,
+        "before_count": 0,
+        "after_start": 188,
+        "after_count": 1
+      },
+      {
+        "before_start": 221,
+        "before_count": 0,
+        "after_start": 222,
+        "after_count": 2
+      },
+      {
+        "before_start": 222,
+        "before_count": 2,
+        "after_start": 225,
+        "after_count": 0
+      },
+      {
+        "before_start": 226,
+        "before_count": 0,
+        "after_start": 227,
+        "after_count": 1
+      },
+      {
+        "before_start": 244,
+        "before_count": 0,
+        "after_start": 246,
+        "after_count": 5
+      }
+    ]
+  },
+  {
+    "path": "src/Piv/examples/PivTool/README.md",
+    "before_sha256": "f99a39262fbb13470081c013ce5bc8bdb9a7470ae7e5f22d7c855571e451f71a",
+    "after_sha256": "c5fc7c6d5bc7c09d96157477afd22a8e9e238427d7ac348342dddd100b28f580",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X006"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 5,
+        "before_count": 1,
+        "after_start": 5,
+        "after_count": 1
+      },
+      {
+        "before_start": 131,
+        "before_count": 0,
+        "after_start": 131,
+        "after_count": 5
+      },
+      {
+        "before_start": 144,
+        "before_count": 1,
+        "after_start": 149,
+        "after_count": 3
+      }
+    ],
+    "predecessor_sha256": "899ad7a7119ab202fcd98955f81b051d626b505943259df6b354568b4db01320",
+    "predecessor_to_revision_2_ranges": [
+      {
+        "before_start": 5,
+        "before_count": 1,
+        "after_start": 5,
+        "after_count": 1
+      },
+      {
+        "before_start": 149,
+        "before_count": 1,
+        "after_start": 149,
+        "after_count": 3
+      }
+    ]
+  },
+  {
+    "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+    "before_sha256": "f4c01518680646dc7f960a61afb36a43ffbdecdfffe1a1b22633945e77c1aace",
+    "after_sha256": "01797e8aed2d0f884f8033201779db7717927bb6829f8179ae7ea58fb4da2f4b",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X003"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 283,
+        "before_count": 1,
+        "after_start": 283,
+        "after_count": 1
+      }
+    ],
+    "predecessor_sha256": "01797e8aed2d0f884f8033201779db7717927bb6829f8179ae7ea58fb4da2f4b",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/src/IPivSession.cs",
+    "before_sha256": "1d3f05a16d3cd60f892def4beb1c20ea8a9e1226d19520e957540f35d7994447",
+    "after_sha256": "6cf9b7d917d852316d6292c840cec4b9b15739ff437c98cff926b7a9f672db7f",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 36,
+        "before_count": 0,
+        "after_start": 36,
+        "after_count": 10
+      },
+      {
+        "before_start": 48,
+        "before_count": 0,
+        "after_start": 58,
+        "after_count": 2
+      },
+      {
+        "before_start": 78,
+        "before_count": 0,
+        "after_start": 90,
+        "after_count": 2
+      },
+      {
+        "before_start": 94,
+        "before_count": 0,
+        "after_start": 108,
+        "after_count": 2
+      },
+      {
+        "before_start": 109,
+        "before_count": 0,
+        "after_start": 125,
+        "after_count": 2
+      }
+    ],
+    "predecessor_sha256": "6cf9b7d917d852316d6292c840cec4b9b15739ff437c98cff926b7a9f672db7f",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/src/IYubiKeyExtensions.cs",
+    "before_sha256": "98d029b71988128578d8ffa4bf094c45f130d6846edf2081f6f0246477e44ef5",
+    "after_sha256": "951665fa054ab7906a06cee19784f4b91f2d1dc03050db879206e2b0c2c0f46c",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 37,
+        "before_count": 0,
+        "after_start": 37,
+        "after_count": 6
+      }
+    ],
+    "predecessor_sha256": "951665fa054ab7906a06cee19784f4b91f2d1dc03050db879206e2b0c2c0f46c",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/src/Keys/KeyProtocol.cs",
+    "before_sha256": "2b4f822663d0e5373591e8d73d23ad8d672dc0fc14b7cfd6a45b96fce10cf3e7",
+    "after_sha256": "cbb73402f1c4ae839c8ca6efe7c3930603c5f596351a20e251b8c9d71691b73f",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 395,
+        "before_count": 1,
+        "after_start": 395,
+        "after_count": 2
+      }
+    ],
+    "predecessor_sha256": "cbb73402f1c4ae839c8ca6efe7c3930603c5f596351a20e251b8c9d71691b73f",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/src/PivSession.cs",
+    "before_sha256": "4b6b75402b8d6007a1e98b065b61fb6e856ac607b13275df3a378a8739f8e9e4",
+    "after_sha256": "cba2261e6c6f591de3d6cb189fc092dfab8f1295b748c18b7ab1715d0dc9349a",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X002",
+      "CORE-PIV-X003",
+      "CORE-PIV-X004"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 100,
+        "before_count": 0,
+        "after_start": 100,
+        "after_count": 8
+      },
+      {
+        "before_start": 129,
+        "before_count": 2,
+        "after_start": 137,
+        "after_count": 2
+      },
+      {
+        "before_start": 199,
+        "before_count": 1,
+        "after_start": 207,
+        "after_count": 2
+      }
+    ],
+    "predecessor_sha256": "cba2261e6c6f591de3d6cb189fc092dfab8f1295b748c18b7ab1715d0dc9349a",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs",
+    "before_sha256": "cc61a30ede310a67f422793311bf769537d605e78664efb94b1d70c539e0cb10",
+    "after_sha256": "62124c562e12fa72dbd982b4b704aeb867526f833ed1489a4f50974f7940c68c",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X005"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 56,
+        "before_count": 2,
+        "after_start": 56,
+        "after_count": 3
+      }
+    ],
+    "predecessor_sha256": "62124c562e12fa72dbd982b4b704aeb867526f833ed1489a4f50974f7940c68c",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs",
+    "before_sha256": "cf328dd691a6eadbfae238cd197fd6a018dd0b404a05f5fe51f9b7698a33d4e9",
+    "after_sha256": "cdbc621258158f25578792a576c0463d5e1694f08ff44ed7ac090caf566e6bb5",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X002",
+      "CORE-PIV-X005"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 24,
+        "before_count": 4,
+        "after_start": 24,
+        "after_count": 4
+      },
+      {
+        "before_start": 75,
+        "before_count": 0,
+        "after_start": 75,
+        "after_count": 2
+      }
+    ],
+    "predecessor_sha256": "cdbc621258158f25578792a576c0463d5e1694f08ff44ed7ac090caf566e6bb5",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs",
+    "before_sha256": "34ee403dc5148558ba2ee5e9512679eec7317b32c2af753d6ebddb0371c6bfd9",
+    "after_sha256": "3d304c794c59f59b4b7ade5f5f285c97598e2650566f4119847687080901e9c5",
+    "before_ends_in_newline": true,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X001",
+      "CORE-PIV-X005"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 27,
+        "before_count": 6,
+        "after_start": 27,
+        "after_count": 3
+      },
+      {
+        "before_start": 35,
+        "before_count": 4,
+        "after_start": 32,
+        "after_count": 4
+      },
+      {
+        "before_start": 71,
+        "before_count": 1,
+        "after_start": 68,
+        "after_count": 2
+      },
+      {
+        "before_start": 80,
+        "before_count": 2,
+        "after_start": 78,
+        "after_count": 2
+      },
+      {
+        "before_start": 94,
+        "before_count": 2,
+        "after_start": 92,
+        "after_count": 2
+      },
+      {
+        "before_start": 103,
+        "before_count": 1,
+        "after_start": 101,
+        "after_count": 2
+      }
+    ],
+    "predecessor_sha256": "3d304c794c59f59b4b7ade5f5f285c97598e2650566f4119847687080901e9c5",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs",
+    "before_sha256": "a4ea10714d01506c3d97ac10cdabbf54c3dd54c37da9f3d2dabf2b02929c3d62",
+    "after_sha256": "6b77a88bb23a9afa0b47eccc56ccec6ee16301995c08401b0efd1394e175ec70",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X003"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 123,
+        "before_count": 2,
+        "after_start": 123,
+        "after_count": 2
+      }
+    ],
+    "predecessor_sha256": "6b77a88bb23a9afa0b47eccc56ccec6ee16301995c08401b0efd1394e175ec70",
+    "predecessor_to_revision_2_ranges": []
+  },
+  {
+    "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs",
+    "before_sha256": "c6f24e1db58b8258b65c7398959f85bf6319496c89859ce9fc3d02eb9e5277e2",
+    "after_sha256": "9d2699c1e4d1516d1e146e8c439d8fcd5c0d70caa1bd07036e3ebc5ac0d991d7",
+    "before_ends_in_newline": false,
+    "after_ends_in_newline": true,
+    "candidate_ids": [
+      "CORE-PIV-X004",
+      "CORE-PIV-X005"
+    ],
+    "changed_ranges": [
+      {
+        "before_start": 195,
+        "before_count": 3,
+        "after_start": 195,
+        "after_count": 3
+      },
+      {
+        "before_start": 506,
+        "before_count": 3,
+        "after_start": 506,
+        "after_count": 3
+      },
+      {
+        "before_start": 548,
+        "before_count": 2,
+        "after_start": 548,
+        "after_count": 3
+      }
+    ],
+    "predecessor_sha256": "9d2699c1e4d1516d1e146e8c439d8fcd5c0d70caa1bd07036e3ebc5ac0d991d7",
+    "predecessor_to_revision_2_ranges": []
+  }
+]

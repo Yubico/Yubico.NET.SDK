@@ -1,0 +1,106 @@
+{
+  "pattern": "QueryFips|FipsMode|SetLegacy|LegacyDeviceConfig|SetModeAsync",
+  "snapshots": [
+    {
+      "path": "src/Core/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/Core/src/PublicAPI.Unshipped.txt",
+      "sha256": "e993cf43c205ac7c8abc62afd1065e5acb16f7c1b7d6b1012f4954abe20dce76",
+      "matches": []
+    },
+    {
+      "path": "src/Ctap2/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/Ctap2/src/PublicAPI.Unshipped.txt",
+      "sha256": "c50ce758af58fac75685c66fb1bca2355094ecf02b1411008818ced5fe161ef5",
+      "matches": []
+    },
+    {
+      "path": "src/Management/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/Management/src/PublicAPI.Unshipped.txt",
+      "sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+      "matches": []
+    },
+    {
+      "path": "src/Oath/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/Oath/src/PublicAPI.Unshipped.txt",
+      "sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e",
+      "matches": []
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Unshipped.txt",
+      "sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf",
+      "matches": []
+    },
+    {
+      "path": "src/Piv/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/Piv/src/PublicAPI.Unshipped.txt",
+      "sha256": "47a8ec228596fa558c78ec5e3ac2b6c41de81c1449092b7f01ee0a19127a4ecd",
+      "matches": []
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+      "sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+      "matches": []
+    },
+    {
+      "path": "src/WebAuthn/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/WebAuthn/src/PublicAPI.Unshipped.txt",
+      "sha256": "58bf398b569712e8c7fd2cc4331daac4d03eee568e4537c01fcfc1e1f6329c41",
+      "matches": []
+    },
+    {
+      "path": "src/YubiHsm/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/YubiHsm/src/PublicAPI.Unshipped.txt",
+      "sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+      "matches": []
+    },
+    {
+      "path": "src/YubiOtp/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "matches": []
+    },
+    {
+      "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+      "sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+      "matches": []
+    }
+  ],
+  "scope": "Complete current snapshot name search corroborates the full owning interfaces, not semantic equivalence of every v1 API or device capability."
+}

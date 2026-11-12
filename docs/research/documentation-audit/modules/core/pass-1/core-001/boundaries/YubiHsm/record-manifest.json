@@ -1,0 +1,101 @@
+{
+  "scope": "BOUNDARY-YubiHsm-owned-records-only",
+  "excludes_self": true,
+  "files": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/analysis.md",
+      "bytes": 20458,
+      "sha256": "f6accecda2ab9f08527a5cc6f74fa7701e0425aa7a1aa40472dda50a97e3521b"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/candidate-index.json",
+      "bytes": 13115,
+      "sha256": "98eda140ff2bc7dd6ee04b11e4ac5ea2ea881aee9fb0972f99fb31caea310b70"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/candidates.md",
+      "bytes": 14811,
+      "sha256": "7a37b54a1476312e19d7bbb90ff75fb2db3d74c3d310d2390c73a79c6f339c77"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/clean-nominees.json",
+      "bytes": 17271,
+      "sha256": "3a94c9134bbdb94fcf4c3b3d7dd935cbf71d58506e9ad0b9fc0f252dcf931344"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/corrections.md",
+      "bytes": 1592,
+      "sha256": "58ea4455808f5b0b5baf306c5a6f093b2753e7f40bf7f5368a781d24f934296a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/coverage-summary.json",
+      "bytes": 1071,
+      "sha256": "fd7ec1b9bde240502e6d64745d9ca3f869a26f1ee5505065f0852578208fb1ba"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/dependency-dispositions.json",
+      "bytes": 20393,
+      "sha256": "f33083fe267dc07ea5e64226e7642f08afa90387194863e453c8573751906da1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/file-dispositions.json",
+      "bytes": 64719,
+      "sha256": "5566701bf63281b194662c195f8235ec0c4486689e74fe6a032e3eda5604c227"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/inherited-dispositions.json",
+      "bytes": 20935,
+      "sha256": "7d596fc91f57f88eaa90aeae6e91783ad99b0c6bb215a38327511941f2094d07"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/oracles-and-proposals.md",
+      "bytes": 12242,
+      "sha256": "de2dc09a1feb2cab16d5f7b85bca8b095ffab31958206c2f83dbe2ce70969a1d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/prepare-records.py",
+      "bytes": 41135,
+      "sha256": "f202d68cd574f376d329b508c63db38b4b85f793752881585827fc440d88902d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/source-identities.json",
+      "bytes": 5651,
+      "sha256": "0dc2fd4dc635837090adb8e059edf4b06a1bdb616edc028386999de9e83de253"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/sources.md",
+      "bytes": 9112,
+      "sha256": "3193a7babadad1e26900fd653a3135812a4f5c56b8248e29c7541a738f0eb4a4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/unit-dispositions.json",
+      "bytes": 326307,
+      "sha256": "ef9898627c3eb00aa348b285a7258f68df54004a88d0c704ff46b2bcb03749e8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verification-attempt-1.txt",
+      "bytes": 673,
+      "sha256": "584533af4a9063db74b77d7484e35c6bb830b090a99008c54a5623930355261a"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verification-receipt.json",
+      "bytes": 955,
+      "sha256": "430646fbaeb68a8a082a497c7b1833a9f022442f4d59139ec2e6b1960d74f58d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verification.json",
+      "bytes": 622,
+      "sha256": "2acbe4a7b06392c1ff4518164107ebe702d2bf28eb640e3e5c0272c5e07c3be1"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verify-records.py",
+      "bytes": 6425,
+      "sha256": "82c5b88e8ae0f55f3c9711343367ea6cbd94b8ef31b50efe459d3ac3a9db0d86"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-YubiHsm.md",
+      "bytes": 11853,
+      "sha256": "fbb36ae91c63f1fbcb468627bcf0e33398ac6bdbf309262854ba96dba31a68ea"
+    }
+  ]
+}

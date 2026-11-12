@@ -1,0 +1,28 @@
+{
+  "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "current_sha256": "3479ebe650269decdc16377febf1f1ee32ba2ce886269cd46094bb317e00d3ea",
+  "pinned_sha256": "0915db50cd6c497e48eaf6cdbbcfb9a88804c0a0c53eb8bc2f7e9096c7229942",
+  "current_method_start_line": 50,
+  "current_method_text": "    [Fact]\n    public void AesCmac_SubkeyGeneration_MatchesRfc4493()\n    {\n        using var cmac = new AesCmac(TestKey);\n\n#if DEBUG\n        Assert.True(cmac.DebugGetSubkey1().SequenceEqual(ExpectedK1));\n        Assert.True(cmac.DebugGetSubkey2().SequenceEqual(ExpectedK2));\n#else\n    // This release branch makes no subkey assertion; the separate RFC cases check full MAC values.\n    Assert.True(true);\n#endif\n    }\n\n",
+  "pinned_method_start_line": 50,
+  "pinned_method_text": "    [Fact]\n    public void AesCmac_SubkeyGeneration_MatchesRfc4493()\n    {\n        using var cmac = new AesCmac(TestKey);\n\n#if DEBUG\n        Assert.True(cmac.DebugGetSubkey1().SequenceEqual(ExpectedK1));\n        Assert.True(cmac.DebugGetSubkey2().SequenceEqual(ExpectedK2));\n#else\n    // In release builds, skip internal validation\n    // RFC vectors provide end-to-end verification\n    Assert.True(true);\n#endif\n    }\n\n",
+  "debug_branch_lines_exactly_unchanged": true,
+  "assert_true_current_line": 60,
+  "assert_true_pinned_line": 61,
+  "assert_true_exact_text": "    Assert.True(true);\n",
+  "release_comment_current_leading_spaces": 4,
+  "release_comments_pinned_leading_spaces": [
+    4,
+    4
+  ],
+  "current_statement_following_whitespace_span": "\n\n",
+  "pinned_statement_following_whitespace_span": "\n\n",
+  "actual_solution_configuration_log_entries": [
+    "Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/.editorconfig'.",
+    "Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.",
+    "Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Core.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'."
+  ],
+  "folder_command_defines_project_debug_symbols": false,
+  "qualification": "Folder command has no project configuration/DEBUG defines. Release-branch indentation requests are consistent with default parsing; no Release build, semantic check, or pinned formatter run was executed."
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/correction.patch",
+    "sha256": "ced6f6028146c99a977bbb07285663cf7d0a8bf0b7747d1344fbb9cfbc1866c2",
+    "bytes": 1144
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/current-identities.json",
+    "sha256": "2906c9a9754a167e8019712c3c9ecae052ff41fd45c9c44eeee30f6f7c762402",
+    "bytes": 51838
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/mapping.json",
+    "sha256": "33f78618d150aa9c7435a20172927a2a66d89da3a0373c81ad5c549358aeaaa3",
+    "bytes": 1724
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/preserved-prior-records.json",
+    "sha256": "b397f78428d9c852d9c2b1f8a50a2c8cc9c38cfb707128c6c53a1a41f8d140b0",
+    "bytes": 2532
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/product.patch",
+    "sha256": "159a59af1d631f1199e60510f0f85319c3ff58230c168d2a842058096d7b2047",
+    "bytes": 125099
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/report.md",
+    "sha256": "07545233e870ede6d688a08c1b3f1ff010df0cc88f05b501d9f6cf6632c89374",
+    "bytes": 7739
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/C/revision-2/verification.json",
+    "sha256": "7f70cb3c3bc194a588f0ce9870714f11600e8fd4f8f9c167c1ee182585cb375d",
+    "bytes": 1304
+  }
+]

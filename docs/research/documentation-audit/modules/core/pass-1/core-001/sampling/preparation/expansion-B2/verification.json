@@ -1,0 +1,112 @@
+{
+  "result": "STRUCTURAL-EXPANSION-AND-SEPARATE-REPLACEMENT-PREPARATION; NO CONTENT VERDICTS",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_B1_reads_reconciled": 111,
+  "original_B2_reads_reconciled": 120,
+  "material_XML_additional": 17,
+  "original_XML_quota": 17,
+  "proposed_XML_total": 34,
+  "administrative_dormant_exclusion_ids": 3,
+  "mandatory_eligibility_replacements": 3,
+  "conditional_history_replacements": 7,
+  "selected_material_misses": 3,
+  "miss_clean_credit": 0,
+  "qualified_history_units": 7,
+  "historical_clean_credit_by_preparer": 0,
+  "overlaps_prior_selections_or_known_accepted_edits": 0,
+  "original_983_and_prior_42_selections": "BYTE-PRESERVED; input hashes bind exact records",
+  "accepted_manifest_paths": 360,
+  "accepted_target_role_diff_paths": 21,
+  "final_denominator": null,
+  "current_mapping": "DEFERRED to final canonical reconciliation",
+  "input_sha256": {
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/expand.py": "c89a45930b26b89132c9f8a172acb1d8320507999c57c4caded1f2a692835fc9",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/population.json": "48442fdec87f94bf432608b9dd07d9004d8f117e558e3db668f7e346b9c2a75c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/selection.json": "c1cfa09bdee585d72a51729f445706a10e1095bc6bcb7e831f2e6db316216eb2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A/additional-selection.json": "f25aba912998b4e64055f736e8e076e9f729d885ddc67f6a695efde97d2fb778",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-A-followup/additional-selection.json": "f90f5635877e18150749cb7bb272babc00c29e5a15b7232e400fd94e0798e87f",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/strata.json": "96d2f8237a8195eef7cdbaa8e110c424393450e120e8bd516717cf22c246b1e8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/files.json": "27f09d24937240b7bc9da83392a4a5d4e05f9355245fdc97e5d2d69d8293af90",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B1-verdicts.json": "802fd7985e992840e3befb4cde7076f61b17b31114a49fad4cc25113977a9158",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B1.md": "ccb070cc50b9a476bbaad8c4cc7023654080867d6547849a69d1f21b69242d6e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2-verdicts.json": "2e0da818e19fdac987d11b6a925f28414acae2f36d9af081faaaabf0b783cbba",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/coordinator/read-B2.md": "68b1e67e122d535ff474fea6d108f09ee77c5fe535604c80b8a71311aeb4def6",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sampling-history-clarification.md": "861a683afa5aa963274ead84e4b674d53125a5f29068c0185e67231b1f6d4d46",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json": "8012cb83332a4ffc6aaae251ee97bb489986e48305cd566aa226d4889a57673e",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-A-C.json": "ab02275eeac6cf721239b8965ebb5ac0c841df9e65fffab8fb3f0eafc082daa2",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-protocols.json": "3cad8f595449bab9c38fe4e017a0f2b212010639c1bff7862161f535d5a6cab0",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-FIDO.json": "141942e73ebf22918e2cbb03ef24f17fc48e59c959e2faf08c2fc98c0c0ccea3",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-transports.json": "8d22ef4cf166ca9b43a21339d745735f1efbfc3bdaefdeedd0881d6c892e2e0a",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-SHARED.json": "98a749f7a5853f4da2fd8c3f83a9cbfb5c0112d977fc3641862d65fb441a20ef",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-applets.json": "196b53e3f397b0e241793d4413c4cbf761f3d60550ed4f4d36e4fc97a568164c",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-PGP-PIV.json": "9945efaa98a20e502fc9aeb8ac7555faabc9fd8c78aaef9dbc36cd6baeaa85a5",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-A.json": "7127792418f5fda0ca4b12e89e9a662d00b30ef37bbb0912240e2e8add80e00b",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-sampling-SHARED.json": "78ececb0a2687e9c2d42f8d27aef9540e0cca7b428b467849e1aac3d771d1366",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/accepted-external.json": "d95731a23966df7564ef056653ca7f235eaa31320dc346a493ccab4b75eae936",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/prepare.py": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/accepted-current-B1-B2-role-scope.diff": "dd71e4957db1a392d6d6c035fc71d8e0b3f74244a8c423397f453509605d6d29"
+  },
+  "outputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/accepted-current-B1-B2-role-scope.diff",
+      "bytes": 90519,
+      "sha256": "dd71e4957db1a392d6d6c035fc71d8e0b3f74244a8c423397f453509605d6d29"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/accepted-overlap-inputs.json",
+      "bytes": 29280,
+      "sha256": "aa79280b5ee74db95b339a43256fd3b0c8d6bd5b6f22039a061bff2d27ba7d7e"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/additional-selection.json",
+      "bytes": 17697,
+      "sha256": "647de2584cb592d348062f4882cb024231e53573efab02e460c024d7dfd42832"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/conditional-history-replacements.json",
+      "bytes": 7074,
+      "sha256": "8ddb21c0d1f5a9956f1ca0b01517f2ca3b8f643be4cc0ee2867b1e27e2d1dee9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/expand.py",
+      "bytes": 19849,
+      "sha256": "c89a45930b26b89132c9f8a172acb1d8320507999c57c4caded1f2a692835fc9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/history-qualification-overlay.json",
+      "bytes": 4746,
+      "sha256": "48a07a3cf943bff8caf400f1dd53d0cbc250d9c89aaa060e72f40686156103be"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/ineligibility-overlay.json",
+      "bytes": 1490,
+      "sha256": "6a1bd18b529ae0d4434402ee3c19f9557b9ad3a38cc931e5df76b855581a0af9"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/miss-overlay.json",
+      "bytes": 2423,
+      "sha256": "30545ca80ab3fbd5930f9f101e1b0b07478f39eb79d917b69ec8cdebe01d8788"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/original-units.md",
+      "bytes": 34836,
+      "sha256": "59a916d17c6b2bfae3303057f17b58a4a5b807db667ccf8b79d5796f6fbeefb4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/quotas.json",
+      "bytes": 3558,
+      "sha256": "588d6132bec8184d86ae74dd59169d24a46f15ff555320e75569e0911a3d0f33"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/read-plan.md",
+      "bytes": 7018,
+      "sha256": "ca94e9ef20a7e394d0f3290a0d5368750b346b7919ff1e104fbe1555a47aadd2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sampling/preparation/expansion-B2/replacement-selection.json",
+      "bytes": 3069,
+      "sha256": "5126b750030c9c46bf9b2673e75238ab3b4443d9b46f8fc7ff067f819819c37c"
+    }
+  ]
+}

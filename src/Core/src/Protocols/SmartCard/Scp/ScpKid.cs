@@ -35,7 +35,8 @@ public static class ScpKid
     public const byte SCP11b = 0x13;
 
     /// <summary>
-    ///     Key ID for SCP11c protocol (mutual authentication with certificate chain, variant C).
+    ///     Key ID for SCP11c, the certificate-based offline-scripting variant using the SD static key
+    ///     in both agreements. Replay and authorization restrictions depend on the applicable device profile.
     /// </summary>
     public const byte SCP11c = 0x15;
 }

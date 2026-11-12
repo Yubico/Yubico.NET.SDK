@@ -1,0 +1,50 @@
+{
+  "status": "Fresh documentation edit batch; independent review and compilation pending",
+  "base_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "candidate_actions": {
+    "CORE-C-C001": "Edit console/interface storage descriptions: interactive pooled characters versus redirected managed strings; preserve the actual fallback and separate its lifetime limitation.",
+    "CORE-C-C002": "Edit confirmation ownership in acquisition/comparison/second cleanup/first transfer order; qualify the sentinel oracle without reopening the resolved original cleanup scope.",
+    "CORE-C-C003": "Edit UTF-16 input limits, encoded-byte/code-point distinctions, ignored versus rejected input, hex separator/decoded units, default replacement fallback and empty allocation limitation. Hold Unicode, empty and hex policy changes; actual applet constraints remain boundary-owned.",
+    "CORE-C-C004": "Edit the precise waiting-key cancellation scope and preserve queued-key/redirected responsiveness as unrun implementation questions; existing no-key test remains unchanged.",
+    "CORE-C-C005": "Edit Tlv view/copy and disposal, list collection versus element ownership, pooled alias lifetime and clear-only handle versus pool-return ownership; retain correct local source/result cleanup context.",
+    "CORE-C-C006": "Edit dictionary/search copy qualifications and recommend the existing disposable DecodeList path for sensitive sequences. Hold abandoned-copy fixes and probes; clearing a later copy is not erasure of the original read-only storage.",
+    "CORE-C-C007": "Edit bounded tag/framing behavior and BerLength sizing/writing scope, with nonnegative caller precondition. Update current range/truncation/indefinite/size regression descriptions; hold single-item/tag-roundtrip/negative-input engineering decisions. X.690 original named clauses inspected; earlier pending confidence is historical.",
+    "CORE-C-C008": "Edit application-owned factory lifetime, configure-before-use, retained static loggers, global temporary-scope limits and callback-exception provenance. Adopt B6's ordinary APDU header/length versus SELECT identifier distinction only in the shared followup, not by editing B6 files.",
+    "CORE-C-C009": "Edit factory-specific PKCS#8/SPKI subset, AlgorithmIdentifier versus outer/nested exhaustion, and AsnContentException distinctions. Hold stronger uniform exact-DER/factory admission claims pending FPX-04; no probes ran.",
+    "CORE-C-C010": "Edit RSA public parameter XML, borrowed mutable parameter arrays, EC cached-point divergence, shape versus selected consistency/full validation, and DP-width admission qualification. Hold validation-depth/alias API choices and provider acceptance claims.",
+    "CORE-C-C011": "Edit independent BigInteger/ARKG secret-copy lifetimes and narrow macOS extra-D wording to inspected .NET v10.0.0 absent-Q extraction. Supplying Q skips that route in the inspected source; actual runtime/native erasure remains unqualified.",
+    "CORE-C-C012": "Edit public creator reach versus direct runtime calls/internal seams, fresh per-call ownership and complete provider disposal fragments. Remove fake helper APIs and stale xref. Existing internal creator tests retain their finite scope.",
+    "CORE-C-C013": "Edit local AES/KDF/alternate-CMAC/ASN writer cleanup boundaries and returned ECDH result ownership. AsnWriter Encode/Reset source is settled; SDK writer Reset and exceptional allocation cleanup are unchanged engineering issues, not provider-wide erasure claims.",
+    "CORE-C-C014": "Edit regression, early version/scalar guard and retained observer-alias descriptions, including finite pool and published-vector qualifications. Preserve every executable test, assertion, runtime message and fixture literal.",
+    "CORE-C-C015": "Edit exact COSE registry name/local zero sentinel wording and structural applicability versus complete profile pairing. Retain numeric IDs and correct widths/catalog descriptions; no applet algorithm upgrade, NIST-final table claim or capability inference.",
+    "CORE-C-C016": "Edit omitted inner parameters versus RFC 5915 section 3 conformance requirement and explicit wrapper versus universal importer claims. Hold target-profile choice and runtime changes; finite importer tests do not establish universal conformance.",
+    "CORE-C-C017": "Edit current RSAPrivateKey and VerifyPinAsync examples with borrowed input/session and complete owned scopes; correct ordinary short-Weierstrass terminology and private-owner rationale. Shared span/Base32/struct narrative recommendations are handed off rather than edited.",
+    "CORE-C-C018": "Edit expired July 7, 2025 draft-09 target, domain separation without injectivity, and exact A/B/C/handle assertion scope. Retain unpinned Rust/generator provenance explicitly; do not claim independent reproducibility or full conformance.",
+    "CORE-C-C019": "HOLD this group's P/E/Q/B facets: no D facet was released. Paths receive separate D edits through C011/C012/C018, not a C019 implementation acceptance. Allocation/conversion outcome checks, native secret-point erasure and exact deployed producer/export/provider qualification remain deferred.",
+    "CORE-C-C020": "RETAIN/HANDOFF: no C primary SCP parameter path. B6 owns StaticKeys input clones versus retained parameter references, SCP11 private/public/certificate containment, shared record-clone lifetime and initializer/profile choices. Session options and actual caller claims remain with their assigned owners."
+  },
+  "retained_primary_reasons": {
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/ConsoleCredentialReaderTests.cs": "Retain the pre-cancelled no-keys fixture: it actually tests waiting-key polling. No queued-key or redirected guarantee is added; responsiveness probes remain unrun.",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs": "Retain current internal ECDH/CMAC factory and cleanup assertions. Their internal scope is accurate; public replacement/universal-provider claims are corrected in provider XML.",
+    "src/Core/src/Cryptography/ICmacPrimitives.cs": "Retain the narrow internal operation summaries: they promise neither all-buffer erasure nor public substitution. Alternate OpenSSL helper cleanup is documented at its actual implementation.",
+    "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs": "Retain operation constants, parameterized relationships and structural applicability. No numeric/profile migration is authorized; the complete pairing qualification belongs to AlgorithmInfo and the affected test explanation.",
+    "src/Core/src/Cryptography/KeyType.cs": "Retain correct concrete identity/nominal-width descriptions and explicit stable IDs; no provider, device, operation-default or approval claim needs a local rewrite.",
+    "src/Core/src/Cryptography/IPublicKeyExtensions.cs": "Retain the ordinary checked-cast summary and body. It has no fake type/helper example or special cryptographic safety promise; the stale private-key example is corrected separately.",
+    "src/Core/src/Utilities/Base32.cs": "Retain the exact already-correct case/space/padding/empty/pad-bit, overlap admission, failure clear, successful tail and caller-owned output wording. Resolved OATH Base32 source scopes remain resolved, with OATH nonempty policy separate."
+  },
+  "retained_facet_reasons": {
+    "CORE-C-C006|src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs": "Retain the C006 cleanup assertions unchanged: this file's documentation edit describes the C007/C014 indefinite-length guard. No new abandoned-copy coverage or passing cleanup result is claimed.",
+    "CORE-C-C013|src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs": "Retain existing C013 borrowed-input/temporary assertions; the local edit qualifies the C014 early version guard. No writer/provider erasure is inferred.",
+    "CORE-C-C013|src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs": "Retain existing C013 encoder temporary-observer assertions; the local edit qualifies C014 scalar-versus-point admission. Writer storage remains separately unobserved by those tests.",
+    "CORE-C-C016|src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs": "Retain finite explicit-tag/BCL compatibility assertions. The local C014 version-guard comment does not settle RFC 5915 inner-parameter target policy or every importer.",
+    "CORE-C-C016|src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs": "Retain finite explicit-wrapper/BCL import assertions. The local C014 scalar/point comment is independent of the C016 encoding-profile decision.",
+    "CORE-C-C016|src/Core/src/Cryptography/AsnUtilities.cs": "Retain the existing RFC 5915 scalar-width context. Shape/range/ordinary-curve terminology is clarified through C010/C017; this helper does not choose the encoder's inner-parameter profile.",
+    "CORE-C-C018|src/Core/src/Cryptography/CryptographyProviders.cs": "Retain the creator's limited algorithm description; C012 edits public/internal availability and disposal fragments. Draft status and finite-oracle qualifications are supplied in IArkgPrimitives, ArkgPrimitivesOpenSsl and ArkgP256Tests."
+  },
+  "additional_primary_associations": {
+    "src/Core/src/Credentials/ICredentialPrompt.cs": ["CORE-C-C003", "CORE-C-C017"],
+    "src/Core/src/Cryptography/AlgorithmInfo.cs": ["CORE-C-C015"],
+    "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs": ["CORE-C-C005"]
+  }
+}

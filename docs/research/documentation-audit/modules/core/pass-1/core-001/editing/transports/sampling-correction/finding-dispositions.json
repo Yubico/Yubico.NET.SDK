@@ -1,0 +1,38 @@
+[
+  {
+    "id": "SAMPLE-B2-001",
+    "verification": "SUPPORTED; no contradiction found",
+    "original_units": [
+      "core-001:unit:2ab3cc1db2ed4269",
+      "core-001:unit:7a90c15f7fb4a767"
+    ],
+    "current_source_before_anchors": [
+      "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs:189-235 (Poll timeout -1)",
+      "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs:260-293 (signal attempt/early return/ObjectDisposedException)",
+      "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs:351-388 (write result/errno policy)",
+      "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs:119-168 (caller stop/join versus thread-owned disposal)"
+    ],
+    "test_source_read_only_anchors": [
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs:33-92",
+      "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/LinuxHidDeviceListenerFaultInjectionTests.cs:278-356"
+    ],
+    "correction": "SignalShutdown attempts a wake, tolerates concurrent disposal and supplies no normal-return acknowledgment of wake, loop exit, drain or release. Type prose now identifies loop-policy/caller-stop fake tests rather than promising bounded native poll completion.",
+    "source_nuance": "WriteShutdownSignal returns for full write, short/nonnegative failure, EAGAIN, other errors and exhausted bounded EINTR retries. Some failures are logged through a callback; normal return is not an outcome carrier. Fake waits are released through ManualResetEventSlim, not native poll.",
+    "runtime_or_qualification_change": false,
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "SAMPLE-B2-002",
+    "verification": "SUPPORTED; no contradiction found",
+    "original_units": [
+      "core-001:unit:5c0f333d06ef9126"
+    ],
+    "same_file_consistency_unit": "core-001:unit:cf330b6a639970cd",
+    "current_source_before_anchors": [
+      "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs:70-115 (already-started return, factory, initialization/session construction)"
+    ],
+    "correction": "Factory documentation refers to creation for a new-session attempt, excluding Start calls returning at the already-started guard. Matching file-level remarks now describe each new session rather than every Start invocation. No-hardware injected-fake purpose and session resource-safety rationale are unchanged.",
+    "runtime_or_qualification_change": false,
+    "independent_review": "PENDING"
+  }
+]

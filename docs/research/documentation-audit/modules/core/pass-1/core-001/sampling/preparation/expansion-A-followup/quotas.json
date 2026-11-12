@@ -1,0 +1,99 @@
+[
+  {
+    "owner": "A",
+    "stratum": "narrative-examples-and-maps",
+    "original_population": 79,
+    "original_full_quota": 8,
+    "original_selected_ids": [
+      "core-001:unit:689d848fe4e3b5fb",
+      "core-001:unit:c7ac3ec8651f40bf",
+      "core-001:unit:22ce88df9daddd31",
+      "core-001:unit:cf1e2081af8b8ac4",
+      "core-001:unit:b97af2e9d8692339",
+      "core-001:unit:b77ef6f0677fffbf",
+      "core-001:unit:a84e2cc173ca0753",
+      "core-001:unit:cb2232cff0d50f0d"
+    ],
+    "additional_full_quota": 8,
+    "proposed_stratum_total": 16,
+    "additional_selected_ids": [
+      "core-001:unit:f24674b7449e617e",
+      "core-001:unit:47befc3dc2cc5dd5",
+      "core-001:unit:572af9c8e29c74f9",
+      "core-001:unit:eea6325dac26e880",
+      "core-001:unit:e90e615ba927962a",
+      "core-001:unit:7b5daf3c140bfbc6",
+      "core-001:unit:b1b8f3f0d43abb21",
+      "core-001:unit:13971cb61434ba4c"
+    ],
+    "accepted_overlap_skips": [
+      {
+        "id": "core-001:unit:7d5377d0944da659",
+        "path": "docs/usage/device-discovery.md",
+        "original_rank": 28,
+        "spans": [
+          {
+            "start_character": 1787,
+            "end_character_exclusive": 1878,
+            "old_first_line": 45,
+            "old_line_count": 1,
+            "added_lines": 1,
+            "kind": "replacement-or-deletion"
+          }
+        ]
+      },
+      {
+        "id": "core-001:unit:0d6f20d8f98638b4",
+        "path": "docs/architecture/event-driven-device-discovery.md",
+        "original_rank": 52,
+        "spans": [
+          {
+            "start_character": 8106,
+            "end_character_exclusive": 8419,
+            "old_first_line": 119,
+            "old_line_count": 3,
+            "added_lines": 6,
+            "kind": "replacement-or-deletion"
+          }
+        ]
+      }
+    ],
+    "remaining_unchosen_eligible": 61
+  },
+  {
+    "owner": "A",
+    "stratum": "implementation-state-and-internal-contracts",
+    "original_population": 106,
+    "original_full_quota": 11,
+    "original_selected_ids": [
+      "core-001:unit:05c27da3274a61c3",
+      "core-001:unit:34cf0693a537f0df",
+      "core-001:unit:2d775717e74d6f32",
+      "core-001:unit:d73e12e719d3fff0",
+      "core-001:unit:3fb51ea489737870",
+      "core-001:unit:10653b759a2209f8",
+      "core-001:unit:1780289b48616248",
+      "core-001:unit:010596d531cf6d98",
+      "core-001:unit:d46b1ef7a44e6284",
+      "core-001:unit:7573e895ff24c450",
+      "core-001:unit:2b3cc1caf0dfec3f"
+    ],
+    "additional_full_quota": 11,
+    "proposed_stratum_total": 22,
+    "additional_selected_ids": [
+      "core-001:unit:cec556dd8f62b863",
+      "core-001:unit:d0048ac2b4474b13",
+      "core-001:unit:ac046b142303c33e",
+      "core-001:unit:3ccf06e816f277d2",
+      "core-001:unit:25673509b9d722bf",
+      "core-001:unit:9c8ab813d3edc094",
+      "core-001:unit:297e68004991d4a8",
+      "core-001:unit:ad16310453b46d29",
+      "core-001:unit:6e9c74a6b5e82dc5",
+      "core-001:unit:cf3538431462d4ab",
+      "core-001:unit:4089aedab94d4e23"
+    ],
+    "accepted_overlap_skips": [],
+    "remaining_unchosen_eligible": 84
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "correction": "R1: bind the checker actually executed to its reviewed inputs and actual warning-free compilation outputs",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "original_review": {
+    "path": "validation-review.md",
+    "sha256": "b788cb19aa760041590b14d254a1a2e6d234b92b8b158f3e835d9fab8f61d371"
+  },
+  "preserved_preparation": {
+    "path": "pre-r1-validation-preparation.md.snapshot",
+    "sha256": "105c6c428f26ccac5363f1408143f5861fc65fbdace0f11d0d07a2db07bf048b"
+  },
+  "accepted_logger_unchanged": {
+    "foundation.py": "c62bc72cecc56a8441b36a24425879fd00bc3db55ea3b39a28dc0198aac5caaa",
+    "run-command.py": "648234e0eaa442249047a3c9c1337b9ec97d8e4431338d0048b9319b71f9b9bf",
+    "qualify-logger.py": "779c4bb3864d5352b6189489177b61a61c7b245ea09e4260c1b612ecc3aa8fa6"
+  },
+  "algorithm_source": "New checker-specific admission code, using the accepted Core logger load/parser/capture API. No frozen supervisor or PIV compiler framework is changed or cloned.",
+  "compiler_hook_source": "Installed SDK 10.0.404 Roslyn/Microsoft.CSharp.Core.targets: Csc emits CscCommandLineArgs when ProvideCommandLineArgs is true; CoreCompile calls TargetsTriggeredByCompilation after its actual Csc task. The profile hashes this SDK target, compiler/task binaries and selected SDK/runtime files. Actual import/item/argument capture remains an assigned-build prerequisite.",
+  "scope": "One non-packable DocCheck project; no ProjectReference or AdditionalFiles. Additional projects, alternate compiler inputs, response files or runtime injection require a separately reviewed profile.",
+  "versioning": "Fixed participating files only. Later unrelated helpers and Core documentation source edits leave this checker profile unchanged. Changes to a participant, missing original output or replaced output require a new reviewed profile/build seal; earlier records remain immutable.",
+  "actual_build_status": "Prepared only. No checker build or checker process execution by the correction worker.",
+  "entry_point": "The additive wrapper maps SIGTERM to KeyboardInterrupt like the accepted Core logger main entry. Its direct call to the unchanged v2 capture retains the original cleanup/quiescence path; static checks send no actual signal.",
+  "qualification": "Coordinator reports core-foundation-first disposable Python qualification passed and retained 38 raw text records. The correction neither reruns it nor changes its participating logger stack."
+}

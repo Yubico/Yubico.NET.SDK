@@ -1,0 +1,270 @@
+{
+  "pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "findings": [
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "report": {
+        "LineNumber": 1,
+        "CharNumber": 1,
+        "DiagnosticId": "IMPORTS",
+        "FormatDescription": "Fix imports ordering."
+      },
+      "site": "// Copyright 2024 Yubico AB",
+      "baseline_line": 1,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "951665fa054ab7906a06cee19784f4b91f2d1dc03050db879206e2b0c2c0f46c",
+      "baseline_sha256": "98d029b71988128578d8ffa4bf094c45f130d6846edf2081f6f0246477e44ef5",
+      "current_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "baseline_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "report": {
+        "LineNumber": 19,
+        "CharNumber": 15,
+        "DiagnosticId": "IDE1006",
+        "FormatDescription": "error IDE1006: Naming rule violation: These words must begin with upper case characters: kern_return_t"
+      },
+      "site": "internal enum kern_return_t",
+      "baseline_line": 19,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "baseline_sha256": "c6e67b5f18a169296d52685432486030fbadd88a8f356ddf1bc6e2f1281f5306",
+      "current_import_sequence": [
+        "using System.Runtime.InteropServices;"
+      ],
+      "baseline_import_sequence": [
+        "using System.Runtime.InteropServices;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "report": {
+        "LineNumber": 189,
+        "CharNumber": 26,
+        "DiagnosticId": "IDE1006",
+        "FormatDescription": "error IDE1006: Naming rule violation: These words must begin with upper case characters: udev_device_get_parent"
+      },
+      "site": "    public static IntPtr udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject) =>",
+      "baseline_line": 189,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "59ec90d1127cfdfeeb7ae52d440526643694a6dbeeff2089b74191fe246df30f",
+      "baseline_sha256": "90c85abc02ac072cef845e50bfffe647bde56155259580d971b50d53c6ff8aba",
+      "current_import_sequence": [
+        "using System.Runtime.InteropServices;"
+      ],
+      "baseline_import_sequence": [
+        "using System.Runtime.InteropServices;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "report": {
+        "LineNumber": 211,
+        "CharNumber": 26,
+        "DiagnosticId": "IDE1006",
+        "FormatDescription": "error IDE1006: Naming rule violation: These words must begin with upper case characters: udev_device_get_syspath"
+      },
+      "site": "    public static IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject) =>",
+      "baseline_line": 211,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "59ec90d1127cfdfeeb7ae52d440526643694a6dbeeff2089b74191fe246df30f",
+      "baseline_sha256": "90c85abc02ac072cef845e50bfffe647bde56155259580d971b50d53c6ff8aba",
+      "current_import_sequence": [
+        "using System.Runtime.InteropServices;"
+      ],
+      "baseline_import_sequence": [
+        "using System.Runtime.InteropServices;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "report": {
+        "LineNumber": 15,
+        "CharNumber": 1,
+        "DiagnosticId": "IDE0005",
+        "FormatDescription": "error IDE0005: Using directive is unnecessary."
+      },
+      "site": "using Yubico.YubiKit.Core.Abstractions;",
+      "baseline_line": 15,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+      "baseline_sha256": "266864458b21fa5f6f171c6a4a9420bd32c42e8ca8e1ba6c1df318d490a0064f",
+      "current_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;"
+      ],
+      "baseline_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "report": {
+        "LineNumber": 19,
+        "CharNumber": 1,
+        "DiagnosticId": "IDE0005",
+        "FormatDescription": "error IDE0005: Using directive is unnecessary."
+      },
+      "site": "using Yubico.YubiKit.Core.Native;",
+      "baseline_line": 19,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "baseline_sha256": "385671401a44d8740e19e7194338d51b8c40652a14d125938e00a9b68da32ccc",
+      "current_import_sequence": [
+        "using Microsoft.Extensions.Logging;",
+        "using System.Diagnostics;",
+        "using System.Globalization;",
+        "using System.Runtime.InteropServices;",
+        "using Yubico.YubiKit.Core.Native;",
+        "using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;",
+        "using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;"
+      ],
+      "baseline_import_sequence": [
+        "using Microsoft.Extensions.Logging;",
+        "using System.Diagnostics;",
+        "using System.Globalization;",
+        "using System.Runtime.InteropServices;",
+        "using Yubico.YubiKit.Core.Native;",
+        "using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;",
+        "using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "report": {
+        "LineNumber": 17,
+        "CharNumber": 1,
+        "DiagnosticId": "IDE0005",
+        "FormatDescription": "error IDE0005: Using directive is unnecessary."
+      },
+      "site": "using Yubico.YubiKit.Core.UnitTests.Infrastructure;",
+      "baseline_line": 17,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03",
+      "baseline_sha256": "d9b6c411a93d0a3600f488a03cc313b8dfe1bfec0ba504c9fa594ae8fc9347f9",
+      "current_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.UnitTests.Infrastructure;"
+      ],
+      "baseline_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.UnitTests.Infrastructure;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+      "report": {
+        "LineNumber": 15,
+        "CharNumber": 1,
+        "DiagnosticId": "IDE0005",
+        "FormatDescription": "error IDE0005: Using directive is unnecessary."
+      },
+      "site": "using Yubico.YubiKit.Core.Abstractions;",
+      "baseline_line": 15,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "069cb81458129a99dd46573ce21b83a73639e43b74124de9ce68600e0b5ebc3c",
+      "baseline_sha256": "5987bdaaa8186d48b7b2bb96dd4658457a62ba2bfcef84ca3a50cf4a2d261521",
+      "current_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Protocols.Otp.Hid;",
+        "using Yubico.YubiKit.Core.Transports.Hid;"
+      ],
+      "baseline_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.Fido.Hid;",
+        "using Yubico.YubiKit.Core.Protocols.Otp.Hid;",
+        "using Yubico.YubiKit.Core.Transports.Hid;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/Piv/src/IYubiKeyExtensions.cs",
+      "report": {
+        "LineNumber": 17,
+        "CharNumber": 1,
+        "DiagnosticId": "IDE0005",
+        "FormatDescription": "error IDE0005: Using directive is unnecessary."
+      },
+      "site": "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+      "baseline_line": 17,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "951665fa054ab7906a06cee19784f4b91f2d1dc03050db879206e2b0c2c0f46c",
+      "baseline_sha256": "98d029b71988128578d8ffa4bf094c45f130d6846edf2081f6f0246477e44ef5",
+      "current_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "baseline_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    },
+    {
+      "path": "src/OpenPgp/src/IYubiKeyExtensions.cs",
+      "report": {
+        "LineNumber": 17,
+        "CharNumber": 1,
+        "DiagnosticId": "IDE0005",
+        "FormatDescription": "error IDE0005: Using directive is unnecessary."
+      },
+      "site": "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+      "baseline_line": 17,
+      "exact_site_unchanged_at_pin": true,
+      "current_sha256": "3e2cc825ab4bd1227f7b19bf26e37504c0f2f4dba0704929f9e0a099c9069e83",
+      "baseline_sha256": "c3fa9520aa4d5b016f88fad8c3447692a9cbaba8c8757ce6a1526f36681195c2",
+      "current_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "baseline_import_sequence": [
+        "using Yubico.YubiKit.Core.Abstractions;",
+        "using Yubico.YubiKit.Core.Devices;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;",
+        "using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;",
+        "using Yubico.YubiKit.Core.Sessions;",
+        "using Yubico.YubiKit.Core.Transports.SmartCard;"
+      ],
+      "classification": "preservation-conflicting baseline finding; unchanged"
+    }
+  ],
+  "qualification": "Source-site/import-sequence evidence only; no pinned formatter replay."
+}

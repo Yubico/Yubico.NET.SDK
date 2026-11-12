@@ -1,0 +1,50 @@
+[
+  {
+    "url": "https://www.w3.org/TR/2026/REC-webauthn-3-20260825/",
+    "access_utc": "2026-11-12T00:26:23.875544+00:00",
+    "path": "webauthn3.html",
+    "status": 200,
+    "sha256": "157030c980d44a3ce4b1ec5bcfaa16790c7dfefac20709af6ed2b11c7120970b",
+    "bytes": 2739242
+  },
+  {
+    "url": "https://yubicolabs.github.io/webauthn-sign-extension/4/",
+    "access_utc": "2026-11-12T00:26:24.071663+00:00",
+    "path": "preview-sign-v4.html",
+    "status": 200,
+    "sha256": "29359265d3b0f3dbc738482d4a33865beeb5c698e38651d2d12f14b7b5e6d86c",
+    "bytes": 2834409
+  },
+  {
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/Task.cs",
+    "access_utc": "2026-11-12T00:26:24.445690+00:00",
+    "path": "Task-v10.0.0.cs",
+    "status": 200,
+    "sha256": "5b0d6892267269233dcf5c6191f357b0ba6c4257d1e757ca4d2fe93272b29d9b",
+    "bytes": 389364
+  },
+  {
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/ReadOnlyMemory.cs",
+    "access_utc": "2026-11-12T00:26:24.748733+00:00",
+    "path": "ReadOnlyMemory-v10.0.0.cs",
+    "status": 200,
+    "sha256": "c19b25038fdf0abf70658aed8979dd83e9ca11e27f5b3df68950e8ecb40d879e",
+    "bytes": 19770
+  },
+  {
+    "url": "https://raw.githubusercontent.com/fluentassertions/fluentassertions/7.0.0/Src/FluentAssertions/Equivalency/Ordering/ByteArrayOrderingRule.cs",
+    "access_utc": "2026-11-12T00:40:50.818030+00:00",
+    "path": "ByteArrayOrderingRule-v7.0.0.cs",
+    "status": 200,
+    "sha256": "6d9b2ac3c0565b8b76862d091493b212e83398224b89a0f60f405de78628e3de",
+    "bytes": 709
+  },
+  {
+    "url": "https://raw.githubusercontent.com/fluentassertions/fluentassertions/7.0.0/docs/_pages/objectgraphs.md",
+    "access_utc": "2026-11-12T00:41:17.743809+00:00",
+    "path": "FluentAssertions-objectgraphs-v7.0.0.md",
+    "status": 200,
+    "sha256": "9836fed1ccefa3a30fac5c4852e83fee32ab7532ae36fc261365405df9922b21",
+    "bytes": 17408
+  }
+]

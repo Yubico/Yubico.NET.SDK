@@ -84,8 +84,9 @@ public static class TestCategories
 
     /// <summary>
     /// Test makes permanent device state changes that survive across test runs.
-    /// Only a factory reset (physical reinsertion within 10s) can undo them.
-    /// Examples: increasing minPinLength, enabling enterprise attestation.
+    /// Examples include increasing minPinLength and enabling enterprise attestation.
+    /// Recovery depends on the application and firmware. FIDO reset has a power-cycle window;
+    /// physical reinsertion alone does not reset state, and other applets have different reset rules.
     /// </summary>
     public const string PermanentDeviceState = "PermanentDeviceState";
 

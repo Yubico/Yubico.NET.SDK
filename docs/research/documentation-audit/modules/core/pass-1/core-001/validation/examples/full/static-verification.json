@@ -1,0 +1,71 @@
+{
+  "scope": "Static exact source-region/wrapper/real-context and preserved-pilot checks only; no compilation or test/example execution.",
+  "counts": {
+    "additional_authority_records": 662,
+    "pilot_records": 41,
+    "total_authority_records": 703,
+    "additional_prepared_occurrences": 302,
+    "unique_additional_compilations": 300,
+    "consumer_bodies": 244,
+    "existing_test_body_occurrences": 58,
+    "unique_existing_test_bodies": 56,
+    "proposed_illustration_qualifications": 34,
+    "compile_contexts": 10
+  },
+  "exact_additional_compiled_source_files": 300,
+  "pilot_current_record_bytes_unchanged": true,
+  "source_regions_and_wrappers_unchanged": true,
+  "proposed_qualifications": "34 explicit source-backed partial/design/fixture qualifications require independent confirmation.",
+  "actual_full_build": "not-run",
+  "final_checker_binding": "Separate existing-binder profile db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1; no rebuild by this worker.",
+  "profile": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/reviewed-inputs-current.json",
+    "bytes": 586272,
+    "sha256": "806ce07d050835dbcac7e4ce33ffb2b0006c5c8e9937e4321f3af6f569a4dc5c"
+  },
+  "fixed_participants": 1713,
+  "known_compile_sources": 1330,
+  "declared_project_closure": 25,
+  "accepted_product_paths": 361,
+  "toolchain_control_deltas": [
+    "scripts/toolchain/Process.cs",
+    "scripts/toolchain/Results.cs",
+    "scripts/toolchain/TestTargets.cs"
+  ],
+  "wrapper_only_pre_review_corrections": [
+    {
+      "id": "FULL-006",
+      "old_sha256": "d0cadf1e6962e49c5ce30cea1028ad1ae721dd31d73dcf4e91090c2411a07d8c",
+      "current_sha256": "442bd8ef7c87a3aba7391be9ac0b531cd3e1b8a4649c244a35b9cfe3bb5725a4",
+      "scope": "Wrapper parameter/container only; exact accepted body reconstruction passed."
+    },
+    {
+      "id": "FULL-200",
+      "old_sha256": "192fe080bab176e9e4e26c41ba92e7c38a22dace54a335c4123e42532e1f1165",
+      "current_sha256": "ae13b2e023174433e22ac5e509d745ef09e00e3d5597e6e146883df72a08dd2b",
+      "scope": "Wrapper parameter/container only; exact accepted body reconstruction passed."
+    },
+    {
+      "id": "FULL-276",
+      "old_sha256": "117d8d52e9d12952311d34f60173e6671e95266dafc1164ccfe2b06c56e3be7e",
+      "current_sha256": "951a636156780d12fb584de8f054f32ab0e6f47fc0f40ed8b13b3c4f2a6ea3c4",
+      "scope": "Wrapper parameter/container only; exact accepted body reconstruction passed."
+    },
+    {
+      "id": "FULL-323",
+      "old_sha256": "c955f8a2cfad756be22905f8bf0a594c7a8efb29fdf88f2a0764c3645fbdfc6e",
+      "current_sha256": "6febb50da990f471a1720099656ab1242f2bd31ceb9fde037e5693e1d900957e",
+      "scope": "Wrapper parameter/container only; exact accepted body reconstruction passed."
+    },
+    {
+      "id": "FULL-324",
+      "old_sha256": "e846f2e0091baac541425eabb4dc7b5858b21307bac8d54c971568ce51a0e285",
+      "current_sha256": "7b054fa247881648d6f47a4e0a56638574d389e115ec6648889a17f00567d495",
+      "scope": "Wrapper parameter/container only; exact accepted body reconstruction passed."
+    }
+  ],
+  "qualified_pilot_observer_sha256": "482151879d4c9e8c911a8e6615352a1c05a6406d58383dbc96a8d36154112eed",
+  "final_checker_profile_sha256": "db8347bc9370f25bfc5c99edac854691d5baeca41ae4687fa794cb398a4a8ff1",
+  "actual_sdk_compilation": "not-run by preparation worker",
+  "release": "Fresh bounded independent preparation/qualification review before coordinator commands; no final archive freeze claimed."
+}

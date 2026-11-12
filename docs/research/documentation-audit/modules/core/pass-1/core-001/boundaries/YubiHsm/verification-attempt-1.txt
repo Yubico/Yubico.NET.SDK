@@ -1,0 +1,10 @@
+Command: python3 -B docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verify-records.py
+Exit: 1
+Traceback (most recent call last):
+  File "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/YubiHsm/verify-records.py", line 106, in <module>
+    assert 'ThrowOnRetryFailure(response, command, "Credential password verification failed")' in implementation.read_text()
+AssertionError
+
+This assertion was based on an investigator misreading, not an SDK test execution.
+Fresh source read at HsmAuthSession.cs:985–986 shows "Invalid credential password".
+That matches HsmAuthRetryExceptionTests.cs:204. See corrections.md.

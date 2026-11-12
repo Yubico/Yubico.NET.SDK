@@ -1,0 +1,1090 @@
+{
+  "contexts": [
+    {
+      "context": "Core.UnitTests",
+      "project": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-060",
+          "path": "injections/Core.UnitTests/FULL-060.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "CLAUDE.md",
+            "bytes": 33846,
+            "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "5612534782766c1a027168785ffd7c42287b63f5baf9031fa63104c283d95b7b",
+          "preserved_import_prefix": "using Xunit;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\n\n",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Xunit;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\n\nnamespace Audit20261111.DocExamples.Test60;\n",
+          "suffix": "\n",
+          "generated_sha256": "4e985a408bc35f905ffee3939a7fb3f532cf310567fa8bd4ca8ebdef1bcfaca2",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-142",
+          "path": "injections/Core.UnitTests/FULL-142.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "docs/TESTING.md",
+            "bytes": 27563,
+            "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "b14c14be0a3e2d17af1471fefc05a76a3626e5387367942374fd070c594afc45",
+          "preserved_import_prefix": "using Xunit;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\n",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Xunit;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\n\nnamespace Audit20261111.DocExamples.Test142;\npublic sealed class DocumentationBody142\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "d7335ccd908d337e5bf8b1d0c56834584c69a8e45c2dce295ed8bea1853c9859",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-204",
+          "path": "injections/Core.UnitTests/FULL-204.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Core/CLAUDE.md",
+            "bytes": 68419,
+            "sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "af595ce3ca9abebbc4b4eb2385d9109211322cbc7ab45573363b4c537c8a6365",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Native;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\nnamespace Audit20261111.DocExamples.Test204;\npublic sealed class DocumentationBody204\n{\ninternal void CompileOnly(PcscProtocol protocol, FirmwareVersion firmwareVersion)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "718411f756db3fa29ea10c48b430f9dc0ce72167f65d508e1976eba011ff76d8",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-205",
+          "path": "injections/Core.UnitTests/FULL-205.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Core/CLAUDE.md",
+            "bytes": 68419,
+            "sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "6e2a6e271d7f299aff55802a869bcf8a70335f9d285542234c9808b74adda27d",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Native;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\nnamespace Audit20261111.DocExamples.Test205;\npublic sealed class DocumentationBody205\n{\ninternal void CompileOnly(string libraryPath)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "77b86d7c941b055f24d06b2c8ed30619e7c4288a720dfac258eb73226d1e0a57",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-206",
+          "path": "injections/Core.UnitTests/FULL-206.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Core/CLAUDE.md",
+            "bytes": 68419,
+            "sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "Current RIGHT LibraryImport declaration only; explicit DllImport antipattern remains excluded",
+          "body_sha256": "26e3e7f8b329844f1b2b60c38912813e04a883036c36f8ca67faabe9bba78af0",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Native;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\nusing System.Runtime.InteropServices;\nnamespace Audit20261111.DocExamples.Test206;\npublic sealed partial class DocumentationBody206\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "7880fee12e387df993d8953219416d59c9f3c4c47dc8b4f08f9fe260a873bef4",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-211",
+          "path": "injections/Core.UnitTests/FULL-211.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Core/CLAUDE.md",
+            "bytes": 68419,
+            "sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "dda0e27130ce7f7798da802648aaa728594b3d51d8907a4ff1305786af5c0666",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Native;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\nnamespace Audit20261111.DocExamples.Test211;\npublic sealed class DocumentationBody211\n{\ninternal async Task CompileOnly()\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "c831150b9a796cfb77b54e7620ed95cb3b4c67ffde9db26abee71ce73af57a75",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-238",
+          "path": "injections/Core.UnitTests/FULL-211.cs",
+          "compilation_alias_of": "FULL-211",
+          "source_document": {
+            "path": "src/Core/tests/CLAUDE.md",
+            "bytes": 3641,
+            "sha256": "6ead47ab0e401351f6050e3f54ec022ac35753f0b65d880965b75a4577d7eb75"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "dda0e27130ce7f7798da802648aaa728594b3d51d8907a4ff1305786af5c0666",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Core.Native;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\nnamespace Audit20261111.DocExamples.Test211;\npublic sealed class DocumentationBody211\n{\ninternal async Task CompileOnly()\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "c831150b9a796cfb77b54e7620ed95cb3b4c67ffde9db26abee71ce73af57a75",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    },
+    {
+      "context": "Ctap2.UnitTests",
+      "project": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-010",
+          "path": "injections/Ctap2.UnitTests/FULL-010.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Ctap2/CLAUDE.md",
+            "bytes": 36334,
+            "sha256": "00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "75d60efcbfde6e1582bcc4ee6944b0ed39f69fd4fd1c5eca25f832a8566094b1",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing System.Formats.Cbor;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2.Ctap;\nusing Yubico.YubiKit.Ctap2.Credentials;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Ctap2.Extensions;\nusing NSubstitute;\nnamespace Audit20261111.DocExamples.Test10;\npublic sealed class DocumentationBody10\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "f22177d79bba0a27dc71b7b1da42421486a87d20abf6f5fc415da9cead7efa2e",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-011",
+          "path": "injections/Ctap2.UnitTests/FULL-011.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Ctap2/CLAUDE.md",
+            "bytes": 36334,
+            "sha256": "00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "a5259cd2b5de59f93278371ef338f3e44d9dd6068e9e9ab1d5a34821f11a1428",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing System.Formats.Cbor;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2.Ctap;\nusing Yubico.YubiKit.Ctap2.Credentials;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Ctap2.Extensions;\nusing NSubstitute;\nnamespace Audit20261111.DocExamples.Test11;\npublic sealed class DocumentationBody11\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "8e0fa3425d3a3993e0c3e0500bb91ac138ea071d52a79a94e247c863a4aad35c",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-030",
+          "path": "injections/Ctap2.UnitTests/FULL-030.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Ctap2/tests/CLAUDE.md",
+            "bytes": 10297,
+            "sha256": "2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "dd81d2ed020243a41cd102015f74a6ac529f4e988e6d9c731194b2a807717f71",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing System.Formats.Cbor;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2.Ctap;\nusing Yubico.YubiKit.Ctap2.Credentials;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Ctap2.Extensions;\nusing NSubstitute;\nnamespace Audit20261111.DocExamples.Test30;\npublic sealed class DocumentationBody30\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "dd8d848832f3e4857cac948de3ec95b97b726223f693245b259da695956bfcd0",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    },
+    {
+      "context": "Ctap2.IntegrationTests",
+      "project": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-012",
+          "path": "injections/Ctap2.IntegrationTests/FULL-012.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Ctap2/CLAUDE.md",
+            "bytes": 36334,
+            "sha256": "00c95c509221eb694c61a8992e614e3455291ad95ba317220c82870751fb0e17"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "bc24180805fc1babc21af884581ce670c11a7779c0683c38793275b3523b4a7e",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing System.Formats.Cbor;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2.Ctap;\nusing Yubico.YubiKit.Ctap2.Credentials;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Ctap2.Extensions;\nusing Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;\nnamespace Audit20261111.DocExamples.Test12;\npublic sealed class DocumentationBody12\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "03ac527261ef02acc7d820c1bc02c8cdaf6e1a2fb87c7f18b4afa5f0fb44e00b",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-026",
+          "path": "injections/Ctap2.IntegrationTests/FULL-026.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Ctap2/tests/CLAUDE.md",
+            "bytes": 10297,
+            "sha256": "2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "ab7d8daabca4098eaadf09ec68f5c5d407cbfbd7d137061c1ba17cba9a273511",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing System.Formats.Cbor;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2.Ctap;\nusing Yubico.YubiKit.Ctap2.Credentials;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Ctap2.Extensions;\nusing Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;\nnamespace Audit20261111.DocExamples.Test26;\npublic sealed class DocumentationBody26\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "11a6f15142db2120248ef5dd72f0c0eabc61dea5072f0b4b2714c63107dc4d92",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-027",
+          "path": "injections/Ctap2.IntegrationTests/FULL-027.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Ctap2/tests/CLAUDE.md",
+            "bytes": 10297,
+            "sha256": "2646adacbaaa6de1e09d4e0bec1a968dccb135944b4ea0ae559d774e8473f3d8"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "84082bfb8a78b95af8d4cbf65e557f636b3e83b9b5eded7449673c5fa7e2e198",
+          "preserved_import_prefix": "",
+          "prefix": "using System.Text;\nusing System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing System.Formats.Cbor;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.Ctap2.Ctap;\nusing Yubico.YubiKit.Ctap2.Credentials;\nusing Yubico.YubiKit.Ctap2.Pin;\nusing Yubico.YubiKit.Ctap2.Extensions;\nusing Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;\nnamespace Audit20261111.DocExamples.Test27;\npublic sealed class DocumentationBody27\n{\npublic async Task CompileOnly(ICtap2Session session)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "fd16f812a587768c29de2667ec6db89d4a41c1542ac263b278fbc9f0df9cce06",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    },
+    {
+      "context": "Management.IntegrationTests",
+      "project": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-061",
+          "path": "injections/Management.IntegrationTests/FULL-061.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "CLAUDE.md",
+            "bytes": 33846,
+            "sha256": "461e4a616fa191fd0952bfad0585653605959a1ca82bc9d8f0f72354bd76b109"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "b04a32f9b5cd80815f9ed59a636d25f068685c0afc3c5f2fe37ac2e24af5c9a6",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test61;\npublic sealed class DocumentationBody61\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "d4a6c4b31a43961495a1ee225bfb8da7c97a7dd7cd90e061d1a15b06645fa1e2",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-133",
+          "path": "injections/Management.IntegrationTests/FULL-133.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "docs/TESTING.md",
+            "bytes": 27563,
+            "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "cc32e323f373a777f974c5141391b2300daa511cf6dacea72b019312b6eb079d",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test133;\npublic sealed class DocumentationBody133\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "167214466984d0579afacf62e59928c1536766c57d1e5fbd6ab36000716d4e2f",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-134",
+          "path": "injections/Management.IntegrationTests/FULL-134.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "docs/TESTING.md",
+            "bytes": 27563,
+            "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "d5f9dcf4b8386284e90a1f93fe6c5aef8a80443729ca70c575e5a321e97f564c",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test134;\npublic sealed class DocumentationBody134\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "3966f8b56915e6f025d08fa9671aabdfb7ceb73372c8a821bbb50e8b14f7ed70",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-135",
+          "path": "injections/Management.IntegrationTests/FULL-135.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "docs/TESTING.md",
+            "bytes": 27563,
+            "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "132ea4a58cc7358e5e1c6dd9cea3f728bece708a8e7fda15f8b3ab5397c0504b",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test135;\npublic sealed class DocumentationBody135\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "f86668df8d960d2e684b357299d9d66da41ac9e353cd27d7cbe70504dbc11eae",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-137",
+          "path": "injections/Management.IntegrationTests/FULL-137.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "docs/TESTING.md",
+            "bytes": 27563,
+            "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "0d00117ad5fab385db1b275f632fb9256222fc214ad374962f1ca94e625e0e36",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test137;\npublic sealed class DocumentationBody137\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "6da691242bd98475cbb752b1e2a21769be9e9c7a3ee3b74040346aa6fd1e6da9",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-138",
+          "path": "injections/Management.IntegrationTests/FULL-138.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "docs/TESTING.md",
+            "bytes": 27563,
+            "sha256": "dc907bcb34d86a3be45c44937c47035b8442cc7051d69be0bdc332f8f9e1fdbe"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "774ce1fc2ab2210fd690fab2ff8acdd5bab75fa78153bddd035cb32e7d7e1d0e",
+          "preserved_import_prefix": "using Yubico.YubiKit.Tests.Shared.Infrastructure;\n\n",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\n\nnamespace Audit20261111.DocExamples.Test138;\n",
+          "suffix": "\n",
+          "generated_sha256": "52e074861e492231ad5be0cbb95538409df169a9686eae1abd17f1abf16ee8c7",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-241",
+          "path": "injections/Management.IntegrationTests/FULL-241.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "dae17b6c69fcd0a775b55409c65e7df13dd0dd45a4d734bee0c099d7ef3d3fd7",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test241;\npublic sealed class DocumentationBody241\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "76e096b28aa878c4fd440296bc80bdc1f185c38e53c5be61ba512c84a23e78fa",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-242",
+          "path": "injections/Management.IntegrationTests/FULL-242.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "ac78a972ef73a79fb8455a1ecc4d0763e82fcefb295b4a89fce34cbf4f99cfed",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test242;\npublic sealed class DocumentationBody242\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "b07953f11c061900afb31888c933d78467c0d743774283190d2553fdeb4797f1",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-243",
+          "path": "injections/Management.IntegrationTests/FULL-243.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "f630b2f9802a5fb56aedd1a702c9219ed449922f09b9981582d40e6cffe86329",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test243;\npublic sealed class DocumentationBody243\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "d2084d45cd2992bc83d3686332be355cbe8432ec406d847360b72d18f51b5eb1",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-244",
+          "path": "injections/Management.IntegrationTests/FULL-244.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "a57c23385fd2dcf11793ba0ae228541bc6f5404b510350f9d0c185044a75ee80",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test244;\npublic sealed class DocumentationBody244\n{\npublic void CompileOnly(YubiKeyTestState state)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "061334440222e4d7921a0cc1ca258228d408315efcab8159aa9b0bb4892075d7",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-252",
+          "path": "injections/Management.IntegrationTests/FULL-252.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "957298f114da196158d884ba4745cef4efd8c8ea30aaa7dff05da0711089c491",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test252;\npublic sealed class DocumentationBody252\n{\npublic async Task CompileOnly(YubiKeyTestState state)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "c1869edeffc021faf463619bd06cd772edfbd7c1b521857b07677ec98b595bc8",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-253",
+          "path": "injections/Management.IntegrationTests/FULL-253.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "64dd0a9006d1937482a71828a837592ae1e0b051965a84a752ccd3468accc1f8",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test253;\npublic sealed class DocumentationBody253\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "6046f4c809f891a4bb3457338d2bdd7ad071cb87dd36c1f9acf296968c7e6c5b",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-254",
+          "path": "injections/Management.IntegrationTests/FULL-254.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "16dc8b868be198827258cc254abcf53ac76d6a9d7515587f02cd23ffcb9c5ca3",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test254;\npublic sealed class DocumentationBody254\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "5b265795e2db6a1d5245632d02fca1c8ee15f82fea6c2fbdb151886c17278102",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-255",
+          "path": "injections/Management.IntegrationTests/FULL-255.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "233c8a6f25adcc0c787f2c51b234feb04e59fe1ee962c859b4b4252244570ce6",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test255;\npublic sealed class DocumentationBody255\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "ce96ff7e9f4823ffb25d76b75add839b4e734829064519f2e32ad5d079c5d7f6",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-256",
+          "path": "injections/Management.IntegrationTests/FULL-256.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "da586bbb121bd0b23661333ae4e9b47c46881398bfc394dc70c6886f27a54b44",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test256;\npublic sealed class DocumentationBody256\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "2fc267efcb1078ae2fb385e0842bb4a05dc148ef697ada24c8c3dd3a1d984b40",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-257",
+          "path": "injections/Management.IntegrationTests/FULL-257.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "8cebe97f542d9c35cf1e145d25963ebfa03680f0dc370989a7dcbb18ae5540f8",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test257;\npublic sealed class DocumentationBody257\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "e22c68c0797eee38860d98ac0b24704bfa11dca003fa28f6571a372f534fa9b8",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-258",
+          "path": "injections/Management.IntegrationTests/FULL-258.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "514298e8e15972b41776fd4d160b1f84e1030b460618f2cb907c859bf75bc9ec",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test258;\npublic sealed class DocumentationBody258\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "7f39bfa277f7d505f64fe21fea50f9bbb04058d2855a10d6eeddd2f50c16548d",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-259",
+          "path": "injections/Management.IntegrationTests/FULL-259.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "1205f2b0100396b29ff556d26031c97dd96053f44b0c09805f35967ee7ef9ff6",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test259;\npublic sealed class DocumentationBody259\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "89f11aa6b35f5e3e0997d78c3ab7630ee493567c48e709b0339265a64b6c87d4",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-260",
+          "path": "injections/Management.IntegrationTests/FULL-260.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "04ccf03e170ae6327ed9fad4d437abfaef7b01ca02d13138604b31fcbeb7180d",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test260;\npublic sealed class DocumentationBody260\n{\npublic async Task CompileOnly(YubiKeyTestState state)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "c5d8127df281d281cb706d0cd261194eb1d604f6c80e90cd8503d9db26ad40ce",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-261",
+          "path": "injections/Management.IntegrationTests/FULL-261.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "5e1adff16c0afcec8f72c703d2b61e6364d0c8c42f1e5584aa984c3a7233eba4",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test261;\npublic sealed class DocumentationBody261\n{\npublic async Task CompileOnly(YubiKeyTestState state)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "9dfab861dc1e610b9a4be22396b979d2bc065d49eb93ef3d713a430fd9939804",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-262",
+          "path": "injections/Management.IntegrationTests/FULL-262.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/CLAUDE.md",
+            "bytes": 45494,
+            "sha256": "a3f5b0d3e46a153e6cf9a52d13089dbc3a5214de132cda10a9a5a25dc5a1c7f7"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "8b5d4e9d8263c7594bcb9294a26b3510ec094c5708bb481f44292e030d8757ac",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test262;\npublic sealed class DocumentationBody262\n{\npublic async Task CompileOnly(ManagementSession mgmt)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "e1c15de3c16e5fa2c31a03d9fd2f5320de55e18e9e4f8f15c50b84b692a10f13",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-288",
+          "path": "injections/Management.IntegrationTests/FULL-288.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/tests/CLAUDE.md",
+            "bytes": 4601,
+            "sha256": "b8f00044fae55e057cecaf4c7cb3e9d52dbaf692f8499dc7b4bcfd4a84c60887"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "de88636f0d9756f95d7a91fe65976e52ea364a4d31df33f8d0e91284c1844e02",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test288;\npublic sealed class DocumentationBody288\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "8fab13d956810097a9c7b71984e2e31e2f32a7aef322ff69a26ddc92504f8d45",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-289",
+          "path": "injections/Management.IntegrationTests/FULL-289.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Management/tests/CLAUDE.md",
+            "bytes": 4601,
+            "sha256": "b8f00044fae55e057cecaf4c7cb3e9d52dbaf692f8499dc7b4bcfd4a84c60887"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "a6cb41ea4f62b5f140cdf088c73ab78d1f5e8f4d96c6cf918eec9792274ffdeb",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nnamespace Audit20261111.DocExamples.Test289;\npublic sealed class DocumentationBody289\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "70f74c9b10eddb41647a0a24743781166a7f0841ab3fbbf45767d13e0d852443",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    },
+    {
+      "context": "SecurityDomain.IntegrationTests",
+      "project": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-302",
+          "path": "injections/SecurityDomain.IntegrationTests/FULL-302.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/SecurityDomain/tests/CLAUDE.md",
+            "bytes": 7637,
+            "sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "b27092e6900114630415c26813e4f6acd5e960de57c5685bce2c489e7005cf64",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.SecurityDomain;\nnamespace Audit20261111.DocExamples.Test302;\npublic sealed class DocumentationBody302\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "154ce9459a9ef62eb9efbc0ecfb9b5acbec37c8a3533300690c1a91abbe404f2",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-303",
+          "path": "injections/SecurityDomain.IntegrationTests/FULL-303.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/SecurityDomain/tests/CLAUDE.md",
+            "bytes": 7637,
+            "sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "3816ca9178d3a41081ca85bd57d29fe3b6a61947698d1f6cc6f20437cb8d722b",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.SecurityDomain;\nnamespace Audit20261111.DocExamples.Test303;\npublic sealed class DocumentationBody303\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "a57bb44f26c3bfe797840f3e095f6cc5c782f53a2213d28f8677a395d984662a",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-306",
+          "path": "injections/SecurityDomain.IntegrationTests/FULL-306.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/SecurityDomain/tests/README.md",
+            "bytes": 4268,
+            "sha256": "83b15cd245f2eefafb833af830b25cbeed0f616b8845d81345e170541ed1c1f8"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/applet-boundaries/revision-2/review.md",
+            "bytes": 6273,
+            "sha256": "e304b2aa6721264429df04471c1035e9134b4c2c41734087684ffa84e3aab760"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "b8dca8f108767609ed76ce9cf0c9f6b6c3e1c7426251446c7046a2d40102124b",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.SecurityDomain;\nnamespace Audit20261111.DocExamples.Test306;\npublic sealed class DocumentationBody306\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "8dbaf8c62f6beeb59dba3f0bfbe6e639e9c521ac950a144bbae77163778edf0a",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    },
+    {
+      "context": "Piv.IntegrationTests",
+      "project": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-375",
+          "path": "injections/Piv.IntegrationTests/FULL-375.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Piv/CLAUDE.md",
+            "bytes": 17003,
+            "sha256": "de79b8e299566ab1260fe758bb5fff3dd42da89bb3ef69524cfdf7a47f75577a"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/PIV-boundary/revision-2/review.md",
+            "bytes": 6003,
+            "sha256": "bc96a40b283b64eb92b84d7c9ddedb9aaae5c314f7f28541ad0ef308500feea1"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "25bc50932fdb0921f8c1ecdaa328c63b48a5983414e448bbdb84a956b6dc5531",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Piv;\nnamespace Audit20261111.DocExamples.Test375;\npublic sealed class DocumentationBody375\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "94fcaceef54ca218e4b9d31d77ea48455529a1c4b35fff9510d7c420d76bb58e",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    },
+    {
+      "context": "Core.IntegrationTests",
+      "project": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-212",
+          "path": "injections/Core.IntegrationTests/FULL-212.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Core/CLAUDE.md",
+            "bytes": 68419,
+            "sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "9282b2378ab6a0d758f040a0b07b4e49dd8e10b953e748afa03293785baeaf99",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.IntegrationTests;\nnamespace Audit20261111.DocExamples.Test212;\n",
+          "suffix": "\n",
+          "generated_sha256": "983bb56d0987d60973e019aaba6e1707d256187919f18741446d679d37c7c547",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-239",
+          "path": "injections/Core.IntegrationTests/FULL-239.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/Core/tests/CLAUDE.md",
+            "bytes": 3641,
+            "sha256": "6ead47ab0e401351f6050e3f54ec022ac35753f0b65d880965b75a4577d7eb75"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/SHARED/revision-2/review.md",
+            "bytes": 8886,
+            "sha256": "d0fb5ec322f36781168fdfda5e7634db17ac112ebd51fe80a300fd4aaabbd5b2"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "d54e3e18c70866dabf708ede3dbf2ce47727f9e54b2c045811f2960c2bae74d5",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.IntegrationTests;\nnamespace Audit20261111.DocExamples.Test239;\n",
+          "suffix": "\n",
+          "generated_sha256": "a32efd1b6422b95feeb8173f59c26480be0cdc520981e2a02987fe4ab9d4323b",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    },
+    {
+      "context": "WebAuthn.IntegrationTests",
+      "project": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj",
+      "bodies": [
+        {
+          "id": "FULL-032",
+          "path": "injections/WebAuthn.IntegrationTests/FULL-032.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/WebAuthn/CLAUDE.md",
+            "bytes": 36508,
+            "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "Exact source field in containing class; exact log statement in typed method",
+          "body_sha256": "7c2396900aa0b184930cb26cb1854b0d2efc3001cae2f004a72a17d789245ff5",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.WebAuthn;\nusing Yubico.YubiKit.WebAuthn.Client;\nusing Yubico.YubiKit.WebAuthn.IntegrationTests;\nusing Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Ctap2.Cose;\nusing Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;\nnamespace Audit20261111.DocExamples.Test32;\npublic sealed class DocumentationBody32\n{\nprivate static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();\ninternal void CompileOnly(CoseAlgorithm selectedAlgorithm)\n{\n",
+          "suffix": "\n}\n}\n",
+          "generated_sha256": "6d7d82a0b0fbba0909878e27f61f4defe0ce2d8b4cf918526f45a82b69938cc8",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        },
+        {
+          "id": "FULL-037",
+          "path": "injections/WebAuthn.IntegrationTests/FULL-037.cs",
+          "compilation_alias_of": null,
+          "source_document": {
+            "path": "src/WebAuthn/CLAUDE.md",
+            "bytes": 36508,
+            "sha256": "8c9b90446fc81c3f44f2aa9ca124f8c292b0b6fca80293417b2ae5c9084a9b8a"
+          },
+          "review": {
+            "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/FIDO-boundaries/revision-2/review.md",
+            "bytes": 7385,
+            "sha256": "ff16cbecf350748228489db8b07e25484023a78d15d43c742ed0f3a639f23dc5"
+          },
+          "body_layout": "literal complete body with separate imports/containing class",
+          "body_sha256": "e61df2ba3ad1a4d79821ff7ad17ebe169b19dc8dcd0389e97ee592cef88d7379",
+          "preserved_import_prefix": "",
+          "prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.WebAuthn;\nusing Yubico.YubiKit.WebAuthn.Client;\nusing Yubico.YubiKit.WebAuthn.IntegrationTests;\nnamespace Audit20261111.DocExamples.Test37;\npublic sealed class DocumentationBody37\n{\n",
+          "suffix": "\n}\n",
+          "generated_sha256": "16795078975a98491762a33796e0e20f30433b80a5500d28412f80cfb44c101e",
+          "compilation_status": "prepared-existing-project-injection",
+          "execution_status": "not-run"
+        }
+      ],
+      "access": "Actual existing project/assembly and its real fixture/package references; no assembly-name impersonation or new IVT.",
+      "operation": "Canonical build only with run-owned Compile injection; no product project edit and no test execution.",
+      "qualification": "Generated assemblies contain documentation test declarations and must remain unexecuted. Restore ordinary outputs with the final clean solution build before any SDK test lane."
+    }
+  ],
+  "source_projects_unchanged": true,
+  "final_descriptor": "unsealed; pending remaining contexts/external final source"
+}

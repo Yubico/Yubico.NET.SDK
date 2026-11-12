@@ -1,0 +1,22 @@
+{
+  "status": "FINAL_SOURCE_STATIC_ADMISSION_READY_FOR_FOCUSED_REVIEW_NOT_COMPILER_ACCEPTANCE",
+  "completed_receipts": 9,
+  "whole_file_transition_steps": 252,
+  "unique_transition_paths": 250,
+  "accepted_product_paths": 363,
+  "eof_paths_verified": 241,
+  "source_body_rows_reextracted": 538,
+  "raw_and_generated_body_changes": [
+    "FULL-032"
+  ],
+  "unchanged_canonical_body_source_pairs": 299,
+  "pilot_bodies_unchanged": 41,
+  "accepted_contexts_preserved": 9,
+  "accepted_body_occurrences": 298,
+  "retained_local_files": 169,
+  "source_alias_rows_updated": 95,
+  "qualified_toolchain_and_friendship_inputs_unchanged": true,
+  "existing_capture_runtime_entrypoint_fixes_unchanged": true,
+  "scope": "Static final source/body/known-receipt reconciliation only; no build/capture/test/native/device/Git/subagent action.",
+  "qualification": "Nine original checkpoints remain original exact evidence. Fresh actual WA then Oath Csc proofs remain coordinator-owned; no old-binary/current-source equivalence claimed."
+}

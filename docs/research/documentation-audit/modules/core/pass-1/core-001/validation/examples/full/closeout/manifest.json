@@ -1,0 +1,139 @@
+{
+  "status": "FINISHED_ADDITIVE_EXAMPLE_ACCEPTANCE_ROLLUP_READY_FOR_FRESH_FINAL_EVIDENCE_REVIEW",
+  "scope": "Actual accepted compiler checkpoints/current source-body association/retained copies/complete authority dispositions. No new build, capture, requalification, primary edit or old-binary equivalence claim.",
+  "counts": {
+    "authority_records": 703,
+    "full_selected_unique_body_ids": 302,
+    "full_unique_preparations": 300,
+    "consumer_sources": 244,
+    "test_injection_sources": 56,
+    "full_aliases": 2,
+    "pilot_unique_compilations": 17,
+    "total_unique_compilations": 317,
+    "accepted_full_contexts": 11,
+    "retained_full_local_copies": 208
+  },
+  "outputs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/acceptance.json",
+      "bytes": 3449,
+      "sha256": "d72b062c396d044f16fb7ae75cf75889656428505fa9c074f0af066dd3e61120"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/contexts.json",
+      "bytes": 93673,
+      "sha256": "d28cf26ecbb11f15a74b11f365cde558a610c6369b9b5e2b788ad1a25eb4f325"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/retained-files.json",
+      "bytes": 180789,
+      "sha256": "dc2131b058c0ced25acf8ffac32e7261f5718cdf0e1aa4e68028a11c1762a57f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/selected-bodies.json",
+      "bytes": 912948,
+      "sha256": "57da954d9f03817475e30bf2acd59b1f4fd11f7195f461579847c1a7abe65c04"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/preparations.json",
+      "bytes": 890804,
+      "sha256": "1cc9d90ce6f403cad3a0df4945f0f6cf21e826180c748f4cf00dfe287bb220d4"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/pilot.json",
+      "bytes": 57301,
+      "sha256": "e47238a4cb5e48b52e9e1b43d401fd55ddbf6d7d46416eefb7f1880c2186c35c"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/authority-dispositions.json",
+      "bytes": 1609107,
+      "sha256": "a35ac85409682d4295cb450f54977b640695cac1cfc3dda87159bfa45c884aae"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/history-identities.json",
+      "bytes": 524488,
+      "sha256": "8d03be159b20b82f4627df6d9a783db757cdeaad438eca9fc0a8f8a6f9d8e284"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/closeout/acceptance.md",
+      "bytes": 7639,
+      "sha256": "3677335fd4bcf174e661a612a7e8c346c717020daaff1dfd6ce26bb51dcd00f2"
+    }
+  ],
+  "source_and_authority_inputs": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/manifest.json",
+      "bytes": 2315007,
+      "sha256": "84e70ceed63320f4ddcf8210c2cf69ebd0a08259d2f39b16923dcfd657c8206b"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/reviewed-inputs.json",
+      "bytes": 972734,
+      "sha256": "070b721e14ab9ec4d19705301ab2ac3d103bac0f78b9b157cc13b737493a5daf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/known-transitions.json",
+      "bytes": 376762,
+      "sha256": "084cb75ff2ba3cfc53a0f7e3a66d251f296a544dbedb948f861be1907916999d"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/body-checkpoint-match.json",
+      "bytes": 418056,
+      "sha256": "f9014b8b378cac77afc18828ee3cd73020ea66ab35200dbbd65e4135b578d464"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/pilot-source-match.json",
+      "bytes": 34846,
+      "sha256": "a9d416e3d61b57bc5d24ff24fad0c3de39885ef9b6b496f966900342a8713dd7"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/final-source-admission/verification.json",
+      "bytes": 8467,
+      "sha256": "aae8e4ed54ed7791140a6cc7a90636df1c69c6875e7455e37e309e71bb68e557"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/compiled-contexts-runner-fixed.json",
+      "bytes": 12202,
+      "sha256": "bde980ff7ae7d73f3407f769469c0306b12857a8a586c61b237af1dc0da06a67"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/qualification-decisions.json",
+      "bytes": 6648,
+      "sha256": "2dcc234df92710ddd9c5459e48f299cae3b45a28975315d2dc36c59653ae25f3"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/review.md",
+      "bytes": 14055,
+      "sha256": "f1c2d367252874dd6cb8b6b895fa4b5726103986a35ca26853c3899b310f03e0"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/review-correction/review.md",
+      "bytes": 10181,
+      "sha256": "91109833a77574e5ed28e21e95dbe4c9d718769b8f27befd90d8efbd71769efb"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/pilot-output-preservation.json",
+      "bytes": 67505,
+      "sha256": "aa37ec854f913480570ea438f98c63e66aec3f7747b489dad4dec060109132bc"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/manifest.json",
+      "bytes": 87165,
+      "sha256": "f864583c4f36050eb1543a1f4cc1ca2a78c7001577ec8ea13c4715575b6b6f60"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/attempts/examples-ac-first/accepted-compilation.json",
+      "bytes": 7053,
+      "sha256": "4b17d3e629b608b9a8b127696a9cbaa26c53b31523589a81c89e00f45b3531d6"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/integration/current-products.json",
+      "bytes": 104259,
+      "sha256": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b"
+    }
+  ],
+  "execution_status": "not-run",
+  "primary_mutable_output_authority": "Retained copies and original capture identities; current bin/obj paths intentionally excluded from checkpoint equality checks.",
+  "normative_physical_and_deferred_holds": "retained unchanged",
+  "new_profile_or_tool": "none; existing final070 source profile and original checkpoint profiles preserved"
+}

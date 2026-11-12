@@ -14,12 +14,26 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </remarks>
 /// <example>
 /// <code>
-/// var key = await YubiKeyManager.FindFirstAsync(
-///     predicate: key => key.SerialNumber == serial, cancellationToken: ct);
+/// using System;
+/// using System.Threading;
+/// using System.Threading.Tasks;
+/// using Yubico.YubiKit.Core.Devices;
 ///
-/// await using var monitor = await YubiKeyManager.CreateMonitorAsync(ct);
-/// await foreach (var change in monitor.WatchAsync(ct))
-///     Apply(change); // DeviceAdded replay, SnapshotComplete, then live changes.
+/// static async Task TrackAsync(CancellationToken cancellationToken)
+/// {
+///     await using var monitor = await YubiKeyManager.CreateMonitorAsync(cancellationToken);
+///     await foreach (var change in monitor.WatchAsync(cancellationToken))
+///     {
+///         Console.WriteLine(change switch
+///         {
+///             DeviceAdded added => $"Added: {added.Device.DeviceId}",
+///             DeviceRemoved removed => $"Removed: {removed.Device.DeviceId}",
+///             DeviceUpdated updated => $"Updated: {updated.Device.DeviceId}",
+///             SnapshotComplete complete => $"Snapshot complete at revision {complete.Revision}",
+///             _ => throw new InvalidOperationException("Unknown device change.")
+///         });
+///     }
+/// }
 /// </code>
 /// </example>
 public static class YubiKeyManager
@@ -43,10 +57,14 @@ public static class YubiKeyManager
     /// <remarks>
     /// Each call uses fresh identity and metadata evidence without changing running monitors. Ordering is
     /// unspecified. Grouping is conservative: ambiguous evidence can split one physical key into several
-    /// results. Metadata is best-effort last-known data. For full composite keys, discover All and filter
+    /// results. Complementary partial interfaces from same-PID keys can also resemble one complete key
+    /// and group across keys until serial, topology, or fuller enumeration distinguishes them. Metadata
+    /// is best-effort last-known data. For full composite keys, discover All and filter
     /// locally with <see cref="IYubiKey.SupportsConnection"/>. Coordinate YubiKeys from disjoint scopes before
     /// opening connections: physical-key exclusion relies on overlapping known interface IDs. Cancellation
     /// bounds waits, not dispatched native work; returned YubiKeys remain usable after discovery ends.
+    /// Each transport enumeration has a five-second wait budget. A timeout logs a warning and omits that
+    /// transport for this call; repeat discovery after the service recovers if the result is incomplete.
     /// </remarks>
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType interfaces = ConnectionType.All,

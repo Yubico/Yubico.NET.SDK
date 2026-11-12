@@ -1,0 +1,1593 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "routed_provenance_rows": 11,
+  "mechanism_groups": 3,
+  "rows": [
+    {
+      "original": {
+        "key": "security-domain-001:SD-DEP-004",
+        "source_run": "security-domain-001",
+        "original_id": "SD-DEP-004",
+        "module": "security-domain",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "shared-exchange-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/security-domain.md",
+          "ledger": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/review-closeout.md",
+          "source_run": "security-domain-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+          "start_line": 53,
+          "end_line": 53,
+          "text": "| SD-DEP-004 | Session/connection lease, cancellation, response-memory lifetime and APDU Le semantics; factory/OwnConnection/GetData call sites | Factory/connection and raw-data contracts |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "A direct factory borrows its connection; protocol exchange admission/drain is distinct from a whole multi-command workflow. APDU response copies and Le formatting need the SD GetData call-site trace.",
+        "current_implementation_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/SecurityDomain/README.md",
+            "src/SecurityDomain/CLAUDE.md"
+          ],
+          "precise_trigger": "| SD-DEP-004 | Session/connection lease, cancellation, response-memory lifetime and APDU Le semantics; factory/OwnConnection/GetData call sites | Factory/connection and raw-data contracts |",
+          "sample_test_reopening_paths": [
+            "src/SecurityDomain/tests/CLAUDE.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/SecurityDomain/src/ISecurityDomainSession.cs",
+            "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+            "src/SecurityDomain/src/SecurityDomainSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 42,
+            "end_line": 44,
+            "observation": "Session has no full in-flight-operation lifetime lease.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 169,
+            "end_line": 199,
+            "observation": "Terminal resolution receives primary failure; successful produced result cannot be reclaimed by fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 470,
+            "end_line": 568,
+            "observation": "Async core cleanup precedes derived Dispose(bool) in finally; borrowed connection detached separately.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "git_blob": "346d21bb714448646ab3d9425f8860795bc702e3",
+            "sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+            "recent_path_history_at_baseline": [
+              "1eb242e3ab86ef73a5e1a1c44c442188c11979ab fix(core,piv)!: clear response data through explicit buffer ownership",
+              "284557812469ad4559a355957cf83f79296a67b2 chore: clean usings",
+              "752b34eff7b897edd00e06c5df2e5d4b664b9704 Reorganize Core source layout"
+            ]
+          },
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+            "git_blob": "effdc2eaebcab2fd310bc68960e7f609e3999e94",
+            "sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+            "recent_path_history_at_baseline": [
+              "8d13fd1ed60148a9d7eceea94ca6d2e87610ff67 fix(core): keep opaque callback and recovery errors out of diagnostics",
+              "cc13b5185b3eb92985f46862a11a1a230e687742 fix(core): refuse smart-card reuse after interrupted secure exchanges",
+              "be380756373e7776d5eeec418ce6d640089fced7 fix(core): close raw protocol review gaps"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual multi-command and callback paths cross per-exchange guard/disposal lifetime; no complete-workflow lease or native interruption guarantee.",
+      "outcome": "SHARED-MECHANISM-CONFIRMED-AT-PIV-CALLERS; APPLET-OWNER-RETAINS-OWN-SCOPE",
+      "local_proposals": [
+        "CORE-PIV-X002"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "yubiotp-001:OTP-DEP-001",
+        "source_run": "yubiotp-001",
+        "original_id": "OTP-DEP-001",
+        "module": "yubiotp",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "shared-exchange-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/yubiotp.md",
+          "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+          "source_run": "yubiotp-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+          "start_line": 60,
+          "end_line": 60,
+          "text": "| OTP-DEP-001 / D001 | ApplicationSession/device helpers physical lease, initialization failure cleanup, selected transport/no fallback and disposal | Factory/extension/README ownership, OtpTool creation, migration and architecture |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "changed-source-review-pending",
+        "current_conclusion": "Owned Linux typed HID opens now transfer grouped claims before native acquisition. Current ApplicationSession owns protocol disposal and only convenience factories own hidden connections. Recheck YubiOTP selection/failure cleanup with these routes.",
+        "current_implementation_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Devices/YubiKeyDevice.cs",
+          "src/Core/src/Devices/HidConnectionSlot.cs",
+          "src/YubiOtp/src/IYubiKeyExtensions.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/src/Devices/YubiKeyDevice.cs",
+            "src/Core/src/Devices/HidConnectionSlot.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/YubiOtp/README.md",
+            "src/YubiOtp/CLAUDE.md"
+          ],
+          "precise_trigger": "| OTP-DEP-001 / D001 | ApplicationSession/device helpers physical lease, initialization failure cleanup, selected transport/no fallback and disposal | Factory/extension/README ownership, OtpTool creation, migration and architecture |",
+          "sample_test_reopening_paths": [
+            "src/YubiOtp/examples/OtpTool/Program.cs",
+            "src/YubiOtp/tests/CLAUDE.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/YubiOtp/src/IYubiKeyExtensions.cs",
+            "src/YubiOtp/src/IYubiOtpSession.cs",
+            "src/YubiOtp/src/YubiOtpSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 42,
+            "end_line": 44,
+            "observation": "Session has no full in-flight-operation lifetime lease.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 169,
+            "end_line": 199,
+            "observation": "Terminal resolution receives primary failure; successful produced result cannot be reclaimed by fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 470,
+            "end_line": 568,
+            "observation": "Async core cleanup precedes derived Dispose(bool) in finally; borrowed connection detached separately.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "changed-source-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/Core/src/Devices/YubiKeyDevice.cs",
+            "git_blob": "a910a7f6a34b080abf2297e5d10c95302773cf72",
+            "sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",
+            "recent_path_history_at_baseline": [
+              "820c323a815b8f7395a6222da9ef3b5c29bd7333 chore(merge): integrate latest yubikit discovery changes",
+              "f32848f6279d637e3ae3d66065176dcac59d000a feat(core): add owned Linux HID async lifetimes",
+              "0952126d4140464ab9b1d1e54c27a34a1e7e02d7 chore:  fix warns"
+            ]
+          },
+          {
+            "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+            "git_blob": "febe52df52754dd3576854ec6cdcddeabc6556c6",
+            "sha256": "29ca3ec49bf3333417b8a1fcb9d967e10bbb4b085c9f0eacc65fce755d1586d7",
+            "recent_path_history_at_baseline": [
+              "529e2c8acb2d51e3c0a40bc1c8bee1299df7506d docs(core): document Linux HID ownership and compatibility contracts",
+              "f32848f6279d637e3ae3d66065176dcac59d000a feat(core): add owned Linux HID async lifetimes",
+              "904431319cf9f0e61a3948239e3734fa59d23372 refactor(core)!: distinguish HID interfaces from native report access"
+            ]
+          },
+          {
+            "path": "src/YubiOtp/src/IYubiKeyExtensions.cs",
+            "git_blob": "1eb4669d595b81867a1017d8c91fab7615d598dd",
+            "sha256": "cdf2f0f475212ad45112adee839fc6fd63811a0d8200aef5ebdd0bc604ddc8e9",
+            "recent_path_history_at_baseline": [
+              "f4419397df7e6c25cef89c7ea01e1baacb35ce2a docs(yubiotp): clarify slot configuration and challenge contracts",
+              "611f8c29a73c603103713ed5f06b8eab45c72d84 feat(applets)!: accept session options in every one-shot convenience",
+              "bdeedf367eb351119fbc86e3decd29afde0a769c refactor(core,applets): copy session options instead of rebuilding them"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual multi-command and callback paths cross per-exchange guard/disposal lifetime; no complete-workflow lease or native interruption guarantee.",
+      "outcome": "SHARED-MECHANISM-CONFIRMED-AT-PIV-CALLERS; APPLET-OWNER-RETAINS-OWN-SCOPE",
+      "local_proposals": [
+        "CORE-PIV-X002"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "yubiotp-001:OTP-DEP-003",
+        "source_run": "yubiotp-001",
+        "original_id": "OTP-DEP-003",
+        "module": "yubiotp",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "shared-exchange-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/yubiotp.md",
+          "ledger": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/review-closeout.md",
+          "source_run": "yubiotp-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/yubiotp/pass-1/yubiotp-001/findings.md",
+          "start_line": 62,
+          "end_line": 62,
+          "text": "| OTP-DEP-003 / D003 | SmartCard admitted cancellation/drain, serialized-copy lifetime and notification exception/cleanup guarantees | Response/input ownership, README cancellation, backend comments/shared interaction and IMP003 |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "SmartCard admitted exchange uses uncancellable constituent work. UserPresence fallback cannot reclaim a sensitive result after transfer if resolution throws; applet producer owns resolution-before-transfer and cleanup.",
+        "current_implementation_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+          "src/Core/src/Credentials/UserPresenceNotification.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+            "src/Core/src/Credentials/UserPresenceNotification.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/YubiOtp/README.md",
+            "src/YubiOtp/CLAUDE.md"
+          ],
+          "precise_trigger": "| OTP-DEP-003 / D003 | SmartCard admitted cancellation/drain, serialized-copy lifetime and notification exception/cleanup guarantees | Response/input ownership, README cancellation, backend comments/shared interaction and IMP003 |",
+          "sample_test_reopening_paths": [
+            "src/YubiOtp/examples/OtpTool/Program.cs",
+            "src/YubiOtp/tests/CLAUDE.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/YubiOtp/src/IYubiKeyExtensions.cs",
+            "src/YubiOtp/src/IYubiOtpSession.cs",
+            "src/YubiOtp/src/YubiOtpSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 42,
+            "end_line": 44,
+            "observation": "Session has no full in-flight-operation lifetime lease.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 169,
+            "end_line": 199,
+            "observation": "Terminal resolution receives primary failure; successful produced result cannot be reclaimed by fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 470,
+            "end_line": 568,
+            "observation": "Async core cleanup precedes derived Dispose(bool) in finally; borrowed connection detached separately.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+            "git_blob": "effdc2eaebcab2fd310bc68960e7f609e3999e94",
+            "sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+            "recent_path_history_at_baseline": [
+              "8d13fd1ed60148a9d7eceea94ca6d2e87610ff67 fix(core): keep opaque callback and recovery errors out of diagnostics",
+              "cc13b5185b3eb92985f46862a11a1a230e687742 fix(core): refuse smart-card reuse after interrupted secure exchanges",
+              "be380756373e7776d5eeec418ce6d640089fced7 fix(core): close raw protocol review gaps"
+            ]
+          },
+          {
+            "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+            "git_blob": "a9704b1ed619b31ccda8ff49fbae6397e0521baf",
+            "sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+            "recent_path_history_at_baseline": [
+              "a58815339e8b0569e5988a07c675392f413718c5 feat(core): let apps attach intent to user-presence prompts (#682)",
+              "d628ce5f1c999ab79d0f63180b56799237c7ecdb feat(applets)!: unify user-presence notifications (#656)"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual multi-command and callback paths cross per-exchange guard/disposal lifetime; no complete-workflow lease or native interruption guarantee.",
+      "outcome": "SHARED-MECHANISM-CONFIRMED-AT-PIV-CALLERS; APPLET-OWNER-RETAINS-OWN-SCOPE",
+      "local_proposals": [
+        "CORE-PIV-X002"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "yubihsm-001:HSM-DEP-002",
+        "source_run": "yubihsm-001",
+        "original_id": "HSM-DEP-002",
+        "module": "yubihsm",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "shared-exchange-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/yubihsm.md",
+          "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+          "source_run": "yubihsm-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+          "start_line": 56,
+          "end_line": 56,
+          "text": "| HSM-DEP-002 | SmartCard admitted cancellation/drain and connection/prompt ownership; public outcomes versus native guarantees | Factory/README ownership, cancellation/presence guidance, shared interaction and touch-test explanations |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "Connection/prompt borrowing and admitted native drain need the CALCULATE path. Historical 6982/Failed plus fresh-session recovery is measured outcome, not proof of native cancellation or timeout causality.",
+        "current_implementation_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Credentials/UserPresenceNotification.cs",
+          "src/YubiHsm/src/HsmAuthSession.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/src/Credentials/UserPresenceNotification.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/YubiHsm/README.md",
+            "src/YubiHsm/CLAUDE.md"
+          ],
+          "precise_trigger": "| HSM-DEP-002 | SmartCard admitted cancellation/drain and connection/prompt ownership; public outcomes versus native guarantees | Factory/README ownership, cancellation/presence guidance, shared interaction and touch-test explanations |",
+          "sample_test_reopening_paths": [
+            "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+            "src/YubiHsm/tests/CLAUDE.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/YubiHsm/src/HsmAuthSession.cs",
+            "src/YubiHsm/src/IHsmAuthSession.cs",
+            "src/YubiHsm/src/IYubiKeyExtensions.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 42,
+            "end_line": 44,
+            "observation": "Session has no full in-flight-operation lifetime lease.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 169,
+            "end_line": 199,
+            "observation": "Terminal resolution receives primary failure; successful produced result cannot be reclaimed by fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 470,
+            "end_line": 568,
+            "observation": "Async core cleanup precedes derived Dispose(bool) in finally; borrowed connection detached separately.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+            "git_blob": "a9704b1ed619b31ccda8ff49fbae6397e0521baf",
+            "sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+            "recent_path_history_at_baseline": [
+              "a58815339e8b0569e5988a07c675392f413718c5 feat(core): let apps attach intent to user-presence prompts (#682)",
+              "d628ce5f1c999ab79d0f63180b56799237c7ecdb feat(applets)!: unify user-presence notifications (#656)"
+            ]
+          },
+          {
+            "path": "src/YubiHsm/src/HsmAuthSession.cs",
+            "git_blob": "95e90197f92791edd57c09362c2fd43c46256907",
+            "sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+            "recent_path_history_at_baseline": [
+              "e053386a6afff23194f8874603625a2a13c07a00 docs(yubihsm): clarify enrollment, retry and session-key contracts",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "3faa60342246e614ef24352f26a859613730aa3a feat(core): report operation in user-presence context (#681)"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual multi-command and callback paths cross per-exchange guard/disposal lifetime; no complete-workflow lease or native interruption guarantee.",
+      "outcome": "SHARED-MECHANISM-CONFIRMED-AT-PIV-CALLERS; APPLET-OWNER-RETAINS-OWN-SCOPE",
+      "local_proposals": [
+        "CORE-PIV-X002"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "yubihsm-001:HSM-DEP-003",
+        "source_run": "yubihsm-001",
+        "original_id": "HSM-DEP-003",
+        "module": "yubihsm",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "apdu-tlv-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/yubihsm.md",
+          "ledger": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/review-closeout.md",
+          "source_run": "yubihsm-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/yubihsm/pass-1/yubihsm-001/findings.md",
+          "start_line": 57,
+          "end_line": 57,
+          "text": "| HSM-DEP-003 | TLV/formatter/response copied-buffer ownership and reachable cleanup across transport | Qualified sensitive-buffer claims, ZeroApduResponse and SessionKeys/input lifetime |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "ApduResponse is a sealed copied owner with Clear invalidating its views. Tlv and serialized intermediates have independent storage/lifetimes; HSM ZeroApduResponse and SessionKeys copies need full reachable-path tracing.",
+        "current_implementation_paths": [
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+          "src/Core/src/Utilities/Tlv.cs",
+          "src/Core/src/Utilities/TlvHelper.cs",
+          "src/YubiHsm/src/HsmAuthSession.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "src/Core/src/Utilities/Tlv.cs",
+            "src/Core/src/Utilities/TlvHelper.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/YubiHsm/README.md",
+            "src/YubiHsm/CLAUDE.md"
+          ],
+          "precise_trigger": "| HSM-DEP-003 | TLV/formatter/response copied-buffer ownership and reachable cleanup across transport | Qualified sensitive-buffer claims, ZeroApduResponse and SessionKeys/input lifetime |",
+          "sample_test_reopening_paths": [
+            "src/YubiHsm/examples/HsmAuthTool/Program.cs",
+            "src/YubiHsm/tests/CLAUDE.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/YubiHsm/src/HsmAuthSession.cs",
+            "src/YubiHsm/src/IHsmAuthSession.cs",
+            "src/YubiHsm/src/IYubiKeyExtensions.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "start_line": 23,
+            "end_line": 36,
+            "observation": "Sealed copied owner.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "start_line": 94,
+            "end_line": 99,
+            "observation": "Clear zeroes the actual owned raw buffer, including SW.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "git_blob": "346d21bb714448646ab3d9425f8860795bc702e3",
+            "sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+            "recent_path_history_at_baseline": [
+              "1eb242e3ab86ef73a5e1a1c44c442188c11979ab fix(core,piv)!: clear response data through explicit buffer ownership",
+              "284557812469ad4559a355957cf83f79296a67b2 chore: clean usings",
+              "752b34eff7b897edd00e06c5df2e5d4b664b9704 Reorganize Core source layout"
+            ]
+          },
+          {
+            "path": "src/Core/src/Utilities/Tlv.cs",
+            "git_blob": "829915a09524ed713edf97b5bea18f77582f2449",
+            "sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+            "recent_path_history_at_baseline": [
+              "ed9cd73569ac560103b5769acb9c316c339bd724 fix(core): validate BER-TLV long-form lengths (YESDK-1633 25e, YESDK-1628 #20)",
+              "d628ce5f1c999ab79d0f63180b56799237c7ecdb feat(applets)!: unify user-presence notifications (#656)",
+              "752b34eff7b897edd00e06c5df2e5d4b664b9704 Reorganize Core source layout"
+            ]
+          },
+          {
+            "path": "src/Core/src/Utilities/TlvHelper.cs",
+            "git_blob": "0d415f18d4fb5d5f345b0e08cd99ee5a76c7f314",
+            "sha256": "9e722d799e53504684e7c700a59adb456c0857ddfe03d2eed222e96b1a76de44",
+            "recent_path_history_at_baseline": [
+              "a8066061a88ed5b0a9bdcc0a084949cddf7f1186 fix(core): size TlvHelper.EncodeDictionary from the built TLVs (YESDK-1633, 25f)",
+              "d628ce5f1c999ab79d0f63180b56799237c7ecdb feat(applets)!: unify user-presence notifications (#656)",
+              "9a9d5ef623703db547fda8c49c6654171f454edb fix(core): define TLV output ownership"
+            ]
+          },
+          {
+            "path": "src/YubiHsm/src/HsmAuthSession.cs",
+            "git_blob": "95e90197f92791edd57c09362c2fd43c46256907",
+            "sha256": "cff7ce2e4b3d7e6da16277503257705767d2e1b9b014ccfccd136a1a8e630240",
+            "recent_path_history_at_baseline": [
+              "e053386a6afff23194f8874603625a2a13c07a00 docs(yubihsm): clarify enrollment, retry and session-key contracts",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "3faa60342246e614ef24352f26a859613730aa3a feat(core): report operation in user-presence context (#681)"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual response/TLV/input/intermediate/output scopes confirmed; lower-layer/native/provider copies remain with their owners.",
+      "outcome": "SHARED-MECHANISM-CONFIRMED-AT-PIV-CALLERS; APPLET-OWNER-RETAINS-OWN-SCOPE",
+      "local_proposals": [
+        "CORE-PIV-X003"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "openpgp-001:PGP-CORE-002",
+        "source_run": "openpgp-001",
+        "original_id": "PGP-CORE-002",
+        "module": "openpgp",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "shared-exchange-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/openpgp.md",
+          "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+          "source_run": "openpgp-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+          "start_line": 89,
+          "end_line": 89,
+          "text": "| PGP-CORE-002 | Factory/connection ownership, async disposal dispatch, SCP applicability and KDF cache cleanup boundaries (C003/C021). | Factory/GetKdf/disposal/borrowed-connection guide |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "Core async session disposal dispatches DisposeAsyncCore then derived Dispose(bool) in finally; connection ownership remains borrowed unless transferred. OpenPGP KDF cache alias/disposal and SCP applicability need separate applet verification.",
+        "current_implementation_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/OpenPgp/src/OpenPgpSession.cs",
+          "src/OpenPgp/src/OpenPgpSession.Config.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/OpenPgp/README.md",
+            "src/OpenPgp/CLAUDE.md"
+          ],
+          "precise_trigger": "| PGP-CORE-002 | Factory/connection ownership, async disposal dispatch, SCP applicability and KDF cache cleanup boundaries (C003/C021). | Factory/GetKdf/disposal/borrowed-connection guide |",
+          "sample_test_reopening_paths": [
+            "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+            "src/OpenPgp/tests/CLAUDE.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/OpenPgp/src/IOpenPgpSession.cs",
+            "src/OpenPgp/src/IYubiKeyExtensions.cs",
+            "src/OpenPgp/src/OpenPgpSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 42,
+            "end_line": 44,
+            "observation": "Session has no full in-flight-operation lifetime lease.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 169,
+            "end_line": 199,
+            "observation": "Terminal resolution receives primary failure; successful produced result cannot be reclaimed by fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 470,
+            "end_line": 568,
+            "observation": "Async core cleanup precedes derived Dispose(bool) in finally; borrowed connection detached separately.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/OpenPgp/src/OpenPgpSession.cs",
+            "git_blob": "28d8d539c1989b334b63448c808f5576999acfb1",
+            "sha256": "17f9f55ac2fb098c4f11c4957d3dd0c24d6d96ade19ac228577fe9c983be57f9",
+            "recent_path_history_at_baseline": [
+              "84715ee1cbd45d885417ddc8b7dcb9205784f6ef docs(openpgp): document PIN, key-operation and reset contracts",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "3faa60342246e614ef24352f26a859613730aa3a feat(core): report operation in user-presence context (#681)"
+            ]
+          },
+          {
+            "path": "src/OpenPgp/src/OpenPgpSession.Config.cs",
+            "git_blob": "f7b742b9dfa8cf6e1f0125deea9ed235c93fa861",
+            "sha256": "f0d3c11cdd8b7c2c5c6b0f2f05bff6acc0d27b1d007a865ae40025aea1c54760",
+            "recent_path_history_at_baseline": [
+              "727fe43afc430c5d8364d868a6436de50626e476 chore(audit): integrate merged PIV APIs into documentation campaign",
+              "56d721288273b8ec12d93a808327d998b46bc581 feat(core): add cryptographic catalog and OpenPGP key mappings",
+              "84715ee1cbd45d885417ddc8b7dcb9205784f6ef docs(openpgp): document PIN, key-operation and reset contracts"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual multi-command and callback paths cross per-exchange guard/disposal lifetime; no complete-workflow lease or native interruption guarantee.",
+      "outcome": "SHARED-MECHANISM-CONFIRMED-AT-PIV-CALLERS; APPLET-OWNER-RETAINS-OWN-SCOPE",
+      "local_proposals": [
+        "CORE-PIV-X002"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "openpgp-001:PGP-CORE-004",
+        "source_run": "openpgp-001",
+        "original_id": "PGP-CORE-004",
+        "module": "openpgp",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "shared-exchange-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/openpgp.md",
+          "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+          "source_run": "openpgp-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+          "start_line": 91,
+          "end_line": 91,
+          "text": "| PGP-CORE-004 | SmartCard admitted cancellation, session serialization, operation drain and prompt ownership/outcome (C008/C012). | Crypto/presence/cancellation/resource guidance and actual ceremony tests |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "Exchange serialization and session disposal do not alone prove whole PIN/key/reset workflow atomicity. Preserve 6600/Failed and fresh-session recovery without native-interruption claims.",
+        "current_implementation_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Utilities/ExchangeGuard.cs",
+          "src/OpenPgp/src/OpenPgpSession.Crypto.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/src/Utilities/ExchangeGuard.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/OpenPgp/README.md",
+            "src/OpenPgp/CLAUDE.md"
+          ],
+          "precise_trigger": "| PGP-CORE-004 | SmartCard admitted cancellation, session serialization, operation drain and prompt ownership/outcome (C008/C012). | Crypto/presence/cancellation/resource guidance and actual ceremony tests |",
+          "sample_test_reopening_paths": [
+            "src/OpenPgp/examples/OpenPgpTool/Program.cs",
+            "src/OpenPgp/tests/CLAUDE.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/OpenPgp/src/IOpenPgpSession.cs",
+            "src/OpenPgp/src/IYubiKeyExtensions.cs",
+            "src/OpenPgp/src/OpenPgpSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 42,
+            "end_line": 44,
+            "observation": "Session has no full in-flight-operation lifetime lease.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 169,
+            "end_line": 199,
+            "observation": "Terminal resolution receives primary failure; successful produced result cannot be reclaimed by fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 470,
+            "end_line": 568,
+            "observation": "Async core cleanup precedes derived Dispose(bool) in finally; borrowed connection detached separately.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+            "git_blob": "b2980dd7dd5ce35c9ec0db1029e2380dae9edc60",
+            "sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+            "recent_path_history_at_baseline": [
+              "be380756373e7776d5eeec418ce6d640089fced7 fix(core): close raw protocol review gaps",
+              "1eabc5b039c718b013ff8be2677ba11e77cb362a fix(core): harden raw session exchanges",
+              "188e8e62f4d389ccc0e755123f220382a9daa761 fix(core): refuse overlapping protocol exchanges"
+            ]
+          },
+          {
+            "path": "src/OpenPgp/src/OpenPgpSession.Crypto.cs",
+            "git_blob": "01a8374188a42eb5e89d5faf7a7ed5fefe9197f7",
+            "sha256": "5d9f05321f0c71b08e7553185c616d7130b3ae927ccafb388f07a7033c9cf610",
+            "recent_path_history_at_baseline": [
+              "727fe43afc430c5d8364d868a6436de50626e476 chore(audit): integrate merged PIV APIs into documentation campaign",
+              "56d721288273b8ec12d93a808327d998b46bc581 feat(core): add cryptographic catalog and OpenPGP key mappings",
+              "84715ee1cbd45d885417ddc8b7dcb9205784f6ef docs(openpgp): document PIN, key-operation and reset contracts"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual multi-command and callback paths cross per-exchange guard/disposal lifetime; no complete-workflow lease or native interruption guarantee.",
+      "outcome": "SHARED-MECHANISM-CONFIRMED-AT-PIV-CALLERS; APPLET-OWNER-RETAINS-OWN-SCOPE",
+      "local_proposals": [
+        "CORE-PIV-X002"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "piv-001:PIVCORE-001",
+        "source_run": "piv-001",
+        "original_id": "PIVCORE-001",
+        "module": "piv",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "pcsc-pin-isolation",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/piv.md",
+          "ledger": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-closeout.md",
+          "source_run": "piv-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+          "start_line": 45,
+          "end_line": 45,
+          "text": "**PIVCORE-001 through003** retain physical PIN state/handle isolation, cancellation/workflow serialization,"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "changed-scoped-policy-physical-gap",
+        "current_conclusion": "Current default is strict Exclusive, with shared/fallback explicit opt-ins and UNPOWER_CARD release. Source and policy assertions settle mode selection, not universal physical PIN/cache isolation across OSes/handles.",
+        "current_implementation_paths": [
+          "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+          "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+          "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+          "src/Piv/src/PivSession.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+            "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+            "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/Piv/README.md",
+            "src/Piv/CLAUDE.md"
+          ],
+          "precise_trigger": "**PIVCORE-001 through003** retain physical PIN state/handle isolation, cancellation/workflow serialization,",
+          "sample_test_reopening_paths": [
+            "src/Piv/examples/PivTool/Program.cs",
+            "src/Piv/examples/PivTool/README.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/Piv/src/IPivSession.cs",
+            "src/Piv/src/IYubiKeyExtensions.cs",
+            "src/Piv/src/PivSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions. PIV physical prerequisite/touch/hotplug and touch-dependent cancellation/recovery remain user-deferred. Windows concurrency work remains pending a user-provided handoff.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "start_line": 41,
+            "end_line": 86,
+            "observation": "Exclusive default; shared retry only for explicit fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "start_line": 116,
+            "end_line": 120,
+            "observation": "Release requests UNPOWER_CARD.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+            "start_line": 43,
+            "end_line": 75,
+            "observation": "Default exclusive, no shared retry after contention, released claim and fresh reopen asserted.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+            "start_line": 176,
+            "end_line": 288,
+            "observation": "Explicit policies and unpower disposition assertions.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "changed-scoped-policy-physical-gap",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions. PIV physical prerequisite/touch/hotplug and touch-dependent cancellation/recovery remain user-deferred. Windows concurrency work remains pending a user-provided handoff.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+            "git_blob": "ba923598c70e70b884dee18fb9dc1264ea78460b",
+            "sha256": "7261185284f657f0a78ab18cb42f6aa6abf31c0ce0bd38ac0d05b436f20716db",
+            "recent_path_history_at_baseline": [
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches",
+              "d89b7534914df54c72d74c8382dc10fe8dce0650 docs: keep documentation about the code, not about how it was written"
+            ]
+          },
+          {
+            "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+            "git_blob": "9d1ba3c10197ced851f09759ae0844599e5603ec",
+            "sha256": "891ed9acdf57c4436707ed8ec847e8df9f796261c4b3951c0876774f982a2e48",
+            "recent_path_history_at_baseline": [
+              "54a4e08c4175907ca2f121a59138a3054a580cde docs(core): clarify PCSC contention recovery and ownership (YESDK-1630, audit 22)",
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches"
+            ]
+          },
+          {
+            "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "git_blob": "e4773c7a9bd4707af1f4197e2998b4f86c0bb906",
+            "sha256": "657cf8862442fc697cfa675186ab9f7b29c5c1e1c7773885591acf8946783584",
+            "recent_path_history_at_baseline": [
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches",
+              "d89b7534914df54c72d74c8382dc10fe8dce0650 docs: keep documentation about the code, not about how it was written"
+            ]
+          },
+          {
+            "path": "src/Piv/src/PivSession.cs",
+            "git_blob": "64014877bb5fdb407c36e58d6b29672c90545866",
+            "sha256": "4b6b75402b8d6007a1e98b065b61fb6e856ac607b13275df3a378a8739f8e9e4",
+            "recent_path_history_at_baseline": [
+              "bf0c0207b5accb446492b282cef1e602869976ee docs(piv): document credential, key and certificate contracts",
+              "b1362127203beda5e9c797e8648b28e2716c496c chore(merge): integrate upstream catalog with PIV session APIs",
+              "b0c7c638ed3b7addf6d52f034a8345c71c02643b chore(piv): finish key-type labels and correct migration gap notes"
+            ]
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+            "git_blob": "306a9af3f31b13353240323c01d94a0b8367c030",
+            "sha256": "edd11a4a91481a80248ef61ade51d778695a7e754344194848b30a0ca6e441c3",
+            "recent_path_history_at_baseline": [
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches",
+              "d89b7534914df54c72d74c8382dc10fe8dce0650 docs: keep documentation about the code, not about how it was written"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "Strict Exclusive/opt-ins and requested UNPOWER confirmed; actual PIN/power/cross-process state remains separately qualified/deferred.",
+      "outcome": "SOURCE-REBASELINED-WITH-REMAINING-POLICY-QUALIFICATION",
+      "local_proposals": [
+        "CORE-PIV-X001"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "piv-001:PIVCORE-002",
+        "source_run": "piv-001",
+        "original_id": "PIVCORE-002",
+        "module": "piv",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "shared-exchange-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/piv.md",
+          "ledger": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-closeout.md",
+          "source_run": "piv-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+          "start_line": null,
+          "end_line": null,
+          "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "Check multi-APDU authentication/recovery/reset overlap beyond individual protocol exchange guards. The session has no in-flight operation admission lease; disposal may race a larger workflow between exchanges.",
+        "current_implementation_paths": [
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Core/src/Utilities/ExchangeGuard.cs",
+          "src/Piv/src/PivSession.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/src/Utilities/ExchangeGuard.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/Piv/README.md",
+            "src/Piv/CLAUDE.md"
+          ],
+          "precise_trigger": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found.",
+          "sample_test_reopening_paths": [
+            "src/Piv/examples/PivTool/Program.cs",
+            "src/Piv/examples/PivTool/README.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/Piv/src/IPivSession.cs",
+            "src/Piv/src/IYubiKeyExtensions.cs",
+            "src/Piv/src/PivSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions. PIV physical prerequisite/touch/hotplug and touch-dependent cancellation/recovery remain user-deferred. Windows concurrency work remains pending a user-provided handoff.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 42,
+            "end_line": 44,
+            "observation": "Session has no full in-flight-operation lifetime lease.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 169,
+            "end_line": 199,
+            "observation": "Terminal resolution receives primary failure; successful produced result cannot be reclaimed by fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "start_line": 470,
+            "end_line": 568,
+            "observation": "Async core cleanup precedes derived Dispose(bool) in finally; borrowed connection detached separately.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions. PIV physical prerequisite/touch/hotplug and touch-dependent cancellation/recovery remain user-deferred. Windows concurrency work remains pending a user-provided handoff.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+            "git_blob": "b2980dd7dd5ce35c9ec0db1029e2380dae9edc60",
+            "sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+            "recent_path_history_at_baseline": [
+              "be380756373e7776d5eeec418ce6d640089fced7 fix(core): close raw protocol review gaps",
+              "1eabc5b039c718b013ff8be2677ba11e77cb362a fix(core): harden raw session exchanges",
+              "188e8e62f4d389ccc0e755123f220382a9daa761 fix(core): refuse overlapping protocol exchanges"
+            ]
+          },
+          {
+            "path": "src/Piv/src/PivSession.cs",
+            "git_blob": "64014877bb5fdb407c36e58d6b29672c90545866",
+            "sha256": "4b6b75402b8d6007a1e98b065b61fb6e856ac607b13275df3a378a8739f8e9e4",
+            "recent_path_history_at_baseline": [
+              "bf0c0207b5accb446492b282cef1e602869976ee docs(piv): document credential, key and certificate contracts",
+              "b1362127203beda5e9c797e8648b28e2716c496c chore(merge): integrate upstream catalog with PIV session APIs",
+              "b0c7c638ed3b7addf6d52f034a8345c71c02643b chore(piv): finish key-type labels and correct migration gap notes"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual multi-command and callback paths cross per-exchange guard/disposal lifetime; no complete-workflow lease or native interruption guarantee.",
+      "outcome": "SOURCE-REBASELINED-WITH-REMAINING-POLICY-QUALIFICATION",
+      "local_proposals": [
+        "CORE-PIV-X002"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "piv-001:PIVCORE-003",
+        "source_run": "piv-001",
+        "original_id": "PIVCORE-003",
+        "module": "piv",
+        "aliases_or_related_ids": [],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "apdu-tlv-ownership",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "handoff": "docs/research/documentation-audit/piv.md",
+          "ledger": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+          "review": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/review-closeout.md",
+          "source_run": "piv-001"
+        },
+        "historical_definition": {
+          "path": "docs/research/documentation-audit/modules/piv/pass-1/piv-001/findings.md",
+          "start_line": null,
+          "end_line": null,
+          "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+        },
+        "historical_implementation_paths": [],
+        "current_state": "source-mapped-review-pending",
+        "current_conclusion": "Owned response Clear and Tlv disposal remain separate from borrowed connection and caller-transferred crypto result lifetimes. Check PIV copy/clear/transfer paths before expanding cleanup claims.",
+        "current_implementation_paths": [
+          "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+          "src/Core/src/Utilities/Tlv.cs",
+          "src/Core/src/Sessions/ApplicationSession.cs",
+          "src/Piv/src/Cryptography/PrivateKeyOperations.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "src/Core/src/Utilities/Tlv.cs",
+            "src/Core/src/Sessions/ApplicationSession.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md",
+            "src/Piv/README.md",
+            "src/Piv/CLAUDE.md"
+          ],
+          "precise_trigger": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found.",
+          "sample_test_reopening_paths": [
+            "src/Piv/examples/PivTool/Program.cs",
+            "src/Piv/examples/PivTool/README.md"
+          ],
+          "module_xml_reopening_paths": [
+            "src/Piv/src/IPivSession.cs",
+            "src/Piv/src/IYubiKeyExtensions.cs",
+            "src/Piv/src/PivSession.cs"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions. PIV physical prerequisite/touch/hotplug and touch-dependent cancellation/recovery remain user-deferred. Windows concurrency work remains pending a user-provided handoff.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "start_line": 23,
+            "end_line": 36,
+            "observation": "Sealed copied owner.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "start_line": 94,
+            "end_line": 99,
+            "observation": "Clear zeroes the actual owned raw buffer, including SW.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "source-mapped-review-pending",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions. PIV physical prerequisite/touch/hotplug and touch-dependent cancellation/recovery remain user-deferred. Windows concurrency work remains pending a user-provided handoff.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+            "git_blob": "346d21bb714448646ab3d9425f8860795bc702e3",
+            "sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+            "recent_path_history_at_baseline": [
+              "1eb242e3ab86ef73a5e1a1c44c442188c11979ab fix(core,piv)!: clear response data through explicit buffer ownership",
+              "284557812469ad4559a355957cf83f79296a67b2 chore: clean usings",
+              "752b34eff7b897edd00e06c5df2e5d4b664b9704 Reorganize Core source layout"
+            ]
+          },
+          {
+            "path": "src/Core/src/Utilities/Tlv.cs",
+            "git_blob": "829915a09524ed713edf97b5bea18f77582f2449",
+            "sha256": "268a42d30e51ad40c54de270a3937765862889cba68d3b079cd558b22594dd42",
+            "recent_path_history_at_baseline": [
+              "ed9cd73569ac560103b5769acb9c316c339bd724 fix(core): validate BER-TLV long-form lengths (YESDK-1633 25e, YESDK-1628 #20)",
+              "d628ce5f1c999ab79d0f63180b56799237c7ecdb feat(applets)!: unify user-presence notifications (#656)",
+              "752b34eff7b897edd00e06c5df2e5d4b664b9704 Reorganize Core source layout"
+            ]
+          },
+          {
+            "path": "src/Core/src/Sessions/ApplicationSession.cs",
+            "git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+            "sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+            "recent_path_history_at_baseline": [
+              "60574b7061a4faa92acd0e78fb68ed30cc09b0fe refactor(core): make feature enforcement protected session machinery",
+              "2e7d262c62c0fe319cf06a606d979c5206fb340d refactor(sessions): Centralize applet session initialization in ApplicationSession (#712)",
+              "8c625375ecaa1a6bb62e51495b210a7cfb40971f fix(core): preserve idle borrowed connections and verify public recovery"
+            ]
+          },
+          {
+            "path": "src/Piv/src/Cryptography/PrivateKeyOperations.cs",
+            "git_blob": "92b6cb47e3864e53b70c602dc9c5a2eab71d7d09",
+            "sha256": "f4c01518680646dc7f960a61afb36a43ffbdecdfffe1a1b22633945e77c1aace",
+            "recent_path_history_at_baseline": [
+              "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef chore(audit): integrate current Core upstream into documentation campaign",
+              "3de42bb54c5e8c986364f0f04398d4e85a66a596 refactor(piv): derive helper logger categories with nameof",
+              "bf0c0207b5accb446492b282cef1e602869976ee docs(piv): document credential, key and certificate contracts"
+            ]
+          }
+        ],
+        "historical_commit_resolution": []
+      },
+      "piv_boundary_conclusion": "PIV actual response/TLV/input/intermediate/output scopes confirmed; lower-layer/native/provider copies remain with their owners.",
+      "outcome": "SOURCE-REBASELINED-WITH-REMAINING-POLICY-QUALIFICATION",
+      "local_proposals": [
+        "CORE-PIV-X003"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    },
+    {
+      "original": {
+        "key": "audit-v2-20261022-20261031:#22",
+        "source_run": "audit-v2-20261022-20261031",
+        "original_id": "#22",
+        "module": "legacy-code-audit",
+        "aliases_or_related_ids": [
+          "YESDK-1630",
+          "26b77ece8",
+          "eef399698"
+        ],
+        "original_identity_kind": "original-numbered-identity",
+        "dedup_group": "pcsc-pin-isolation",
+        "counting": "provenance/dependency occurrence; never an additive bug count",
+        "authority": {
+          "source_run": "audit-v2-20261022-20261031",
+          "handoff": "docs/research/audit-v2-close-out.md",
+          "ledger": "docs/research/audit-v2-closeout-review.md",
+          "review": "docs/research/audit-v2-execution.md"
+        },
+        "historical_definition": {
+          "path": "docs/research/audit-v2-closeout-review.md",
+          "start_line": 19,
+          "end_line": 19,
+          "text": "| #22 / YESDK-1630 — shared PIV PIN state | Another handle can use card-wide PIN authorization when the SDK falls back to shared access. | Mitigated default, not unconditional isolation; compatibility risk needs acceptance. |"
+        },
+        "historical_implementation_paths": [],
+        "current_state": "changed-scoped-policy-physical-gap",
+        "current_conclusion": "Strict Exclusive is the constructor/factory default and sharing violation fails without shared retry; explicit fallback/shared modes remain. Unit assertions cover selection/release policy. Historical physical PIN-state uncertainty stays OS/share-mode/device qualified.",
+        "current_implementation_paths": [
+          "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+          "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+          "src/Core/src/Transports/SmartCard/SmartCardSharing.cs"
+        ],
+        "current_test_sources_to_read_or_reverify": [],
+        "actor_boundary": "Core supplies shared mechanics; the applet owns operation/profile policy; the OS owns native completion.",
+        "relevant_historical_commits": [
+          "26b77ece8",
+          "eef399698"
+        ],
+        "documentation": {
+          "state": "initial rebaseline; family/boundary review pending",
+          "reopen_paths": [
+            "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+            "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+            "src/Core/README.md",
+            "src/Core/CLAUDE.md",
+            "docs/architecture/raw-access-tiers.md",
+            "docs/migration/v1-to-v2.md"
+          ],
+          "precise_trigger": "| #22 / YESDK-1630 — shared PIV PIN state | Another handle can use card-wide PIN authorization when the SDK falls back to shared access. | Mitigated default, not unconditional isolation; compatibility risk needs acceptance. |",
+          "sample_test_reopening_paths": [
+            "src/Core/tests/CLAUDE.md"
+          ],
+          "historical_resolution": "retain source-run handoff and original trigger; no new content acceptance in this preparation"
+        },
+        "qualification": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+        "bounded_current_statement_evidence": [
+          {
+            "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "start_line": 41,
+            "end_line": 86,
+            "observation": "Exclusive default; shared retry only for explicit fallback.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "start_line": 116,
+            "end_line": 120,
+            "observation": "Release requests UNPOWER_CARD.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+            "start_line": 43,
+            "end_line": 75,
+            "observation": "Default exclusive, no shared retry after contention, released claim and fresh reopen asserted.",
+            "read_scope": "bounded source/assertion read; no execution"
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+            "start_line": 176,
+            "end_line": 288,
+            "observation": "Explicit policies and unpower disposition assertions.",
+            "read_scope": "bounded source/assertion read; no execution"
+          }
+        ],
+        "implementation": {
+          "state": "changed-scoped-policy-physical-gap",
+          "review": "initial source rebaseline; assigned full family/boundary review pending"
+        },
+        "verification": {
+          "fresh_sdk_build": false,
+          "fresh_sdk_test": false,
+          "fresh_device_operation": false,
+          "fresh_platform_qualification": false,
+          "historical_scope_and_missing_evidence": "Source mapping only in this preparation. No fresh SDK, test, hardware or platform execution. Preserve the source run's exact scope and missing dimensions.",
+          "next_owner": "assigned Core family and named applet boundary owner; Astra adjudicates consequential decisions"
+        },
+        "current_path_evidence": [
+          {
+            "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+            "git_blob": "e4773c7a9bd4707af1f4197e2998b4f86c0bb906",
+            "sha256": "657cf8862442fc697cfa675186ab9f7b29c5c1e1c7773885591acf8946783584",
+            "recent_path_history_at_baseline": [
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches",
+              "d89b7534914df54c72d74c8382dc10fe8dce0650 docs: keep documentation about the code, not about how it was written"
+            ]
+          },
+          {
+            "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+            "git_blob": "9d1ba3c10197ced851f09759ae0844599e5603ec",
+            "sha256": "891ed9acdf57c4436707ed8ec847e8df9f796261c4b3951c0876774f982a2e48",
+            "recent_path_history_at_baseline": [
+              "54a4e08c4175907ca2f121a59138a3054a580cde docs(core): clarify PCSC contention recovery and ownership (YESDK-1630, audit 22)",
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches"
+            ]
+          },
+          {
+            "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+            "git_blob": "ba923598c70e70b884dee18fb9dc1264ea78460b",
+            "sha256": "7261185284f657f0a78ab18cb42f6aa6abf31c0ce0bd38ac0d05b436f20716db",
+            "recent_path_history_at_baseline": [
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches",
+              "d89b7534914df54c72d74c8382dc10fe8dce0650 docs: keep documentation about the code, not about how it was written"
+            ]
+          },
+          {
+            "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+            "git_blob": "306a9af3f31b13353240323c01d94a0b8367c030",
+            "sha256": "edd11a4a91481a80248ef61ade51d778695a7e754344194848b30a0ca6e441c3",
+            "recent_path_history_at_baseline": [
+              "eef3996988b94d0385dca163b7abdb8c24212780 fix(core)!: default PCSC connections to strict exclusive access (YESDK-1630, audit 22)",
+              "4c0d4c89f730c54f6f78f0937786be71a06dd4c0 refactor(core): one knob for smart card sharing; drop CoreCompatSwitches",
+              "d89b7534914df54c72d74c8382dc10fe8dce0650 docs: keep documentation about the code, not about how it was written"
+            ]
+          }
+        ],
+        "historical_commit_resolution": [
+          {
+            "requested": "26b77ece8",
+            "commit": "26b77ece803d355b35e27fb14c53a8871327a37f",
+            "ancestor_of_source_baseline": false
+          },
+          {
+            "requested": "eef399698",
+            "commit": "eef3996988b94d0385dca163b7abdb8c24212780",
+            "ancestor_of_source_baseline": true
+          }
+        ]
+      },
+      "piv_boundary_conclusion": "Strict Exclusive/opt-ins and requested UNPOWER confirmed; actual PIN/power/cross-process state remains separately qualified/deferred.",
+      "outcome": "SOURCE-REBASELINED-WITH-REMAINING-POLICY-QUALIFICATION",
+      "local_proposals": [
+        "CORE-PIV-X001"
+      ],
+      "authoritative_registry_changed": false,
+      "duplicate_bug_credit": 0,
+      "review_status": "PENDING",
+      "verification": "NO NEW SDK/NATIVE/DEVICE EXECUTION"
+    }
+  ],
+  "all_piv_engineering_groups": "PIVIMP-001..010 retained separately in inherited-outcomes.md",
+  "historical_labels": "PIV-CORE-001..003 refer to original piv-001:PIVCORE-001..003; no renumbering"
+}

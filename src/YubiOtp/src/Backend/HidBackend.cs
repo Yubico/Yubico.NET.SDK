@@ -46,6 +46,8 @@ internal sealed class HidBackend : IYubiOtpBackend
         CancellationToken cancellationToken)
     {
         var status = await protocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
+        // Core's first report establishes protocol firmware (with the NEO refresh when needed);
+        // this returned status comes from a second report. Effective overrides are applied later.
         var firmwareVersion = protocol.FirmwareVersion
                               ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
 

@@ -1,0 +1,41 @@
+[
+  {
+    "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+    "opening_tag_line": 31,
+    "closing_tag_line": 35,
+    "body_first_line": 32,
+    "body_last_line": 34,
+    "body_sha256": "9ff8535b320dc909b8670d626b05c18dc8e362ec80c1c1c5237b6a631c46811e",
+    "body": "ConnectionType.Hid.ToConcreteScope();                             // HidFido | HidOtp\n(ConnectionType.SmartCard | ConnectionType.Hid).ToConcreteScope(); // SmartCard | HidFido | HidOtp\n((ConnectionType)0x40).ToConcreteScope();                         // Unknown: undefined bits are dropped",
+    "classification": "ILLUSTRATIVE-INTERNAL-EXPRESSIONS",
+    "compiler_status": "VALID-NOT-CHECKED",
+    "execution_status": "NOT-RUN",
+    "ownership": "value-only internal extension expressions; no resource acquired"
+  },
+  {
+    "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+    "opening_tag_line": 66,
+    "closing_tag_line": 70,
+    "body_first_line": 67,
+    "body_last_line": 69,
+    "body_sha256": "a6daf07849fb4729187f4c98a5d3b471a34ed7216a69276cd8f0350ec448fb20",
+    "body": "ConnectionType.Hid.Matches(ConnectionType.HidFido | ConnectionType.SmartCard); // true: FIDO is shared\nConnectionType.HidOtp.Matches(ConnectionType.SmartCard);                       // false: nothing shared\nConnectionType.All.Matches(ConnectionType.Unknown);                            // false: empty set",
+    "classification": "ILLUSTRATIVE-INTERNAL-EXPRESSIONS",
+    "compiler_status": "VALID-NOT-CHECKED",
+    "execution_status": "NOT-RUN",
+    "ownership": "value-only internal extension expressions; no resource acquired"
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyManager.cs",
+    "opening_tag_line": 16,
+    "closing_tag_line": 37,
+    "body_first_line": 17,
+    "body_last_line": 36,
+    "body_sha256": "d1620db72041e4a0b935b9fe662bca97261788f471db337171739bd7c66870bf",
+    "body": "using System;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Yubico.YubiKit.Core.Devices;\n\nstatic async Task TrackAsync(CancellationToken cancellationToken)\n{\n    await using var monitor = await YubiKeyManager.CreateMonitorAsync(cancellationToken);\n    await foreach (var change in monitor.WatchAsync(cancellationToken))\n    {\n        Console.WriteLine(change switch\n        {\n            DeviceAdded added => $\"Added: {added.Device.DeviceId}\",\n            DeviceRemoved removed => $\"Removed: {removed.Device.DeviceId}\",\n            DeviceUpdated updated => $\"Updated: {updated.Device.DeviceId}\",\n            SnapshotComplete complete => $\"Snapshot complete at revision {complete.Revision}\",\n            _ => throw new InvalidOperationException(\"Unknown device change.\")\n        });\n    }\n}",
+    "classification": "COMPLETE-METHOD",
+    "compiler_status": "VALID-NOT-CHECKED",
+    "execution_status": "NOT-RUN",
+    "ownership": "await using owns monitor; token is a typed method input"
+  }
+]

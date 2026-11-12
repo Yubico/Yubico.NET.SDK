@@ -115,6 +115,14 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     /// The override configures session/protocol firmware after that gate, and later GetInfo calls do
     /// not update it. SCP on HID is rejected before channel initialization or GetInfo.
     /// </para>
+    /// <para>
+    /// Initial SmartCard SELECT/GetInfo precede options-based configuration. For major-zero firmware,
+    /// Core selects APDU format from connection support before ordinary ForceShortApdus handling.
+    /// SCP setup rebinds the backend without another SELECT or protected CTAP probe; successful setup
+    /// alone does not qualify applet-selection survival or FIDO-over-SCP interoperability.
+    /// Await complete operations and helper workflows before disposal; the exchange drain is not a
+    /// whole-workflow join. Keep caller-owned prompts usable through their final callbacks.
+    /// </para>
     /// </remarks>
     /// <param name="connection">The connection to the YubiKey (SmartCard or FIDO HID).</param>
     /// <param name="options">Optional cross-cutting session creation settings.</param>

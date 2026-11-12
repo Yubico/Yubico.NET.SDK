@@ -30,11 +30,18 @@ namespace Yubico.YubiKit.Ctap2;
 /// <para>
 /// Await each call before starting another exchange. The session refuses overlapping exchanges,
 /// rather than queuing them, and does not reserve the authenticator across a multi-command sequence.
+/// Serialize and fully await complete operations and helper workflows before disposing the session
+/// or its borrowed dependencies. Exchange drain does not join begin/next, PIN-token or blob workflows,
+/// post-exchange decoding, or notification callbacks. Keep caller-owned prompts usable through their
+/// last callback; callbacks must not reenter or dispose the session awaiting them.
 /// A pre-canceled exchange is refused before wire admission.
 /// Cancellation is cooperative: admitted SmartCard exchanges complete, while HID cancellation is
 /// observed during keep-alive processing and the terminal response is drained. Cancellation can race
 /// a successful return and does not impose a host deadline or undo device work. A transport,
 /// notification callback or decoder failure is not proof that the authenticator made no change.
+/// Native completion is transport-specific; baseline Windows synchronous HID reads are not interrupted
+/// by this token. After uncertain framing, transport or teardown state, dispose and reopen the connection
+/// rather than assuming cancellation restored it.
 /// </para>
 /// <para>
 /// User-presence notifications describe SDK policy or an observed HID wait. Their completion reflects

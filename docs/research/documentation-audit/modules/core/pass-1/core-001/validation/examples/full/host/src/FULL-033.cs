@@ -1,0 +1,84 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Utilities;
+using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cbor;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.CredentialManagement;
+using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.Ctap2.Pin;
+using Yubico.YubiKit.WebAuthn;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+
+namespace Audit20261111.DocExamples.Full;
+internal static class Body33
+{
+internal static async Task CompileOnly(ICtap2Session ctap2Session, WebAuthnOrigin origin, ICredentialPrompt myCredentialPrompt, byte[] userId, byte[] registrationChallenge, byte[] authenticationChallenge, RegistrationExtensionInputs registrationExtensions, AuthenticationExtensionInputs authenticationExtensions)
+{
+// Alternative 1: transfer an existing CTAP2 session on successful construction.
+// The application owns RP validity and authorization of each origin/RP pair.
+// WebAuthnClientOptions and its RpIdValidator are required. CredentialPrompt remains optional.
+await using var client = new WebAuthnClient(
+    ctap2Session,
+    origin,
+    new WebAuthnClientOptions
+    {
+        RpIdValidator = (requestOrigin, rpId) =>
+            requestOrigin.StringValue == "https://example.com" && rpId == "example.com",
+        CredentialPrompt = myCredentialPrompt,
+        MaxPromptAttempts = 3
+    });
+
+// Registration
+var createOptions = new PublicKeyCredentialCreationOptions
+{
+    Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+    User = new PublicKeyCredentialUserEntity(userId, "user@example.com", "User"),
+    Challenge = registrationChallenge,
+    PubKeyCredParams = [CoseAlgorithm.Es256],
+    Extensions = registrationExtensions
+};
+
+// Pass pinBytes to supply a PIN directly, or leave it null to use the configured prompt.
+var credential = await client.MakeCredentialAsync(createOptions, pinBytes: null);
+
+// Authentication
+var requestOptions = new PublicKeyCredentialRequestOptions
+{
+    Challenge = authenticationChallenge,
+    RpId = "example.com",
+    AllowCredentials = [new PublicKeyCredentialDescriptor(credential.CredentialId)],
+    Extensions = authenticationExtensions
+};
+
+var matches = await client.GetAssertionAsync(requestOptions, pinBytes: null);
+if (matches.Count == 0)
+    return; // Normal no-match path; no response to submit.
+var assertion = await matches[0].SelectAsync();
+}
+
+}

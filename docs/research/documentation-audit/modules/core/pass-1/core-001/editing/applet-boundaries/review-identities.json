@@ -1,0 +1,104 @@
+{
+  "reviewer": "fresh independent GPT-6.1 Sol content/citation reviewer",
+  "status": "BOUNDED-MANDATORY-CORRECTIONS",
+  "publication_acceptance": false,
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-applet-boundaries",
+  "primary_read_only_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "run": "docs/research/documentation-audit/modules/core/pass-1/core-001",
+  "baseline_HEAD": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "runtime_product_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "hash_algorithm": "SHA-256",
+  "reviewed_product_diff_sha256": "6c3797572fc9dcc7cb7fff70f4f1122f2736101462a43289ff95f7085a71a568",
+  "diff_reproduction": "git diff --src-prefix=c/ --dst-prefix=w/ -- src/Management src/SecurityDomain src/Oath src/YubiOtp src/YubiHsm",
+  "review_report": {
+    "path": "review.md",
+    "sha256": "7b08f04f7fc375bd77c97103978c4f322610eecaaa3cf6546a89fbefdced0951"
+  },
+  "editor_artifacts_relative_to_run": [
+    {"path": "edit-applet-boundaries.md", "sha256": "c323f03719a0978a4e38de30e6a3b386d047212c4e5b58b692bf507282f46bc3"},
+    {"path": "editing/applet-boundaries/product.diff", "sha256": "6c3797572fc9dcc7cb7fff70f4f1122f2736101462a43289ff95f7085a71a568"},
+    {"path": "editing/applet-boundaries/path-decisions.json", "sha256": "2ead959df2dad01d21030dff11bbc4ef39911aa7aa6c42d857fddef11d0ad46e"},
+    {"path": "editing/applet-boundaries/decisions-and-referrals.md", "sha256": "19a28517feccc744682611e21b63e5695133b1e762f3efc6a6e95635f4c5df54"},
+    {"path": "editing/applet-boundaries/examples.json", "sha256": "5e8622a44f7ad1d71695937b9d3640236b741ee5044cb29f32d10a38d126b41d"},
+    {"path": "editing/applet-boundaries/citations.md", "sha256": "601a5afd4456f434ebeb0ed45de05fced2548bbc298b9ee52a62d45e26bb9c73"},
+    {"path": "editing/applet-boundaries/static-checks.json", "sha256": "52b96a60e1f28e247901b67800bde4e70d78f8fac365de7b08de7958a2c615f2"},
+    {"path": "editing/applet-boundaries/input-identities.json", "sha256": "df4f8507d48c821faec5f95932c0785291714f80c6c7d42e4edd97f175aca42c"},
+    {"path": "editing/applet-boundaries/outside-scope-paths.json", "sha256": "445c1db19e5755e68bae5cf5d3b7f86037fe4eab779c5d6b776c18c21a8dd0fd"},
+    {"path": "editing/applet-boundaries/owned-output-identities.json", "sha256": "0405a4e09b362fd991863555c5f62ae598c20e482bb071355c3b478fbfc6c6ea"}
+  ],
+  "primary_originals_relative_to_run": [
+    {
+      "path": "investigation/B6/sources/scp03-1.1.2.txt",
+      "sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+      "source_pdf_sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "revision_status": "SCP03 1.1.2 Public Release, March 2019",
+      "corrected_anchor": "page 29, section 6.2.6, derivative lines 1177-1194; both C-DECRYPTION and C-MAC condition at 1179-1183"
+    },
+    {
+      "path": "investigation/B6/sources/scp11-public-review-1.3.0.13.txt",
+      "sha256": "59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543",
+      "source_pdf_sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "revision_status": "SCP11 1.3.0.13 Public Review, August 2023",
+      "corrected_anchor": "page 24, section 4.3, derivative lines 1108-1134; a/c at 1111-1115, SD receipt at 1123-1126, b-only at 1127-1128"
+    },
+    {"path": "boundaries/SecurityDomain/test-oracles.md", "sha256": "0a1f66aa54592a8c16f74e958da74e31655731a1833c11d2194e9c50114ec7b2"},
+    {"path": "boundaries/YubiHsm/candidates.md", "sha256": "7a37b54a1476312e19d7bbb90ff75fb2db3d74c3d310d2390c73a79c6f339c77", "retraction_preserved": true},
+    {"path": "boundaries/YubiOtp/using-reference.original.md", "sha256": "9d7f81b54120af6653ca7c8272ad143b004274da05bc9e91e9ae6afa3360ac87"}
+  ],
+  "mandatory_corrections": [
+    {
+      "id": "R1",
+      "scope": "citation locators only",
+      "path": "editing/applet-boundaries/citations.md",
+      "lines": [9, 11],
+      "preserve": "exact edition/status/section/actor/selection/applicability distinctions; original historical records unchanged"
+    },
+    {
+      "id": "R2",
+      "scope": "retained Security Domain cleanup comments and editor disposition identities",
+      "candidate": "CORE-SD-X008",
+      "related_candidate": "CORE-SD-X004",
+      "product_paths": [
+        {"path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs", "lines": [112, 118], "sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8"},
+        {"path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs", "lines": [209, 214], "sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5"}
+      ],
+      "preserve": "all executable tokens, assertions, names, cleanup behavior and inherited findings"
+    }
+  ],
+  "candidate_accounting": {
+    "CORE-MGMT": ["X001", "X002", "X003"],
+    "CORE-SD": ["X001", "X002", "X003", "X004", "X005", "X006", "X007", "X008"],
+    "CORE-OATH": ["X001", "X002", "X003", "X004", "X005", "X006"],
+    "CORE-OTP": ["X001", "X002", "X003", "X004", "X005", "X006", "X007", "X008", "X009"],
+    "CORE-HSM": ["X001", "X002", "X003", "X004", "X005", "X006", "X007"],
+    "count": 33,
+    "interpretation": "Every group has a doc/hold/referral disposition; R2 corrects an incomplete retain decision. No engineering, policy or qualification facet is closed."
+  },
+  "independent_static_checks": {
+    "eligible_path_before_and_after_hashes_checked": 233,
+    "edited_paths": 37,
+    "retained_paths": 196,
+    "edited_CSharp_paths_with_non_full_line_comment_lines_exact": 27,
+    "changed_comment_contexts_checked_outside_executable_literals": true,
+    "imports_directives_signatures_defaults_attributes_assertions_runtime_help_API_executable_tokens": "UNCHANGED in reviewed product diff",
+    "edited_XML_fragment_parse_errors": 0,
+    "example_bodies_hashes_and_ranges_checked": 107,
+    "new_or_changed_example_bodies": 2,
+    "excluded_raw_and_normalized_Git_identities_checked": 29,
+    "primary_input_hashes_checked_and_matching": 105,
+    "git_diff_check_exit_code": 0,
+    "record_writing_collector_executed": false,
+    "failures": []
+  },
+  "remaining_gates": [
+    "R1/R2 correction and bounded successor-diff/identity re-review",
+    "coordinator Core/root/SHARED migration and helper dependency reconciliation",
+    "compiler/analyzer/cref binding and meaningful consumer/example compilation",
+    "exact final/review/vendor/ISO profile and independent wire/crypto oracles where stronger claims need them",
+    "separately authorized platform/device/native/HSM peer-host-connector qualification; not commissioned by this review"
+  ],
+  "prohibited_operations_performed": [],
+  "reviewer_owned_paths_only": ["editing/applet-boundaries/review.md", "editing/applet-boundaries/review-identities.json"],
+  "self_hash": "intentionally omitted",
+  "stopping_point": "Publish Core Pass 1 and deferred-finding handoff, then stop; no Pass-2 or implementation authorization."
+}

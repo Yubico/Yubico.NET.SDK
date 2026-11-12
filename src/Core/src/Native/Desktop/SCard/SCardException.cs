@@ -16,6 +16,12 @@ using System.Globalization;
 
 namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
 
+/// <summary>Reports a PC/SC failure, with the supplied native status stored in the 32-bit HResult.</summary>
+/// <remarks>
+///     Message lookup uses the existing Windows-oriented catalog. A backend can assign a different meaning
+///     to the same raw code, notably pcsc-lite's unsupported-feature status. Preserve backend and raw-code
+///     provenance when diagnosing failures rather than treating the symbolic message as normalization.
+/// </remarks>
 [Serializable]
 public class SCardException : Exception
 {

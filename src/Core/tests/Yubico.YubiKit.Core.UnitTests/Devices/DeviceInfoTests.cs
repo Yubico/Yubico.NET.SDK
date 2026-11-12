@@ -96,7 +96,8 @@ public class DeviceInfoTests
     public void Equals_SnapshotsDecodedFromSeparateBuffers_CompareByContent()
     {
         // Each decode slices ChallengeResponseTimeout from its own response buffer. Monitoring publishes
-        // DeviceUpdated on inequality, so reference-based memory equality would report a change on every rescan.
+        // DeviceUpdated on inequality, so storage-based memory equality would treat equal fresh bytes as a change.
+        // All comparisons occur while both input TLV lists are alive; post-disposal stability is outside this oracle.
         using var firstTlvs = CreateRequiredDeviceInfoTlvs();
         using var secondTlvs = CreateRequiredDeviceInfoTlvs();
         var first = DeviceInfo.CreateFromTlvs(firstTlvs, defaultVersion: null);

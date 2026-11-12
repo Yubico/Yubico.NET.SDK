@@ -1,0 +1,610 @@
+diff --git c/src/Piv/CLAUDE.md w/src/Piv/CLAUDE.md
+index c0fe7ae78..8cdf41779 100644
+--- c/src/Piv/CLAUDE.md
++++ w/src/Piv/CLAUDE.md
+@@ -77,6 +77,19 @@ the parsed output or performing local RSA padding removal, with `CancellationTok
+ success responses therefore resolve as `Failed`, and raw or untransferred parsed output is cleared. PIV does not report
+ `TimedOut` because these exchanges provide no confirmed touch-timeout status.
+ 
++Direct `PivSession.CreateAsync` borrows the connection; the device extension transfers its hidden connection only
++after successful initialization. Core binds before SELECT and owns protocol disposal during incomplete setup.
++PIV reads FD before effective-version configuration/SCP, rebinds its backend and discovers management type before
++readiness. The backend borrows the protocol. Keep caller-owned SCP parameters/contained owners alive through factory
++completion and the caller-owned prompt through all callbacks. Failed direct setup detaches without closing the
++borrowed connection; the convenience helper cleans up its failed hidden connection.
++
++Core guards logical exchanges, not complete authentication, metadata-plus-crypto, PIN-only or reset workflows.
++Await and serialize whole public tasks before other calls or disposal. PIV callbacks and RSA unpadding are outside
++the exchange guard and can outlive its drain; this is not OTP's callback-inside-guard self-wait path. Each exchange
++checks cancellation before admission, then uses None for constituent traffic. An outer canceled wait does not
++complete the underlying task or permit borrowed-input cleanup; admitted work may still succeed.
++
+ ## Critical Security Requirements
+ 
+ Raw APDU responses have a Core-owned `Clear()` operation. Internal crypto/data-object results stay in owned
+@@ -210,6 +223,11 @@ No Bio-hardware coverage is implied by fake-protocol tests.
+ 
+ Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of duplicating version checks. Be careful to distinguish device firmware from applet-reported firmware when beta hardware reports sentinel applet versions.
+ 
++Detected PIV FD, Management/discovery metadata and effective compatibility override have different provenance.
++The override controls framing/feature policy; detected firmware drives the management-type fallback while metadata
++takes precedence. Major-zero acceptance supplies no physical 5.8 minimum. Reset retains the existing backend/protocol
++without reselection or a new SCP handshake; the channel flag alone establishes no restoration evidence.
++
+ `Features` is a public standalone PIV catalog; `IsSupported` stays public and `EnsureSupports` is protected.
+ `Slot` replaces `PivSlot`; shared Core `KeyType` replaces `PivAlgorithm`. Only internal `KeyTypeEncoding`
+ maps Core key types to protocol bytes. Never cast `KeyType` to byte. Metadata preserves unknown algorithm
+@@ -227,7 +245,9 @@ detected firmware, independent of compatibility overrides.
+ ## Known Gotchas
+ 
+ 1. **Management key first**: key generation/import and some metadata changes require management-key authentication.
+-2. **PIN verification persists by session**: once verified, PIN state may remain until failure or disposal.
++2. **PIN verification is card state**: selection and card policy govern its lifetime. Direct-session disposal closes
++   no borrowed connection and explicitly clears no card PIN state. Strict Exclusive/explicit sharing and requested
++   UNPOWER remain distinct from observed PIN isolation, device power and separate-process behavior.
+ 3. **Touch policy timing**: cached touch policy caches for a short window after first touch.
+ 4. **Certificate size limits**: PIV certificates may need compression or careful object sizing.
+ 5. **Default credentials**: never assume defaults are acceptable outside explicit test/reset flows.
+diff --git c/src/Piv/README.md w/src/Piv/README.md
+index 04319dad5..675973f66 100644
+--- c/src/Piv/README.md
++++ w/src/Piv/README.md
+@@ -26,6 +26,12 @@ signing, decryption, ECDH key agreement, and attestation, on top of `Yubico.Yubi
+ Yubico dates released-device AES management support to **5.4.2**; the SDK gate is 5.4.0. High-level
+ `DecryptAsync` also needs metadata (5.3.0), even where raw RSA operations work on older firmware.
+ 
++Session creation selects PIV and reads its FD version before configuring framing and optional SCP. The detected
++applet version, Management/discovery metadata and the effective `FirmwareVersionOverride` are separate values;
++an override changes compatibility policy without skipping the probe or identifying physical firmware. Metadata
++determines the management-key type when available; the detected version, not the override, supplies its fallback
++at creation and reset. Major-zero versions use the SDK's optimistic development convention, not a physical 5.8 floor.
++
+ ## Installation
+ 
+ ```bash
+@@ -61,6 +67,26 @@ the device reports success without a count, it throws `InvalidOperationException
+ Later fragments assume these directives and a `device` obtained the same way. Run persistent-state
+ examples only on a device you are authorized to provision: key generation can replace an existing key.
+ 
++The device extension opens a hidden SmartCard connection and transfers its ownership to the returned session.
++It selects that transport once; a failed open or initialization does not try HID. The direct
++`PivSession.CreateAsync(connection, ...)` factory instead borrows your open connection: dispose the session before
++reusing the connection, then dispose the connection in its enclosing `await using` scope. Both routes bind before
++SELECT and publish readiness after management-type discovery. Failed direct creation disposes/detaches the session
++without closing your connection; failed convenience creation also cleans up its hidden connection.
++
++For SCP, pass `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile and keep its inputs alive
++through actual factory completion. The session owns the effective protocol; its backend borrows it. The caller owns
++the SCP parameters: SCP03 parameter disposal disposes the retained `StaticKeys` owner, whose arrays are copies of
++the original inputs. SCP11 parameters copy certificate-list membership but retain the supplied objects; disposal
++disposes the OCE private key and certificates, not the SD public key. Record copies can share these contained owners.
++Keep one explicit cleanup owner and avoid disposing an alias during creation. See the [Core guide](../Core/README.md)
++for configuration; setup flags and generic version gates do not establish full PIV SCP/profile interoperability.
++
++Await and serialize complete public tasks before another operation or disposal. Core excludes overlapping logical
++APDU exchanges, including chaining/SCP, but management authentication uses two exchanges and PIN-only/reset workflows
++span several. Parsing, prompt callbacks and local RSA unpadding can continue after an exchange leaves the guard.
++Keep borrowed credentials, keys, peer objects and prompt services alive through that whole task.
++
+ ## Common operations
+ 
+ ### Authenticate and generate a key pair
+@@ -95,6 +121,13 @@ updates the type and preserves authentication without retaining the supplied key
+ failure clears the flag; other SET command failures preserve it. External card changes can still invalidate
+ what a local observation tells you.
+ 
++`PinPolicy.Once` follows card-controlled verification state, including application-selection effects; it is not a
++per-managed-session isolation guarantee. Disposing a directly created session leaves its borrowed connection open
++and sends no explicit PIN-clear command. Built-in PC/SC connections default to strict Exclusive sharing. Opting into
++Shared or fallback accepts coexistence rather than establishing PIN isolation. Connection cleanup requests UNPOWER;
++that request and successful release checks are distinct from observing physical power or subsequent PIN state.
++See [PC/SC sharing and migration](../Core/README.md#pcsc-sharing-policy-and-migration) for the application-wide policy.
++
+ To rotate a management key, authenticate the current key, securely back up the replacement, then call
+ `SetManagementKeyAsync(newType, newKey, requireTouch: false, cancellationToken: token)`. Clear your buffers
+ after the operation, including failure. Keep the backup until a fresh session authenticates the replacement.
+@@ -147,11 +180,12 @@ a disposable host object containing public material only. The host verifies the
+ ```csharp
+ await using var session = await device.CreatePivSessionAsync();
+ 
+-byte[] pin = Encoding.UTF8.GetBytes("123456");
+-byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
++byte[] digest = [];
+ Memory<byte> signature = Memory<byte>.Empty;
++byte[] pin = Encoding.UTF8.GetBytes("123456");
+ try
+ {
++    digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
+     await session.VerifyPinAsync(pin);
+     var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+         ?? throw new InvalidOperationException("Generate a P-256 key first.");
+@@ -185,11 +219,12 @@ using var certificate = await session.GetCertificateAsync(Slot.KeyManagement)
+     ?? throw new InvalidOperationException("Provision a matching RSA certificate first.");
+ using var rsa = certificate.GetRSAPublicKey()
+     ?? throw new InvalidOperationException("The certificate must contain an RSA public key.");
+-byte[] pin = Encoding.UTF8.GetBytes("123456");
+-byte[] expected = Encoding.UTF8.GetBytes("known plaintext");
++byte[] expected = [];
+ Memory<byte> plaintext = Memory<byte>.Empty;
++byte[] pin = Encoding.UTF8.GetBytes("123456");
+ try
+ {
++    expected = Encoding.UTF8.GetBytes("known plaintext");
+     byte[] ciphertext = rsa.Encrypt(expected, RSAEncryptionPadding.OaepSHA256);
+     await session.VerifyPinAsync(pin);
+     plaintext = await session.DecryptAsync(Slot.KeyManagement, ciphertext, RSAEncryptionPadding.OaepSHA256);
+@@ -209,6 +244,11 @@ finally
+ P-256/P-384 or X25519 peer public key and returns raw agreement bytes. Your protocol authenticates the peer,
+ selects a KDF and derives application keys; clear the raw shared secret after derivation.
+ 
++Both examples enter `try` immediately after acquiring the PIN buffer, before hashing or allocating the known-plaintext
++fixture. Their `finally` blocks clear that PIN and each successfully assigned digest, signature, known-plaintext or
++output buffer, including when later setup fails. Keep this acquisition-to-cleanup scope when adapting them. Independent source,
++provider or application copies retain their own cleanup requirements; clearing these buffers does not clear those copies.
++
+ ### Manage PIN/PUK retries and recover access
+ 
+ `VerifyPinAsync` and `ChangePinAsync` validate 6–8 encoded bytes. `ChangePukAsync` and `UnblockPinAsync`
+@@ -310,6 +350,10 @@ still throw after the reset has applied. Inspect fresh state before retrying. Bi
+ device-reset route; the PIV implementation's Bio preflight remains unfinished. Consult the product's reset
+ procedure before invoking this workflow on Bio hardware.
+ 
++Reset keeps the current backend/protocol and performs no reselection or fresh SCP handshake. The inherited channel
++authentication flag therefore supplies no post-reset restoration evidence. After uncertain reset or recovery, await
++actual work and teardown, reopen and inspect persistent state before retrying; retain independent key/recovery backups.
++
+ ## User interaction
+ 
+ - Verify the PIN before private-key operations in slots created with `PinPolicy.Once` or `Always`.
+@@ -341,6 +385,13 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
+ Cancellation is cooperative: await the operation's terminal result and transport drain before retrying,
+ disposing or inspecting a possibly changed device. A token alone supplies no native-call deadline.
+ 
++The session retains but never disposes your prompt service. Keep it alive through final callback and public-task
++completion. PIV's request and resolution callbacks run outside the APDU exchange guard; protocol drain alone does
++not cover them or local unpadding. Cancellation is checked before each exchange is admitted. After admission the
++constituent traffic uses `CancellationToken.None`, so successful completion can follow cancellation; a later workflow
++exchange can still reject the canceled token. Ending an outer wait does not stop the original task or permit early
++input cleanup. No PIV `TimedOut` notification or native interruption guarantee follows from these callbacks.
++
+ ## Constraints
+ 
+ Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes immutable `KeyInfo` on
+@@ -395,6 +446,10 @@ development firmware retains Core's permissive compatibility handling.
+   Clear owned plaintext, shared secrets, and temporary PINs with `CryptographicOperations.ZeroMemory(result.Span)`
+   after use. This replaces read-only result memory from earlier previews. Internal parsers retain mutable
+   owned buffers until transfer; raw APDU responses are cleared through their owner's `Clear()` method.
++  Clearing reaches that response's owned copy, including status bytes, not its constructor source, transport staging,
++  earlier chained fragments or SCP/provider intermediates. Each has a separate owner. TLV values alias their owner;
++  copy results before disposing the TLV. Public metadata/certificate copies need ownership accuracy rather than
++  automatic secret classification. PRINTED management keys, private inputs and agreement/plaintext outputs are sensitive.
+ 
+ - PINs, PUKs, management keys, and temporary PINs cross the API as `ReadOnlyMemory<byte>`. The session never
+   zeroes a buffer you passed in; zero it yourself with `CryptographicOperations.ZeroMemory` in a `finally`.
+@@ -421,6 +476,14 @@ The qualified selector targets the module's test projects in a checkout that als
+ These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch
+ and hotplug tests need separate human coordination; multi-key contention tests need two attached keys.
+ 
++Interpret each assertion at its actual boundary. Actual-array observers in crypto/raw-object tests reach managed
++command/response owners, not the full native/chaining/SCP/provider copy graph. Request-callback cancellation is
++pre-wire; it does not demonstrate interruption of an admitted operation. Reset command-membership assertions check
++neither a complete sequence nor erasure. Hotplug tokens/windows do not bound admitted native work, and uncertain
++release can retain a claim. Physical PIN/power, separate-process isolation, touch, hotplug and touch-dependent
++cancellation/recovery remain separately qualified/deferred; historical test outcomes do not cover another device,
++firmware, transport or OS.
++
+ ## Related
+ 
+ - [Core](../Core/README.md) - device discovery, SmartCard protocol, TLV, and cryptography primitives.
+diff --git c/src/Piv/examples/PivTool/README.md w/src/Piv/examples/PivTool/README.md
+index 8e0b86b8b..92d904a43 100644
+--- c/src/Piv/examples/PivTool/README.md
++++ w/src/Piv/examples/PivTool/README.md
+@@ -2,7 +2,7 @@
+ 
+ PivTool is an evaluation application for device discovery, credentials, key generation, certificates,
+ signing/decryption, attestation retrieval and reset. Start with the [PIV task guide](../../README.md)
+-for SDK contracts and complete host-verification/plaintext-cleanup examples. The tool demonstrates a
++for SDK contracts and scoped host-verification/plaintext-cleanup examples. The tool demonstrates a
+ subset of the SDK and has the limitations below; use a device you are authorized to provision.
+ 
+ ## Run and select a device
+@@ -128,6 +128,11 @@ block while calling the async SDK and have limited cancellation propagation; a d
+ represent cancellation caught by the helper. Await terminal work and inspect device state before repeating
+ mutations. These limitations remain engineering follow-ups rather than guarantees of the sample.
+ 
++Keep the original SDK task and its inputs/session/prompt alive until actual completion, even if an outer wait ends.
++Core guards one logical exchange, not the tool's complete credential, certificate or PIN-only workflow. PIV presence
++callbacks and local RSA unpadding sit outside that exchange guard. A cancellation token does not interrupt admitted
++SmartCard traffic or supply a native deadline; the sample's broad error/timeout mapping does not establish one.
++
+ ## Find the SDK examples
+ 
+ - `PivExamples/`: task helpers using real SDK types, including device-backed certificate signature generators.
+@@ -141,7 +146,9 @@ XML examples are composable fragments: supply an `IYubiKey device`, `Cancellatio
+ credential/data buffers and, where used, an application-owned `IUserPresencePrompt`. Keep borrowed inputs
+ alive through awaited calls and clear secrets in the caller's finally scope. Returned host crypto objects,
+ certificates and imported `IPrivateKey` objects need their own disposal scopes. See the module task guide
+-for complete signature verification, known-plaintext decryption and protected-mode reopen/recovery scopes.
++for signature verification, known-plaintext decryption and protected-mode reopen/recovery scopes. Its signing and
++decryption examples protect each acquired PIN before later setup; preserve that scope in adaptations and account
++separately for any additional source, provider or result copies you create.
+ 
+ ## License
+ 
+diff --git c/src/Piv/src/Cryptography/PrivateKeyOperations.cs w/src/Piv/src/Cryptography/PrivateKeyOperations.cs
+index 92b6cb47e..f723977ba 100644
+--- c/src/Piv/src/Cryptography/PrivateKeyOperations.cs
++++ w/src/Piv/src/Cryptography/PrivateKeyOperations.cs
+@@ -280,7 +280,7 @@ private static byte[] ModPow(byte[] baseBytes, byte[] expBytes, byte[] modBytes,
+     /// <param name="slot">The slot containing the private key.</param>
+     /// <param name="peerPublicKey">The peer's public key.</param>
+     /// <param name="cancellationToken">Token to cancel the operation.</param>
+-    /// <returns>The shared secret (x-coordinate for NIST curves, point for Curve25519).</returns>
++    /// <returns>Raw shared-secret bytes: the x-coordinate for NIST ECDH, or the 32-byte X25519 result.</returns>
+     internal static async Task<byte[]> CalculateSecretAsync(
+         IBackend backend,
+         Slot slot,
+@@ -463,4 +463,4 @@ private static byte[] EncodePeerPublicKey(IPublicKey publicKey)
+             _ => throw new ArgumentException("Unsupported public key type", nameof(publicKey))
+         };
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/src/IPivSession.cs w/src/Piv/src/IPivSession.cs
+index 16d7f1ba9..9718b21cb 100644
+--- c/src/Piv/src/IPivSession.cs
++++ w/src/Piv/src/IPivSession.cs
+@@ -33,6 +33,16 @@ namespace Yubico.YubiKit.Piv;
+ /// <para>Credential inputs are caller-owned buffers. PIN/PUK inputs are UTF-8 bytes; byte-length
+ /// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
+ /// transferred to the caller, who must clear plaintext, shared secrets, and temporary PINs after use.</para>
++/// <para>
++/// Await and serialize complete public tasks before another operation or disposal. Core guards one logical
++/// APDU exchange, including chaining/SCP, rather than a complete management-authentication, PIN-only or reset
++/// workflow. Parsing, presence callbacks and local RSA unpadding can continue after that exchange leaves the
++/// guard. Keep borrowed inputs, keys and prompt services alive through actual public-task completion.
++/// Cancellation is checked before each exchange is admitted; admitted constituent traffic uses
++/// CancellationToken.None and may succeed after the caller cancels. An outer canceled wait is not operation
++/// completion or permission to clear inputs. Await actual completion/teardown before inspecting or retrying
++/// a possibly persistent change.
++/// </para>
+ /// </remarks>
+ public interface IPivSession : IApplicationSession
+ {
+@@ -45,6 +55,8 @@ public interface IPivSession : IApplicationSession
+     /// <remarks>
+     ///     This is distinct from the inherited <see cref="IApplicationSession.IsAuthenticated"/>, which
+     ///     represents application-protocol authentication such as SCP. Returns <c>false</c> once disposal begins.
++    ///     It is a local observation; the card owns current administration and PIN state. SCP setup grants
++    ///     neither PIN verification nor management-key authorization.
+     /// </remarks>
+     bool IsManagementKeyAuthenticated { get; }
+ 
+@@ -75,6 +87,8 @@ public interface IPivSession : IApplicationSession
+     /// session uses detected firmware (not a compatibility override): AES-192 for 5.7+ and development
+     /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate,
+     /// including after the physical reset has succeeded. Inspect fresh device state before retrying.
++    /// The method retains the existing backend/protocol, without reselection or a new SCP handshake;
++    /// its authentication flag alone establishes no post-reset secure-channel restoration.
+     /// </para>
+     /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -91,6 +105,8 @@ public interface IPivSession : IApplicationSession
+     /// The caller retains ownership of the management-key buffer and clears it after use.
+     /// Authentication enables key generation, import, certificate storage, and management operations.
+     /// A failed authentication attempt clears any previously recorded management authentication state.
++    /// The witness/challenge exchange uses two separately guarded sends. Keep this buffer valid and
++    /// serialize the full method, rather than interleaving another session operation between them.
+     /// </para>
+     /// </remarks>
+     /// <param name="managementKey">Management key bytes (24 bytes for 3DES, 16/24/32 for AES).</param>
+@@ -106,6 +122,8 @@ public interface IPivSession : IApplicationSession
+     /// Supply 6–8 encoded bytes. SDK validation checks length; the device/product profile governs
+     /// credential content. The caller retains the input buffer and clears it after use. The referenced
+     /// SP 800-73-4 Part 2 §2.4.3 profile specifies ASCII decimal PINs; UTF-8 byte acceptance is an SDK mechanism.
++    /// PIN verification is card-controlled state, not a managed session flag. Disposing a session that
++    /// borrows a connection does not close that connection or explicitly clear the card's PIN state.
+     /// </para>
+     /// </remarks>
+     /// <param name="pin">PIN as UTF-8 encoded bytes. The caller owns and must clear this input buffer; the SDK never clears it.</param>
+@@ -677,4 +695,4 @@ Task SetManagementKeyAsync(
+         ReadOnlyMemory<byte> newKey,
+         bool requireTouch = false,
+         CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/src/IYubiKeyExtensions.cs w/src/Piv/src/IYubiKeyExtensions.cs
+index ad825cd92..a017e579a 100644
+--- c/src/Piv/src/IYubiKeyExtensions.cs
++++ w/src/Piv/src/IYubiKeyExtensions.cs
+@@ -34,6 +34,12 @@ public static class IYubiKeyExtensions
+         /// <param name="options">Optional cross-cutting session creation settings.</param>
+         /// <param name="cancellationToken">Cancellation token.</param>
+         /// <returns>An initialized PIV session.</returns>
++        /// <remarks>
++        /// The returned session owns its hidden SmartCard connection; dispose it with <c>await using</c>.
++        /// Creation selects SmartCard once and does not retry another transport after failure. Failed creation
++        /// also cleans up the hidden connection. SCP parameters are borrowed through factory completion;
++        /// the caller-owned presence prompt remains alive through all session operations and callbacks.
++        /// </remarks>
+         /// <exception cref="NotSupportedException">If the YubiKey does not support PIV or SmartCard connections.</exception>
+         public async Task<PivSession> CreatePivSessionAsync(
+             SessionCreationOptions? options = null,
+@@ -63,4 +69,4 @@ public async Task<PivSession> CreatePivSessionAsync(
+                 .ConfigureAwait(false);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/src/Keys/KeyProtocol.cs w/src/Piv/src/Keys/KeyProtocol.cs
+index ebd7d76b7..977eed109 100644
+--- c/src/Piv/src/Keys/KeyProtocol.cs
++++ w/src/Piv/src/Keys/KeyProtocol.cs
+@@ -392,7 +392,8 @@ internal static async Task<X509Certificate2> AttestKeyAsync(
+     {
+         Logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
+ 
+-        // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
++        // This command has no data. Core's formatter appends Le, encoded as trailing 00 on the short path.
++        // Describe the emitted bytes separately from any ISO case/profile conformance claim.
+         var command = new ApduCommand(Cla, InsAttest, (byte)slot, 0);
+         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+         if (response.SW == SWConstants.InsNotSupported)
+@@ -504,4 +505,4 @@ private static IPublicKey ParseRsaPublicKey(ReadOnlySpan<byte> data)
+ 
+         return RSAPublicKey.CreateFromParameters(parameters);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/src/PivSession.cs w/src/Piv/src/PivSession.cs
+index 64014877b..0f963b91b 100644
+--- c/src/Piv/src/PivSession.cs
++++ w/src/Piv/src/PivSession.cs
+@@ -97,6 +97,14 @@ internal PivSession(
+     /// <param name="options">Optional cross-cutting session creation settings.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>An initialized PIV session.</returns>
++    /// <remarks>
++    /// The caller retains the connection and disposes it after session teardown. The factory binds before
++    /// SELECT and registers protocol disposal before setup. It reads the PIV version, configures the effective
++    /// override-or-detected version and optional SCP, then resolves the management-key type before publishing
++    /// readiness. Failed initialization disposes/detaches the session without closing this borrowed connection.
++    /// Keep borrowed SCP inputs alive through factory completion. The session owns its protocol; its backend
++    /// borrows that protocol, and its user-presence prompt remains caller-owned.
++    /// </remarks>
+     /// <exception cref="ArgumentNullException">If connection is null.</exception>
+     /// <exception cref="ApduException">If PIV application selection fails.</exception>
+     public static Task<PivSession> CreateAsync(
+@@ -126,8 +134,8 @@ private async Task InitializeAsync(
+ 
+         try
+         {
+-            // Production applet versions match firmware. Major zero is development firmware;
+-            // Core's feature evaluation deliberately treats it as current.
++            // Read the PIV applet's version before SCP. Core treats major-zero versions optimistically;
++            // that compatibility policy establishes no independently identified physical firmware version.
+             var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+             var detectedFirmwareVersion = initialization.FirmwareVersion;
+             _detectedFirmwareVersion = detectedFirmwareVersion;
+@@ -196,7 +204,8 @@ public async Task ResetAsync(CancellationToken cancellationToken = default)
+             throw ApduException.FromStatusWord(response.SW, "PIV reset failed");
+         }
+ 
+-        // Reset authentication state
++        // Reset management authentication state. This workflow retains its backend/protocol and performs
++        // no terminal session disposal, applet reselection or fresh SCP handshake.
+         SetManagementKeyAuthenticationState(false);
+ 
+         // RESET changed the physical applet even if the metadata refresh below fails. Establish a
+@@ -1124,4 +1133,4 @@ private static void ValidateSlot(Slot slot)
+         if (!Enum.IsDefined(slot))
+             throw new ArgumentOutOfRangeException(nameof(slot), "Unknown PIV asymmetric key reference.");
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs w/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs
+index c3c9ba155..848fca59c 100644
+--- c/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs
++++ w/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/AuditV2/PivAuditHardwareReproTests.cs
+@@ -53,8 +53,9 @@ public async Task YESDK1630_PinOnceStateSurvivesConnectionDisposal(YubiKeyTestSt
+ 
+         // This handle has never supplied a PIN. Desired behaviour under an isolation/release policy
+         // (not a PIV spec requirement; see docs/audit-v2/findings/22-*): the verifier's disposal must
+-        // not leave PIN state usable by an unrelated handle. Today this signs successfully and
+-        // produces a signature that verifies against the slot key.
++        // not leave PIN state usable by an unrelated handle. Earlier hardware recorded successful
++        // signing here; that historical outcome is not guaranteed by the current sharing/release path.
++        // These are sequential handles in one process, not concurrent clients or a two-process oracle.
+         await using var unverified = await state.Device.CreatePivSessionAsync();
+         ReadOnlyMemory<byte> signature = ReadOnlyMemory<byte>.Empty;
+         Exception? rejection = await Record.ExceptionAsync(async () =>
+@@ -132,4 +133,4 @@ await File.WriteAllTextAsync(publicPath,
+             Directory.Delete(directory, recursive: true);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs w/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs
+index de536cbf1..6354e0e43 100644
+--- c/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs
++++ w/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivConnectionConcurrencyTests.cs
+@@ -21,10 +21,10 @@
+ namespace Yubico.YubiKit.Piv.IntegrationTests;
+ 
+ /// <summary>
+-///     Demonstrates on hardware that a single session refuses concurrent calls before APDUs can
+-///     interleave on the shared connection. The deterministic gate for this behavior is
+-///     <c>Core.UnitTests PcscProtocolConcurrencyTests</c>; this test shows the end-to-end effect on a
+-///     real card.
++///     Attempts to overlap a large GET exchange with signing on one session and checks refusal.
++///     Core guards a logical exchange, not every complete public workflow. The deterministic
++///     exchange-admission oracle is <c>Core.UnitTests PcscProtocolConcurrencyTests</c>; this hardware
++///     test depends on the read still owning the exchange when signing reaches it.
+ /// </summary>
+ public class PivConnectionConcurrencyTests
+ {
+@@ -72,10 +72,12 @@ public async Task ConcurrentSignAndObjectRead_OnOneSession_SecondOperationIsRefu
+         for (var iteration = 0; iteration < 10; iteration++)
+         {
+             var readTask = session.GetObjectAsync(DataObject.Retired1);
++            // If refusal is not observed, this assertion can throw before readTask is awaited.
++            // Complete pending-task cleanup on that failure remains a separate harness follow-up.
+             await Assert.ThrowsAsync<InvalidOperationException>(
+                 async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
+             var readBack = await readTask;
+             Assert.Equal(storedObject, readBack.ToArray());
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs w/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs
+index d9bfd45e5..ff605a75a 100644
+--- c/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs
++++ w/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivHotplugContentionTests.cs
+@@ -24,18 +24,15 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
+ /// </summary>
+ /// <remarks>
+ ///     <para>
+-///         The risk this effort owns is not that the operation fails — of course it fails, the card is gone.
+-///         It is that the grouped physical-key lease could be STRANDED. The lease is released in the connection's
+-///         disposal path, and there is deliberately no finalizer backstop, so if removal made disposal hang
+-///         or throw before the release, the physical key would stay marked in-use for the process lifetime and
+-///         every later open would be refused with <c>ConnectionInUseException</c> — on a key the user has
+-///         already plugged back in.
++///         Exercises removal failure, connection disposal and a later open. Checked native teardown releases
++///         the grouped physical-key claim only with release proof; uncertain release can retain/quarantine it.
++///         Best-effort native finalization is not deterministic session or connection cleanup.
+ ///     </para>
+ ///     <para>
+-///         The test therefore asserts three things after the operator pulls the key: the in-flight API fails
+-///         within a bounded window rather than hanging, disposal still completes, and a subsequent connect
+-///         attempt reports something OTHER than <c>ConnectionInUseException</c>. That last assertion is the
+-///         real content: it distinguishes "device is gone" from "we stranded our own lease".
++///         The poll accepts any read exception, then awaits disposal and checks that a later open does not
++///         report ConnectionInUseException. It does not independently identify removal as the failure cause
++///         or observe native release. A token is not a native I/O deadline, and the polling window is checked
++///         between awaits. The existing reopening expectation needs separate review for unproven release.
+ ///     </para>
+ ///     <para>
+ ///         Requires a human to remove the key during execution, so it is marked
+@@ -68,7 +65,8 @@ public async Task PivSession_KeyRemovedMidSession_FailsBoundedAndDoesNotStrandTh
+         }
+         finally
+         {
+-            // Must complete even though the card vanished; this is what releases the physical-key lease.
++            // Await checked teardown. Its outcome is separate from proof of native release;
++            // an uncertain release can retain the original claim rather than permit an unsafe reopen.
+             await connection.DisposeAsync();
+         }
+ 
+@@ -77,8 +75,8 @@ public async Task PivSession_KeyRemovedMidSession_FailsBoundedAndDoesNotStrandTh
+             $"The key was not removed within {RemovalWindow.TotalSeconds:F0}s, so this run proves nothing. " +
+             "Re-run and physically unplug the key while it is executing.");
+ 
+-        // The lease must be gone. A second open may fail because the device is absent, but it must never
+-        // fail because this process still believes it holds the physical key.
++        // Retain this test's existing no-ConnectionInUse expectation. It does not establish a general
++        // unconditional-release policy; genuinely unproven native release has a different recovery boundary.
+         var reopen = await Record.ExceptionAsync(async () =>
+         {
+             await using var second = await state.Device.ConnectAsync<ISmartCardConnection>();
+@@ -91,8 +89,8 @@ public async Task PivSession_KeyRemovedMidSession_FailsBoundedAndDoesNotStrandTh
+     }
+ 
+     /// <summary>
+-    ///     Calls a cheap PIV read until it fails (the key was pulled) or the window expires. Returns the
+-    ///     failure, or <see langword="null" /> if the key was never removed.
++    ///     Calls a PIV serial read until any exception or the between-await window check expires.
++    ///     Returns that exception, or null if no read failed; a failure alone does not identify physical removal.
+     /// </summary>
+     private static async Task<Exception?> PollUntilRemovedAsync(PivSession session)
+     {
+@@ -100,7 +98,8 @@ public async Task PivSession_KeyRemovedMidSession_FailsBoundedAndDoesNotStrandTh
+ 
+         while (DateTime.UtcNow < deadline)
+         {
+-            // Bound each attempt so a wedged native call surfaces as a hang we can see, not an infinite wait.
++            // Expiry can prevent exchange admission; it does not interrupt an admitted native call
++            // or bound its completion. The loop's deadline is checked only after awaited work returns.
+             using var attemptTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+ 
+             var failure = await Record.ExceptionAsync(
+diff --git c/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs w/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs
+index 199e76939..36d80fe1e 100644
+--- c/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs
++++ w/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/DataObjects/DataObjectProtocolTests.cs
+@@ -120,8 +120,8 @@ public async Task GetObjectAsync_WrappedResponse_ZeroesOriginalResponseBuffer()
+         Assert.Equal(printedInner, result.ToArray());
+ 
+         Assert.NotNull(backend.CapturedRawDataArray);
+-        // RawData includes the trailing 2 SW bytes, which are not part of the unwrapped payload
+-        // and are not required to be zeroed; only the response's Data portion must be.
++        // Clear zeroes the response owner's full storage, including SW. This assertion observes only
++        // its Data portion; it does not check the trailing status bytes or the constructor's source array.
+         int dataLength = backend.CapturedCount - 2;
+         Assert.All(
+             backend.CapturedRawDataArray!.AsSpan(backend.CapturedOffset, dataLength).ToArray(),
+@@ -189,4 +189,4 @@ public Task<ApduResponse> SendAsync(
+             return Task.FromResult(new ApduResponse([], unchecked((short)0x9000)));
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs w/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
+index aa9367ad7..68c277f01 100644
+--- c/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
++++ w/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/PivSessionTests.cs
+@@ -192,9 +192,9 @@ public async Task CreateAsync_WhenReliableFirmwareManagementMetadataUnavailable_
+     ///     metadata is unavailable.
+     /// </summary>
+     /// <remarks>
+-    ///     A major version of 0 marks a development key, which is at least 5.8.0 and therefore defaults
+-    ///     to AES-192. Assuming Triple-DES for it would pick an algorithm the key does not use. See
+-    ///     <see cref="FirmwareVersion.IsAlphaOrBeta" />.
++    ///     A major-zero fixture selects the SDK's optimistic development-version policy and AES-192
++    ///     fallback. These synthetic bytes establish no physical firmware minimum or installed key type.
++    ///     Available management metadata takes precedence. See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+     /// </remarks>
+     [Theory]
+     [InlineData(0, 0, 0)]
+@@ -503,9 +503,9 @@ public async Task AuthenticateAsync_WhenAttemptFails_ClearsPriorAuthentication()
+     [Fact]
+     public async Task ResetAsync_BlocksPinAndPukThenResets()
+     {
+-        // Regression test for the BlockPukAsync -> AuthenticationProtocol.BlockPukAsync extraction:
+-        // the APDU sequence (PIN metadata, VERIFY-until-blocked, RESET RETRY-until-blocked P2=0x80,
+-        // RESET, re-fetch management key metadata) must be unchanged.
++        // The queued responses model PIN metadata/blocking, PUK blocking, RESET and metadata refresh.
++        // Assertions below check membership of VERIFY, RESET RETRY P2=80 and RESET commands,
++        // not equality of the complete command sequence or a device erasure postcondition.
+         var connection = CreateInitializedConnection(
+             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
+             [0x63, 0xC0], // VERIFY empty PIN -> blocked (0 retries)
+@@ -545,8 +545,9 @@ public async Task ResetAsync_WhenSuccessful_RefreshesManagementKeyTypeAndClearsA
+     ///     After reset on an alpha or beta key whose metadata is unsupported, the fallback is AES-192.
+     /// </summary>
+     /// <remarks>
+-    ///     <c>VersionResponse</c> reports 0.0.1, marking a development key, which is at least 5.8.0 and
+-    ///     therefore defaults to AES-192. See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
++    ///     <c>VersionResponse</c> supplies 0.0.1. The test checks the SDK's development-version AES-192
++    ///     fallback and management-flag clearing, not a physical 5.8.0 minimum or real reset default.
++    ///     See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+     /// </remarks>
+     [Fact]
+     public async Task ResetAsync_WhenMetadataUnsupportedOnAlphaFirmware_UsesAes192FallbackAndClearsAuthentication()
+@@ -774,4 +775,4 @@ private static byte[] EccP256PublicKeyResponse()
+         ];
+     }
+ 
+-}
+\ No newline at end of file
++}

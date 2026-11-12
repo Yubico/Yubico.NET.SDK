@@ -1,0 +1,98 @@
+{
+  "schema": "core-001-packet-A-revision-2-independent-review-v1",
+  "decision": "PASS",
+  "acceptance_scope": "Full 37-file successor documentation batch, combining focused R1/R2 acceptance with unchanged prior accepted content/citation hashes; not final compiler or runtime validation",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-discovery",
+  "base": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "accepted_full_product_patch_sha256": "028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228",
+  "predecessor_product_patch_sha256": "28cfedee32cba340d041a90edadd79afff3d65ced04317a8863d43854890a517",
+  "immutable_predecessor_review": {
+    "editing/A/review.md": "d15893a37fdd3a01ad1fa0e8c30adffc818cb220917a46390177470c4662ccb1",
+    "editing/A/review-identities.json": "8acfb7df9d4ec066989385ef613b17045349d09973cfbd62ff5f796e007609a4"
+  },
+  "accepted_corrected_paths": [
+    {
+      "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+      "current_sha256": "232ca280c1b12bb29fcbc34b783bdfcab9dc6786c287ed848fcf82d8ad79e4a2",
+      "previous_reviewed_sha256": "f8d9c718ffab04b60b540c37f836f54bed3d8fa6f0dd7e001fb1e152628c668e",
+      "review_id": "R1",
+      "candidates": ["CORE-A-C010", "CORE-A-C011"],
+      "proposals": ["FPT-010", "FPT-011"],
+      "reviewed_wording_lines": "224-236",
+      "decision": "PASS; repeated stale evidence can persist, no age/expiry or one-scan convergence guarantee"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+      "current_sha256": "77ca59e5a983ee204198c65d1f95647fa52234ba216e1b8e213c3f28c6c6ab03",
+      "previous_reviewed_sha256": "09cb1d140127384964aa370f69c97279e7c1e07d742533d897567ebb8e4a7315",
+      "review_id": "R1",
+      "candidates": ["CORE-A-C010", "CORE-A-C011"],
+      "proposals": ["FPT-010", "FPT-011"],
+      "reviewed_units": "Both complete partial-evidence tests 253-299 and helpers 773-795, against complete merger",
+      "decision": "PASS; same-PID serial disagreement alone need not bypass complete PID-count-one shortcut; single-scan oracle preserved"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsDeviceTopologyResolverTests.cs",
+      "current_sha256": "a6e12a8ff10cb6309fcf3c2f3b1280307c30f81be87bf0797369dd469015328c",
+      "previous_reviewed_sha256": "69607b7ed5e6aaa40413c7a87154fe866b6b63a32ed6d7f959b8935af9c46dd8",
+      "review_id": "R2",
+      "candidates": ["CORE-A-C009"],
+      "proposals": ["FPT-009"],
+      "reviewed_units": "Null-resolver test 211-222, selector test 224-235, local helper context and complete null-resolver/factory implementation",
+      "successor_disposition": "EDIT",
+      "decision": "PASS; current SDK selection and false/null oracle, not OS API absence"
+    }
+  ],
+  "successor_artifacts_relative_to_revision_2": {
+    "report.md": "014c09198326a2050d0f5ae82e657a21c00c6029db1f078ebe5b1c890f80b3cd",
+    "product.patch": "028c2a45a04d8522cf6211a6d76724e8ce0c84b3dc6a32dfdc128f584dcf7228",
+    "changed-path-sha256.json": "4ecc11cf6e641cb94be9d578aa5c98a504a14baba00be73884d97f90aa39b0e1",
+    "path-dispositions.json": "7a94167e7b3830b9686fb79eed04f70e87bd5045634e68cfd65bd17caca0af4e",
+    "candidate-dispositions.json": "37044d79f9a7f47312c1c8a702621c37193de7eafcea012c5a5a0f950433c958",
+    "correction-paths.json": "7a411c97d08d8708fff0b839b551dca7f157d63dcfb940c0acefa5d55f57b755",
+    "example-bodies.json": "4088b11eb2dc2c872c99ea7f06a4421e1edd981bfe855b2aa04ecc20010b290f",
+    "verification.json": "d06a4eae1698168aa7c4127e931048975b92ea6c84001822ca2df3a53efa56ca",
+    "predecessor-identities.json": "8e5611c69ed18dea8643050e8d610bcdfe2928ce9bedbfab38a30ffa1eb8466e",
+    "output-identities.json": "8fef6a617dd845d69f330413661f514ca0c07698ab4b3bb1662e693f3ad7b757"
+  },
+  "accepted_full_path_hash_binding": "All current hashes in the exact successor changed-path and path-disposition manifests above, with original prior review scope/qualification limits preserved",
+  "fresh_independent_static_checks": {
+    "packet_paths": 90,
+    "edited_paths": 37,
+    "retained_paths": 53,
+    "correction_delta_paths": 3,
+    "unchanged_accepted_edited_hashes": 34,
+    "unchanged_supported_candidate_retained_hashes": 12,
+    "other_retained_identity_only_paths": 41,
+    "predecessor_reconstructed_in_memory_and_hashes_match": true,
+    "source_pin_product_equals_base": true,
+    "all_90_base_pin_predecessor_current_manifest_hashes_match": true,
+    "all_90_filtered_noncomment_lines_preserved": true,
+    "executable_change_found_in_correction_delta": false,
+    "full_actual_diff_equals_successor_patch": true,
+    "immutable_predecessor_files_hash_checked": 13,
+    "original_input_identities_unchanged": true,
+    "successor_artifact_identities_match": true,
+    "candidate_rows_and_evidence_reference_joins": 21,
+    "example_records_byte_identical": true,
+    "example_bodies_reextracted_and_hash_matched": 3,
+    "xml_blocks_parsed": 187,
+    "git_diff_check_exit_code": 0
+  },
+  "example_body_sha256": [
+    "9ff8535b320dc909b8670d626b05c18dc8e362ec80c1c1c5237b6a631c46811e",
+    "a6daf07849fb4729187f4c98a5d3b471a34ed7216a69276cd8f0350ec448fb20",
+    "d1620db72041e4a0b935b9fe662bca97261788f471db337171739bd7c66870bf"
+  ],
+  "qualification": {
+    "compiler_token_API_cref_compiled_examples": "Coordinator gates pending; not proved by filtered comment-line check",
+    "example_compile_execution": "VALID-NOT-CHECKED / NOT-RUN",
+    "FPX-01_A-E01_A-E02_through_A-E06": "NOT-RUN",
+    "original_native_physical_profile_cross_process_historical_and_boundary_limits": "Unchanged",
+    "product_edits_builds_tests_formatter_compiler_crypto_native_device_Git_mutations_subagents": "NOT-RUN",
+    "whole_Core_publication": "Coordinator-owned; complete existing final validation and handoff, then stop"
+  },
+  "reviewer_writes_only": ["editing/A/revision-2/review.md", "editing/A/revision-2/review-identities.json"],
+  "self_and_review_text_hashes_excluded": true
+}

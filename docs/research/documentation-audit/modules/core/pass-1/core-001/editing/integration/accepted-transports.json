@@ -1,0 +1,419 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "Content-reviewed transport documentation transfer; combined validation pending",
+  "patch_sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de",
+  "product_files": [
+    {
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "sha256": "19a6ff2836c687491016f0ba3d51eeef5641fa773cba4f92ce58ce298274b720"
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "sha256": "016e4d3b76e1e099d584b084047221d0699767aa9b10deb46395591c5ae1b63b"
+    },
+    {
+      "path": "src/Core/src/Devices/PcscConnectionSlot.cs",
+      "sha256": "3e5a04199d228468ab0ca5b661ebaf2dded78ff3db75956d03250d0b7d0df9d1"
+    },
+    {
+      "path": "src/Core/src/Devices/RegisteredConnections.cs",
+      "sha256": "f8d8b39cb29a4225cd933ca868fd39d20d588c03fdde2ee485db3c153d5cb8e0"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "sha256": "beed8d6754ed94be3c939e80c56d4bed83c4d91aad52d5ad6e842d7770d0b32c"
+    },
+    {
+      "path": "src/Core/src/Exceptions.cs",
+      "sha256": "1d9a8899928ee17b860bb9e63a1f54918205e2d0d12b64a97661a8e037e53231"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCard.Interop.cs",
+      "sha256": "09370f2c2e610c860387a08fdc49c91d087a63ffb46319380b5eb9b9b2f160f7"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+      "sha256": "3835bd1441a6b7a3d7a7daa1b72717f9ff16c675f6041990fa0ad394d2658ae1"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardException.cs",
+      "sha256": "25c39edce657b4d7d18fbff92e6ae0a221a7b64e676490ebe2f9ac634e81b7b0"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardIORequest.cs",
+      "sha256": "36b67f4191b6cf590736865575f37356c7a70df9ecd741b57238fc73eb80293e"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardProtocol.cs",
+      "sha256": "d98eaad86428065bd7148f71457207c0ec7d797a5017b08728335b5eeca9d10e"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+      "sha256": "382d46e09439844c5b3ae5e74ce7fe5d4ab72b8b07dd2271afa92928d1eefc07"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardScope.cs",
+      "sha256": "85b88d1b9a3fdc56b8cd8e30adc42a263bc30698311c11b777da80f9c7c59b8d"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardShare.cs",
+      "sha256": "77fcc5da58938edfc90238f4744212a3ac7ced210d4ea86179de31b7db5c8693"
+    },
+    {
+      "path": "src/Core/src/Native/Desktop/SCard/SCardStatus.cs",
+      "sha256": "2d5bdb905d18d2d9b224cd91ca096ee9cb40285012123650fe9effb76a44a8a5"
+    },
+    {
+      "path": "src/Core/src/Native/Libraries.cs",
+      "sha256": "228bace3632e2e8ed98f27db908f2001bc0d328d1e7f92c198ee2a7769176214"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Libc/LinuxDescriptorLease.cs",
+      "sha256": "6926589e3b9bdbb6ad07796f1e95d5ea33f360dfd574dc99102e0cff971f93c4"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Linux.Libraries.cs",
+      "sha256": "bf9848eafe4dc95596c76852c639ef419443942058530a832e5887dc4fe4811e"
+    },
+    {
+      "path": "src/Core/src/Native/Linux/Udev/Udev.Interop.cs",
+      "sha256": "59ec90d1127cfdfeeb7ae52d440526643694a6dbeeff2089b74191fe246df30f"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+      "sha256": "ad4e0a5761fad445d329b7c6b36fb1056e7583f64e3f5f178b06e98a20119132"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90"
+    },
+    {
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748"
+    },
+    {
+      "path": "src/Core/src/Native/NativeMethods.cs",
+      "sha256": "00f56a5b00d35f5ebc60516b664295b081dcdf1078a7741492f43ff7e2919167"
+    },
+    {
+      "path": "src/Core/src/Native/PlatformApiException.cs",
+      "sha256": "84cf37aa7ed011470303a44a0946727519bf2619845c5c4b11722074f61a6d03"
+    },
+    {
+      "path": "src/Core/src/Native/SdkPlatformInfo.cs",
+      "sha256": "7e39b186cb6bb50a153b555624fdf7870c495b7687d4d1671b4c9f2fb1b2c181"
+    },
+    {
+      "path": "src/Core/src/Native/UnmanagedDynamicLibrary.cs",
+      "sha256": "346b40085678d2cee542ba7d8785089ee84ffcb41bac7f17d24a41c90d900e72"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+      "sha256": "04f722e8de186c43bb00a033e2473de2d673a8168816dec164b94e2b41abdbe4"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "sha256": "ab0e190ddf0adf7a17333516bb0c84a220a8edc0f72017c85aee36f2a61716f7"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "sha256": "8c7dfabb8b3d011317912b1c71dc6374b2a15318cb49918d40acb125da5bbd21"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "sha256": "183a5bcd93e003b9a4f6fb17178fe2e72c1e221652fc0c4287cbecb330a18d86"
+    },
+    {
+      "path": "src/Core/src/ServiceLocator.cs",
+      "sha256": "1a56af874d020260085c5b1c374c109ac60448b6acd2bd2436fe28b76b04130d"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+      "sha256": "05659dd5b10e5df0ecca4ac123d4c01f7f570a496ba36372710476928b8b71c6"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+      "sha256": "9b4ec4fd9bbfd5b6e459e64152a0aa0f555168493cefd42d80a318bbfd90207c"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/IHidInterface.cs",
+      "sha256": "242c8d2e14eb75965c91ff550d55b2df449e105ab20b8c9e2c618f34fd1fb799"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+      "sha256": "1658f4b211f4f2c97901bf73d816ce5e1f4235a2eb7883018c5cc9f9b1f6cfdb"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+      "sha256": "21b93e6a95b7ee7182c5697381be0ef54131e8be0266c55a51b979307ec96dcc"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs",
+      "sha256": "297c7f2a0452cad079e92b54a829566d1503555172fedf78a4ad2a681d68e003"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs",
+      "sha256": "cac8382f45a045c4475a85bbbfd8604c108fbc0a25a001f3cd78d0d62296b428"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+      "sha256": "c5d18e19be6baa9823c7cd6bcdeea1375d02f9b1d062a99e9cf8796401326964"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs",
+      "sha256": "ac9a1c896f82d766b28ab456e2ae511e9ac326b983df57012e4cfe82335633d0"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IOKitHelpers.cs",
+      "sha256": "81c0010ee6352821adca2a5c7bbf4aa0f9c753ff27ae901141b5d451e12680fc"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "sha256": "3510a3ff0a1ed360bad0b9eb44fbe8bc0c53820644c1b542a990c2ff567dcf4e"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "sha256": "9f586abba719425f246bf3731a854163c21a533dc472e9de7bf6486250f09cfa"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "sha256": "e36965aadaee30ef241c45b7da5a2141b117a2e41495d1b391fdb0c0ede4507d"
+    },
+    {
+      "path": "src/Core/src/Transports/IDeviceChangeListener.cs",
+      "sha256": "fd9ad294ec6d199f7044289834b1f0be752eb203f6aa068e86f0a87aa70ea1a5"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs",
+      "sha256": "d079f655a8c0261c32f9687bf26e8a09f8d2eecc5242d8d45545c7b184a28b7b"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/FindPcscDevices.cs",
+      "sha256": "6112c337e3b701da891c2ca39de8be270bb94a49c27c5b64f64fad05e9e47053"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+      "sha256": "53395c3f41bb3d12aa31142c365d47407f01b380fc4d7d1d67194b70460420a0"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "sha256": "e0d25805f1b42b4eb0666f7ffa22674e5f173cbc28c04a8887564522075aa817"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "sha256": "3cd87b0435f55032d75613d1b1adacd505a40628d9a0dccdb81e873c104545e6"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardSharing.cs",
+      "sha256": "1bc88cbc1d76f0c5d13ec6a563231fefb2178af776783798682c6038a0a38136"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs",
+      "sha256": "47e92b43da068107fb7ca2415a6c88b8b61b2a04fd45d920e7fb79505d1f9c06"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/SmartCard/SmartCardDeviceListenerIntegrationTests.cs",
+      "sha256": "7a7316cf12935d66c42fa013f9245fdb2a92a4a40447cfa68d7aa08c1e20c420"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ApplicationSessionScpTests.cs",
+      "sha256": "a4022478dcd571fc38cd979fcfaef58dcf91ce262181e7d86d00726209ec23fe"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/ConnectionOwnershipContractTests.cs",
+      "sha256": "a4adb44b77ba49b91f3bc6311130e627fe25d96c8d059cd33f3f3254576e4bf3"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs",
+      "sha256": "f7ddfe4cf0c5cb08c62c4044121286192c639d990ea32697533122dd11d97318"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/DesktopSmartCardDeviceListenerDisposalTests.cs",
+      "sha256": "0bc79209f2fac5db4c4f63b456bd9265c154a6e148b48f5d869bb55889692879"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "sha256": "d592c70ef9ce35b70d6fa1cdb87201398573896ecf3bb7329f88ece79089f550"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "sha256": "a17c5ca5567636e3f32ab0e203843377a8cb02e5328f21c1f1c7dc83ef51f215"
+    }
+  ],
+  "retained_records": [
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/edit-transports.md",
+      "bytes": 15838,
+      "sha256": "7e4f3c9bdaf334a574c5f127198037628eedf4035d48901d0fec4e57c82a72a3"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/file-dispositions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/file-dispositions.json",
+      "bytes": 611260,
+      "sha256": "dcd67fdf4dda350456a2034220b7089dd80fabdd38c6e6155056eea813ece35f"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/proposal-dispositions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/proposal-dispositions.json",
+      "bytes": 696324,
+      "sha256": "c32b2c2b1063becaf4d567b616993aabb5329819755bc2ed9b3d63b97ccf2115"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/followups.json",
+      "bytes": 310649,
+      "sha256": "85483bbbbaf83b598abcb6965043b1e07df5c89bd1ad364da0a24d3ac3e04c11"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/example-bodies.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/example-bodies.json",
+      "bytes": 5256,
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source-citations.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source-citations.json",
+      "bytes": 12942,
+      "sha256": "596f27302575eb63b3eca6d7d7bab4658a48fd5ebfd5673fd86b6849c2b0fc09"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/source.patch",
+      "bytes": 95685,
+      "sha256": "86b0c6ed78d5d1c3cf2cd68ec4b529ad8903e9b0ad3258dfa8b2bd7cb1656ef6"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/static-preservation.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/static-preservation.json",
+      "bytes": 1912,
+      "sha256": "629eaf27ce006f955f0fe36f985524266f5f3b89912873d27a0d5505db9eafc4"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review.md",
+      "bytes": 13859,
+      "sha256": "090e3f28b303b77839d08e852eced612bc4a785923f73d106f2cc6965bc19812"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/review-identities.json",
+      "bytes": 8282,
+      "sha256": "94b90c17733559a9a2b5cf77136085ac3844b7bad66091f86a223b32ec176e16"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-inputs.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-inputs.json",
+      "bytes": 82502,
+      "sha256": "9d8b522c7beae4c02746b86534a7c1a7dc5849f2c9af95b3ecfcf302f2fdc741"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/file-dispositions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/file-dispositions.json",
+      "bytes": 614750,
+      "sha256": "b3a1421c894431a33dc88a0674b552f12773cb9238845652c169dfd5212ebed4"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/current-path-hashes.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/current-path-hashes.json",
+      "bytes": 157132,
+      "sha256": "0d440261ba1d64ab54bc415689a3f42bb8a199703e0c53cf9c3738f52d69f2e5"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/proposal-dispositions.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/proposal-dispositions.json",
+      "bytes": 697920,
+      "sha256": "ba2b3214d65cc416eeebb72c1518c295db5d625b1fa9a2d37a42af4a7e9273ee"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/revision-corrections.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/revision-corrections.json",
+      "bytes": 4650,
+      "sha256": "91d813ecff200a43d1f5e9056114e02a8f86e4d9157afee3d82c05950e7362e2"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-bodies.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-bodies.json",
+      "bytes": 5256,
+      "sha256": "08fed43a17fa6fc38339d6595a89236518287084d38b507ea47b0abc5f33d3b1"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-identity-check.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/example-identity-check.json",
+      "bytes": 828,
+      "sha256": "fd3ad6ef4e2147919cf7aeee396996489081f5a083426dcbf2e9b306a68858c9"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/xml-check.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/xml-check.json",
+      "bytes": 925,
+      "sha256": "f8f8477e5116f33e058d833df1bec9cac20a99998eeaad87412f49ea4d365627"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-review-delta.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-review-delta.patch",
+      "bytes": 4418,
+      "sha256": "b4f3ce617eba070cd6d56ccd9aedf89a310ca1fb8f7b688638638345ae0c48f2"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/source.patch",
+      "bytes": 98254,
+      "sha256": "109bd7833b71d69f9b25b2a021ea27e460334535fe28e8fcdc8cd6bd160404de"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/prior-record-preservation.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/prior-record-preservation.json",
+      "bytes": 2693,
+      "sha256": "18d3e961e86ae8dcc43fc2ea5f5de83ec39c1fc5d1b40def04d3bdc285395ccb"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-citations.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/focused-citations.json",
+      "bytes": 6117,
+      "sha256": "1e245be21f9507bb5dc904e8002aafeb6fb4dd2922e16a29571153a81b817b97"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/static-preservation.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/static-preservation.json",
+      "bytes": 2814,
+      "sha256": "9929bb8578289b73ff8ba25cf87bff9750abf785060a48a000f16b87ab2aa49b"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/report.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/report.md",
+      "bytes": 9560,
+      "sha256": "69b055e77390877dc5455f90f114dc37b821fd720a0cec293197f0e909ae22ed"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/return-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/return-identities.json",
+      "bytes": 2332,
+      "sha256": "2ddcf469145643dd0a825ac8f23aace0cbfab2b61cd0b7f257bde3d34d17d75f"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review.md",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review.md",
+      "bytes": 9083,
+      "sha256": "22bfc0b8c83cc6be155eb967348e88af4ae337258f7c37bc574b603ecb2ef64e"
+    },
+    {
+      "source": "/home/rupicola/Code/y/yubikit-core-docs-edit-transports/docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-identities.json",
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/editing/transports/revision-2/review-identities.json",
+      "bytes": 8377,
+      "sha256": "01471d9e9e2558b38b045d8ae6b2257659bb72d3c554e4a835cb21f6943af494"
+    }
+  ]
+}

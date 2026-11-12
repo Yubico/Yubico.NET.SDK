@@ -1,0 +1,35 @@
+[
+  {
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+    "sample_findings": [
+      "SAMPLE-B2-002"
+    ],
+    "before_raw_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+    "current_primary_accepted_before_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+    "after_raw_sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+    "accepted_revision_2_disposition": "RETAIN",
+    "additive_disposition": "EDIT-COMMENTS-ONLY",
+    "original_selected_unit_ids": [
+      "core-001:unit:5c0f333d06ef9126"
+    ],
+    "sampling_disposition": "Sampler owns edited-overlap zero-credit accounting and XML-category expansion; no coverage credit or sampling acceptance claimed here.",
+    "independent_review": "PENDING"
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+    "sample_findings": [
+      "SAMPLE-B2-001"
+    ],
+    "before_raw_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+    "current_primary_accepted_before_sha256": "547a1b3236949e845c5dde57ec7bd254e9ae7dbbf62530a73e92cf64b64c94b0",
+    "after_raw_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+    "accepted_revision_2_disposition": "EDIT",
+    "additive_disposition": "EDIT-COMMENTS-ONLY",
+    "original_selected_unit_ids": [
+      "core-001:unit:2ab3cc1db2ed4269",
+      "core-001:unit:7a90c15f7fb4a767"
+    ],
+    "sampling_disposition": "Sampler owns edited-overlap zero-credit accounting and XML-category expansion; no coverage credit or sampling acceptance claimed here.",
+    "independent_review": "PENDING"
+  }
+]

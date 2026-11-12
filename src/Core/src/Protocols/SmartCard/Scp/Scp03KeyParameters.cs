@@ -18,6 +18,12 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 ///     SCP key parameters for SCP03 authentication.
 ///     SCP03 uses three keys (enc, mac, dek) with shared KVN but different KIDs.
 /// </summary>
+/// <remarks>
+///     This owner retains and disposes the exact StaticKeys instance supplied by the caller. A record with-clone
+///     shares that owner rather than cloning its key arrays. Keep parameters alive until all using sessions have
+///     been disposed; Security Domain also borrows them for reset. Supply per-card keys: initialization does not
+///     diversify a base master key from INITIALIZE UPDATE's diversification bytes.
+/// </remarks>
 public sealed record Scp03KeyParameters : ScpKeyParameters
 {
     private bool _disposed;
@@ -42,6 +48,8 @@ public sealed record Scp03KeyParameters : ScpKeyParameters
     /// </summary>
     public StaticKeys Keys { get; }
 
+    /// <summary>Creates a new owner containing the public factory-default SCP03 keys.</summary>
+    /// <remarks>Use only with an authorized key still configured with those defaults; they provide no secret provisioning.</remarks>
     public static Scp03KeyParameters Default => new(KeyReference.Default, StaticKeys.GetDefaultKeys());
     public override void Dispose()
     {

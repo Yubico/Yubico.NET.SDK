@@ -73,8 +73,9 @@ public sealed class OathScpResetTests
         owner.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(owner)
         ?? throw new InvalidOperationException($"Missing field {name}.");
 
-    // Adapt only SELECT metadata and an authenticated, empty RESET response. The existing fake
-    // handles the random-host-challenge handshake and CMAC; no encrypted-payload emulator is needed.
+    // Adapt SELECT metadata and synthesize an R-MAC-bearing empty RESET response for the cleanup oracle.
+    // The existing fake handles the handshake, but does not verify outbound encryption or command MACs.
+    // Actual key-array clearing/order is tested; whole-SCP conformance and live secure reset are separate.
     private sealed class OathScpConnection : ISmartCardConnection
     {
         private readonly Scp03HandshakeFakeConnection _handshake = new();

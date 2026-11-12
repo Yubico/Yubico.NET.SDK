@@ -1,0 +1,224 @@
+[
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "current_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "source_pin_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "source_pin_blob": "effdc2eaebcab2fd310bc68960e7f609e3999e94",
+    "ranges": [
+      {
+        "first_line": 44,
+        "last_line": 70,
+        "text": "    public PcscProtocol(\n        ISmartCardConnection connection,\n        ReadOnlyMemory<byte> insSendRemaining = default,\n        ILogger<PcscProtocol>? logger = null)\n    {\n        _logger = logger ?? NullLogger<PcscProtocol>.Instance;\n        _connection = connection;\n        InsSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;\n        UseExtendedApdus = _connection.SupportsExtendedApdu();\n        _processor = BuildBaseProcessor();\n    }\n\n    internal bool UseExtendedApdus { get; private set; }\n\n    public int MaxApduSize { get; private set; } = SmartCardMaxApduSizes.Neo; // Lowest as default\n\n    public FirmwareVersion? FirmwareVersion { get; private set; }\n\n    private IApduProcessor BuildCommandProcessor(bool secure = false)\n    {\n        return UseExtendedApdus\n            ? new ApduTransmitter(_connection, new ApduFormatterExtended(MaxApduSize))\n            : new ChainedApduTransmitter(_connection, new ApduFormatterShort(), MarkRecoveryRequired, secure);\n    }\n\n    private IApduProcessor BuildBaseProcessor()\n    {\n",
+        "range_sha256": "40537502d9e710c0cdb06e3667964804f081ff499e3f34bb45e05e02d2f09621"
+      },
+      {
+        "first_line": 162,
+        "last_line": 195,
+        "text": "    public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration = null)\n    {\n        ObjectDisposedException.ThrowIf(_disposed, this);\n\n        _exchangeGuard.Run(() =>\n        {\n            ThrowIfRecoveryRequired();\n            FirmwareVersion = firmwareVersion;\n            var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);\n\n            if (FirmwareVersion.IsAlphaOrBeta)\n            {\n                UseExtendedApdus = _connection.SupportsExtendedApdu();\n                MaxApduSize = SmartCardMaxApduSizes.Yk43;\n                ReconfigureProcessor();\n                return;\n            }\n\n            if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))\n            {\n                if (insSendRemainingChanged)\n                    ReconfigureProcessor();\n\n                return;\n            }\n\n            var forceShortApdu = configuration is { ForceShortApdus: true };\n            UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;\n            MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)\n                ? SmartCardMaxApduSizes.Yk43\n                : SmartCardMaxApduSizes.Yk4;\n\n            ReconfigureProcessor();\n        });\n",
+        "range_sha256": "968075a644b0369d70ce5c58068ddfe6d8efb3e9c9a1d0044a0f5f53efb0ef3b"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+    "current_sha256": "eb013d8aaeababdd56312a80520f9c21978b00611b97e0ab64e27dd67fe3b94e",
+    "source_pin_sha256": "eb013d8aaeababdd56312a80520f9c21978b00611b97e0ab64e27dd67fe3b94e",
+    "source_pin_blob": "51e4c20e0dfd2a91461311b5fd30b254cbec41dc",
+    "ranges": [
+      {
+        "first_line": 17,
+        "last_line": 34,
+        "text": "public static class SmartCardMaxApduSizes\n{\n    /// <summary>\n    ///     The max APDU command size for the YubiKey NEO\n    /// </summary>\n    public const int Neo = 1390;\n\n    /// <summary>\n    ///     The max APDU command size for the YubiKey 4 and greater\n    /// </summary>\n    public const int Yk4 = 2038;\n\n    /// <summary>\n    ///     The max APDU command size for the YubiKey 4.3 and greater\n    /// </summary>\n    public const int Yk43 = 3062;\n\n    public const int ShortApduMaxChunkSize = 255;\n",
+        "range_sha256": "5df366f4333492d7140e3f4224c623b7d0c6642afb86f25539ed5301b8a24bd5"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+    "current_sha256": "2238b68c379cacc52dc4b8648760ac5d05961092963ce2e44f0f761268e6ebe7",
+    "source_pin_sha256": "2238b68c379cacc52dc4b8648760ac5d05961092963ce2e44f0f761268e6ebe7",
+    "source_pin_blob": "116cf2d956b77ddfdb4ad03d6367efffbdb7b643",
+    "ranges": [
+      {
+        "first_line": 24,
+        "last_line": 72,
+        "text": "internal sealed class FakeSmartCardConnection : ISmartCardConnection\n{\n    private readonly Queue<ReadOnlyMemory<byte>> _responses = new();\n    private bool _disposed;\n\n    public bool SupportsExtendedApduValue { get; set; } = true;\n    public int DisposeCount { get; private set; }\n    public List<ReadOnlyMemory<byte>> TransmittedCommands { get; } = [];\n    public ConnectionType Type { get; } = ConnectionType.SmartCard;\n\n    public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);\n\n\n    public Transport Transport { get; set; } = Transport.Usb;\n\n    public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>\n        throw new NotImplementedException();\n\n    public bool SupportsExtendedApdu() => SupportsExtendedApduValue;\n\n    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(\n        ReadOnlyMemory<byte> command,\n        CancellationToken cancellationToken = default)\n    {\n        if (_disposed)\n        {\n            throw new ObjectDisposedException(nameof(FakeSmartCardConnection));\n        }\n\n        cancellationToken.ThrowIfCancellationRequested();\n\n        TransmittedCommands.Add(command.ToArray());\n\n        return _responses.Count == 0\n            ? throw new InvalidOperationException(\"No response enqueued for transmission\")\n            : await Task.FromResult(_responses.Dequeue());\n    }\n\n    public void Dispose()\n    {\n        DisposeCount++;\n        _disposed = true;\n    }\n\n    public ValueTask DisposeAsync() =>\n        // TODO release managed resources here\n        ValueTask.CompletedTask;\n\n}",
+        "range_sha256": "775a2b1d19ecb144f771cbc9cf80fa14dd65ff7466a1e7f950a5bd1cc2074211"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Transports/SmartCard/ISmartCardConnection.cs",
+    "current_sha256": "188da8f1dad0887acbc07681b77dfaed94c93af3cf21f07bbab17ef551507b86",
+    "source_pin_sha256": "188da8f1dad0887acbc07681b77dfaed94c93af3cf21f07bbab17ef551507b86",
+    "source_pin_blob": "1a0ec1e4a310b21b85f25852d4a46091ed383480",
+    "ranges": [
+      {
+        "first_line": 19,
+        "last_line": 72,
+        "text": "public interface ISmartCardConnection : IConnection\n{\n    Transport Transport { get; }\n\n    /// <summary>\n    ///     True when this connection holds the card exclusively; see <see cref=\"SmartCardSharing\" /> for what a\n    ///     shared handle means. Custom implementations that do not model sharing report false.\n    /// </summary>\n    bool IsExclusive => false;\n\n    /// <summary>Transmits caller-formatted SmartCard bytes and returns the raw response bytes.</summary>\n    /// <remarks>\n    ///     This Tier 2 method bypasses <see cref=\"Sessions.ApplicationSession\" />, the connection session guard,\n    ///     and the logical exchange guard. The caller owns APDU formatting, chaining, response correlation,\n    ///     concurrency exclusion, cancellation recovery, and state integrity. Do not call it concurrently with\n    ///     a live session or another raw operation. Dispose and reopen the connection when state is uncertain.\n    ///     Keep borrowed <paramref name=\"command\" /> memory valid until the returned task is terminal;\n    ///     only then zero sensitive caller-owned input. This applies to every implementation. Built-in PC/SC\n    ///     connections reject cancellation before native dispatch; after dispatch the call may succeed and the\n    ///     task waits for native completion and resource drain. Cancellation alone does not make a raw connection\n    ///     reusable; dispose and reopen if exchange state is uncertain.\n    /// </remarks>\n    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(\n        ReadOnlyMemory<byte> command,\n        CancellationToken cancellationToken = default);\n\n    /// <summary>\n    ///     Starts a PC/SC transaction. The transaction is ended when the returned scope is disposed.\n    ///     Uses LEAVE_CARD disposition when ending the transaction. Built-in synchronous begin and scope\n    ///     disposal can block without a bound on native acquisition/end; prefer async begin and, for built-in\n    ///     scopes, async disposal.\n    /// </summary>\n    IDisposable BeginTransaction(CancellationToken cancellationToken = default);\n\n    /// <summary>\n    ///     Starts a PC/SC transaction. Built-in connections await native acquisition without blocking the caller.\n    ///     Their returned <see cref=\"IDisposable\" /> scope also implements <see cref=\"IAsyncDisposable\" />;\n    ///     use async disposal when available to await transaction end.\n    /// </summary>\n    /// <remarks>\n    ///     The default for custom implementations calls <see cref=\"BeginTransaction\" /> synchronously and may\n    ///     block the caller; override it for nonblocking acquisition. Built-in connections reject cancellation\n    ///     before native dispatch; afterward the transaction may begin successfully, and completion waits for\n    ///     native work. Do not assume cancellation releases the connection or ends the transaction.\n    /// </remarks>\n    Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default)\n    {\n        cancellationToken.ThrowIfCancellationRequested();\n        return Task.FromResult(BeginTransaction(cancellationToken));\n    }\n\n    bool SupportsExtendedApdu();\n    // byte[] getAtr();\n}",
+        "range_sha256": "1c7c828991c8deea4bdbe49b778fb53dc50d77c322cdcf2e7d1edc5c264687ae"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Abstractions/IConnection.cs",
+    "current_sha256": "3f0082b1471f4fc8904580375f1429201d747d2057706044e790aa703e294daa",
+    "source_pin_sha256": "3f0082b1471f4fc8904580375f1429201d747d2057706044e790aa703e294daa",
+    "source_pin_blob": "dd4b6977ed44984d6629cb6fef9350dbe68d74a4",
+    "ranges": [
+      {
+        "first_line": 26,
+        "last_line": 29,
+        "text": "public interface IConnection : IDisposable, IAsyncDisposable\n{\n    ConnectionType Type { get; }\n}",
+        "range_sha256": "3d20a36734b5cedd03008c6085bd1b387da5027c3b7930c29ab523613d181234"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+    "current_sha256": "bd90a8023444a8a5ad3d31b7986a74cb2b2b3b6736ffc611fa3310913f5ccb96",
+    "source_pin_sha256": "bd90a8023444a8a5ad3d31b7986a74cb2b2b3b6736ffc611fa3310913f5ccb96",
+    "source_pin_blob": "0e88612391f4a1da1c90d661721cc91b9b248950",
+    "ranges": [
+      {
+        "first_line": 94,
+        "last_line": 124,
+        "text": "    public static async ValueTask<IDisposable> AcquireConnectionAsync(\n        IReadOnlyCollection<string> interfaceIds,\n        CancellationToken cancellationToken = default)\n    {\n        ArgumentNullException.ThrowIfNull(interfaceIds);\n        if (interfaceIds.Count == 0)\n            throw new ArgumentException(\"At least one interface id is required.\", nameof(interfaceIds));\n\n        var uniqueIds = new HashSet<string>(interfaceIds, StringComparer.Ordinal);\n        var orderedIds = new string[uniqueIds.Count];\n        uniqueIds.CopyTo(orderedIds);\n        Array.Sort(orderedIds, StringComparer.Ordinal);\n\n        var acquired = new List<IDisposable>(orderedIds.Length);\n        try\n        {\n            foreach (var id in orderedIds)\n            {\n                acquired.Add(await GetOwnership(id)\n                    .AcquireConnectionAsync(id, cancellationToken)\n                    .ConfigureAwait(false));\n            }\n\n            return new CompositeRegistration(acquired);\n        }\n        catch\n        {\n            for (var i = acquired.Count - 1; i >= 0; i--)\n                acquired[i].Dispose();\n            throw;\n        }\n",
+        "range_sha256": "94781cfd7fa903c0dfa238316bf737cd01cca6c54bd37650729672eee66af9a3"
+      },
+      {
+        "first_line": 193,
+        "last_line": 245,
+        "text": "        public async ValueTask<IDisposable> AcquireConnectionAsync(\n            string deviceId,\n            CancellationToken cancellationToken)\n        {\n            Task discoveryReleased;\n            lock (_sync)\n            {\n                ThrowIfUnrecovered();\n\n                if (!_discoveryActive)\n                    return Claim(deviceId);\n\n                _waitingConnections++;\n                discoveryReleased = _discoveryReleased?.Task\n                    ?? throw new InvalidOperationException(\"Discovery ownership has no release signal.\");\n            }\n\n            try\n            {\n                await discoveryReleased.WaitAsync(cancellationToken).ConfigureAwait(false);\n            }\n            catch\n            {\n                lock (_sync)\n                    _waitingConnections--;\n                throw;\n            }\n\n            lock (_sync)\n            {\n                _waitingConnections--;\n                if (_discoveryActive)\n                    throw new InvalidOperationException(\"Discovery ownership was reacquired ahead of a waiting connection.\");\n\n                ThrowIfUnrecovered();\n\n                return Claim(deviceId);\n            }\n        }\n\n        /// <summary>Takes the lease, or refuses when the interface is already held.</summary>\n        private IDisposable Claim(string deviceId)\n        {\n            ThrowIfUnrecovered();\n\n            if (_connectionCount > 0)\n                throw new ConnectionInUseException(\n                    $\"This YubiKey already has a live connection in this process (held interface: '{deviceId}'). \" +\n                    \"A physical YubiKey supports one live connection at a time across all interfaces. \" +\n                    \"Dispose the existing connection first; connections are reused sequentially, not in parallel.\");\n\n            _connectionCount++;\n            return new Registration(this, LeaseKind.Connection);\n",
+        "range_sha256": "d22ebdeb5a7ba262be295618db18b520fa18d691e1038872709f74b2fdbd3f2d"
+      }
+    ]
+  },
+  {
+    "path": "src/Ctap2/src/Pin/PinUvAuthHelpers.cs",
+    "current_sha256": "47d199377344b2505fa593fbe3ad4f31fb0eeb937b5f63d572ae5f702a617643",
+    "source_pin_sha256": "47d199377344b2505fa593fbe3ad4f31fb0eeb937b5f63d572ae5f702a617643",
+    "source_pin_blob": "902bde0ca0f5fa45bbbe860c14b9a865dbabbdca",
+    "ranges": [
+      {
+        "first_line": 58,
+        "last_line": 117,
+        "text": "    internal static (Dictionary<int, object?> KeyAgreement, byte[] RawSharedSecret)\n        PerformEcdhKeyAgreement(IReadOnlyDictionary<int, object?> peerCoseKey)\n    {\n        ArgumentNullException.ThrowIfNull(peerCoseKey);\n\n        // Check coordinate storage here; required kty/alg/crv labels are not yet validated.\n        if (!peerCoseKey.TryGetValue(CoseEC2X, out var xObj) || xObj is not byte[] peerX)\n        {\n            throw new ArgumentException(\"Peer COSE key missing or invalid X coordinate (-2).\", nameof(peerCoseKey));\n        }\n\n        if (!peerCoseKey.TryGetValue(CoseEC2Y, out var yObj) || yObj is not byte[] peerY)\n        {\n            throw new ArgumentException(\"Peer COSE key missing or invalid Y coordinate (-3).\", nameof(peerCoseKey));\n        }\n\n        // Validate coordinate lengths (P-256 uses 32-byte coordinates)\n        if (peerX.Length != 32)\n        {\n            throw new ArgumentException($\"Invalid X coordinate length: expected 32, got {peerX.Length}.\", nameof(peerCoseKey));\n        }\n\n        if (peerY.Length != 32)\n        {\n            throw new ArgumentException($\"Invalid Y coordinate length: expected 32, got {peerY.Length}.\", nameof(peerCoseKey));\n        }\n\n        // Generate ephemeral ECDH key pair\n        using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);\n        var ourParams = ecdh.ExportParameters(includePrivateParameters: false);\n\n        // Import as P-256; provider point-validation errors here are outside the derivation catch.\n        var peerParams = new ECParameters\n        {\n            Curve = ECCurve.NamedCurves.nistP256,\n            Q = new ECPoint { X = peerX, Y = peerY }\n        };\n\n        using var peerEcdh = ECDiffieHellman.Create(peerParams);\n\n        // Derive raw shared secret (X coordinate of ECDH shared point)\n        byte[] z;\n        try\n        {\n            z = ecdh.DeriveRawSecretAgreement(peerEcdh.PublicKey);\n        }\n        catch (CryptographicException ex)\n        {\n            throw new ArgumentException(\"Failed to derive shared secret. Peer key may be invalid.\", nameof(peerCoseKey), ex);\n        }\n\n        // Build our COSE key for key agreement\n        var keyAgreement = new Dictionary<int, object?>\n        {\n            { CoseKeyType, CoseKeyTypeEC2 },\n            { CoseAlgorithm, CoseAlgEcdhEsHkdf256 },\n            { CoseEC2Curve, CoseEC2CurveP256 },\n            { CoseEC2X, ourParams.Q.X },\n            { CoseEC2Y, ourParams.Q.Y }\n        };\n",
+        "range_sha256": "d6773baf2eb82d231dc1d9763432590d371c5654302ea4c31d7e0d869bb6cef5"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Devices/FindYubiKeys.cs",
+    "current_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+    "source_pin_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+    "source_pin_blob": "47252936c81ab20ea15d4b249ca28dde69e11811",
+    "ranges": [
+      {
+        "first_line": 43,
+        "last_line": 43,
+        "text": "    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();\n",
+        "range_sha256": "3da5a507913eb607ecb5f947310d7832b6a08466708a9feee4f3e95f055a25e4"
+      },
+      {
+        "first_line": 230,
+        "last_line": 271,
+        "text": "        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)\n        {\n            if (!reused)\n                _ = ObserveAbandonedEnumerationAsync(enumeration, transport);\n            throw;\n        }\n        catch (OperationCanceledException) when (reused)\n        {\n            // The reused enumeration honoured an earlier caller's cancellation; nothing is outstanding now.\n            outstanding.Task = null;\n            return await EnumerateBoundedAsync(outstanding, enumerate, transport, tolerateTimeout, cancellationToken)\n                .ConfigureAwait(false);\n        }\n        catch (TimeoutException)\n        {\n            if (!reused)\n                _ = ObserveAbandonedEnumerationAsync(enumeration, transport);\n            cancellationToken.ThrowIfCancellationRequested();\n            if (!tolerateTimeout)\n            {\n                throw new TimeoutException(\n                    $\"{transport} interface enumeration exceeded its {_enumerationBudget} budget; the scan was not published.\");\n            }\n\n            Logger.LogWarning(\n                \"{Transport} interface enumeration exceeded its {Budget} budget; continuing without its interfaces this scan.\",\n                transport, _enumerationBudget);\n            return [];\n        }\n    }\n\n    private static async Task ObserveAbandonedEnumerationAsync(Task enumeration, string transport)\n    {\n        try\n        {\n            await enumeration.ConfigureAwait(false);\n            Logger.LogDebug(\"Abandoned {Transport} interface enumeration completed.\", transport);\n        }\n        catch (Exception exception)\n        {\n            Logger.LogDebug(exception, \"Abandoned {Transport} interface enumeration failed.\", transport);\n        }\n",
+        "range_sha256": "c1fde7f76a76b303a48edd4ee6a05571d7236f22878eb277671317bb94705c9e"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/YubiKitLogging.cs",
+    "current_sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "source_pin_sha256": "bfa254965b5f8959cbaebc533127eb594877d87849fa58005bde3fa5b963fe14",
+    "source_pin_blob": "f6642bd38e1bcdcf9fd1da1151e8efba292a3817",
+    "ranges": [
+      {
+        "first_line": 38,
+        "last_line": 39,
+        "text": "    internal static ILogger<T> CreateLogger<T>() => LoggerFactory.CreateLogger<T>();\n    internal static ILogger CreateLogger(string categoryName) => LoggerFactory.CreateLogger(categoryName);\n",
+        "range_sha256": "195ad69810c9d15edefc4ab70a9c5822137ee94b11e3e91662922eb051cd9e83"
+      },
+      {
+        "first_line": 52,
+        "last_line": 66,
+        "text": "    public static IDisposable UseTemporary(ILoggerFactory factory)\n    {\n        var original = LoggerFactory;\n        LoggerFactory = factory;\n        return new RestoreDisposable(() => LoggerFactory = original);\n    }\n\n    private sealed class RestoreDisposable(Action restore) : IDisposable\n    {\n        private Action? _restore = restore;\n\n        public void Dispose()\n        {\n            _restore?.Invoke();\n            _restore = null;\n",
+        "range_sha256": "8dc32cbfdbe1c95b0c3a7458a18bd9293d9b18feb9e465b7f5e6b90f2332c8ab"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+    "current_sha256": "41bfe1a66795324aa3b3eb086ae627ae0ce81b5a249517be13418309f421687f",
+    "source_pin_sha256": "41bfe1a66795324aa3b3eb086ae627ae0ce81b5a249517be13418309f421687f",
+    "source_pin_blob": "4dcd6fab32e2e47b3beb76d838709c71f97aede8",
+    "ranges": [
+      {
+        "first_line": 64,
+        "last_line": 74,
+        "text": "    public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(\n        byte command,\n        ReadOnlyMemory<byte> payload,\n        CancellationToken cancellationToken = default)\n    {\n        ThrowIfDisposed();\n        return FidoProtocol.SendCommandAsync(\n            command,\n            payload,\n            UserPresenceNotification.None,\n            cancellationToken);\n",
+        "range_sha256": "e6abae87f9d5318d8e6c0dfbfa72247a535b041678456e05233e01e6f942d554"
+      }
+    ]
+  },
+  {
+    "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+    "current_sha256": "fc50686f051f5fb6f3ee01aca09f3b9f2175f9fc60cc6c97bbc7f2ed308c62a2",
+    "source_pin_sha256": "fc50686f051f5fb6f3ee01aca09f3b9f2175f9fc60cc6c97bbc7f2ed308c62a2",
+    "source_pin_blob": "45ffb348d555176602d99dc4bcaa2a6165728d67",
+    "ranges": [
+      {
+        "first_line": 290,
+        "last_line": 310,
+        "text": "            var ownershipTransferred = false;\n            try\n            {\n                await ReadResponseDataAsync(initPacket, responseData, responseLength, channelId, exchangeToken)\n                    .ConfigureAwait(false);\n                _logger.LogTrace(\"Received {Length} bytes in response\", responseLength);\n                terminalResponseDrained = true;\n\n                // Only here is the channel provably clean. Throwing any earlier would strand the\n                // remaining frames for the next exchange to misread.\n                promptFailure?.Throw();\n\n                // CTAP 2.3 §11.2.9.1.5: a cancelled request \"will reply with the error\n                // CTAP2_ERR_KEEPALIVE_CANCEL\". A touch that raced the cancel yields a real success\n                // instead; the authenticator has done the work (a credential may now exist), and the\n                // spec never says to discard it, so it is returned.\n                if (cancelRequested && !IsCtapSuccess(expectedCommand, responseData))\n                    callerToken.ThrowIfCancellationRequested();\n\n                ownershipTransferred = true;\n                return responseData;\n",
+        "range_sha256": "6ba91d8f6eae1b88a57a0f319c631286d445d50f5bcb0bdf23fe5c673017e48a"
+      },
+      {
+        "first_line": 384,
+        "last_line": 410,
+        "text": "    private static bool IsCtapSuccess(byte command, ReadOnlySpan<byte> response) =>\n        command == CtapConstants.CtapHidCbor\n        && response.Length > 0\n        && response[0] == CtapConstants.CtapStatusSuccess;\n\n    private static bool IsUserPresenceKeepAlive(ReadOnlySpan<byte> packet) =>\n        GetPacketLength(packet) > 0 && packet[CtapConstants.InitHeaderSize] == CtapConstants.KeepAliveStatusUpNeeded;\n\n    private static int ValidateTerminalResponse(ReadOnlySpan<byte> packet, uint channelId, byte expectedCommand)\n    {\n        ValidateInitPacket(packet, channelId);\n        int responseLength = GetPacketLength(packet);\n        if (responseLength > CtapConstants.MaxPayloadSize)\n            throw new InvalidOperationException($\"Response length {responseLength} exceeds max payload size\");\n\n        byte responseCommand = GetPacketCommand(packet);\n        if (responseCommand == CtapConstants.CtapHidError)\n        {\n            byte errorCode = responseLength > 0 ? packet[CtapConstants.InitHeaderSize] : (byte)0x7F;\n            throw new InvalidOperationException($\"CTAP HID error response: 0x{errorCode:X2}\");\n        }\n\n        byte normalizedExpectedCommand = (byte)(expectedCommand & ~CtapConstants.InitPacketMask);\n        if (responseCommand != normalizedExpectedCommand)\n            throw new InvalidOperationException(\n                $\"CTAP HID response command 0x{responseCommand:X2} does not match request command 0x{expectedCommand:X2}\");\n\n",
+        "range_sha256": "ab8ece8a5c44e8897d527918388e344eecd50c6fbf178f507abb02662e7b2c58"
+      }
+    ]
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap21.txt",
+    "sha256": "97960d3aff3b1d266cdcb6e8e1ee2802df5629b0c420bc6e0192d6b1841ed71f",
+    "authority": "CTAP 2.1 PS 2021-06-15 / errata 2022-06-21, §§6.5.6–6.5.7; ecdh/getPublicKey requirements and protocol-two inheritance, not SDK enforcement.",
+    "ranges": [
+      {
+        "first_line": 8227,
+        "last_line": 8230,
+        "text": "ecdh(peerCoseKey) → sharedSecret | error\nParse peerCoseKey as specified for getPublicKey, below, and produce a P-256 point,\nY\n. If unsuccessful, or if the resulting point is not on the curve, return error.\n",
+        "range_sha256": "a947297c29ffab85392b2baf46b9cb46378ff18ef067346dda9c80327648ad20"
+      },
+      {
+        "first_line": 8272,
+        "last_line": 8292,
+        "text": "getPublicKey()\nReturn a COSE_Key with the following header parameters:\n1 (kty) = 2 (EC2)\n3 (alg) = -25 (although this is not the algorithm actually used)\n-1 (crv) = 1 (P-256)\n-2 (x) = 32-byte, big-endian encoding of the x-coordinate of\nx\nB\n(the\nkey agreement key\n's\npublic point\n)\n-3 (y) = 32-byte, big-endian encoding of the y-coordinate of\nx\nB\nencapsulate(peerCoseKey) → (coseKey, sharedSecret) | error\nLet sharedSecret be the result of calling ecdh(peerCoseKey). Return any resulting error.\nReturn (getPublicKey(), sharedSecret)\ndecapsulate(peerCoseKey) → sharedSecret | error\nReturn ecdh(peerCoseKey)\n",
+        "range_sha256": "7f4a0556c648ef59e6eda02cc7fc75d04aacff79249903b593e0a7ba950d4cfb"
+      },
+      {
+        "first_line": 8321,
+        "last_line": 8325,
+        "text": "The length of the\npinUvAuthToken\nfor PIN/UV auth protocol two MUST be 32 bytes. Otherwise, it inherits all the behavior of\nPIN protocol one\nand overrides only these functions:\n",
+        "range_sha256": "f80d9356949a44bf296caebfc5409fe7cca4c610e2bf9d6ee3459587ff941f67"
+      }
+    ]
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap23.txt",
+    "sha256": "e36c7e9111613ed7d821e47ddfcf86ec1d782c4f5666e00549a2724087799faf",
+    "authority": "CTAP 2.3 PS 2026-02-26, §11.2.9.1.5; authenticator MUST cancel cancelable outstanding work and MUST NOT reply to CANCEL; client MAY send during CBOR. Not the SDK raced-success classification.",
+    "ranges": [
+      {
+        "first_line": 13960,
+        "last_line": 13969,
+        "text": "11.2.9.1.5.\nCTAPHID_CANCEL (0x11)\nCancel any outstanding requests on this CID. If there is an outstanding request\nthat can be cancelled, the authenticator MUST cancel it and that cancelled request\nwill reply with the error CTAP2_ERR_KEEPALIVE_CANCEL.\nAs the CTAPHID_CANCEL command is sent during an ongoing transaction, transaction semantics do not apply.\nWhether a request was cancelled or not, the authenticator MUST NOT reply to the CTAPHID_CANCEL message itself.\nThe CTAPHID_CANCEL command MAY be sent by the client during ongoing processing of a CTAPHID_CBOR request.\nThe CTAP2_ERR_KEEPALIVE_CANCEL response MUST be the response to that request, not an error response in the HID transport.\nA CTAPHID_CANCEL received while no CTAPHID_CBOR request is being processed, or on a non-active CID SHALL be ignored by the authenticator.\n",
+        "range_sha256": "edeab6b34a63c5813c801f0ffd46b3497b4825d76e2ab38ba059d83c3957a4b1"
+      }
+    ]
+  }
+]

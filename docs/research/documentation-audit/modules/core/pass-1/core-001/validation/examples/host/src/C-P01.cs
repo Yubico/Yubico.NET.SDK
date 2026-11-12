@@ -1,0 +1,19 @@
+using System;
+using System.Buffers;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Utilities;
+namespace Audit20261111.DocExamples;
+internal static class ExampleCP01
+{
+    internal static void ConfigureOrUseProvider()
+    {
+  using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
+  {
+      // Use the RNG within this disposal scope.
+  }
+    }
+}

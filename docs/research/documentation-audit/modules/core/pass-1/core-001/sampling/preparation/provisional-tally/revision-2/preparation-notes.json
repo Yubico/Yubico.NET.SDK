@@ -1,0 +1,47 @@
+{
+  "scope": "Preparation-tool failures only; no source or sampling-content verdicts.",
+  "attempts": [
+    {
+      "attempt": 1,
+      "error": "FileNotFoundError: sampling-UIF-fallback/before/OpenPgpSession.cs",
+      "cause": "The queued PGP snapshot layout retains full repository-relative paths, rather than basename-only captures.",
+      "correction": "Use before/<repository-relative-path> and after/<repository-relative-path>, bound to the exact review manifest hashes.",
+      "impact": "No primary product changes, sampler credit, quota or source-correctness claim. The first generation stopped before publishing a completed-read tally."
+    },
+    {
+      "attempt": 2,
+      "error": "AssertionError: base.endswith('\\n') and successor.endswith('\\n')",
+      "cause": "Pinned OpenPgpSession.cs has no final newline (16035 bytes); reviewed before/after snapshots do. CLAUDE.md is terminated in all three captures.",
+      "correction": "Preserve exact source EOF and frame unterminated unified-diff data lines with the explicit No newline at end of file marker; reuse the original-coordinate parser.",
+      "impact": "Generation stopped before tally publication. No source bytes normalized or changed; no final quota or sampler pass claimed."
+    },
+    {
+      "attempt": 3,
+      "error": "NameError: byid is not defined in AST-extracted predecessor pool_reason",
+      "cause": "Isolated helper namespace omitted the population lookup required only when an exclusion row is emitted.",
+      "correction": "Supply the immutable loaded population lookup to that helper namespace.",
+      "impact": "Generation stopped before completed-tally publication. No source edits or sampler credit."
+    },
+    {
+      "attempt": "independent structural check 1",
+      "error": "AssertionError on source/range hash against direct Git blob representation",
+      "cause": "The original inventory preserves BOM/newline working-tree bytes, which may differ from the normalized pinned Git blob representation. The generator already reconstructs exact inventory representations; the independent checker initially did not.",
+      "correction": "Independently reconstruct BOM/LF/CRLF representations and require exact inventory file hash before verifying ranges. Count the admitted population via candidate-eligible records, not all population rows.",
+      "impact": "No sampler or final quota acceptance. No source/inventory bytes changed."
+    },
+    {
+      "attempt": "independent structural check 2",
+      "error": "Exact inventory BOM/newline representation unavailable for src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "cause": "That inventory capture uses mixed endings: 24 CRLF and 25 LF in total. Uniform newline candidates cannot reconstruct it. Current bytes still exactly match the inventory SHA-256 and normalize identically to the pinned blob.",
+      "correction": "Accept the current representation only when both the exact original inventory hash and normalized pinned text equality independently hold, matching the existing original-byte helper contract.",
+      "impact": "No file presence used for read/content credit; exact byte identity only. No source edits or final acceptance."
+    },
+    {
+      "attempt": "independent structural check 3",
+      "error": "Expected explicit X25519 pool-exclusion evidence absent",
+      "cause": "Known X25519 candidates were already skipped by prior-proposal or original edited-overlap filters, before the ranked pool screen ran. No X25519 candidate was selected, but the explicit reason was not emitted.",
+      "correction": "Record all specifically requested credential/discovery and X25519 avoidance surfaces proactively in the replacement-only exclusion ledger, regardless of earlier skip filters. Keep every selected ID unchanged.",
+      "impact": "Evidence-completeness correction only; no new content verdict, denominator shrink, or selection change."
+    }
+  ]
+}

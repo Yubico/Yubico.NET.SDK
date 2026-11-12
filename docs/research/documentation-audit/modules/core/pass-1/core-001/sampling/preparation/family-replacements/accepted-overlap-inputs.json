@@ -1,0 +1,1018 @@
+{
+  "manifest": "editing/integration/current-products.json",
+  "manifest_sha256": "d33ac76a90640420d868b77dcbfa285e9e1c84ac1c8ab10b644e314fcbb0d23f",
+  "accepted_paths": 361,
+  "target_role_paths": [
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs"
+  ],
+  "command": [
+    "git",
+    "--no-optional-locks",
+    "diff",
+    "--no-ext-diff",
+    "--no-textconv",
+    "--no-renames",
+    "--unified=3",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
+    "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "--",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+    "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs"
+  ],
+  "diff_sha256": "4edb288451cd072879d917318ac845fde03ae70d49339c3f387e2cc84461b008",
+  "diff_bytes": 64986,
+  "original_changed_spans": {
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs": [
+      {
+        "start_character": 1113,
+        "end_character_exclusive": 1175,
+        "old_first_line": 27,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1206,
+        "end_character_exclusive": 1751,
+        "old_first_line": 30,
+        "old_line_count": 8,
+        "added_lines": 25,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2650,
+        "end_character_exclusive": 2696,
+        "old_first_line": 65,
+        "old_line_count": 1,
+        "added_lines": 6,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3570,
+        "end_character_exclusive": 3571,
+        "old_first_line": 84,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs": [
+      {
+        "start_character": 765,
+        "end_character_exclusive": 765,
+        "old_first_line": 20,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 5533,
+        "end_character_exclusive": 5534,
+        "old_first_line": 142,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs": [
+      {
+        "start_character": 791,
+        "end_character_exclusive": 791,
+        "old_first_line": 23,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3693,
+        "end_character_exclusive": 3694,
+        "old_first_line": 100,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs": [
+      {
+        "start_character": 7521,
+        "end_character_exclusive": 7521,
+        "old_first_line": 198,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12044,
+        "end_character_exclusive": 12045,
+        "old_first_line": 282,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs": [
+      {
+        "start_character": 659,
+        "end_character_exclusive": 758,
+        "old_first_line": 18,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 773,
+        "end_character_exclusive": 773,
+        "old_first_line": 20,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1215,
+        "end_character_exclusive": 1286,
+        "old_first_line": 37,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1305,
+        "end_character_exclusive": 1372,
+        "old_first_line": 39,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1673,
+        "end_character_exclusive": 1674,
+        "old_first_line": 48,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs": [
+      {
+        "start_character": 753,
+        "end_character_exclusive": 840,
+        "old_first_line": 21,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 855,
+        "end_character_exclusive": 855,
+        "old_first_line": 23,
+        "old_line_count": 0,
+        "added_lines": 12,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1355,
+        "end_character_exclusive": 1454,
+        "old_first_line": 33,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3313,
+        "end_character_exclusive": 3374,
+        "old_first_line": 81,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3508,
+        "end_character_exclusive": 3569,
+        "old_first_line": 87,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3715,
+        "end_character_exclusive": 3789,
+        "old_first_line": 93,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4474,
+        "end_character_exclusive": 4475,
+        "old_first_line": 121,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs": [
+      {
+        "start_character": 659,
+        "end_character_exclusive": 733,
+        "old_first_line": 18,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 748,
+        "end_character_exclusive": 748,
+        "old_first_line": 20,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 1059,
+        "end_character_exclusive": 1060,
+        "old_first_line": 29,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs": [
+      {
+        "start_character": 1239,
+        "end_character_exclusive": 1337,
+        "old_first_line": 38,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1393,
+        "end_character_exclusive": 1394,
+        "old_first_line": 41,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs": [
+      {
+        "start_character": 1679,
+        "end_character_exclusive": 1795,
+        "old_first_line": 46,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2924,
+        "end_character_exclusive": 3008,
+        "old_first_line": 67,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3055,
+        "end_character_exclusive": 3567,
+        "old_first_line": 70,
+        "old_line_count": 5,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3682,
+        "end_character_exclusive": 3782,
+        "old_first_line": 80,
+        "old_line_count": 1,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6646,
+        "end_character_exclusive": 6805,
+        "old_first_line": 139,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7267,
+        "end_character_exclusive": 7637,
+        "old_first_line": 156,
+        "old_line_count": 4,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7969,
+        "end_character_exclusive": 8273,
+        "old_first_line": 168,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9218,
+        "end_character_exclusive": 9219,
+        "old_first_line": 198,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs": [
+      {
+        "start_character": 1033,
+        "end_character_exclusive": 1208,
+        "old_first_line": 26,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 1443,
+        "end_character_exclusive": 1536,
+        "old_first_line": 32,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2702,
+        "end_character_exclusive": 2784,
+        "old_first_line": 59,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3153,
+        "end_character_exclusive": 3325,
+        "old_first_line": 70,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10234,
+        "end_character_exclusive": 10336,
+        "old_first_line": 243,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11056,
+        "end_character_exclusive": 11228,
+        "old_first_line": 265,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11875,
+        "end_character_exclusive": 12036,
+        "old_first_line": 287,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 12153,
+        "end_character_exclusive": 12153,
+        "old_first_line": 292,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 12667,
+        "end_character_exclusive": 12730,
+        "old_first_line": 305,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13008,
+        "end_character_exclusive": 13009,
+        "old_first_line": 312,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs": [
+      {
+        "start_character": 770,
+        "end_character_exclusive": 770,
+        "old_first_line": 22,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2916,
+        "end_character_exclusive": 3011,
+        "old_first_line": 76,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3659,
+        "end_character_exclusive": 3660,
+        "old_first_line": 109,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs": [
+      {
+        "start_character": 850,
+        "end_character_exclusive": 850,
+        "old_first_line": 24,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 3416,
+        "end_character_exclusive": 3511,
+        "old_first_line": 81,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5446,
+        "end_character_exclusive": 5589,
+        "old_first_line": 136,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7966,
+        "end_character_exclusive": 7967,
+        "old_first_line": 189,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs": [
+      {
+        "start_character": 1303,
+        "end_character_exclusive": 1484,
+        "old_first_line": 33,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2570,
+        "end_character_exclusive": 2766,
+        "old_first_line": 64,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5431,
+        "end_character_exclusive": 5546,
+        "old_first_line": 124,
+        "old_line_count": 1,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6148,
+        "end_character_exclusive": 6261,
+        "old_first_line": 141,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9199,
+        "end_character_exclusive": 9200,
+        "old_first_line": 202,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs": [
+      {
+        "start_character": 773,
+        "end_character_exclusive": 1239,
+        "old_first_line": 22,
+        "old_line_count": 5,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2626,
+        "end_character_exclusive": 2735,
+        "old_first_line": 61,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 5385,
+        "end_character_exclusive": 5537,
+        "old_first_line": 112,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14005,
+        "end_character_exclusive": 14006,
+        "old_first_line": 330,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs": [
+      {
+        "start_character": 24807,
+        "end_character_exclusive": 25182,
+        "old_first_line": 559,
+        "old_line_count": 4,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 26007,
+        "end_character_exclusive": 26146,
+        "old_first_line": 582,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 27222,
+        "end_character_exclusive": 27411,
+        "old_first_line": 610,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 31533,
+        "end_character_exclusive": 31873,
+        "old_first_line": 695,
+        "old_line_count": 4,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 33739,
+        "end_character_exclusive": 34103,
+        "old_first_line": 744,
+        "old_line_count": 4,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 46796,
+        "end_character_exclusive": 46797,
+        "old_first_line": 1068,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs": [
+      {
+        "start_character": 1589,
+        "end_character_exclusive": 1868,
+        "old_first_line": 36,
+        "old_line_count": 3,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 3980,
+        "end_character_exclusive": 3981,
+        "old_first_line": 108,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs": [
+      {
+        "start_character": 12174,
+        "end_character_exclusive": 12341,
+        "old_first_line": 339,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 14367,
+        "end_character_exclusive": 14526,
+        "old_first_line": 403,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 15898,
+        "end_character_exclusive": 15899,
+        "old_first_line": 443,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs": [
+      {
+        "start_character": 757,
+        "end_character_exclusive": 966,
+        "old_first_line": 21,
+        "old_line_count": 3,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 2049,
+        "end_character_exclusive": 2151,
+        "old_first_line": 59,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6706,
+        "end_character_exclusive": 6834,
+        "old_first_line": 209,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7785,
+        "end_character_exclusive": 7865,
+        "old_first_line": 244,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 16048,
+        "end_character_exclusive": 16049,
+        "old_first_line": 494,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs": [
+      {
+        "start_character": 1118,
+        "end_character_exclusive": 1250,
+        "old_first_line": 29,
+        "old_line_count": 2,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 38465,
+        "end_character_exclusive": 38466,
+        "old_first_line": 812,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs": [
+      {
+        "start_character": 2791,
+        "end_character_exclusive": 2869,
+        "old_first_line": 58,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8978,
+        "end_character_exclusive": 9089,
+        "old_first_line": 109,
+        "old_line_count": 2,
+        "added_lines": 3,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9246,
+        "end_character_exclusive": 9313,
+        "old_first_line": 115,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9320,
+        "end_character_exclusive": 9321,
+        "old_first_line": 117,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs": [
+      {
+        "start_character": 930,
+        "end_character_exclusive": 1010,
+        "old_first_line": 25,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7338,
+        "end_character_exclusive": 7388,
+        "old_first_line": 189,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8018,
+        "end_character_exclusive": 8104,
+        "old_first_line": 206,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9808,
+        "end_character_exclusive": 9809,
+        "old_first_line": 256,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs": [
+      {
+        "start_character": 2478,
+        "end_character_exclusive": 2558,
+        "old_first_line": 60,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8440,
+        "end_character_exclusive": 8638,
+        "old_first_line": 211,
+        "old_line_count": 2,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8703,
+        "end_character_exclusive": 9066,
+        "old_first_line": 215,
+        "old_line_count": 4,
+        "added_lines": 4,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9633,
+        "end_character_exclusive": 9820,
+        "old_first_line": 230,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 10029,
+        "end_character_exclusive": 10115,
+        "old_first_line": 235,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 11801,
+        "end_character_exclusive": 11875,
+        "old_first_line": 277,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 13145,
+        "end_character_exclusive": 13146,
+        "old_first_line": 308,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs": [
+      {
+        "start_character": 337,
+        "end_character_exclusive": 744,
+        "old_first_line": 10,
+        "old_line_count": 4,
+        "added_lines": 5,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 4120,
+        "end_character_exclusive": 4121,
+        "old_first_line": 85,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs": [
+      {
+        "start_character": 7208,
+        "end_character_exclusive": 7295,
+        "old_first_line": 173,
+        "old_line_count": 1,
+        "added_lines": 2,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7462,
+        "end_character_exclusive": 7537,
+        "old_first_line": 177,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 7591,
+        "end_character_exclusive": 7731,
+        "old_first_line": 179,
+        "old_line_count": 2,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 8982,
+        "end_character_exclusive": 8982,
+        "old_first_line": 216,
+        "old_line_count": 0,
+        "added_lines": 2,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 9173,
+        "end_character_exclusive": 9248,
+        "old_first_line": 220,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 9362,
+        "end_character_exclusive": 9363,
+        "old_first_line": 223,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs": [
+      {
+        "start_character": 826,
+        "end_character_exclusive": 826,
+        "old_first_line": 23,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 7010,
+        "end_character_exclusive": 7011,
+        "old_first_line": 168,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs": [
+      {
+        "start_character": 967,
+        "end_character_exclusive": 967,
+        "old_first_line": 25,
+        "old_line_count": 0,
+        "added_lines": 5,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 7923,
+        "end_character_exclusive": 7924,
+        "old_first_line": 167,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs": [
+      {
+        "start_character": 1448,
+        "end_character_exclusive": 1515,
+        "old_first_line": 31,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      },
+      {
+        "start_character": 6694,
+        "end_character_exclusive": 6695,
+        "old_first_line": 189,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ],
+    "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs": [
+      {
+        "start_character": 73,
+        "end_character_exclusive": 73,
+        "old_first_line": 5,
+        "old_line_count": 0,
+        "added_lines": 4,
+        "kind": "insertion-point"
+      },
+      {
+        "start_character": 2561,
+        "end_character_exclusive": 2562,
+        "old_first_line": 57,
+        "old_line_count": 1,
+        "added_lines": 1,
+        "kind": "replacement-or-deletion"
+      }
+    ]
+  },
+  "parser_reuse_sha256": "cec1fda648e5c2cf91a8e85547cdb3e149173c72336616322c075ef63beee75d",
+  "scope": "Exact known accepted target-role changed spans; no whole-file/class exclusion"
+}

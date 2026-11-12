@@ -152,7 +152,8 @@ public class WebAuthnClientGetAssertionTests
         var response1 = await matched.SelectAsync(TestContext.Current.CancellationToken);
         var response2 = await matched.SelectAsync(TestContext.Current.CancellationToken);
 
-        // Assert - same instance or value-equal
+        // Repeated selections have equal CredentialId and Signature bytes;
+        // the fixture observes one backend GetAssertion call in total.
         Assert.Equal(response1.CredentialId.ToArray(), response2.CredentialId.ToArray());
         Assert.Equal(response1.Signature.ToArray(), response2.Signature.ToArray());
 

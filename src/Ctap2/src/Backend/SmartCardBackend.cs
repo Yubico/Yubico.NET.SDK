@@ -27,7 +27,11 @@ namespace Yubico.YubiKit.Ctap2.Backend;
 /// </summary>
 /// <remarks>Uses a borrowed protocol. With no in-flight presence signal, an operation's supplied
 /// policy notification is requested before transmission. Resolution uses CTAP status before typed
-/// decoding, not verified UP/UV or RP success. Only an untransferred response is cleared here.</remarks>
+/// decoding, not verified UP/UV or RP success. The returned status-stripped view shares ApduResponse's
+/// copied Data storage; other transport, SCP and decoded copies have separate lifetimes. Failure cleanup
+/// clears the received, untransferred Data view after resolution. It cannot reach an APDU error response
+/// that Core never returns, and a logging provider throwing while a secondary resolution failure is
+/// logged can bypass the later clearing statement.</remarks>
 internal sealed class SmartCardBackend : ICtap2Backend
 {
     private const byte NfcCtapMsg = 0x10;  // Used as APDU INS
@@ -95,7 +99,7 @@ internal sealed class SmartCardBackend : ICtap2Backend
                 P1 = 0x00,
                 P2 = 0x00,
                 Data = request,
-                Le = 0  // Maximum response length
+                Le = 0  // Formatter emits wire Le=0 (maximum for the selected format), not an absent Le.
             };
 
             var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);

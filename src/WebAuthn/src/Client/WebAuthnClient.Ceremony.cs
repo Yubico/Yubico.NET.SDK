@@ -157,10 +157,10 @@ public sealed partial class WebAuthnClient
     /// <param name="auth">The ceremony's token owner.</param>
     /// <param name="decision">The UV decision in force (its method is reused for a re-mint).</param>
     /// <param name="remintPermissions">
-    /// When set, the token is re-minted with these permissions after the probe. Authenticators may refuse
-    /// to reuse a token consumed by a getAssertion(up:false) probe for a following makeCredential, so
-    /// registration passes <c>MakeCredential</c>; a following getAssertion accepts the same token, so
-    /// selection passes null.
+    /// When set and a token exists, the token is re-minted with these permissions after the probe.
+    /// Registration passes <c>MakeCredential</c>; authentication selection passes null and reuses its
+    /// existing token for the final assertion. This is the SDK's reuse choice, not a guarantee of
+    /// authenticator acceptance; the authenticator's token state and expiry conditions still apply.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     private async Task<PublicKeyCredentialDescriptor?> ProbeCredentialsAsync(

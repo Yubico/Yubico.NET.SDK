@@ -1,0 +1,689 @@
+[
+  {
+    "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "d7f8d23c30e78350a45267e116672064e8e26c4778b0a268a80d8bbbec047aa4",
+    "pinned_git_blob": "bb843d34eeabfe7969bdcebe17c6eb3387122501",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 632,
+        "start_character": 0,
+        "end_character_exclusive": 26727,
+        "range_sha256": "d7f8d23c30e78350a45267e116672064e8e26c4778b0a268a80d8bbbec047aa4"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "pinned_git_blob": "675d5d69b4b4beaea0126981b2962a6bc02e9a47",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 569,
+        "start_character": 0,
+        "end_character_exclusive": 23204,
+        "range_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Protocols/ProtocolFactory.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "4a45f172706a618b4126289aa7f2fcd55f826362fffabd2bb64423910b087757",
+    "pinned_git_blob": "d80984f3eeffda5326f202dd61d09b0a5efcc474",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 69,
+        "start_character": 0,
+        "end_character_exclusive": 2355,
+        "range_sha256": "4a45f172706a618b4126289aa7f2fcd55f826362fffabd2bb64423910b087757"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "pinned_git_blob": "effdc2eaebcab2fd310bc68960e7f609e3999e94",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 207,
+        "start_character": 0,
+        "end_character_exclusive": 8027,
+        "range_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "pinned_git_blob": "346d21bb714448646ab3d9425f8860795bc702e3",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 100,
+        "start_character": 0,
+        "end_character_exclusive": 3694,
+        "range_sha256": "d1f1c65a748969923832a2697b408b443f31e9e566b7575ea5bbd1f48efe65f6"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b",
+    "pinned_git_blob": "bdfb2e469322b0ebc487a0cfd9a84973bdd34f0e",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 49,
+        "start_character": 0,
+        "end_character_exclusive": 1660,
+        "range_sha256": "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78",
+    "pinned_git_blob": "fac728f3147560dd4a8051a7811c8f4fe954ae87",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 77,
+        "start_character": 0,
+        "end_character_exclusive": 2772,
+        "range_sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67",
+    "pinned_git_blob": "d7fe567c828ccbd1394b16e1e7525815ef0719c5",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 210,
+        "start_character": 0,
+        "end_character_exclusive": 9717,
+        "range_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "pinned_git_blob": "a9704b1ed619b31ccda8ff49fbae6397e0521baf",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 205,
+        "start_character": 0,
+        "end_character_exclusive": 9130,
+        "range_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "pinned_git_blob": "0418d7391a09c38c3d86d844a09848b0207b9406",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 389,
+        "start_character": 0,
+        "end_character_exclusive": 12967,
+        "range_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "pinned_git_blob": "b2980dd7dd5ce35c9ec0db1029e2380dae9edc60",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 140,
+        "start_character": 0,
+        "end_character_exclusive": 4987,
+        "range_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "75f07413d79f617a6a4be26081d02840abb6a57caabeb69a25e438718d43fa70",
+    "pinned_git_blob": "c147cf1d5ac3bdb25b19b05256e072df91a724d7",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 201,
+        "start_character": 0,
+        "end_character_exclusive": 7694,
+        "range_sha256": "75f07413d79f617a6a4be26081d02840abb6a57caabeb69a25e438718d43fa70"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyDevice.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",
+    "pinned_git_blob": "a910a7f6a34b080abf2297e5d10c95302773cf72",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 322,
+        "start_character": 0,
+        "end_character_exclusive": 13227,
+        "range_sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "29ca3ec49bf3333417b8a1fcb9d967e10bbb4b085c9f0eacc65fce755d1586d7",
+    "pinned_git_blob": "febe52df52754dd3576854ec6cdcddeabc6556c6",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 132,
+        "start_character": 0,
+        "end_character_exclusive": 7291,
+        "range_sha256": "29ca3ec49bf3333417b8a1fcb9d967e10bbb4b085c9f0eacc65fce755d1586d7"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "pinned_git_blob": "bb2a171f0b5b73a05815ddde68004f512fb22840",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 175,
+        "last_line": 305,
+        "start_character": 8254,
+        "end_character_exclusive": 14761,
+        "range_sha256": "31c79b49a1db4b28bbd740d8218fae094a36a17679f650414850c3e3cbfd2751"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Devices/RegisteredConnections.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "7dafef7f99f9024d492c72c35bb5cc1ac5404604cebe8ac859f15356ea4f0968",
+    "pinned_git_blob": "12fc626e3cd90759c8f8393344add3d3d303fd0b",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 107,
+        "start_character": 0,
+        "end_character_exclusive": 4331,
+        "range_sha256": "7dafef7f99f9024d492c72c35bb5cc1ac5404604cebe8ac859f15356ea4f0968"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Devices/FirmwareVersion.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+    "pinned_git_blob": "b8a2261a1302360dca391ae7fd29558befef0d83",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 277,
+        "start_character": 0,
+        "end_character_exclusive": 11617,
+        "range_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "pinned_git_blob": "320c26f094782e4e706a74283326904ff17b7794",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 42,
+        "start_character": 0,
+        "end_character_exclusive": 1507,
+        "range_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Protocols/Otp/Hid/OtpHidConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "522e31c435741c09a1c7da24be6adb9af6af46c99b3b72ff12ad32990848b8e8",
+    "pinned_git_blob": "2aba4e908d005cd7dfe8e43be5015d78952d8e9e",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 78,
+        "start_character": 0,
+        "end_character_exclusive": 2520,
+        "range_sha256": "522e31c435741c09a1c7da24be6adb9af6af46c99b3b72ff12ad32990848b8e8"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "fe9e2e88d6657dd21e15a335fde9f679d1a2f9025e1f65df24d35b06accb78cf",
+    "pinned_git_blob": "29899ed1cc7fc1889ebb88afcdbfe9c43ab83f91",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 62,
+        "start_character": 0,
+        "end_character_exclusive": 3258,
+        "range_sha256": "fe9e2e88d6657dd21e15a335fde9f679d1a2f9025e1f65df24d35b06accb78cf"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "be5207547d332a77dabeafa9d0f0e7106c9f9c3b122b948367bd2b8d882621be",
+    "pinned_git_blob": "49019836f5ae118dcda40552b7ff8e5eadd8054d",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 113,
+        "start_character": 0,
+        "end_character_exclusive": 6913,
+        "range_sha256": "be5207547d332a77dabeafa9d0f0e7106c9f9c3b122b948367bd2b8d882621be"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxOtpHidNativeOwner.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c",
+    "pinned_git_blob": "2e4ff76171bf91b02d39a1536ebb86d834cfabdf",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 380,
+        "start_character": 0,
+        "end_character_exclusive": 16878,
+        "range_sha256": "cddfc6e360703c08a8451a02e5c0542c9c0c0b29ce3f98156a6db0446d96bd7c"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "c69601befd66580de9a6762012f31ff0221058d6689c44f48711f97f6a2a7c09",
+    "pinned_git_blob": "e1f7dab1d094b9a5ca2c2079f56b9b8410f68e09",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 108,
+        "start_character": 0,
+        "end_character_exclusive": 6453,
+        "range_sha256": "c69601befd66580de9a6762012f31ff0221058d6689c44f48711f97f6a2a7c09"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8",
+    "pinned_git_blob": "65d1b0cda007025095867e5f34715dfcef2c2a11",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 395,
+        "start_character": 0,
+        "end_character_exclusive": 16434,
+        "range_sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "aaaf9c3752ebff3a102aa4283ce30f169a6cd9482c1b18b5588ec42b12b79420",
+    "pinned_git_blob": "75ca27a965d7e9a859b234a3bbaa18e75d966c61",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 49,
+        "start_character": 0,
+        "end_character_exclusive": 2067,
+        "range_sha256": "aaaf9c3752ebff3a102aa4283ce30f169a6cd9482c1b18b5588ec42b12b79420"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "4ca6b498e4f7254873bc205f879fe829aac9a5e58220f02bfedc58a73b436bdb",
+    "pinned_git_blob": "998c6a1cf97b6dc996a287b30de456ad5e380e6b",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 84,
+        "start_character": 0,
+        "end_character_exclusive": 2668,
+        "range_sha256": "842d45253ff75f1194dd6661fff2920f353d3ebd8f1910661e5874aa038b70a0"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "0c877aeab9d9cb6134ce2fbf50197a16efde08c47fcd9ed7c04bd7e4c9e3a1e7",
+    "pinned_git_blob": "2f5dd9c7e975f9799c09dcf5c3b8d5d46bbbe0ab",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 320,
+        "start_character": 0,
+        "end_character_exclusive": 12929,
+        "range_sha256": "3a8a9e78ae24ac46185be4bcccd60e532bb426c5f18026e5c86e1bc6a331a10d"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "f3063a8df9a21fff878cd632c78313091ac2ec33d5613725aebf92018b331e7d",
+    "pinned_git_blob": "419bebe00095297c3be391bf66e00f67b267b2ce",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 77,
+        "start_character": 0,
+        "end_character_exclusive": 3570,
+        "range_sha256": "f3063a8df9a21fff878cd632c78313091ac2ec33d5613725aebf92018b331e7d"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "f2664b4d2f50d043a45514e3e495c66bd333376e1347e294a4fc3a973def8ca9",
+    "pinned_git_blob": "bf8e49bf26b130d55cef5e7f6d530ab18856c693",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 214,
+        "start_character": 0,
+        "end_character_exclusive": 8427,
+        "range_sha256": "78f7243ff2e9292dce46745c4afb5b7d4ecd2c79aebf298686d421c727c7c7f4"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "f31205b72ec5b7591b0fb24a1a499c54b9fa81a9323e8c0d3cebd112247f4006",
+    "pinned_git_blob": "d8823a807405532cda464d26812c53240df4fe92",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 99,
+        "start_character": 0,
+        "end_character_exclusive": 3055,
+        "range_sha256": "56e880fcfbf6e54d4dcb807bde3f6215eae4fff9ab3cbfe4bad40a2caf8e6ea7"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "5db2356490d6a6f6e4380fc20055d3116d687d597d42625ee07ce094b82c3420",
+    "pinned_git_blob": "231baa2e2838ae1a36aa52f40837e96675fe2a30",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 28,
+        "start_character": 0,
+        "end_character_exclusive": 833,
+        "range_sha256": "27e3f3f9f9dd38c66274e0a9b4b83b66b4e538bc6c6878b72c957ea0d6492ade"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Management/src/IManagementSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "b35858944a645276e2e023bcb971be503ef250e211c85553d4bf77588f11df9f",
+    "pinned_git_blob": "7dcd36b4597191e92a01e50e7c6b080763538148",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 130,
+        "start_character": 0,
+        "end_character_exclusive": 8710,
+        "range_sha256": "b35858944a645276e2e023bcb971be503ef250e211c85553d4bf77588f11df9f"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Management/src/ManagementSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "36f879ea7d703e78c69d0f02b97a24c752301eab4dce02b0164fa1d9f5aadfe9",
+    "pinned_git_blob": "d57fb7e74a7072f3e25b6b1fac4eecf1ed7c3340",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 130,
+        "last_line": 229,
+        "start_character": 6788,
+        "end_character_exclusive": 10941,
+        "range_sha256": "98c9c17bb86ff477bd137101d71faeb6c1c0334a2a4ac2f82a5ea08c8fcd8c9d"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Management/src/DeviceConfig.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "f0eb2e575ec32fe4ed175a546c137e04aaae954ce081d6f9fc2ab409d923a4b4",
+    "pinned_git_blob": "8a569e359d9279f360e000da93d5cb65a9e5f3d9",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 231,
+        "start_character": 0,
+        "end_character_exclusive": 11454,
+        "range_sha256": "f0eb2e575ec32fe4ed175a546c137e04aaae954ce081d6f9fc2ab409d923a4b4"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "ed6ba5d91314eb226d83fac9724ff2d4b22fcf1caa7332bd516e30d6d1d83bb9",
+    "pinned_git_blob": "02f6f0e94e41f07c32cdd3cc9d60953097afdd85",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 190,
+        "last_line": 264,
+        "start_character": 5967,
+        "end_character_exclusive": 8997,
+        "range_sha256": "5bb42902e08c8f4f50961e690abccd89dfe97014e9e302f343c9c50755a8a6ff"
+      },
+      {
+        "first_line": 495,
+        "last_line": 574,
+        "start_character": 16745,
+        "end_character_exclusive": 19591,
+        "range_sha256": "515c9fcad2b0c808aaeb52fb97b01d826556dd53a9cc47819c4b1ee728dc2a59"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/AuditV2/CliStaticPasswordEncodingTests.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "f77133a44338ad83eb48a55289c64dff1d840b4df49f07ed8475c307c06e27ae",
+    "pinned_git_blob": "d73e638d053ad0f8a72b0ac9a830ecaf1c1eccf8",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 83,
+        "start_character": 0,
+        "end_character_exclusive": 3299,
+        "range_sha256": "f77133a44338ad83eb48a55289c64dff1d840b4df49f07ed8475c307c06e27ae"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "docs/migration/v1-to-v2-gaps.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "827ced7b8e4055b98b2cc2b1738086494437c169ba88e92af3ee27488fac177a",
+    "pinned_git_blob": "6eb3aee891f95e55dd051ff615ccd4d8ad33cb16",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 201,
+        "last_line": 257,
+        "start_character": 19465,
+        "end_character_exclusive": 25718,
+        "range_sha256": "5f9e6d8bd6373cd12a27cb760a78837de4e0bee8a22bb2b2674001a0eafa7343"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "pinned_git_blob": "463b4ea474e81b7eb7880994c31b2b49ab3937fc",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 160,
+        "last_line": 219,
+        "start_character": 9395,
+        "end_character_exclusive": 14089,
+        "range_sha256": "621e87ac061bf42261c72cab6a1fa254d10c2e90668ec365fb7c231d9ef716f8"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/README.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "pinned_git_blob": "0b8672e6ff4029163022cf51c9cd9c64901ea6a1",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 661,
+        "start_character": 0,
+        "end_character_exclusive": 43091,
+        "range_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "raw_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "pinned_git_blob": "1b98f97c9ee8bb798530c93600cfec86640cbd4d",
+    "normalized_pin_equal": true,
+    "ranges": [
+      {
+        "first_line": 1,
+        "last_line": 907,
+        "start_character": 0,
+        "end_character_exclusive": 63635,
+        "range_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e"
+      }
+    ],
+    "role": "Read-only caller/helper/owner context; primary family and future shared editor retain disposition/edit ownership. No new assigned units are created."
+  }
+]

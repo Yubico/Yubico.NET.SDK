@@ -14,11 +14,16 @@
 
 namespace Yubico.YubiKit.Core;
 
+/// <summary>Physical transport categories, distinct from connection interfaces or application capabilities.</summary>
 [Flags]
 public enum Transport
 {
+    /// <summary>No transport selected.</summary>
     None = 0,
+    /// <summary>USB attachment, which can expose smart-card and HID interfaces.</summary>
     Usb = 1,
+    /// <summary>Contactless access through an NFC reader.</summary>
     Nfc = 2,
+    /// <summary>Both modeled transport categories.</summary>
     All = Usb | Nfc
 }

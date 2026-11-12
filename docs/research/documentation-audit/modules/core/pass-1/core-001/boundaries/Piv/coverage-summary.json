@@ -1,0 +1,31 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "metadata_checkpoint": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "packet": "inventory/packets/BOUNDARY-Piv.json",
+  "assigned_units": 513,
+  "selected_paths": 93,
+  "complete_candidate_files": 121,
+  "complete_candidate_lines": 22213,
+  "dispositions": {
+    "READ-CLEAN": 384,
+    "READ-CANDIDATE": 46,
+    "READ-CONTEXT": 83
+  },
+  "unread": 0,
+  "awaiting_context": 0,
+  "local_proposal_groups": 6,
+  "accepted_core_ids": 0,
+  "clean_nominees": 12,
+  "routed_inherited_rows": 11,
+  "inherited_groups": 3,
+  "piv_engineering_groups_retained": 10,
+  "editing": "PENDING SEPARATE ASSIGNMENT",
+  "independent_review": "PENDING",
+  "compilation_tests": "UNEXECUTED",
+  "hardware": "UNEXECUTED; PIV touch/hotplug/touch-dependent cancellation-recovery DEFERRED",
+  "publication": "COORDINATOR GATE",
+  "scratch": {
+    "path": "/home/rupicola/Code/y/.core-docs-audit-runtime/core-001/Piv",
+    "all_temp_environment_variables_equal": true
+  }
+}

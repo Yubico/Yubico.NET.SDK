@@ -1,0 +1,226 @@
+--- a/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs
+@@ -18,8 +18,9 @@
+ 
+ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ 
+-// Implements the fixed P-256/SHA-256/AES-128 derivation shape: ka1 || ka2 yields 80 bytes,
+-// split into receipt key, S-ENC, S-MAC, S-RMAC, and DEK. Parameter admission is broader than
++// Implements the fixed P-256/SHA-256/AES-128 derivation shape: two 32-byte agreements form
++// the 64-byte input ka1 || ka2. X9.63 then produces 80 bytes, split into five 16-byte values:
++// receipt key, S-ENC, S-MAC, S-RMAC, and DEK. Parameter admission is broader than
+ // this parser's fixed curve/coordinate widths; it does not establish generic SCP11 profile support.
+ internal static class Scp11X963Kdf
+ {
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs
+@@ -43,7 +43,7 @@
+     /// </summary>
+     public void Dispose() => State.Dispose();
+ 
+-    /// <summary>9000, 62xx and 63xx: protected response statuses in SCP03 1.1.2 Public Release, §6.2.5.</summary>
++    /// <summary>9000, 62xx and 63xx: response statuses protected when R-MAC is selected (SCP03 1.1.2 Public Release, §6.2.5).</summary>
+     private static bool IsSuccessOrWarning(short sw) =>
+         sw == SWConstants.Success || (sw & 0xFF00) is 0x6200 or 0x6300;
+ 
+@@ -76,8 +76,9 @@
+         try
+         {
+             // Step 1: Encrypt command data if requested
+-            // Current code pads and encrypts empty input too. SCP03 1.1.2 Public Release §6.2.6 instead
+-            // requires the off-card entity to advance the counter without encrypting an absent data field.
++            // Current code pads and encrypts empty input too. When C-DECRYPTION and C-MAC are required,
++            // SCP03 1.1.2 Public Release §6.2.6 instead requires the off-card entity to advance the counter
++            // without encrypting an absent data field. Core's SCP03 initializer selects both in 0x33.
+             // Preserve that implementation/profile discrepancy separately from counter synchronization.
+             var commandData = command.Data;
+             if (encrypt)
+@@ -154,8 +155,9 @@
+                 return new ApduResponse(unmacdData, response.SW);
+             }
+ 
+-            // SCP03 1.1.2 Public Release §6.2.5 requires card R-MAC for 9000/62xx/63xx, except the
+-            // EXTERNAL AUTHENTICATE response, and status-only unprotected errors otherwise. The check
++            // With R-MAC selected (as in Core's SCP03 level 0x33), SCP03 1.1.2 Public Release §6.2.5
++            // requires card R-MAC for 9000/62xx/63xx except EXTERNAL AUTHENTICATE. Error statuses return
++            // status only, without protection. R-MAC is optional across SCP03 security levels. The check
+             // below identifies the exception by INS 82 alone, not by handshake phase; later raw INS 82
+             // calls also reach it. Missing-R-MAC rejection is not universal phase-gating evidence.
+             if (IsSuccessOrWarning(response.SW) && command.Ins != InsExternalAuthenticate)
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs
+@@ -37,9 +37,10 @@
+     ///     is the first command MAC'd through it.
+     /// </returns>
+     /// <remarks>
+-    ///     References here use SCP03 1.1.2 Public Release (March 2019). Its §7.1.1.6 conditionally includes a
+-    ///     three-byte sequence counter. This parser consumes the 29-byte prefix without validating that profile
+-    ///     or key-info fields; diversification bytes are unused, so supplied static keys must already be per-card.
++    ///     References here use SCP03 1.1.2 Public Release (March 2019). Its §7.1.1.6/Table 7-3 lists 29 mandatory
++    ///     bytes plus a three-byte sequence counter for pseudo-random challenge generation. This parser consumes
++    ///     the 29-byte prefix without validating that profile or key-info fields; diversification bytes are unused,
++    ///     so supplied static keys must already be per-card.
+     ///     The caller owns returned state and cryptogram. The initializer's post-return cleanup does not cover
+     ///     provider failures during cryptogram derivation after this method has allocated SessionKeys.
+     /// </remarks>
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs
+@@ -22,7 +22,7 @@
+ internal partial class ScpState
+ {
+     // Citations in this file use SCP11 1.3.0.13 Public Review (August 2023), not unverified final 1.4.
+-    // SCP identifier parameter "i" in the 90 tag of the authenticate command (§7.6.2.3):
++    // SCP identifier parameters in tag 90 (§7.1.1); request fields are in §7.6.2.3 (a/c) and §7.7.2.3 (b):
+     // SCP11a mutual authentication with OCE certificates, SCP11b card-only authentication,
+     // SCP11c like SCP11a with offline-scripting support.
+     private const byte Scp11aTypeParam = 0x01;
+@@ -33,13 +33,13 @@
+     private const byte Scp11KeyType = 0x88; // AES (tag 80)
+ 
+     private const byte InsPerformSecurityOperation = 0x2A; // Amd F §7.5: send the OCE certificate chain
+-    private const byte InsInternalAuthenticate = 0x88; // Amd F §7.6: SCP11b
++    private const byte InsInternalAuthenticate = 0x88; // Amd F §7.7: SCP11b INTERNAL AUTHENTICATE
+     private const byte InsExternalAuthenticate = 0x82; // Amd F §7.6: SCP11a/c (named MUTUAL AUTHENTICATE in the spec)
+     private const int TagEpkSdEcka = 0x5F49; // Returned SD public key: ephemeral for a/b, static for c
+     private const int TagReceipt = 0x86; // Receipt: card's key-confirmation MAC, becomes the initial MAC chaining value
+ 
+     /// <summary>
+-    ///     Runs the host side of the SCP11 handshake (Amd F §7.1.1): sends the OCE certificate chain for
++    ///     Runs host-side SCP11 setup (Public Review §§7.5–7.7): sends the OCE certificate chain for
+     ///     SCP11a/c, performs the ECKA key agreement with the SD, derives the session keys and verifies
+     ///     the receipt. The returned state supports secure messaging. Under the inspected Public Review §4.3,
+     ///     the SD authenticates the a/c OCE using its certificate and the first correct-MAC APDU after
+@@ -53,7 +53,7 @@
+         Scp11KeyParameters keyParams,
+         CancellationToken cancellationToken = default)
+     {
+-        // Request/key-role model: inspected Amendment F Public Review §§3.1.1 and 7.1.1.
++        // Key roles: Public Review §3.1.1. Identifier/parameter coding: §7.1.1, rather than handshake processing.
+         var kid = keyParams.KeyReference.Kid;
+         var kvn = keyParams.KeyReference.Kvn;
+ 
+@@ -100,7 +100,8 @@
+             epkOce = ownEphemeralPublicKey.ExportParameters().ToUncompressedPoint();
+         }
+ 
+-        // Inspected Amendment F Public Review §7.6.2.3; request selects AES-128 and no HostID/CardGroup option.
++        // Public Review request data: §7.6.2.3 for a/c; §7.7.2.3 for b incorporates that processing
++        // with its own key-agreement modifications. This request selects AES-128 and no HostID/CardGroup option.
+         // Construct the host authentication command
+         // These contain the parameters for the host authentication command that the YubiKey will respond to.
+         // EncodeAndDisposeList rather than EncodeList: these Tlvs are constructed inline and
+@@ -127,7 +128,8 @@
+             if (response.SW != SWConstants.Success)
+                 throw ApduException.FromResponse(response, authenticateCommand, "SCP11 authentication failed");
+ 
+-            // Public Review §7.6.2.3/Table 7-18: SD key (5F49), then receipt (86).
++            // Public Review response data: a/c §7.6.3.1/Table 7-18; b §7.7.3.1/Table 7-22.
++            // Both list the returned SD key (5F49), then receipt (86).
+             // The c response carries the static SD key; a/b carry an ephemeral SD key.
+             // Only the first two tag positions are checked here; additional decoded TLVs are unused.
+             using var tlvs = TlvHelper.DecodeList(response.Data.Span);
+--- a/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
++++ b/src/Core/src/Protocols/SmartCard/Scp/ScpState.cs
+@@ -31,7 +31,7 @@
+ /// <remarks>
+ ///     Establish a session with <see cref="Scp03InitAsync" /> or <see cref="Scp11InitAsync" />; the
+ ///     partial files hold the protocol-specific handshakes. <c>macChain</c> is the initial MAC chaining
+-///     value: 16 zero bytes for SCP03 (the inspected Public Release §6.2.4), the receipt for SCP11
++///     value: 16 zero bytes for SCP03 EXTERNAL AUTHENTICATE (the inspected Public Release §6.2.3), the receipt for SCP11
+ ///     (the inspected Public Review §5.3.2). These citations describe selected rules, not blanket conformance.
+ /// </remarks>
+ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null) : IDisposable
+@@ -72,8 +72,9 @@
+     /// </summary>
+     /// <remarks>
+     ///     Advances the counter before IV derivation completes, including on some provider failures. Current
+-    ///     empty input produces an encrypted padding block. SCP03 1.1.2 Public Release §6.2.6 instead requires
+-    ///     the off-card entity to advance the counter without encryption when command data is absent.
++    ///     empty input produces an encrypted padding block. When C-DECRYPTION and C-MAC are both required,
++    ///     SCP03 1.1.2 Public Release §6.2.6 instead requires the off-card entity to advance the counter without
++    ///     encryption when command data is absent. Core's SCP03 initializer selects these protections in 0x33.
+     /// </remarks>
+     /// <returns>The ciphertext. The caller owns it and must zero it after transmission.</returns>
+     public byte[] Encrypt(ReadOnlySpan<byte> data)
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs
+@@ -121,7 +121,9 @@
+     // --- N2 (no Jira key): SCP initialization and response parsing must fail with BadResponseException ---
+ 
+     /// <summary>
+-    ///     GP Amd D §7.1.1.3: INITIALIZE UPDATE returns 10 + 3 + 8 + 8 = 29 bytes. Anything shorter is malformed.
++    ///     Checks rejection below the implementation's 29-byte INITIALIZE UPDATE minimum prefix. SCP03 1.1.2
++    ///     Public Release (March 2019), §7.1.1.6/Table 7-3 lists 10 + 3 + 8 + 8 mandatory bytes plus a three-byte
++    ///     sequence counter for pseudo-random challenge generation; 29 is not a universal exact response size.
+     /// </summary>
+     [Theory]
+     [Trait("Audit", "N2")]
+@@ -138,7 +140,8 @@
+     }
+ 
+     /// <summary>
+-    ///     GP Amd F §7.1.3: the SCP11 authenticate response is ePK.SD.ECKA (5F49) followed by the receipt (86).
++    ///     Checks the SCP11b response's first two tags: ePK.SD.ECKA (5F49), then receipt (86), as listed in
++    ///     SCP11 1.3.0.13 Public Review (August 2023), §7.7.3.1/Table 7-22. These cases do not exercise a/c setup.
+     /// </summary>
+     [Theory]
+     [Trait("Audit", "N2")]
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs
+@@ -8,8 +8,9 @@
+ 
+ /// <summary>
+ ///     Checks missing-R-MAC rejection for ordinary success responses and the initialization exception.
+-///     SCP03 1.1.2 Public Release (March 2019), §6.2.5 requires the card to protect 9000/62xx/63xx
+-///     except EXTERNAL AUTHENTICATE, and to return other statuses without protection. These synthetic
++///     With R-MAC selected, as in Core's SCP03 level 0x33, SCP03 1.1.2 Public Release (March 2019), §6.2.5
++///     requires the card to protect 9000/62xx/63xx except EXTERNAL AUTHENTICATE. Other statuses return status
++///     only without protection; R-MAC is optional across SCP03 security levels. These synthetic
+ ///     cases do not establish device/profile interoperability or phase-gating of a later raw INS 82 call.
+ /// </summary>
+ [Collection(CryptographyProvidersCollection.Name)]
+--- a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs
+@@ -170,14 +170,14 @@
+         var keyParams = new Scp03KeyParameters(new KeyReference(0x01, 0xFF), staticKeys);
+ 
+         // Act & Assert
+-        // Should proceed to initialization (will fail, but not due to firmware check)
+-        var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
+-            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
+-
+-        // Should NOT be NotSupportedException about firmware requirements
++        // Null firmware fails ScpInitializer's configured-processor admission before the support branch.
++        // This broad exception assertion does not establish that the branch or handshake was reached.
++        var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
++            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
++
++        // The conditional message assertion below does not require the current ArgumentException outcome.
+         if (ex is NotSupportedException notSupported)
+-            // If it IS NotSupportedException, it should be from device (CLA_NOT_SUPPORTED),
+-            // not from firmware version check
++            // For a NotSupportedException, it only excludes this firmware threshold from the message.
+             Assert.DoesNotContain("5.3.0", notSupported.Message);
+     }
+ 
+@@ -213,11 +213,13 @@
+             publicKey
+         );
+ 
+-        // Act & Assert
+-        var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
+-            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
+-
+-        // Should NOT be NotSupportedException about firmware requirements
++        // Null firmware fails configured-processor admission before the SCP11 support branch or handshake.
++        // The broad exception assertion below does not require that current ArgumentException outcome.
++        // Act & Assert
++        var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
++            await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
++
++        // This conditional check only excludes the firmware threshold if the exception has this type.
+         if (ex is NotSupportedException notSupported) Assert.DoesNotContain("5.7.2", notSupported.Message);
+     }
+-}
+\ No newline at end of file
++}

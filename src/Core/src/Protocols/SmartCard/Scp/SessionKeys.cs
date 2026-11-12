@@ -19,6 +19,10 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 /// <summary>
 ///     Holds the session keys derived for an SCP session.
 /// </summary>
+/// <remarks>
+///     Construction clones the inputs. Dispose zeroes and releases the owned arrays, so subsequent property
+///     reads are empty and previously obtained views refer to zeroed storage. Input buffers have separate owners.
+/// </remarks>
 internal sealed class SessionKeys : IDisposable
 {
     private byte[]? _dek;
@@ -73,7 +77,7 @@ internal sealed class SessionKeys : IDisposable
 
 
     /// <summary>
-    ///     Releases the resources used by this instance and securely zeroes all key material.
+    ///     Zeroes and releases this instance's owned key arrays.
     /// </summary>
     public void Dispose()
     {

@@ -1,0 +1,6 @@
+
+        ///   using (SHA1 sha1Object = CryptographyProviders.Sha1Creator())
+        ///   {
+        ///       // Use the hash object within this disposal scope.
+        ///   }
+        /// 

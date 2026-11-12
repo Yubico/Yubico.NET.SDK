@@ -43,11 +43,12 @@ not RP registration/sign-in verification. See the README for the complete protoc
 > CTAP GetInfo on this transport.
 > FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
 > firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
-> so `Major == 0` sentinel firmware is treated as modern.
-> A grouped physical YubiKey admits one live SDK connection across all known interfaces. A second
-> session is refused with `ConnectionInUseException` until the current session disposes its owned
-> connection. CTAP2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
-> transport after a connection failure.
+> so `Major == 0` passes a permissive SDK feature policy, not a verified modern-firmware check.
+> SDK-managed opens claim the device view's known member interface IDs in this process. An overlapping
+> connection claim is refused with `ConnectionInUseException`; disjoint scoped views, direct factories
+> and other processes need separate coordination. Each connection admits one live session.
+> CTAP2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
+> transport after an opening or initialization failure.
 
 ## Architecture Overview
 
@@ -135,6 +136,19 @@ Alternatively, pass an existing supported `IConnection connection` to
 scope outside the session's. Do not append the direct factory or a one-shot GetInfo helper while another
 connection-owning session is live on the same key. SCP03 requires an authorized SmartCard key configured
 with the supplied keys; own/dispose `Scp03KeyParameters` outside the secure session scope.
+
+Serialize and fully await complete operations and helper workflows before disposal. The Core guard
+drains one admitted exchange; it does not join ClientPin's multiple exchanges, begin/next enumeration,
+blob read-modify-write, or post-exchange parsing and callbacks. Keep borrowed inputs, protocols, tokens
+and caller-owned prompts usable through their last continuation. A callback must not reenter or dispose
+the session awaiting it. Prefer async disposal, but do not treat it as a whole-workflow completion join.
+
+Detected GetInfo firmware gates USB SmartCard before an override sets effective session/protocol
+firmware. HID INIT vendor bytes and Management firmware are separate observations. Initial SmartCard
+SELECT/GetInfo precede options-based configuration; major-zero configuration selects APDU format from
+connection support before ordinary `ForceShortApdus` handling. SCP setup rebinds the backend without
+another SELECT or protected CTAP probe. Applet-selection survival and FIDO-over-SCP product acceptance
+remain device/profile qualifications; `IsAuthenticated` is not CTAP PIN/UV authorization.
 
 ### GetInfo (No User Presence Required)
 
@@ -341,8 +355,18 @@ resolution after the response is fully drained and the CTAP status is known. Sma
 equivalent in-flight signal, so `SmartCardBackend` owns both the policy request and resolution;
 MakeCredential and GetAssertion emit `PolicyRequires` immediately before the APDU unless their
 effective `UserPresence` option is `false`. Their scope is the RP ID.
-Successful response ownership transfers only after terminal resolution succeeds; a callback failure clears
-the untransferred backend response, including secret-derived extension output.
+Successful response ownership transfers only after terminal resolution succeeds. The backends clear
+their untransferred response view after resolution on failure, including secret-derived extension
+output. Cleanup is not unconditional: when a terminal callback fails alongside a primary exception,
+a logging provider throwing while that failure is logged can bypass the later clearing statement.
+APDU failures before a backend receives a response and independent report/APDU/decoded copies also
+remain outside that view's cleanup scope.
+
+Resolution uses an uncancelled token and can delay return after cancellation; a failed request callback
+disables resolution. Completed describes CTAP status before decoding, not an entire WebAuthn ceremony
+or RP acceptance. Baseline Windows HID uses synchronous report I/O without native read interruption;
+neither keep-alive cancellation nor async disposal imposes a completion deadline. Dispose and reopen
+after uncertain framing, transport or teardown state rather than promising universal reuse.
 
 Selection and Reset carry null-scope context for an authoritative HID keep-alive, but do not predict
 touch on SmartCard. Generic `SendCborRequestAsync` calls do not infer touch semantics. Bio enrollment

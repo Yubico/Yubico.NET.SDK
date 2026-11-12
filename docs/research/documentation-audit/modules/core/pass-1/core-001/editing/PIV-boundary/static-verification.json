@@ -1,0 +1,15 @@
+{
+  "product_files_changed": 13,
+  "file_dispositions": 121,
+  "outside_owner_referrals": 31,
+  "Markdown_examples_preserved": 19,
+  "XML_examples_preserved": 23,
+  "well_formed_XML_blocks_in_changed_source": 124,
+  "local_link_targets_resolve": 20,
+  "cs_noncomment_lines_exactly_preserved_ignoring_final_newline": true,
+  "all_CS_changed_lines_standalone_comments": true,
+  "git_diff_check": "PASS",
+  "OpenPGP_product_patch_and_after_hashes_unchanged": true,
+  "build_test_formatter_crypto_native_device": "NOT RUN",
+  "independent_review_compiler_binding_runtime": "PENDING; no credit claimed"
+}

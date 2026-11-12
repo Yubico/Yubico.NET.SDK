@@ -1,0 +1,67 @@
+{
+  "schema":"core-001-SHARED-architecture-map-closeout-independent-review-1",
+  "verdict":"PASS",
+  "scope":"PF02 exact five diagram-evidence symbol additions plus bounded L3 SCP/L4 lifecycle teaching prose; separate from sampling-final-guide",
+  "worktree":"/home/rupicola/Code/y/yubikit-core-docs-edit-guides",
+  "accepted_patch_sha256":"27a8d85cda33ec95f3e309a8d1d5665ec9f3cd6403d3a75acdf501aebae31c33",
+  "accepted_paths":[
+    {"path":"docs/architecture/sdk-architecture-map.yml","before_sha256":"6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852","after_sha256":"5e1f2107e05ec7c9e13de1b922d9ea08f8cd0adebe0e34443f93aeaf44005b21"},
+    {"path":"docs/architecture/sdk-architecture-diagrams.md","before_sha256":"b20a8bcd6a77d4d21413852e57a91a166e56b5b1f950ffa4f028ff57a881a04c","after_sha256":"71c78c9d5dcfbc921873320552654d9449952d4b135573a25262683692061359"}
+  ],
+  "authorization":{
+    "path":"/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/triage/final/reconciliation-3/coordinator-adjudication.md",
+    "sha256":"27469a042650ef9d2d910603709d545abadc37b222ab80feef466b42699b0c77",
+    "lines":[24,32],
+    "limit":"Explicit source-backed evidence-map metadata/prose assignment, preserving useful anchors/Mermaid/images; no SDK runtime/configuration/API/test/device permission"
+  },
+  "input_sha256":{
+    "report.md":"ab032b64e54ffd7fde429ed79df9195630a965e8c243aae25cccc498012def91",
+    "before-identities.json":"0df3f81b2f9ce3e1bc70cd74e6ace550fcb74efaf704a25bfda5bcf1849b1a29",
+    "product-before-identities.json":"f91917b1405c1f8afbbb0c60376fc8a42d80087b5de2f5a11af4fc2bf913b301",
+    "preserved-record-identities.json":"ccb0a7c0eb9ece31bc226a1cccacd2241e42918433e6a0b916d885712c98fa45",
+    "image-before-identities.json":"406c6a198eb4fb5f2e36409ae20460ac5b8b82a4b69a40bc0fc8c474b22ace10",
+    "source-evidence.json":"38c623ec948ef9b0acc45e71e2e4928bf1baa01420946024cd9a8439991e6982",
+    "product.patch":"27a8d85cda33ec95f3e309a8d1d5665ec9f3cd6403d3a75acdf501aebae31c33",
+    "changed-path-sha256.json":"ba79134aad63ae5deeffeca0574ec272ad96ba3c547a7cba69b1950ceafbc643",
+    "example-bodies.json":"b38275e7436e02b490f5bc44dec96d9e4b3e5a9caeab570acf60ba80dcf777ff",
+    "map-checker.log":"c302f4b5c27c3b30bea950b3f418452e3d614954f8b11b513a13d7d089c9ae20",
+    "verification.json":"db0ab91a47ba1381018c28157e3b3db13d35f99360057a1af23878e2d7ba0fe8",
+    "output-identities.json":"42a8ade753dda4c785be7f2017d0da4f47253701e10616ecec1589acdb88e590"
+  },
+  "added_symbols":[
+    {"diagram":"L2-layered-stack","name":"Ctap2SessionRequestEncoding","path":"src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs"},
+    {"diagram":"L2-layered-stack","name":"MakeCredentialResponse","path":"src/Ctap2/src/Credentials/MakeCredentialResponse.cs"},
+    {"diagram":"L2-layered-stack","name":"GetAssertionResponse","path":"src/Ctap2/src/Credentials/GetAssertionResponse.cs"},
+    {"diagram":"L3b-fido2-ctap-sequence","name":"Ctap2SessionRequestEncoding","path":"src/Ctap2/src/Cbor/Ctap2SessionRequestEncoding.cs"},
+    {"diagram":"L3b-fido2-ctap-sequence","name":"MakeCredentialResponse","path":"src/Ctap2/src/Credentials/MakeCredentialResponse.cs"}
+  ],
+  "source_acceptance_limit":"Actual diagram/teaching context, declarations and caller/request/response paths checked separately from schema. SCP03 selected 0x33 checked against actual initializer and retained release 1.1.2 §7.1.2.3/Table7-6; internal INS82 exemption is described, not authorized or repaired. No whole protocol/final/vendor conformance inferred.",
+  "checks":{
+    "primary_current_before_hashes_match":2,
+    "exact_added_symbol_lines":5,
+    "map_before_bytes_recovered_by_removing_only_added_lines":true,
+    "builder_parser_anchors_preserved":true,
+    "actual_after_matches_captures":true,
+    "reconstructed_diff_equals_patch":true,
+    "prior_artifacts_preserved":80,
+    "other_predecessor_guide_paths_unchanged":25,
+    "complete_unchanged_fences":8,
+    "unchanged_mermaid_fences":7,
+    "unchanged_other_fences":1,
+    "image_manifest_files_unchanged":15,
+    "source_evidence_entries_verified":10,
+    "map_checker_command":"bash scripts/architecture/check-architecture-map.sh",
+    "map_checker_readonly_inspected":true,
+    "map_checker_exit":0,
+    "map_checker_output":"architecture map OK: 6 diagram entries, all evidence + project edges resolve; coverage matches 6 diagram heading level(s).",
+    "git_diff_check_exit":0,
+    "focused_reverse_check_exit":0,
+    "index_unchanged":true
+  },
+  "separate_packet_patch_sha256":"2e5a12d5c057f999a67c46a89836b899f29615943b278ee09a1d120d4eda30f9",
+  "preserved_history":"Prior acceptance/editor/review/sampling/patch identities remain immutable predecessors; this verdict does not relabel an old full-26-path patch",
+  "unrun":["SDK build/tests/compiler/formatter","npm/render/image regeneration","protocol cryptography/provider/native/device execution"],
+  "not_granted":["Operational configuration change","Clean-sampling credit","Checker-as-semantic-conformance proof","Whole architecture or platform re-audit"],
+  "remaining_gates":["Separate packet integration/reconciliation","Existing final validation and publication gates","Core Pass-1 precise deferred-owner handoff, then stop"],
+  "reviewer_writes_only":["editing/SHARED/architecture-map-closeout/review.md","editing/SHARED/architecture-map-closeout/review-identities.json"]
+}

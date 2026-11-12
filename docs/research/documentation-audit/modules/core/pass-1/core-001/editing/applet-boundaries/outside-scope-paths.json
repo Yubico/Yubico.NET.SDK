@@ -1,0 +1,799 @@
+[
+  {
+    "module": "Management",
+    "path": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "c626ed23567cc748c694a9d092f781d6a6a1f2f724748a60307febd1bf125d47",
+    "after_worktree_sha256": "78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373",
+    "before_worktree_source_ledger_sha256": "78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "source_sha256": "78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373",
+      "pinned_git_blob": "ee0dcfe9cd73c4f42e6c261d965d5388a728b5a6",
+      "pinned_bytes_sha256": "c626ed23567cc748c694a9d092f781d6a6a1f2f724748a60307febd1bf125d47",
+      "normalized_pin_equal": true,
+      "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+      "unit_ids": [
+        "core-001:unit:71595eb5336ba181"
+      ],
+      "status": "READ-CLEAN",
+      "candidates": [],
+      "observation": "Actual Management/Core/Cli.Shared/Cli.Commands references plus Spectre PackageReference and explicit HintPath. Reference resolution/analyzer participation requires later coordinator compilation.",
+      "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+    }
+  },
+  {
+    "module": "Management",
+    "path": "src/Management/src/PublicAPI.Shipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "after_worktree_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "before_worktree_source_ledger_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Management/src/PublicAPI.Shipped.txt",
+      "source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+      "pinned_bytes_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "normalized_pin_equal": true,
+      "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+      "unit_ids": [],
+      "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+      "candidates": [],
+      "observation": "Context exclusion: nullable directive only, no active shipped declarations or assigned primary IDs.",
+      "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+    }
+  },
+  {
+    "module": "Management",
+    "path": "src/Management/src/PublicAPI.Unshipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+    "after_worktree_sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+    "before_worktree_source_ledger_sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Management/src/PublicAPI.Unshipped.txt",
+      "source_sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+      "pinned_git_blob": "e9fec056741b5f28013fc42521cd87ab861de428",
+      "pinned_bytes_sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+      "normalized_pin_equal": true,
+      "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+      "unit_ids": [
+        "core-001:unit:10bb0a92e252320f"
+      ],
+      "status": "READ-CLEAN",
+      "candidates": [],
+      "observation": "Snapshot matches inspected factories/operations, separate config/session options and Core-owned metadata. Compiler binding remains VALID-NOT-CHECKED.",
+      "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+    }
+  },
+  {
+    "module": "Management",
+    "path": "src/Management/src/Yubico.YubiKit.Management.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "17087622b08053928597ba8b6a7b256ec3a49e2edf2ae83941542ff4bcdd8b3d",
+    "after_worktree_sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad",
+    "before_worktree_source_ledger_sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "source_sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad",
+      "pinned_git_blob": "c48991d3674c0b9e66e56def45d12d3841d912ec",
+      "pinned_bytes_sha256": "17087622b08053928597ba8b6a7b256ec3a49e2edf2ae83941542ff4bcdd8b3d",
+      "normalized_pin_equal": true,
+      "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+      "unit_ids": [
+        "core-001:unit:6cb194bebfaebec7"
+      ],
+      "status": "READ-CLEAN",
+      "candidates": [],
+      "observation": "Shipping Management references Core only and opts into shared AOT policy; IVT enables backend fakes. Static configuration supplies no compile/publish result.",
+      "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+    }
+  },
+  {
+    "module": "Management",
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "6e089bc92a64ffd7524cd2e2573f814e895ee89f3a5e29b4a84e3549540954e2",
+    "after_worktree_sha256": "625b84748e3f82754db5567822d71e7a313dd6ab0403b8439d30412ddfd177cb",
+    "before_worktree_source_ledger_sha256": "625b84748e3f82754db5567822d71e7a313dd6ab0403b8439d30412ddfd177cb",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "source_sha256": "625b84748e3f82754db5567822d71e7a313dd6ab0403b8439d30412ddfd177cb",
+      "pinned_git_blob": "2ce03d2d9bb9adfa98bcf617e1f7e3e1ffe484c0",
+      "pinned_bytes_sha256": "6e089bc92a64ffd7524cd2e2573f814e895ee89f3a5e29b4a84e3549540954e2",
+      "normalized_pin_equal": true,
+      "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+      "unit_ids": [
+        "core-001:unit:e789b93d00ad745f"
+      ],
+      "status": "READ-CLEAN",
+      "candidates": [],
+      "observation": "xUnit2/VSTest references Management/Core/Tests.Shared; no blanket project-run safety inferred from fake readiness cases. Build/runner/native lanes remain separate.",
+      "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+    }
+  },
+  {
+    "module": "Management",
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "dee3ce7dc31f88a33fa71c6821343cbb5c28b942c695e520b71afbfd99ade59c",
+    "after_worktree_sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156",
+    "before_worktree_source_ledger_sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+      "source_sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156",
+      "pinned_git_blob": "8a5b78f4f190f52d01ecdfbdcf4701a1a4e1fb5b",
+      "pinned_bytes_sha256": "dee3ce7dc31f88a33fa71c6821343cbb5c28b942c695e520b71afbfd99ade59c",
+      "normalized_pin_equal": true,
+      "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+      "unit_ids": [
+        "core-001:unit:b1c4e562962c539a"
+      ],
+      "status": "READ-CLEAN",
+      "candidates": [],
+      "observation": "net10 executable xUnit3/MTP references Management with inherited compiler policy. No restore/evaluation/runner execution.",
+      "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+    }
+  },
+  {
+    "module": "SecurityDomain",
+    "path": "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "after_worktree_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "before_worktree_source_ledger_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "pinned_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": true,
+      "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+      "note": "Read whole nullable-enable empty shipped API snapshot. Supplemental bookkeeping only, not a substantive clean nominee or evidence of compilation.",
+      "candidates": [],
+      "assigned_unit_ids": [],
+      "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+      "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+      "supplemental": true
+    }
+  },
+  {
+    "module": "SecurityDomain",
+    "path": "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+    "after_worktree_sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+    "before_worktree_source_ledger_sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+      "sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+      "pinned_sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+      "git_blob": "ee78cabaed48de322b73f2c59d1fe2b38142bd5a",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": true,
+      "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+      "note": "Read complete snapshot, reconcile session/interface operations, factory options, extension/static representations, feature descriptors, data records and exception constructors/status against source. Compiler-generated clone/equality/accessor entries retained as API context, not invented authored prose or compiled binding proof.",
+      "candidates": [],
+      "assigned_unit_ids": [
+        "core-001:unit:c45e0e1e5111737b"
+      ],
+      "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+      "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+      "supplemental": false
+    }
+  },
+  {
+    "module": "SecurityDomain",
+    "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "2b8f192c64eca7bdbceec5ae15fd14cfdf4596f2b18598aef62d65ccbeb58555",
+    "after_worktree_sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0",
+    "before_worktree_source_ledger_sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0",
+      "pinned_sha256": "2b8f192c64eca7bdbceec5ae15fd14cfdf4596f2b18598aef62d65ccbeb58555",
+      "git_blob": "93238510d9cb920afd4fb0a29bf06c6d1b6925b0",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": false,
+      "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+      "note": "Read full project. Assembly/root namespace, module package description/tags, shared SDK/AOT opt-in and only Core project reference. No direct platform loader or test execution. Keep packaging unchanged.",
+      "candidates": [],
+      "assigned_unit_ids": [
+        "core-001:unit:46c50ef1b1611364"
+      ],
+      "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+      "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+      "supplemental": false
+    }
+  },
+  {
+    "module": "SecurityDomain",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "8ecc6ca0634df5ffe45f11b7c42fce5f2dd958400780004f61e9b48cd24bae14",
+    "after_worktree_sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909",
+    "before_worktree_source_ledger_sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+      "sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909",
+      "pinned_sha256": "8ecc6ca0634df5ffe45f11b7c42fce5f2dd958400780004f61e9b48cd24bae14",
+      "git_blob": "be4b9649866500ff0739935f586b94f761cec7af",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": false,
+      "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+      "note": "Read full project: net10 xUnit2/TestSdk/skippable/traditional runner, shared/Core/SD refs, runner config copy. No new runtime/runner claim; retain configuration context.",
+      "candidates": [],
+      "assigned_unit_ids": [
+        "core-001:unit:487eb5020839d77e"
+      ],
+      "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+      "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+      "supplemental": false
+    }
+  },
+  {
+    "module": "SecurityDomain",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "e5e1d2ed2db0b55f1d113f68193dec7372fdb94c565c92bee63aad076ac94385",
+    "after_worktree_sha256": "af1a9564844531b0dd815462cc1005f46162eff27d7c77e15bb29e1a8a8f59a9",
+    "before_worktree_source_ledger_sha256": "af1a9564844531b0dd815462cc1005f46162eff27d7c77e15bb29e1a8a8f59a9",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+      "sha256": "af1a9564844531b0dd815462cc1005f46162eff27d7c77e15bb29e1a8a8f59a9",
+      "pinned_sha256": "e5e1d2ed2db0b55f1d113f68193dec7372fdb94c565c92bee63aad076ac94385",
+      "git_blob": "3776da0d590d421cdc0fc973887b76e04de6e0f7",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": false,
+      "read_scope": "COMPLETE-FILE, meaningful assertions/helpers/cleanup and full examples",
+      "note": "Read full net10 executable xUnit3/MTP project, NSubstitute/logging DI refs and shared SD/test refs. No compiler/analyzer execution inferred; retain configuration context.",
+      "candidates": [],
+      "assigned_unit_ids": [
+        "core-001:unit:35649950e5de8147"
+      ],
+      "candidate_associated_unchanged_reason": "Complete read found no additional boundary documentation correction in this file outside expressly retained dependency context; preserve current bytes.",
+      "handoff_owner": "Security Domain fresh editor/test owner after coordinator triage; Core mechanisms remain B5/B6/C",
+      "supplemental": false
+    }
+  },
+  {
+    "module": "Oath",
+    "path": "src/Oath/examples/OathTool/OathTool.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "934f312303ae90741b13625ecdee69a2c725350fcec53bc81e96a4832fddf05d",
+    "after_worktree_sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c",
+    "before_worktree_source_ledger_sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Oath/examples/OathTool/OathTool.csproj",
+      "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "edd9cd7afd25aa27e5f9d1d827e3260bd9d03023d33ce9ac5eb9e2eefd81f82c",
+      "pinned_raw_sha256": "934f312303ae90741b13625ecdee69a2c725350fcec53bc81e96a4832fddf05d",
+      "normalized_sha256": "934f312303ae90741b13625ecdee69a2c725350fcec53bc81e96a4832fddf05d",
+      "pinned_git_blob": "092331bc083fe65cd9007164085ffa313bb9bb58",
+      "pin_equality": "BOM-CRLF-NORMALIZED-EQUAL",
+      "lines": 25,
+      "full_file_read": true,
+      "credit": "assigned selected units only; other units are related context",
+      "candidates": [],
+      "observation": "Complete references include Oath/Core/Management/Cli.Shared/Cli.Commands; example links production services and no implicit test project. IsPackable false; analyzer suppression is existing source metadata, not changed or validated by compilation.",
+      "product_disposition": "UNCHANGED",
+      "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+    }
+  },
+  {
+    "module": "Oath",
+    "path": "src/Oath/src/PublicAPI.Shipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "after_worktree_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "before_worktree_source_ledger_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Oath/src/PublicAPI.Shipped.txt",
+      "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "pinned_raw_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "normalized_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+      "pin_equality": "RAW-EQUAL",
+      "lines": 1,
+      "full_file_read": true,
+      "credit": "assigned selected units only; other units are related context",
+      "candidates": [],
+      "observation": "Complete one-line nullable marker read; no shipped API claims to semantically accept. Retain unchanged administrative context, outside clean semantic sampling.",
+      "product_disposition": "UNCHANGED",
+      "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+    }
+  },
+  {
+    "module": "Oath",
+    "path": "src/Oath/src/PublicAPI.Unshipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e",
+    "after_worktree_sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e",
+    "before_worktree_source_ledger_sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Oath/src/PublicAPI.Unshipped.txt",
+      "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e",
+      "pinned_raw_sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e",
+      "normalized_sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e",
+      "pinned_git_blob": "6d45c24f5565a08b1d1fec6b420a84e7e38e0946",
+      "pin_equality": "RAW-EQUAL",
+      "lines": 121,
+      "full_file_read": true,
+      "credit": "assigned selected units only; other units are related context",
+      "candidates": [],
+      "observation": "Complete121-line snapshot reconciled with read OATH source: inherited session members are on Core, concrete access-key/calculation signatures match, extension entries include one-shot options and final token. Reflection/analyzer/compiler binding remains unrun. Preserve every API byte.",
+      "product_disposition": "UNCHANGED",
+      "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+    }
+  },
+  {
+    "module": "Oath",
+    "path": "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "91930b2a248c15da3eee3149ffb31c42ff851fff13d7d64efbc487ae0aa4ab2a",
+    "after_worktree_sha256": "c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110",
+    "before_worktree_source_ledger_sha256": "c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+      "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "c435652e278028500459d4dc6a0db1472c78b811269eac65725628ceaa4b3110",
+      "pinned_raw_sha256": "91930b2a248c15da3eee3149ffb31c42ff851fff13d7d64efbc487ae0aa4ab2a",
+      "normalized_sha256": "91930b2a248c15da3eee3149ffb31c42ff851fff13d7d64efbc487ae0aa4ab2a",
+      "pinned_git_blob": "334c13ca6650e0805873917aff5b4a89f797e34e",
+      "pin_equality": "BOM-CRLF-NORMALIZED-EQUAL",
+      "lines": 24,
+      "full_file_read": true,
+      "credit": "assigned selected units only; other units are related context",
+      "candidates": [],
+      "observation": "Complete module reference/InternalsVisibleTo/package metadata read. Only shipping dependency is Core; protocol friend access is not a consumer extension API. AOT opt-in is analyzer metadata, not actual native execution.",
+      "product_disposition": "UNCHANGED",
+      "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+    }
+  },
+  {
+    "module": "Oath",
+    "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "13966e6cdf6fc88bc1b20e4d4b09862448b25e98bcf00ad5cb7238172999b0f6",
+    "after_worktree_sha256": "2091f6c788f5b741309f917925dd73a6955beeed60e3745197b1d80678046556",
+    "before_worktree_source_ledger_sha256": "2091f6c788f5b741309f917925dd73a6955beeed60e3745197b1d80678046556",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj",
+      "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "2091f6c788f5b741309f917925dd73a6955beeed60e3745197b1d80678046556",
+      "pinned_raw_sha256": "13966e6cdf6fc88bc1b20e4d4b09862448b25e98bcf00ad5cb7238172999b0f6",
+      "normalized_sha256": "13966e6cdf6fc88bc1b20e4d4b09862448b25e98bcf00ad5cb7238172999b0f6",
+      "pinned_git_blob": "d11fb037f48f01e36fa1024cd59e367cf1379f28",
+      "pin_equality": "BOM-CRLF-NORMALIZED-EQUAL",
+      "lines": 42,
+      "full_file_read": true,
+      "credit": "assigned selected units only; other units are related context",
+      "candidates": [],
+      "observation": "Complete xUnitv2 project/references/config read. Offline lifecycle regressions live here among hardware cases. Runner config disables parallel hardware execution; no inferred trait-only authorization/native execution.",
+      "product_disposition": "UNCHANGED",
+      "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+    }
+  },
+  {
+    "module": "Oath",
+    "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+    "after_worktree_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+    "before_worktree_source_ledger_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+      "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "c56bfd22622299fd638159f5aa9e21b4784412157c8afc937d160d14df38fc18",
+      "pinned_raw_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+      "normalized_sha256": "4176a8a2907526b474c9bcd691d362ea56b2db2e7879fb1a25ad0850f568351e",
+      "pinned_git_blob": "e40ac1245673ad63316c041747e68ba40d6fd739",
+      "pin_equality": "BOM-CRLF-NORMALIZED-EQUAL",
+      "lines": 37,
+      "full_file_read": true,
+      "credit": "assigned selected units only; other units are related context",
+      "candidates": [
+        "CORE-OATH-X003"
+      ],
+      "observation": "Complete xUnitv3 runner/project links read. Links SecurityDomain handshake fake source, not a cryptographic conformance library; RFC4493 primitive tests are scoped. References full OathTool and Tests.Shared; no compiler/analyzer execution credited.",
+      "product_disposition": "UNCHANGED",
+      "future_editor_review": "PENDING; retain or edit exact local passages after triage"
+    }
+  },
+  {
+    "module": "YubiOtp",
+    "path": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "49e7bb694a09069068a39c17184e2374bf44bd597fdbab66fe0ec85e3dfee246",
+    "after_worktree_sha256": "1085ebedfad2fc0669bab7c600a4ac962cec36d3c237e9f0ff1801ee6f936028",
+    "before_worktree_source_ledger_sha256": "1085ebedfad2fc0669bab7c600a4ac962cec36d3c237e9f0ff1801ee6f936028",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiOtp/examples/OtpTool/OtpTool.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "raw_sha256": "1085ebedfad2fc0669bab7c600a4ac962cec36d3c237e9f0ff1801ee6f936028",
+      "pinned_git_blob": "64291654cb613d453a28f28164e4f154f9e3af08",
+      "pinned_content_sha256": "49e7bb694a09069068a39c17184e2374bf44bd597fdbab66fe0ec85e3dfee246",
+      "normalized_sha256": "49e7bb694a09069068a39c17184e2374bf44bd597fdbab66fe0ec85e3dfee246",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": false,
+      "read_scope": "complete file, including full callers/helpers/assertions and enclosing cleanup",
+      "unit_ids": [
+        "core-001:unit:e779f9d6ee196a1e"
+      ],
+      "candidates": [],
+      "outcome": "READ-CLEAN",
+      "semantic_observation": "The executable references YubiOtp, Core, Management, Cli.Shared and Cli.Commands plus Hosting/Spectre packages. It is not packable and suppresses only the stated example analyzer. Source membership/compile and Native AOT execution remain unrun; a project reference to the fixed unified CLI does not make standalone StaticCommand call that implementation.",
+      "unchanged_reason": "Retain the complete scoped contract/assertion context for the authored reason; no boundary correction selected. Future changes reopen the mapped owners.",
+      "review_status": "PENDING-INDEPENDENT-REVIEW",
+      "runtime_status": "NOT-EXECUTED"
+    }
+  },
+  {
+    "module": "YubiOtp",
+    "path": "src/YubiOtp/src/PublicAPI.Shipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "after_worktree_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "before_worktree_source_ledger_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiOtp/src/PublicAPI.Shipped.txt",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "raw_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+      "pinned_content_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "normalized_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": true,
+      "read_scope": "complete file, including full callers/helpers/assertions and enclosing cleanup",
+      "unit_ids": [],
+      "candidates": [],
+      "outcome": "READ-CLEAN",
+      "semantic_observation": "The nullable directive is the whole shipped snapshot. It supplies no semantic unit in the exact packet, but remains an explicit unchanged disposition path. No API update is authorized.",
+      "unchanged_reason": "Retain the complete scoped contract/assertion context for the authored reason; no boundary correction selected. Future changes reopen the mapped owners.",
+      "review_status": "PENDING-INDEPENDENT-REVIEW",
+      "runtime_status": "NOT-EXECUTED"
+    }
+  },
+  {
+    "module": "YubiOtp",
+    "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+    "after_worktree_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+    "before_worktree_source_ledger_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "raw_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+      "pinned_git_blob": "02b359e01bb6cfc338910ddb3507541400e3e86b",
+      "pinned_content_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+      "normalized_sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": true,
+      "read_scope": "complete file, including full callers/helpers/assertions and enclosing cleanup",
+      "unit_ids": [
+        "core-001:unit:73de73d0945fd38d"
+      ],
+      "candidates": [
+        "CORE-OTP-X008"
+      ],
+      "outcome": "READ-CANDIDATE-CONTEXT",
+      "semantic_observation": "Complete snapshot reconciles typed configurations, session operations, extension block/static signatures, slot/flag carriers and protected base members. There is no typed YubiOTP FIPS-mode query, legacy device-config or device-info method. Enum alias spelling in mask output reflects equal numeric bits, not extra update capabilities. Compiler binding remains unrun.",
+      "unchanged_reason": "Investigation-only assignment preserves product bytes; localized candidate facets await triage, a fresh editor and independent review.",
+      "review_status": "PENDING-INDEPENDENT-REVIEW",
+      "runtime_status": "NOT-EXECUTED"
+    }
+  },
+  {
+    "module": "YubiOtp",
+    "path": "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "08c2a8f58a9263934024bcc29f09415cad371cff989e6c4afc853d55c448e220",
+    "after_worktree_sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc",
+    "before_worktree_source_ledger_sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "raw_sha256": "4f82a4e302f8a51328994c39b005add84706e42cadfe8ffdac7ddc35394554cc",
+      "pinned_git_blob": "e0f011ec61dcace4bea37bb06dff0f264bd789bf",
+      "pinned_content_sha256": "08c2a8f58a9263934024bcc29f09415cad371cff989e6c4afc853d55c448e220",
+      "normalized_sha256": "08c2a8f58a9263934024bcc29f09415cad371cff989e6c4afc853d55c448e220",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": false,
+      "read_scope": "complete file, including full callers/helpers/assertions and enclosing cleanup",
+      "unit_ids": [
+        "core-001:unit:0dfd1625b3b64ef7"
+      ],
+      "candidates": [],
+      "outcome": "READ-CLEAN",
+      "semantic_observation": "Shipping module references Core, marks SDK/AOT analyzer participation, exposes internals only to its unit assembly and supplies descriptive package metadata. No Management dependency or relocated FIPS/legacy surface is hidden in this project. Compilation/publish qualification remains separate.",
+      "unchanged_reason": "Retain the complete scoped contract/assertion context for the authored reason; no boundary correction selected. Future changes reopen the mapped owners.",
+      "review_status": "PENDING-INDEPENDENT-REVIEW",
+      "runtime_status": "NOT-EXECUTED"
+    }
+  },
+  {
+    "module": "YubiOtp",
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "e9262663cf3566ad9f1239a62a77721ae3571b46ed6c095c6eb43d7dc7eabd8d",
+    "after_worktree_sha256": "efafa99712b038addecf307481addcd68351dfe9b2822da3f0bf95f6ade52317",
+    "before_worktree_source_ledger_sha256": "efafa99712b038addecf307481addcd68351dfe9b2822da3f0bf95f6ade52317",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "raw_sha256": "efafa99712b038addecf307481addcd68351dfe9b2822da3f0bf95f6ade52317",
+      "pinned_git_blob": "10da9e47650eaf1c9532fd64b90421fe453e1f90",
+      "pinned_content_sha256": "e9262663cf3566ad9f1239a62a77721ae3571b46ed6c095c6eb43d7dc7eabd8d",
+      "normalized_sha256": "e9262663cf3566ad9f1239a62a77721ae3571b46ed6c095c6eb43d7dc7eabd8d",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": false,
+      "read_scope": "complete file, including full callers/helpers/assertions and enclosing cleanup",
+      "unit_ids": [
+        "core-001:unit:dd542cb4d5374c67"
+      ],
+      "candidates": [],
+      "outcome": "READ-CLEAN",
+      "semantic_observation": "The xUnit v2/VSTest integration project references module/Core/Tests.Shared and direct SkippableFact for runtime copy. Runner config disables hardware parallelism; attribute filtering still binds one matching fixture and does not pin operation transport by itself. Project read supplies no execution.",
+      "unchanged_reason": "Retain the complete scoped contract/assertion context for the authored reason; no boundary correction selected. Future changes reopen the mapped owners.",
+      "review_status": "PENDING-INDEPENDENT-REVIEW",
+      "runtime_status": "NOT-EXECUTED"
+    }
+  },
+  {
+    "module": "YubiOtp",
+    "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "94feaec796550d88571fca0b825fb808987093a551ea241256f7a8cb481c54bd",
+    "after_worktree_sha256": "c80a84f2acd59f0d1c0580fd2c1d597e4a912101da65121b871a3d4584792cc3",
+    "before_worktree_source_ledger_sha256": "c80a84f2acd59f0d1c0580fd2c1d597e4a912101da65121b871a3d4584792cc3",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "raw_sha256": "c80a84f2acd59f0d1c0580fd2c1d597e4a912101da65121b871a3d4584792cc3",
+      "pinned_git_blob": "4b8cd9f53845785f26f142bf5f8d7f759f190c16",
+      "pinned_content_sha256": "94feaec796550d88571fca0b825fb808987093a551ea241256f7a8cb481c54bd",
+      "normalized_sha256": "94feaec796550d88571fca0b825fb808987093a551ea241256f7a8cb481c54bd",
+      "normalized_pin_equal": true,
+      "raw_pin_equal": false,
+      "read_scope": "complete file, including full callers/helpers/assertions and enclosing cleanup",
+      "unit_ids": [
+        "core-001:unit:344fabd776dbe65f"
+      ],
+      "candidates": [],
+      "outcome": "READ-CLEAN",
+      "semantic_observation": "The net10 executable uses xUnit v3 Microsoft.Testing.Platform, NSubstitute and only the module project reference, with internals granted by shipping project. This is distinct from integration v2 infrastructure. No runner/build command was invoked.",
+      "unchanged_reason": "Retain the complete scoped contract/assertion context for the authored reason; no boundary correction selected. Future changes reopen the mapped owners.",
+      "review_status": "PENDING-INDEPENDENT-REVIEW",
+      "runtime_status": "NOT-EXECUTED"
+    }
+  },
+  {
+    "module": "YubiHsm",
+    "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+    "after_worktree_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+    "before_worktree_source_ledger_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "46e9c570d09ecc93455761f0dd8e388933376439db6d9e2c339e509abb5e53ed",
+      "pinned_git_blob": "23c9c8dc4304e39910ee393a23a7e27fb22431ab",
+      "pinned_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+      "normalized_lf_sha256": "75fd54633d84b2824818afd75a35e025046a1a4fbbc126190aae8aafbde1f16b",
+      "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+      "line_count": 26,
+      "read_status": "READ-COMPLETE",
+      "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+      "candidate_ids": [
+        "CORE-HSM-X007"
+      ],
+      "authored_context": "Actual HSM/Core/Management/Cli.Shared/Cli.Commands references and Spectre/Hosting package participation. Compilation needs full project/helper context, no build conducted.",
+      "unit_ids": [
+        "core-001:unit:f2d244364ba202c5"
+      ],
+      "review_status": "INDEPENDENT-REVIEW-PENDING",
+      "validation_status": "VALID-NOT-CHECKED"
+    }
+  },
+  {
+    "module": "YubiHsm",
+    "path": "src/YubiHsm/src/PublicAPI.Shipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "after_worktree_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "before_worktree_source_ledger_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiHsm/src/PublicAPI.Shipped.txt",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+      "pinned_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "normalized_lf_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+      "line_count": 1,
+      "read_status": "READ-COMPLETE",
+      "outcome": "UNCHANGED-RETAIN",
+      "candidate_ids": [],
+      "authored_context": "Nullable header only; no shipped signatures to semantically disposition. Preserve exact file, no API edit.",
+      "unit_ids": [],
+      "review_status": "INDEPENDENT-REVIEW-PENDING",
+      "validation_status": "VALID-NOT-CHECKED"
+    }
+  },
+  {
+    "module": "YubiHsm",
+    "path": "src/YubiHsm/src/PublicAPI.Unshipped.txt",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+    "after_worktree_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+    "before_worktree_source_ledger_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiHsm/src/PublicAPI.Unshipped.txt",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+      "pinned_git_blob": "b1cc1389de1251088f5f3d3a83e9f0e0407c02e8",
+      "pinned_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+      "normalized_lf_sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca",
+      "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+      "line_count": 84,
+      "read_status": "READ-COMPLETE",
+      "outcome": "UNCHANGED-RETAIN",
+      "candidate_ids": [],
+      "authored_context": "Complete 84-line snapshot reconciled with eight public types, inherited interface/session machinery and current operations/feature fields. Snapshot lists 48 parser constant, not complete wire-response universal grammar. No compiled API binding performed.",
+      "unit_ids": [
+        "core-001:unit:3543d20e17e245b9"
+      ],
+      "review_status": "INDEPENDENT-REVIEW-PENDING",
+      "validation_status": "VALID-NOT-CHECKED"
+    }
+  },
+  {
+    "module": "YubiHsm",
+    "path": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "abc45db95fa758e433c10e7fdbdef18bd61611fabafd9fcd560c079b3ceea29e",
+    "after_worktree_sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed",
+    "before_worktree_source_ledger_sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "fc6941d145a685222e011d074b91cfc57afb323b0c8638b16500cd2682d7e7ed",
+      "pinned_git_blob": "f7a631a9b6c53bde89ad62c41d1031744bec03f6",
+      "pinned_sha256": "abc45db95fa758e433c10e7fdbdef18bd61611fabafd9fcd560c079b3ceea29e",
+      "normalized_lf_sha256": "abc45db95fa758e433c10e7fdbdef18bd61611fabafd9fcd560c079b3ceea29e",
+      "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+      "line_count": 20,
+      "read_status": "READ-COMPLETE",
+      "outcome": "UNCHANGED-RETAIN",
+      "candidate_ids": [],
+      "authored_context": "Core-only shipping reference and descriptive applet-not-connector package boundary. Shared NativeAOT opt-in is analyzer/metadata participation rather than runtime qualification.",
+      "unit_ids": [
+        "core-001:unit:548d700094d3206f"
+      ],
+      "review_status": "INDEPENDENT-REVIEW-PENDING",
+      "validation_status": "VALID-NOT-CHECKED"
+    }
+  },
+  {
+    "module": "YubiHsm",
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+    "after_worktree_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+    "before_worktree_source_ledger_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "441268c2b36ebee235987cf2bf350a6640ba975aec0e752285f8fc4aa2868eb4",
+      "pinned_git_blob": "026c2a2fe4c4f81dc81a3f65600e75007b4a3c18",
+      "pinned_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+      "normalized_lf_sha256": "a7bdcbb6e472953eb7ecac1c4a76d4eb70f30a6325f7bc221a6f5cd1b7cd2a35",
+      "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+      "line_count": 42,
+      "read_status": "READ-COMPLETE",
+      "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+      "candidate_ids": [
+        "CORE-HSM-X007"
+      ],
+      "authored_context": ".NET 10, xUnit v2/traditional runner, hardware parallelism config and actual Tests.Shared/Core/HSM references. Metadata filtering and runner participation are not actual device execution.",
+      "unit_ids": [
+        "core-001:unit:38c5a121ce477d50"
+      ],
+      "review_status": "INDEPENDENT-REVIEW-PENDING",
+      "validation_status": "VALID-NOT-CHECKED"
+    }
+  },
+  {
+    "module": "YubiHsm",
+    "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+    "decision": "HOLD-OUTSIDE-EDIT-SCOPE",
+    "reason": "Outside the five-module .cs-comment/.md ownership; retain exact bytes.",
+    "before_git_HEAD_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+    "after_worktree_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+    "before_worktree_source_ledger_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+    "git_comparison": "Explicit UTF-8 BOM/CRLF normalization; raw ledger equality checked separately",
+    "original_boundary_disposition": {
+      "path": "src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj",
+      "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+      "source_sha256": "02df5ac93d5659727450e0567ba648e7a984e50ded660f270f63698455c4184b",
+      "pinned_git_blob": "20e0c7065c5537fdf565f7116d5792e676980212",
+      "pinned_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+      "normalized_lf_sha256": "0f7c2bad17e66102dbe8b1e149135172c3ad335a2006e57b2192e2279bc05fa0",
+      "pinned_equal_after_explicit_utf8_bom_crlf_normalization": true,
+      "line_count": 31,
+      "read_status": "READ-COMPLETE",
+      "outcome": "UNCHANGED-REFER-FRESH-EDITOR",
+      "candidate_ids": [
+        "CORE-HSM-X007"
+      ],
+      "authored_context": ".NET 10/xUnit v3 executable/MTP runner and actual shared/helper references; no direct traditional test SDK. Test-source inspection only.",
+      "unit_ids": [
+        "core-001:unit:2429245cbf9bcf06"
+      ],
+      "review_status": "INDEPENDENT-REVIEW-PENDING",
+      "validation_status": "VALID-NOT-CHECKED"
+    }
+  }
+]

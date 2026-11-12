@@ -1,0 +1,1473 @@
+diff --git c/src/Management/CLAUDE.md w/src/Management/CLAUDE.md
+index 2fe5acf84..80c7e0627 100644
+--- c/src/Management/CLAUDE.md
++++ w/src/Management/CLAUDE.md
+@@ -111,7 +111,8 @@ use these fields to identify Bio MPE reset eligibility.
+ 
+ ## YubiKeyTestState - Device Context
+ 
+-`YubiKeyTestState` exposes cached metadata from shared device initialization. These property reads do
++`YubiKeyTestState` exposes a separate initial live Management read from shared device initialization,
++not the Core discovery snapshot. These property reads do
+ not refresh it. The first state access can trigger lazy discovery/binding; a later configuration write
+ does not update the cache. Use an explicit session read for current persisted configuration.
+ 
+@@ -251,6 +252,8 @@ await mgmt.SetDeviceConfigAsync(
+ 
+ SCP parameters are caller-owned and borrowed for initialization. This example creates them before the
+ session so the session is disposed first, then the parameter scope disposes its owned static key arrays.
++It also assumes a caller-supplied `ProtocolConfiguration customProtocolConfig` in addition to the
++`IYubiKey yubiKey` and `CancellationToken cancellationToken` prerequisites above.
+ 
+ ```csharp
+ // Requires a SmartCard-capable key configured with the supplied SCP03 keys.
+@@ -345,7 +348,7 @@ The difference is **who manages the session lifecycle**:
+ - Low-level extension: Caller manages lifecycle (manual)
+ 
+ Direct `ManagementSession.CreateAsync(connection)` validates that `connection` is SmartCard, FIDO
+-HID, or OTP HID before the `ApplicationSession` base attaches its one-session guard. It borrows the
++HID, or OTP HID before the shared factory attaches its one-session guard. It borrows the
+ connection and never disposes it. The creator must dispose the connection with `await using`; there
+ is no session finalizer recovery; a connection's best-effort native finalizer is not a lifetime guarantee.
+ One live session per connection is allowed, and sequential reuse after
+@@ -639,7 +642,11 @@ await state.WithManagementAsync(async (mgmt, info) =>
+ 
+ `DeviceInfo` is Core's readonly record struct. Optional serials remain nullable and absent optional
+ fields can have default values. It is not a mutable session cache. Compare the fields relevant to the
+-test rather than assuming two snapshots must match every field during reconfiguration:
++test rather than assuming two snapshots must match every field during reconfiguration.
++
++Content equality does not imply deep storage independence: the current memory-backed timeout value can
++alias across record/result/list copies. Keep its ownership limitation separate from scalar snapshot replacement.
++The following example compares only serial numbers:
+ 
+ ```csharp
+ var info1 = await mgmt.GetDeviceInfoAsync();
+@@ -765,6 +772,22 @@ that every initialization exchange used SCP. A firmware override does not skip p
+ the protocol and feature checks, while `_version` retains discovered metadata for subsequent reads.
+ Non-cancellation metadata-probe failures fall back to the transport version; cancellation propagates.
+ 
++Public reads pass captured `_version` as the decoder default: it wins over tag 05, while non-final
++qualifier firmware can win again. Initial probing passes null. Neither public reads nor configuration
++writes publish a discovery snapshot. Keep this provenance beside live-I/O claims.
++
++Creation performs no protected Management command after SCP setup. The inherited authentication flag
++records setup, not lock-code authorization or ongoing channel health. The SCP11 v1.3.0.13 Public Review
++draft (August 2023), §4.3, includes a/c's first correct-MAC command in host authentication; final/vendor-profile
++qualification remains separate. Empty public reads/reset and protected continuations reach Core's
++SCP formatting/response paths, not a Management-specific
++wire policy. Local encoding cleanup does not clear all downstream copies.
++
++Await the entire public workflow before disposal; per-page guard drain leaves parsing and later pages
++outside that boundary. Windows HID's current compatibility calls are synchronous, and direct connection
++disposal during native I/O can release registration before native-reference drain. Correct scope order
++avoids that concurrent use; managed disposal alone is not proof of physical release or recovery.
++
+ Management does not forward `SessionCreationOptions.UserPresencePrompt` to its base constructor. The
+ service is unused here: this module does not retain, invoke or dispose it. Do not copy the general
+ retained-prompt contract into Management-specific ownership explanations.
+diff --git c/src/Management/README.md w/src/Management/README.md
+index b16a6dc3a..f0289e0d6 100644
+--- c/src/Management/README.md
++++ w/src/Management/README.md
+@@ -81,6 +81,12 @@ Console.WriteLine($"Configuration locked: {info.IsLocked}");
+ applications. After a configuration write, reported persisted values need not mean the active interfaces
+ have already changed.
+ 
++Each call performs device I/O, but the firmware field also uses the version captured during session
++initialization: that default takes precedence over the ordinary firmware tag, while a non-final qualifier
++can replace it. A firmware override changes session policy, not this returned value. Live reads and writes
++do not refresh `IYubiKey.CachedDeviceInfo` or a test fixture's initial snapshot. The current `DeviceInfo`
++also contains memory-backed timeout data; copying the record or a result wrapper does not clone those bytes.
++
+ The current Core decoder has two metadata limitations: FIPS capability/approval tags use the wrong bit
+ mapping, so `FipsCapabilities`, `FipsApproved` and derived filters must not be used to establish application
+ approval. `IsFips` is a separate manufacturing indicator, not an operating mode. Also, product flag bits
+@@ -202,6 +208,10 @@ If SmartCard is not exposed, session creation throws `NotSupportedException`. On
+ Passing the check does not guarantee that the device implements whole-device reset; a device rejection
+ propagates as `ApduException` rather than `NotSupportedException`.
+ 
++The current reset path does not invalidate managed readiness, refresh metadata, or perform a fresh SCP
++handshake. After reset or an uncertain outcome, end old scopes and rediscover/reopen the intended key;
++unchanged readiness/authentication flags do not establish device or channel recovery.
++
+ ## User interaction
+ 
+ Management commands do not require touch, a PIN or a PIV management key. Configuration protection uses
+@@ -214,6 +224,9 @@ Pass a `cancellationToken` to request cancellation; an admitted SmartCard
+ exchange drains before returning, and cancellation does not roll back configuration already sent. HID wait
+ cancellation has transport-specific behavior. Await operations sequentially: overlapping exchanges are
+ refused, not queued. A multi-page read contains separate exchanges; it is not one atomic public operation.
++Await the complete public task before disposal or input cleanup. On the current Windows HID path, report
++calls run synchronously and a blocked native call must return before protocol cancellation can advance.
++Disposing a connection concurrently with I/O is not a way to prove native completion or release.
+ 
+ Configuration can change how the device behaves afterwards. `DeviceFlags.TouchEject` makes the CCID smart card
+ absent until the user touches the key, affecting every SmartCard session that follows, but it only takes effect
+@@ -260,9 +273,16 @@ device does not expose throws `NotSupportedException`.
+   options object is not retained. Keep source buffers valid and unchanged until the awaited operation
+   completes, then zero owned secrets with `CryptographicOperations.ZeroMemory` in a `finally`.
+ - The session zeroes the encoded configuration buffer, lock-code copies included, after transmitting it.
++  This clears that encoding, not every downstream formatter, transport or SCP temporary.
+ - A lost lock code cannot be read back. Do not assume device reset removes it, even on Bio MPE.
+ - Never log lock codes.
+ 
++Successful SCP creation records channel setup and performs no later protected Management command inside
++the factory. `IsAuthenticated` does not authorize a configuration-lock write or monitor ongoing channel
++health. SCP11b authenticates the device, not the host. For SCP11a/c, the August 2023 **1.3.0.13 Public Review**
++draft §4.3 includes the first correct-MAC command after setup in host authentication; final SCP11 1.4 and
++the complete YubiKey profile remain unverified. Keep these actor/phase limits distinct from lock-code checks.
++
+ ## Example
+ 
+ The [ManagementTool sample](examples/ManagementTool/README.md) provides menus and read-only `info`/`config`
+diff --git c/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs w/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
+index c582db329..fddf9382a 100644
+--- c/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
++++ w/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
+@@ -38,7 +38,7 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+ 
+         var info = infoResult.DeviceInfo.Value;
+ 
+-        // Display current timeouts
++        // Display the live query's timeout view; copying DeviceInfo does not clone its timeout bytes.
+         AnsiConsole.MarkupLine("[bold]Current Timeouts[/]");
+         OutputHelpers.WriteKeyValue("Auto-Eject Timeout", info.AutoEjectTimeout > 0 ? $"{info.AutoEjectTimeout} seconds" : "Disabled (0)");
+         OutputHelpers.WriteKeyValue("Challenge-Response Timeout", info.ChallengeResponseTimeout.Length > 0 ? $"{info.ChallengeResponseTimeout.Span[0]} seconds" : "Unknown");
+@@ -113,4 +113,4 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs w/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs
+index e5eb39451..9059cc952 100644
+--- c/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs
++++ w/src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs
+@@ -29,6 +29,7 @@ public sealed record DeviceInfoResult
+     /// <summary>
+     /// Gets the device information.
+     /// </summary>
++    /// <remarks>Copies the DeviceInfo value, not its memory-backed timeout storage.</remarks>
+     public DeviceInfo? DeviceInfo { get; init; }
+ 
+     /// <summary>
+@@ -47,4 +48,4 @@ public static DeviceInfoResult Succeeded(DeviceInfo info) =>
+     /// </summary>
+     public static DeviceInfoResult Failed(string error) =>
+         new() { Success = false, ErrorMessage = error };
+-}
+\ No newline at end of file
++}
+diff --git c/src/Management/src/IManagementSession.cs w/src/Management/src/IManagementSession.cs
+index 7dcd36b45..12012a159 100644
+--- c/src/Management/src/IManagementSession.cs
++++ w/src/Management/src/IManagementSession.cs
+@@ -24,6 +24,8 @@ namespace Yubico.YubiKit.Management;
+ ///     Await each operation before starting the next. Overlapping exchanges are refused rather than queued.
+ ///     A device-information read can span several exchanges; it is not an atomic snapshot, and concurrent
+ ///     disposal does not guarantee completion of the whole read.
++///     Await the complete public task before disposing the session or clearing borrowed inputs; the
++///     Core guard drains an admitted exchange, not every page or post-exchange step in a workflow.
+ ///     Cancellation is transport-specific: SmartCard checks cancellation before admitting an exchange,
+ ///     then drains the admitted exchange without interrupting it. HID protocols have their own cancellation
+ ///     signaling during device waits. Cancellation never rolls back configuration already sent to the device.
+@@ -36,6 +38,11 @@ public interface IManagementSession : IApplicationSession
+     ///     serial number are optional and depend on the device and transport. Firmware 4.1.0 or later is
+     ///     supported; this method does not enforce that minimum before sending the request. Unsupported
+     ///     devices can instead fail during communication or response parsing.
++    ///     Later reads use the firmware captured during initialization as the decoder's default, which
++    ///     takes precedence over the ordinary firmware tag; a non-final version qualifier can replace it.
++    ///     A firmware override controls session policy, not this returned value. Neither this read nor a
++    ///     configuration write updates the device's discovery snapshot. The current DeviceInfo value
++    ///     contains memory-backed timeout data: copying it does not create independent timeout storage.
+     ///     Device, transport, and parsing errors propagate from their respective layers.
+     /// </remarks>
+     /// <param name="cancellationToken">A token requesting cancellation, subject to the transport's exchange boundaries.</param>
+@@ -65,6 +72,7 @@ public interface IManagementSession : IApplicationSession
+     ///     Lock-code memory remains caller-owned: keep it valid and unchanged until completion, then clear
+     ///     it when no longer needed, including on failure or cancellation. The session clears its encoded
+     ///     configuration buffer after the backend write completes, including failure or cancellation.
++    ///     That cleanup covers this encoding, not every formatter, transport, or secure-response copy.
+     ///     </para>
+     ///     <para>
+     ///     A requested reboot can disconnect the key; dispose stale sessions and rediscover/reopen it.
+@@ -98,6 +106,8 @@ Task SetDeviceConfigAsync(
+     ///     <see cref="Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride" /> applies.
+     ///     The SDK does not check the product family; passing the firmware check does not establish support.
+     ///     HID FIDO and HID OTP sessions are rejected without sending a reset command.
++    ///     Success does not refresh metadata, invalidate the managed session, or establish a new secure
++    ///     channel. End the old session/connection scopes and rediscover the intended key before further use.
+     /// </remarks>
+     /// <param name="cancellationToken">A token checked before exchange admission; it does not interrupt an admitted SmartCard reset or undo it.</param>
+     /// <returns>A task representing the asynchronous reset operation.</returns>
+@@ -127,4 +137,4 @@ Task SetDeviceConfigAsync(
+     ///     </code>
+     /// </example>
+     Task ResetDeviceAsync(CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/Management/src/ManagementSession.cs w/src/Management/src/ManagementSession.cs
+index d57fb7e74..e45b32e36 100644
+--- c/src/Management/src/ManagementSession.cs
++++ w/src/Management/src/ManagementSession.cs
+@@ -84,6 +84,10 @@ private static IConnection EnsureSupportedConnection(IConnection connection)
+     ///     Creation settings are not retained as an options object. SCP parameters remain caller-owned
+     ///     and borrowed through initialization. Management does not retain, invoke, or dispose the optional
+     ///     user-presence prompt. Communication, SCP, and response errors propagate from their layers.
++    ///     Successful SCP setup sets IsAuthenticated but performs no subsequent protected Management
++    ///     command during creation. That flag is setup history, not channel-health or configuration-lock
++    ///     authorization. Await complete public operations before teardown; native completion and release
++    ///     remain responsibilities of the selected connection implementation.
+     /// </remarks>
+     /// <param name="connection">An open SmartCard, FIDO HID, or OTP HID connection, retained by the caller.</param>
+     /// <param name="options">
+@@ -151,6 +155,8 @@ public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken =
+     {
+         ThrowIfDisposed();
+         var protocol = Protocol ?? throw new InvalidOperationException("Management session is not initialized.");
++        // Query current fields while retaining initialization's firmware default; non-final qualifier
++        // precedence belongs to DeviceInfo.CreateFromTlvs. This read does not publish discovery metadata.
+         return DeviceInfoReader.ReadAsync(protocol, _version, cancellationToken);
+     }
+ 
+@@ -239,4 +245,4 @@ private static IManagementBackend CreateBackend(IProtocol protocol) =>
+                 $"The protocol type {protocol.GetType().Name} is not supported by ManagementSession.")
+         };
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs w/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs
+index 4d2851c31..6132ef2bc 100644
+--- c/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs
++++ w/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs
+@@ -39,7 +39,7 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
+ public class ManagementSessionAdvancedTests
+ {
+     /// <summary>
+-    ///     Compares a fresh query with cached discovery metadata for one authorized device row.
++    ///     Compares a fresh query with the shared fixture's initial live-read snapshot for one authorized row.
+     /// </summary>
+     [SkippableTheory]
+     [WithYubiKey]
+@@ -49,7 +49,7 @@ await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+             // Act
+             var deviceInfo = await mgmt.GetDeviceInfoAsync();
+ 
+-            // Assert - Verify device info matches what was cached during discovery
++            // Compare against shared fixture initialization, not the Core discovery snapshot.
+             Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+             Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
+             Assert.Equal(state.FormFactor, deviceInfo.FormFactor);
+@@ -438,4 +438,4 @@ await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+         },
+         preferredConnection: state.ConnectionType);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs w/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs
+index 294b3cd97..4c80f6b2b 100644
+--- c/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs
++++ w/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs
+@@ -200,8 +200,8 @@ private static async Task<DeviceInfo> WaitForDeviceInfoBySerialAsync(int serial)
+ 
+     /// <summary>
+     ///     Finds the physical key carrying <paramref name="serial" /> via a fresh scan, matching by the
+-    ///     serial-form id when discovery minted one and by a Management read otherwise (single-key rigs
+-    ///     merge by PID and never read serials — cost discipline, not a gap).
++    ///     serial-form id when discovery minted one and by a Management read otherwise. Discovery attempts
++    ///     metadata reads even on single-key rigs, but missing serial evidence can still require this fallback.
+     /// </summary>
+     private static async Task<IYubiKey?> TryFindBySerialAsync(int serial)
+     {
+@@ -235,4 +235,4 @@ private static async Task<DeviceInfo> WaitForDeviceInfoBySerialAsync(int serial)
+ 
+         return null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs w/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs
+index 52b8b4a91..236a79cf1 100644
+--- c/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs
++++ w/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs
+@@ -220,7 +220,8 @@ private async Task<IConnection> ConnectWithRetryAsync(IYubiKey view, ConnectionT
+ 
+     internal static void AssertMetadataMatches(DeviceInfo expected, DeviceInfo actual)
+     {
+-        // Compare semantic fields, not record equality over independently-owned ReadOnlyMemory values.
++        // Compare this suite's selected semantic fields. DeviceInfo has content equality, but timeout
++        // storage can alias across copies; these assertions do not prove deep snapshot independence.
+         Assert.Equal(expected.SerialNumber, actual.SerialNumber);
+         Assert.Equal(expected.FirmwareVersion, actual.FirmwareVersion);
+         Assert.Equal(expected.FormFactor, actual.FormFactor);
+@@ -229,4 +230,4 @@ internal static void AssertMetadataMatches(DeviceInfo expected, DeviceInfo actua
+         Assert.Equal(expected.NfcSupported, actual.NfcSupported);
+         Assert.Equal(expected.NfcEnabled, actual.NfcEnabled);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs w/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs
+index bca7bbcb4..e445f8298 100644
+--- c/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs
++++ w/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs
+@@ -39,6 +39,8 @@ public async Task CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached(
+                 connection,
+                 cancellationToken: TestContext.Current.CancellationToken));
+ 
++        // This direct constructor does not attach a guard holder. The assertion above checks rejection,
++        // but this probe cannot detect a stale attachment; that requires a separately bound factory probe.
+         await using var probe = new ProbeSession(connection);
+     }
+ 
+@@ -364,4 +366,4 @@ public void Dispose()
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Oath/CLAUDE.md w/src/Oath/CLAUDE.md
+index d7ba7706e..d6a6c6135 100644
+--- c/src/Oath/CLAUDE.md
++++ w/src/Oath/CLAUDE.md
+@@ -126,7 +126,9 @@ an SDK `NotSupportedException` for touch/SHA-512 credential options from these g
+ 
+ ## Reference Implementation
+ 
+-**Python (authoritative):** `yubikit/oath.py` in yubikey-manager — follow this for exact wire format details.
++**Python comparator:** `yubikit/oath.py` in yubikey-manager supplies related host wire-flow evidence.
++It is not normative conformance or device qualification. Preserve the
++chosen protocol edition/profile separately, especially for Core SCP empty commands and continuations.
+ 
+ ## Testing
+ 
+@@ -147,6 +149,10 @@ them before creating a fresh session; convenience-owned connections are disposed
+ connections globally. This deliberate OATH-only policy differs from Python's same-connection reselect/SCP
+ rehandshake; it is not a request to change other applets.
+ 
++Cached IsLocked/IsPasswordProtected/DeviceId/FirmwareVersion observations can remain after disposal;
++operations are terminal, and Salt views reference cleared session storage. Inherited IsAuthenticated
++records Core setup, independently of OATH password unlock and secure-channel recovery state.
++
+ `WithOathSessionAsync` uses a separate reset session/owned connection, completes teardown, then opens a
+ fresh session/connection for the body. Preserve the first failure if later disposal/independent cleanup
+ also fails; do not combine explicit disposal with an implicit owner that can replay a failed completion.
+@@ -172,6 +178,9 @@ validates the truncated response before successful resolution; `CalculateAsync`
+ tag, a digit header, and a nonempty HMAC payload. This is structural validation, not verification of a
+ particular digest length. It returns an independent copy of the HMAC only, without the digit header,
+ after the callback succeeds. The caller owns and clears that returned storage; caller inputs remain unchanged.
++Await the whole public workflow before teardown: CalculateAll followups, password-provider/VALIDATE/retry
++and notification callbacks extend beyond one guarded exchange. Keep borrowed inputs/services alive and
++do not dispose reentrantly. A completed exchange is not completion of detached application callback work.
+ Raw VALIDATE and calculation response buffers are cleared in `finally`, and decoded TLV copies are disposed.
+ The immutable `Code.Value` string is not formatted until the individual-calculation callback succeeds.
+ 
+diff --git c/src/Oath/README.md w/src/Oath/README.md
+index 85b2f1f51..493bdb114 100644
+--- c/src/Oath/README.md
++++ w/src/Oath/README.md
+@@ -44,19 +44,25 @@ using System.Collections.Generic;
+ using System.Linq;
+ using System.Security.Cryptography;
+ using System.Text;
++using System.Threading;
++using System.Threading.Tasks;
+ using Yubico.YubiKit.Core.Abstractions;
+ using Yubico.YubiKit.Core.Credentials;
+ using Yubico.YubiKit.Core.Devices;
+ using Yubico.YubiKit.Core.Sessions;
+ using Yubico.YubiKit.Oath;
+ 
+-IYubiKey device = await YubiKeyManager.FindFirstAsync();
++IYubiKey device = await YubiKeyManager.FindFirstAsync(
++    predicate: key => key.SupportsConnection(ConnectionType.SmartCard));
+ await using var session = await device.CreateOathSessionAsync();
+ IReadOnlyList<Credential> credentials = await session.ListCredentialsAsync();
+ Console.WriteLine(string.Join('\n', credentials.Select(c => $"{c.Issuer}:{c.Name} ({c.OathType})")));
+ ```
+ 
+-Later snippets assume these directives and a `device` obtained the same way. The one-shot
++This uses default All discovery, then selects a SmartCard-capable result. SmartCard-scoped discovery
++is a different census choice; it omits other interfaces rather than merely filtering a full result.
++Later snippets are independent alternatives, each assuming these directives and a `device` obtained
++the same way, after the previous session/connection scope has ended. The one-shot
+ `device.ListOathCredentialsAsync()` extension does the same listing and owns its own session.
+ 
+ ## Common operations
+@@ -224,11 +230,17 @@ The context uses application `OATH`, basis `PolicyRequires`, and the public `iss
+ `CalculateAllAsync` is silent. Cancelling the token before the calculation's SmartCard exchange is admitted
+ resolves a requested notification as cancelled; once admitted, the exchange runs to completion and cancellation
+ does not interrupt the device or necessarily change the notification outcome.
++Await the complete public task before disposal or clearing inputs. `CalculateAllAsync` can issue followup
++calculations; `AuthenticateAndRetryAsync` includes password acquisition, VALIDATE and retry; presence
++callbacks can run after an exchange. Keep prompt/provider resources alive until the workflow finishes,
++and avoid reentering or disposing the session from a callback.
+ 
+ ## Constraints
+ 
+-- SmartCard transport only. A physical YubiKey admits one live connection and one session per connection; a second
+-  attempt throws `ConnectionInUseException`. Whoever opens a connection disposes it.
++- SmartCard transport only. Within this process, grouped views admit one live connection across known
++  member IDs, and each connection admits one session. Disjoint scoped views are not coordinated solely
++  by matching serials. See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
++  Whoever opens a connection disposes it.
+ - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
+ - `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
+   `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
+@@ -243,12 +255,21 @@ does not interrupt the device or necessarily change the notification outcome.
+   as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
+   While the applet is locked, protected operations fail with an `OathException`
+   whose `Reason` is `OathFailureReason.Locked` until `ValidateAsync` succeeds.
++- `IsAuthenticated` records SCP setup, not OATH unlock or ongoing channel health. Cached applet properties
++  describe this session's observations and can remain readable after disposal. `Salt` borrows session-owned
++  storage that disposal clears. Use a fresh session after RESET to obtain the new salt and identity.
++- Synthetic secure-reset tests establish terminal state, key-array cleanup and command order, not outbound
++  encryption/MAC correctness or live SCP reset. Empty LIST/RESET and protected continuations also depend
++  on Core's APDU/SCP profile; passing the synthetic cleanup test is not wire-conformance qualification.
+ 
+ ### Migrating reset callers
+ 
+ Do not call LIST, derive a key, or inspect a refreshed identity on the old session after `ResetAsync`.
+ With the convenience factory, successful reset closes the hidden owned connection; explicitly open a new session:
+ 
++This composable fragment assumes the selected `IYubiKey device` above and a caller-supplied
++`CancellationToken ct`. Both scopes own their connections; no earlier session remains open.
++
+ ```csharp
+ await using (var reset = await device.CreateOathSessionAsync(cancellationToken: ct))
+ {
+@@ -274,6 +295,9 @@ retains the original creation parameters. This terminal contract replaces same-s
+ - `ParseUri` clears decoded temporary buffers on success and failure. Immutable URI/Base32 strings and literal
+   demo seeds cannot be erased; avoid retaining or logging them and prefer securely acquired byte input in production.
+ - `DeriveKey` takes a borrowed UTF-8 password and returns a 16-byte key you own and must zero; `AuthenticateAndRetryAsync` zeroes the key it derives, not the bytes your callback returned.
++- `OathCredentialOptions.ForOathPassword` configures the console reader's 1..128 **UTF-16 code-unit** UI
++  limit before UTF-8 encoding, not a firmware/password-byte limit. Direct byte inputs bypass that preset.
++  Immutable redirected strings have a different cleanup lifetime from returned mutable password buffers.
+ - Never log secrets, passwords, derived access keys, or calculated codes.
+ 
+ ## Example
+diff --git c/src/Oath/src/Credentials/OathCredentialOptions.cs w/src/Oath/src/Credentials/OathCredentialOptions.cs
+index da255f30f..da1200a72 100644
+--- c/src/Oath/src/Credentials/OathCredentialOptions.cs
++++ w/src/Oath/src/Credentials/OathCredentialOptions.cs
+@@ -24,6 +24,12 @@ public static class OathCredentialOptions
+     /// <summary>
+     /// Creates options configured for OATH password input.
+     /// </summary>
++    /// <remarks>
++    ///     The 1..128 limit counts UTF-16 code units in the console reader, before UTF-8 conversion.
++    ///     Interactive input filters entries at its input boundary; redirected lines are validated and
++    ///     rejected when outside the limits. This is a UI preset, not a firmware or raw access-key limit.
++    ///     Password byte buffers supplied directly to session APIs do not pass through this preset.
++    /// </remarks>
+     public static CredentialReaderOptions ForOathPassword() => new()
+     {
+         Prompt = "Enter OATH password: ",
+@@ -31,4 +37,4 @@ public static class OathCredentialOptions
+         MinLength = 1,
+         MaxLength = 128
+     };
+-}
+\ No newline at end of file
++}
+diff --git c/src/Oath/src/IOathSession.cs w/src/Oath/src/IOathSession.cs
+index 55d466530..d30fa866a 100644
+--- c/src/Oath/src/IOathSession.cs
++++ w/src/Oath/src/IOathSession.cs
+@@ -19,17 +19,30 @@ namespace Yubico.YubiKit.Oath;
+ /// <summary>
+ ///     Interface for interacting with the OATH application on a YubiKey.
+ /// </summary>
++/// <remarks>
++///     Inherited IsAuthenticated records Core SCP setup, not OATH password validation or ongoing channel
++///     health. IsLocked and IsPasswordProtected describe this session's observed applet state. Cached
++///     metadata getters can retain historical values after disposal; operations refuse a terminal session.
++///     Await complete public tasks before disposal or input cleanup. Aggregate followups, authentication
++///     retry and user-presence callbacks extend beyond Core's individual guarded exchanges. Keep borrowed
++///     inputs and callback/prompt resources alive until those tasks finish, without reentrant disposal.
++/// </remarks>
+ public interface IOathSession : IApplicationSession
+ {
+     /// <summary>
+-    ///     Gets the stable device identifier, computed as <c>Base64(SHA256(salt)[:16])</c> with padding stripped.
+-    ///     Changes on factory reset.
++    ///     Gets this session's device identifier, computed as <c>Base64(SHA256(salt)[:16])</c> with padding stripped.
++    ///     A fresh session after factory reset reads the new salt and identifier; this cached value is not refreshed.
+     /// </summary>
+     string DeviceId { get; }
+ 
+     /// <summary>
+     ///     Gets the raw salt bytes from the OATH applet SELECT response.
+     /// </summary>
++    /// <remarks>
++    ///     Borrows session-owned storage until disposal, which clears existing views. Copy only when
++    ///     independent storage is needed. Successful RESET ends the session; create a fresh session for
++    ///     the new salt and identity rather than reading historical cached state from this one.
++    /// </remarks>
+     ReadOnlyMemory<byte> Salt { get; }
+ 
+     /// <summary>
+@@ -50,10 +63,10 @@ public interface IOathSession : IApplicationSession
+     ///     current session has already been unlocked via <see cref="ValidateAsync" />.
+     /// </summary>
+     /// <remarks>
++    ///     Reflects SELECT and successful password changes in this session, not a fresh device query.
+     ///     Unlike <see cref="IsLocked" />, which becomes <see langword="false" /> once the current
+-    ///     session successfully validates, this property stays <see langword="true" /> for the
+-    ///     lifetime of the session as long as a password is configured on the device. Use this to
+-    ///     distinguish "no password configured" from "password already unlocked this session" —
++    ///     session successfully validates, this property remains <see langword="true" /> after validation.
++    ///     Use this to distinguish "no password configured" from "password already unlocked this session" —
+     ///     for example, to decide whether a "remove password" UI action should be shown, or whether
+     ///     a key-change flow needs to prompt for the current password.
+     /// </remarks>
+@@ -332,6 +345,8 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     /// <returns>The result of the (possibly retried) <paramref name="operation" /> call.</returns>
+     /// <remarks>
+     ///     Authentication uses this session's outstanding challenge, as required by <see cref="ValidateAsync" />.
++    ///     Await this entire workflow, including the provider and retried operation, before disposing
++    ///     resources. A completed exchange does not mean the password provider or retry has finished.
+     /// </remarks>
+     /// <exception cref="OathException">
+     ///     The device rejected access-key validation, or the wrapped operation reported an OATH failure.
+@@ -359,4 +374,4 @@ Task AuthenticateAndRetryAsync(
+         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+         CancellationToken cancellationToken = default);
+ #pragma warning restore RS0026
+-}
+\ No newline at end of file
++}
+diff --git c/src/Oath/src/IYubiKeyExtensions.cs w/src/Oath/src/IYubiKeyExtensions.cs
+index 912cef2e4..145bb896f 100644
+--- c/src/Oath/src/IYubiKeyExtensions.cs
++++ w/src/Oath/src/IYubiKeyExtensions.cs
+@@ -39,7 +39,9 @@ public static class IYubiKeyExtensions
+         ///     The caller must dispose the session with <c>await using</c> to close that connection.
+         /// </returns>
+         /// <remarks>
+-        ///     A physical YubiKey admits one live connection, and each connection admits one live session.
++        ///     Within this process, grouped views admit one live connection across known member IDs,
++        ///     and each connection admits one live session. Disjoint scoped views are not coordinated
++        ///     merely because they refer to the same physical key.
+         ///     To use a connection you already own, call <see cref="OathSession.CreateAsync" /> instead;
+         ///     that factory borrows the connection and leaves its disposal to you.
+         /// </remarks>
+@@ -104,4 +106,4 @@ public async Task<IReadOnlyList<Credential>> ListOathCredentialsAsync(
+             return await session.CalculateAllAsync(timestamp, cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs
+index 7b8f498e0..13e76c5f5 100644
+--- c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs
++++ w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs
+@@ -609,7 +609,8 @@ public void GetProcessedSecret_OversizeKey_HashesFirst()
+     [Fact]
+     public void ParseBase32Key_StandardPadded_DecodesCorrectly()
+     {
+-        // "JBSWY3DPEHPK3PXP" encodes "Hello!0xDE0xAD0xBE0xEF"
++        // This unpadded input only checks that decoding returns nonempty storage. Exact byte/shape
++        // vectors are covered separately in OathInputTests and Core Base32Tests.
+         byte[] result = CredentialData.ParseBase32Key("JBSWY3DPEHPK3PXP");
+ 
+         try
+@@ -663,4 +664,4 @@ public void ParseBase32Key_EmptyString_ReturnsEmptyArray()
+ 
+         Assert.Empty(result);
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs
+index 4797a2b3e..3eb506989 100644
+--- c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs
++++ w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs
+@@ -73,8 +73,9 @@ private static object Field(object owner, string name) =>
+         owner.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(owner)
+         ?? throw new InvalidOperationException($"Missing field {name}.");
+ 
+-    // Adapt only SELECT metadata and an authenticated, empty RESET response. The existing fake
+-    // handles the random-host-challenge handshake and CMAC; no encrypted-payload emulator is needed.
++    // Adapt SELECT metadata and synthesize an R-MAC-bearing empty RESET response for the cleanup oracle.
++    // The existing fake handles the handshake, but does not verify outbound encryption or command MACs.
++    // Actual key-array clearing/order is tested; whole-SCP conformance and live secure reset are separate.
+     private sealed class OathScpConnection : ISmartCardConnection
+     {
+         private readonly Scp03HandshakeFakeConnection _handshake = new();
+@@ -122,4 +123,4 @@ public void Dispose()
+         }
+         public ValueTask DisposeAsync() { Dispose(); return ValueTask.CompletedTask; }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
+index e5459ca5e..5e54b856a 100644
+--- c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
++++ w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
+@@ -115,8 +115,8 @@ public void ComputeDeviceId_Uses16BytePrefix_NotFullHash()
+     [Fact]
+     public void DeriveKey_WithKnownInputs_ProducesDeterministicOutput()
+     {
+-        // DeriveKey is an instance method that uses the session's salt.
+-        // We can verify the PBKDF2 algorithm independently.
++        // Direct BCL PBKDF2 parameter/shape and repeatability check. This does not call session.DeriveKey
++        // or compare against an independently supplied known-answer vector.
+         string password = "test_password";
+         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+ 
+@@ -143,6 +143,7 @@ public void DeriveKey_WithKnownInputs_ProducesDeterministicOutput()
+     [Fact]
+     public void DeriveKey_DifferentPasswords_ProduceDifferentKeys()
+     {
++        // Compare direct BCL calls, not the session method or its salt handling.
+         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+ 
+         byte[] key1 = Rfc2898DeriveBytes.Pbkdf2(
+@@ -165,6 +166,7 @@ public void DeriveKey_DifferentPasswords_ProduceDifferentKeys()
+     [Fact]
+     public void DeriveKey_DifferentSalts_ProduceDifferentKeys()
+     {
++        // Compare direct BCL calls with different salts; no independent expected key is asserted.
+         byte[] salt1 = [0x01, 0x02, 0x03, 0x04];
+         byte[] salt2 = [0x05, 0x06, 0x07, 0x08];
+ 
+@@ -626,9 +628,9 @@ public async Task DisposeAsync_ZeroesSessionSalt()
+     }
+ 
+     /// <summary>
+-    ///     A session that fails to initialize must release its claim on the connection. The connection
+-    ///     outlives the failure and belongs to the caller, so a retry — or a different applet — must not be
+-    ///     refused by a ghost holder that no reference points at any more.
++    ///     Checks guard release and borrowed-connection reuse after this fake's first SELECT returns 6A82.
++    ///     The second scripted SELECT succeeds. This does not establish recovery after every factory
++    ///     failure, an uncertain secure-channel state, or an actual device/native failure.
+     /// </summary>
+     [Fact]
+     public async Task CreateAsync_InitializationFails_LeavesTheConnectionUsableByTheNextSession()
+@@ -750,4 +752,4 @@ public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellatio
+             Task.FromResult((connection as TConnection)!);
+     }
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/SecurityDomain/CLAUDE.md w/src/SecurityDomain/CLAUDE.md
+index 27ee96445..c1ce07ff3 100644
+--- c/src/SecurityDomain/CLAUDE.md
++++ w/src/SecurityDomain/CLAUDE.md
+@@ -91,6 +91,9 @@ Yubico documents factory SCP03 restoration after last-set deletion; do not exten
+ mixed-key/firmware guarantee. Retained SCP parameters can fail reauthentication. Reinitialization currently
+ omits the original configuration/version and clears the explicit-version indicator; a fresh session with
+ the required options is the workaround, not a claim that losing them is intended policy.
++SCP11 can fail Core's local 5.7.2 gate during reinitialization because the omitted override becomes 5.3.0.
++Raw attempts bypass the guard and can mutate state before flags clear. Await the entire reset, then
++dispose/reopen after uncertainty; old readiness/authentication values are not recovery evidence.
+ 
+ #### Writing Tests
+ 
+@@ -125,7 +128,15 @@ key reference and trusted device public key; SCP11a/c also take the OCE private
+ host certificate chain. SCP11b authenticates the device, not the host, so `IsAuthenticated` is not a
+ management-authorization check. See the [README role table](README.md#understand-scp11ac-provisioning-roles):
+ the device certificate store is not OCE-chain provisioning. Keep caller-owned parameters alive through
+-session disposal, and do not infer unverified deep ownership rules from the retained `_scpKeyParams` reference.
++session disposal. StaticKeys copies sources, while SCP03 parameters retain/dispose that same owner.
++SCP11 parameters copy the certificate collection but retain/dispose its certificate objects and the
++private-key wrapper; record clones share them. Give these contained objects one lifetime owner and
++clear original secret arrays separately. The supplied SD public key is not disposed by parameters.
++
++Inherited IsAuthenticated records Core setup. The SCP11 v1.3.0.13 Public Review draft (August 2023),
++§4.3, includes a/c's first correct-MAC command after setup in OCE authentication to the SD. Keep this
++draft-specific phase and b's device-only authentication separate from administrative permissions;
++final SCP11 1.4 and the complete YubiKey profile remain unverified.
+ 
+ ### Session Initialization Pattern
+ 
+@@ -134,6 +145,8 @@ asynchronous initialization. The constructor retains the connection and SCP para
+ takes configuration, firmware version, then cancellation token. It prepares the protocol, selects the SD
+ through `SecurityDomainBackend.SelectApplicationAsync`, and configures it with the supplied version or
+ 5.3.0 fallback. If configuration returns a different protocol, the backend is rebuilt for that protocol.
++SCP11 creation therefore requires a known supported override (normally 5.7.2+), independently of the
++optional local GenerateKey gate. An override does not skip SELECT or establish actual device support.
+ 
+ `ProtocolFactory`, `IProtocol`, and `ISmartCardProtocol` are not consumer extension points. External low-level
+ code should use `RawSmartCardSession`; SecurityDomain uses these types only as friend-assembly implementation
+@@ -145,6 +158,15 @@ Initialization wraps `ApduException`, `BadResponseException`, or `NotSupportedEx
+ `ConfigureProtocolAsync` only when SCP parameters were supplied. Preparation and app selection precede
+ that catch; cancellation is rethrown unchanged. Later operation failures retain their original types.
+ `SecureChannelException.StatusWord` copies only an immediate `ApduException` status, not a nested one.
++A local version-gate failure is not a card rejection. Core's CLA-not-supported translation can put an
++APDU status inside a nested NotSupportedException, leaving the immediate StatusWord null. Provider and
++missing-DEK InvalidOperationException failures are outside this selected catch. Inspect provenance before
++deciding recovery; logged exception text can include provider-defined detail and is not universally redacted.
++
++The facade returns response.Data without exposing the ApduResponse owner. The view survives session
++disposal, but caller-copy cleanup cannot reach that owner. Core's supported Clear method also clears
++status bytes, so inspect status first if a future owned-response path adopts it. Earlier transport,
++fragment and decrypted temporaries have separate lifetimes. Public metadata alone needs no secret zeroing.
+ 
+ ## GlobalPlatform Command Structure
+ 
+diff --git c/src/SecurityDomain/README.md w/src/SecurityDomain/README.md
+index e6363a47c..7a331ef58 100644
+--- c/src/SecurityDomain/README.md
++++ w/src/SecurityDomain/README.md
+@@ -35,6 +35,10 @@ examples below use SCP03. SCP11 permissions are command-specific: the August 202
+ Review draft §4.6 forbids PUT KEY, DELETE [keys], and SET STATUS over SCP11c. This draft restriction does not
+ establish final-specification or YubiKey-profile behavior. The inherited `IsAuthenticated` flag alone is
+ not evidence that the host has authority for a particular operation.
++It records successful Core setup, not ongoing channel health. In the same Public Review draft, §4.3
++includes the first correct-MAC APDU after establishment in a/c authentication of the OCE to the device;
++the factory return alone does not establish that device-side phase. Final SCP11 1.4 and the complete
++YubiKey profile remain separate qualification requirements.
+ 
+ ## Installation
+ 
+@@ -130,9 +134,32 @@ var keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);
+ ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);
+ ```
+ 
+-Persist `devicePublicKey` through this trusted provisioning session. Later sessions establish SCP11b by
+-passing `new Scp11KeyParameters(keyReference, devicePublicKey)` as `ScpKeyParameters`, with an owned parameter
+-scope enclosing the session as in the SCP03 example. This provides a channel, not host management authority.
++Persist `devicePublicKey` through this trusted provisioning session. End that session before opening
++another. SCP11 creation also needs a known supported firmware version, normally 5.7.2 or later, in
++`FirmwareVersionOverride`: Security Domain's default 5.3.0 fails Core's SCP11 setup gate locally, even
++if the preceding generation request succeeded on a newer device. An override supplies policy; it does
++not detect firmware or prove hardware support.
++
++This complete composable method uses the directives above plus System.Collections.Generic,
++System.Threading and System.Threading.Tasks. The caller supplies the intended device, an SCP11b reference,
++its trusted public key and a known supported version. The method owns parameters and session, disposing
++the session first. It reads public metadata through the channel; it grants no host management authority.
++
++```csharp
++static async Task<IReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo>> ReadWithScp11bAsync(
++    IYubiKey device, FirmwareVersion knownFirmware, KeyReference keyReference,
++    ECPublicKey trustedDevicePublicKey, CancellationToken cancellationToken)
++{
++    using var parameters = new Scp11KeyParameters(keyReference, trustedDevicePublicKey);
++    await using var session = await device.CreateSecurityDomainSessionAsync(
++        new SessionCreationOptions
++        {
++            FirmwareVersionOverride = knownFirmware,
++            ScpKeyParameters = parameters
++        }, cancellationToken);
++    return await session.ListKeyInformationAsync(cancellationToken);
++}
++```
+ 
+ ### Understand SCP11a/c provisioning roles
+ 
+@@ -180,6 +207,9 @@ therefore does not prove complete restoration. Failure or cancellation can leave
+ Use an unauthenticated reset session as above: retained SCP parameters may no longer work during reselection
+ and reauthentication. Currently reset reinitialization also omits the original protocol configuration and
+ firmware override. Dispose the reset session and create a fresh session with your required options afterward.
++SCP11 reinitialization can fail at the local version gate before a new handshake because reset falls
++back to 5.3.0. After any failed or cancelled reset, await its terminal task, dispose the session and
++reopen; retained readiness/authentication values do not prove that the old graph survived raw attempts.
+ 
+ ## User interaction
+ 
+@@ -188,6 +218,9 @@ supply through `SessionCreationOptions.ScpKeyParameters`, so this module does no
+ `SessionCreationOptions.UserPresencePrompt`. Pass a `CancellationToken` to session calls to request cancellation.
+ Cancellation is not rollback: a device may already have accepted a persistent change. Reset can take noticeably
+ longer than other operations because it makes repeated authentication attempts.
++Await complete public workflows before disposal or input cleanup. Core guards individual exchanges,
++not the entire reset, multi-query retrieval or application callback. The reset attempt limit is not a
++wall-clock deadline or a native interruption guarantee.
+ 
+ ## Constraints
+ 
+@@ -197,8 +230,10 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
+ 
+ - SmartCard transport only. Requesting another transport through
+   `SessionCreationOptions { PreferredConnectionType = ... }` throws.
+-- One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
+-  disposes it with `await using`; a session from `CreateSecurityDomainSessionAsync` owns the one it opened.
++- Within this process, grouped views admit one live connection across known member IDs, and each connection
++  admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
++  it with `await using`; a session from `CreateSecurityDomainSessionAsync` owns the one it opened.
++  See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
+ - The Security Domain cannot detect firmware. `SessionCreationOptions.FirmwareVersionOverride` is its only
+   exact version source; without it the session assumes 5.3.0 for protocol configuration. Supply the version
+   from a Management session so the SCP11 gate can be evaluated.
+@@ -217,7 +252,7 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
+ - `StaticKeys` holds the ENC, MAC, and DEK values and implements `IDisposable`. Wrap it in `using` so the key
+   bytes are zeroed; `Scp03KeyParameters` and `Scp11KeyParameters` do the same for what they own.
+ - Session creation borrows the key parameters you pass. You keep ownership and remain responsible for
+-  disposing them after the session is gone.
++  disposing them after every session using them is gone. Security Domain retains the exact object for reset.
+ - `GetCertificatesAsync` returns caller-owned certificates. Dispose each certificate when no longer needed;
+   disposing the session does not dispose them. If any certificate cannot be loaded, the SDK disposes those
+   already loaded and throws instead of returning a partial bundle.
+@@ -227,6 +262,18 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
+   before relying on the channel.
+ - Never log key bytes, key check values, or challenge and response payloads. Log key references only.
+ 
++| Parameter content | Ownership action |
++| --- | --- |
++| `StaticKeys` | Copies the original arrays. Clear those sources separately; `Scp03KeyParameters` retains and disposes that same `StaticKeys` object. |
++| SCP11 private key and certificates | Parameters copy the collection, not the contained objects. Disposing parameters disposes the retained private-key wrapper and certificates; arrange one owner and keep them alive through every session/reset. The SD public-key object is not disposed by parameters. |
++| Record clones | Share contained owners; cloning parameters is not an independent secret/certificate lifetime. |
++
++`GetDataAsync` returns a view into a response array, not a pooled loan. That view survives session disposal,
++but the facade does not expose the response's supported clear handle. Clearing an independent copy cannot
++erase the hidden owner or earlier transport/SCP copies. Classify data by meaning: public certificates and
++references differ from KCVs or a caller-selected sensitive object. The current facade does not provide
++complete response-erasure control for arbitrary sensitive objects. Do not cast borrowed read-only memory writable.
++
+ ## Related
+ 
+ - [Core](../Core/README.md) - SCP key parameter types, SmartCard protocol, TLV, and logging configuration.
+diff --git c/src/SecurityDomain/src/ISecurityDomainSession.cs w/src/SecurityDomain/src/ISecurityDomainSession.cs
+index c12ee06bb..41c596d3e 100644
+--- c/src/SecurityDomain/src/ISecurityDomainSession.cs
++++ w/src/SecurityDomain/src/ISecurityDomainSession.cs
+@@ -29,6 +29,10 @@ namespace Yubico.YubiKit.SecurityDomain;
+ ///     establish final-specification or YubiKey-profile behavior. SCP11b authenticates the device, not
+ ///     the host; channel establishment alone does not grant authority for a particular operation.
+ ///     Cancellation does not roll back persistent changes already accepted by the device.
++///     IsAuthenticated records Core channel setup, not ongoing channel health or administrative authority.
++///     The same Public Review draft, §4.3, includes the first correct-MAC APDU after setup in a/c host
++///     authentication. Await entire public tasks before disposal; individual guarded exchanges do not
++///     serialize a complete reset or multi-query workflow.
+ /// </remarks>
+ public interface ISecurityDomainSession : IApplicationSession
+ {
+@@ -37,14 +41,23 @@ public interface ISecurityDomainSession : IApplicationSession
+     /// </summary>
+     /// <param name="dataObject">Data object identifier in the range 0x0000–0xFFFF, encoded as P1/P2.</param>
+     /// <param name="requestData">Optional request payload sent alongside the GET DATA command.</param>
+-    /// <param name="expectedResponseLength">Optional expected response length encoded in the Le field.</param>
++    /// <param name="expectedResponseLength">Le value, default zero; not an exact returned-byte count.</param>
+     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+     /// <returns>The response data, without the status word.</returns>
+     /// <remarks>
+     ///     The caller supplies any object-specific request encoding. The current implementation sends
+     ///     only the low two bytes of <paramref name="dataObject" />; it does not validate that range.
++    ///     Keep requestData valid and unchanged until the actual task completes. The selected formatter
++    ///     appends Le: short format accepts 0..255 and encodes zero as 00; extended format accepts
++    ///     0..65536 and encodes zero or 65536 as 0000. These zero encodings request the format's maximum
++    ///     response length, not an empty response; the actual result still depends on the device.
++    ///     The result aliases response storage and remains reachable after session disposal; it is not
++    ///     a pooled loan. The facade hides the response's supported clear handle. Clearing a caller copy
++    ///     does not clear that owner or earlier transport/SCP copies, so no complete secret-result erasure
++    ///     guarantee is provided for arbitrary data objects.
+     /// </remarks>
+     /// <exception cref="ArgumentOutOfRangeException">The expected response length is negative.</exception>
++    /// <exception cref="ArgumentException">The expected response length exceeds the selected formatter's bounds.</exception>
+     Task<ReadOnlyMemory<byte>> GetDataAsync(
+         int dataObject,
+         ReadOnlyMemory<byte> requestData = default,
+@@ -284,7 +297,8 @@ Task ClearAllowListAsync(
+     /// <param name="data">Caller-encoded BER-TLV payload for the selected Security Domain operation.</param>
+     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+     /// <remarks>
+-    ///     Sends one STORE DATA command with header 00 E2 90 00. The SDK does not validate the payload,
++    ///     Sends one logical STORE DATA command with header 00 E2 90 00; Core may fragment it into
++    ///     chained APDUs. The SDK does not validate the payload,
+     ///     select a different application, or implement a multi-block personalization flow. The caller
+     ///     supplies valid operation-specific encoding and device-accepted administrative authority;
+     ///     lack of authority is not checked locally by this method.
+@@ -324,10 +338,13 @@ Task StoreCaIssuerAsync(
+     ///     Failure or cancellation can leave persistent partial changes and cannot roll them back.
+     ///     Currently reinitialization omits the original protocol configuration and firmware override.
+     ///     Dispose this session and create a fresh one with those options when they are required after reset.
++    ///     SCP11 reinitialization can fail at the local version gate before a new handshake. After a
++    ///     failed/cancelled reset, await completion and dispose/reopen rather than relying on retained
++    ///     readiness/authentication flags; raw attempts can have changed device/channel state before flags clear.
+     /// </remarks>
+     /// <exception cref="SecureChannelException">
+     ///     Retained SCP parameters cause a selected secure-channel configuration failure during reinitialization.
+     ///     The original failure is preserved as InnerException.
+     /// </exception>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/SecurityDomain/src/IYubiKeyExtensions.cs w/src/SecurityDomain/src/IYubiKeyExtensions.cs
+index fa29211d9..4f4288832 100644
+--- c/src/SecurityDomain/src/IYubiKeyExtensions.cs
++++ w/src/SecurityDomain/src/IYubiKeyExtensions.cs
+@@ -39,6 +39,8 @@ public static class IYubiKeyExtensions
+         ///     Supply FirmwareVersionOverride when the exact firmware is known: Security Domain cannot
+         ///     detect it and otherwise configures with 5.3.0. Reset currently omits the original protocol
+         ///     configuration/version; create a fresh session with those options when needed after reset.
++        ///     SCP11 setup requires a known supported override (normally 5.7.2+); the default 5.3.0
++        ///     fails Core's local gate before authentication. An override is policy, not hardware detection.
+         /// </remarks>
+         /// <exception cref="SecureChannelException">
+         ///     SCP parameters were supplied and secure-channel configuration threw ApduException,
+@@ -91,4 +93,4 @@ public async Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
+             return await session.ListKeyInformationAsync(cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/SecurityDomain/src/SecurityDomainSession.cs w/src/SecurityDomain/src/SecurityDomainSession.cs
+index bc30e5ae9..8bfb6eabb 100644
+--- c/src/SecurityDomain/src/SecurityDomainSession.cs
++++ w/src/SecurityDomain/src/SecurityDomainSession.cs
+@@ -128,6 +128,9 @@ private SecurityDomainSession(
+     ///     cannot detect firmware: creation uses the supplied override or configures with 5.3.0.
+     ///     Supply an exact version for the local SCP11 generation gate. Reset currently does not forward
+     ///     the original configuration/version; create a fresh session to reapply them after reset.
++    ///     SCP11 setup itself requires a known supported override, normally 5.7.2 or later: the default
++    ///     5.3.0 fails Core's gate before the handshake. Keep the retained parameters and their shared
++    ///     contained key/certificate owners alive through every reset and session using them.
+     /// </remarks>
+     /// <exception cref="SecureChannelException">
+     ///     SCP parameters were supplied and secure-channel configuration threw ApduException,
+@@ -785,6 +788,8 @@ await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token),
+             await BlockKeyAsync(instruction, overrideKeyRef, cancellationToken).ConfigureAwait(false);
+         }
+ 
++        // All configured attempts finished; this does not verify restoration. Reinitialization below
++        // reuses parameters but omits the original configuration/version, including SCP11's prerequisite.
+         _logger.LogInformation("Security Domain reset complete; reinitializing session");
+ 
+         Protocol?.Dispose();
+@@ -819,6 +824,8 @@ private async Task<ReadOnlyMemory<byte>> TransmitAndGetResponseDataAsync(
+     {
+         EnsureInitializedBackend();
+         var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
++        // This alias keeps final response storage alive but hides its supported Clear owner. A caller
++        // copy has a separate lifetime; session disposal does not erase this result or earlier copies.
+         return response.Data;
+     }
+ 
+@@ -952,4 +959,4 @@ protected override void Dispose(bool disposing)
+             base.Dispose(disposing);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
+index 742ce23d8..f729325ae 100644
+--- c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
++++ w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs
+@@ -208,9 +208,10 @@ await state.WithSecurityDomainSessionAsync(false,
+         }
+         finally
+         {
+-            // The rotated key set replaced the defaults. Restore factory defaults so later tests and
+-            // suites can still authenticate with Scp03KeyParameters.Default.
++            // Session 2 replaces the original custom key set imported in Session 1, not the defaults.
++            // Request reset to attempt the default-key precondition for later tests and suites using
++            // Scp03KeyParameters.Default; this cleanup does not assert restored factory contents.
+             await state.ResetSecurityDomainAsync(ct);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
+index f86d67273..c5ac7e96f 100644
+--- c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
++++ w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs
+@@ -111,9 +111,9 @@ await state.WithSecurityDomainSessionAsync(false,
+         }
+         finally
+         {
+-            // This test deliberately supersedes the default SCP03 keys and asserts they stop
+-            // working. Restore factory defaults so later tests and suites can still authenticate
+-            // with Scp03KeyParameters.Default.
++            // This test deliberately supersedes the default SCP03 keys. Request reset to attempt
++            // the default-key precondition needed by later tests and suites using
++            // Scp03KeyParameters.Default; this cleanup does not assert restored factory contents.
+             await state.ResetSecurityDomainAsync(CancellationTokenSource.Token);
+         }
+     }
+@@ -193,4 +193,4 @@ await state.WithSecurityDomainSessionAsync(true,
+             scpKeyParams: Scp03KeyParameters.Default,
+             configuration: new ProtocolConfiguration { ForceShortApdus = true },
+             cancellationToken: CancellationTokenSource.Token);
+-}
+\ No newline at end of file
++}
+diff --git c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs
+index 3ac01d4dd..3941180c5 100644
+--- c/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs
++++ w/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs
+@@ -64,7 +64,8 @@ await state.WithSecurityDomainSessionAsync(false,
+             {
+                 Assert.True(session.IsAuthenticated);
+ 
+-                // Verify we can perform an authenticated operation
++                // Check protected key listing, which is also available without host authentication;
++                // this does not establish restricted administrative authority.
+                 var keyInfo = await session.ListKeyInformationAsync(ct);
+                 Assert.True(keyInfo.Count > 0);
+             }, scpKeyParams: keyParams, cancellationToken: ct);
+@@ -180,4 +181,4 @@ private static ReadOnlyMemory<byte> GetSki(X509Certificate2 certificate)
+         var tlv = Tlv.Create(skiExtension.RawData);
+         return tlv.Value;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/CLAUDE.md w/src/YubiHsm/CLAUDE.md
+index e8f54e5ab..9ca05d5aa 100644
+--- c/src/YubiHsm/CLAUDE.md
++++ w/src/YubiHsm/CLAUDE.md
+@@ -40,6 +40,11 @@ applet selection. Initialization uses the caller's firmware override or the SELE
+ backend falls back to 5.4.3 when a three-byte version value is unavailable. Reset reselects over the existing
+ protocol and retains resolved version policy. Device metadata and development-build labels alone establish
+ neither an operation's availability nor a suitable override.
++Overrides do not skip SELECT, and malformed TLV framing can throw before fallback. Reset sends through
++the existing protocol then reselects without a new SCP handshake; secure SELECT passes through unprotected.
++Old host state and ready/auth flags remain, so dispose/reopen with required options after uncertainty.
++No PC/SC transaction is created by this protocol path. Inherited IsAuthenticated records SCP setup,
++not applet management/password authority, live channel health or external HSM authentication.
+ 
+ | Feature | Version | Methods |
+ |---------|---------|---------|
+@@ -112,6 +117,10 @@ Keep the returned `SessionKeys` in a `using` scope through the host's HSM task.
+ 16-byte slices into owned arrays. Disposal clears those arrays, including storage viewed by existing spans,
+ and rejects later property access. The Parse input and any additional caller/connector copies require
+ separate clearing. Calculation returns key material; the HSM library completes host authentication.
++The calculation helper's final-response cleanup reaches the actual raw owner, including status bytes,
++after Parse/callback success or failure. Core's supported owner API is ApduResponse.Clear(); the legacy
++write-through helper is source-functional. Earlier transport/fragment/decrypted arrays remain independent,
++and retry/backend errors before that try have a different scope. Keep standalone Parse input cleanup separate.
+ The session passes the full CALCULATE response to the strict 48-byte key parser. A supplied symmetric
+ cryptogram can yield 56 bytes and fail parsing, as observed on a development key. Vendor Python has
+ handled 56-byte input since 2023 and now ignores the suffix; vendor C withholds an 8-byte symmetric
+@@ -129,6 +138,9 @@ LIST cancellation propagates. A session without a prompt skips this notification
+ prompt and non-reentrant. After cancellation is requested, await the operation's terminal result and
+ cleanup; an admitted SmartCard exchange can drain until a device response and end with an APDU failure.
+ Follow that outcome for recovery rather than promising native device interruption.
++Await the entire public workflow before disposal or another call. LIST policy lookup and CALCULATE are
++separate exchanges; parsing, callbacks and finally cleanup are outside Core's per-exchange guard. Keep
++borrowed inputs/prompt resources alive through actual completion, not an outer cancelled wait.
+ 
+ The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challenge and optional
+ card cryptogram are generated by the HSM and relayed by its connector. The asymmetric context is
+diff --git c/src/YubiHsm/README.md w/src/YubiHsm/README.md
+index 3772f43d3..aa9128b99 100644
+--- c/src/YubiHsm/README.md
++++ w/src/YubiHsm/README.md
+@@ -26,6 +26,8 @@ A session normally resolves feature support from the applet's three-byte SELECT
+ policy instead. Choose an override that the actual applet supports: device metadata, a development-build
+ label, and an override alone provide different evidence from successfully executing an operation.
+ `ResetAsync` reselects the applet and retains the session's resolved version policy.
++An override does not skip SELECT, and malformed TLV framing can fail before fallback. Fixture/discovery
++metadata is a separate version source; it is not substituted by the HSM session factory.
+ 
+ A credential is identified by a public label of 1 to 64 UTF-8 bytes, represented as a plain `string`. A
+ symmetric credential holds an AES-128 K-ENC and K-MAC pair, an asymmetric one an EC P-256 private key, and each is
+@@ -279,9 +281,18 @@ the cancellation request as a device-interruption guarantee.
+ ## Constraints
+ 
+ - Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
+-- One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
+-  disposes it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
++- Within this process, grouped views admit one live connection across known member IDs, and each connection
++  admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
++  it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
++  See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
++- Await the entire public workflow before another operation or disposal. Optional LIST policy lookup,
++  CALCULATE, parsing and callbacks are separate phases; Core drains an admitted exchange, not all later
++  application work. Keep borrowed inputs/prompt resources alive until the task is terminal.
+ - `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.
++  Reset reuses its protocol without a fresh SCP handshake. With SCP, RESET is protected but re-SELECT
++  passes through unprotected; old host state and public readiness/authentication flags remain. End the
++  session/connection scopes and create fresh ones after reset or uncertainty rather than relying on
++  those flags as post-reset channel-health evidence.
+ - Unsupported feature gates throw `NotSupportedException`; on versions 5.6.0–5.7.0 `GetChallengeAsync`
+   omits a supplied password.
+ - Enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods
+@@ -302,9 +313,15 @@ the cancellation request as a device-interruption guarantee.
+ - `SessionKeys.Parse` copies the response into three owned arrays; disposal clears those arrays and later
+   property access throws. Existing spans view the cleared storage. Clear the Parse source and any caller-made
+   copies separately, and keep `SessionKeys` in a `using` scope through the HSM task.
++  The calculation helper clears its final successful CALCULATE response even if strict parsing or the
++  success callback fails. This does not clear independent transport, fragment or decrypted-response copies;
++  retry/backend failures can occur before that final-response cleanup scope.
+ - `PutCredentialDerivedAsync` derives K-ENC and K-MAC with PBKDF2-HMAC-SHA256, salt `"Yubico"`, 10,000 iterations.
+ - Never log passwords, key material, challenges, or cryptograms. Log labels, algorithms, and status words only.
+ 
++Inherited `IsAuthenticated` records Core SCP setup, independently of the applet's per-operation management
++key/password checks and the application's external HSM authentication. It is not an ongoing channel-health check.
++
+ ## Example
+ 
+ HsmAuthTool is a **diagnostic evaluation sample**. Run it with disposable test credentials: generated symmetric
+diff --git c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs
+index 8b49b7fdc..430619597 100644
+--- c/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs
++++ w/src/YubiHsm/examples/HsmAuthTool/Cli/Commands/InfoCommand.cs
+@@ -27,6 +27,8 @@ public static async Task<int> RunAsync(string[] args, CancellationToken cancella
+         var retries = await session.GetManagementKeyRetriesAsync(cancellationToken);
+         var credentials = await session.ListCredentialsAsync(cancellationToken);
+ 
++        // This is session feature policy (SELECT version/fallback, or an override), not an independent
++        // physical-firmware measurement. The display label does not change that provenance.
+         AnsiConsole.MarkupLine($"YubiHSM Auth version: [green]{session.FirmwareVersion}[/]");
+         AnsiConsole.MarkupLine($"Management key retries remaining: [green]{retries}[/]");
+         AnsiConsole.MarkupLine($"Stored credentials: [green]{credentials.Count}[/]");
+@@ -38,4 +40,4 @@ public static async Task<int> RunAsync(string[] args, CancellationToken cancella
+ 
+         return 0;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/HsmAuthRetryException.cs w/src/YubiHsm/src/HsmAuthRetryException.cs
+index 050c74d4d..d6adce393 100644
+--- c/src/YubiHsm/src/HsmAuthRetryException.cs
++++ w/src/YubiHsm/src/HsmAuthRetryException.cs
+@@ -41,8 +41,8 @@ namespace Yubico.YubiKit.YubiHsm;
+ ///     </para>
+ ///     <para>
+ ///         This type derives from <see cref="ApduException" /> so existing code that catches
+-///         <see cref="ApduException" /> continues to observe every YubiHSM Auth protocol failure,
+-///         including retry failures.
++///         <see cref="ApduException" /> also observes these retry-count APDU-status failures.
++///         Malformed responses, strict key parsing and transport failures can use other exception types.
+ ///     </para>
+ /// </remarks>
+ public sealed class HsmAuthRetryException : ApduException
+@@ -68,4 +68,4 @@ public HsmAuthRetryException(int retriesRemaining, string message)
+     {
+         RetriesRemaining = retriesRemaining;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/HsmAuthSession.cs w/src/YubiHsm/src/HsmAuthSession.cs
+index 95e90197f..7e11e9317 100644
+--- c/src/YubiHsm/src/HsmAuthSession.cs
++++ w/src/YubiHsm/src/HsmAuthSession.cs
+@@ -125,6 +125,11 @@ private HsmAuthSession(
+     /// </param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
++    /// <remarks>
++    ///     An override does not skip SELECT; malformed response framing can still fail before version
++    ///     fallback. Keep borrowed inputs and prompt services alive through complete public tasks,
++    ///     including policy lookup, CALCULATE and callbacks, before disposing the session.
++    /// </remarks>
+     public static Task<HsmAuthSession> CreateAsync(
+         ISmartCardConnection connection,
+         SessionCreationOptions? options = null,
+@@ -512,7 +517,9 @@ public async Task ResetAsync(CancellationToken cancellationToken = default)
+         await _backend.SendAsync(command, cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
+ 
+-        // Reuse the current protocol so its PC/SC transaction remains owned and disposable.
++        // Reuse the protocol; this path owns no PC/SC transaction and starts no fresh SCP handshake.
++        // Under SCP the re-SELECT passes through unprotected, retaining old host state and public flags;
++        // it does not establish that the next protected operation will succeed.
+         // Reselect after reset while retaining the resolved feature-version policy. Discarding the
+         // returned version keeps caller overrides and later feature gates consistent within this session.
+         _ = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+@@ -945,6 +952,9 @@ private static void ValidateManagementKey(ReadOnlySpan<byte> managementKey)
+ 
+     internal static void ZeroApduResponse(ApduResponse response)
+     {
++        // This legacy helper reaches the final response's actual array, including status bytes.
++        // Core now exposes Clear() for that owner. Earlier transport/fragment/decrypted copies remain
++        // separate; retry/backend failures before the caller's try are outside this cleanup scope.
+         if (MemoryMarshal.TryGetArray(response.RawData, out var rawData))
+             CryptographicOperations.ZeroMemory(rawData.AsSpan());
+     }
+@@ -984,4 +994,4 @@ private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduComma
+     /// </summary>
+     private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
+         ThrowOnRetryFailure(response, command, "Invalid credential password");
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiHsm/src/IHsmAuthSession.cs w/src/YubiHsm/src/IHsmAuthSession.cs
+index 08d622e1c..9b6fb3ba1 100644
+--- c/src/YubiHsm/src/IHsmAuthSession.cs
++++ w/src/YubiHsm/src/IHsmAuthSession.cs
+@@ -20,6 +20,12 @@ namespace Yubico.YubiKit.YubiHsm;
+ ///     Defines the public contract for interacting with the YubiHSM Auth applet on a YubiKey.
+ ///     This applet stores credentials used to authenticate to YubiHSM 2 hardware security modules.
+ /// </summary>
++/// <remarks>
++///     Inherited IsAuthenticated records Core SCP setup, not management-key/credential-password authority,
++///     ongoing channel health, or completion of the external HSM handshake. Await complete public tasks
++///     before another operation or disposal, keeping borrowed inputs and prompt resources alive. LIST
++///     policy lookup, CALCULATE, parsing and callbacks extend beyond individual guarded exchanges.
++/// </remarks>
+ public interface IHsmAuthSession : IApplicationSession
+ {
+     /// <summary>
+@@ -193,6 +199,10 @@ Task PutManagementKeyAsync(
+     ///     Reset permanently erases all credentials, restores the 16-zero-byte management key and resets
+     ///     retry counters. The session reselects the applet over its existing protocol and retains its
+     ///     resolved feature-version policy, including any caller-supplied firmware override.
++    ///     It retains no SCP parameters and performs no fresh handshake. With SCP, RESET uses the secure
++    ///     graph but re-SELECT passes through unprotected, retaining old host state and readiness/auth flags.
++    ///     These values do not prove a usable post-reset channel. After reset or uncertainty, dispose the
++    ///     session/connection and create fresh scopes with required options rather than assuming recovery.
+     /// </remarks>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+@@ -375,4 +385,4 @@ Task ChangeCredentialPasswordAdminAsync(
+         string label,
+         ReadOnlyMemory<byte> newPassword,
+         CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiOtp/CLAUDE.md w/src/YubiOtp/CLAUDE.md
+index 000c03345..bd278d04d 100644
+--- c/src/YubiOtp/CLAUDE.md
++++ w/src/YubiOtp/CLAUDE.md
+@@ -49,11 +49,18 @@ SmartCard path:
+ 5. Construct the SmartCard backend once with the effective protocol, firmware, and SELECT programming sequence
+ 
+ OTP HID path:
+-1. `ReadStatusAsync()` → store status bytes
+-2. Extract firmware version from protocol or status bytes
++1. `ReadStatusAsync()` → Core's first report initializes protocol firmware, with the NEO refresh if needed;
++   a second report supplies the returned cached status
++2. Prefer protocol firmware over the second status version; retain the raw status separately
+ 3. `ConfigureProtocolAsync` → configure protocol
+ 4. Construct the HID backend with the effective protocol
+ 
++The override is applied after discovery. ConfigState gates and the SmartCard touch heuristic still use
++raw status. Core's local readiness/touch windows are checked between awaited native calls, not hard
++call-duration bounds. Custom IOtpHidConnection providers must supply eight-byte reports; built-in length
++checks do not establish central defensive handling for malformed custom input. Keep Core report/NEO
++failure classification and polling policy separate from applet sequence/CRC interpretation.
++
+ ## User-presence notifications
+ 
+ When `SessionCreationOptions.UserPresencePrompt` is supplied, only HMAC-SHA1 and Yubico OTP
+@@ -132,6 +139,11 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
+ 
+ - Configurations copy inputs; Dispose clears private fixed/UID/key fields, not source buffers or GetConfig results.
+ - Caller owns source buffers, every GetConfig array, and successful calculation output. Clear them separately.
++- One-shot HMAC returns only after hidden-session disposal. A teardown exception after calculation can
++  strand the transferred backend result without exposing it to the caller; no runtime fix is implied.
++- Clearing returned prefixes/owned encodings does not clear every incoming report, Windows report-ID
++  staging array, APDU owner, fragment or decrypted temporary. Ordinary callback-failure cleanup is narrower
++  than all-path erasure when a logging provider itself throws.
+ - HMAC clears its padded copy; AES borrows the unpadded six-byte input. Keep borrowed inputs stable until await ends.
+ - Immutable password/CLI strings cannot be deterministically erased. Raw translated scan codes permit mutable-source cleanup.
+ - Normal WriteConfig cleanup clears assembled blocks, but invalid new/current-code paths allocate secret copies
+@@ -140,6 +152,11 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
+ 
+ ## Current implementation constraints
+ 
++Await complete workflows before disposal: write/status fallback, CRC/sequence checks, cached publication
++and terminal callbacks extend beyond guarded exchanges. Borrowed configurations/services remain alive
++through actual completion, not an outer cancelled wait. Grouped connection exclusion is process-local
++and limited to overlapping known member IDs.
++
+ - Updates send complete masked values, not patches. Defaults are SerialApiVisible/AllowUpdate, other update
+   flags clear. New code omission sends zeros; repeat current code in both code arguments to retain protection.
+ - HOTP nonzero IMF divides by 65,536 instead of the vendor 16; recommend zero, not the erroneous accepted range.
+diff --git c/src/YubiOtp/README.md w/src/YubiOtp/README.md
+index 25c684ffd..31ee70247 100644
+--- c/src/YubiOtp/README.md
++++ w/src/YubiOtp/README.md
+@@ -35,6 +35,12 @@ examples below explicitly select OTP HID; this is the supported USB recipe, not
+ 
+ Session creation discovers firmware and slot status before constructing its operational backend. SmartCard
+ programming-sequence validation starts from the value returned by OTP selection, including when SCP is enabled.
++On OTP HID, Core reads a first report for protocol firmware, performs the NEO refresh when needed, then
++reads a second report for cached status. SmartCard probes Management on both USB CCID and NFC, then
++selects OTP; when OTP's major version is three it uses the higher Management/OTP version. A caller override
++is applied afterward to session policy. Cached `ConfigState` still uses raw OTP status, so its gates and
++the SmartCard touch heuristic can differ from effective session feature checks. Major-zero acceptance
++is optimistic SDK policy, not proof of device/command support.
+ 
+ ## Installation
+ 
+@@ -240,7 +246,9 @@ replay policy. The SDK returns bytes; it does not decrypt, verify, format an OTP
+ 
+ ### Program a static password
+ 
+-The YubiKey emits HID scan codes and types correctly only under the same layout; `KeyboardLayout.ModHex` is neutral.
++The YubiKey emits HID scan codes interpreted by the host's active layout. Select that layout;
++`KeyboardLayout.ModHex` uses characters shared by supported layouts, not a universal layout guarantee.
++Verify actual output under the intended host layout and input state.
+ 
+ ```csharp
+ {
+@@ -319,14 +327,23 @@ notification resolves as cancelled. The reset is not a rollback of commands alre
+ fails, dispose the session and connection rather than reusing them. SmartCard operations already
+ admitted run to completion even if the caller cancels their token.
+ 
++OTP HID's local checks use a one-second write-ready window with a 5 ms busy delay, a three-second
++readiness window without an explicit busy delay, and 250 ms touch polling with a local 14-second
++threshold. These checks occur between awaited calls; a held native GET/SET can exceed them. Only the
++classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are failures.
++
+ ## Constraints
+ 
+-- A physical YubiKey admits one live connection and one session per connection; a second attempt throws
+-  `ConnectionInUseException`. Whoever opens a connection disposes it.
++- Within this process, grouped views admit one live connection across known member IDs, and each connection
++  admits one session. Disjoint scoped views remain uncoordinated. Whoever opens a connection disposes it;
++  see [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
+ - A session from `device.CreateYubiOtpSessionAsync(...)` owns the connection it opened;
+   `YubiOtpSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
+ - Override the transport with `new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }`; one
+   transport is selected and a connection failure propagates instead of falling back.
++- Await the entire public task before another operation or disposal, keeping configurations, borrowed
++  memory and prompt resources alive. Write/status fallback, CRC validation and notification callbacks
++  extend beyond Core's individual guarded exchanges.
+ - `PutConfigurationAsync`, `UpdateConfigurationAsync`, `SwapSlotsAsync`, `DeleteSlotAsync`, `SetScanMapAsync`, and
+   `SetNdefConfigurationAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
+ - Firmware-gated operations throw `NotSupportedException`; `ConfigState` accessors throw `InvalidOperationException`.
+@@ -356,6 +373,10 @@ admitted run to completion even if the caller cancels their token.
+ - Successful calculation output belongs to you even though it is exposed as `ReadOnlyMemory<byte>`.
+   The examples use `MemoryMarshal.AsMemory` only to clear these documented, caller-owned SDK outputs.
+   Do not use that technique on arbitrary borrowed read-only memory. Consume first, then clear in `finally`.
++  The one-shot HMAC helper transfers only after hidden-session teardown succeeds. If teardown throws
++  after calculation, its task faults without exposing or clearing that result. An explicit session lets
++  you retain the calculation result before teardown and clear it in an enclosing `finally`; this does
++  not erase separate incoming-report, APDU, decrypted-response or transport staging copies.
+ - Normal write cleanup clears assembled configuration/payload copies, but invalid access-code preflight
+   currently has cleanup gaps. No-I/O validation does not imply erasure of every temporary allocation.
+   None of these measures promises erasure of all heap copies. Never log keys, passwords, codes, or responses.
+@@ -384,6 +405,12 @@ dotnet run --project src/YubiOtp/examples/OtpTool/OtpTool.csproj
+ 
+ ## Related
+ 
++Use Management's `GetDeviceInfoAsync` for device metadata and `SetDeviceConfigAsync` for modern TLV
++configuration (effective 5.0.0 write gate). These are not a typed OTP FIPS-mode query or the legacy
++mode/timeout/eject mutator: v2 exposes no typed `QueryFipsMode`, `SetLegacyDeviceConfig` or `SetMode` API.
++FIPS metadata/approval fields do not answer that legacy operating-mode question. Raw command access is
++an expert tier, not a relocated typed implementation; see [raw access tiers](../../docs/architecture/raw-access-tiers.md).
++
+ - [../Core/README.md](../Core/README.md) - device discovery, connections, and session plumbing.
+ - [../Oath/README.md](../Oath/README.md) - TOTP and HOTP credential storage.
+ - [../Management/README.md](../Management/README.md) - enabling the OTP application per transport.
+diff --git c/src/YubiOtp/src/Backend/HidBackend.cs w/src/YubiOtp/src/Backend/HidBackend.cs
+index 59f286ffc..2be7428ab 100644
+--- c/src/YubiOtp/src/Backend/HidBackend.cs
++++ w/src/YubiOtp/src/Backend/HidBackend.cs
+@@ -46,6 +46,8 @@ public static async ValueTask<YubiOtpInitialization> ReadInitialStateAsync(
+         CancellationToken cancellationToken)
+     {
+         var status = await protocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
++        // Core's first report establishes protocol firmware (with the NEO refresh when needed);
++        // this returned status comes from a second report. Effective overrides are applied later.
+         var firmwareVersion = protocol.FirmwareVersion
+                               ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
+ 
+@@ -139,4 +141,4 @@ public async ValueTask<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiOtp/src/IYubiKeyExtensions.cs w/src/YubiOtp/src/IYubiKeyExtensions.cs
+index 1eb4669d5..ad73126d5 100644
+--- c/src/YubiOtp/src/IYubiKeyExtensions.cs
++++ w/src/YubiOtp/src/IYubiKeyExtensions.cs
+@@ -74,6 +74,11 @@ await session.PutConfigurationAsync(slot, config, accessCode, currentAccessCode,
+         /// See IYubiOtpSession.CalculateHmacSha1Async for input/payload/slot-mode distinctions. Use one
+         /// challenge-length convention per slot. Explicit OTP HID is the USB recipe; default SmartCard
+         /// selection does not establish challenge-command parity. Output ownership transfers to the caller.
++        /// Transfer occurs only when this outer task returns successfully, after hidden-session teardown.
++        /// If teardown throws after calculation succeeds, the task faults without exposing the result to
++        /// clear; the current helper does not clear that stranded result. Keep caller input cleanup in
++        /// finally even when creation or teardown fails. Use an explicit session when result ownership
++        /// must be visible before teardown; lower-layer copy cleanup remains a separate limitation.
+         /// </remarks>
+         /// <returns>A caller-owned 20-byte response; clear its backing memory after use.</returns>
+         /// <param name="slot">The challenge-response slot.</param>
+@@ -105,6 +110,11 @@ public async Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+         /// </param>
+         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
+         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
++        /// <remarks>
++        /// Grouped connection exclusion is process-local and limited to overlapping known member IDs.
++        /// Await complete public operations before disposal; the exchange guard does not own a whole
++        /// configuration/status/notification workflow or the caller's configuration and prompt resources.
++        /// </remarks>
+         public async Task<YubiOtpSession> CreateYubiOtpSessionAsync(
+             SessionCreationOptions? options = null,
+             CancellationToken cancellationToken = default)
+@@ -149,4 +159,4 @@ scpKeyParams is not null && preferredConnectionType is null
+     private static readonly ConnectionType[] YubiOtpTransportOrder =
+         [ConnectionType.SmartCard, ConnectionType.HidOtp];
+ 
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiOtp/src/IYubiOtpSession.cs w/src/YubiOtp/src/IYubiOtpSession.cs
+index 7e658cc44..e8556614e 100644
+--- c/src/YubiOtp/src/IYubiOtpSession.cs
++++ w/src/YubiOtp/src/IYubiOtpSession.cs
+@@ -29,6 +29,10 @@ namespace Yubico.YubiKit.YubiOtp;
+ /// SmartCard programming-sequence checks currently bypass effective firmware 5.0.0 inclusive to 5.5.0
+ /// exclusive and accept zero after any predecessor. Short fallback status can escape rejection. These
+ /// limitations mean successful return is not exhaustive malformed-status or write-acceptance validation.
++/// Await the complete public task before starting another operation or disposing the session. A write
++/// can require a second status exchange, and CRC checking, cached-state updates and prompt callbacks
++/// extend beyond Core's per-exchange guard. Keep configurations and prompt services alive through that work.
++/// Returned response views do not provide cleanup control over all incoming report, APDU or SCP copies.
+ /// </remarks>
+ public interface IYubiOtpSession : IApplicationSession
+ {
+@@ -337,4 +341,4 @@ Task<ReadOnlyMemory<byte>> CalculateYubicoOtpAsync(
+         Slot slot,
+         ReadOnlyMemory<byte> challenge,
+         CancellationToken cancellationToken = default);
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs w/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
+index 4ce044a03..5cc0b9cbf 100644
+--- c/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
++++ w/src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
+@@ -43,7 +43,8 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
+     /// The YubiKey itself has no concept of a keyboard layout; it only emits HID scan
+     /// codes over USB. The scan codes produced here will render as <paramref name="password"/>
+     /// only on a host configured with the same <paramref name="keyboardLayout"/>. Use
+-    /// <see cref="KeyboardLayout.ModHex"/> for a layout-independent password.
++    /// <see cref="KeyboardLayout.ModHex"/> for characters whose scan codes are shared by supported
++    /// host layouts. Verify the selected characters and actual host layout; this is not universal layout independence.
+     /// </remarks>
+     /// <param name="password">The human-readable password (up to 38 characters).</param>
+     /// <param name="keyboardLayout">The keyboard layout to translate characters with.</param>
+@@ -176,4 +177,4 @@ private static byte[] ToScanCodes(string password, KeyboardLayout keyboardLayout
+ 
+         return scanCodes;
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs w/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs
+index d45d126b7..e09e48a50 100644
+--- c/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs
++++ w/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/SlotConfigurationTests.cs
+@@ -1042,7 +1042,8 @@ public void Base_DefaultMinimumFirmware_Is200()
+     [Fact]
+     public void Crc_AllZeroConfig_ValidCrc()
+     {
+-        // UpdateConfiguration with no flags produces a mostly-zero config
++        // Default update flags remain present (SerialApiVisible/AllowUpdate); check the assembled CRC,
++        // not an all-zero wire vector or an independently supplied CRC known answer.
+         using var config = new UpdateConfiguration();
+         var result = config.GetConfig();
+ 
+@@ -1070,4 +1071,4 @@ public void Crc_DifferentConfigs_ProduceDifferentCrcs()
+         Assert.NotEqual(crc1, crc2);
+     }
+ 
+-}
+\ No newline at end of file
++}

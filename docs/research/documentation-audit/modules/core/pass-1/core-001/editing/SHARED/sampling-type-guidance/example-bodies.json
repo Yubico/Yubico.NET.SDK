@@ -1,0 +1,342 @@
+[
+  {
+    "path": "CLAUDE.md",
+    "body_number": 1,
+    "before": {
+      "opening_line": 143,
+      "closing_line": 148,
+      "body": "dotnet toolchain.cs build\ndotnet toolchain.cs -- test --project WebAuthn --smoke\ndotnet toolchain.cs -- test --project Piv --filter \"FullyQualifiedName~Sign\"\ndotnet toolchain.cs -- pack --include-docs\n",
+      "body_sha256": "8ecb64b67e51e4353c6c4e85d2957ec20316e64124e3b6324b106fbd0a07de11",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 143,
+      "closing_line": 148,
+      "body": "dotnet toolchain.cs build\ndotnet toolchain.cs -- test --project WebAuthn --smoke\ndotnet toolchain.cs -- test --project Piv --filter \"FullyQualifiedName~Sign\"\ndotnet toolchain.cs -- pack --include-docs\n",
+      "body_sha256": "8ecb64b67e51e4353c6c4e85d2957ec20316e64124e3b6324b106fbd0a07de11",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 2,
+    "before": {
+      "opening_line": 188,
+      "closing_line": 224,
+      "body": "// \u2705 BEST - Small, immutable, value semantics\npublic readonly struct StatusWord\n{\n    public StatusWord(byte sw1, byte sw2) => (SW1, SW2) = (sw1, sw2);\n    \n    public byte SW1 { get; }\n    public byte SW2 { get; }\n    public ushort Value => (ushort)((SW1 << 8) | SW2);\n    \n    public bool IsSuccess => Value == 0x9000;\n}\n\n// \u2705 GOOD - Wraps small data\npublic readonly struct SlotNumber\n{\n    public SlotNumber(byte value) => Value = value;\n    public byte Value { get; }\n}\n\n// \u2705 GOOD - Protocol metadata\npublic readonly struct ApduHeader\n{\n    public ApduHeader(byte cla, byte ins, byte p1, byte p2)\n    {\n        CLA = cla;\n        INS = ins;\n        P1 = p1;\n        P2 = p2;\n    }\n    \n    public byte CLA { get; }\n    public byte INS { get; }\n    public byte P1 { get; }\n    public byte P2 { get; }\n}\n",
+      "body_sha256": "5585c11e200aca5ec94e79cc3e860c7b2334937fa0dda7fea922b885d4805d52",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 192,
+      "closing_line": 228,
+      "body": "// \u2705 BEST - Small, immutable, value semantics\npublic readonly struct StatusWord\n{\n    public StatusWord(byte sw1, byte sw2) => (SW1, SW2) = (sw1, sw2);\n    \n    public byte SW1 { get; }\n    public byte SW2 { get; }\n    public ushort Value => (ushort)((SW1 << 8) | SW2);\n    \n    public bool IsSuccess => Value == 0x9000;\n}\n\n// \u2705 GOOD - Wraps small data\npublic readonly struct SlotNumber\n{\n    public SlotNumber(byte value) => Value = value;\n    public byte Value { get; }\n}\n\n// \u2705 GOOD - Protocol metadata\npublic readonly struct ApduHeader\n{\n    public ApduHeader(byte cla, byte ins, byte p1, byte p2)\n    {\n        CLA = cla;\n        INS = ins;\n        P1 = p1;\n        P2 = p2;\n    }\n    \n    public byte CLA { get; }\n    public byte INS { get; }\n    public byte P1 { get; }\n    public byte P2 { get; }\n}\n",
+      "body_sha256": "5585c11e200aca5ec94e79cc3e860c7b2334937fa0dda7fea922b885d4805d52",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 3,
+    "before": {
+      "opening_line": 236,
+      "closing_line": 253,
+      "body": "// \u26a0\ufe0f Acceptable - Mutable builder pattern\npublic struct ApduBuilder\n{\n    private byte _cla;\n    private byte _ins;\n    private byte[] _data;\n    \n    public ApduBuilder WithCommand(byte cla, byte ins)\n    {\n        _cla = cla;\n        _ins = ins;\n        return this;\n    }\n    \n    public CommandApdu Build() => new(_cla, _ins, 0, 0, _data);\n}\n",
+      "body_sha256": "ca62e60f143c007cd487b2da87eeb5bbf4b638b9f54779c7547ab11701f07146",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 242,
+      "closing_line": 259,
+      "body": "// \u26a0\ufe0f Acceptable - Mutable builder pattern\npublic struct ApduBuilder\n{\n    private byte _cla;\n    private byte _ins;\n    private byte[] _data;\n    \n    public ApduBuilder WithCommand(byte cla, byte ins)\n    {\n        _cla = cla;\n        _ins = ins;\n        return this;\n    }\n    \n    public CommandApdu Build() => new(_cla, _ins, 0, 0, _data);\n}\n",
+      "body_sha256": "ca62e60f143c007cd487b2da87eeb5bbf4b638b9f54779c7547ab11701f07146",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 4,
+    "before": {
+      "opening_line": 261,
+      "closing_line": 284,
+      "body": "// \u2705 BETTER - Immutable with builder\npublic readonly struct CommandApdu\n{\n    // ... immutable properties\n    \n    public static Builder CreateBuilder() => new();\n    \n    public class Builder  // Class builder for mutable state\n    {\n        private byte _cla;\n        private byte _ins;\n        \n        public Builder WithCommand(byte cla, byte ins)\n        {\n            _cla = cla;\n            _ins = ins;\n            return this;\n        }\n        \n        public CommandApdu Build() => new(_cla, _ins, 0, 0);\n    }\n}\n",
+      "body_sha256": "d555511a9c56869ffd3524ad49b23019ce102be2b79e6c62b085b42911e13e4b",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 267,
+      "closing_line": 290,
+      "body": "// \u2705 BETTER - Immutable with builder\npublic readonly struct CommandApdu\n{\n    // ... immutable properties\n    \n    public static Builder CreateBuilder() => new();\n    \n    public class Builder  // Class builder for mutable state\n    {\n        private byte _cla;\n        private byte _ins;\n        \n        public Builder WithCommand(byte cla, byte ins)\n        {\n            _cla = cla;\n            _ins = ins;\n            return this;\n        }\n        \n        public CommandApdu Build() => new(_cla, _ins, 0, 0);\n    }\n}\n",
+      "body_sha256": "d555511a9c56869ffd3524ad49b23019ce102be2b79e6c62b085b42911e13e4b",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 5,
+    "before": {
+      "opening_line": 294,
+      "closing_line": 316,
+      "body": "// \u2705 GOOD - Illustrative application model, not Core's readonly record struct DeviceInfo\npublic class DeviceMetadataExample\n{\n    public string SerialNumber { get; init; }\n    public Version FirmwareVersion { get; init; }\n    public FormFactor FormFactor { get; init; }\n    public IReadOnlyList<Transport> AvailableTransports { get; init; }\n    // ... more properties (>16 bytes total)\n}\n\n// \u2705 GOOD - Contains managed resources\npublic sealed class SmartCardConnection : IConnection\n{\n    private readonly SafeHandle _handle;\n    private readonly ILogger _logger;\n    \n    // ... implementation\n}\n\n// Device monitoring uses the owned YubiKeyMonitor reference type.\n// Create it with YubiKeyManager.CreateMonitorAsync and dispose it with await using.\n",
+      "body_sha256": "b67eaec390e6b6ab3314e05d036b0354d23e9ba77c4d581aa26dafea799c2562",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 300,
+      "closing_line": 322,
+      "body": "// \u2705 GOOD - Illustrative application model, not Core's readonly record struct DeviceInfo\npublic class DeviceMetadataExample\n{\n    public string SerialNumber { get; init; }\n    public Version FirmwareVersion { get; init; }\n    public FormFactor FormFactor { get; init; }\n    public IReadOnlyList<Transport> AvailableTransports { get; init; }\n    // ... more properties (>16 bytes total)\n}\n\n// \u2705 GOOD - Contains managed resources\npublic sealed class SmartCardConnection : IConnection\n{\n    private readonly SafeHandle _handle;\n    private readonly ILogger _logger;\n    \n    // ... implementation\n}\n\n// Device monitoring uses the owned YubiKeyMonitor reference type.\n// Create it with YubiKeyManager.CreateMonitorAsync and dispose it with await using.\n",
+      "body_sha256": "b67eaec390e6b6ab3314e05d036b0354d23e9ba77c4d581aa26dafea799c2562",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 6,
+    "before": {
+      "opening_line": 321,
+      "closing_line": 363,
+      "body": "// \u2705 CommandApdu - Use readonly struct if small OR class if contains byte[]\n// Option A: Small header-only commands\npublic readonly struct CommandApduHeader\n{\n    public CommandApduHeader(byte cla, byte ins, byte p1, byte p2)\n    {\n        CLA = cla; INS = ins; P1 = p1; P2 = p2;\n    }\n    \n    public byte CLA { get; }\n    public byte INS { get; }\n    public byte P1 { get; }\n    public byte P2 { get; }\n}\n\n// Option B: Full APDU with data - use class (contains byte array)\npublic sealed class CommandApdu\n{\n    private readonly ReadOnlyMemory<byte> _data;\n    \n    public CommandApdu(ReadOnlySpan<byte> data)\n    {\n        _data = data.ToArray();\n    }\n    \n    public ReadOnlySpan<byte> AsSpan() => _data.Span;\n}\n\n// \u2705 ResponseApdu - Class (contains byte array)\npublic sealed class ResponseApdu\n{\n    private readonly ReadOnlyMemory<byte> _data;\n    \n    public ResponseApdu(ReadOnlySpan<byte> data)\n    {\n        _data = data.ToArray();\n    }\n    \n    public ReadOnlySpan<byte> Data => _data.Span[..^2];\n    public StatusWord SW => new(_data.Span[^2], _data.Span[^1]);\n}\n",
+      "body_sha256": "f8be2100558e9bac4b7bb6ebe0bb04960c03cd5a741ad959887ba57f886ded47",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 327,
+      "closing_line": 369,
+      "body": "// \u2705 CommandApdu - Use readonly struct if small OR class if contains byte[]\n// Option A: Small header-only commands\npublic readonly struct CommandApduHeader\n{\n    public CommandApduHeader(byte cla, byte ins, byte p1, byte p2)\n    {\n        CLA = cla; INS = ins; P1 = p1; P2 = p2;\n    }\n    \n    public byte CLA { get; }\n    public byte INS { get; }\n    public byte P1 { get; }\n    public byte P2 { get; }\n}\n\n// Option B: Full APDU with data - use class (contains byte array)\npublic sealed class CommandApdu\n{\n    private readonly ReadOnlyMemory<byte> _data;\n    \n    public CommandApdu(ReadOnlySpan<byte> data)\n    {\n        _data = data.ToArray();\n    }\n    \n    public ReadOnlySpan<byte> AsSpan() => _data.Span;\n}\n\n// \u2705 ResponseApdu - Class (contains byte array)\npublic sealed class ResponseApdu\n{\n    private readonly ReadOnlyMemory<byte> _data;\n    \n    public ResponseApdu(ReadOnlySpan<byte> data)\n    {\n        _data = data.ToArray();\n    }\n    \n    public ReadOnlySpan<byte> Data => _data.Span[..^2];\n    public StatusWord SW => new(_data.Span[^2], _data.Span[^1]);\n}\n",
+      "body_sha256": "f8be2100558e9bac4b7bb6ebe0bb04960c03cd5a741ad959887ba57f886ded47",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 7,
+    "before": {
+      "opening_line": 368,
+      "closing_line": 397,
+      "body": "// \u2705 16 bytes - OK for readonly struct\npublic readonly struct DeviceId\n{\n    public Guid Value { get; }  // 16 bytes (128 bits)\n}\n\n// \u2705 8 bytes - Excellent for readonly struct\npublic readonly struct Timestamp\n{\n    public long Ticks { get; }  // 8 bytes\n}\n\n// \u274c 24+ bytes - Use class instead\npublic struct DeviceMetadataExample  // Illustrative large value type, not the SDK DeviceInfo\n{\n    public Guid Id { get; }              // 16 bytes\n    public long Timestamp { get; }        // 8 bytes\n    public int FirmwareVersion { get; }   // 4 bytes\n    // Total: 28 bytes - too large!\n}\n\n// \u2705 Convert to class\npublic sealed class DeviceMetadataExample\n{\n    public Guid Id { get; init; }\n    public long Timestamp { get; init; }\n    public int FirmwareVersion { get; init; }\n}\n",
+      "body_sha256": "7a339ac3ab481cdb4304e314b022ce957d7ec9c57ddebd2826fbf47fdeaa57d1",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 374,
+      "closing_line": 403,
+      "body": "// \u2705 16 bytes - OK for readonly struct\npublic readonly struct DeviceId\n{\n    public Guid Value { get; }  // 16 bytes (128 bits)\n}\n\n// \u2705 8 bytes - Excellent for readonly struct\npublic readonly struct Timestamp\n{\n    public long Ticks { get; }  // 8 bytes\n}\n\n// \u274c 24+ bytes - Use class instead\npublic struct DeviceMetadataExample  // Illustrative large value type, not the SDK DeviceInfo\n{\n    public Guid Id { get; }              // 16 bytes\n    public long Timestamp { get; }        // 8 bytes\n    public int FirmwareVersion { get; }   // 4 bytes\n    // Total: 28 bytes - too large!\n}\n\n// \u2705 Convert to class\npublic sealed class DeviceMetadataExample\n{\n    public Guid Id { get; init; }\n    public long Timestamp { get; init; }\n    public int FirmwareVersion { get; init; }\n}\n",
+      "body_sha256": "7a339ac3ab481cdb4304e314b022ce957d7ec9c57ddebd2826fbf47fdeaa57d1",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 8,
+    "before": {
+      "opening_line": 402,
+      "closing_line": 409,
+      "body": "public struct SensitivePayload  // 32+ bytes, owns private clone!\n{\n    private readonly byte[] _data;  // Copies share storage but have no single disposal/lifetime owner\n    public DateTime Timestamp { get; set; }\n    public Guid CorrelationId { get; set; }\n}\n",
+      "body_sha256": "081d389812cb6970faf98a1cf411653de38a1dddb8ee1eee6a4a4527ab2fddc6",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 408,
+      "closing_line": 415,
+      "body": "public struct SensitivePayload  // 32+ bytes, owns private clone!\n{\n    private readonly byte[] _data;  // Copies share storage but have no single disposal/lifetime owner\n    public DateTime Timestamp { get; set; }\n    public Guid CorrelationId { get; set; }\n}\n",
+      "body_sha256": "081d389812cb6970faf98a1cf411653de38a1dddb8ee1eee6a4a4527ab2fddc6",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 9,
+    "before": {
+      "opening_line": 412,
+      "closing_line": 415,
+      "body": "var list = new List<MutableStruct>();\nlist[0].Value = 10;  // Modifies COPY, not original!\n",
+      "body_sha256": "2f3bd012f14224605c97d3c7271ef1e61d4453a3eef970e8b7c1981772971b4c",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 418,
+      "closing_line": 421,
+      "body": "var list = new List<MutableStruct>();\nlist[0].Value = 10;  // Modifies COPY, not original!\n",
+      "body_sha256": "2f3bd012f14224605c97d3c7271ef1e61d4453a3eef970e8b7c1981772971b4c",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 10,
+    "before": {
+      "opening_line": 418,
+      "closing_line": 422,
+      "body": "public readonly struct ApduHeader { /* 4 bytes, no sensitive payload */ }\npublic readonly record struct ApduCommand { /* ReadOnlyMemory<byte> passthrough \u2014 caller owns and zeroes */ }\npublic sealed class SessionKey : IDisposable { /* Owns private byte[] clone \u2014 zeroes in Dispose() */ }\n",
+      "body_sha256": "d73a67968a044473a28f47045d34a3ed0bd410569a47d4ed39e10a37ce5b5b77",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 424,
+      "closing_line": 428,
+      "body": "public readonly struct ApduHeader { /* 4 bytes, no sensitive payload */ }\npublic readonly record struct ApduCommand { /* ReadOnlyMemory<byte> passthrough \u2014 caller owns and zeroes */ }\npublic sealed class SessionKey : IDisposable { /* Owns private byte[] clone \u2014 zeroes in Dispose() */ }\n",
+      "body_sha256": "d73a67968a044473a28f47045d34a3ed0bd410569a47d4ed39e10a37ce5b5b77",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 11,
+    "before": {
+      "opening_line": 460,
+      "closing_line": 476,
+      "body": "// \u274c BAD - Only tests ArgumentNullException.ThrowIfNull()\n[Fact]\npublic void Method_WithNullInput_ThrowsArgumentNullException()\n{\n    var sut = new MyClass();\n    Assert.Throws<ArgumentNullException>(() => sut.Process(null));\n}\n\n// \u274c BAD - Only tests basic type checking\n[Fact]\npublic void Method_WithWrongType_ThrowsArgumentException()\n{\n    var sut = new MyClass();\n    Assert.Throws<ArgumentException>(() => sut.Process(wrongType));\n}\n",
+      "body_sha256": "97d68e7349dda8a52698fea3583ce8d2106511e0d6d59b84b9b7dbbbe5a2e34b",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 466,
+      "closing_line": 482,
+      "body": "// \u274c BAD - Only tests ArgumentNullException.ThrowIfNull()\n[Fact]\npublic void Method_WithNullInput_ThrowsArgumentNullException()\n{\n    var sut = new MyClass();\n    Assert.Throws<ArgumentNullException>(() => sut.Process(null));\n}\n\n// \u274c BAD - Only tests basic type checking\n[Fact]\npublic void Method_WithWrongType_ThrowsArgumentException()\n{\n    var sut = new MyClass();\n    Assert.Throws<ArgumentException>(() => sut.Process(wrongType));\n}\n",
+      "body_sha256": "97d68e7349dda8a52698fea3583ce8d2106511e0d6d59b84b9b7dbbbe5a2e34b",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 12,
+    "before": {
+      "opening_line": 485,
+      "closing_line": 492,
+      "body": "// \u274c BAD - Creating a test that will never be implemented\n[Fact(Skip = \"Requires mocking static methods which can't be done\")]\npublic void Method_ActualBehavior_WorksCorrectly()\n{\n    // This will never run\n}\n",
+      "body_sha256": "639c31818db6756a352f8ab9a13e5b9d4830bba8fae6f203801171856a82f518",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 491,
+      "closing_line": 498,
+      "body": "// \u274c BAD - Creating a test that will never be implemented\n[Fact(Skip = \"Requires mocking static methods which can't be done\")]\npublic void Method_ActualBehavior_WorksCorrectly()\n{\n    // This will never run\n}\n",
+      "body_sha256": "639c31818db6756a352f8ab9a13e5b9d4830bba8fae6f203801171856a82f518",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 13,
+    "before": {
+      "opening_line": 505,
+      "closing_line": 524,
+      "body": "using Xunit;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\n\npublic class ProtocolConfigurationExamples\n{\n    [Fact]\n    public void Configure_FirmwareBelow400_UsesNeoMaxSize()\n    {\n        using var connection = new FakeSmartCardConnection { SupportsExtendedApduValue = false };\n        using var protocol = new PcscProtocol(connection);\n\n        protocol.Configure(new FirmwareVersion(3, 5, 0));\n\n        Assert.Equal(1390, protocol.MaxApduSize); // Complete-command ceiling, not a short data chunk.\n    }\n}\n",
+      "body_sha256": "0b45a961044085951da4ada152bf365ce60e5c5aa9ea6c8029d8ece8b41ae5ba",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 511,
+      "closing_line": 530,
+      "body": "using Xunit;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;\nusing Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;\n\npublic class ProtocolConfigurationExamples\n{\n    [Fact]\n    public void Configure_FirmwareBelow400_UsesNeoMaxSize()\n    {\n        using var connection = new FakeSmartCardConnection { SupportsExtendedApduValue = false };\n        using var protocol = new PcscProtocol(connection);\n\n        protocol.Configure(new FirmwareVersion(3, 5, 0));\n\n        Assert.Equal(1390, protocol.MaxApduSize); // Complete-command ceiling, not a short data chunk.\n    }\n}\n",
+      "body_sha256": "0b45a961044085951da4ada152bf365ce60e5c5aa9ea6c8029d8ece8b41ae5ba",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 14,
+    "before": {
+      "opening_line": 527,
+      "closing_line": 541,
+      "body": "// \u2705 GOOD - Tests actual SCP handshake with real hardware\n[Fact]\npublic async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()\n{\n    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);\n    using var scpKeyParams = Scp03KeyParameters.Default;\n    await using var session = await device.CreateManagementSessionAsync(\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: TestContext.Current.CancellationToken);\n\n    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);\n    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);\n}\n",
+      "body_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 533,
+      "closing_line": 547,
+      "body": "// \u2705 GOOD - Tests actual SCP handshake with real hardware\n[Fact]\npublic async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()\n{\n    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);\n    using var scpKeyParams = Scp03KeyParameters.Default;\n    await using var session = await device.CreateManagementSessionAsync(\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: TestContext.Current.CancellationToken);\n\n    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);\n    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);\n}\n",
+      "body_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 15,
+    "before": {
+      "opening_line": 560,
+      "closing_line": 574,
+      "body": "/// <summary>\n///     SCP initialization has a fakeable APDU-processor seam, even though Scp03InitAsync is static.\n/// </summary>\n/// <remarks>\n///     CoreScpAuditReproTests.N2_Scp03InitializeUpdateShortResponse_ThrowsBadResponse supplies a fake\n///     INITIALIZE UPDATE response and checks rejection of malformed lengths. That unit test does not\n///     establish real-device interoperability. Device communication is exercised by integration tests\n///     such as ManagementSessionSimpleTests.CreateManagementSession_WithScp03DefaultKeys_CommunicatesSecurely.\n/// </remarks>\npublic class ScpInitializer\n{\n    // Test fakeable wire behavior directly; use hardware integration tests for device interoperability.\n}\n",
+      "body_sha256": "e3d15741589aef444b49e3f9f6b7f5e64f1c960d7bf7d9fd511adc2362fe99f8",
+      "language": "csharp"
+    },
+    "after": {
+      "opening_line": 566,
+      "closing_line": 580,
+      "body": "/// <summary>\n///     SCP initialization has a fakeable APDU-processor seam, even though Scp03InitAsync is static.\n/// </summary>\n/// <remarks>\n///     CoreScpAuditReproTests.N2_Scp03InitializeUpdateShortResponse_ThrowsBadResponse supplies a fake\n///     INITIALIZE UPDATE response and checks rejection of malformed lengths. That unit test does not\n///     establish real-device interoperability. Device communication is exercised by integration tests\n///     such as ManagementSessionSimpleTests.CreateManagementSession_WithScp03DefaultKeys_CommunicatesSecurely.\n/// </remarks>\npublic class ScpInitializer\n{\n    // Test fakeable wire behavior directly; use hardware integration tests for device interoperability.\n}\n",
+      "body_sha256": "e3d15741589aef444b49e3f9f6b7f5e64f1c960d7bf7d9fd511adc2362fe99f8",
+      "language": "csharp"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 16,
+    "before": {
+      "opening_line": 619,
+      "closing_line": 624,
+      "body": "gh stack init --base yubikit <branch>   # v2; v1 work uses --base develop\ngh stack add <branch>\ngh stack submit\ngh stack rebase && gh stack push && gh stack submit\n",
+      "body_sha256": "45b71aa3b35c053f64fe58df4c17081557a53d5d0a8b513f209d1738d86a4b1e",
+      "language": "bash"
+    },
+    "after": {
+      "opening_line": 625,
+      "closing_line": 630,
+      "body": "gh stack init --base yubikit <branch>   # v2; v1 work uses --base develop\ngh stack add <branch>\ngh stack submit\ngh stack rebase && gh stack push && gh stack submit\n",
+      "body_sha256": "45b71aa3b35c053f64fe58df4c17081557a53d5d0a8b513f209d1738d86a4b1e",
+      "language": "bash"
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  },
+  {
+    "path": "CLAUDE.md",
+    "body_number": 17,
+    "before": {
+      "opening_line": 634,
+      "closing_line": 636,
+      "body": "    dotnet format Yubico.YubiKit.sln --include $(git diff --name-only HEAD -- '*.cs')\n",
+      "body_sha256": "bed507505e203496713b064a95b862c854e79a7d83ccd89275018c2603db6bed",
+      "language": ""
+    },
+    "after": {
+      "opening_line": 640,
+      "closing_line": 642,
+      "body": "    dotnet format Yubico.YubiKit.sln --include $(git diff --name-only HEAD -- '*.cs')\n",
+      "body_sha256": "bed507505e203496713b064a95b862c854e79a7d83ccd89275018c2603db6bed",
+      "language": ""
+    },
+    "body_unchanged": true,
+    "compilation_execution": "NOT RUN; unchanged example, no new eligibility claim"
+  }
+]

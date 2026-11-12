@@ -1,0 +1,1391 @@
+{
+  "schema": "core-C-revision-2-identities-v1",
+  "base_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "prior_ledger": "../files.json",
+  "prior_ledger_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+  "primary_paths": [
+    {
+      "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+      "current_sha256": "7e375afde276858564d7ca7699a9b888096facb62e633ff19e7dbd640b2523d9",
+      "prior_record": "../files.json#/0",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C001",
+        "CORE-C-C002",
+        "CORE-C-C003",
+        "CORE-C-C004"
+      ],
+      "proposal_mapping": [
+        "FPT-083",
+        "FPT-084",
+        "FPT-085",
+        "FPT-086"
+      ]
+    },
+    {
+      "path": "src/Core/src/Credentials/CredentialKind.cs",
+      "current_sha256": "31aea8d0c89266ac907f00b187e656e7c67f7556fb155c361b72b214f5c675dd",
+      "prior_record": "../files.json#/1",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Credentials/CredentialPromptContext.cs",
+      "current_sha256": "6ffb3f8f7700b8fb6736a5af274cb9f646b2d4c68c1e2ecf60cb19a0209303fd",
+      "prior_record": "../files.json#/2",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C003"
+      ],
+      "proposal_mapping": [
+        "FPT-085"
+      ]
+    },
+    {
+      "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+      "current_sha256": "38db90c0798d78426885729202e0095ec1bea05669c2ef1239f2f5acd5f90fa5",
+      "prior_record": "../files.json#/3",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C003"
+      ],
+      "proposal_mapping": [
+        "FPT-085"
+      ]
+    },
+    {
+      "path": "src/Core/src/Credentials/IConsoleInputSource.cs",
+      "current_sha256": "1c5d1758ba6add46dc7f393d1eff07613da7d9a23c446455cf9c3dfe98ab38d2",
+      "prior_record": "../files.json#/4",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Credentials/ICredentialPrompt.cs",
+      "current_sha256": "9a1ffa2cbf6ff55651c835ec762ce81a8953c65fda6c84314fdf58d9baf633ee",
+      "prior_record": "../files.json#/5",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C003",
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-085",
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/src/Credentials/ISecureCredentialReader.cs",
+      "current_sha256": "f2b6a0687cc3d628a52c65ee27d77df45e0458aa6eab2b3537bd7cb6fe3ee669",
+      "prior_record": "../files.json#/6",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C001",
+        "CORE-C-C002",
+        "CORE-C-C004",
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-083",
+        "FPT-084",
+        "FPT-086",
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/src/Credentials/IUserPresencePrompt.cs",
+      "current_sha256": "a569b9dd7c0a0386554ecae71c3de0b5854441c75e16d2bb8e4ba6ea734811c9",
+      "prior_record": "../files.json#/7",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceApplications.cs",
+      "current_sha256": "8bb35f828eadb9e8cbe84a1a0fdbeb96539b8dce9920ce3d41853436cc07fcf7",
+      "prior_record": "../files.json#/8",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceBasis.cs",
+      "current_sha256": "ed4831a45ec802ad1848b6d53a2eb60c9a664409f9b7ffae450bf629f5f978ff",
+      "prior_record": "../files.json#/9",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceContext.cs",
+      "current_sha256": "01fd2d3b668e6cde7811eddc27e9cf2dcf83f20097a13d6af3d0d537fb543d1c",
+      "prior_record": "../files.json#/10",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+      "current_sha256": "7aaca59de916782b7762b1c6d3f4ff614a31109ff5077c78c8a9c88627310c8f",
+      "prior_record": "../files.json#/11",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C008"
+      ],
+      "proposal_mapping": [
+        "FPT-090"
+      ]
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+      "current_sha256": "9606437dfc5bb05a71754956cdf8ee962acde15d56aa1e05cd2d2cb7dd2d3baa",
+      "prior_record": "../files.json#/12",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C008"
+      ],
+      "proposal_mapping": [
+        "FPT-090"
+      ]
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceOperations.cs",
+      "current_sha256": "ca493e573bbc6d80e1c8f057ddf12075284cba8db2fe02be21faf60ddcff7ff9",
+      "prior_record": "../files.json#/13",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Credentials/UserPresenceOutcome.cs",
+      "current_sha256": "c6c3184b39fc3c58c631666b1b42a4e61fa34ae4ad9a65a69793526bfa145b2f",
+      "prior_record": "../files.json#/14",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/AesUtilities.cs",
+      "current_sha256": "17f3932d55346e8e4d11c27b9137135e5d9283c93be9926f1af59d3979659425",
+      "prior_record": "../files.json#/15",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": true,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C013"
+      ],
+      "proposal_mapping": [
+        "FPT-095"
+      ],
+      "current_changed_documentation_ranges_from_base": [
+        {
+          "base_start": 18,
+          "base_count": 0,
+          "current_start": 19,
+          "current_count": 9
+        },
+        {
+          "base_start": 92,
+          "base_count": 1,
+          "current_start": 101,
+          "current_count": 1
+        },
+        {
+          "base_start": 162,
+          "base_count": 1,
+          "current_start": 171,
+          "current_count": 1
+        },
+        {
+          "base_start": 225,
+          "base_count": 1,
+          "current_start": 234,
+          "current_count": 1
+        }
+      ],
+      "review_correction": "C-REVIEW-001"
+    },
+    {
+      "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+      "current_sha256": "45dc63f9c0efea2c37440ffad433182a7b8fa5b356d3f06738873e6a76ac4e97",
+      "prior_record": "../files.json#/16",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C015"
+      ],
+      "proposal_mapping": [
+        "FPT-097"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/ArkgPrimitives.cs",
+      "current_sha256": "a01efcdb859522d65147ef3194d255537f9e993a3226a8c2a0c2fc110e7b164a",
+      "prior_record": "../files.json#/17",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C012",
+        "CORE-C-C019"
+      ],
+      "proposal_mapping": [
+        "FPT-094",
+        "FPT-101"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+      "current_sha256": "82f8d05d60381ff6a793e14c04b392752b0cb4b69fe7f6ed9765c84da225883e",
+      "prior_record": "../files.json#/18",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C011",
+        "CORE-C-C018",
+        "CORE-C-C019"
+      ],
+      "proposal_mapping": [
+        "FPT-093",
+        "FPT-100",
+        "FPT-101"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/Asn1KeyInfo.cs",
+      "current_sha256": "39dc6cb4e51935d0834e60a947f8ac766e7d1bb2bab32984ad154ecfa6457dde",
+      "prior_record": "../files.json#/19",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPrivateKeyDecoder.cs",
+      "current_sha256": "8ee77d7217e93934f341755d721b9dd2076e84ef6b75e1b14e7ffc0946880e97",
+      "prior_record": "../files.json#/20",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C009",
+        "CORE-C-C014",
+        "CORE-C-C016"
+      ],
+      "proposal_mapping": [
+        "FPT-091",
+        "FPT-096",
+        "FPT-098"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPrivateKeyEncoder.cs",
+      "current_sha256": "8504b99a7f51a6f867bd1a101652ba50ee24477ef3799d19e14de63d593f94e8",
+      "prior_record": "../files.json#/21",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C013",
+        "CORE-C-C016"
+      ],
+      "proposal_mapping": [
+        "FPT-095",
+        "FPT-098"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPublicKeyDecoder.cs",
+      "current_sha256": "26b7907b746f9a296d99f66128cae255e38c86a766b66321ed6f9a8c9ab1ca78",
+      "prior_record": "../files.json#/22",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C009"
+      ],
+      "proposal_mapping": [
+        "FPT-091"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnPublicKeyEncoder.cs",
+      "current_sha256": "bf4b9b50f28551e6bea8c969a5ca4f7c7cda7da1c71377b579c9e8ee56b05e2e",
+      "prior_record": "../files.json#/23",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/AsnUtilities.cs",
+      "current_sha256": "15587cfb868ec3d36b5c0d83dff66a823608b4d70ecf59c2c751f3e6b7061707",
+      "prior_record": "../files.json#/24",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C010",
+        "CORE-C-C016"
+      ],
+      "proposal_mapping": [
+        "FPT-092",
+        "FPT-098"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/CmacPrimitives.cs",
+      "current_sha256": "a932263c808aa568e3cb6ca77e24b20301a4bf568c005dccbae75b0b2686ffcd",
+      "prior_record": "../files.json#/25",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/CmacPrimitivesOpenSsl.cs",
+      "current_sha256": "a668602bef0417d1a7235da49a8e7c62b97e6ae20455ad007c555816900f5a7a",
+      "prior_record": "../files.json#/26",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C013",
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-095",
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseAlgorithmIdentifier.cs",
+      "current_sha256": "5c19d5a3538db6a1f31a663f9f6f707c4e422508fe277e6983a4915c5ffaecf5",
+      "prior_record": "../files.json#/27",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C015"
+      ],
+      "proposal_mapping": [
+        "FPT-097"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseEcCurve.cs",
+      "current_sha256": "6c237d7c9881e20dbbd31be119d012a8214eed6135124f0c7176b35e287c5de4",
+      "prior_record": "../files.json#/28",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C015"
+      ],
+      "proposal_mapping": [
+        "FPT-097"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs",
+      "current_sha256": "c84aa56f757fda2e5f7597962cf6df740f36cff2275dc9585373b2e0c9f3c22d",
+      "prior_record": "../files.json#/29",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseKeyOperations.cs",
+      "current_sha256": "fcdef228f4a2bb3d050699194981b33245f865bb755b4bc0303dbfbd2c7233bb",
+      "prior_record": "../files.json#/30",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/Cose/CoseKeyType.cs",
+      "current_sha256": "299644fa0ce91355c674780157f3528f304e20dd2fdcfc923322d2b13fcdea44",
+      "prior_record": "../files.json#/31",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C015"
+      ],
+      "proposal_mapping": [
+        "FPT-097"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Algorithms.cs",
+      "current_sha256": "e72da0896c4ade8a22eb0ce5699a842edc7b6314465c29b706396c7ee4b58827",
+      "prior_record": "../files.json#/32",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [
+        "CORE-C-C015"
+      ],
+      "proposal_mapping": [
+        "FPT-097"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Curves.cs",
+      "current_sha256": "778fee571d0f0395df1e6f40b56f50b9a899576fc23c3acbfcf633c08e9a10fc",
+      "prior_record": "../files.json#/33",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.Keys.cs",
+      "current_sha256": "81c2c47e2a3faa58457531d9e45e887cc4683517945a6fa4beb7bfab269050fa",
+      "prior_record": "../files.json#/34",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographicDefinitions.cs",
+      "current_sha256": "9fde6c5422b1f74c68bc987097c5a0e81e55b2af90378038e52c93ff1a37644a",
+      "prior_record": "../files.json#/35",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+      "current_sha256": "db7f06987aa2d914738b1221a1a25aa8e9dc95d5be3dc8e64391c55ca0f5df03",
+      "prior_record": "../files.json#/36",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C012",
+        "CORE-C-C018"
+      ],
+      "proposal_mapping": [
+        "FPT-094",
+        "FPT-100"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/Curve25519PrivateKey.cs",
+      "current_sha256": "75725ac0e25041a681382cafcd60cdcead480c0c6a700e094e1bb13668fc4b00",
+      "prior_record": "../files.json#/37",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C009"
+      ],
+      "proposal_mapping": [
+        "FPT-091"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/Curve25519PublicKey.cs",
+      "current_sha256": "ffe47de2652fd7dca99d9b3d6141a2725aa03a770712211865fbd272defc6906",
+      "prior_record": "../files.json#/38",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C010"
+      ],
+      "proposal_mapping": [
+        "FPT-092"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/CurveInfo.cs",
+      "current_sha256": "9847305b871aed1a752cb54a4a3e5f294ae2f9e91b165c6ac584d0c1b15e03b3",
+      "prior_record": "../files.json#/39",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECParametersExtensions.cs",
+      "current_sha256": "05e16bbbe01261b47a03a96b286c3eb3dfe1c129b9586f7d2c457a3c00c82f96",
+      "prior_record": "../files.json#/40",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C010"
+      ],
+      "proposal_mapping": [
+        "FPT-092"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+      "current_sha256": "b5da4960c915723491bf70ad610b0652fa722e451a69ce68122a098fdab7e7cb",
+      "prior_record": "../files.json#/41",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C010",
+        "CORE-C-C011",
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-092",
+        "FPT-093",
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+      "current_sha256": "e9f9d6b291e8b93e310154f3e070fcca11fbfef0f1ec249c033cc4c44c485a13",
+      "prior_record": "../files.json#/42",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C009",
+        "CORE-C-C010"
+      ],
+      "proposal_mapping": [
+        "FPT-091",
+        "FPT-092"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/EcdhPrimitives.cs",
+      "current_sha256": "212452f774a2b1fe5b440dc08ef3684658e273db19d99fc03c787f24a6c9aa0c",
+      "prior_record": "../files.json#/43",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/IArkgPrimitives.cs",
+      "current_sha256": "e2e6a3d3fd2cccc655db0a1a93e3ec1896d43aa0b513dced58e676c36f7dfb6a",
+      "prior_record": "../files.json#/44",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C011",
+        "CORE-C-C018"
+      ],
+      "proposal_mapping": [
+        "FPT-093",
+        "FPT-100"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/ICmacPrimitives.cs",
+      "current_sha256": "35e581309105f2e3502121d41453e2ad54a43ff7d8f54aff0085fb987800b9a2",
+      "prior_record": "../files.json#/45",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [
+        "CORE-C-C013"
+      ],
+      "proposal_mapping": [
+        "FPT-095"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/IEcdhPrimitives.cs",
+      "current_sha256": "d18fde691b1a4316a1b0a582a39c76a0a9a5192a099bd36e28e4949df1076493",
+      "prior_record": "../files.json#/46",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C013"
+      ],
+      "proposal_mapping": [
+        "FPT-095"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/IKeyBase.cs",
+      "current_sha256": "0df7a9691d6c628cb86bd4a1b899595b86b1a2aa0c8ac92d84b911ba37e90fb9",
+      "prior_record": "../files.json#/47",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/IPrivateKey.cs",
+      "current_sha256": "a5e02fcf62680464795ad5b4f323b08cc3676803184086994347fffc31614d2d",
+      "prior_record": "../files.json#/48",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/IPrivateKeyExtensions.cs",
+      "current_sha256": "f4d100755cc3130896c3cca87a8a8e9e191aa2478be12ed60ca564f7a36081f6",
+      "prior_record": "../files.json#/49",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/IPublicKey.cs",
+      "current_sha256": "e67be70749b5ca6cf534d1f3932e718f87e6af834b422e6fb2aa035915990508",
+      "prior_record": "../files.json#/50",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/IPublicKeyExtensions.cs",
+      "current_sha256": "22310de0be252b46e787a4cc48fbb68bf6e303a53634cf0d09e3797935753cd9",
+      "prior_record": "../files.json#/51",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/KeyInfo.cs",
+      "current_sha256": "9e48f5e0e3cdbd62f9d5c64a6b5fe84f3e3ca629e5865b8750749079507ec465",
+      "prior_record": "../files.json#/52",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/KeyType.cs",
+      "current_sha256": "4ccb9fda8061067084e070c682b4a535bda038a4f3382224c2ade229328c7e8d",
+      "prior_record": "../files.json#/53",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [
+        "CORE-C-C015"
+      ],
+      "proposal_mapping": [
+        "FPT-097"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/KeyTypeExtensions.cs",
+      "current_sha256": "bb760af5e5690885675018e5be005770f9c97f6c4f7497fa502c684135294bdb",
+      "prior_record": "../files.json#/54",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/Oids.cs",
+      "current_sha256": "31af57e783095af7a7d62939706e81efc6974085577c15699975b472f721c2e2",
+      "prior_record": "../files.json#/55",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/PrivateKey.cs",
+      "current_sha256": "db8b4268ed403aa80d262c308e99b391124535d05f9503f698fbddadc5e7a8da",
+      "prior_record": "../files.json#/56",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/PrivateKeyConsistency.cs",
+      "current_sha256": "3d6c47f447a20766ea20a3a7e9c7feb661639c02b588a8c60dd32a7121cbbda0",
+      "prior_record": "../files.json#/57",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C010",
+        "CORE-C-C011"
+      ],
+      "proposal_mapping": [
+        "FPT-092",
+        "FPT-093"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/PublicKey.cs",
+      "current_sha256": "338ae06b1b5fb64f401a86bc9eed7ac5f2180f6f7c1c7d247c758fddd8a2056d",
+      "prior_record": "../files.json#/58",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAParametersExtensions.cs",
+      "current_sha256": "45a6c27b898b24aeefc1681b21e561e3566f010244a7283aacc89b9cfd7459c9",
+      "prior_record": "../files.json#/59",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C010",
+        "CORE-C-C013",
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-092",
+        "FPT-095",
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAPrivateKey.cs",
+      "current_sha256": "f65cd61ee52425ab9e952a2eee5e987ae7ece24f2826493d5a2731334ac50072",
+      "prior_record": "../files.json#/60",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C009",
+        "CORE-C-C010",
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-091",
+        "FPT-092",
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/RSAPublicKey.cs",
+      "current_sha256": "54784fc400d7221094f4111fb69db34ef1bcb959450965f8d0500cdb663eb5f5",
+      "prior_record": "../files.json#/61",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C009",
+        "CORE-C-C010"
+      ],
+      "proposal_mapping": [
+        "FPT-091",
+        "FPT-092"
+      ]
+    },
+    {
+      "path": "src/Core/src/Cryptography/RsaFormat.cs",
+      "current_sha256": "9cd9277c402d58d0dd9bad00023ffdb7ea14a8f89ad000b7c035b69f222b3c53",
+      "prior_record": "../files.json#/62",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Cryptography/X963Kdf.cs",
+      "current_sha256": "99dbc7e0cd8468c2f3febeaf6fdbdfc2aa46b3373d5baad10a8b481541f6abf4",
+      "prior_record": "../files.json#/63",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C013"
+      ],
+      "proposal_mapping": [
+        "FPT-095"
+      ]
+    },
+    {
+      "path": "src/Core/src/Utilities/Base32.cs",
+      "current_sha256": "326de36769cdefb2136354bace6b496e39c2731d478299473475fa29e58e4011",
+      "prior_record": "../files.json#/64",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Utilities/BerLength.cs",
+      "current_sha256": "da923dae9ab0248000b149cae26611cd20ef7a84d4eca023bb8f3cec3bd65698",
+      "prior_record": "../files.json#/65",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C007"
+      ],
+      "proposal_mapping": [
+        "FPT-089"
+      ]
+    },
+    {
+      "path": "src/Core/src/Utilities/ByteUtils.cs",
+      "current_sha256": "4d79076d1895f41a7d2bf3509902b0e807dfaf66ab4a12591450d65e3a4359b2",
+      "prior_record": "../files.json#/66",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Utilities/Crc13239.cs",
+      "current_sha256": "5d35425361675fc7ec4e8ee4c21203e17bf9f7af9677fc9c3e7d1c22a0d49619",
+      "prior_record": "../files.json#/67",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs",
+      "current_sha256": "6a1a905f9c9b655f5d0c617891a78e0d8dfa7f9e40ff497798d0b2e292495724",
+      "prior_record": "../files.json#/68",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C005"
+      ],
+      "proposal_mapping": [
+        "FPT-087"
+      ]
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableBufferHandle.cs",
+      "current_sha256": "3f2a3b6c5c9b7f8e31fbd16eccf382df7e66fa8663520b8969774a07a708b980",
+      "prior_record": "../files.json#/69",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C005"
+      ],
+      "proposal_mapping": [
+        "FPT-087"
+      ]
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableTlvDictionary.cs",
+      "current_sha256": "8c4d4a149f4eb80f2623f62e0ef043932d66f6502057b6946a9eb231e00e6b2f",
+      "prior_record": "../files.json#/70",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Utilities/DisposableTlvList.cs",
+      "current_sha256": "13aaaf632d7d18748b07d902e705877f199d79e547bb49fe2600fa0f9bb90bdf",
+      "prior_record": "../files.json#/71",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C005"
+      ],
+      "proposal_mapping": [
+        "FPT-087"
+      ]
+    },
+    {
+      "path": "src/Core/src/Utilities/MemoryExtensions.cs",
+      "current_sha256": "98505ef4490a1596f9a8a071b70dc60fad435d3f86a75a9ea4b81d4ac1669cf9",
+      "prior_record": "../files.json#/72",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C005"
+      ],
+      "proposal_mapping": [
+        "FPT-087"
+      ]
+    },
+    {
+      "path": "src/Core/src/Utilities/MultiString.cs",
+      "current_sha256": "45adcedd24700ced17e77bcd758de47b33ad50f1168d5b1c3446009ee7c13735",
+      "prior_record": "../files.json#/73",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/src/Utilities/Tlv.cs",
+      "current_sha256": "dfdf9731f0f4521b6749afda8506a9fa2a3a6d0a68fa437383adab1739eef028",
+      "prior_record": "../files.json#/74",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C005",
+        "CORE-C-C007"
+      ],
+      "proposal_mapping": [
+        "FPT-087",
+        "FPT-089"
+      ]
+    },
+    {
+      "path": "src/Core/src/Utilities/TlvHelper.cs",
+      "current_sha256": "af4e21d6a3913c38bf3c7e3f1afbe8ee1625e3c355facebbb2ab85d696fbe1ab",
+      "prior_record": "../files.json#/75",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C006",
+        "CORE-C-C007"
+      ],
+      "proposal_mapping": [
+        "FPT-088",
+        "FPT-089"
+      ]
+    },
+    {
+      "path": "src/Core/src/YubiKitLogging.cs",
+      "current_sha256": "a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b",
+      "prior_record": "../files.json#/76",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C008"
+      ],
+      "proposal_mapping": [
+        "FPT-090"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreCredentialReaderAuditReproTests.cs",
+      "current_sha256": "4c5cba1c0c827f8a15cb3c545672e183252d9244a647a019ecc723435eb2b537",
+      "prior_record": "../files.json#/77",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C002",
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-084",
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreNumericBoundaryAuditReproTests.cs",
+      "current_sha256": "ecaa0167ed46ba84809f1789d121d0bbba314e6e6e6a3951cf87020e6a910c48",
+      "prior_record": "../files.json#/78",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C007",
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-089",
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/ConsoleCredentialReaderTests.cs",
+      "current_sha256": "d6e02a1f3fcbee186b6d465db79fd1dff4b744f032a8c5681cae281d103916aa",
+      "prior_record": "../files.json#/79",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [
+        "CORE-C-C004"
+      ],
+      "proposal_mapping": [
+        "FPT-086"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/HexParsingTests.cs",
+      "current_sha256": "88b9e489b25d68f425b6320d36a84a213bb882b8d3a66db4e092e304ae39cea4",
+      "prior_record": "../files.json#/80",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Credentials/UserPresenceIntentTests.cs",
+      "current_sha256": "cc11552fb8359df794c955c431e412272cab8ae6f87a6bf23522b788629937f9",
+      "prior_record": "../files.json#/81",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AlgorithmIdentifierParameterTests.cs",
+      "current_sha256": "1e392325edcc90d627a0dfd65a1f58a912c2fe20f5adacffc536f70352d9f768",
+      "prior_record": "../files.json#/82",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/ArkgP256Tests.cs",
+      "current_sha256": "de9ee73e9d918441d66e3f71cc0197c1105b4625f30185fa2a987612b7215fc0",
+      "prior_record": "../files.json#/83",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C018",
+        "CORE-C-C019"
+      ],
+      "proposal_mapping": [
+        "FPT-100",
+        "FPT-101"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyDecoderTests.cs",
+      "current_sha256": "375581b5321b6b8c4975d137c17e389d27e2ab7ea7b11c221fb51dbb20bafd44",
+      "prior_record": "../files.json#/84",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C013",
+        "CORE-C-C014",
+        "CORE-C-C016"
+      ],
+      "proposal_mapping": [
+        "FPT-095",
+        "FPT-096",
+        "FPT-098"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPrivateKeyEncoderTests.cs",
+      "current_sha256": "4051b8ba7c567249aeb6871d2eb5864a52b2c652cb24c93977f960dc6b272145",
+      "prior_record": "../files.json#/85",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C013",
+        "CORE-C-C014",
+        "CORE-C-C016"
+      ],
+      "proposal_mapping": [
+        "FPT-095",
+        "FPT-096",
+        "FPT-098"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyDecoderTests.cs",
+      "current_sha256": "8b3a173ae3bd241b4ec07d73a9d30c3d08bb36071f46e1405e686355d21e1578",
+      "prior_record": "../files.json#/86",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnPublicKeyEncoderTests.cs",
+      "current_sha256": "3ba5f002966c4566ff894a214079b9c570167304dd1a7b512a898640febbfaf6",
+      "prior_record": "../files.json#/87",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/AsnUtilitiesTests.cs",
+      "current_sha256": "d66e1e5976ce1090b6545cacefba11e4f66c07f4e060d417e58cd94bfd6a511b",
+      "prior_record": "../files.json#/88",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicAlgorithmApplicabilityTests.cs",
+      "current_sha256": "3d176b07a6c9ee5a51c88efbf49e06fb9273d54f6d42bbb96207655a718cad8a",
+      "prior_record": "../files.json#/89",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C015"
+      ],
+      "proposal_mapping": [
+        "FPT-097"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographicDefinitionsTests.cs",
+      "current_sha256": "26d450371b0ad0de2af0a23a5f5f4ad36cc2ea1c9c38f964adb272017bb4ce00",
+      "prior_record": "../files.json#/90",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/CryptographyProviderExtensionTests.cs",
+      "current_sha256": "b0d78f740745504de4c6e636f2013fbf95ca070938b2483f2f3c993ef3cfc294",
+      "prior_record": "../files.json#/91",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [
+        "CORE-C-C012"
+      ],
+      "proposal_mapping": [
+        "FPT-094"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/Curve25519PrivateKeyTests.cs",
+      "current_sha256": "7a41e3311bd2d0e8849584a11264437a688c2b416f6cd238630608b351df1ecc",
+      "prior_record": "../files.json#/92",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/EcTestSupport.cs",
+      "current_sha256": "8c9ecb3fbfc3407945111b012b39c4171961ed9c652e07b5dc7d134a406cf0dd",
+      "prior_record": "../files.json#/93",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C017"
+      ],
+      "proposal_mapping": [
+        "FPT-099"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/KnownPrivateKeyVectors.cs",
+      "current_sha256": "10fa11ba4295d4a34ef97b877953b02ec38e2152163a8910374ee3ef7f434814",
+      "prior_record": "../files.json#/94",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/NamedCurveCatalogVectorsTests.cs",
+      "current_sha256": "b0b0ea4eeec11dd117983b4f1cd854bf6a230ac03514d249e0cb1dfc86c7c5c0",
+      "prior_record": "../files.json#/95",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyConsistencyTests.cs",
+      "current_sha256": "6bf4c94ffaad5057920d04ebbdfc2498cfd71a8cdeb12b006bde9624eedcdccf",
+      "prior_record": "../files.json#/96",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyDecodingZeroingTests.cs",
+      "current_sha256": "c40f52063e35bbd97a0f1ab60c9a4b1e25a03cc7af20615be4aee6ff5333feff",
+      "prior_record": "../files.json#/97",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Cryptography/PrivateKeyZeroingFollowupTests.cs",
+      "current_sha256": "9ed00911dd78fa126730664aebe3e658bac914db05826d1e45b72b03f40b7b99",
+      "prior_record": "../files.json#/98",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+      "current_sha256": "7ad62c849fa4023baa623ae74bdb675756725e8d2bf5a3186354b5c01c4702b4",
+      "prior_record": "../files.json#/99",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableArrayPoolBufferTests.cs",
+      "current_sha256": "c769011cc5fd5a1a1b27cd5d51d345ef5413f7c272c5a31e56fd8d5d6b1cf8ec",
+      "prior_record": "../files.json#/100",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/DisposableTlvListTests.cs",
+      "current_sha256": "a324cd388a830a5db885e59b97558741a5254c2aceb6b525859adcf575ebb5f3",
+      "prior_record": "../files.json#/101",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvHelperTests.cs",
+      "current_sha256": "03cd00c4c169df7f097684c14545575bf3bdcb3e102bba8bd237cc9309645afb",
+      "prior_record": "../files.json#/102",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "EDIT",
+      "candidate_mapping": [
+        "CORE-C-C006",
+        "CORE-C-C007",
+        "CORE-C-C014"
+      ],
+      "proposal_mapping": [
+        "FPT-088",
+        "FPT-089",
+        "FPT-096"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/TlvTests.cs",
+      "current_sha256": "0de8bda5324ae6b29f00245df91ddae8a6aa33a34b375f703695f655260de92a",
+      "prior_record": "../files.json#/103",
+      "prior_record_sha256": "3ff90a3ed3e6a6971cd75a83af309d40ca3e19497c6e8eafde0d93a1b428d8f9",
+      "changed_since_review": false,
+      "decision": "RETAIN",
+      "candidate_mapping": [],
+      "proposal_mapping": []
+    }
+  ],
+  "current_identity_set_sha256": "af7d3eb18826ba696eb16ba2d7d4652da9972ab2c7eefc4675ecd0636c06a5e1"
+}

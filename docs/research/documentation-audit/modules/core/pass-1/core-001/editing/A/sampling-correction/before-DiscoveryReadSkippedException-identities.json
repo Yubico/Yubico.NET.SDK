@@ -1,0 +1,11 @@
+{
+  "sample": "SAMPLE-A002",
+  "selected_unit_ids": [
+    "core-001:unit:c085f1cd3632e7c2",
+    "core-001:unit:076b4d4328825902"
+  ],
+  "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+  "before_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+  "primary_before_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+  "primary_bytes_equal": true
+}

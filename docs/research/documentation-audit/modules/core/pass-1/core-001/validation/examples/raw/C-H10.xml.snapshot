@@ -1,0 +1,7 @@
+
+//         ///   SHA-256(M-Prime)
+//         ///     This will be
+//         ///   SHA-256(mPrimeAndH, 0, (2 * digestLength) + 8)
+//         ///     or
+//         ///   SHA-256(mPrimeAndH, 0, 72) // offset 0, length 72
+//         /// 

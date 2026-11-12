@@ -1,0 +1,72 @@
+{
+  "old_project_count": 25,
+  "new_project_count": 26,
+  "added_project": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+    "bytes": 1012,
+    "sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156"
+  },
+  "added_existing_project_files": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/AuditV2/ManagementAuditReproTests.cs",
+      "bytes": 4180,
+      "sha256": "37bb1351fa289ecc549d925335d4d02502fcac62c6c5eb84b13d42f7b0dfcf4f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "bytes": 16302,
+      "sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "bytes": 12223,
+      "sha256": "906daac2d262529d5104083f6804869df2c008bb2968045b485e14af060ef661"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementBackendLifecycleTests.cs",
+      "bytes": 3286,
+      "sha256": "ce0f8245201cde725b60fb5a10992a94f94faebad857cc7b026769a39c475de5"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionExchangeOverlapTests.cs",
+      "bytes": 6921,
+      "sha256": "fba3474e0de7c6a4c28dff5c4f48836590df2cb16c01e4fee13dfd69e68fefda"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "bytes": 14064,
+      "sha256": "b2fb7e6c388c09a014113ea1f7bf05fff77438153db217e12375b9e126d44baf"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+      "bytes": 1012,
+      "sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/xunit.runner.json",
+      "bytes": 77,
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad"
+    }
+  ],
+  "direct_references": [
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/Yubico.YubiKit.Management.csproj"
+  ],
+  "transitive_references": [
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj"
+  ],
+  "runner": "Existing xunit.v3/3.0.0 + MTP; no runner/package/project edits.",
+  "compile_sources_removed": [
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.IntegrationTests/FULL-061.cs"
+  ],
+  "compile_sources_added": [
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/Management.UnitTests/FULL-061.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/AuditV2/ManagementAuditReproTests.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementBackendLifecycleTests.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionExchangeOverlapTests.cs",
+    "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs"
+  ],
+  "old_compile_source_count": 1331,
+  "new_compile_source_count": 1337
+}

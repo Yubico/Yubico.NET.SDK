@@ -1,0 +1,15 @@
+[
+  "test:Cli.Commands.UnitTests",
+  "test:Cli.Shared.UnitTests",
+  "test:Core.UnitTests",
+  "test:Ctap2.UnitTests",
+  "test:Management.UnitTests",
+  "test:Oath.UnitTests",
+  "test:OpenPgp.UnitTests",
+  "test:Piv.UnitTests",
+  "test:PublicApi.UnitTests",
+  "test:SecurityDomain.UnitTests",
+  "test:WebAuthn.UnitTests",
+  "test:YubiHsm.UnitTests",
+  "test:YubiOtp.UnitTests"
+]

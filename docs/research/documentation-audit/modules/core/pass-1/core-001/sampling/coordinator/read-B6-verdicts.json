@@ -1,0 +1,268 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of29 pinned B6 units; inherited original-source/profile gaps and reference-data qualification preserved; final eligibility/mapping pending",
+  "reading_sha256": "46b81520cb924945bf7b4c3c6ba760a7439eede82f74f82f47e5a1d181668dd8",
+  "units": [
+    {
+      "id": "core-001:unit:fbe13be6dd441542",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+      "range_sha256": "4f683a1e82927ba9167de7637da2264c31db3b6ac549e7c6d9c76bd3a10c4385",
+      "current_file_sha256": "749263a8472ce616903867e57973d708a7541552103a7f6e7174d0955e60bd32",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6be1d61c780616e4",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+      "range_sha256": "da8c090c19c5dfb84f29f1d463a0cfb8582b12e4dd0f0f0f7d68a554148a8c0c",
+      "current_file_sha256": "750dca027db182a40edcccb2be7ae80af7feeca38ac952c8dba21b8ed66b888f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b0c0d59299e1e832",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "13ca40dfcd1b3136e00d9370d5ec1a50d9a48963671e2a43541199abb3ee435a",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    {
+      "id": "core-001:unit:8e9040753e759723",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "372aa59d11d2414c2c87b5c3f2bc9c7c293dbc834ae25ccf8a5c52a0304bbffc",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    {
+      "id": "core-001:unit:53f3eee8233f9a20",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "6cd51745fd65115dd86853c3f608e04361f7643f35a2f29a629954bf5e6bddba",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    {
+      "id": "core-001:unit:e7354a1214c8ba41",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "803c4574dbf6995c6fc7d120c81185a81a67fc34d06164fa713930fb47a190a8",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    {
+      "id": "core-001:unit:5f18c0d67c2c7815",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+      "range_sha256": "d6c57d1e7708babd2f01dea32789b5f6f817796a6d94859d39634627a621370a",
+      "current_file_sha256": "b9c95d23384160b8b0c05fb7ec8f43ab10e1e919588493ef424cf6c403113857",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-QUALIFIED-NORMATIVE-GAP",
+      "note": "Declaration/status meaning read; inherited unavailable exact ISO clauses/revision remain explicit. No independent original-ISO acceptance or final clean-quota credit claimed for this sample."
+    },
+    {
+      "id": "core-001:unit:f5efa5515faba0fb",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "range_sha256": "2da8111699f90d4cb99803c15d180d617f18fc62799ede0ecd80d90ba4fad5bb",
+      "current_file_sha256": "c8d49b216c963eaade43fcd638d938140fae87d5d7e9002a28a0ca5a3c5727fa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:bce440683985de79",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "range_sha256": "4000e99ddb96ec487ea66fc224ccb56d5f7d88acea0239a9ef2eac7395ac2d53",
+      "current_file_sha256": "c8d49b216c963eaade43fcd638d938140fae87d5d7e9002a28a0ca5a3c5727fa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0854b6428dc7d333",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+      "range_sha256": "c8af6f2ad4b6af33538d54c65632299e4c9df444868a456da23b6e7ae366cda4",
+      "current_file_sha256": "c8d49b216c963eaade43fcd638d938140fae87d5d7e9002a28a0ca5a3c5727fa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c143535480645641",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+      "range_sha256": "ddd14ae6d0a9eaafbf2b4e4b4d791e0380e4a5deff8db6bf94faa1c902f12ea5",
+      "current_file_sha256": "39c27442ce9667fc4282b41a8c5d09926fe6bc7b6d66f009e69baa4d5e501c6d",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Destination guard and separate new-chain computation precede replacement; failed ComputeCmac clears new storage and leaves previous chain reference. First8/full16 widths match this implementation; broader security-level/profile scope remains qualified."
+    },
+    {
+      "id": "core-001:unit:ad3312a036a8ce65",
+      "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+      "range_sha256": "8f9e1a99535995a504e0d1b8195545da281c96308dc251ad2f8e0b8addc9c616",
+      "current_file_sha256": "cf28fd54950dca187c7ac9c8428998ce7866a73c9b06d01eab67958d80557c30",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5a4dba6c6d25b59e",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/AesCmac.cs",
+      "range_sha256": "e947f0dcdf271aa8cf6367078edbf5fdf323225cecb41382800326a16f745b65",
+      "current_file_sha256": "2d44cc4393a59c8c0e5b82e8dfeaa716f4e89f09832b39b511656754a7cf397b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2f4fe04ec06bb866",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/AesCmac.cs",
+      "range_sha256": "8b7c68de6d50efadb4c4c3774d13a194af823510508fa0283ff64db38e90eec7",
+      "current_file_sha256": "2d44cc4393a59c8c0e5b82e8dfeaa716f4e89f09832b39b511656754a7cf397b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:a3af7098af466632",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+      "range_sha256": "a213a3432e71fed61b1b5ef07afe466798b56da8c1c56d1f3768e8486e96d574",
+      "current_file_sha256": "d388a3328c180bf8774b8982aab17cf5045879816595e8888cc4df6347269195",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8cec358279fb0d77",
+      "path": "src/Tests.Shared/CLAUDE.md",
+      "range_sha256": "e9d7254bf4d10e26d85375e0d383070b3d5e23bf2b42705711ef8aab7bb5681b",
+      "current_file_sha256": "bf5121b4117a8657ecd5ba98fccb2c36d4b6caa42b52e1688cc0bbdbf9aaba6f",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:cf5d082b3f88b961",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs",
+      "range_sha256": "7d9d039c2184cf6a104329dd106bb8b93453aa9a360b9c583a9afb262cd01889",
+      "current_file_sha256": "197768eb7cf136a1627e669307b515d28b5398f44da95f0de358eeb5eb0ccf28",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:75249ea1e1bc3dbf",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+      "range_sha256": "729be14355d09d547aa864b21045c97b23e31d6ec4fe3c9bb9a21dd3eb1d40ee",
+      "current_file_sha256": "2238b68c379cacc52dc4b8648760ac5d05961092963ce2e44f0f761268e6ebe7",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:98724675b7858e85",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolConcurrencyTests.cs",
+      "range_sha256": "549fbaad1ee53da42da97b346af8d849979b005b2a53516eca668c50c98d7a25",
+      "current_file_sha256": "997dc048355ef6d952681854a65c71d5147e3c067996bf41efe12e97017b30a2",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Fault then later successful exchange checks released managed guard under explicit timeout, not native recovery or whole-workflow atomicity."
+    },
+    {
+      "id": "core-001:unit:7a1d315eb50d497b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "range_sha256": "ba16c3f2bfa9ab0468ac17dc05d25f6f2a51da617e08acdfb7cdef2d452dda68",
+      "current_file_sha256": "0f1a4eff327d3d87ab02e9b6f6a6fd69df1be586881f66409b6912b1c2789bf3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:dd0502438d1dc1d3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+      "range_sha256": "24b97747c07fbfd83872aa2af79c5fa4ca7ab6f6c628809b6eb8f9cb4e20261e",
+      "current_file_sha256": "0f1a4eff327d3d87ab02e9b6f6a6fd69df1be586881f66409b6912b1c2789bf3",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Test retains formatted command view and observes zeroing of that buffer only; caller input and independent copies remain separate."
+    },
+    {
+      "id": "core-001:unit:66715b7a11aa4c97",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "range_sha256": "331edfe7a3d494aa30392d0e338dba1c93541b2f583f0a7988dbcd380f9a41f5",
+      "current_file_sha256": "0309afaef1dd32bc103b3aa064effdcdf8fb8a747c8f3273731defa804303494",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7c1c4536dda19f1e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+      "range_sha256": "d3d90c819ea6ab871e58029f13f0390c22492767a3886dea3c2fba720c072fac",
+      "current_file_sha256": "0309afaef1dd32bc103b3aa064effdcdf8fb8a747c8f3273731defa804303494",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7fbae0b508ba9783",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "range_sha256": "85b0dea8d29c98e458fe58b4b99864749652d7938c2c98d8dcc7233c039e8c17",
+      "current_file_sha256": "366f2813be1a73df6e0c9fcfafd415260da0910f8e7b2421c4b4e8ab47f17240",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:f4124ed4d8b4de61",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "range_sha256": "83b8ce11c5744c21a29ab986c0eb682d1610e0e36f61694af7f039a246f245d6",
+      "current_file_sha256": "366f2813be1a73df6e0c9fcfafd415260da0910f8e7b2421c4b4e8ab47f17240",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2f77bfbd3d50a45b",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+      "range_sha256": "6d140a61d87065bae4d6bbf40efbe77fdfc59c35cbeb58885143ec1398d882f6",
+      "current_file_sha256": "366f2813be1a73df6e0c9fcfafd415260da0910f8e7b2421c4b4e8ab47f17240",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6eac55005bea451f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+      "range_sha256": "ad8408c7c0de23c7de9ec814e057f60a45e61dcf930113aee15d6ae8afc128ba",
+      "current_file_sha256": "a6fcce466e6c12262dbe9c4d7fe6b856993e9f6aa6ebb7e1beca66774ca59bc1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Non-null exact5.7.2 configuration differs from earlier corrected null-firmware admission cases. Assertion excludes NotSupportedException but is not successful handshake or provider/profile qualification."
+    },
+    {
+      "id": "core-001:unit:c6a6486477e62329",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/X963KdfTests.cs",
+      "range_sha256": "fe94d20593e0280bd0fbfb4b6369cf6db9513587359990835720023313deeb73",
+      "current_file_sha256": "2206aba4feec8e08c9743350bf1c5fff789f5f4ac1b7726eade8b8c260a64ba6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete pinned unit read by Astra; local data/ownership/control flow or exact test oracle supported. No full protocol/profile, provider-erasure or hardware qualification inferred."
+    },
+    {
+      "id": "core-001:unit:59c33b8c7c8f294c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.rsp",
+      "range_sha256": "7661e28b856fbe789aef528c3b056c06b2b91c1f246d64403201692c77123897",
+      "current_file_sha256": "7661e28b856fbe789aef528c3b056c06b2b91c1f246d64403201692c77123897",
+      "original_unit_present_in_current": true,
+      "verdict": "REFERENCE-DATA-QUALIFIED",
+      "note": "Complete555-line CAVS reference file read: algorithm/length sections and COUNT/Z/SharedInfo/key_data records, including521-bit material. No cryptographic outputs recomputed, original NIST archive gap unchanged; no final clean-contract quota credit."
+    }
+  ]
+}

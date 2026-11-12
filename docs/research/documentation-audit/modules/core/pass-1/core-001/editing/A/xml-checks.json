@@ -1,0 +1,182 @@
+[
+  {
+    "path": "src/Core/src/Abstractions/IYubiKey.cs",
+    "xml_blocks_parsed": 9,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/CompositeDeviceMerger.cs",
+    "xml_blocks_parsed": 9,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/CompositeMetadataReader.cs",
+    "xml_blocks_parsed": 1,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/ConnectionType.cs",
+    "xml_blocks_parsed": 7,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+    "xml_blocks_parsed": 10,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceChange.cs",
+    "xml_blocks_parsed": 6,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceFlags.cs",
+    "xml_blocks_parsed": 4,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceInfo.cs",
+    "xml_blocks_parsed": 27,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+    "xml_blocks_parsed": 2,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryBudgets.cs",
+    "xml_blocks_parsed": 2,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryDeviceInfoReader.cs",
+    "xml_blocks_parsed": 2,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryIdentityReader.cs",
+    "xml_blocks_parsed": 1,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/DiscoveryReadScope.cs",
+    "xml_blocks_parsed": 5,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "xml_blocks_parsed": 8,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/FindYubiKeys.cs",
+    "xml_blocks_parsed": 9,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/FirmwareVersion.cs",
+    "xml_blocks_parsed": 8,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/FormFactor.cs",
+    "xml_blocks_parsed": 9,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/IDeviceTopologyResolver.cs",
+    "xml_blocks_parsed": 5,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/ProtocolDeviceInfo.cs",
+    "xml_blocks_parsed": 1,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+    "xml_blocks_parsed": 1,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/VersionQualifier.cs",
+    "xml_blocks_parsed": 11,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/WindowsDeviceTopologyResolver.cs",
+    "xml_blocks_parsed": 5,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/WindowsTopologyNativeOps.cs",
+    "xml_blocks_parsed": 1,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyManager.cs",
+    "xml_blocks_parsed": 6,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyMonitor.cs",
+    "xml_blocks_parsed": 5,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/src/Transport.cs",
+    "xml_blocks_parsed": 5,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/CompositeDiscoveryIntegrationTests.cs",
+    "xml_blocks_parsed": 3,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DiscoveryUnattendedTests.cs",
+    "xml_blocks_parsed": 1,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/HotPlugIdentityContractTests.cs",
+    "xml_blocks_parsed": 1,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/YubiKeyTests.cs",
+    "xml_blocks_parsed": 2,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerTests.cs",
+    "xml_blocks_parsed": 0,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/CompositeDeviceMergerVectorTests.cs",
+    "xml_blocks_parsed": 7,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoReaderTests.cs",
+    "xml_blocks_parsed": 0,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DeviceInfoTests.cs",
+    "xml_blocks_parsed": 0,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/DiscoveryIdentityReaderTests.cs",
+    "xml_blocks_parsed": 2,
+    "well_formed": true
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+    "xml_blocks_parsed": 11,
+    "well_formed": true
+  }
+]

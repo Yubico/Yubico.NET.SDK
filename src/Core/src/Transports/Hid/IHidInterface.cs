@@ -34,10 +34,20 @@ public interface IHidInterface : IDevice
     /// <summary>
     /// Establishes an active connection to the HID interface for the transmittal of data through feature reports.
     /// </summary>
+    /// <remarks>
+    ///     Opens synchronously. The caller owns the returned connection and must dispose it after all report
+    ///     calls finish. This direct open acquires no grouped-key registry claim; coordinate other opens and
+    ///     discovery for the entire lifetime. Prefer typed IYubiKey connections for SDK-managed admission.
+    /// </remarks>
     IHidConnection ConnectToFeatureReports();
 
     /// <summary>
     /// Establishes an active connection to the HID interface for the transmittal of data through I/O reports.
     /// </summary>
+    /// <remarks>
+    ///     Opens synchronously and transfers the connection to the caller. Dispose it after report calls finish.
+    ///     This direct open acquires no grouped-key registry claim. Blocking, report normalization, cancellation,
+    ///     and native release behavior depend on the platform; descriptor sizes alone do not define every result.
+    /// </remarks>
     IHidConnection ConnectToIOReports();
 }

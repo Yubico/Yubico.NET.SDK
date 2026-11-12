@@ -1,0 +1,14 @@
+//         ///   Signer:
+//         ///     message --> Digest(message) --> signer's digest
+//         ///     signer's digest --> derivation(salt, digest) --> signer's H
+//         ///     signer's H --> format, includes salt and is masked --> formattedData
+//         ///     formattedData --> RSA(privateKey, formattedData) --> signature
+//         ///     send message + signature
+//         ///<br/>
+//         ///   Verifier:
+//         ///     message --> Digest(message) --> verifier's digest
+//         ///     signature --> RSA(publicKey, signature) --> formattedData
+//         ///     formattedData --> parse, unmask, extract elements --> salt and signer's H
+//         ///     verifier's digest --> derivation(salt, digest) --> verifier's H
+//         ///     compare verifier's H with signer's H
+//         /// 

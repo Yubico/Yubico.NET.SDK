@@ -48,7 +48,8 @@ public class CryptographicAlgorithmApplicabilityTests
         Assert.DoesNotContain(Algorithms.Ed25519, algorithms);
         Assert.DoesNotContain(Algorithms.RsaPssSha256, algorithms);
         Assert.DoesNotContain(Algorithms.Aes256Cbc, algorithms);
-        // ES256 describes a hash/signature construction, not a P-256-only profile.
+        // These assertions check structural applicability and the stored -7 mapping separately.
+        // They do not establish that COSE or a consuming profile permits every listed curve/alg pair.
         Assert.Contains(Algorithms.EcdsaSha256, Algorithms.FindForKey(Keys.P384));
         Assert.Contains(Algorithms.EcdsaSha256, Algorithms.FindForKey(Keys.Secp256k1));
         Assert.Equal(-7, Algorithms.EcdsaSha256.CoseAlgorithmId);

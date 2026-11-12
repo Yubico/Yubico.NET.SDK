@@ -1,0 +1,2541 @@
+{
+  "units": {
+    "core-001:unit:21bef981d5360feb": {
+      "id": "core-001:unit:21bef981d5360feb",
+      "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+      "first_line": 62,
+      "last_line": 95,
+      "source_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+      "range_sha256": "80d155c90b34ab99cdafb2803293190ccaf768b728902e80c219fa768e09cea8",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:8e7356e172293835": {
+      "id": "core-001:unit:8e7356e172293835",
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "first_line": 459,
+      "last_line": 471,
+      "source_sha256": "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88",
+      "range_sha256": "ac18b4aec66beb86bd4c553693c380a0ad75d5e1b673ed1a92c28f3b2921e8f9",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C013",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:2ab1f3fe98ee5ca4": {
+      "id": "core-001:unit:2ab1f3fe98ee5ca4",
+      "path": "src/Core/src/Abstractions/IDevice.cs",
+      "first_line": 1,
+      "last_line": 19,
+      "source_sha256": "7afd6405680d7a6b1339b1213145dd6866b4cb868929bea9b7924e029afdc4de",
+      "range_sha256": "9c54baec99f50f39ae910aeb3922a850dc74563cf4275cd4d18fbd5dc9f161f3",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:c680372cf0dd564e": {
+      "id": "core-001:unit:c680372cf0dd564e",
+      "path": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+      "first_line": 37,
+      "last_line": 43,
+      "source_sha256": "5f1e05d34147cca9c8f84473c2e008a31694118762d6fcd3cf75176009088136",
+      "range_sha256": "ec6586e94b13d3b139f1a0381835fb31aa8c908ce9ff9a04cca1070cd4a3cef8",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:6e6307d613511921": {
+      "id": "core-001:unit:6e6307d613511921",
+      "path": "src/Core/src/Devices/DiscoveryWorkerAdmission.cs",
+      "first_line": 37,
+      "last_line": 47,
+      "source_sha256": "491a9a218172ebb220ad4989a11eae2b4e88c71acd6da53125a2204ea549ae50",
+      "range_sha256": "01938b3a2af7c4aced26ff05d468b1143cb021d9a53cd271383e2ae2d183e24a",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:d0757dfa453abbeb": {
+      "id": "core-001:unit:d0757dfa453abbeb",
+      "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+      "first_line": 77,
+      "last_line": 85,
+      "source_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+      "range_sha256": "6fa5a91c603bff3dbcb58f521d05ee6a77a6bcf5617db6a2b1ca32120bbfa023",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:32032fade9d7fddb": {
+      "id": "core-001:unit:32032fade9d7fddb",
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "first_line": 1,
+      "last_line": 19,
+      "source_sha256": "0fd928454eac72d56b199eb23e92a4539a88b6814c8e7fef624267d9a1d28d70",
+      "range_sha256": "98e6ff34bd88c3b7daa6931192600b150c8f67e2cee5849a5f18b63c869d462a",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:f1df5948d71dcc9d": {
+      "id": "core-001:unit:f1df5948d71dcc9d",
+      "path": "src/Tests.Shared/Infrastructure/WithYubiKeyTraitDiscoverer.cs",
+      "first_line": 1,
+      "last_line": 23,
+      "source_sha256": "9061daf05ecc5fc2bfcb3d72a2929871f1dc5334b8d040edbfab62c6a9643516",
+      "range_sha256": "3065a3cba2b699eb16fe23d37fa693a285abac10ac2a4b38216fd20ce61b28c1",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:d5838c51b4cca87e": {
+      "id": "core-001:unit:d5838c51b4cca87e",
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "first_line": 229,
+      "last_line": 235,
+      "source_sha256": "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88",
+      "range_sha256": "21255b72620b0297bc7b5b83ecbd948daea43c3f3495d42b5329139307dcc971",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C013",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:f713ea0c593064bf": {
+      "id": "core-001:unit:f713ea0c593064bf",
+      "path": "src/Tests.Shared/Infrastructure/AuthorizedDevices.cs",
+      "first_line": 74,
+      "last_line": 94,
+      "source_sha256": "57869029de0d89d7d2179e8c55311cdc288cfc237a40c9e380249834e9c0d1be",
+      "range_sha256": "d61719b0a676c971ede44f1155f519e072eb20d5662166a0e2bdd3fa39090260",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:44a66dad89e6e9e9": {
+      "id": "core-001:unit:44a66dad89e6e9e9",
+      "path": "src/Core/src/DeviceListenerStatus.cs",
+      "first_line": 1,
+      "last_line": 19,
+      "source_sha256": "920712a93d64267e5a2ff5995ec8ef25a615fc8d46ac6484fe1dc3387af62437",
+      "range_sha256": "eb9767d1dd90a23b7a0c7081cda7749ef962920f55ba6d908d28a90bf87541c0",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:b530f2ba7c68da7e": {
+      "id": "core-001:unit:b530f2ba7c68da7e",
+      "path": "src/Core/src/Abstractions/IYubiKey.cs",
+      "first_line": 186,
+      "last_line": 196,
+      "source_sha256": "3ba053c772725075a827c7f0ab83362f4a4d20cddbb1901bc094c71b248fbe5a",
+      "range_sha256": "1cec4d6cfad30404757d3abaf30f451e20a893db3ad94734912c1cf83dca9479",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C021",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C012",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:a581a1ab8be230d2": {
+      "id": "core-001:unit:a581a1ab8be230d2",
+      "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "first_line": 55,
+      "last_line": 64,
+      "source_sha256": "c28e1d6ba276e217bacb5106eaa6e7a8bd8a395bcb4fc2ceee2fd36cdd3bd2bd",
+      "range_sha256": "a0c08c90c19d2b2ca0a778222474c34fb67adc7f57c9d5629225107eb06b7874",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C013",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C014",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C008",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:7045e0544998269f": {
+      "id": "core-001:unit:7045e0544998269f",
+      "path": "src/Core/src/Devices/FindYubiKeys.cs",
+      "first_line": 35,
+      "last_line": 40,
+      "source_sha256": "3c72ab3addb70073210f7094727eb169893d51d546111218662944cbdb230d30",
+      "range_sha256": "8005ea69b32f6e4c2268c8d367435c824cbad69119a38c04326ef235e387fb28",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C017",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C021",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:939161b425c3e89f": {
+      "id": "core-001:unit:939161b425c3e89f",
+      "path": "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "first_line": 74,
+      "last_line": 81,
+      "source_sha256": "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435",
+      "range_sha256": "73a1406781d4934b4326fb7ae25bc879b26b6cf780cad681f1c4480c58102e1a",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C014",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:d28709e3276a4138": {
+      "id": "core-001:unit:d28709e3276a4138",
+      "path": "src/Tests.Shared/Infrastructure/FilterCriteria.cs",
+      "first_line": 85,
+      "last_line": 91,
+      "source_sha256": "85f7c3ba59653a5ccf52a7d6e709302afaffbff9db06189183174097d1b2466d",
+      "range_sha256": "82ce10d22862bea99e7726075181f24df826c4f7fa1f78044eb471aea232faf6",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:2a47e7cc5a9259e3": {
+      "id": "core-001:unit:2a47e7cc5a9259e3",
+      "path": "src/Tests.Shared/Infrastructure/AuthorizedDevices.cs",
+      "first_line": 94,
+      "last_line": 102,
+      "source_sha256": "57869029de0d89d7d2179e8c55311cdc288cfc237a40c9e380249834e9c0d1be",
+      "range_sha256": "0149d77972b938dbf43de76afe6bb6792563a67b876189bd6385ff75ebfc4f6c",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:548bc1460a3f9b8f": {
+      "id": "core-001:unit:548bc1460a3f9b8f",
+      "path": "src/Core/src/Devices/ConnectionTypeExtensions.cs",
+      "first_line": 24,
+      "last_line": 27,
+      "source_sha256": "4cecfa68985981135ed696a3afb861162c3f108fbbef9921d097b16539056737",
+      "range_sha256": "0e7e175c325f35042608f5cc1dbc907b3fa81b52aee0d17b810f8b071aa71be1",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:c5b35440184cef31": {
+      "id": "core-001:unit:c5b35440184cef31",
+      "path": "src/Core/src/Devices/YubiKeyDevice.cs",
+      "first_line": 256,
+      "last_line": 275,
+      "source_sha256": "53df172ece75bfd2e9d66c0db6e9d649d5d0578699dabd1bdcf73a44e5bf7607",
+      "range_sha256": "12f98ea2b9e5401b36f994b64bf8efb81d9f216153b3e889b5b795608963fc88",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B1-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X001",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:4f7f2feb81045f0f": {
+      "id": "core-001:unit:4f7f2feb81045f0f",
+      "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+      "first_line": 25,
+      "last_line": 30,
+      "source_sha256": "a6b7f49f9475daf5c026a8eb372e19fab10e7435213f504795b9c5a86f9ed1ac",
+      "range_sha256": "66768da253fbb5a6f02ba8b103d12b67d95353dea7753e35028593797e228f64",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C006",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:abc48bf7ccf04d19": {
+      "id": "core-001:unit:abc48bf7ccf04d19",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/FindYubiKeysFaultInjectionTests.cs",
+      "first_line": 775,
+      "last_line": 776,
+      "source_sha256": "1ed0d5eca00f1c69cbe5109cb2cebce251a5406c621cdad75a3e2e08317e4f25",
+      "range_sha256": "0540b5e30a4aba2177325a2e0e00b782a77e24b801eed7a2b5c3fed98a2b732d",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C017",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C021",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:26a01b51fa2d612f": {
+      "id": "core-001:unit:26a01b51fa2d612f",
+      "path": "src/Core/src/Devices/DiscoveryReadSkippedException.cs",
+      "first_line": 37,
+      "last_line": 44,
+      "source_sha256": "0de5842734567dec85406471841150b7e44d8c29eeebab947c8d938faa8b8ac4",
+      "range_sha256": "f0acae8a819a6bbafadcd4a1bfee5f1608fc3d5cb12a06865765ca14dc43f495",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:f7a53cd9184afd96": {
+      "id": "core-001:unit:f7a53cd9184afd96",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyMonitorTests.cs",
+      "first_line": 351,
+      "last_line": 351,
+      "source_sha256": "1298d3ffb6b7fb62aea8f7737ccb7e4a49853e02dff0fb8730aa58e0ff54b633",
+      "range_sha256": "4eecaf7cce85f42850937d328565f06e7b4ef8d616c6da2ce9a48043e38e818d",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:f24674b7449e617e": {
+      "id": "core-001:unit:f24674b7449e617e",
+      "path": "docs/migration/v1-to-v2-changelog.md",
+      "first_line": 12,
+      "last_line": 25,
+      "source_sha256": "250fa9763bd3ec3ffe98ad8732ae832620d9b72fd62c24da1b3fdace3ff56600",
+      "range_sha256": "9ccf1def4f0f0d8ddd155355f3064351d94e15313fbcb6a3bdd2c03788cd61c4",
+      "verdict": "HISTORICAL-EVIDENCE-QUALIFIED",
+      "note": "Historical migration changelog; read and retained, zero clean quota credit.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B5-C009",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:47befc3dc2cc5dd5": {
+      "id": "core-001:unit:47befc3dc2cc5dd5",
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "first_line": 291,
+      "last_line": 302,
+      "source_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+      "range_sha256": "31bd64fca8916f100ba87a31ebc9e4c6e1f87350b82f9ec41414ddc99fa8025b",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported current mapping: async physical discovery and explicit connection availability; historical evidence references are provenance, not runtime proof.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B5-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C012",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X008",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:572af9c8e29c74f9": {
+      "id": "core-001:unit:572af9c8e29c74f9",
+      "path": "src/Core/src/Devices/README.md",
+      "first_line": 1,
+      "last_line": 4,
+      "source_sha256": "e1cdbc46c7e3bd85e35722cb93298b35b0fbbf26c8bca47207a5381a5502b5a4",
+      "range_sha256": "c13fadcd6aded3cd926e8f998680ae54604a0522990de663df563a1f63233539",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported substantive producer/subscriber distinction.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:eea6325dac26e880": {
+      "id": "core-001:unit:eea6325dac26e880",
+      "path": "docs/architecture/physical-device-model.md",
+      "first_line": 129,
+      "last_line": 137,
+      "source_sha256": "b38d5053935ca3e26cc2821c0487e7dbf43bc764eb6bc1b11cc2156b6911a482",
+      "range_sha256": "4c78191118c73a482c11a20b1aa42b46d7dddae8ae9266baf86af28798b42885",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported platform-route distinction; PC/SC does not use HID report handles. No universal access or native-release guarantee inferred.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C011",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C017",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X001",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:e90e615ba927962a": {
+      "id": "core-001:unit:e90e615ba927962a",
+      "path": "docs/TESTING.md",
+      "first_line": 279,
+      "last_line": 316,
+      "source_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+      "range_sha256": "a1f8efc3f758096d152575d9f43c6038c09ba8420a3e24b444bf2f15aaac8421",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported: three device-filter rows do not prove transport coverage; explicit pinning requirement is present.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C018",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C010",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:7b5daf3c140bfbc6": {
+      "id": "core-001:unit:7b5daf3c140bfbc6",
+      "path": "docs/migration/v1-to-v2-changelog.md",
+      "first_line": 40,
+      "last_line": 46,
+      "source_sha256": "250fa9763bd3ec3ffe98ad8732ae832620d9b72fd62c24da1b3fdace3ff56600",
+      "range_sha256": "aae46c50ec4fdaaddbb8eb7d14d25d7f5bd47ab76e7de3af26bb27aaf9958915",
+      "verdict": "HISTORICAL-EVIDENCE-QUALIFIED",
+      "note": "Historical baseline changelog; zero clean quota credit.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B5-C009",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:b1b8f3f0d43abb21": {
+      "id": "core-001:unit:b1b8f3f0d43abb21",
+      "path": "src/Core/README.md",
+      "first_line": 250,
+      "last_line": 282,
+      "source_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+      "range_sha256": "0c3ca90e64ce9c1595cd691545fe744d4fc821951d22af12a59d8000a7a323dc",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within source scope: owned manager watch, ordered initial replay, local projection and separate attended hardware gate.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C020",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:13971cb61434ba4c": {
+      "id": "core-001:unit:13971cb61434ba4c",
+      "path": "docs/architecture/device-discovery-guarantees.md",
+      "first_line": 449,
+      "last_line": 456,
+      "source_sha256": "d8a5b25b029c374f7504727ae9afdb5b6c618dae4807608e4a6576e5e2c2ff47",
+      "range_sha256": "027690a4c353336553f76bc4d0a7f2f59e32ea7ae44ada003dc7eb218cf7f54a",
+      "verdict": "HISTORICAL-EVIDENCE-QUALIFIED",
+      "note": "Historical firmware measurement; no fresh physical or exact device-run proof supplied by this excerpt. Qualified context, zero clean quota credit.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C011",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C012",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C020",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C021",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:cec556dd8f62b863": {
+      "id": "core-001:unit:cec556dd8f62b863",
+      "path": "scripts/toolchain/TestTargets.cs",
+      "first_line": 58,
+      "last_line": 95,
+      "source_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+      "range_sha256": "a9400e49013370b9e8663e5248ba52b26c7a67cfee6a7ff93a84a4d7bff62d52",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported exact test-command/result flow, including NoTestsExecuted as distinct from execution.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C018",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C008",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:d0048ac2b4474b13": {
+      "id": "core-001:unit:d0048ac2b4474b13",
+      "path": "scripts/toolchain/BuildTargets.cs",
+      "first_line": 109,
+      "last_line": 150,
+      "source_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+      "range_sha256": "d64ab1cfa3ad2ebb9c9114d44e321a029463fb9bb4f9c207b202d4a39f8f62fb",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported path-based SDK discovery and closed CLI exclusion set; actual gates establish metadata requirements, not native execution.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B4-C008",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:ac046b142303c33e": {
+      "id": "core-001:unit:ac046b142303c33e",
+      "path": "src/Core/src/ProductAtrs.cs",
+      "first_line": 68,
+      "last_line": 77,
+      "source_sha256": "956b7fc7c32868563625a757b2326d790a882ff352af1b55bd639b857b265c55",
+      "range_sha256": "d56377e6360872801b42d0b8114f0343047e63a9df85ddb3330b2772122f9c6a",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported: returns a fresh list of modeled ATR constants, not an exhaustive device attestation.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:3ccf06e816f277d2": {
+      "id": "core-001:unit:3ccf06e816f277d2",
+      "path": "src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs",
+      "first_line": 108,
+      "last_line": 151,
+      "source_sha256": "39a4dd33e9fb593e1658c4e25efbee5146b2ce4c3dcb36129f47f77b74342199",
+      "range_sha256": "a238802748a29e3145921c74cc496c86078fd4bb7151916c4e5b4777848db400",
+      "verdict": "DEFERRED-SOURCE-OBSERVATION",
+      "note": "**SAMPLE-A004 additional caller:** newly loaded certificate lacks deterministic disposal on output/PIN/import paths. Same lifetime concern as the earlier PIV CLI observation; preserve as a caller-specific deferred facet, not a permanent-leak claim. Zero clean credit.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:25673509b9d722bf": {
+      "id": "core-001:unit:25673509b9d722bf",
+      "path": "src/Core/src/Abstractions/IDevice.cs",
+      "first_line": 21,
+      "last_line": 22,
+      "source_sha256": "7afd6405680d7a6b1339b1213145dd6866b4cb868929bea9b7924e029afdc4de",
+      "range_sha256": "560cd2308facf5d1ca723b64ab5c0a2a08ed16c5b831a6aa027c62697c46d5ba",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported reader-name declaration.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:9c8ab813d3edc094": {
+      "id": "core-001:unit:9c8ab813d3edc094",
+      "path": "src/Cli.Commands/src/Oath/OathCommands.cs",
+      "first_line": 187,
+      "last_line": 207,
+      "source_sha256": "eaae8ea1efeae7f6634d2ca068aca06e3ca29621b4b942e96dd452ab3511668c",
+      "range_sha256": "95e95206ddb7321a00822699bc246cccab82ce8c993fe9ddf82d45c52643e79c",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported scoped OATH reset workflow; printed success is not additional physical-state qualification.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:297e68004991d4a8": {
+      "id": "core-001:unit:297e68004991d4a8",
+      "path": "src/Cli.Commands/src/OpenPgp/OpenPgpInfoCommand.cs",
+      "first_line": 16,
+      "last_line": 109,
+      "source_sha256": "da2d48cda7d9272dbef97240ad16dd1fd144fc7492b7a51a31ba22d4b8cc45bf",
+      "range_sha256": "9fb48d8a6b939fef12aedcc7d1b9b279c7f55ee7bd1c8a2b582834166f8f1c7c",
+      "verdict": "SOURCE-QUALIFIED-PENDING-REPLACEMENT",
+      "note": "Source read with protected-output qualification: reported key status is inferred from fingerprint presence and PIN policy text is runtime output. Existing applet metadata/PIN-state limits remain; no independent key existence or workflow lifetime proof, zero clean quota credit.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:ad16310453b46d29": {
+      "id": "core-001:unit:ad16310453b46d29",
+      "path": "scripts/toolchain/Discovery.cs",
+      "first_line": 82,
+      "last_line": 91,
+      "source_sha256": "98acb349a33dd48a0a567dc6b2b69ee16e4a692ed9a977758b0d48cda13b07e7",
+      "range_sha256": "82e5743194028ce99fa972b15e2b3a6280c146b5951c422bcefbf2ba41788b87",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported archive-prefix predicate.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:6e9c74a6b5e82dc5": {
+      "id": "core-001:unit:6e9c74a6b5e82dc5",
+      "path": "src/Cli.Shared/src/Device/DeviceSelector.cs",
+      "first_line": 25,
+      "last_line": 26,
+      "source_sha256": "b96f8bb765a5a8f60052c1bba193f93352fa7cf3597e0aca217699f218c22c70",
+      "range_sha256": "9033ddc1d799faa60726885f978ff390f30b4aa8294294aca0d1196867a4abf4",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported metadata-reader delegate declaration.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B1-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C008",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:cf3538431462d4ab": {
+      "id": "core-001:unit:cf3538431462d4ab",
+      "path": "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs",
+      "first_line": 244,
+      "last_line": 301,
+      "source_sha256": "167e5234ae5703ba2084455611b0bab81a3cb627aee6c9d994cb944a5612037e",
+      "range_sha256": "f4868c591c167034d57603e116b35d04a72fece08d45305b56dc81b6e5257ada",
+      "verdict": "SOURCE-QUALIFIED-PENDING-REPLACEMENT",
+      "note": "Source behavior read: algorithm switch requests selected key/slot combination; retained OpenPGP key applicability defects remain open. No clean credit for unresolved applicability.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:4089aedab94d4e23": {
+      "id": "core-001:unit:4089aedab94d4e23",
+      "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+      "first_line": 447,
+      "last_line": 499,
+      "source_sha256": "ed6ba5d91314eb226d83fac9724ff2d4b22fcf1caa7332bd516e30d6d1d83bb9",
+      "range_sha256": "2900fce50592644b9d66fef13b81cccb87555c51032c5ba6ef93595407478303",
+      "verdict": "KNOWN-DEFERRED-PRETRY-CLEANUP-QUALIFICATION",
+      "note": "Source-only cleanup qualification: HMAC key exists before generated-key output and access-code parsing outside try. A failure there bypasses its clearing finally. Same pre-protected-scope cleanup class, no new runtime experiment. Zero clean credit.",
+      "verdict_record": "sampling/coordinator/expansion-A-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B4-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X007",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:9d8102989bf52740": {
+      "id": "core-001:unit:9d8102989bf52740",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "first_line": 236,
+      "last_line": 257,
+      "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+      "range_sha256": "2685577c06ac002f669fd6befbc7c15eebc0de4e4e7a87c44e8fb2cf474eaf01",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C003",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:f00b1d2526f62fe3": {
+      "id": "core-001:unit:f00b1d2526f62fe3",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+      "first_line": 230,
+      "last_line": 272,
+      "source_sha256": "1a59f4c9ee3c5582787977467be560c5fa8e1f6a1b1c23bc3362e26072e42ec2",
+      "range_sha256": "4f4ae7d3a639913c781cfa69ad831acc44e4a193add202691dc5cd5de94dae7a",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:e5b5533e4df67ea7": {
+      "id": "core-001:unit:e5b5533e4df67ea7",
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+      "first_line": 46,
+      "last_line": 49,
+      "source_sha256": "5a16c7924d5c04e26007f4087e67f487b5d506609345d91183c15afd455bbf6d",
+      "range_sha256": "eb15d599118e7e5d032e0b7f0262feaa902c0a902b6a364f9cfd7725204187af",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:727ad82dd732b613": {
+      "id": "core-001:unit:727ad82dd732b613",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "first_line": 435,
+      "last_line": 437,
+      "source_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "range_sha256": "372de3f15447f2ce7c486e5504e5b66aad9e05a74caba4860bb9d063901c12d8",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:1dcf2e836efee1d5": {
+      "id": "core-001:unit:1dcf2e836efee1d5",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "first_line": 92,
+      "last_line": 98,
+      "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+      "range_sha256": "64dc58cc8cc523f287b87cf546c89f2c95fe0e70fe6d44e993d010fc0043064e",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C003",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:9e1f0228fabdcb5d": {
+      "id": "core-001:unit:9e1f0228fabdcb5d",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxFidoHidNativeOwner.cs",
+      "first_line": 291,
+      "last_line": 324,
+      "source_sha256": "1a59f4c9ee3c5582787977467be560c5fa8e1f6a1b1c23bc3362e26072e42ec2",
+      "range_sha256": "8e09ddb592fce25d6ed8d0cdb4245639667890695dd8e37ee7acf32f62005624",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:f82d55d29d5e7e42": {
+      "id": "core-001:unit:f82d55d29d5e7e42",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "first_line": 62,
+      "last_line": 69,
+      "source_sha256": "5a3faea74b7cd54edc036a01dcaa749585c5193f9fd5b36ba96df7c7d0118559",
+      "range_sha256": "bf0a214594a8f0d514b0c82ed81ab2c799fa7590f9b6795419003f0c81d0177b",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C006",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:fb2be78aaf8f6f25": {
+      "id": "core-001:unit:fb2be78aaf8f6f25",
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+      "first_line": 28,
+      "last_line": 31,
+      "source_sha256": "5a16c7924d5c04e26007f4087e67f487b5d506609345d91183c15afd455bbf6d",
+      "range_sha256": "bd23da370bd4e995cee4bd8339733194c9797a3a3ffe0c96065a8ddd79fc2bba",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:e9d68bf588ab00e4": {
+      "id": "core-001:unit:e9d68bf588ab00e4",
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs",
+      "first_line": 58,
+      "last_line": 60,
+      "source_sha256": "0991c7b8b52cee0019202cdb2cfbe6a0bfac1c73606395e2ab945e833282ff3e",
+      "range_sha256": "9e2a4929c4b57f3a48e767426623c0fcb3a15d6f42d9e4c856a6976e5d707c08",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:1f646b31d8d5f48a": {
+      "id": "core-001:unit:1f646b31d8d5f48a",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "first_line": 46,
+      "last_line": 54,
+      "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+      "range_sha256": "c054e7de32279022079bcc198be3cda0458c0942e6482c5f19d268e6d1a3dcb5",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C003",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:dd179ffbb8315a43": {
+      "id": "core-001:unit:dd179ffbb8315a43",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "first_line": 130,
+      "last_line": 133,
+      "source_sha256": "5a3faea74b7cd54edc036a01dcaa749585c5193f9fd5b36ba96df7c7d0118559",
+      "range_sha256": "cd0188629b56812d9f75130d7fd615705d172e8dfd1d33c8c2c278db49d0f8a8",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C006",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:d5ffab3651d9f944": {
+      "id": "core-001:unit:d5ffab3651d9f944",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "first_line": 492,
+      "last_line": 494,
+      "source_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "range_sha256": "eef5954f1578e40e6195f4db44083d351dd6afc3bf0ae172bd800752d2bc45af",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:e954bf0af6c49fba": {
+      "id": "core-001:unit:e954bf0af6c49fba",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "first_line": 33,
+      "last_line": 39,
+      "source_sha256": "5a3faea74b7cd54edc036a01dcaa749585c5193f9fd5b36ba96df7c7d0118559",
+      "range_sha256": "e625229f27d8bfdd11d4c7814755df58036c172b119b60898c19a47ffcef207e",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C006",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:fb09fe35ad8505f1": {
+      "id": "core-001:unit:fb09fe35ad8505f1",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadReactor.cs",
+      "first_line": 439,
+      "last_line": 441,
+      "source_sha256": "083202480b99e35eed1f12d05ddc322bee5a8f35cea4d45f18d42b1cf684535f",
+      "range_sha256": "14fa0f36650b5b6c475cbfe4b525685a1a9437a026a80509d9757383b7ff70eb",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:418fbc28a73c4bd5": {
+      "id": "core-001:unit:418fbc28a73c4bd5",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "first_line": 116,
+      "last_line": 186,
+      "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+      "range_sha256": "44de487258f37184849817cc67287317dc31a18a9c5dc3d199023b3ba1835d9c",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C003",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:9b2517c252b41c26": {
+      "id": "core-001:unit:9b2517c252b41c26",
+      "path": "src/Core/src/Devices/DisposalGate.cs",
+      "first_line": 26,
+      "last_line": 30,
+      "source_sha256": "0cdfe89e05eaea96cf64525bfd3675de0179b65705f1bffc2719ccde6f3336c4",
+      "range_sha256": "9029af7013fa08fab1c75c090dc93e69e3fea73857ed63fa57e1a150eacfabcb",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B1-C005",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:21cfb83cdc2b4263": {
+      "id": "core-001:unit:21cfb83cdc2b4263",
+      "path": "src/Core/src/Devices/DeviceConnectionRegistry.cs",
+      "first_line": 165,
+      "last_line": 166,
+      "source_sha256": "bd90a8023444a8a5ad3d31b7986a74cb2b2b3b6736ffc611fa3310913f5ccb96",
+      "range_sha256": "4f5118829b29d6645d3e246bee181738f80ff7fe3cf2d8988f57bb3848efdf10",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B1-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C012",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:1dc08e7d03f341ef": {
+      "id": "core-001:unit:1dc08e7d03f341ef",
+      "path": "src/Core/src/Native/Linux/Libc/LinuxFileSafeHandle.cs",
+      "first_line": 24,
+      "last_line": 25,
+      "source_sha256": "a02fdcae45642475cdfc2382f93a2cd5a5bc7b612c0f4de48bce30ce6a4ee7d4",
+      "range_sha256": "23f0edcc21d7aa339a62981afea944e88d0d45d433134eec02e8abe356fd5df3",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported within the source scope stated in the completed coordinator expansion verdict.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:cf330b6a639970cd": {
+      "id": "core-001:unit:cf330b6a639970cd",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "first_line": 1,
+      "last_line": 34,
+      "source_sha256": "d0ab57494728d55049b57238ec3a962b677f806a225df6c6441c5f72a699b01c",
+      "range_sha256": "8d723e273400f1cf31afe4041a17dfcc0570d554b429c90b7e9cf57dd27020dd",
+      "verdict": "INELIGIBLE-EDITED-OVERLAP",
+      "note": "**edited overlap**, zero clean credit. Its “Each Start” wording was already\n  corrected by the accepted Linux sampling patch to account for the started guard.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:82f001f6db22d507": {
+      "id": "core-001:unit:82f001f6db22d507",
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "first_line": 79,
+      "last_line": 86,
+      "source_sha256": "a8f0cddf2bde1291b604c1dcd0a494af65e7ff720c19e58bdabc006a47854a79",
+      "range_sha256": "179df7e3823075e5935f005be8da257c76fa909edac2e5ee1f58ef8eae2856ab",
+      "verdict": "SOURCE-QUALIFIED-PENDING-REPLACEMENT",
+      "note": "**source-qualified**, zero clean credit. Null receive and possible event loss\n  are supported; “most likely” event-storm frequency is not independently established. Preserve\n  the uncertainty rather than treating the likelihood claim as verified native evidence.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C003",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:4c48c7d8d8d2e37a": {
+      "id": "core-001:unit:4c48c7d8d8d2e37a",
+      "path": "src/Core/CLAUDE.md",
+      "first_line": 600,
+      "last_line": 603,
+      "source_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+      "range_sha256": "e7b400a00600b3490bccb1cda8f398146b73804700d74381d130e6aa42e7ee01",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported concrete/group flag semantics; “cache” does not introduce a new public cache API.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C011",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C012",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C020",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:4c955b22a2de68df": {
+      "id": "core-001:unit:4c955b22a2de68df",
+      "path": "docs/research/linux-native-acceptance.md",
+      "first_line": 247,
+      "last_line": 306,
+      "source_sha256": "4c9ba74f1c0b3ee0e7f40d6bebe6385053d571b208df2c79a6aa2c8a0a941e7b",
+      "range_sha256": "ae7c0539092c49d52dded3cfd6127821b683e27b24034015990e566f38e7a653",
+      "verdict": "HISTORICAL-EVIDENCE-QUALIFIED",
+      "note": "Historical build/result receipt and specific artifact-count claims: read as qualified evidence, zero clean contract credit.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:0b2135f2f301e2c1": {
+      "id": "core-001:unit:0b2135f2f301e2c1",
+      "path": "docs/research/linux-read-reactor.md",
+      "first_line": 99,
+      "last_line": 112,
+      "source_sha256": "027146bc35127a5fbb208e38d41edd85dabf1fb94ca300b1ce17dc7c926482d3",
+      "range_sha256": "b852ee036949c168759a0ff5d37f2054da39b15f134428e6568401b66e8de94a",
+      "verdict": "HISTORICAL-EVIDENCE-QUALIFIED",
+      "note": "Historical test/inventory accounting: qualified evidence, zero clean quota credit.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:d8f176c067aa0fd3": {
+      "id": "core-001:unit:d8f176c067aa0fd3",
+      "path": "docs/research/linux-fido-async-lifetime.md",
+      "first_line": 57,
+      "last_line": 77,
+      "source_sha256": "9cd6e5c387ec005f26fb5be7b7a56f032c5c870a7e1c93c2bdd1678b9347bfc4",
+      "range_sha256": "323e02f6d181c4739b6a36bf8f7e73d3f7ee7603a88410b243ef661964072077",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported current source mechanism, despite research-file location: original-worker drain, registration release, checked close and retained failure are independently distinguishable. No physical result claimed.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C005",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:b45b5794aa92008c": {
+      "id": "core-001:unit:b45b5794aa92008c",
+      "path": "docs/research/linux-read-reactor.md",
+      "first_line": 69,
+      "last_line": 98,
+      "source_sha256": "027146bc35127a5fbb208e38d41edd85dabf1fb94ca300b1ce17dc7c926482d3",
+      "range_sha256": "78d7240759eb6d0fa807ac6c5737480832e81672056ab2dfae334ea9d76b3e55",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported source mechanism: one poller, eventfd-only retirement, pending admissions, bounded wake retries and independent owner release. The explicit local-source classification is not a hard syscall deadline.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:4330e60d07cd5417": {
+      "id": "core-001:unit:4330e60d07cd5417",
+      "path": "docs/research/linux-native-acceptance.md",
+      "first_line": 101,
+      "last_line": 202,
+      "source_sha256": "4c9ba74f1c0b3ee0e7f40d6bebe6385053d571b208df2c79a6aa2c8a0a941e7b",
+      "range_sha256": "8e2ace3ee5756143fdff5ec1f3fcb1a2f88e6fd8942c6ebcd521527571b5e807",
+      "verdict": "HISTORICAL-EVIDENCE-QUALIFIED",
+      "note": "Historical physical checkpoint and measurements: qualified evidence only, zero clean quota credit.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:457a4879daaf1b55": {
+      "id": "core-001:unit:457a4879daaf1b55",
+      "path": "docs/research/linux-otp-async-lifetime.md",
+      "first_line": 50,
+      "last_line": 69,
+      "source_sha256": "1b6379a822f311c56e64ccaf17c00cceefc9e253fca028e9a7044a501ad26cd5",
+      "range_sha256": "5ebe91ad1af26aebdce328f853f258dfe5268efe07e330c2c1c66ef25429c4ff",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported source mechanism: shared owner completion, original-worker cleanup and finalizer request-only behavior; known native interruption/release limits are explicit.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:e3d8ada85fd182e2": {
+      "id": "core-001:unit:e3d8ada85fd182e2",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs",
+      "first_line": 118,
+      "last_line": 127,
+      "source_sha256": "77c6bb05a10a56196c3236ba0b3ff60c8d25fa1a3e4f47906dc7e6896921bfd6",
+      "range_sha256": "5cc49b5bc4766f8f4de25257f9f0a246a11b578b26db806507dc7be74980860a",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "supported synchronous report-connection factory; native open can fail, and\n  this API supplies no asynchronous drain guarantee.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B3-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C003",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:76b664da02352c87": {
+      "id": "core-001:unit:76b664da02352c87",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "first_line": 106,
+      "last_line": 112,
+      "source_sha256": "f68a29e95a161d100d4f500a081f1ecdc3010282a6781e2d29845c7eb5b2e4a0",
+      "range_sha256": "01a5bb67c63cd7baf1628680d92ff1921ff9a95dcf4ac90f6a0da101f016e8ec",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "supported registration/clear contract; callback registration is not proof\n  of quiescence or checked native release.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B3-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C004",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:f5a358ec89b4c4ce": {
+      "id": "core-001:unit:f5a358ec89b4c4ce",
+      "path": "src/Core/CLAUDE.md",
+      "first_line": 6,
+      "last_line": 13,
+      "source_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+      "range_sha256": "106bc5ae03317d80751eb0295b567cf472e2be6d9d437593c19b74579d5fb5c1",
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "administrative documentation-maintenance policy; zero clean contract credit.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C011",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C012",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C020",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:9a180bff18d16922": {
+      "id": "core-001:unit:9a180bff18d16922",
+      "path": "src/Core/PACKAGE_README.md",
+      "first_line": 13,
+      "last_line": 19,
+      "source_sha256": "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74",
+      "range_sha256": "409758ccb8ec1313d0292e2a2ada89daaea0b0ffa63026112e6cc11f9a9abaeb",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "installation/feed/package recipe read; current-feed availability is a\n  publication prerequisite, not inferred from these commands alone. Source-content supported,\n  pending the final package/document checks.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:7070cc291aec3e7e": {
+      "id": "core-001:unit:7070cc291aec3e7e",
+      "path": "src/Core/CLAUDE.md",
+      "first_line": 1,
+      "last_line": 5,
+      "source_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+      "range_sha256": "4ed3484b9ae703d691ed4250f9928cbb7a2255685f7a984be584ba8af544c028",
+      "verdict": "INELIGIBLE-ADMINISTRATIVE",
+      "note": "administrative module/router preamble; zero clean contract credit.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": 0,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-A-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-A-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B1-C011",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B2-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B3-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B4-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B5-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C012",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C008",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C020",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-OTP-X002",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:db781bee61b48612": {
+      "id": "core-001:unit:db781bee61b48612",
+      "path": "CLAUDE.md",
+      "first_line": 585,
+      "last_line": 596,
+      "source_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+      "range_sha256": "fc40f0fe89200e52bcd710c16e21f77a4d995b4104f2a56c4e1348af70adb2f4",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "project programming-policy guidance read; recommendations are not performance\n  measurements or promises that init/read-only views deep-freeze mutable storage. Supported at that scope.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B4-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C017",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:7dc8f2fc14f0186c": {
+      "id": "core-001:unit:7dc8f2fc14f0186c",
+      "path": "nuget.config",
+      "first_line": 1,
+      "last_line": 20,
+      "source_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "range_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "package-source mapping and credential-location comment agree with the XML;\n  restored package selection/publication remain separate checks.",
+      "verdict_record": "sampling/coordinator/expansion-B2-B3-B4-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": []
+    },
+    "core-001:unit:0052beaaca7e3aab": {
+      "id": "core-001:unit:0052beaaca7e3aab",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+      "first_line": 124,
+      "last_line": 126,
+      "source_sha256": "47496685cae2f56925ee1ee9118ef44291356bb607994b2d40f2168cf188c97c",
+      "range_sha256": "b8e483e80f511c134c24d5c0d1c6a102d65c5cdaf6dfeee327390456d6869dd8",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported captured-report list declaration.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B5-C008",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:891bea911fc43528": {
+      "id": "core-001:unit:891bea911fc43528",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+      "first_line": 69,
+      "last_line": 78,
+      "source_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+      "range_sha256": "92e2f475b43181fb740888adb55d3c293c1439ecfac3568f9388fb2695551e44",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported fake status bytes encode5.4.3 and the helper constructs the protocol with optional touch timeout.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B5-C005",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:f96355d3db0dfcd7": {
+      "id": "core-001:unit:f96355d3db0dfcd7",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "first_line": 34,
+      "last_line": 39,
+      "source_sha256": "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1",
+      "range_sha256": "c86713436602d53c71e22c851d7b5ba8af5eb0b33f5ae84629d738a045f1808c",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported retained processor-state property.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C011",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:d41ecdd3d18d0e91": {
+      "id": "core-001:unit:d41ecdd3d18d0e91",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+      "first_line": 75,
+      "last_line": 79,
+      "source_sha256": "346254b6ff3ccc12e3093f8520c9dbcb3f5f7c78422433aa95749733cba451cb",
+      "range_sha256": "72c563f14e74705980c68daad8bc3b1ecd8a571107b4f7c8d8e9389f9df15924",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported formatting includes headers, Le and data length, not payload bytes.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B6-C001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:035ae50978ce88d7": {
+      "id": "core-001:unit:035ae50978ce88d7",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+      "first_line": 51,
+      "last_line": 56,
+      "source_sha256": "0fd16eb6e4c0c5d6cee783d353fd466eef63b6586768a02b85f501e53d1667b2",
+      "range_sha256": "af2c05e3641671a005c88f7ea22f8d16a8ea0d36181964f4ec3b99a30d5b0747",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported S-ENC view of the owned session key storage; not an independent copy or erasure promise.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B6-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C007",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:9cd17279b86d5878": {
+      "id": "core-001:unit:9cd17279b86d5878",
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+      "first_line": 79,
+      "last_line": 86,
+      "source_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+      "range_sha256": "f596144e0685e623e259c25e1f9ac68f6856274b096a2c378aabd23ae6011331",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported shared logical-exchange guard for plain/wrapped protocol paths. Public direct raw I/O remains outside that guard.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B1-C011",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C014",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:62ede839d51aa516": {
+      "id": "core-001:unit:62ede839d51aa516",
+      "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+      "first_line": 183,
+      "last_line": 189,
+      "source_sha256": "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1",
+      "range_sha256": "bb91818dcef154ef7c679c7c6fedd2549f8853da4e936f062758b5346c308bac",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported delegation of the formatter property.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B6-C002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C005",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C011",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:edaef2dcf282acc6": {
+      "id": "core-001:unit:edaef2dcf282acc6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+      "first_line": 171,
+      "last_line": 186,
+      "source_sha256": "adac19d43dc96b853b48229b4e95839e21f4e772b1ce4344efe323acd661bf6f",
+      "range_sha256": "53f4dad81c12ecb1415f2bb05e8ca374b108d7ab5282c46dd876454a17590f00",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported local test oracle: explicit80-plus-zeros and all-zero blocks respectively yield empty data and BadResponseException. This does not resolve the unavailable exact ISO publication clauses or qualify broader SCP conformance.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B6-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C013",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:5f636711739239fe": {
+      "id": "core-001:unit:5f636711739239fe",
+      "path": "src/SecurityDomain/README.md",
+      "first_line": 1,
+      "last_line": 11,
+      "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1",
+      "range_sha256": "274f3445a5affb72f2085f23dbcdc2ff87d0c6eff5920a66b61f33c2a4c86295",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported package/task overview within the stated APDU secure-channel scope; session transport/version/profile prerequisites remain in the guide, not universal HID SCP support.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B6-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C020",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X006",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    },
+    "core-001:unit:0d64e57897a15be3": {
+      "id": "core-001:unit:0d64e57897a15be3",
+      "path": "src/SecurityDomain/README.md",
+      "first_line": 76,
+      "last_line": 89,
+      "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1",
+      "range_sha256": "387da9ffdb9f6211dcedf833b53ea5f87d8904ce7396d68cb6963f263140bf81",
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Supported complete factory-key/session scope with explicit installed-key and separate-task prerequisites. No new hardware authentication was performed.",
+      "verdict_record": "sampling/coordinator/family-and-SD-replacement-verdicts.md",
+      "reader": "Astra",
+      "actual_read": true,
+      "final_clean_credit": null,
+      "read_count_limit": "Actual expansion/replacement read; duplicates with any other record count once. Final mapping and quota acceptance pending.",
+      "original_candidate_links": [
+        {
+          "candidate": "CORE-B6-C006",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C007",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C009",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C010",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-B6-C015",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-C-C020",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X001",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X002",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X003",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X004",
+          "relation": "same path only, not a same-defect finding"
+        },
+        {
+          "candidate": "CORE-SD-X006",
+          "relation": "same path only, not a same-defect finding"
+        }
+      ]
+    }
+  },
+  "completed_records": {
+    "sampling/coordinator/expansion-A-verdicts.md": "# Astra A expansion readings\n\nRead all 23 whole units in `preparation/expansion-A/original-units.md` and all 19 in\n`preparation/expansion-A-followup/original-units.md`. These are actual readings, not structural credit.\nFinal current mappings and eligibility remain subject to the combined-diff reconciliation.\n\n## First expansion: 23 units\n\nContent supported within the stated source scope for all listed IDs:\n\n`21bef981d5360feb`, `8e7356e172293835`, `2ab1f3fe98ee5ca4`, `c680372cf0dd564e`,\n`6e6307d613511921`, `d0757dfa453abbeb`, `32032fade9d7fddb`, `f1df5948d71dcc9d`,\n`d5838c51b4cca87e`, `f713ea0c593064bf`, `44a66dad89e6e9e9`, `b530f2ba7c68da7e`,\n`a581a1ab8be230d2`, `7045e0544998269f`, `939161b425c3e89f`, `d28709e3276a4138`,\n`2a47e7cc5a9259e3`, `548bc1460a3f9b8f`, `c5b35440184cef31`, `4f7f2feb81045f0f`,\n`abc48bf7ccf04d19`, `26a01b51fa2d612f`, `f7a53cd9184afd96`.\n\nThe feed subscription disposes its registration around replay/live enumeration. Completion/error\nbehavior is interpreted with the complete feed already read, including buffered-drain behavior.\nAdmission bounds waits rather than guaranteeing interruption of native work. Authorization/filter\nhelpers are predicates/lazy initialized observations, not device attestation. Connect's claim is limited\nto known members; it is not a universal cross-process or atomic group claim. Supersession is an internal\nread disposition, not proof that all future calls retry. Substantive XML summaries are retained even\nwhere their units include license/import preambles. The flag and fake enum values do not displace\nthe substantive XML sample.\n\n## Follow-up expansion: 19 units\n\n| Unit suffix | Verdict |\n| --- | --- |\n| `f24674b7449e617e` | Historical migration changelog; read and retained, zero clean quota credit. |\n| `47befc3dc2cc5dd5` | Supported current mapping: async physical discovery and explicit connection availability; historical evidence references are provenance, not runtime proof. |\n| `572af9c8e29c74f9` | Supported substantive producer/subscriber distinction. |\n| `eea6325dac26e880` | Supported platform-route distinction; PC/SC does not use HID report handles. No universal access or native-release guarantee inferred. |\n| `e90e615ba927962a` | Supported: three device-filter rows do not prove transport coverage; explicit pinning requirement is present. |\n| `7b5daf3c140bfbc6` | Historical baseline changelog; zero clean quota credit. |\n| `b1b8f3f0d43abb21` | Supported within source scope: owned manager watch, ordered initial replay, local projection and separate attended hardware gate. |\n| `13971cb61434ba4c` | Historical firmware measurement; no fresh physical or exact device-run proof supplied by this excerpt. Qualified context, zero clean quota credit. |\n| `cec556dd8f62b863` | Supported exact test-command/result flow, including NoTestsExecuted as distinct from execution. |\n| `d0048ac2b4474b13` | Supported path-based SDK discovery and closed CLI exclusion set; actual gates establish metadata requirements, not native execution. |\n| `ac046b142303c33e` | Supported: returns a fresh list of modeled ATR constants, not an exhaustive device attestation. |\n| `3ccf06e816f277d2` | **SAMPLE-A004 additional caller:** newly loaded certificate lacks deterministic disposal on output/PIN/import paths. Same lifetime concern as the earlier PIV CLI observation; preserve as a caller-specific deferred facet, not a permanent-leak claim. Zero clean credit. |\n| `25673509b9d722bf` | Supported reader-name declaration. |\n| `9c8ab813d3edc094` | Supported scoped OATH reset workflow; printed success is not additional physical-state qualification. |\n| `297e68004991d4a8` | Source read with protected-output qualification: reported key status is inferred from fingerprint presence and PIN policy text is runtime output. Existing applet metadata/PIN-state limits remain; no independent key existence or workflow lifetime proof, zero clean quota credit. |\n| `ad16310453b46d29` | Supported archive-prefix predicate. |\n| `6e9c74a6b5e82dc5` | Supported metadata-reader delegate declaration. |\n| `cf3538431462d4ab` | Source behavior read: algorithm switch requests selected key/slot combination; retained OpenPGP key applicability defects remain open. No clean credit for unresolved applicability. |\n| `4089aedab94d4e23` | Source-only cleanup qualification: HMAC key exists before generated-key output and access-code parsing outside try. A failure there bypasses its clearing finally. Same pre-protected-scope cleanup class, no new runtime experiment. Zero clean credit. |\n\nAll suffixes identify `core-001:unit:` IDs. The follow-up caller findings belong in deferred lifetime\nreconciliation; executable code remains unchanged. Replace qualified/history units as required while\nkeeping the broad denominator and all predecessor selections intact.\n",
+    "sampling/coordinator/expansion-B2-B3-B4-verdicts.md": "# Astra B2/B3/B4 expansion and replacement readings\n\nRead all 27 whole units in `expansion-B2/original-units.md`, both new B3 units and all five B4\nunits. The seven repeated B3 activation excerpts are the same IDs already read in the B2 file;\nthey receive no additional read or sample count. Final changed-span mapping remains pending.\n\n## B2 XML expansion and three eligibility replacements\n\nContent supported in the stated source scope for:\n`9d8102989bf52740`, `f00b1d2526f62fe3`, `e5b5533e4df67ea7`, `727ad82dd732b613`,\n`1dcf2e836efee1d5`, `9e1f0228fabdcb5d`, `f82d55d29d5e7e42`, `fb2be78aaf8f6f25`,\n`e9d68bf588ab00e4`, `1f646b31d8d5f48a`, `dd179ffbb8315a43`, `d5ffab3651d9f944`,\n`e954bf0af6c49fba`, `fb09fe35ad8505f1`, `418fbc28a73c4bd5`,\n`9b2517c252b41c26`, `21cfb83cdc2b4263`, `1dc08e7d03f341ef`.\n\nThe complete send/receive implementations preserve admitted-copy ownership and separate caller\nbuffers. Reactor completion and quiescence remain distinct from owner/device close. Udev events\nare copied from a scoped native device. Readiness is an instantaneous openability check, not a\nreservation against later changes. Initialization failure leaves cleanup with the owning listener\nsession; no all-stage cleanup or wake acknowledgment is inferred.\n\n- `cf330b6a639970cd`: **edited overlap**, zero clean credit. Its “Each Start” wording was already\n  corrected by the accepted Linux sampling patch to account for the started guard.\n- `82f001f6db22d507`: **source-qualified**, zero clean credit. Null receive and possible event loss\n  are supported; “most likely” event-storm frequency is not independently established. Preserve\n  the uncertainty rather than treating the likelihood claim as verified native evidence.\n\n## Seven activated historical-scope replacements\n\n| Unit suffix | Verdict |\n| --- | --- |\n| `4c48c7d8d8d2e37a` | Supported concrete/group flag semantics; “cache” does not introduce a new public cache API. |\n| `4c955b22a2de68df` | Historical build/result receipt and specific artifact-count claims: read as qualified evidence, zero clean contract credit. |\n| `0b2135f2f301e2c1` | Historical test/inventory accounting: qualified evidence, zero clean quota credit. |\n| `d8f176c067aa0fd3` | Supported current source mechanism, despite research-file location: original-worker drain, registration release, checked close and retained failure are independently distinguishable. No physical result claimed. |\n| `b45b5794aa92008c` | Supported source mechanism: one poller, eventfd-only retirement, pending admissions, bounded wake retries and independent owner release. The explicit local-source classification is not a hard syscall deadline. |\n| `4330e60d07cd5417` | Historical physical checkpoint and measurements: qualified evidence only, zero clean quota credit. |\n| `457a4879daaf1b55` | Supported source mechanism: shared owner completion, original-worker cleanup and finalizer request-only behavior; known native interruption/release limits are explicit. |\n\nThis distinction follows the content of each unit: a current control-flow explanation can be checked\nagainst source, while a historical test run, inventory count or measurement requires its own evidence.\n\n## B3: two new XML units\n\n- `e3d8ada85fd182e2`: supported synchronous report-connection factory; native open can fail, and\n  this API supplies no asynchronous drain guarantee.\n- `76b664da02352c87`: supported registration/clear contract; callback registration is not proof\n  of quiescence or checked native release.\n\n## B4: four narrative additions and one protected-output replacement\n\n- `f5a358ec89b4c4ce`: administrative documentation-maintenance policy; zero clean contract credit.\n- `9a180bff18d16922`: installation/feed/package recipe read; current-feed availability is a\n  publication prerequisite, not inferred from these commands alone. Source-content supported,\n  pending the final package/document checks.\n- `7070cc291aec3e7e`: administrative module/router preamble; zero clean contract credit.\n- `db781bee61b48612`: project programming-policy guidance read; recommendations are not performance\n  measurements or promises that init/read-only views deep-freeze mutable storage. Supported at that scope.\n- `7dc8f2fc14f0186c`: package-source mapping and credential-location comment agree with the XML;\n  restored package selection/publication remain separate checks.\n\nAll suffixes use `core-001:unit:`. No compiler or native/device operation was run by these readings.\nReplace the explicit exclusions/qualifications without silently narrowing the broad denominator.\n",
+    "sampling/coordinator/family-and-SD-replacement-verdicts.md": "# Astra family replacements and SD expansion\n\nRead all eight complete units in `family-replacements/revision-2/original-units.md` and both\nSecurity Domain additions. The four superseded SWConstants replacement proposals receive no credit;\ntheir unavailable original-ISO evidence and the broad denominator remain preserved.\n\n| Unit suffix | Source-content verdict |\n| --- | --- |\n| `0052beaaca7e3aab` | Supported captured-report list declaration. |\n| `891bea911fc43528` | Supported fake status bytes encode5.4.3 and the helper constructs the protocol with optional touch timeout. |\n| `f96355d3db0dfcd7` | Supported retained processor-state property. |\n| `d41ecdd3d18d0e91` | Supported formatting includes headers, Le and data length, not payload bytes. |\n| `035ae50978ce88d7` | Supported S-ENC view of the owned session key storage; not an independent copy or erasure promise. |\n| `9cd17279b86d5878` | Supported shared logical-exchange guard for plain/wrapped protocol paths. Public direct raw I/O remains outside that guard. |\n| `62ede839d51aa516` | Supported delegation of the formatter property. |\n| `edaef2dcf282acc6` | Supported local test oracle: explicit80-plus-zeros and all-zero blocks respectively yield empty data and BadResponseException. This does not resolve the unavailable exact ISO publication clauses or qualify broader SCP conformance. |\n| `5f636711739239fe` | Supported package/task overview within the stated APDU secure-channel scope; session transport/version/profile prerequisites remain in the guide, not universal HID SCP support. |\n| `0d64e57897a15be3` | Supported complete factory-key/session scope with explicit installed-key and separate-task prerequisites. No new hardware authentication was performed. |\n\nAll suffixes use `core-001:unit:`. These are actual reads, pending final current-span/edited-overlap\nand role-quota reconciliation; no runtime or cryptographic execution occurred.\n"
+  },
+  "distinct_expansion_replacement_ids": 86,
+  "new_ids_beyond_original_983": 86,
+  "verdict_counts": {
+    "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY": 72,
+    "HISTORICAL-EVIDENCE-QUALIFIED": 6,
+    "DEFERRED-SOURCE-OBSERVATION": 1,
+    "SOURCE-QUALIFIED-PENDING-REPLACEMENT": 3,
+    "KNOWN-DEFERRED-PRETRY-CLEANUP-QUALIFICATION": 1,
+    "INELIGIBLE-EDITED-OVERLAP": 1,
+    "INELIGIBLE-ADMINISTRATIVE": 2
+  },
+  "final_clean_pass": false,
+  "rule": "Finished actual reads are credited only as reads; explicit qualification/exclusion and remaining quota replacements stay open."
+}

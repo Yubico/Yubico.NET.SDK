@@ -1,0 +1,68 @@
+{
+  "review_kind": "focused-independent-ReceiveEvent-documentation-review",
+  "sample_finding": "SAMPLE-B2-003",
+  "decision": "PASS",
+  "acceptance_scope": "Exact ReceiveEvent XML-only additive patch; no broader audit, runtime change or new unique engineering finding.",
+  "accepted_patch_sha256": "9405abcd2f52d438f281b809ef8d4b3f5fbd010cfb3e9d17a51ddc9b1140be86",
+  "accepted_patch_bytes": 1052,
+  "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+  "before_current_primary_raw_sha256": "676d31c9d87d67a9b481082caed6cb06a91576f3120aa3c336d2dd9ded1f2f29",
+  "accepted_after_raw_sha256": "27276323b17745eaddd0b16d1030d01304ae6122d49d516795a945620d040445",
+  "before_basis": "Current primary including accepted Linux sampling patch a994f3081f0bc7439221d2a6073b5bc4f0dec9149d9dfa4c3e254799cbab1049, not older revision2 Linux bytes.",
+  "accepted_current_xml_lines": [[82, 91]],
+  "original_selected_unit": "core-001:unit:82f001f6db22d507",
+  "reviewed_evidence": [
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "current_read_lines": [[57, 111], [197, 306]],
+      "conclusion": "Missing/invalid monitor and invalid native device return null; errno/cause frequencies are not inspected. Complete receive flow and existing no-wake-ack qualification preserved."
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidDeviceListener.cs",
+      "sha256": "3bad0ebd9f43e81ae610b38cd18b998aa8e678494e5f0a7c9d693834e9fbd9c6",
+      "current_read_lines": [[220, 264]],
+      "conclusion": "Null result emits existing unknown-change rescan hint; potential notification loss/removal is conservative recovery rationale, not demonstrated loss or cause-frequency evidence."
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B2/sources/libudev-monitor.c",
+      "sha256": "3f0808560973029612b17d936b61ecfb71388504ef0fc5af401f25cb440d9589",
+      "revision": "systemd v257, retained original register/manifest URL",
+      "read_lines": [[175, 249]],
+      "conclusion": "Filtered-message helper can exhaust readiness and return -EAGAIN; negative wrapper results produce NULL with errno. API comment documents NULL on error. Supports possibilities, not likelihood ranking or deployed-binary behavior."
+    }
+  ],
+  "accepted_input_records_relative_to_sampling_udev_receive": {
+    "report.md": "2817f5dc862dbab86e951fe2f42001ac196067c48398572ed9b55bcd6876c6df",
+    "inputs.json": "7678bd8c995afa1891621738b528a287c980d4d34bb8494f94afe7e8d1b0a012",
+    "file-disposition.json": "34b43e1e254971b622b05b7f931dc6d80fc6a02daf16c01452c2f9e777e7a227",
+    "source-evidence.json": "8c7622d975b46ded2d5ff28874169ec73582fdffc88bedc21e01d4aa4e2b0606",
+    "return-identities.json": "7e5947026d04e1ff9aacc45d9dc9cf0e6421c1ed3d2ae47c987b341f01982348",
+    "static-preservation.json": "9405febf09f454983e2433577cc7619ac64128d7df09ede250cd2bdc9c173043"
+  },
+  "independent_static_checks": {
+    "result": "PASS",
+    "discrepancies": [],
+    "before_text_matches_current_primary_bytes": true,
+    "before_hash_matches_accepted_Linux_sampling_after_identity": true,
+    "after_hash_matches": true,
+    "focused_patch_equals_independently_regenerated_delta": true,
+    "only_ReceiveEvent_xml_changed": true,
+    "all_other_same_file_text_and_no_wake_ack_qualification_exact": true,
+    "bom_and_final_newline_preserved": true,
+    "other_eligible_source_files_unchanged_against_revision2_plus_accepted_sampling": 212,
+    "protected_prior_records_exact": 47,
+    "prior_patch_identities_exact": 4,
+    "listed_editor_record_hashes_match": 6,
+    "original_unit_identity_range_hash_matches_B2_ledger": true,
+    "source_evidence_hashes_match": true,
+    "examples_unchanged": true,
+    "limitation": "Static text/hash comparisons, not compiler/tokenizer/API-binding/runtime verification. Editor XML/Git checks not rerun by reviewer."
+  },
+  "remaining_mandatory_corrections": [],
+  "qualifications": "Potential loss is recovery rationale, not proven lost notification, observed ENOBUFS/event storm or frequency distribution. All native/deployment/physical/producer gaps and held decisions remain unchanged.",
+  "sampling_ownership": "Sampler/coordinator retains exclusion, quota, category expansion and credit accounting; no sampling or coverage credit allocated here.",
+  "primary_reservation": "Primary read only for exact before-byte comparison; no primary writes. Reservation through owner's full compile cycle remains intact.",
+  "execution": "Read-only managed/native-source/record inspection and Python text/hash comparisons only. No product/editor-record writes, SDK build/tests/native/device/SDK-crypto/formatter/Git commands or mutations/subagents/new tooling/broader audit.",
+  "owned_writes": ["editing/transports/sampling-udev-receive/review.md", "editing/transports/sampling-udev-receive/review-identities.json"],
+  "stopping_point": "Existing coordinator validation, Core Pass1 publication and deferred finding handoff, then stop."
+}

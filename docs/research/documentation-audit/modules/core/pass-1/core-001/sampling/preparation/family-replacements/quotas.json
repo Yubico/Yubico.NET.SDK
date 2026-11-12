@@ -1,0 +1,75 @@
+[
+  {
+    "owner": "B5",
+    "stratum": "tests-and-helpers",
+    "original_population": 503,
+    "working_population": 501,
+    "conservative_denominator_policy": "Only the two explicitly adjudicated preambles removed; no other code/private/test eligibility narrowed",
+    "original_quota": 51,
+    "working_minimum": 51,
+    "withheld_sample_ids": [
+      "core-001:unit:c7319c1c1182a4be",
+      "core-001:unit:5bcf834655fef594"
+    ],
+    "known_edited_original_selected_ids": [],
+    "valid_original_selected": 49,
+    "required_replacements": 2,
+    "replacement_ids": [
+      "core-001:unit:0052beaaca7e3aab",
+      "core-001:unit:891bea911fc43528"
+    ],
+    "purpose": "SPECIFIC-ADMINISTRATIVE-ELIGIBILITY-REPLACEMENT",
+    "final_denominator": null,
+    "content_verdicts": "PENDING actual Astra reading; these counts are not clean acceptance"
+  },
+  {
+    "owner": "B6",
+    "stratum": "XML-contracts",
+    "original_population": 104,
+    "working_population": 104,
+    "conservative_denominator_policy": "Original broad role population retained; only six sampled units lose clean credit, no whole class narrowed",
+    "original_quota": 11,
+    "working_minimum": 11,
+    "withheld_sample_ids": [
+      "core-001:unit:b0c0d59299e1e832",
+      "core-001:unit:8e9040753e759723",
+      "core-001:unit:53f3eee8233f9a20",
+      "core-001:unit:e7354a1214c8ba41",
+      "core-001:unit:5f18c0d67c2c7815"
+    ],
+    "known_edited_original_selected_ids": [],
+    "valid_original_selected": 6,
+    "required_replacements": 5,
+    "replacement_ids": [
+      "core-001:unit:f96355d3db0dfcd7",
+      "core-001:unit:3ad8b9f956a4e672",
+      "core-001:unit:aa9d6d49701b178d",
+      "core-001:unit:a3d37dc1aed22b2f",
+      "core-001:unit:f39183b2d438d21d"
+    ],
+    "purpose": "SOURCE-QUALIFICATION-REPLACEMENT; NOT DOCUMENTATION-DEFECT-EXPANSION",
+    "final_denominator": null,
+    "content_verdicts": "PENDING actual Astra reading; these counts are not clean acceptance"
+  },
+  {
+    "owner": "B6",
+    "stratum": "tests-and-helpers",
+    "original_population": 128,
+    "working_population": 128,
+    "conservative_denominator_policy": "Original broad role population retained; only six sampled units lose clean credit, no whole class narrowed",
+    "original_quota": 13,
+    "working_minimum": 13,
+    "withheld_sample_ids": [
+      "core-001:unit:59c33b8c7c8f294c"
+    ],
+    "known_edited_original_selected_ids": [],
+    "valid_original_selected": 12,
+    "required_replacements": 1,
+    "replacement_ids": [
+      "core-001:unit:edaef2dcf282acc6"
+    ],
+    "purpose": "REFERENCE-DATA-QUALIFICATION-REPLACEMENT; NOT DOCUMENTATION-DEFECT-EXPANSION",
+    "final_denominator": null,
+    "content_verdicts": "PENDING actual Astra reading; these counts are not clean acceptance"
+  }
+]

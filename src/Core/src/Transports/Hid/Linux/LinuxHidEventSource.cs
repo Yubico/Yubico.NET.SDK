@@ -57,12 +57,13 @@ internal sealed record LinuxHidUdevEvent(string? Action, string? StableIdentity,
 /// <summary>
 /// Abstraction over the native udev monitor, poll(), and shutdown eventfd used by
 /// <see cref="LinuxHidDeviceListener"/>. Enables no-hardware fault-injection tests of the
-/// listener's loop policy (bounded exit, error transitions, hint emission).
+/// listener's loop policy (error transitions, hint emission and caller-requested stop).
 /// </summary>
 /// <remarks>
 /// Ownership: the listener session's thread owns the source and disposes it when the loop
 /// exits. <see cref="SignalShutdown"/> may be called concurrently from other threads and
 /// must tolerate a source that is concurrently disposing.
+/// Fake-driven loop-policy and caller-stop tests do not establish native poll completion or a shutdown deadline.
 /// </remarks>
 internal interface ILinuxHidEventSource : IDisposable
 {
@@ -79,16 +80,24 @@ internal interface ILinuxHidEventSource : IDisposable
     LinuxHidPollOutcome WaitForEvent();
 
     /// <summary>
-    /// Receives one pending udev event. Returns null when the receive fails — which is most
-    /// likely during event storms (for example ENOBUFS after the kernel dropped notifications),
-    /// exactly when a removal may have been lost.
+    /// Receives one pending udev event, or returns null when the source has no event to return.
     /// </summary>
+    /// <remarks>
+    /// The built-in source returns null for a missing or invalid monitor or a native no-device result.
+    /// The native result can mean no event is available or reception failed. Receive failures can coincide
+    /// with lost notifications, so the listener requests a rescan on null to reconcile potentially missed
+    /// changes, including removals.
+    /// </remarks>
     LinuxHidUdevEvent? ReceiveEvent();
 
     /// <summary>
-    /// Wakes a thread blocked in <see cref="WaitForEvent"/> so it can observe cancellation.
-    /// Safe to call from any thread, including concurrently with <see cref="IDisposable.Dispose"/>.
+    /// Attempts a shutdown wake so a thread blocked in <see cref="WaitForEvent"/> can observe cancellation.
     /// </summary>
+    /// <remarks>
+    /// May be called from any thread and must tolerate concurrent <see cref="IDisposable.Dispose"/>.
+    /// A missing, invalid or concurrently disposed shutdown handle, or a failed signal write, can leave the
+    /// native wait unwoken. A normal return does not acknowledge a wake, loop termination, drain or release.
+    /// </remarks>
     void SignalShutdown();
 
     /// <summary>
@@ -190,7 +199,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
     {
         var pollFds = _pollFds ?? throw new InvalidOperationException("The event source is not initialized.");
         // The listener thread owns both handles. Retain them explicitly for this raw-fd
-        // poll; future report-reactor registrations need references across registration too.
+        // poll. The separate report reactor retains device references across each entire registration.
         using var shutdownLease = new LinuxDescriptorLease(_shutdownEventHandle
             ?? throw new InvalidOperationException("The shutdown event is not initialized."));
         using var monitorLease = new LinuxDescriptorLease(_monitorHandle

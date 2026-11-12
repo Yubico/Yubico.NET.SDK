@@ -1,0 +1,8 @@
+{
+  "sample": "SAMPLE-A003",
+  "kind": "ADDITIONAL-CONTEXT-FINDING-NOT-NEW-SELECTED-UNIT",
+  "path": "src/Core/src/Devices/DeviceChangeFeed.cs",
+  "before_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+  "primary_before_sha256": "68d779ac0a709ad45daf74ce4b75938f55f8c7a22151eac57afed59b6d091ee3",
+  "primary_bytes_equal": true
+}

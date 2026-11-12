@@ -84,6 +84,10 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     ///     Creation settings are not retained as an options object. SCP parameters remain caller-owned
     ///     and borrowed through initialization. Management does not retain, invoke, or dispose the optional
     ///     user-presence prompt. Communication, SCP, and response errors propagate from their layers.
+    ///     Successful SCP setup sets IsAuthenticated but performs no subsequent protected Management
+    ///     command during creation. That flag is setup history, not channel-health or configuration-lock
+    ///     authorization. Await complete public operations before teardown; native completion and release
+    ///     remain responsibilities of the selected connection implementation.
     /// </remarks>
     /// <param name="connection">An open SmartCard, FIDO HID, or OTP HID connection, retained by the caller.</param>
     /// <param name="options">
@@ -151,6 +155,8 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     {
         ThrowIfDisposed();
         var protocol = Protocol ?? throw new InvalidOperationException("Management session is not initialized.");
+        // Query current fields while retaining initialization's firmware default; non-final qualifier
+        // precedence belongs to DeviceInfo.CreateFromTlvs. This read does not publish discovery metadata.
         return DeviceInfoReader.ReadAsync(protocol, _version, cancellationToken);
     }
 

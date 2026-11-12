@@ -42,7 +42,8 @@ internal sealed class WindowsTopologyNativeOps : IWindowsTopologyNativeOps
 
         using (context)
         {
-            // Two-call pattern: length probe, then the buffered read.
+            // A null output buffer returns the required character count, including the terminator, with
+            // SCARD_S_SUCCESS. Use that count for the second call's buffer.
             var lengthInChars = 0;
             var probeResult = WinSCardNativeMethods.SCardGetReaderDeviceInstanceId(
                 context,

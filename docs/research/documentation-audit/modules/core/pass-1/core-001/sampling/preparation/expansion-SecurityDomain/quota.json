@@ -1,0 +1,11 @@
+{
+  "owner": "SecurityDomain",
+  "stratum": "narrative-examples-and-maps",
+  "original_population": 19,
+  "original_full_quota": 2,
+  "additional_full_quota": 2,
+  "proposed_total": 4,
+  "known_miss_clean_credit": 0,
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "other_owner_role_reductions": 0
+}

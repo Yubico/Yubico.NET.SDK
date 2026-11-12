@@ -1,0 +1,45 @@
+{
+  "source_log": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-security-domain-first/toolchain/20261112-053848-637-build/02-build-SecurityDomain.IntegrationTests.log",
+    "bytes": 7653,
+    "sha256": "b7db52241bc89c94d4261eccd17d6fd060dedca914a13b7704563d11d5f496a2"
+  },
+  "unique_diagnostics": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-306.cs",
+      "line": "30",
+      "column": "17",
+      "code": "CS1061",
+      "message": "'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-302.cs",
+      "line": "30",
+      "column": "17",
+      "code": "CS1061",
+      "message": "'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-303.cs",
+      "line": "33",
+      "column": "21",
+      "code": "CS1061",
+      "message": "'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-303.cs",
+      "line": "39",
+      "column": "21",
+      "code": "CS1061",
+      "message": "'YubiKeyTestState' does not contain a definition for 'WithSecurityDomainSessionAsync' and no accessible extension method 'WithSecurityDomainSessionAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?)"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/SecurityDomain.IntegrationTests/FULL-303.cs",
+      "line": "52",
+      "column": "21",
+      "code": "CS1061",
+      "message": "'YubiKeyTestState' does not contain a definition for 'ResetSecurityDomainAsync' and no accessible extension method 'ResetSecurityDomainAsync' accepting a first argument of type 'YubiKeyTestState' could be found (are you missing a using directive or an assembly reference?)"
+    }
+  ],
+  "classification": "Generated context: omitted actual module-local test-helper namespace explicitly required by enclosing source docs."
+}

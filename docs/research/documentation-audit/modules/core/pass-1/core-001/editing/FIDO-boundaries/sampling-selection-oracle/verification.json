@@ -1,0 +1,61 @@
+{
+  "sample": "SAMPLE-WA-001",
+  "selected_unit": "e29522f04d40349a",
+  "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+  "before_accepted_primary_sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5",
+  "after_sha256": "9223a2299f63cd2f8ceb5479cf5cc56ed5fb99463c084db60590cf3123f4cff1",
+  "focused_patch_sha256": "d70a50aaf297cc62fd6c7fa93f13e8cfb1acb44fe975279dc9fb60fc30e5b05e",
+  "changed_ranges": [
+    {
+      "before": [
+        155,
+        155
+      ],
+      "after": [
+        155,
+        156
+      ],
+      "operation": "replace"
+    }
+  ],
+  "comment_only_substantive_change": true,
+  "non_comment_lines_identical": true,
+  "eof_newline_added": true,
+  "accepted_primary_still_equals_before": true,
+  "preserved_historical_records": 27,
+  "other_product_paths_preserved": 309,
+  "markdown_fences_unchanged": 47,
+  "implementation_read": {
+    "path": "src/WebAuthn/src/Client/Authentication/MatchedCredential.cs",
+    "sha256": "d04cb09b436eda097f5e7f642ca265d9252e50b1705aeb9f2a426838bf836673",
+    "lines": [
+      1,
+      96
+    ]
+  },
+  "complete_fixture_read_lines": [
+    1,
+    533
+  ],
+  "test_method_before_lines": [
+    132,
+    163
+  ],
+  "test_method_after_lines": [
+    132,
+    164
+  ],
+  "focused_diff_check": "passed",
+  "independent_review": "pending",
+  "sampling_credit_and_expansion": "sampler-owned; no edited credit allocated here",
+  "not_run": [
+    "SDK build",
+    "SDK test",
+    "formatter",
+    "crypto",
+    "native",
+    "device",
+    "Git mutation",
+    "subagent"
+  ]
+}

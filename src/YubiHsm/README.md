@@ -26,6 +26,8 @@ A session normally resolves feature support from the applet's three-byte SELECT 
 policy instead. Choose an override that the actual applet supports: device metadata, a development-build
 label, and an override alone provide different evidence from successfully executing an operation.
 `ResetAsync` reselects the applet and retains the session's resolved version policy.
+An override does not skip SELECT, and malformed TLV framing can fail before fallback. Fixture/discovery
+metadata is a separate version source; it is not substituted by the HSM session factory.
 
 A credential is identified by a public label of 1 to 64 UTF-8 bytes, represented as a plain `string`. A
 symmetric credential holds an AES-128 K-ENC and K-MAC pair, an asymmetric one an EC P-256 private key, and each is
@@ -279,9 +281,18 @@ the cancellation request as a device-interruption guarantee.
 ## Constraints
 
 - Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
-- One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
-  disposes it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
+- Within this process, grouped views admit one live connection across known member IDs, and each connection
+  admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
+  it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
+  See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
+- Await the entire public workflow before another operation or disposal. Optional LIST policy lookup,
+  CALCULATE, parsing and callbacks are separate phases; Core drains an admitted exchange, not all later
+  application work. Keep borrowed inputs/prompt resources alive until the task is terminal.
 - `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.
+  Reset reuses its protocol without a fresh SCP handshake. With SCP, RESET is protected but re-SELECT
+  passes through unprotected; old host state and public readiness/authentication flags remain. End the
+  session/connection scopes and create fresh ones after reset or uncertainty rather than relying on
+  those flags as post-reset channel-health evidence.
 - Unsupported feature gates throw `NotSupportedException`; on versions 5.6.0–5.7.0 `GetChallengeAsync`
   omits a supplied password.
 - Enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods
@@ -302,8 +313,14 @@ the cancellation request as a device-interruption guarantee.
 - `SessionKeys.Parse` copies the response into three owned arrays; disposal clears those arrays and later
   property access throws. Existing spans view the cleared storage. Clear the Parse source and any caller-made
   copies separately, and keep `SessionKeys` in a `using` scope through the HSM task.
+  The calculation helper clears its final successful CALCULATE response even if strict parsing or the
+  success callback fails. This does not clear independent transport, fragment or decrypted-response copies;
+  retry/backend failures can occur before that final-response cleanup scope.
 - `PutCredentialDerivedAsync` derives K-ENC and K-MAC with PBKDF2-HMAC-SHA256, salt `"Yubico"`, 10,000 iterations.
 - Never log passwords, key material, challenges, or cryptograms. Log labels, algorithms, and status words only.
+
+Inherited `IsAuthenticated` records Core SCP setup, independently of the applet's per-operation management
+key/password checks and the application's external HSM authentication. It is not an ongoing channel-health check.
 
 ## Example
 

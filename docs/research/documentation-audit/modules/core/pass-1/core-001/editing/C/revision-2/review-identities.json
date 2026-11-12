@@ -1,0 +1,77 @@
+{
+  "schema": "core-packet-c-revision-2-focused-independent-review-v1",
+  "verdict": "PASS",
+  "review_date": "2026-11-12",
+  "worktree": "/home/rupicola/Code/y/yubikit-core-docs-edit-crypto",
+  "base_head": "da66f5d01ba594993974ddd26723e8c300c0a454",
+  "product_source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "acceptance_scope": "Full successor Packet C batch for bounded independent content/citation review only: predecessor acceptance carried forward on unchanged identities plus focused acceptance of C-REVIEW-001 correction. Not publication, compilation or runtime acceptance.",
+  "resolved_review_comment": {
+    "id": "C-REVIEW-001",
+    "candidate": "CORE-C-C013",
+    "proposal": "FPT-095",
+    "original_candidate_path_row_zero_based": 80,
+    "path": "src/Core/src/Cryptography/AesUtilities.cs",
+    "current_remarks_lines": "21-26",
+    "predecessor_sha256": "697fca9dcdcba3f05bf92ea0af68d2c25d527bb4bec9c4e7a0b2a0eeab133b44",
+    "accepted_sha256": "17f3932d55346e8e4d11c27b9137135e5d9283c93be9926f1af59d3979659425",
+    "status": "RESOLVED-DOCUMENTATION-ONLY",
+    "control_flow_anchors": {
+      "block_cipher_key_allocation_try_finally": "59,61,83-86; later zero-IV allocation at 70 is inside try",
+      "cbc_encrypt_allocations_try_finally": "130-131,133,152-156",
+      "cbc_decrypt_allocations_try_finally": "200-201,203,223-227"
+    },
+    "deferred_runtime_issue": "CBC IV-copy allocation failure can leave the preceding key copy uncleared; no implementation fix or failure experiment accepted."
+  },
+  "accepted_successor_batch": {
+    "primary_paths": 104,
+    "edited_from_base": 54,
+    "retained_from_base": 50,
+    "changed_since_predecessor_review": 1,
+    "other_product_identities_preserved": 103,
+    "current_primary_identity_manifest": "current-identities.json",
+    "manifest_sha256": "2906c9a9754a167e8019712c3c9ecae052ff41fd45c9c44eeee30f6f7c762402",
+    "acceptance_rule": "Accept all 104 current path identities and unchanged edit/retain mappings in this hash-bound manifest for the bounded content/citation gate. Semantic acceptance of unchanged content is inherited from the immutable predecessor review, not a new broad re-review.",
+    "full_product_patch": "product.patch",
+    "patch_bytes": 125099,
+    "patch_sha256": "159a59af1d631f1199e60510f0f85319c3ff58230c168d2a842058096d7b2047",
+    "fresh_read_only_base_diff_equals_patch": true
+  },
+  "predecessor_review": {
+    "review_path": "../review.md",
+    "review_sha256": "e946b59c54ccb1ff844bc57256adf3ef64cd4db53f9c7c29bf52ebf83980d9a5",
+    "identities_path": "../review-identities.json",
+    "identities_sha256": "84ead0eac92e5c273c7cc94ea240db75066985881ff4b58d6a3a4e8b1d5ead14",
+    "historical_bytes_unchanged": true,
+    "supersession": "Closes the sole mandatory correction; all other content/citation conclusions and limitations carry forward on their unchanged identities."
+  },
+  "reviewed_revision_2_input_sha256": {
+    "report.md": "07545233e870ede6d688a08c1b3f1ff010df0cc88f05b501d9f6cf6632c89374",
+    "current-identities.json": "2906c9a9754a167e8019712c3c9ecae052ff41fd45c9c44eeee30f6f7c762402",
+    "mapping.json": "33f78618d150aa9c7435a20172927a2a66d89da3a0373c81ad5c549358aeaaa3",
+    "preserved-prior-records.json": "b397f78428d9c852d9c2b1f8a50a2c8cc9c38cfb707128c6c53a1a41f8d140b0",
+    "output-identities.json": "81ed9b4385982501c609e03138c81c00b169025687820e15c680032a8391f993",
+    "verification.json": "7f70cb3c3bc194a588f0ce9870714f11600e8fd4f8f9c167c1ee182585cb375d",
+    "correction.patch": "ced6f6028146c99a977bbb07285663cf7d0a8bf0b7747d1344fbb9cfbc1866c2",
+    "product.patch": "159a59af1d631f1199e60510f0f85319c3ff58230c168d2a842058096d7b2047"
+  },
+  "preservation_checks": {
+    "prior_records_verified": 13,
+    "revision_2_editor_output_rows_verified": 7,
+    "all_104_current_product_hashes_verified": true,
+    "decisions_candidate_and_proposal_mappings_unchanged": true,
+    "exact_predecessor_aes_reconstructed_by_reversing_only_xml_comment_correction": true,
+    "example_map_preserved": true,
+    "CORE-C-C019_FPT-101": "HOLD-FACET unchanged; no D facet",
+    "CORE-C-C020_FPT-102": "RETAIN-REFER-OWNER unchanged; no C primary SCP parameter path"
+  },
+  "pending_gates": [
+    "Coordinator existing token/API/cref/example binding and compilation/integration checks on final integrated bytes",
+    "Runtime/native producer/provider/physical device/applet profile qualifications as bounded by predecessor review",
+    "Deferred CBC exceptional-copy cleanup handoff; no runtime repair authorized",
+    "Finish Core Pass 1 publication plus deferred handoff after authorized gates, then stop"
+  ],
+  "writes": ["review.md", "review-identities.json"],
+  "prohibited_execution_performed": false,
+  "execution_limit": "Focused source/record reads, in-memory predecessor reconstruction, static hash comparisons and read-only Git diff only; no new research/tooling, product edits, builds/tests/formatter/native/device/crypto execution, Git mutations or subagents."
+}

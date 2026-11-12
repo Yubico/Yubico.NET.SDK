@@ -69,14 +69,24 @@ src/
 
 ## Logging
 
-Use Core's `YubiKitLogging.CreateLogger<T>()` when adding logging; there is no `LoggingFactory`.
+Use the public `YubiKitLogging.LoggerFactory.CreateLogger<T>()` route when adding WebAuthn logging.
+Core's `YubiKitLogging.CreateLogger<T>()` helper is internal and unavailable to this assembly;
+the general preference for that helper applies only where it is accessible. There is no `LoggingFactory`.
+
+Keep the logger in a static readonly field so it is created once for the type's category. Configure the
+factory before that field is initialized, and keep the application-owned factory and its providers
+usable while the logger is in use. Replacing the factory affects newly created loggers, not an already
+cached static logger; the module does not own or dispose the application's logging infrastructure.
 
 The WebAuthn source currently contains no logger calls. This does not guarantee that the underlying
 CTAP2/Core layers or application logging are silent, and it is not a sensitive-data logging audit.
 
-When adding logs:
+This implementation fragment belongs inside `PreviewSignProcessor`: declare the field at class scope
+and call `LogDebug` inside a method with `selectedAlgorithm` in scope. Import
+`Microsoft.Extensions.Logging` for `ILogger`, `CreateLogger<T>()` and `LogDebug`, and
+`Yubico.YubiKit.Core` for `YubiKitLogging`, using file-scope `using` directives.
 ```csharp
-private static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();
+private static readonly ILogger Logger = YubiKitLogging.LoggerFactory.CreateLogger<PreviewSignProcessor>();
 
 Logger.LogDebug("Selected algorithm: {Algorithm}", selectedAlgorithm);
 ```
@@ -169,6 +179,14 @@ required `clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `
 The origin and client options are required; `RpIdValidator` is required within the client options,
 while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
 in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
+
+Serialize and fully await whole ceremonies before client disposal. Core drains individual exchanges,
+not the complete probing, PIN-token, assertion or extension-output workflow; the client has no
+whole-ceremony disposal join. Keep borrowed inputs and caller-owned prompts usable through their last
+actual continuation, including late PIN-prompt completion after cancellation. Callbacks must not
+reenter or dispose the client awaiting them. Session adoption does not acquire a borrowed connection.
+SDK-managed connection exclusion requires overlapping known member interface IDs in this process;
+coordinate disjoint scoped views, direct factories and other processes separately.
 
 ### Registration transport metadata
 
@@ -280,6 +298,11 @@ the prompt in the `SessionCreationOptions` already forwarded to CTAP2; callers s
 
 The prompt is informational, not a user-verification input. To abandon a ceremony, cancel its token.
 A PIN still comes only from `pinBytes` or `WebAuthnClientOptions.CredentialPrompt`.
+
+Terminal notification describes CTAP status before typed decoding and extension-output preparation,
+not complete ceremony or RP success. Resolution uses an uncancelled token and can delay return after
+cancellation. A failed request callback disables resolution. The caller owns both prompt services
+and keeps their resources usable through actual remaining callbacks.
 
 ### RP ID Validation
 
@@ -542,7 +565,7 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 1. **previewSign maps cover the allow list** — require one parameter entry per allowed descriptor and select by the recognized credential, including multi-entry requests
 2. **Extension inputs must reach the backend** — Assert on encoded extension maps because a missing processor call can silently omit an extension
 3. **previewSign registration flags belong to the inner attestation** — The draft's signed registration extension value supplies the selected algorithm at key 3. Policy flags belong inside the generated-key attestation. The CTAP decoder's tolerated outer key 4 is not a standard optional field or evidence of a beta/device variant.
-4. **No LoggingFactory** — Use `YubiKitLogging.CreateLogger<T>()` from Core
+4. **No LoggingFactory** — WebAuthn uses the public `YubiKitLogging.LoggerFactory.CreateLogger<T>()` extension with `Microsoft.Extensions.Logging` imported; Core's helper is internal.
 5. **CBOR key constants are context-specific** — key `7` means authentication `additionalArgs` in GetAssertion input and attestation object in MakeCredential unsigned output; keep parsing paths context-specific
 6. **The client never asks for anything except a PIN** — input comes from `pinBytes` or
    `WebAuthnClientOptions.CredentialPrompt`; abandonment comes from the cancellation token.

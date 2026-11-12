@@ -1,0 +1,28 @@
+--- a/src/OpenPgp/CLAUDE.md
++++ b/src/OpenPgp/CLAUDE.md
+@@ -34,8 +34,9 @@
+ | `OpenPgpSession.Reset.cs` | Factory reset sequence |
+ 
+ ### Shared Session State
+-- `OpenPgpBackend _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
+-- `FirmwareVersion _version` — firmware for feature gating
++- `IOpenPgpBackend? _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
++- Inherited `ApplicationSession.FirmwareVersion` — effective version for protocol configuration and feature gating;
++  initialization chooses the override or detected applet version. The detected version is logged, not retained in a `_version` field.
+ - `ApplicationRelatedData _appData` — cached card state (refreshable)
+ - `Kdf? _kdf` — active KDF configuration (lazy-loaded)
+ - `GetKdfAsync` returns the cached instance and `SetKdfAsync` retains its input instance. Session
+--- a/src/OpenPgp/README.md
++++ b/src/OpenPgp/README.md
+@@ -526,8 +526,9 @@
+ `ResetAsync` attempts PIN blocking, TERMINATE, ACTIVATE and state refresh, using the SDK's 1.0.6 check. Its current
+ implementation ignores TERMINATE/ACTIVATE statuses and checks no complete erasure postcondition. A normal return
+ alone proves too little: independently inspect key status, certificates, PIN acceptance/retries, KDF and UIF afterward.
+-Cancellation/failure can leave blocked PINs or partial state. This method performs the attempted reset and returns
+-fresh application metadata for part of that inspection; your application supplies authorization and full verification.
++Cancellation/failure can leave blocked PINs or partial state. `ResetAsync` refreshes the session's application-data
++cache without returning metadata. The `ResetAndInspectAsync` example below makes a separate application-data read
++and returns that result for part of the inspection; your application supplies authorization and full verification.
+ 
+ Reset preserves the session's effective version, including any override. On an SCP-created session, reset commands
+ use the existing secure graph; reselection sends a plain SELECT without discarding that graph or establishing new

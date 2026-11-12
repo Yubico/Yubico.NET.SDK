@@ -1,0 +1,1004 @@
+{
+  "reader": "Astra",
+  "scope": "Actual reading of110 complete pinned B3 units plus relevant source and original headers; final eligibility/mapping pending",
+  "reading_sha256": "8823615fc0f725fa141679df8f0570f678ba8656d5f48785ed64fbdb44f77206",
+  "original_header_orientation": "https://raw.githubusercontent.com/apple-oss-distributions/xnu/xnu-12377.1.9/osfmk/mach/kern_return.h",
+  "context": [
+    "IIOKitDeviceLifetime production CreateDevice/OpenDevice/report/CF release implementation",
+    "Retained IOHIDManager.h194\u2013228,402\u2013436",
+    "Retained IOKitLib.h420\u2013432",
+    "Native-owner header/exports cancel and fault constants"
+  ],
+  "units": [
+    {
+      "id": "core-001:unit:f8412d69f0903d78",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "range_sha256": "e1c59ac5aa5c5193f00ec7822e25c9d2a30c2771e4db9fbe93c538fe5ae519ce",
+      "current_file_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "original_unit_present_in_current": true,
+      "verdict": "DOCUMENTATION-MISS",
+      "note": "SAMPLE-B3-001: one-for-one/no-policy seam description overstates implementation. CreateDevice combines lookup/create/release and status handling; owner/test logic, not seam alone, supplies drain ordering. Bounded comment correction assigned."
+    },
+    {
+      "id": "core-001:unit:663f44912ef5c3b2",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "range_sha256": "efe020c3e367b9d1f8f4d092b719bbd7a82274ac5c57344f0deaac2efe4c995c",
+      "current_file_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:68257c2609ad2cf4",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "c6aae72a9bd51e4f04d3510a555aae44e989645182a385f7105438bd2be532a0",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected KERN numeric value independently checked against Apple xnu-12377.1.9 osfmk/mach/kern_return.h. This is source-header agreement, distinct from IOReturn mismatch findings and deployed ABI qualification."
+    },
+    {
+      "id": "core-001:unit:598fb7688002ea28",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "61e6740b63cd4677bfe40b6ad08ea2ec0dfa29ead885ee2704e104e38aefc8e4",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected KERN numeric value independently checked against Apple xnu-12377.1.9 osfmk/mach/kern_return.h. This is source-header agreement, distinct from IOReturn mismatch findings and deployed ABI qualification."
+    },
+    {
+      "id": "core-001:unit:c697deea597fd88d",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "c1e28447784719f79d390178d70dd82b9afd1698dfbc6b9227a22d2baeea3ab8",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected KERN numeric value independently checked against Apple xnu-12377.1.9 osfmk/mach/kern_return.h. This is source-header agreement, distinct from IOReturn mismatch findings and deployed ABI qualification."
+    },
+    {
+      "id": "core-001:unit:b2c3553b04c1bb00",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "b9c7f9db900302e601e4e83f1099be0d9839cc7314fd297e6b70470ea1fb5d31",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected KERN numeric value independently checked against Apple xnu-12377.1.9 osfmk/mach/kern_return.h. This is source-header agreement, distinct from IOReturn mismatch findings and deployed ABI qualification."
+    },
+    {
+      "id": "core-001:unit:8cc4e387d857f6a0",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "67e6a5688c6102e4eceaedbd92d01832588965c1ac42e21fd4b49a07041706cb",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected KERN numeric value independently checked against Apple xnu-12377.1.9 osfmk/mach/kern_return.h. This is source-header agreement, distinct from IOReturn mismatch findings and deployed ABI qualification."
+    },
+    {
+      "id": "core-001:unit:9303921f0cddea50",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "5db97d22e74a80493c9bf4e97d194a1191dae0ea972f432b20f12c7f8d375771",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected KERN numeric value independently checked against Apple xnu-12377.1.9 osfmk/mach/kern_return.h. This is source-header agreement, distinct from IOReturn mismatch findings and deployed ABI qualification."
+    },
+    {
+      "id": "core-001:unit:38f5dfa3e4d48985",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "e2003c8b7f64de95f4b49da769a6b3f4631a5c7b482009f82535e057d30e136f",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Selected KERN numeric value independently checked against Apple xnu-12377.1.9 osfmk/mach/kern_return.h. This is source-header agreement, distinct from IOReturn mismatch findings and deployed ABI qualification."
+    },
+    {
+      "id": "core-001:unit:77aebb8c72bc4f8b",
+      "path": "verification/MacOSHidBoundaryComparison/CurrentProfile.cs",
+      "range_sha256": "2cbc04243a9df7ce3e8d8b5312d0d01a59c9bd236352f06928ee0233f54ab238",
+      "current_file_sha256": "7ac06ceb62a29cd3463344fbd7b3ce4d149b109a81388b81bf340cfbe863cea6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Exact source computation/checked provenance fields reviewed. Metrics remain descriptive, with explicit unavailable native/pending data; this does not qualify sample completeness, host equivalence, hardware or native-only latency beyond actual checks."
+    },
+    {
+      "id": "core-001:unit:6a56c4d4ce9e07f2",
+      "path": "verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj",
+      "range_sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+      "current_file_sha256": "93f84de262761a0a325b750634017ec419b0601af9ebfa5d20df38d94f87ee78",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c8d2fe15b70e0f86",
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "range_sha256": "3a04a99eb1ce2a2aa8857c0fa2006402ad8cd686b6dcd6018957c7a327b0829a",
+      "current_file_sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8a664f6d0d04c1b2",
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "range_sha256": "bef7be172e2d36f56c790df11b58e3248d19a408665f380823166807149fa52e",
+      "current_file_sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:81efac9d6d487eb2",
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "range_sha256": "ae670d4e4cfafe618964aa529f70aafe8ac1981214ec1c6dd2afcf4daa9adff8",
+      "current_file_sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:bb7b5bb06936d638",
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "range_sha256": "aba31ae73dba5b035a8b9b2b69a7a6500d0a726eb8ca41050ec18097ba8d7737",
+      "current_file_sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Exact source computation/checked provenance fields reviewed. Metrics remain descriptive, with explicit unavailable native/pending data; this does not qualify sample completeness, host equivalence, hardware or native-only latency beyond actual checks."
+    },
+    {
+      "id": "core-001:unit:872e42063988d971",
+      "path": "verification/MacOSHidBoundaryComparison/Program.cs",
+      "range_sha256": "4cf3b92e145302fcfe4bb77e99969ec25aac3b04e8093e4abc74e1d0c0394f7f",
+      "current_file_sha256": "9a46c56ed96496706868ba7b3b09202ac9835ed3e76f2ec2634c66401ea8b29c",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Exact source computation/checked provenance fields reviewed. Metrics remain descriptive, with explicit unavailable native/pending data; this does not qualify sample completeness, host equivalence, hardware or native-only latency beyond actual checks."
+    },
+    {
+      "id": "core-001:unit:a8935af0aa96ef61",
+      "path": "verification/MacOSHidInputVerification/Program.cs",
+      "range_sha256": "ab87c8d3f8a33b69379d07326740e73206b7f8de518df9b185a8717686ff5d1d",
+      "current_file_sha256": "ef4c55ace3a7ab0185b678de84d8d276c9adb5d819ae952dc03c2939ca621963",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5b36bb754879dcba",
+      "path": "verification/MacOSHidInputVerification/Program.cs",
+      "range_sha256": "6300393969ac1b643bbc3a1c5d94b435b62d5754e5d1708777406e7ac3b4d1ea",
+      "current_file_sha256": "ef4c55ace3a7ab0185b678de84d8d276c9adb5d819ae952dc03c2939ca621963",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:be7c5a145c84bea2",
+      "path": "verification/MacOSHidRouteVerification/AcceptanceScenarios.cs",
+      "range_sha256": "a8926aec15620f76f1c47edc91a260330fe3ebb013040202b5357070d20965ff",
+      "current_file_sha256": "9e24f9ceb435c60ed719d1be483edac263b8e9c0cbacfc7e6f86c029fbe87163",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Removal path requires terminal reason1 before disposal, observed serial absence, unique fresh replacement and later GetInfo versions; no live removal run performed during sampling."
+    },
+    {
+      "id": "core-001:unit:bdb6c944a5756859",
+      "path": "verification/MacOSHidRouteVerification/AcceptanceScenarios.cs",
+      "range_sha256": "0cf1bbff773b3f4c41b0f590fc0989b4a36c8afc92b99098650f93cc5c573278",
+      "current_file_sha256": "9e24f9ceb435c60ed719d1be483edac263b8e9c0cbacfc7e6f86c029fbe87163",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5a01a3b881ea5b76",
+      "path": "verification/MacOSHidRouteVerification/AcceptanceScenarios.cs",
+      "range_sha256": "261f6648e3c8c3120d0d702741e2402f19cf09965e198531e44fd40a91c90ee7",
+      "current_file_sha256": "9e24f9ceb435c60ed719d1be483edac263b8e9c0cbacfc7e6f86c029fbe87163",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c272a9fb00347790",
+      "path": "verification/MacOSHidRouteVerification/AcceptanceScenarios.cs",
+      "range_sha256": "b9cde47672548a66fb93b5b3e81e46dac3c569f9c969b02ed2941f9c02750220",
+      "current_file_sha256": "9e24f9ceb435c60ed719d1be483edac263b8e9c0cbacfc7e6f86c029fbe87163",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5c2a9d17d0a6d264",
+      "path": "verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs",
+      "range_sha256": "b011d1ee275361359a33e7881690354442c81d3fa7b24a554c18dfbf9865a4a6",
+      "current_file_sha256": "649dd53e6314cf5561d61bfad150695b4ab3777810276be2e8f76af54c36e937",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:290fea93ad2bc0b6",
+      "path": "verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs",
+      "range_sha256": "b6517ce62bb91dd0dbf5120d9506797f5837dd4b1b0077960e2cd9a1bc5531d8",
+      "current_file_sha256": "649dd53e6314cf5561d61bfad150695b4ab3777810276be2e8f76af54c36e937",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b9573e58de539bae",
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "range_sha256": "218e7a3f2b1206815304225f744daada5e95766e095a122e5c7f1894a22e6951",
+      "current_file_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:befc7b7f5b2de383",
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "range_sha256": "2831603681c5f1e79f74acb75e987c79a05e6be68bf51c669e3469c513d733c7",
+      "current_file_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:beef240f1f71761d",
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "range_sha256": "5857bf35a6c2c7f706876daa24f49ce984e99f6d45424c11c4d71b7ea34a26a8",
+      "current_file_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6c685970d91a4bff",
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "range_sha256": "35a262f4a53fb0dbc4f74b0b0fea65337c610a035c98831a7411b3412d2b0e00",
+      "current_file_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:fd8af1cc08c0c3c6",
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "range_sha256": "54fa352915942b77fb38e197c2326b0ebd12991e2cdf76c28b93be7362ad189b",
+      "current_file_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9a36a7aeb6f4830e",
+      "path": "verification/MacOSHidRouteVerification/ListenerDrainScenario.cs",
+      "range_sha256": "2ffb68cc704e74426351a926002609285b4b0009866adfdb9b6f93e98c222b61",
+      "current_file_sha256": "fc02ff51845b952ebfdea580c5e9bb5d9ec2728adf38ee3209561f0ec68682bd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b0c302f97bbe0fad",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "range_sha256": "e5cf868ac23c8d84cd6c4a5b81b76b2f859445ad72b46d469ed1431afc1dbf8b",
+      "current_file_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2766051dada6b6ce",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "range_sha256": "7eaedb712668913574b411653290daec5d515d03da65f3a731f4bb404079ff31",
+      "current_file_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6861fce129a5a2ee",
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "range_sha256": "945d17f9b2471025197825412a51982b88c879ff2c49e880f84c3d03ed65f054",
+      "current_file_sha256": "d76be7afb306e3496eab0e4ea591f61ea58a69a9e9d9f91df3d606fa947ff87a",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:51d6d7f344f7adb1",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "6cb54c33ce30a0b714a6cf3073d89c1afe0e20063eb18c6fec135b1583fcabd3",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:47f51cfacf863097",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "9d0bfdcb47ec8784de8346ec8d230f3d0fd4b38fe104d39e485b2983a459f22c",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0b8eeb5f60672804",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "66ae764e3d751abb77b9ab5a8717f11ec131fe2c8ee67488a6ce1a30f51eee45",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c2658cfe37339eeb",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "0d3f5571e6ff129129263285424023c667d2bd0188bca456a4e9bb956961c4fe",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:4d22a8bffe9fe670",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "a9a2020b5f193f222cfb8aaf70f4cfeaaece816c04711bc134b52515c7de35d3",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:858a29174246303a",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "3ff9eec9f4f25b774c67fe5d0e3dda8ca87cb9148399b30823232dbf33597cdc",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:e638b0aaec64484d",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "45d19447c1a93b196338867ea866c80e4c6d097618e61f2964bd11a16cbd1ba1",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c1c79d3db2b973cf",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "58c32d31c87a01b971ff8708af8cfd0f97d92603d1919e2f0fe9b54f1a82980f",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2fec353019aca6e1",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "range_sha256": "e73a511718bd43dbe7d7fd315d76602ed75787cf422af28dbdc7acdfd5eb519f",
+      "current_file_sha256": "d4573ab5d0fa1b3ace0575c18e79df584cbd4da477010eb01a8976c9f1fea731",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2dd5d34bf274ae46",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "fcd381d9930aca8ecfa3f73e9ecd782624b8c9e8bea6024aeab00c925f66e13c",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:927379e43c7baa9f",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "650f41b9fba4c572fa855b6885a527e6007a103644026193c44b0104e6b916e9",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5c067a5cdaa61349",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "81682e9f788777be74d72d4f9904f925b0a96f051551b15968a7152739e851a2",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:214769af2d1fac51",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "d455b32dc66adb4c3c8aaf61ecd66d5d9361dca979ac97ff0d7c1db99729e51e",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:a9a38fdd04e31b55",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "4eee41ef9fa4c8036e37b8733a1c6395dcabf68adac23e44867537cba77649fb",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d3adfb07c2ac4b74",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "29e864dd6a390c82deccdc8799d2fc02efb41570962233ecabac6bd5d171fee5",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:fde61d2d34e07c11",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "676d6849c2ce169ca1baa8f1c0340a64a5f223f183d80af7b25dd896c6280ace",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b6ebc2963508d4b8",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "c71215c9530870edd9e26b9ccdb170a0f5467bb641b4a20422a6ed48da151665",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:1bdbae7c14c6022e",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidDeviceListener.cs",
+      "range_sha256": "72ad563646c1176fe2c17c2d08bfe3a2e32cbf5676bc807757cb8eff404a4ff5",
+      "current_file_sha256": "6792555ebadf255588db3a8311785c6534b48bdf24fc7e6ab7f7fd9110611f73",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0d4fc0b1ead2d657",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "range_sha256": "0a8d78410ae41627074e72880470bd48b0ff232daff173ecbe85193629d2ea09",
+      "current_file_sha256": "3510a3ff0a1ed360bad0b9eb44fbe8bc0c53820644c1b542a990c2ff567dcf4e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:dd724f79368a79ca",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "range_sha256": "1893a7921adf0a8bd6bfb85bda99d721be05e827e517ebdcf45ab473a7a5e289",
+      "current_file_sha256": "3510a3ff0a1ed360bad0b9eb44fbe8bc0c53820644c1b542a990c2ff567dcf4e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8501aefe4f069add",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "range_sha256": "d1dda3cd70b2d0803a1aa2cb824850eb634801cd6f77091810230a7e97d83c7d",
+      "current_file_sha256": "9f586abba719425f246bf3731a854163c21a533dc472e9de7bf6486250f09cfa",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:dc5d2dbbbf97c4a3",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs",
+      "range_sha256": "c6776c2b5f75a43c632e72368781ae52dd5938adb5d289a595c87ead58518731",
+      "current_file_sha256": "77c6bb05a10a56196c3236ba0b3ff60c8d25fa1a3e4f47906dc7e6896921bfd6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:56f503f8264cee44",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "range_sha256": "95cdfb27c8ea85aa03a56362c4e7d6d5ef077c16255ee8fae0691092569d1f73",
+      "current_file_sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d31af590d030d9cd",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "range_sha256": "5f862dba8a986af621deb69dd5f9846d521957affe17e37169da9e654c599e97",
+      "current_file_sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:11fb36bc205db285",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "range_sha256": "0786b9066ee984c0f5aa624003145c1c28f08f392633f89d76f74172ea9e02fc",
+      "current_file_sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:a46ae51a7fd8c746",
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "range_sha256": "d995b65310798c30410a06443d1cfbc77dcfd573c960b2c2e928e44870d3f0dd",
+      "current_file_sha256": "d597698ea98bb9a8efc349ee6468b5ff69124d061ba62d2c64422dda8965acb8",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:51fddcc95d7f7156",
+      "path": "src/Core/CLAUDE.md",
+      "range_sha256": "e98c746ffde474abe9250fcb3912dd681be0db5dc0dc324e12cb9036cd219117",
+      "current_file_sha256": "f9fb2a6541cefb1e0589e0a82daf9ae61f3cdbfbe982115af14b5bbde00388fd",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:afc3343865d97e1d",
+      "path": "src/Core/src/Native/MacOS/CoreFoundation/CoreFoundation.Interop.cs",
+      "range_sha256": "0dff76b81b343e9da6af45e07dc7660af78fb68cadbb3d7fccf9c163b189d7bf",
+      "current_file_sha256": "ad4e0a5761fad445d329b7c6b36fb1056e7583f64e3f5f178b06e98a20119132",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:37c554d3522ecd2e",
+      "path": "src/Core/src/Native/MacOS/HidInput/HidInput.Interop.cs",
+      "range_sha256": "61965976e45bd0b76377df9fb20c74b7294b6a7f26da520907cfd2474bd0d2b3",
+      "current_file_sha256": "970893fde52cde25baa670fafda287f94be1c3b0876b39663689751dc835fc22",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8e8e6149ecfdedba",
+      "path": "src/Core/src/Native/MacOS/HidInput/HidInput.Interop.cs",
+      "range_sha256": "c4dae37ea265ab48d26099e408a72135fb7a353afbcdd1b7dcb2c95b07882e58",
+      "current_file_sha256": "970893fde52cde25baa670fafda287f94be1c3b0876b39663689751dc835fc22",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8f93cc403a2ac53e",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs",
+      "range_sha256": "06ff1c053c30ba8fa1b4013e196b65e162b6f5f27cc1c18fdd5ede5c7ed4211b",
+      "current_file_sha256": "813f0b7ae67386baf598be6c0296be30933e1886c13503660f013627c297cf90",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Relevant retained Apple IOKitLib/IOHIDManager original passages read; dictionary consume/service release and callback/run-loop conditions agree. Old master-port spelling is distinct from current main-port header naming; no deployed ABI test claimed."
+    },
+    {
+      "id": "core-001:unit:bcd58ec6f480d9d7",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "range_sha256": "6ec7092b1b5bd93a95a3277dc8716d33465db2b4547d149569e5d3355d27bea2",
+      "current_file_sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Relevant retained Apple IOKitLib/IOHIDManager original passages read; dictionary consume/service release and callback/run-loop conditions agree. Old master-port spelling is distinct from current main-port header naming; no deployed ABI test claimed."
+    },
+    {
+      "id": "core-001:unit:58c17de2a80aaa55",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "range_sha256": "62cf112d899a5d2b39de5da8defd933034f540a64a5371a78085b9b06c5023f4",
+      "current_file_sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Relevant retained Apple IOKitLib/IOHIDManager original passages read; dictionary consume/service release and callback/run-loop conditions agree. Old master-port spelling is distinct from current main-port header naming; no deployed ABI test claimed."
+    },
+    {
+      "id": "core-001:unit:8f380e0a9029c637",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "range_sha256": "e3743daac921a72e43acbab3749e42ba5cb9768b087180c9775d13397660a0d5",
+      "current_file_sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Relevant retained Apple IOKitLib/IOHIDManager original passages read; dictionary consume/service release and callback/run-loop conditions agree. Old master-port spelling is distinct from current main-port header naming; no deployed ABI test claimed."
+    },
+    {
+      "id": "core-001:unit:4f3c03787d8628e8",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "range_sha256": "dde10df00bdcc5c38b8aecd4ad393e6a986c5efeb4fcb13b471da8f0317db685",
+      "current_file_sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Relevant retained Apple IOKitLib/IOHIDManager original passages read; dictionary consume/service release and callback/run-loop conditions agree. Old master-port spelling is distinct from current main-port header naming; no deployed ABI test claimed."
+    },
+    {
+      "id": "core-001:unit:fa67b2ef0b63e729",
+      "path": "src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs",
+      "range_sha256": "fdc62e892c1742f003bec78ccf0516239f125d59ee8b0f7b7691e89f8c06a59c",
+      "current_file_sha256": "1e369ed694c4c9d4e5f662b82217213e4dcbb0abc23fd9ce96b914889ce10748",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:e06e64880354c5ab",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+      "range_sha256": "8469687caead46714869f3803a716dc90d70cf3ae546c782b35579d2f9bd5eae",
+      "current_file_sha256": "a66c5b5b9cd8cb9ec0fbdc86c1b4dd913a1012c7b585d91cfdbccdad3d07286e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6c8b14a3d805da68",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+      "range_sha256": "288593e0da8a0e1b998934bf8e740a2f6305080d76c1fe0ecd2cb3613ea890ab",
+      "current_file_sha256": "a66c5b5b9cd8cb9ec0fbdc86c1b4dd913a1012c7b585d91cfdbccdad3d07286e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8c66398d0c0e3a14",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+      "range_sha256": "b2541f069d7eb51ad6a6e45f47ccd1a9285d0458e289ec1377a018bf2ef2c3e3",
+      "current_file_sha256": "a66c5b5b9cd8cb9ec0fbdc86c1b4dd913a1012c7b585d91cfdbccdad3d07286e",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b7af6d77a34a17d0",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+      "range_sha256": "632fd74a0560b0ed39be990c2b3a3211d2e23551ac884be1de09cbe0d0a313ec",
+      "current_file_sha256": "2dd0b7d3c711a468f95600ccad7225326845db99d487f8b49324b87582083286",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c266fb276b6dd6b3",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+      "range_sha256": "3a8c90ed2f65a7f833519fe88be8c69fd9ebd15f3b86c15f36839e30d0f824a7",
+      "current_file_sha256": "2dd0b7d3c711a468f95600ccad7225326845db99d487f8b49324b87582083286",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9bcd2e564aa0699e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+      "range_sha256": "a93400b92649cc412696df9d2a8925669453528476a42bfac520bf1b1da66d1d",
+      "current_file_sha256": "2dd0b7d3c711a468f95600ccad7225326845db99d487f8b49324b87582083286",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0997450c56dcfb2d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+      "range_sha256": "50e6f7ad12be2ca5069357de6c71897738e8accf54785f9eb41d12babd0bc58d",
+      "current_file_sha256": "70e323c35bd061f2bc9c39359b0f689ffd221fab288218dccdc055fe05019ed6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5d65f12b3be49266",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+      "range_sha256": "2811add9052ca1e99830073667873682ba3acc452445916b9391746747935118",
+      "current_file_sha256": "70e323c35bd061f2bc9c39359b0f689ffd221fab288218dccdc055fe05019ed6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:96e61791ebd8cf9c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+      "range_sha256": "a93400b92649cc412696df9d2a8925669453528476a42bfac520bf1b1da66d1d",
+      "current_file_sha256": "70e323c35bd061f2bc9c39359b0f689ffd221fab288218dccdc055fe05019ed6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:6fd77f3b1c5816c9",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+      "range_sha256": "8bca7a22187305abc12282d2c9de52d9e766c79f41265f4653fefb3b1a6ea2ee",
+      "current_file_sha256": "1d132cbbaf5b3805ff1e3f02f61b0b968c72ef36b1931ce52d28e85571f44b87",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:53dfaebec8fd2987",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+      "range_sha256": "99119de350d208cee7f4f0cf0850cad6e5dfe17297b4dad8d30339ce3ce486e0",
+      "current_file_sha256": "1d132cbbaf5b3805ff1e3f02f61b0b968c72ef36b1931ce52d28e85571f44b87",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:bac4e0d807932738",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+      "range_sha256": "6e9f198b60933f2d2c3a6978252d9e89d026f58bbe988195d06f4b92aeac7af7",
+      "current_file_sha256": "1d132cbbaf5b3805ff1e3f02f61b0b968c72ef36b1931ce52d28e85571f44b87",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:09bed7b2bd549db9",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "range_sha256": "dd68645f4c7fca9b8a95b8185779db5810264fcadbeb83f52e54c73280831d98",
+      "current_file_sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Controlled bridge acknowledgement hold distinguishes read terminal from release and disposal completion. Assertion-failure teardown coverage is not inferred from the successful-path assertions."
+    },
+    {
+      "id": "core-001:unit:c021d4413b6368fc",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "range_sha256": "4ceb66ba9d80de5f1bde2875c74c9c09519c943bc8c8e0cb3deb4e2066e7438d",
+      "current_file_sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:7b14a961bb8e9a15",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "range_sha256": "d488c7fe35978460f50920e048ffa43bdd477c74b67a13eb8297dbaf074b8bc9",
+      "current_file_sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:8a16cadbb9ef1cc6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "range_sha256": "e339ec54f7673fc8bf0651c385c708f00a94e9f3e879e5b644f1a2dbc13e495d",
+      "current_file_sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d79a6f5b7ba68aba",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "range_sha256": "b2be1de4940f667dccfac4e17830962467ce42af3a34d651b32d063ecfa872cf",
+      "current_file_sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:c8dd39b1de1bd87a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "range_sha256": "a647760a0f88d7564c4fe1ebe6f9c4f177232360a87f5f1f2063ea8248efdc0b",
+      "current_file_sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:face888566b0b08e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "range_sha256": "68a6d1eb79bdb2035337e6e53cdd2b24f4a4df31cfc521f945dddf6c68bb327d",
+      "current_file_sha256": "79d78f4c82b923ea16a45ea891ba5864371fa5c467afe311eda2731d50aad355",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d429ff5fa192d1d5",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "range_sha256": "59354e53024dbac0c19942eec8d0df62e909b0560485cb548a84b864348d93e0",
+      "current_file_sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:0a86e492926a3a86",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "range_sha256": "4c8f194628ec6610daf76781492f1cfcb4b279a43eddc5f1410f96213f4ba81f",
+      "current_file_sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:3b28c151ff467096",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "range_sha256": "3b72f567c38515a3cb41e3f72f6cacc839393e4b14c5463d74ab72bcecb692f7",
+      "current_file_sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b2ecfc8df07e5b7a",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "range_sha256": "de43566f95cd7429ae19240c5c30c1b27ee35e103945b7ec86d56ac42cfcb510",
+      "current_file_sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:e60607159debe2ce",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "range_sha256": "0e6794f8b1771677a0f78719348a37fd024ef7b5e0c6cca34b141a121b450f63",
+      "current_file_sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:e20e6746acbe1eb6",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "range_sha256": "f06394a91c8d931acece6ff82659b358eef98054f41f59e01e2f403db15039b5",
+      "current_file_sha256": "d77e762ab7df062ec9ef4043efb5b4926d19cf70608cef264601e02304bd4884",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:9213753eaf596d93",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "range_sha256": "7122e49fecbc345c1e150acf61609188b9dd9eda4d10732998d94e18beeacc15",
+      "current_file_sha256": "cb28f7961c93d35e7ea170dbc78a64ca7c5effe005b5982973bf5054f8d83774",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:edf39a10a89938ca",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "range_sha256": "0f365f64e3d15338ecd4da6a96e67be47466af6bc7e818a5cddccbf10864857e",
+      "current_file_sha256": "cb28f7961c93d35e7ea170dbc78a64ca7c5effe005b5982973bf5054f8d83774",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:5eec5b0c7e037930",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "range_sha256": "de83c7edd2d196d78ffc31da20d9fe4e6ce6c2956ad973174eca6871a804f8dc",
+      "current_file_sha256": "cb28f7961c93d35e7ea170dbc78a64ca7c5effe005b5982973bf5054f8d83774",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:475d2d7317d0d9f8",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "range_sha256": "2755538aae16ac32bafe5748560b7f3febe6aa1187bf0caa22a03014a6d0e4bb",
+      "current_file_sha256": "cb28f7961c93d35e7ea170dbc78a64ca7c5effe005b5982973bf5054f8d83774",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b3004d28acdb5408",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+      "range_sha256": "604e1cb918360a1a0877fa82a5180861bff318ad13a6a58b870b339abfa1d37f",
+      "current_file_sha256": "3230dab40cee0644453240b0f70e7b94647f844d1d683647c5a46fc3994a0848",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:18d9dfbaae9f910d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidListenerLifetimeTests.cs",
+      "range_sha256": "9c6b36e774b0135c81a623e39a2a05d715390c4b866ff62d29b63ebfd1600d49",
+      "current_file_sha256": "3230dab40cee0644453240b0f70e7b94647f844d1d683647c5a46fc3994a0848",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b911881e7931c49d",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRecoveryTests.cs",
+      "range_sha256": "c852dbe0d18888a070455a730006e8c03c36382d06ab30f2821b9ab56e9900a4",
+      "current_file_sha256": "219bad77cbe41d3d0e362d681e0453d86032e7f6c7d68134673ae18e52ed375b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:68016c9957dcce0f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRecoveryTests.cs",
+      "range_sha256": "472ca62e91bae413e5338c4e0a59419950f3f3e5c953fa98da1726a49ae18ccc",
+      "current_file_sha256": "219bad77cbe41d3d0e362d681e0453d86032e7f6c7d68134673ae18e52ed375b",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:b6e6f0bfde4e8c82",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "range_sha256": "3011144818407196623aa1010fdd55485bf7d29393a395238e11404d7c54bfc8",
+      "current_file_sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:fc111c86c44a0782",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "range_sha256": "2d4780c7c8f06ace4201dc1abf5669d0f19c01b25bba687799c01677f7fd0b12",
+      "current_file_sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:d1153e63b1b0f30f",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "range_sha256": "f663a125aa2ac40edaa89584d8d80e8aaa3886612695d7f5f3b23dc5fe8dd778",
+      "current_file_sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:2f91cfd2d58f9bfe",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "range_sha256": "4c3f04355226c8ded2c7ca453121c46d4aa184ce6d654a53d04640d3f1f3cc93",
+      "current_file_sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:a9fe1f2c18c24f0e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "range_sha256": "8133a130286dcedf63ced908dede04b48c1db443686e712fbc786d955defd1c2",
+      "current_file_sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:e1f124257be7dd22",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "range_sha256": "94752f040e95a67c3338777bb174f78514e3e1a1fcc52ee8c043b5944c4f410d",
+      "current_file_sha256": "b213018a700f30df3516dac8d99505c3267e611c4a27eb57ce5e4e90d4cd9bd1",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:37739f3b2014b5d7",
+      "path": "verification/MacOSHidBoundaryComparison/CurrentProfile.cs",
+      "range_sha256": "d1e17fe9d9f9fb2addfde92c1dbe4362505df98b4bcc03d3ad0195ca5aaf779d",
+      "current_file_sha256": "7ac06ceb62a29cd3463344fbd7b3ce4d149b109a81388b81bf340cfbe863cea6",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    },
+    {
+      "id": "core-001:unit:f42685023c336760",
+      "path": "verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs",
+      "range_sha256": "83701c8687ba16e29a0f3eeed64b4b89f0fa6ef3fc9b242c42d76598b948d295",
+      "current_file_sha256": "649dd53e6314cf5561d61bfad150695b4ab3777810276be2e8f76af54c36e937",
+      "original_unit_present_in_current": true,
+      "verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "note": "Complete selected unit read by Astra; exact declaration, local control flow or controlled test oracle supported. No current macOS/native producer/device or universal performance qualification inferred."
+    }
+  ]
+}

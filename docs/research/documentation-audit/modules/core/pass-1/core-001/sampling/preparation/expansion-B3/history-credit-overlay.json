@@ -1,0 +1,157 @@
+[
+  {
+    "id": "core-001:unit:f1d4372202bdaa9b",
+    "owner": "B1",
+    "path": "docs/architecture/connection-ownership-and-contention.md",
+    "original_qualification_record": {
+      "id": "core-001:unit:f1d4372202bdaa9b",
+      "owner": "B1",
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "status": "HISTORICAL-REPORT-SUPPORT; FINAL-ELIGIBILITY-ADJUDICATION-PENDING",
+      "authority": "investigation/B1/sampling-history-clarification.md",
+      "report_commit": "64efe84487143235a42121db962c9328cfec0aa8",
+      "report_path": "docs/plans/session-contention/phase1-findings.md",
+      "report_blob": "738d5c433b5583aab2590b8b72391b3d2b01f796",
+      "report_sha256": "fb602ed05f1fe4f9a6253d72195756879995df9b3e31e4a3ef36815fad78851b",
+      "scope": "Astra/owner verified historical report scope; original raw captures/harness missing. No fresh physical verification, universal state claim or raw-capture attestation. Not independently re-investigated here.",
+      "clean_credit_by_this_preparer": 0
+    },
+    "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+    "actually_read_by": "Astra; original B1/B2 selected reading retained",
+    "final_clean_credit": 0,
+    "rationale": "Exact report at 64efe844 was checked by Astra/owner; original raw capture/harness missing. Retain historical rig/repeats and no fresh physical attestation.",
+    "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+  },
+  {
+    "id": "core-001:unit:094e7f926bf428c5",
+    "owner": "B2",
+    "path": "docs/research/linux-otp-async-lifetime.md",
+    "original_qualification_record": {
+      "id": "core-001:unit:094e7f926bf428c5",
+      "owner": "B2",
+      "path": "docs/research/linux-otp-async-lifetime.md",
+      "first_line": 8,
+      "last_line": 30,
+      "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+      "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+      "clean_credit_by_this_preparer": 0,
+      "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+    },
+    "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+    "actually_read_by": "Astra; original B1/B2 selected reading retained",
+    "final_clean_credit": 0,
+    "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+    "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+  },
+  {
+    "id": "core-001:unit:6612f3e188e74e2b",
+    "owner": "B2",
+    "path": "docs/research/linux-native-report-access.md",
+    "original_qualification_record": {
+      "id": "core-001:unit:6612f3e188e74e2b",
+      "owner": "B2",
+      "path": "docs/research/linux-native-report-access.md",
+      "first_line": 1,
+      "last_line": 7,
+      "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+      "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+      "clean_credit_by_this_preparer": 0,
+      "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+    },
+    "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+    "actually_read_by": "Astra; original B1/B2 selected reading retained",
+    "final_clean_credit": 0,
+    "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+    "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+  },
+  {
+    "id": "core-001:unit:95ad4b56865f1456",
+    "owner": "B2",
+    "path": "docs/research/linux-fido-async-lifetime.md",
+    "original_qualification_record": {
+      "id": "core-001:unit:95ad4b56865f1456",
+      "owner": "B2",
+      "path": "docs/research/linux-fido-async-lifetime.md",
+      "first_line": 78,
+      "last_line": 93,
+      "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+      "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+      "clean_credit_by_this_preparer": 0,
+      "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+    },
+    "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+    "actually_read_by": "Astra; original B1/B2 selected reading retained",
+    "final_clean_credit": 0,
+    "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+    "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+  },
+  {
+    "id": "core-001:unit:b37c3e449550734a",
+    "owner": "B2",
+    "path": "docs/research/linux-managed-acceptance.md",
+    "original_qualification_record": {
+      "id": "core-001:unit:b37c3e449550734a",
+      "owner": "B2",
+      "path": "docs/research/linux-managed-acceptance.md",
+      "first_line": 9,
+      "last_line": 30,
+      "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+      "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+      "clean_credit_by_this_preparer": 0,
+      "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+    },
+    "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+    "actually_read_by": "Astra; original B1/B2 selected reading retained",
+    "final_clean_credit": 0,
+    "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+    "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+  },
+  {
+    "id": "core-001:unit:cfea2933573b757f",
+    "owner": "B2",
+    "path": "docs/research/linux-native-acceptance.md",
+    "original_qualification_record": {
+      "id": "core-001:unit:cfea2933573b757f",
+      "owner": "B2",
+      "path": "docs/research/linux-native-acceptance.md",
+      "first_line": 411,
+      "last_line": 446,
+      "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+      "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+      "clean_credit_by_this_preparer": 0,
+      "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+    },
+    "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+    "actually_read_by": "Astra; original B1/B2 selected reading retained",
+    "final_clean_credit": 0,
+    "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+    "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+  },
+  {
+    "id": "core-001:unit:ebf81d7eeea93827",
+    "owner": "B2",
+    "path": "docs/research/linux-otp-async-lifetime.md",
+    "original_qualification_record": {
+      "id": "core-001:unit:ebf81d7eeea93827",
+      "owner": "B2",
+      "path": "docs/research/linux-otp-async-lifetime.md",
+      "first_line": 95,
+      "last_line": 108,
+      "status": "READ-AS-HISTORICAL-RESEARCH-PHASE-EVIDENCE; NOT CURRENT-PLATFORM-QUALIFICATION",
+      "original_verdict": "SOURCE-CONTENT-SUPPORTED-PENDING-FINAL-ELIGIBILITY",
+      "original_ledger_status": "READ-CLEAN-PRESERVED-AS-HISTORY",
+      "clean_credit_by_this_preparer": 0,
+      "qualification": "Preserve exact unit/phase/recorded evidence scope. No whole-file history renaming or current native/device acceptance; Astra adjudicates final narrative sampling eligibility."
+    },
+    "coordinator_adjudication": "SOURCE/EVIDENCE-QUALIFIED-CONTEXT; EXCLUDED-FROM-FINAL-CLEAN-QUOTA",
+    "actually_read_by": "Astra; original B1/B2 selected reading retained",
+    "final_clean_credit": 0,
+    "rationale": "Phase-scope historical status/handoff evidence was actually read. It is not current product/platform acceptance and receives no final clean quota credit.",
+    "authority": "Coordinator release of this task; original source-disposition ledger/rows unchanged"
+  }
+]

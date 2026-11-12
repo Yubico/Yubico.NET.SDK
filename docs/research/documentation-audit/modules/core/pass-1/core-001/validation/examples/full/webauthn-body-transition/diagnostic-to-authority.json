@@ -1,0 +1,77 @@
+{
+  "diagnostic": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs",
+    "line": "29",
+    "column": "42",
+    "code": "CS1929",
+    "message": "'YubiKitLogging' does not contain a definition for 'CreateLogger' and the best extension method overload 'LoggerFactoryExtensions.CreateLogger<PreviewSignProcessor>(ILoggerFactory)' requires a receiver of type 'Microsoft.Extensions.Logging.ILoggerFactory'"
+  },
+  "source_log": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/commands-v2/examples-full-webauthn-first/toolchain/20261112-055228-229-build/02-build-WebAuthn.IntegrationTests.log",
+    "bytes": 2363,
+    "sha256": "d4367a895e5d479b36090a4f966e59b239af33086e2dfca355757bb8b5aa31b8"
+  },
+  "classification": "true-documentation-body-and-prose-access-defect",
+  "generated_context_defect": false,
+  "id": "FULL-032",
+  "document": "src/WebAuthn/CLAUDE.md",
+  "source_code_line": 79,
+  "prose_line": 72,
+  "ordinal": 2,
+  "raw_body_sha256": "84e2288472121c31a22e5277e4b100a74ec61527c11bb24626f28ff8dd762fba",
+  "decoded_body_sha256": "7c2396900aa0b184930cb26cb1854b0d2efc3001cae2f004a72a17d789245ff5",
+  "generated_source_identity": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/injections/WebAuthn.IntegrationTests/FULL-032.cs",
+    "bytes": 1181,
+    "sha256": "6d7d82a0b0fbba0909878e27f61f4defe0ce2d8b4cf918526f45a82b69938cc8"
+  },
+  "actual_generated_line": "private static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();",
+  "original_raw_body": "private static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();\n\nLogger.LogDebug(\"Selected algorithm: {Algorithm}\", selectedAlgorithm);\n",
+  "original_compiled_prefix": "using System;\nusing System.Buffers;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Security.Cryptography;\nusing System.Threading;\nusing System.Threading.Tasks;\nusing Xunit;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Core.Transports.SmartCard;\nusing Yubico.YubiKit.Tests.Shared;\nusing Yubico.YubiKit.Tests.Shared.Infrastructure;\nusing Yubico.YubiKit.Management;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Ctap2;\nusing Yubico.YubiKit.WebAuthn;\nusing Yubico.YubiKit.WebAuthn.Client;\nusing Yubico.YubiKit.WebAuthn.IntegrationTests;\nusing Microsoft.Extensions.Logging;\nusing Yubico.YubiKit.Ctap2.Cose;\nusing Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;\nnamespace Audit20261111.DocExamples.Test32;\npublic sealed class DocumentationBody32\n{\nprivate static readonly ILogger Logger = YubiKitLogging.CreateLogger<PreviewSignProcessor>();\ninternal void CompileOnly(CoseAlgorithm selectedAlgorithm)\n{\n",
+  "api_declaration": {
+    "path": "src/Core/src/YubiKitLogging.cs",
+    "internal_method_line": 46,
+    "public_factory_line": 32,
+    "source_snapshot": {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/before/src/Core/src/YubiKitLogging.cs.snapshot",
+      "bytes": 3155,
+      "sha256": "a9ebaa44b538657637bb3d66c105213d3f6bf22816ecbcdca9e05ec33b00498b"
+    }
+  },
+  "core_friend_assemblies": [
+    "Yubico.YubiKit",
+    "Yubico.YubiKit.Core.UnitTests",
+    "MacOSHidRouteVerification",
+    "LinuxHidRouteVerification",
+    "Yubico.YubiKit.Tests.Shared",
+    "Yubico.YubiKit.Ctap2",
+    "Yubico.YubiKit.Management",
+    "Yubico.YubiKit.Oath",
+    "Yubico.YubiKit.OpenPgp",
+    "Yubico.YubiKit.Piv",
+    "Yubico.YubiKit.SecurityDomain",
+    "Yubico.YubiKit.YubiHsm",
+    "Yubico.YubiKit.YubiOtp",
+    "DynamicProxyGenAssembly2",
+    "Yubico.YubiKit.Ctap2.UnitTests",
+    "Yubico.YubiKit.Management.UnitTests",
+    "Yubico.YubiKit.Piv.UnitTests",
+    "Yubico.YubiKit.SecurityDomain.UnitTests",
+    "Yubico.YubiKit.YubiOtp.UnitTests"
+  ],
+  "core_project_snapshot": {
+    "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/validation/examples/full/webauthn-body-transition/before/src/Core/src/Yubico.YubiKit.Core.csproj.snapshot",
+    "bytes": 3088,
+    "sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76"
+  },
+  "owner": "FIDO editor",
+  "assigned_correction": "Public YubiKitLogging.LoggerFactory.CreateLogger<PreviewSignProcessor>() body plus corresponding prose; awaits explicit accepted editor return, no body edited here.",
+  "forbidden_workarounds": [
+    "Core IVT/access changes",
+    "fake public helper or Logger shim",
+    "switch FULL-032 to a Core friend assembly",
+    "NoWarn/warning suppression",
+    "silent source or authority/body hash repin"
+  ],
+  "status": "blocked-awaiting-explicit-completed-acceptance-inputs"
+}

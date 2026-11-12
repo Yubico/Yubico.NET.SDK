@@ -120,8 +120,8 @@ public class DataObjectProtocolTests
         Assert.Equal(printedInner, result.ToArray());
 
         Assert.NotNull(backend.CapturedRawDataArray);
-        // RawData includes the trailing 2 SW bytes, which are not part of the unwrapped payload
-        // and are not required to be zeroed; only the response's Data portion must be.
+        // Clear zeroes the response owner's full storage, including SW. This assertion observes only
+        // its Data portion; it does not check the trailing status bytes or the constructor's source array.
         int dataLength = backend.CapturedCount - 2;
         Assert.All(
             backend.CapturedRawDataArray!.AsSpan(backend.CapturedOffset, dataLength).ToArray(),

@@ -1,0 +1,2345 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 88019472ff5b12480fd6fca88b6a1c1ae2e8cfd2..f7907509614160bab6becd96bfa9a6fc86b6947e 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -61,7 +61,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
+ - ✅ ALWAYS use `CryptographicOperations.FixedTimeEquals` for secret-derived comparisons
+ - ❌ NEVER log PINs, keys, or sensitive payloads
+ - ❌ NEVER use timing-vulnerable comparisons (`SequenceEqual`) on secrets
+-- ❌ NEVER store a privately-cloned `byte[]` of sensitive data in a `struct`. Struct copies each hold their own reference — you cannot zero all copies. Use a `sealed class` with `IDisposable` and call `ZeroMemory` in `Dispose()`.
++- ❌ NEVER store a privately-cloned `byte[]` of sensitive data in a `struct`. Struct copies share the array reference, so zeroing that storage reaches its aliases; the hazard is shared mutation and ambiguous lifetime/disposal ownership. Use a `sealed class` with `IDisposable` and call `ZeroMemory` in `Dispose()`.
+ - ✅ `ReadOnlyMemory<byte>` passthrough **is** safe in a `readonly record struct` — all copies reference the same caller-owned memory, so zeroing the source zeroes all views. Caller is responsible for zeroing after transmission. See `ApduCommand` as the canonical passthrough example.
+ 
+ > Deep dive: `.claude/skills/domain-security-guidelines/SKILL.md` and `.claude/skills/domain-secure-credential-prompt/SKILL.md` (load when handling PIN/PUK/keys, designing a sensitive-data type, or auditing for memory hygiene).
+@@ -163,7 +163,7 @@ Valid device response data that the SDK does not yet model must not block users.
+ - **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawCtapHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is explicitly unguarded direct raw-connection access, with framing, sequencing, and recovery left to the caller. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
+ - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
+ - **HID vocabulary** — `IYubiKey` is the physical key; `IHidInterface` is an operating-system-exposed report interface enumerated by `FindHidInterfaces`; `IHidConnection` is an opened report connection. Windows `IWindowsHidReportAccess` is the internal report-handle seam, not another physical device.
+-- **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
++- **APDU pipeline** — `ChainedResponseReceiver` wraps `ApduTransmitter` or `ChainedApduTransmitter`, using `ApduFormatterShort`/`ApduFormatterExtended`. Keep complete-command ceilings, short data-chunk sizes, response ownership and recovery/profile limits distinct; see Core's guide.
+ - **Application sessions** — `ApplicationSession` base; the non-generic `ManagementSession` accepts supported SmartCard, FIDO HID or OTP HID connections through its `IConnection` factory parameter.
+ - **User interaction** — `ICredentialPrompt` acquires secret bytes where adopted; `IUserPresencePrompt`, supplied through `SessionCreationOptions.UserPresencePrompt`, is the cross-applet touch-notification contract. Sessions retain but do not own the prompt. See [User interaction](docs/usage/user-interaction.md).
+ - **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.
+@@ -402,7 +402,7 @@ public sealed class DeviceMetadataExample
+ ```csharp
+ public struct SensitivePayload  // 32+ bytes, owns private clone!
+ {
+-    private readonly byte[] _data;  // Each struct copy has its own reference — can't zero all copies
++    private readonly byte[] _data;  // Copies share storage but have no single disposal/lifetime owner
+     public DateTime Timestamp { get; set; }
+     public Guid CorrelationId { get; set; }
+ }
+@@ -499,16 +499,27 @@ public void Method_ActualBehavior_WorksCorrectly()
+ #### ✅ DO Write These Tests
+ 
+ **Behavior Tests** - Tests that verify actual functionality:
++
++This example belongs in the Core unit-test assembly, which can access the internal protocol and its
++existing fake. The test owns the fake connection; the protocol borrows it and is disposed first.
+ ```csharp
+-// ✅ GOOD - Tests real protocol configuration logic
+-[Fact]
+-public void Configure_FirmwareBelow400_UsesNeoMaxSize()
++using Xunit;
++using Yubico.YubiKit.Core.Devices;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
++using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
++
++public class ProtocolConfigurationExamples
+ {
+-    var protocol = new PcscProtocol(logger, connection);
++    [Fact]
++    public void Configure_FirmwareBelow400_UsesNeoMaxSize()
++    {
++        using var connection = new FakeSmartCardConnection { SupportsExtendedApduValue = false };
++        using var protocol = new PcscProtocol(connection);
+ 
+-    protocol.Configure(new FirmwareVersion(3, 5, 0));
++        protocol.Configure(new FirmwareVersion(3, 5, 0));
+ 
+-    Assert.Equal(254, protocol.MaxApduSize);
++        Assert.Equal(1390, protocol.MaxApduSize); // Complete-command ceiling, not a short data chunk.
++    }
+ }
+ ```
+ 
+diff --git a/README.md b/README.md
+index cb5c70e089d80dcd24fcba3a8a2111079083e88f..0be8bf7890dc3ae235249d8d9480b891cd724b34 100644
+--- a/README.md
++++ b/README.md
+@@ -47,8 +47,10 @@ IYubiKey device = await YubiKeyManager.FindFirstAsync();
+ Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
+ ```
+ 
+-One `IYubiKey` is one physical key, whichever interfaces it exposes. `FindFirstAsync` throws when no key is
+-present; `FindAllAsync` returns every connected key, and `FindFirstOrDefaultAsync` takes a predicate. From here, an application package adds
++An `IYubiKey` is discovery's view of a physical key through its observed interfaces. Grouping depends
++on available serial, topology, and PID evidence; partial observations can split a key or combine
++complementary same-PID interfaces. `FindFirstAsync` throws when nothing matches the current scan;
++`FindFirstOrDefaultAsync` returns null, and neither waits for insertion. From here, an application package adds
+ `device.Create<Application>SessionAsync()`; each package README opens with that step and a first read-only
+ call, then covers the common operations. For applet specifics and features, see that documentation.
+ 
+@@ -57,6 +59,12 @@ For continuous presence tracking, use `YubiKeyManager.WatchAsync(ct)`, or share
+ then live `DeviceChange` records. The ownership rule is: manager watch creates a producer; monitor watch subscribes to an existing one.
+ There is no pause/restart; see [Core monitoring](src/Core/README.md#own-continuous-tracking).
+ 
++Read `device.CachedDeviceInfo` for last-known metadata without I/O, or use Management for a live read.
++Discovery itself can open short-lived connections and select applets; coordinate direct/raw connections
++and independent scoped views. Device convenience sessions own their hidden connections, while
++`Session.CreateAsync(connection)` borrows yours. Await each complete operation, then dispose sessions
++and connections with `await using`; cancellation of a wait is not proof of native completion or release.
++
+ ## Packages
+ 
+ | Package | YubiKey application |
+diff --git a/docs/CRYPTO-APIS.md b/docs/CRYPTO-APIS.md
+index 2dde728409ed8d2b9f6e6e800bd00da9b2b116a2..be40d47dc39f18cf9deb3554a38a0a4e8793df60 100644
+--- a/docs/CRYPTO-APIS.md
++++ b/docs/CRYPTO-APIS.md
+@@ -5,10 +5,17 @@ description: Modern .NET Span-based cryptography APIs for the YubiKit SDK. READ
+ 
+ # Cryptography APIs
+ 
+-Use modern .NET 8/9/10 Span-based APIs. They are zero-allocation, faster, and the `using var` pattern auto-zeroes key material on dispose.
++Use .NET 10 destination-span APIs to avoid allocating a separate output array when suitable storage
++already exists. Providers can still allocate internally. Dispose stateful cryptographic objects and
++clear caller-owned secret buffers separately; neither a span nor `using` proves erasure of every copy.
+ 
+ ## Canonical Patterns
+ 
++These are API fragments, not one executable program. Supply the operation's key, IV, input, and
++correctly sized destinations; the AES calls require the same explicitly configured key and an
++appropriate IV. Their CBC mode alone supplies no authentication. Clear secret-bearing buffers in
++the owning operation's `finally` scope.
++
+ ```csharp
+ // Hashing
+ Span<byte> hash = stackalloc byte[32];
+@@ -54,15 +61,40 @@ bool isValid = expected.SequenceEqual(actual);
+ 
+ ## Disposable Crypto Objects
+ 
+-Always wrap stateful crypto objects in `using` so the underlying key material is zeroed on dispose:
++Wrap stateful crypto objects in `using` so their provider resources are released deterministically:
+ 
+ ```csharp
+ using var aes = Aes.Create();
+ using var rsa = RSA.Create();
+ using var hmac = new HMACSHA256(key);
+-// Keys automatically zeroed on dispose
++// Dispose provider state; clear caller-owned key arrays and exports separately.
+ ```
+ 
++Core's public creator delegates cover the call sites that use them, not every direct BCL construction
++or internal native helper. Configure them before concurrent use and treat each returned object as a
++per-call owned resource. Actual provider support, native exports, and cleanup depend on the deployed
++runtime/package. For example, the inspected .NET v10.0.0 macOS EC import extracts an additional private
++representation when Q is absent; supplied X and Y coordinates skip that checked extraction route.
++This source distinction supplies no installed-provider or native-erasure guarantee.
++
++## Keys, encodings, and catalog metadata
++
++Use `CryptographicDefinitions` to look up identities and structural relationships, not to choose a
++default or establish provider/device/app-profile support. A registered COSE identifier and generic
++curve applicability do not validate every algorithm/key pairing. Follow the consuming applet's profile.
++Keep field/order bit lengths, scalar/seed widths, coordinate widths, and public encodings distinct.
++SPKI encodes a public key; it is not an ECDSA signature format. DER ECDSA signatures and fixed-width
++P1363/COSE concatenation are different representations selected by the operation's contract.
++
++RSA/EC wrapper parameter arrays can alias key-owned mutable storage. Do not mutate them while the key
++is in use. Encoded private-key output is another caller-owned secret buffer. AlgorithmIdentifier field
++checks, selected RSA consistency relations, provider acceptance, and complete DER/mathematical key
++validation are separate guarantees; current factories do not implement a uniform all-encoding validator.
++In particular, current RSA admission includes a DP-width gate. The EC private encoder omits inner curve
++parameters because the outer PKCS#8 AlgorithmIdentifier supplies them; RFC 5915 §3 nevertheless requires
++those inner parameters for implementations conforming to that document. This remains a target-profile
++limitation, not a claim that every external importer accepts the same subset.
++
+ ## Buffer Sizing for Hashes
+ 
+ | Algorithm | Output bytes |
+diff --git a/docs/LOGGING.md b/docs/LOGGING.md
+index 3f049a70e481fb4a3783571345d9a238889f7369..6f8fd0112fe211e74ecb584a5b0c4eb6437fe7a6 100644
+--- a/docs/LOGGING.md
++++ b/docs/LOGGING.md
+@@ -16,7 +16,7 @@ YubiKitLogging.Configure(loggerFactory);
+ 
+ By default, YubiKit produces **no log output**. This is intentional:
+ - No surprises for production deployments
+-- No performance overhead if logging isn't needed
++- No configured output destination when logging isn't needed
+ - Developer explicitly opts in to logging
+ 
+ ## Configuration Methods
+@@ -25,6 +25,11 @@ By default, YubiKit produces **no log output**. This is intentional:
+ 
+ Simply don't configure logging. YubiKit uses `NullLoggerFactory` internally.
+ 
++Configure before the first SDK use. Many SDK types retain static logger instances; replacing the
++factory affects later logger creation, not loggers already captured by those types. Your application
++owns the supplied factory and providers. Keep them alive through all SDK operations, monitor shutdown,
++and connection/session disposal, then dispose them in the application's outer scope.
++
+ ```csharp
+ var devices = await YubiKeyManager.FindAllAsync();
+ // No logging output
+@@ -154,7 +159,7 @@ YubiKit uses the following log categories (class names):
+ 
+ | Level | Use |
+ |-------|-----|
+-| `Trace` | Raw APDU bytes, protocol details |
++| `Trace` | Detailed protocol steps; ordinary APDU headers/lengths and SELECT identifier bytes |
+ | `Debug` | State transitions, cache updates |
+ | `Information` | Session creation, major operations |
+ | `Warning` | Recoverable errors, fallback behavior |
+@@ -162,20 +167,30 @@ YubiKit uses the following log categories (class names):
+ 
+ ## Testing with Logging
+ 
+-For unit tests, use `YubiKitLogging.UseTemporary()` to scope logging:
++`YubiKitLogging.UseTemporary()` temporarily replaces the process-wide factory and restores the captured
++factory on disposal. It is useful for serially coordinated diagnostics, not test-local or async-flow
++isolation. Parallel or out-of-order scopes can restore the wrong factory, and existing static loggers
++keep their earlier provider. Coordinate all participants before using it. This helper borrows an
++application-owned factory; it restores the global factory reference without disposing the borrowed one:
+ 
+ ```csharp
+-[Fact]
+-public async Task MyTest()
++using Microsoft.Extensions.Logging;
++using Yubico.YubiKit.Core;
++using Yubico.YubiKit.Core.Devices;
++
++static async Task DiscoverWithTemporaryLoggingAsync(
++    ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+ {
+-    using var loggerFactory = LoggerFactory.Create(b => b.AddXUnit(output));
+     using var _ = YubiKitLogging.UseTemporary(loggerFactory);
+-    
+-    // Test code - logging goes to xUnit output
+-    // Original logger restored when scope exits
++    await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
+ }
+ ```
+ 
++Keep the factory and providers alive through all participating SDK work, including late enumeration
++completion and later uses of static loggers created during this scope. Completion of the bounded Find
++task is not a join for that work. Restoring the global factory neither replaces captured loggers nor
++ends their provider lifetime; the application must choose an outer lifetime that covers those uses.
++
+ ## Troubleshooting
+ 
+ ### No log output?
+@@ -195,20 +210,21 @@ builder.AddFilter("Yubico.YubiKit", LogLevel.Warning);
+ ### Performance concerns?
+ 
+ - Use `LogLevel.Information` or higher in production
+-- `Trace` level logs raw APDU bytes which adds overhead
++- `Trace` formatting and provider output add overhead; filter the categories you actually need
+ - Logging is completely disabled with `NullLoggerFactory` (default)
+ 
+ ## Security Considerations
+ 
+-YubiKit logging is designed to be safe:
++Choose log levels, destinations, retention, and access controls according to the data your application
++handles. `YubiKitLogging` selects a factory; it has no central payload redactor. Ordinary APDU trace
++templates record headers and lengths rather than complete bodies, but SELECT logs caller-supplied
++application identifier bytes. Serial numbers and credential identifiers can also be privacy-sensitive.
+ 
+-- ❌ PINs, PUKs, and passwords are **never** logged
+-- ❌ Private keys are **never** logged  
+-- ❌ Session keys are **never** logged
+-- ✅ Public identifiers (serial numbers, credential IDs) may be logged at Debug level
+-- ✅ Operation types and durations are logged at Info level
+-
+-If you have strict compliance requirements, use `LogLevel.Warning` or higher to minimize information disclosure.
++Exception objects have independent provenance. Transport/provider exceptions and application callback
++exceptions can reach configured providers, including text supplied by your application. Keep credentials,
++keys, plaintext, and sensitive intent/scope text out of exception messages and diagnostics. A higher
++minimum level reduces routine output but does not sanitize an exception at Warning or Error. Inspect
++the actual templates and provider behavior before collecting or exporting logs.
+ 
+ ---
+ 
+@@ -229,13 +245,14 @@ public class Ctap2Session
+ public class Ctap2Session(ILogger<Ctap2Session> logger) { }
+ ```
+ 
+-Canonical logger factory: `YubiKitLogging.CreateLogger<T>()` at `src/Core/src/YubiKitLogging.cs:20`.
++Internal contributor entry point: `YubiKitLogging.CreateLogger<T>()` in
++`src/Core/src/YubiKitLogging.cs`. Consumers configure the public factory rather than calling this internal helper.
+ 
+ ### Log Levels (when contributing new log calls)
+ 
+ | Level | Use for |
+ |---|---|
+-| `Trace` | Raw APDU/CBOR bytes, detailed protocol steps |
++| `Trace` | Detailed protocol steps and reviewed nonsecret metadata; never sensitive payloads |
+ | `Debug` | Protocol-level operations, state transitions |
+ | `Info` | Session creation, major operations (enroll, authenticate) |
+ | `Warning` | Recoverable errors, fallback behavior |
+@@ -244,7 +261,7 @@ Canonical logger factory: `YubiKitLogging.CreateLogger<T>()` at `src/Core/src/Yu
+ ### Logging Sensitive Data
+ 
+ - ❌ NEVER log PINs, keys, or credentials
+-- ✅ Log credential IDs as hex (public identifier)
++- Review identifier privacy before logging credential IDs, even when they are not secret key material
+ - ✅ Log lengths, not contents, of sensitive buffers
+ 
+ ```csharp
+diff --git a/docs/MEMORY-MANAGEMENT.md b/docs/MEMORY-MANAGEMENT.md
+index 53f1a9946b0507dae45fb7aaaac6ff1b4e74e182..8c8ad0d47bd1993ebe67879df78e6295cfc959eb 100644
+--- a/docs/MEMORY-MANAGEMENT.md
++++ b/docs/MEMORY-MANAGEMENT.md
+@@ -41,7 +41,10 @@ ReadOnlySpan<byte> body = apduData.AsSpan()[5..];
+ public void ProcessData(ReadOnlySpan<byte> data) { }
+ ```
+ 
+-**Limitations:** cannot be used in async methods, cannot be stored in fields (ref struct), limit `stackalloc` to ≤512 bytes.
++**Lifetime:** with C# 14, span/ref-struct locals can be used in synchronous segments of an async method,
++provided they do not cross an `await` or `yield` suspension boundary. They cannot be stored in ordinary
++class fields. Keep `stackalloc` bounded to ≤512 bytes and initialize every byte before reading it;
++stack allocation alone does not promise zero-filled storage.
+ 
+ ### 2. `Memory<byte>` and `ReadOnlyMemory<byte>`
+ 
+@@ -168,16 +171,38 @@ finally { ArrayPool<byte>.Shared.Return(buffer); }
+ 
+ ## APDU and Protocol Buffers
+ 
+-Prefer Span for APDU data:
++`ApduCommand` borrows its `ReadOnlyMemory<byte>` payload instead of cloning it. Copying that command
++copies the view, so all copies refer to the same caller-owned storage. Keep it alive and unchanged until
++the original exchange task is terminal; cancellation of an outer wait does not end the borrow. This
++complete method borrows a raw session and clears the request buffer it allocates:
+ 
+ ```csharp
+-public readonly struct CommandApdu
++using System.Security.Cryptography;
++
++static async Task SendAsync(
++    Yubico.YubiKit.Core.Sessions.RawSmartCardSession session, CancellationToken cancellationToken)
+ {
+-    private readonly ReadOnlyMemory<byte> _data;
+-
+-    public ReadOnlySpan<byte> AsSpan() => _data.Span;
+-
+-    public CommandApdu(ReadOnlySpan<byte> data) => _data = data.ToArray(); // only allocate for storage
++    // Illustrative request bytes: choose a valid command/payload for the selected applet.
++    byte[] request = [0x01];
++    try
++    {
++        var command = new Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand(
++            0x00, 0xCA, 0x00, 0x00, request);
++        var response = await session.TransmitAndReceiveAsync(
++            command, throwOnError: false, cancellationToken: cancellationToken);
++        try
++        {
++            Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
++        }
++        finally
++        {
++            response.Clear();
++        }
++    }
++    finally
++    {
++        CryptographicOperations.ZeroMemory(request);
++    }
+ }
+ ```
+ 
+@@ -200,5 +225,24 @@ Cross-reference `.claude/skills/domain-secure-credential-prompt/SKILL.md` for th
+ 
+ - `Span<byte>` on the stack → call `CryptographicOperations.ZeroMemory(span)` before scope exits
+ - `ArrayPool` rented buffer → zero before `Return(buffer, clearArray: false)`
+-- Sealed `IDisposable` class → zero in `Dispose()` (never store sensitive `byte[]` in a struct — copies can't all be zeroed)
+-- `using var` for crypto objects: `Aes.Create()`, `RSA.Create()`, `HMACSHA256` — keys auto-zeroed on dispose
++- Sealed `IDisposable` class → use one reference owner for privately cloned secrets and zero in `Dispose()`.
++  Copying an array-bearing struct copies references, not array contents: zeroing shared storage reaches
++  its aliases. The hazard is shared mutation and ambiguous disposal/lifetime ownership, rather than an
++  inability to reach those aliases. A borrowed view such as `ApduCommand.Data` has a different contract.
++- `using var` for crypto objects → release provider-owned state deterministically. Separately clear
++  caller arrays, exports, SDK temporaries, and other copies. Disposal is not a universal native-erasure proof.
++
++`ApduResponse` owns a constructor copy; `Clear()` reaches that array and its views, including status
++bytes, but leaves source/transport/decrypted-temporary owners separate. `Tlv.Value` borrows the TLV's
++encoding; dispose the TLV/list and clear source, intermediate, and returned encodings separately. Use
++the [TLV guide](usage/tlv-processing.md) for complete nested cleanup scopes.
++
++Key parameter structs can expose mutable arrays owned by an RSA/EC wrapper. Treat them as aliases,
++not fresh exports to mutate independently. `AsnWriter.Encode()` returns a copy and retains writer storage;
++the inspected .NET v10.0.0 `Reset()` clears its written prefix. Current private-key encoders do not
++reset that writer, so clearing only the returned encoding establishes no all-copy erasure. Provider
++and actual native memory behavior require their own qualification.
++
++Exceptional paths need the same owner-by-owner review. For example, current AES-CBC helpers allocate
++key and IV copies before entering their cleanup `try`; a later allocation failure can bypass that
++protected cleanup scope. Describe the actual scope rather than promising every local copy is always erased.
+diff --git a/docs/NATIVE-AOT.md b/docs/NATIVE-AOT.md
+index 0d81e700ee39950c64d871e80bb8e0594b19355e..8f3d2aa0a1224a56296069ec88bf468e8aa7d14f 100644
+--- a/docs/NATIVE-AOT.md
++++ b/docs/NATIVE-AOT.md
+@@ -32,6 +32,11 @@ The research records preserve the environment, commands, and observations behind
+ - [`native-aot-readiness.md`](research/native-aot-readiness.md)
+ - [`native-aot-readiness-data.md`](research/native-aot-readiness-data.md)
+ 
++These are historical execution claims for their recorded source/host artifacts, not fresh execution
++of every current path. Earlier monitor evidence does not exercise the present owned-monitor replay,
++fan-out, or disposal contract. Historical Windows output/binary provenance also has retained gaps;
++successful source compilation or later Linux runs do not reconstruct those missing artifacts.
++
+ ## Evidence terms
+ 
+ | Term | Meaning |
+@@ -148,6 +153,15 @@ when `PublishAot=true` and removes the shared shim from the publish output. Non-
+ continue to use the shared library. Static shim linking does not make the entire application
+ fully static: operating-system libraries such as Linux PC/SC remain runtime dependencies.
+ 
++Qualify the native producer independently of the managed package version. Published NativeShims
++source, local headers, equal asset hashes, and a successful link do not identify a deployed binary's
++compiler flags, patches, exports, or ABI. The inspected NativeShims 1.18.1 Linux LP64 PC/SC path forwards
++the PCI pointer to a header shape with two `unsigned long` fields, whereas the current managed PCI
++carrier uses two four-byte fields. That selected-route discrepancy still needs exact producer/ABI and
++transmit qualification; it is not evidence that every installed Linux path failed. Windows DWORD and
++macOS framework layouts require their own platform evidence. See [Linux setup](linux-setup.md) for
++PC/SC, libudev loader names, and account permissions.
++
+ Core must guard macOS-only shim calls with `OperatingSystem.IsMacOS()` so Native AOT eliminates
+ them on Linux and Windows. This is an SDK responsibility, not a consumer linker configuration
+ requirement. The macOS native bridge remains unchanged on macOS; fake-backed connection tests
+diff --git a/docs/SDK-HOUSE-STYLE.md b/docs/SDK-HOUSE-STYLE.md
+index 31fe858d5cd83fdcf385dacd4375c79f2ca449d2..48e6d97fa1e5f084162a15ababa6eee146e5ed43 100644
+--- a/docs/SDK-HOUSE-STYLE.md
++++ b/docs/SDK-HOUSE-STYLE.md
+@@ -38,6 +38,9 @@ Session method
+ 
+ This is preferred:
+ 
++The following is an illustrative method shape; `Ins`, `GetKeyInfoTag`, `_protocol`, and `ParseKeyInfo`
++stand for the owning applet's actual constants, backend, and parser.
++
+ ```csharp
+ public async Task<KeyInfo[]> ListKeyInformationAsync(CancellationToken cancellationToken = default)
+ {
+@@ -50,7 +53,7 @@ public async Task<KeyInfo[]> ListKeyInformationAsync(CancellationToken cancellat
+         p2: 0x00,
+         data: GetKeyInfoTag);
+ 
+-    var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
++    var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+ 
+     return ParseKeyInfo(response.Data.Span);
+ }
+@@ -143,6 +146,15 @@ and optional SCP establishment. Backend rebinding and applet-specific state rema
+ discovery and cache population. Security Domain reset uses the same completion boundary after clearing readiness.
+ Keep raw-session initialization contracts separate, including lazy raw FIDO channel initialization.
+ 
++Readiness means the initializer completed. It is separate from applet authorization and from the
++provenance of the effective firmware version. Raw HID sessions currently retain inherited `0.0.0`;
++major-zero feature checks are optimistic policy. Shared `IsSupported` queries do not guarantee runtime
++command success, and protected `EnsureSupports` remains derived-session enforcement machinery.
++
++Core guards logical exchanges, not complete multi-exchange public workflows. Callers await and
++serialize those workflows before disposal; a prompt callback must return without disposing its own
++session. Exchange drain supplies no lease for later parsing, cache updates, or callbacks.
++
+ Pass creation-only SCP parameters directly to the initializer; retain them only when a later operation needs
+ them, as Security Domain reinitialization does. `ApplicationSession.Protocol` owns protocol lifetime; avoid
+ duplicate applet fields unless typed operational access requires them. Backend contracts describe shared
+diff --git a/docs/TESTING.md b/docs/TESTING.md
+index 39470688fea556e62af140535ffe5d250a4c04f8..1d0de29675d0224fa9ad510f0861f151f82f48ad 100644
+--- a/docs/TESTING.md
++++ b/docs/TESTING.md
+@@ -124,9 +124,9 @@ The build script checks each test project's `.csproj` file for:
+ 
+ Tests are organized per-module:
+ ```
+-Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/
++src/Core/tests/Yubico.YubiKit.Core.UnitTests/
+ src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/
+-Yubico.YubiKit.Piv/tests/Yubico.YubiKit.Piv.UnitTests/
++src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/
+ ... etc
+ ```
+ 
+@@ -153,6 +153,12 @@ When running filtered tests **outside** the build script (ad-hoc debugging), syn
+ 
+ `toolchain.cs` translates common VSTest-style filters to Microsoft.Testing.Platform-native xUnit v3 flags. Positive filters are preflighted with `--list-tests`; if a selected xUnit v3 project has no matching tests, that project is reported as `no matching tests`. If every selected xUnit v3 project preflighted by the positive filter has no matching tests, the toolchain fails clearly with `No tests matched the specified filter`. Exclusion filters still apply to the actual run.
+ 
++For `&`, the current translator emits separate switches for the terms; it does not combine same-kind
++method terms into one wildcard. Repeated-switch selection semantics depend on the pinned runner and
++remain unqualified here. Inspect the selected test list and executed totals rather than assuming a
++complex expression exercised the intended population. Prefer one unambiguous fully qualified selector
++when a specific acceptance lane matters.
++
+ This matters when a project filter selects multiple Ctap2/WebAuthn test projects and only one contains the focused method.
+ 
+ ### Standard Filter Expressions
+@@ -174,9 +180,12 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
+ 
+ ## Hardware Authorization
+ 
+-Integration tests only ever touch devices whose serial number is in the gitignored
+-`YubiKeyTests:AllowedSerialNumbers` list; anything else hard-fails with `Environment.Exit(-1)`
+-before a single hardware operation runs. Those listed keys are **dedicated test keys**.
++The shared fixture loader identifies devices with live reads before applying the gitignored
++`YubiKeyTests:AllowedSerialNumbers` list. Those discovery/identification reads can already open
++connections and select applets. The allow-list controls which identified devices become test fixtures,
++not whether every discovery operation can reach an unlisted device. An empty configured list triggers
++the loader's exit path; nonmatching devices and failed reads have their own filtering outcomes.
++Listed fixtures are **dedicated test keys**.
+ 
+ That makes the authorization boundary simple, and worth stating plainly so it is not
+ re-litigated per run:
+@@ -272,6 +281,11 @@ Each `[WithYubiKey]` attribute:
+ 2. Binds that row to the first matching authorized device during execution.
+ 3. Applies `ConnectionType` as a device filter; it does not open that connection or force a session to use it.
+ 
++The row is lazy first-match binding, not one row for every connected key. Fixture metadata is run-local
++and can differ from a fresh one-shot Find or Management read. State-changing and reset/reinsertion
++prerequisites remain owned by the actual applet test/helper; a category name alone supplies no universal
++recovery procedure or physical qualification.
++
+ With an unfiltered `[WithYubiKey]`, `state.ConnectionType` is the device's complete `AvailableConnections` flag set and can contain several values. With a concrete filter such as `[WithYubiKey(ConnectionType = ConnectionType.HidFido)]`, `state.ConnectionType` records that requested connection type while `state.AvailableConnections` still reports the device's complete set.
+ 
+ To create separate rows for separate connection types, apply one attribute per concrete connection type. Each attribute still binds independently to a matching authorized device.
+@@ -532,19 +546,23 @@ Rule references: [xUnit1051](https://xunit.net/xunit.analyzers/rules/xUnit1051)
+ 
+ ### Test All Public APIs
+ 
++The following illustrative assertion helper borrows an application-supplied `IYubiKey` fake configured
++to return a SmartCard connection. It checks the public connection type, not live device health or
++protocol behavior. The helper owns and disposes the returned connection even when an assertion fails:
++
+ ```csharp
+-[Fact]
+-public async Task ConnectAsync_WhenDeviceAvailable_ReturnsConnection()
++using Xunit;
++using Yubico.YubiKit.Core.Abstractions;
++using Yubico.YubiKit.Core.Devices;
++using Yubico.YubiKit.Core.Transports.SmartCard;
++
++static async Task AssertSmartCardConnectionAsync(IYubiKey device, CancellationToken cancellationToken)
+ {
+-    // Arrange
+-    var device = new MockYubiKey { IsConnected = true };
++    await using ISmartCardConnection connection =
++        await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
+ 
+-    // Act
+-    var connection = await device.ConnectAsync<ISmartCardConnection>();
+-
+-    // Assert
+     Assert.NotNull(connection);
+-    Assert.True(connection.IsConnected);
++    Assert.Equal(ConnectionType.SmartCard, connection.Type);
+ }
+ ```
+ 
+@@ -564,6 +582,10 @@ Naming pattern: `Subject_WhenCondition_ExpectedBehavior`.
+ 
+ ### Clean Up in Integration Tests
+ 
++This is an illustrative cleanup shape: `ResetDeviceAsync` is a test-specific helper, not a Core API.
++Choose restoration from the owning applet's instructions and observed state. In particular, reset,
++power-cycle/reinsertion, and touch are not interchangeable generic cleanup operations.
++
+ ```csharp
+ [Fact]
+ public async Task IntegrationTest_WithRealDevice()
+@@ -572,8 +594,8 @@ public async Task IntegrationTest_WithRealDevice()
+ 
+     try
+     {
+-        var result = await connection.TransmitAsync(apdu);
+-        Assert.NotNull(result);
++        ReadOnlyMemory<byte> result = await connection.TransmitAndReceiveAsync(apdu);
++        Assert.True(result.Length >= 2); // Framing only, not command success or protocol conformance.
+     }
+     finally
+     {
+diff --git a/docs/architecture/connection-ownership-and-contention.md b/docs/architecture/connection-ownership-and-contention.md
+index 8f94867140effc39671ddf5377faff6adf03b2d5..28ee6548cfc13f651e619faf9a273070961159bf 100644
+--- a/docs/architecture/connection-ownership-and-contention.md
++++ b/docs/architecture/connection-ownership-and-contention.md
+@@ -6,8 +6,8 @@ This document defines the SDK's in-process ownership contract:
+ > this process. A connection hosts at most one live session.
+ > Connections and sessions are reused sequentially; overlapping ownership attempts throw.
+ 
+-Cross-process contention is outside this registry's scope. Another process holding PC/SC may still
+-surface an ordinary platform `SCardException` such as `SCARD_E_SHARING_VIOLATION`.
++Cross-process contention is outside this registry's scope. Built-in PC/SC strict-exclusive open maps a
++sharing violation to `ConnectionInUseException`; other platform failures can surface as `SCardException`.
+ 
+ ## Why connection ownership is enforced
+ 
+@@ -36,24 +36,28 @@ enforcement is bounded by the known-member scope described below.
+ A composite ID describes the evidence tier that formed a group and can change between scans. Member
+ IDs (PC/SC reader names and HID paths) are the stable ownership records.
+ 
+-When discovery proves that interfaces belong to one flat `YubiKeyDevice`, it stores the interfaces in
+-optional SmartCard, HID FIDO, and HID OTP slots with one sorted lease scope. Opening any slot atomically
+-claims all IDs in that scope. Therefore:
++When discovery groups interfaces into one flat `YubiKeyDevice`, it stores the interfaces in
++optional SmartCard, HID FIDO, and HID OTP slots with one sorted lease scope. Opening any slot acquires
++the member claims in order before native open, rolling back earlier claims if acquisition fails. Therefore:
+ 
+ - a second connection through the same interface throws `ConnectionInUseException`;
+ - a second connection through another known member interface throws before native open;
+-- disposing the first connection releases every member claim, in reverse acquisition order;
++- confirmed teardown releases the member claims; uncertain built-in native release can retain them;
+ - standalone records retain a one-element scope and behave as before;
+ - failed or canceled multi-member acquisition rolls back every earlier claim.
+ 
+ Acquisition sorts IDs ordinally and removes duplicates. Racing connects use the same order, admit one
+ winner, and do not deadlock. A connection never waits for another live connection to end.
+ 
++An earlier member's discovery read can still delay acquisition before a later held member is checked.
++The eventual live-connection refusal is not a guarantee of immediate rejection at method invocation;
++cancellation can end that discovery wait and roll back claims already acquired.
++
+ ### Grouping bound
+ 
+-Physical-device exclusivity is only as strong as discovery's evidence. When discovery cannot prove
+-that standalone records belong to one key, it does not guess. Each record then has a one-element lease
+-scope, so protection degrades conservatively to per-interface exclusion. See
++Physical-device exclusivity is only as strong as discovery's evidence. Separate records each have a
++one-element lease scope, reducing protection to per-interface exclusion. PID-completeness grouping also
++has a complementary-partials bound: a grouped record can contain slots from different same-PID keys. See
+ [Device Discovery Guarantees](device-discovery-guarantees.md).
+ 
+ The same bound applies to `YubiKeyManager.Find…Async(interfaces: ...)`: each returned `IYubiKey` is a scoped
+@@ -106,7 +110,17 @@ borrow the connection and never dispose it. Convenience `IYubiKey.Create<App>Ses
+ a hidden connection and call `OwnConnection()`, transferring that connection's lifetime to the returned
+ session.
+ 
+-`DisposalGate` tears down the physical connection before releasing its registry lease. Disposal runs
++For the generic `CreateSessionOverTransportAsync` callback helper, successful results need an explicit
++connection owner too. The helper cleans up an open when the callback fails; after success, it cannot
++infer that an arbitrary returned object owns the connection. Returning only a directly created borrowed
++session loses deterministic ownership unless the result also exposes/owns and disposes that connection.
++Prefer the applet/raw convenience factories or an explicit result owner with session-before-connection cleanup.
++
++`DisposalGate` sequences connection teardown before registry release. Built-in native owners distinguish
++terminal managed work, drained references, and proven physical release; unknown release retains the
++claim. A custom connection's successful `Dispose` supplies only that implementation's guarantee, and
++the pinned Windows HID compatibility route can defer actual SafeHandle close while native work holds
++a reference. Do not equate every managed disposal return with native release. Disposal runs
+ once; all sync and async disposal callers observe the same completion and exception. Sessions have no
+ finalizer recovery. Some built-in connections request best-effort native finalizer cleanup; it is not a
+ guarantee of timely teardown or lease release. A leaked connection can retain the physical-device lease
+@@ -166,16 +180,25 @@ first operation's next exchange to be refused. Each admitted exchange stays inta
+ ordering or all-or-nothing guarantee spans exchanges. Callers must await each public operation before
+ starting the next one on the same session.
+ 
++Session disposal drains the admitted exchange, not every remaining step of that public workflow.
++Post-exchange parsing, cache updates, later exchanges, and application callback work need the caller's
++complete awaited scope. Finish the operation before disposal. A callback must neither dispose its own
++session nor wait for a disposal that needs the callback to return.
++
+ A token already canceled at entry throws before the guard is claimed. Once claimed, the logical
+ exchange receives `CancellationToken.None` for constituent transmits so caller cancellation cannot
+ interrupt APDU chaining, CTAP/OTP frames, or SCP state midway. Cancellation semantics therefore differ by
+ protocol. A PC/SC or SCP exchange observes the caller token only at admission: if the token is canceled
+ afterwards, the admitted exchange still runs to completion and returns its response or failure rather
+ than `OperationCanceledException`. During a FIDO HID keep-alive, the caller
+-token can signal `CTAPHID_CANCEL`; the protocol waits for a terminal response and drains its frames
+-before reporting cancellation when that response is valid. A CTAP success (`0x00`) that arrives after
+-the cancel is returned rather than discarded: the authenticator completed the work, and CTAP 2.3
+-§11.2.9.1.5 only promises `CTAP2_ERR_KEEPALIVE_CANCEL` for a request that was actually cancelled. During an OTP HID touch wait, the caller
++token can signal `CTAPHID_CANCEL` after observing a keep-alive; the protocol then waits for the
++original terminal response and drains its frames. CANCEL has no response of its own. Core currently
++returns a late success payload beginning with `0x00` when the original command byte is unencoded CBOR
++`0x10`. An encoded `0x90` request can correlate with the terminal response but currently misses that
++success classification and can surface cancellation instead. This normalization gap remains separate
++from whether the authenticator actually canceled the request and from the no-response CANCEL rule.
++With no further report, the
++wait can remain pending indefinitely. During an OTP HID touch wait, the caller
+ token can trigger a dummy-report reset;
+ reuse requires that reset to succeed. Neither signal rolls back work already sent. A failed partial
+ APDU exchange or failed OTP reset requires disposing and reopening the connection. The guard resets
+@@ -192,10 +215,10 @@ What the drain leaves behind differs by protocol:
+   exchange succeeds, a borrowed connection remains usable by the next session.
+ - A FIDO HID disposal that finds no admitted exchange does not touch a borrowed connection, which remains
+   usable by the next session.
+-- If a FIDO HID exchange is admitted when disposal begins on the built-in macOS connection, disposal
++- If a FIDO HID exchange is admitted when disposal begins on the built-in macOS/Linux connection, disposal
+   terminally wakes that connection's input so the drain cannot wait indefinitely for a report. The wake
+   does not dispose the connection, but it may leave it unusable, even when the exchange finishes
+-  concurrently with the wake. Other built-in FIDO HID connections receive no wake, and their drain waits
++  concurrently with the wake. Windows/custom compatibility connections receive no equivalent wake, and their drain waits
+   for the exchange's native I/O.
+ 
+ Treat a FIDO HID disposal that began while an exchange was active like a failed partial exchange: dispose
+@@ -215,7 +238,8 @@ the deliberate tradeoff for never abandoning a stateful exchange halfway through
+   option, owns in-process admission.
+ - Windows OTP HID feature reports use `DESIRED_ACCESS.NONE`; keyboard collections reject ordinary
+   read/write access.
+-- Windows FIDO HID read/write access requires elevation.
++- Windows FIDO HID read/write access may require elevation under the host's access policy. Enumeration
++  metadata alone does not establish that a report handle can be opened or used.
+ - Cross-process PC/SC contention is not converted into an SDK transport retry.
+ 
+ ## Invariants and pinning tests
+@@ -240,12 +264,17 @@ the deliberate tradeoff for never abandoning a stateful exchange halfway through
+ - In-process only; other processes are governed by platform APIs.
+ - Admission never waits for a live connection or active protocol exchange; only disposal drains an
+   admitted exchange.
+-- Conservative discovery may leave ungrouped interface records with independent one-element scopes.
+-- Hotplug exception type is unspecified; failure must be bounded and must not strand the lease.
++- Separate discovery records have independent member scopes; PID-only grouping retains its G2 bound.
++- Hotplug exception type is unspecified. Native completion and release may remain unbounded; uncertain
++  cleanup is not permission to release a claim or reopen the interface.
+ 
+ ## Troubleshooting: wedged macOS OTP HID
+ 
+-If macOS OTP HID reports `IOHIDDeviceGetReport = 0xE00002E2` (`kIOReturnNotOpen`) and OTP interfaces
++If macOS OTP HID reports `IOHIDDeviceGetReport = 0xE00002E2` (`kIOReturnNotPermitted`) and OTP interfaces
+ appear as standalone `hid:...` records, verify independently with `ykman --device <serial> otp info`.
+ Do not truncate that command's output: it may otherwise continue over CCID and hide the HID failure.
+-Replug the key first; restart the host only if replugging does not clear the fault.
++Check host privacy/access policy as well as device state. Apple's inspected IOHID implementation can
++return NotPermitted when required authorization is denied; the code alone does not identify that as
++the cause of every failure. `kIOReturnNotOpen` is the different value `0xE00002CD`. The retained numeric
++error belongs to the historical observation; correcting its name does not diagnose the original fault.
++Replugging can help a device-state fault, but cannot substitute for required host authorization.
+diff --git a/docs/architecture/device-discovery-guarantees.md b/docs/architecture/device-discovery-guarantees.md
+index e6f5133f8a83cb820ff00baa49d88266d68586d7..ee401f8c3170135342a5d8be7683775cdb108a02 100644
+--- a/docs/architecture/device-discovery-guarantees.md
++++ b/docs/architecture/device-discovery-guarantees.md
+@@ -2,8 +2,8 @@
+ 
+ What the SDK's composite device discovery does and does not guarantee, per platform, and why.
+ 
+-Every guarantee below cites the test that pins it. A guarantee with no pinning test is not a
+-guarantee — if you cannot find the citation, treat the behavior as unspecified and report it.
++The named tests below pin selected managed rules and fixture assertions. Scripted inputs establish
++those rules separately from native ABI, physical identity, permissions, and installed-driver evidence.
+ 
+ Scope: grouping multiple USB interfaces (CCID/smart card, HID FIDO, HID OTP) of one physical
+ YubiKey into one `IYubiKey`, as performed by `FindYubiKeys.FindAllAsync` and
+@@ -33,15 +33,19 @@ Discovery resolves same-PID keys using an **evidence hierarchy**, strongest firs
+ | 4 | **Pigeonhole deduction** — an orphan whose type fills the one incomplete anchored composite, under type-count closure | free | always |
+ | 5 | **Conservative standalone** — publish the interface on its own rather than guess | free | always |
+ 
+-The hierarchy never guesses. When evidence runs out, interfaces are published separately, which is
+-incomplete but never wrong.
++The hierarchy uses the strongest available evidence and often leaves ambiguous interfaces separate.
++PID completeness and pigeonhole grouping still have a consequential limit: complementary partial
++observations from two same-PID keys can look like one complete key and form a cross-key composite.
++Read the [G2 bound](#g2-the-epistemic-bound) before using a composite serial to select a transport slot.
+ 
+ Serial reads are conditional and on demand; discovery does **not** open every interface on every
+ scan. It requests serial evidence only when PID correlation is untrusted, more than one physical key
+ shares a PID, or a partial-PID shape is ambiguous. Only successful reads are cached, keyed by the
+ stable **interface identifier** (`hid:*`, `pcsc:*` — not the physical `ykphysical:*` identifier discussed
+ in [Device identity](#device-identity-what-deviceid-does-and-does-not-promise), which is a different
+-concept); failures and null serials are retried on later scans. This is pinned by
++concept). Failed identity reads and identity reads without a serial are retried on later scans.
++Successful metadata reads are cached separately, including results without a serial; those results
++need not be reread on an unchanged scan. The failed-read behavior is pinned by
+ `FindAllAsync_ScriptedIdentityFailure_DeducedIntoAnchoredKey_AndRereadOnNextScan_Pin`,
+ `FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries_Pin`, and
+ `FindAllAsync_PcscReaderRenameBetweenScans_OldEntryMissesAndSuccessfulRereadHeals_Pin` in
+@@ -56,8 +60,10 @@ immediately before the hotplug scan. Activity on any transport globally discards
+ metadata caches; the reported transport is diagnostic context, not an eviction scope. A fresh different
+ serial then makes the repository republish the successor rather than mutate the retained predecessor. A
+ composite swap's events can arrive on one transport before another, so per-transport retention could
+-combine evidence from the departed and replacement keys. **Configuration**: each entry records the PID
+-observed at read time, and a hit under a different PID is a miss. Pinned by
++combine evidence from the departed and replacement keys. **Configuration**: each identity-cache entry
++records the PID observed at read time, and a hit under a different PID is a miss. The separate metadata
++cache stores metadata and member IDs without the same PID check, so a stable-ID configuration change
++can retain stale metadata until another invalidation. The identity and global-invalidation paths are pinned by
+ `FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
+ `FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
+ the global-invalidation vectors in `FindYubiKeysFaultInjectionTests`, and
+@@ -228,9 +234,10 @@ two members of the same connection type, invisible in `AvailableConnections` and
+ connect time) and they do **not** both mint the id. Instead, the *winner rule* applies: the PID group
+ whose serial-anchored census exactly matches its PID's expected interface set keeps `ykphysical:{serial}`;
+ every other contested interface publishes standalone. Zero or multiple complete groups is ambiguity, and
+-ambiguity fragments conservatively — the next scan converges. Completeness is a heuristic and can pick the
++ambiguity fragments conservatively. Later scans converge only when the evidence changes sufficiently.
++Completeness is a heuristic and can pick the
+ stale enumeration when a scan catches it still fully enumerated; both groups are the same physical key, so
+-the consequence is bounded to one scan of stale membership and self-corrects. The reasoning is recorded at
++stale membership can persist while that evidence persists. The reasoning is recorded at
+ `CompositeDeviceMerger.ResolveContestedSerials`, and the rule is pinned by the `Merge_ContestedSerial_*`
+ vectors plus `Merge_AnyVector_ProducesPairwiseDistinctDeviceIds`.
+ 
+@@ -256,9 +263,9 @@ though the device did not. Measured on macOS hardware:
+ | 103 alone | `ykphysical:pid:0407` | its PID is unique on the bus; no serial evidence needed |
+ | 103 + a same-PID sibling | `ykphysical:103` | serial evidence is now required to tell the two apart |
+ 
+-Inserting an unrelated second key therefore changes how the first one is named. Discovery absorbs this
+-without emitting spurious add/remove events for the incumbent, which is the guarantee that matters to
+-subscribers, but the identifier itself is not invariant.
++Inserting an unrelated second key can change how a fresh scan names the first one. Within an owned
++monitor, the incumbent is retained when its member and connection sets stay unchanged and no known
++serial contradicts it. The identifier of an independent scan object remains evidence-dependent.
+ 
+ ### A live repository and a fresh scan can disagree
+ 
+@@ -305,7 +312,7 @@ This SDK's merger contains no firmware-version logic, and none should be added f
+ |---|---|---|---|---|
+ | G1 | No cross-key composite under complete same-PID visibility | yes | yes | yes |
+ | G2 | No cross-key composite during partial visibility | yes, with topology evidence | bounded — see [G2 bound](#g2-the-epistemic-bound) | same as macOS |
+-| G3 | Same-PID keys that report serials: complete grouping | first scan, with topology | first scan in practice; converges — see [G3](#g3-convergence) | same as macOS |
++| G3 | Same-PID keys that report serials: grouping when consumed evidence resolves them | with usable topology evidence | conditional; see [G3](#g3-convergence) | same as macOS |
+ | G4 | Serial-less multi-interface keys: complete grouping | yes, with topology | **no — permanent split** | **no — permanent split** |
+ | G5 | Reconfigured key (different enabled interfaces) | yes | yes | yes |
+ | G6 | Single-interface keys publish as one-slot flat devices with their transport-shaped `DeviceId` preserved | yes | yes | yes |
+@@ -364,15 +371,17 @@ this bound.
+ **When it can occur:** staggered USB enumeration during hotplug, the ~3 second reboot window after
+ a configuration change, or an interface failing to enumerate.
+ 
+-**How it heals:** on the first scan with complete same-PID visibility, serial evidence, or topology
+-evidence. Healing is conditional on evidence, not on elapsed time — an interface that stays absent,
+-busy, or unreadable keeps the window open. Discovery keeps scanning, but no scan is guaranteed to
+-heal.
++**How it can heal:** later observations can regroup interfaces when they supply evidence actually used
++by the merger's tiers. Complete visibility or newly available serials alone do not guarantee that the
++next scan takes a different tier or discards cached ambiguous evidence. There is no expiry forcing
++one-scan convergence; repeated scans can select the same ambiguous grouping. Healing depends on the
++effective evidence changing, not elapsed time or a promised first complete/serial-bearing scan.
+ 
+-**Blast radius:** raw interface slots are path-bound — PC/SC connects through its enumerated reader
+-and HID through its enumerated device handle — so a misgrouped composite never routes a connection to a different physical
+-interface than the one it names. The exposure is composite-level metadata and capability-filter
+-truth, not connection misdelivery.
++**Blast radius:** raw interface slots are path-bound: PC/SC opens its enumerated reader and HID opens its
++enumerated path. This preserves slot routing, but does not verify that the chosen slot belongs to the
++composite's reported serial. Selecting a misgrouped composite by serial and then opening another slot
++can therefore reach the other physical key. For consequential identity-sensitive work, require suitable
++identity evidence rather than treating path-bound routing as a serial-to-slot guarantee.
+ 
+ **Rejected alternatives**, recorded so they are not re-proposed: (a) always requiring serial
+ evidence for every multi-interface merge — imposes seconds of first-scan latency on every
+@@ -384,13 +393,13 @@ than closing it, and doubles metadata reads.
+ 
+ Successful serial reads are cached per interface and evicted when an interface disappears or any
+ transport activity globally invalidates cached identity and metadata. Between invalidations, knowledge
+-accumulates across scans within an owned monitor. In practice a long-lived `YubiKeyMonitor` reaches complete grouping on the first
+-scan and stays there until any HID or PC/SC hotplug activity invalidates it. Listener activity is
++accumulates across scans within an owned monitor. An unambiguous readable fixture can group on its first
++scan, but that is not a universal first-scan convergence promise. Listener activity is
+ transport-wide and can include devices other than YubiKeys.
+ 
+-Convergence is conditional: it completes **provided each interface is eventually idle and
+-identity-readable**. An interface held in use forever, or persistently unreadable, stays
+-conservatively split (see G8).
++Convergence depends on the evidence the tiers actually consume. Eventual idle/readable interfaces
++help but do not alone force an ambiguous cached grouping to expire. An interface held in use forever
++or persistently unreadable can remain separate (see G8).
+ 
+ Reader-name renames are safe: a PC/SC reader-name change (`"... 01"` → `"... 02"` as the reader set
+ changes) is a cache miss, costing one re-read. A stale serial is never served under a rename.
+@@ -401,9 +410,10 @@ A key that reports no serial number offers protocol-level identity nothing to wo
+ such keys are connected and each exposes multiple interfaces:
+ 
+ - **Windows** groups them correctly using Container ID — no serial needed, no device I/O.
+-- **macOS and Linux cannot group them at all.** Each interface is published as a separate device,
+-  permanently. This is a platform bound, not an implementation gap: neither platform offers a
+-  supported mapping from a PC/SC reader name to a USB device. On macOS, `TKSmartCardSlot` and the
++- **The current macOS and Linux resolvers supply no topology keys.** With multiple same-PID keys and
++  no serial evidence, the merger can leave their interfaces separate indefinitely. This describes the
++  implemented route, not proof that every possible platform correlation technique is unavailable.
++  On macOS, `TKSmartCardSlot` and the
+   PC/SC reader name expose no USB topology, and the `" 02"` suffix is a driver-local enumeration
+   artifact. On Linux, the pcsc-lite reader-name serial component comes from the USB
+   `iSerialNumber`, which YubiKeys do not expose, and `SCARD_ATTR_CHANNEL_ID` is not a documented
+@@ -413,9 +423,9 @@ The v1 SDK had the same bound and never attempted CCID topology correlation on a
+ 
+ ### G8: in-use interfaces
+ 
+-Discovery **never disturbs an open session**: if an interface has a live connection, discovery
+-skips its identity read rather than competing for it. That interface therefore has no serial
+-evidence while it stays busy.
++Discovery skips reads on registry-claimed member interfaces. Previously cached evidence may still be
++available. A direct unregistered connection, or an unclaimed sibling in a disjoint scoped view, falls
++outside that protection; coordinate those lifetimes explicitly before scanning.
+ 
+ The guarantee is: an in-use interface is attributed **once it first becomes idle AND a subsequent
+ scan successfully reads its identity**; the cache retains that attribution thereafter, including
+diff --git a/docs/architecture/device-identity.md b/docs/architecture/device-identity.md
+index d634d00fa41f96de8e3e0ca0a29bb08079b4f6aa..838f8c14c102c47ab2e7a172e639f75a58205acc 100644
+--- a/docs/architecture/device-identity.md
++++ b/docs/architecture/device-identity.md
+@@ -1,8 +1,9 @@
+ # Device identity and physical-device correlation
+ 
+-**Status:** accepted; stage D' identity contract decided and shipped, including the metadata-retry
+-policy (retry-every-scan, measured and pinned — see the stage D' section of
+-`docs/plans/flat-device-model.md`)
++The current identity contract retains monitor objects while their interface and connection sets stay
++unchanged and no known serial contradicts them. The stage D' decision and hardware observations below
++are historical evidence. Current caching retries failed reads, but can retain a successful serial-less
++metadata result; the old retry-every-scan description is not a promise for that case.
+ 
+ ## Context
+ 
+@@ -28,6 +29,11 @@ contract.
+ 
+ ## Canonical yubikit evidence
+ 
++This section preserves the earlier comparison as historical rationale. The short Rust commit and the
++Python paths below have not been independently recovered as a complete immutable source set in this
++audit. Use the C# source and current contract sections for SDK behavior; these comparisons establish no
++current interoperability or runtime qualification.
++
+ The comparison below was made against `yubikey-manager-rust-auto` commit `7d7a7455`.
+ 
+ - Rust represents a discovered key as one flat `LocalYubiKeyDevice` with optional `reader_name`,
+@@ -184,9 +190,9 @@ correlate with `SameDeviceAs` (D3 recipe).
+ ### D7: single-interface devices keep their transport-shaped `DeviceId` — decided
+ 
+ A one-slot flat device keeps its `pcsc:*` / `hid:*` identifier. A lone interface observation carries
+-only transport-level evidence; a `ykphysical:*` name would claim a physical-identity discovery never
+-established. The `DeviceId` prefix therefore remains truthful about the evidence tier that produced
+-it: `ykphysical:*` appears only when grouping evidence proved a physical key.
++only transport-level evidence. A `ykphysical:*` prefix names the grouping tier rather than attesting
++physical identity; the PID-completeness tier retains the complementary-partials bound described in
++[discovery guarantees](device-discovery-guarantees.md#g2-the-epistemic-bound).
+ 
+ ## Answers to the user-story questions
+ 
+@@ -212,6 +218,11 @@ it: `ykphysical:*` appears only when grouping evidence proved a physical key.
+ 
+ ## Hardware evidence
+ 
++The following paragraphs are retained historical observations of their named rigs and host revisions.
++They do not qualify the current owned-monitor implementation, every interface's live identity, or
++all platform/native producers. In particular, expected-shape/count assertions are narrower than an
++independent physical-key census.
++
+ On 2026-09-01, macOS enumerated five allow-listed USB keys, all PID `0x0407`, with serials `20260533`,
+ `125`, `103`, `31683481`, and `31683268`. Six non-user-presence tests in
+ `CompositeDiscoveryIntegrationTests` passed: conservation, zero orphans, complete expected interface sets,
+@@ -248,6 +259,10 @@ event stream and records which layer observed the removal, so a recurrence will
+   The identity fault-injection test verifies exactly three attempts across repeated scans and that a
+   failing interface does not amplify reads of a healthy sibling. See the stage D' section of
+   `docs/plans/flat-device-model.md` for the measurements.
++- Successful metadata without a serial is different: the monitor can cache it without rereading on
++  unchanged scans. The identity cache validates Product ID; the metadata cache currently keys successful
++  values by member identifiers without the same PID check. Use a fresh Find for an independent observation
++  and Management for current configuration, while keeping native discovery cleanup separate from waiter completion.
+ - A derived product name ("YubiKey 5C NFC"-style, per Rust's `name()` convenience) is deferred: it
+   requires the PID/version/form-factor naming table.
+ - Run the repeatable `HotPlugIdentityContractTests` ceremony (`RequiresUserPresence`) as one narrowly
+diff --git a/docs/architecture/event-driven-device-discovery.md b/docs/architecture/event-driven-device-discovery.md
+index 31af49987f2b4251c04bb698d88f33024216a3c9..53b9a2744e1f631e7db6e11af11505573da938d3 100644
+--- a/docs/architecture/event-driven-device-discovery.md
++++ b/docs/architecture/event-driven-device-discovery.md
+@@ -65,6 +65,10 @@ Budgets bound callers' waits, not native execution or ownership. Already-dispatc
+ and cleans up independently. A returned initialized monitor is not proof that every transport or
+ metadata field was accessible.
+ 
++The monitor can reuse successful serial-less metadata. Its identity cache checks Product ID changes;
++its metadata cache currently does not perform that same check. Listener invalidation and observed
++absence still evict both. Treat cached metadata as last-known evidence rather than a periodic live read.
++
+ ## Snapshot diff rules
+ 
+ `SnapshotDiff.Apply(current, observed, revision)` builds a successor dictionary keyed by the physical
+@@ -84,6 +88,10 @@ share the revision. Metadata lives on retained mutable device objects; a revisio
+ Diffing and metadata refresh occur outside the feed gate, so atomic publication is a membership/change
+ boundary, not transactional isolation of device properties.
+ 
++`DeviceInfo` scalar fields in a returned value survive snapshot replacement. Its `ChallengeResponseTimeout`
++memory currently aliases an input TLV, however, so read-only metadata is not a general independent-storage
++or post-disposal stability guarantee. See [cached metadata](../usage/device-discovery.md#cached-device-metadata).
++
+ ## Publication and subscription
+ 
+ Only the monitor loop calls `DeviceChangeFeed.Apply`. It computes the diff outside the gate, then
+diff --git a/docs/architecture/physical-device-model.md b/docs/architecture/physical-device-model.md
+index 7f1a5cd17f367f40031f18e8a30c40c6d1c53f78..503027c42b24acf71f9716f8d08307d815c0f7a2 100644
+--- a/docs/architecture/physical-device-model.md
++++ b/docs/architecture/physical-device-model.md
+@@ -2,7 +2,7 @@
+ 
+ In v2 of the SDK, an `IYubiKey` represents **one physical YubiKey**, not a single transport interface.
+ A composite USB YubiKey exposes several interfaces at once — PC/SC CCID (smart card), HID FIDO, and HID OTP
+-— and discovery returns **one** `IYubiKey` for that physical key, with the interfaces it exposes described
++— and discovery groups observed interfaces into an `IYubiKey` when its evidence permits, with those interfaces described
+ by `AvailableConnections`. This document explains the model, how to discover and connect, where read-only
+ metadata lives, how each applet picks a transport, and how to migrate code written against the old
+ per-interface-handle model.
+@@ -23,8 +23,10 @@ See also: [device identity and physical-device correlation](./device-identity.md
+ - `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
+   an owned `YubiKeyMonitor` repository, its `DeviceId` remains stable for that uninterrupted physical presence while its
+   physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
+-  originally published object across evidence-tier flips so its eventual `Removed` event correlates with
+-  the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
++  object only while fresh known serial evidence does not contradict it. A known-serial substitution
++  produces `DeviceRemoved` followed by `DeviceAdded` for a new object. The repository retains the
++  originally published object across evidence-tier flips so its eventual `DeviceRemoved` event correlates with
++  the earlier `DeviceAdded` event. A fresh direct scan object can still have an evidence-tier-derived ID
+   (`ykphysical:topology:*`, `ykphysical:{serial}`, or `ykphysical:pid:*`) different from an earlier scan;
+   do not treat independently created scan objects as durable identity records. The repository correlates
+   physical presence by interface set (`YubiKeyDevice.PhysicalIdentityKeyFor`, internal).
+@@ -35,7 +37,7 @@ See also: [device identity and physical-device correlation](./device-identity.md
+ - `int? SerialNumber` — discovery's independently latched durable hardware identity, when known; see
+   [device identity](device-identity.md). It is not derived from the latest metadata snapshot.
+ - `DeviceInfo? CachedDeviceInfo` — last-known read-only metadata, available without I/O. It can be null or
+-  stale; existing discovery/repository updates may replace it without a device event. The default interface
++  stale; changed metadata on a retained monitor object produces `DeviceUpdated`. The default interface
+   implementation returns null for custom implementations.
+ - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The
+   concrete values (`SmartCard`, `HidFido`, `HidOtp`) test a specific openable interface; the `Hid` group
+@@ -82,11 +84,11 @@ the PC/SC reader name (serial number is consulted only to disambiguate multiple
+ physical key is returned as one device even when no connection is opened and even when another process holds
+ the CCID exclusively. NFC PC/SC devices are never merged with USB interfaces.
+ 
+-The one-device-per-physical-key result is the common merge case, not an absolute guarantee. Discovery
+-intentionally degrades to conservative **no-merge** in ambiguous cases — for example when a USB CCID reader
+-name cannot be parsed for its Product ID, or when a serial number needed to disambiguate same-Product-ID
+-keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
+-distinct keys, so one physical key can surface as more than one row.
++The one-device-per-physical-key result is the common merge case, not an absolute guarantee. Ambiguous
++observations can leave a key split across rows. Conversely, complementary partial observations from
++two same-PID keys can satisfy the PID-completeness heuristic and form a cross-key composite. A slot
++still opens its enumerated path, but selecting the composite by serial does not independently verify
++every slot against that serial. See the [G2 evidence bound](device-discovery-guarantees.md#g2-the-epistemic-bound).
+ 
+ Every `FindAllAsync`, `FindFirstAsync`, and `FindFirstOrDefaultAsync` call performs independent one-shot
+ discovery with fresh per-call evidence, including after an earlier empty result. First-result methods
+@@ -107,8 +109,10 @@ await foreach (var change in monitor.WatchAsync(cancellationToken))
+ 
+ manager watch creates a producer; monitor watch subscribes to an existing one.
+ 
+-The monitor's finder retains successful identity/metadata evidence until observed interface absence,
+-PID change, or listener activity invalidates it. When a later scan obtains metadata for an unchanged
++The monitor's finder retains successful evidence until invalidation. Observed absence and listener
++activity evict identity and metadata; PID changes are checked by the identity cache, while the metadata
++cache currently lacks an equivalent PID check. Successful serial-less metadata can also remain cached.
++When a later scan obtains metadata for an unchanged
+ physical device, the diff updates its retained object and emits `DeviceUpdated` if metadata changed.
+ This is last-known data, not continuously refreshed configuration. Request live Management data when
+ current configuration matters. `WatchAsync` changes come from snapshot diffs, not native hints.
+@@ -175,8 +179,10 @@ exposes `YubiKeyDevice`'s existing atomically published snapshot, not a second c
+ DeviceInfo? lastKnown = device.CachedDeviceInfo; // No I/O or presence check.
+ ```
+ 
+-Null means unavailable. Failed metadata reads do not clear a successful snapshot, and returned values do
+-not change when a later discovery/change-feed update replaces it. The data is not guaranteed current and
++Null means unavailable. Failed metadata reads preserve a successful snapshot, and replacing that snapshot
++preserves the scalar fields in a previously returned value. `ChallengeResponseTimeout` currently aliases its input
++TLV memory, so read-only access does not establish independent storage or stability after owner cleanup.
++The data is not guaranteed current and
+ can remain historical on retained objects after configuration changes or disconnection. A replacement
+ object does not inherit its predecessor's snapshot. `SerialNumber` keeps its independent identity contract
+ even if the latest snapshot has no serial. See [cached device metadata](../usage/device-discovery.md#cached-device-metadata).
+@@ -247,9 +253,11 @@ interface after `ConnectionInUseException`, PC/SC sharing errors, cancellation,
+ 
+ ## One Connection Per Physical Device, One Session Per Connection
+ 
+-A YubiKey's CCID interface holds exactly one selected application. Selecting another deselects the first and
+-destroys its security state — measured: after a second applet is selected, the first session's next command
+-returns `SW=0x6D00` (*instruction not supported*), and nothing at the intervening call site reports a problem.
++A YubiKey's basic CCID channel has one selected application. Selecting another applet changes that
++selection and can disturb the first session. In the recorded PIV/Management hardware sequence, the
++next PIV command returned `SW=0x6D00` (*instruction not supported*). That observation does not establish
++that every applet's security state is cleared by selection; PIV PIN state and power/reset effects have
++their own conditions.
+ 
+ The SDK refuses that at acquisition, before any command reaches the card, so the error lands on the call that
+ would have caused the damage rather than on the victim's next operation:
+@@ -272,9 +280,8 @@ await using (var piv = await PivSession.CreateAsync(connection))
+ await using var oath = await OathSession.CreateAsync(connection);
+ ```
+ 
+-This mirrors canonical yubikit: Rust's applet sessions take the connection by value and hand it back with
+-`into_connection`, making a second concurrent session a compile error; Python's base `Session` binds itself
+-to the connection at construction. Neither inspects the wire.
++Core enforces this lifetime through its connection/session guards before applet initialization. This
++managed ownership rule is separate from the operating system's sharing mode and the card's security state.
+ 
+ **Who disposes what:** whoever created the connection. The `device.Create<App>SessionAsync()` convenience
+ methods open a connection the caller never sees, so the session they return owns and disposes it through the
+@@ -287,7 +294,8 @@ timely teardown or lease release. Use deterministic disposal to observe completi
+ 
+ The registry is process-local; it does not exclude other processes' handles. Opening any grouped member
+ claims all known stable member interface IDs. When conservative discovery cannot
+-prove grouping, a standalone record retains a one-element scope; the SDK does not guess associations.
++establish grouping, a standalone record retains a one-element scope. The PID-completeness exception
++described above remains a bound on what a grouped object proves.
+ 
+ macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK
+ exclusivity is enforced before native open; seizing would add a separate platform-wide exclusion policy
+diff --git a/docs/architecture/raw-access-tiers.md b/docs/architecture/raw-access-tiers.md
+index 91981383dc1d2fe20eed8fcbf734509777d7ab7d..35468dce9d0b65f7c40d3b1b9f1dc179e1ff7118 100644
+--- a/docs/architecture/raw-access-tiers.md
++++ b/docs/architecture/raw-access-tiers.md
+@@ -33,6 +33,12 @@ enforces its minimum firmware version. Bypassing applet checks does not bypass p
+ sessions still participate in the one-live-connection-per-physical-key and one-live-session-per-connection
+ contracts.
+ 
++Readiness has a narrow meaning at this tier. Raw HID creation performs no wire initialization; the
++first exchange initializes lazily, and the inherited raw HID `FirmwareVersion` currently remains
++`0.0.0` even after protocol discovery. A configured version is effective SDK policy, not hardware
++attestation. Major-zero versions pass optimistic feature checks. Use applet sessions for their actual
++selection, version discovery, authorization, and command-specific prerequisites.
++
+ ### SmartCard/APDU
+ 
+ ```csharp
+@@ -50,12 +56,17 @@ ApduResponse response = await raw.TransmitAndReceiveAsync(
+ ```
+ 
+ When `throwOnError` is `false`, inspect `response.Data`, `response.SW1`, and `response.SW2` directly.
++For sensitive data, put consumption in `try` and `response.Clear()` in `finally`; clearing also
++invalidates status bytes and all aliases into that response owner. Clear source and copied buffers
++separately. These snippets are composable fragments whose APDU, AID, payload, version, device, and token
++inputs come from the caller's protocol implementation.
+ The `IYubiKey` extension opens exactly the SmartCard transport and transfers ownership of the hidden connection
+ to the returned session. Disposing the session therefore disposes that connection.
+ 
+-If a chained command or response continuation fails, the original exception is returned and that protocol
+-instance refuses further transmissions, selections, and configuration; it does not replay or drain the
+-unfinished exchange. Dispose and reopen the connection before continuing, including when a raw session borrowed
++When the protocol marks a failed command chain or response continuation unrecoverable, it refuses
++further transmissions, selections, and configuration without replaying the exchange. Its current
++offset-based detection does not cover every uncertain first-fragment failure; a released guard alone
++is not proof of recovery. Dispose and reopen after an interrupted or uncertain exchange, including when a raw session borrowed
+ the connection: replacing only the session over the same connection is not a recovery procedure. The protocol
+ cannot guard direct raw calls or a different protocol instance using that connection.
+ 
+@@ -93,6 +104,15 @@ The caller supplies and interprets the CTAPHID command payload. This API does no
+ request semantics. A final response command must match the request; `CTAPHID_KEEPALIVE` is accepted only while
+ waiting, and `CTAPHID_ERROR` fails the exchange instead of returning an apparently successful payload.
+ 
++Supply ordinary request/response commands to `SendAndReceiveAsync`. `CTAPHID_CANCEL` is a no-response
++control command, not a request with a cancel acknowledgment. Core's caller-token cancellation sends it
++only after a keep-alive and then drains the original response; silence can leave that drain pending.
++The late-success exception currently requires the original unencoded CBOR command byte `0x10` and a
++response payload beginning with `0x00`. Encoded `0x90` can pass terminal-command correlation, which masks
++the initialization bit, but misses that success classification and can surface cancellation instead.
++This is a current normalization gap, not a different intended CBOR grammar or authenticator requirement.
++Malformed control data or a partial FIDO failure does not establish a general safe-reuse guarantee.
++
+ ### OTP HID
+ 
+ ```csharp
+@@ -124,19 +144,54 @@ without replaying the command. The original exchange error is preserved on abort
+ does not issue an abort. Recovery after a failed reset requires disposal and reopening the connection; a new
+ session over the same borrowed connection is not a recovery procedure.
+ 
++OTP status polling and touch-wait conditions use local deadlines; they do not impose a deadline on an
++already-dispatched native GET/SET. The current NEO refresh path also catches broader failures than
++cancellation alone, and tight status polling has no general backoff guarantee. Treat those as current
++limits when diagnosing latency, rather than assuming vendor/Python timing policy is enforced here.
++
+ ### Raw SmartCard With SCP
+ 
+-Load SCP parameters from secure application storage; do not embed or log real keys:
++Select the applet on a plain borrowed session before establishing a raw secure channel. This complete
++method borrows caller-supplied parameters and request data; the caller keeps those alive through the
++await and clears sensitive source buffers afterward. It consumes only status and length, then clears
++the response. The command and selected applet must be valid for the provisioned SCP profile:
+ 
+ ```csharp
+-using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
+-await using RawSmartCardSession raw = await yubiKey.CreateRawSmartCardSessionAsync(
+-    scpParameters,
+-    firmwareVersion,
+-    cancellationToken: cancellationToken);
++using Yubico.YubiKit.Core.Devices;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
++using Yubico.YubiKit.Core.Sessions;
++using Yubico.YubiKit.Core.Transports.SmartCard;
+ 
+-await raw.SelectAsync(applicationId, cancellationToken);
+-ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
++static async Task SendProtectedAsync(
++    Yubico.YubiKit.Core.Abstractions.IYubiKey yubiKey,
++    ScpKeyParameters scpParameters,
++    FirmwareVersion firmwareVersion,
++    ReadOnlyMemory<byte> applicationId,
++    ApduCommand command,
++    CancellationToken cancellationToken)
++{
++    await using ISmartCardConnection connection =
++        await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
++    await using (var plain = await RawSmartCardSession.CreateAsync(connection, cancellationToken))
++    {
++        plain.Configure(firmwareVersion);
++        await plain.SelectAsync(applicationId, cancellationToken);
++    }
++
++    await using var secure = await RawSmartCardSession.CreateAsync(
++        connection, scpParameters, firmwareVersion, cancellationToken: cancellationToken);
++    ApduResponse response = await secure.TransmitAndReceiveAsync(
++        command, throwOnError: false, cancellationToken: cancellationToken);
++    try
++    {
++        Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
++    }
++    finally
++    {
++        response.Clear();
++    }
++}
+ ```
+ 
+ Configuration is applied to the base APDU processor before SCP establishment. An SCP raw session cannot be
+@@ -146,6 +201,20 @@ The caller retains the normal ownership obligations of the supplied key-paramete
+ Pass a `ProtocolConfiguration` during creation only when the target requires a non-default framing option, such as
+ forcing short APDUs.
+ 
++`SelectAsync` after SCP sends a plain SELECT while retaining the existing processor graph. It is not
++a reauthentication/recovery procedure. Prefer an applet factory when its modeled operation fits.
++SCP setup and `IsAuthenticated` supply no PIN, UV, or management authorization. SCP11b authenticates
++the card to the host; a/c setup completion is distinct from the device's first protected-command phase.
++The current fixed P-256/AES-128 SCP11 implementation and supplied certificate/key references need a
++matching provisioned device profile; accepted constructor shapes alone establish neither trust-chain
++validation nor full SCP conformance.
++
++For source comparisons, keep GlobalPlatform editions separate: SCP03 1.1.2 is the March 2019 Public
++Release; code-cited 1.1.2.6 is a December 2019 Public Review. The inspected SCP11 1.3.0.13 is an August
++2023 Public Review, not the published final 1.4. Final/profile clause verification and independent wire
++qualification remain outstanding. In particular, current empty-command and protected response/error
++handling should not be presented as complete conformance established by synthetic tests.
++
+ ## Tier 2: Raw Connections
+ 
+ `ISmartCardConnection.TransmitAndReceiveAsync`, `IFidoHidConnection.SendAsync` / `ReceiveAsync`, and
+@@ -163,6 +232,11 @@ cancelled while waiting may detach its reader while the input owner remains acti
+ arrive. A built-in OTP report already dispatched may succeed after cancellation. Neither case proves the
+ device protocol is reset. Custom connections define their own scheduling, cancellation and release behavior.
+ 
++If an outer `WaitAsync` times out or is canceled, retain and observe the original operation task. Its
++completion controls the borrowed-memory lifetime; the outer wait supplies no native completion or
++release evidence. Windows compatibility report calls can execute synchronously before returning a task
++and do not honor cancellation tokens like the built-in macOS/Linux native owners.
++
+ The built-in PC/SC connection enforces the caller-exclusion rule at native admission: a second raw operation is
+ refused immediately rather than queued. Open, transmit, transaction begin/end, disconnect, and context release use
+ one connection-lifetime background worker. Cancellation observed before dispatch submits no native call. After
+@@ -203,6 +277,11 @@ The feature-report connection drains an admitted report before release; overlapp
+ refused. Direct report opens do not acquire a grouped-key claim. The macOS input-owner
+ behavior does not establish drain guarantees for all public synchronous entry points.
+ 
++Direct macOS IO descriptor metadata can describe lengths other than 64, while the shared FIDO owner
++normalizes received input to 64 bytes. Direct feature GET separately returns eight-byte storage and can
++pad a short successful native report. Descriptor metadata alone therefore does not promise arbitrary
++input lengths or exact native transfer counts on those facades.
++
+ The Core [source-site inventory](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md)
+ classifies waits and pre-task-return dispatch, but a listed site is not automatically a public boundary
+ or a verified drain. The [finite public entry registry](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs)
+@@ -239,7 +318,9 @@ for either case. These Core-only inventories do not certify other SDK-wide bound
+ - Dispose session N before creating session N+1 over the same caller-owned connection.
+ - `Raw*Session.CreateAsync(connection)` borrows the connection; the caller disposes both.
+ - `IYubiKey.CreateRaw*SessionAsync(...)` owns its hidden connection and disposes it with the returned session.
+-- Overlapping operations on one raw session throw `InvalidOperationException` immediately.
++- Overlapping guarded exchanges on one raw session throw `InvalidOperationException` immediately.
++  Await the complete public workflow before starting another or disposing the session; exchange drain
++  does not cover later workflow exchanges, parsing, or callback work.
+ - Overlapping raw calls on a built-in SmartCard connection also throw `InvalidOperationException` immediately.
+ - Once admitted, constituent I/O in a stateful session exchange is not cancelled mid-frame. A SmartCard
+   exchange observes the token only at admission; canceling afterwards lets the exchange finish and return
+@@ -259,10 +340,13 @@ for either case. These Core-only inventories do not certify other SDK-wide bound
+ 
+ ## Sensitive Buffers
+ 
+-FIDO and OTP protocols clear SDK-owned outgoing payload copies, frames, and reports in `finally` after each awaited
+-send, including failure paths. Caller-owned request memory is never modified. Returned response memory must remain
+-valid after the method returns and therefore cannot be cleared by the SDK. The caller owns sensitive response-data
+-handling: retain it only as long as required, avoid logging it, and zero any caller-owned mutable copy after use.
++FIDO and OTP protocols clear selected SDK-owned outgoing payload copies, frames, and report staging in
++`finally`. Incoming report arrays, accumulated responses, transport staging, and applet-decoded output
++are separate owners; cleanup of one does not erase the others. Caller-owned request memory remains
++unchanged. Retain sensitive response data only as long as needed and clear mutable storage you own.
++`ReadOnlyMemory<byte>` alone supplies neither a disposal contract nor permission to cast its backing
++storage writable. A separately cleared copy also leaves the original intact. For SmartCard responses,
++use the explicit `ApduResponse.Clear()` owner API after inspecting status.
+ 
+ ## Migration From ProtocolFactory
+ 
+diff --git a/docs/architecture/sdk-architecture-diagrams.md b/docs/architecture/sdk-architecture-diagrams.md
+index c638d56b2e2ff0fe9a75b6f28807a6ecfcff52bc..2506d9b44aade1520ec0171f003f5882becbff71 100644
+--- a/docs/architecture/sdk-architecture-diagrams.md
++++ b/docs/architecture/sdk-architecture-diagrams.md
+@@ -9,7 +9,7 @@
+ >
+ > **How to use these:** Read top to bottom. Each level zooms in one step. For a talk, one
+ > diagram per slide, in this order. For learning, study L2–L4 with the code open beside you —
+-> every box is a real type you can grep for.
++> type boxes name source types; grouping boxes and arrows are schematic explanations, not complete call graphs.
+ 
+ ---
+ 
+@@ -76,10 +76,11 @@ flowchart TD
+ ```
+ 
+ **Key facts to say out loud:**
+-- **Core is the only hub.** Every app module has exactly *one* project reference → Core.
++- **Core is the foundational hub.** Direct applet modules reference Core; WebAuthn is the exception,
++  referencing Ctap2 as its higher-level client layer.
+ - **WebAuthn is the only 2nd-level module:** `Core ← Ctap2 ← WebAuthn`. WebAuthn is a
+   higher-level client over CTAP2 and must never duplicate CTAP2 behavior.
+-- App modules **do not** reference each other. They are independent verticals over Core.
++- Other applet modules are independent verticals over Core; the WebAuthn-to-Ctap2 edge is deliberate.
+ - (Not shown: CLI/test/example projects — noise for an architecture talk.)
+ 
+ ---
+@@ -233,8 +234,9 @@ sequenceDiagram
+   `Configure()` time. Extended = FW ≥ 4.0; short path uses `ChainedApduTransmitter` to split.
+ - **SCP variant:** if `scpKeyParams` were passed, an `ScpProcessor` sits in the chain and
+   encrypts/MACs every APDU before it hits the wire, decrypts on the way back.
+-- **Security detail worth mentioning:** the wire buffer is zeroed in a `finally` — the SDK
+-  is disciplined about not leaving sensitive bytes in memory.
++- **Buffer ownership:** selected wire buffers are cleared in `finally`. Caller input, response owners,
++  earlier fragments, and decrypted temporaries have separate lifetimes; one cleared buffer supplies
++  no all-copy erasure guarantee. `ApduResponse` is a sealed copied owner with explicit `Clear()`.
+ 
+ ### L3b — the CTAP2 variant (same shape, different bytes)
+ 
+@@ -386,12 +388,14 @@ flowchart TD
+ ```
+ 
+ **Teaching notes:**
+-- **One `IYubiKey` = one physical key.** It exposes `AvailableConnections`
++- **`IYubiKey` is a discovered view of a physical key.** It exposes `AvailableConnections`
+   (`SmartCard | HidFido | HidOtp` flags). Discovery publishes one internal production implementation,
+   `YubiKeyDevice`. Before merging, each live PC/SC or HID handle is a raw `PcscConnectionSlot` or `HidConnectionSlot`,
+   not an `IYubiKey`.
+-- **Merge logic** is conservative: interfaces merge by USB Product ID; NFC is never merged
+-  with USB; ambiguity → surface as separate rows rather than mis-merge.
++- **Merge logic** uses topology, serial, PID-completeness, and pigeonhole evidence; NFC stays separate
++  from USB. Ambiguity often splits results, but complementary partial same-PID observations can form
++  a cross-key composite. The schematic labels above omit that bound; use the
++  [current guarantees](device-discovery-guarantees.md#g2-the-epistemic-bound) when teaching identity-sensitive selection.
+ - **Connection ownership:** a grouped physical key admits one live connection across CCID, FIDO HID,
+   and OTP HID. One live session is allowed per connection. A direct session factory borrows
+   the caller's connection; only convenience entry points own the hidden connection they create.
+@@ -415,7 +419,7 @@ If your audience remembers only six names, make it these:
+ | `IConnection` | transport | base for SmartCard / FIDO-HID / OTP-HID connections |
+ | `ApplicationSession` | session base | firmware, init, auth, protocol lifetime, optional hidden-connection ownership |
+ | `RawSmartCardSession` | raw session | supported explicit SELECT and APDU exchange path |
+-| `ApduCommand` / `ApduResponse` | pipeline | the record structs that flow through the decorator chain |
++| `ApduCommand` / `ApduResponse` | pipeline | borrowed-payload command record struct / sealed copied response owner |
+ 
+ ---
+ 
+diff --git a/docs/architecture/webauthn-extension-processing.md b/docs/architecture/webauthn-extension-processing.md
+index 8f49190d7045845588520308e7ebbe5dc5e97b14..2d686fa4ad6364f72a81b9172df101eaf8067779 100644
+--- a/docs/architecture/webauthn-extension-processing.md
++++ b/docs/architecture/webauthn-extension-processing.md
+@@ -203,6 +203,20 @@ through read-only result memory, with no SDK cleanup guarantee for returned or i
+ Decrypted large/credential blobs can also be sensitive.
+ Clearing an application copy does not clear the SDK's original allocations.
+ 
++Await and serialize the complete ceremony before disposing its client or borrowed connection. The
++Core guard/drain covers a logical exchange, while probes, PIN/token acquisition, GetNext, extension
++outputs, and blob workflows can span several exchanges. Presence `Completed` classifies the CTAP
++exchange before typed decoding and extension/RP processing; it is not whole-ceremony or RP acceptance.
++Keep prompt services alive through actual callback completion and schedule disposal outside callbacks.
++
++Core ARKG helpers deliberately target `draft-bradleylundberg-cfrg-arkg-09` (July 7, 2025,
++Internet-Draft, intended Informational, expired January 8, 2026), rather than a final standard. Their
++context input provides domain separation, not a proof of injective key derivation. Selected point/handle
++fixtures and sibling implementation agreement establish narrower structural evidence; the original
++immutable Rust generator provenance remains unavailable. Provider/native copies and actual packaged
++exports have separate qualification gaps. These facts neither establish full draft conformance nor
++settle the WebAuthn actor, serializer, or result-disclosure policy.
++
+ The PRF salt mapping belongs in WebAuthn, but correct domain separation alone does not establish
+ conformance. [L3 REC §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
+ requires the verified-use hmac-secret PRF and a UV override when necessary. The current processor
+diff --git a/docs/linux-setup.md b/docs/linux-setup.md
+index 24c6164ed34d2ee61c5babe91743a20cb28ea41b..01d2b6f3f24e74dc58e88823dec0c0965d7e05e3 100644
+--- a/docs/linux-setup.md
++++ b/docs/linux-setup.md
+@@ -18,6 +18,12 @@ Install the runtime packages for your distribution:
+ The PC/SC package supplies or depends on the client library. The CCID package supports the YubiKey's USB
+ reader interface; an external NFC reader may require its own driver.
+ 
++HID discovery also uses libudev. The current import requests the unversioned `libudev.so`, while some
++runtime-only installations provide only `libudev.so.1`. For example, Ubuntu noble's amd64 package lists
++place the unversioned name in `libudev-dev`, not `libudev1`. Verify the actual loader names in your
++deployment image; installing only the runtime package need not satisfy this SDK import. Do not treat
++an empty best-effort discovery result as proof that both HID and PC/SC loaded successfully.
++
+ On systemd-based installations that provide `pcscd.socket`, enable on-demand startup:
+ 
+ ```bash
+@@ -39,7 +45,10 @@ References: [Yubico's Smart Card access guidance](https://github.com/Yubico/yubi
+ 
+ ## udev Rules for HID Device Access
+ 
+-On Linux, HID devices (`/dev/hidraw*`) are typically only accessible by root. To allow non-root users to access YubiKey HID interfaces, you need to install udev rules.
++Check your distribution's existing YubiKey/FIDO rules before adding local rules. Desktop session ACLs
++may already grant the active user access. Headless services need a policy for their service account;
++an active-desktop ACL is not a service-account permission grant. Scope access to the intended users
++instead of granting every local account read/write access.
+ 
+ ### Why This Is Needed
+ 
+@@ -51,17 +60,13 @@ Without proper udev rules, you'll see `EACCES (Permission denied)` errors when t
+ 
+ ### Installing udev Rules
+ 
+-Create a file `/etc/udev/rules.d/70-yubikey.rules` with the following content:
++If the distribution policy does not cover the required HID interface, an administrator can use a
++dedicated group. In this example `yubikey` must already exist, and only authorized user/service accounts
++should belong to it. Create `/etc/udev/rules.d/70-yubikey.rules`:
+ 
+ ```udev
+-# YubiKey HID devices - allow user access for OTP and FIDO interfaces
+-# Vendor ID 1050 = Yubico
+-
+-# All YubiKey HID interfaces (OTP keyboard + FIDO)
+-KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", MODE="0666"
+-
+-# USB device rules for non-HID access (smartcard, etc)
+-SUBSYSTEM=="usb", ATTR{idVendor}=="1050", MODE="0666"
++# Scope Yubico hidraw access to authorized members of the local yubikey group.
++KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", MODE="0660", GROUP="yubikey"
+ ```
+ 
+ Then reload and trigger the rules:
+@@ -84,23 +89,23 @@ for f in /dev/hidraw*; do
+ done
+ ```
+ 
+-You should see permissions like `crw-rw-rw-` (mode 0666) for YubiKey devices.
++Check the node's group and effective ACL as the account that will run the application. This example
++expects group `yubikey` and mode `0660`; distribution/session ACLs can add further access. Metadata
++enumeration alone does not establish that the account can open or exchange reports.
+ 
+-### Alternative: Using Groups
++### Granting account access
+ 
+-For tighter security, you can grant access to a specific group instead of all users:
+-
+-```udev
+-# Grant access to 'plugdev' group (user must be a member)
+-KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", MODE="0660", GROUP="plugdev"
+-```
+-
+-Add your user to the group:
++After the administrator creates the group, add the intended account:
+ ```bash
+-sudo usermod -aG plugdev $USER
++sudo usermod -aG yubikey "$USER"
+ # Log out and back in for group membership to take effect
+ ```
+ 
++For a service, configure its actual account/group membership and restart that service instead. Broad
++USB-device permissions are not required merely to use PC/SC: access goes through its client library,
++resource manager, and reader driver. Review those permissions separately. Avoid world-writable
++`MODE="0666"` rules as a general deployment recipe.
++
+ ## Troubleshooting
+ 
+ ### Permission Denied Errors
+diff --git a/docs/usage/device-discovery.md b/docs/usage/device-discovery.md
+index fb7943f096dc9c054d7d0d72cf0f45c271c2ac85..fa2b824fb22517d83531b81fe07c37734cdc4d16 100644
+--- a/docs/usage/device-discovery.md
++++ b/docs/usage/device-discovery.md
+@@ -42,7 +42,7 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
+ 
+ | Application | Recommended path |
+ |---|---|
+-| Short CLI command or script | `FindFirstAsync` / `FindAllAsync`; no background cleanup |
++| Short CLI command or script | `FindFirstAsync` / `FindAllAsync`; no caller-owned monitor or start/stop lifetime |
+ | Optional hardware feature | `FindFirstOrDefaultAsync`; null means no matching key now |
+ | CCID-only utility | `Find…Async(interfaces: ConnectionType.SmartCard)` to avoid HID probing |
+ | One device-change consumer | `YubiKeyManager.WatchAsync(ct)`; enumeration owns the monitor |
+@@ -161,7 +161,10 @@ the default implementation returns `null`.
+ 
+ This is **last-known data, not guaranteed-current state**. Monitoring can
+ replace the snapshot on a retained object and emit `DeviceUpdated`; a failed metadata read does
+-not erase the last successful value. A snapshot already returned to your code does not change. Metadata
++not erase the last successful value. Replacing the snapshot preserves the scalar fields in a value
++already returned to your code. `DeviceInfo.ChallengeResponseTimeout` is a separate storage caveat: it currently
++aliases the input TLV's memory rather than owning an independent copy. Its read-only type does not
++guarantee stable bytes after that owner is changed or cleared. Metadata
+ can be stale after configuration changes, and a retained object can still expose historical data after
+ disconnection. Reading the property does not refresh it, and there is no freshness or presence guarantee.
+ 
+@@ -173,6 +176,19 @@ Keep using `device.SerialNumber` for durable physical identity. Its independent
+ unchanged: once known, it remains known on that object even if the latest cached metadata omits the serial.
+ Do not substitute `device.CachedDeviceInfo?.SerialNumber` for it.
+ 
++Interpret fields according to their provenance. Firmware can be detected, inferred by an applet, or
++overridden for session policy; a major-zero version passes optimistic feature checks. Supported and
++enabled capabilities describe different device reports, while `AvailableConnections` describes only
++observed interfaces. None alone establishes that an operation is authorized or will succeed. Missing
++fields can use defaults, unknown tags are ignored, and the typed metadata is not a complete raw-response
++archive. For current applet prerequisites, use the applet's guide and handle the operation's result.
++
++Within a monitor, failed reads are retried on later scans, but a successful metadata read without a
++serial can be cached. An unchanged scan therefore need not retry that serial-less result. Hotplug hints
++or observed absence invalidate evidence; a new one-shot Find supplies independent evidence. The identity
++cache checks USB Product ID changes, whereas the metadata cache currently does not independently bind
++its successful value to a Product ID. Stable interface paths alone are not a freshness proof.
++
+ ## Selection in the CLI examples
+ 
+ The seven applet tools and unified `yk` commands use one
+@@ -339,6 +355,13 @@ end empty. Disposal is idempotent and does not dispose caller-owned sessions or
+ - Disposal waits for the in-flight scan within its discovery budgets; cancellation is not proof of native
+   release. See [monitor lifecycle](../architecture/event-driven-device-discovery.md#monitor-lifecycle-and-disposal).
+ 
++If a PC/SC listener consumes unexpected CPU, remember that its native timeout is a maximum wait,
++not a minimum sleep: an UNAWARE-state query can return success immediately. The current success-loop
++cadence and partial-start/timeout cleanup paths have separate implementation limitations. Repeated
++empty discovery is likewise not a native health check: service availability, enumeration context cleanup,
++and nullable macOS manager/device-set handling need their own diagnostics. Preserve the actual backend
++code and outcome rather than inferring a physical disconnect or successful native release from an empty list.
++
+ ### UI thread marshaling
+ 
+ Changes may be consumed on background threads. Capture the UI `SynchronizationContext` before awaiting
+diff --git a/docs/usage/tlv-processing.md b/docs/usage/tlv-processing.md
+index c2edd29b50511969531ef501bb875e9652847682..77ea93542419f587e5fee9e566e5e0cbda4c047e 100644
+--- a/docs/usage/tlv-processing.md
++++ b/docs/usage/tlv-processing.md
+@@ -1,8 +1,9 @@
+ # TLV processing
+ 
+ `Yubico.YubiKit.Core.Utilities` provides `Tlv` and `TlvHelper` for the tag-length-value encoding used by
+-smart-card applets. Both own buffers, so disposal and zeroing rules matter; this page is the canonical set
+-of usage examples.
++smart-card applets. A `Tlv` owns its encoding; the static `TlvHelper` creates or searches values without
++being an owner itself. Dispose owned TLVs and clear sensitive source/result buffers separately. The
++examples below are composable fragments with caller-supplied response, certificate, or key bytes.
+ 
+ ```csharp
+ using System.Security.Cryptography;
+@@ -34,6 +35,18 @@ disposes only the `Tlv` inputs passed to that call; `EncodeList` does not dispos
+ clears source buffers supplied to `Tlv` constructors, returned encodings, or intermediate encodings used for
+ nesting.
+ 
++`Tlv.Value` is a borrowed view into the TLV's owned encoding, not another copy. Use it only while that
++owner remains alive and unchanged. Disposing `DisposableTlvList` disposes its elements; clearing the
++collection alone is a different action. `TryFindValue` returns an independent mutable value copy, but
++the current search implementation also leaves an intermediate copied encoding outside that returned
++owner. Clearing the returned value cannot erase that intermediate. Prefer an explicitly disposed
++`DecodeList` for sensitive sequences and retain the original response's own cleanup scope.
++
++These helpers implement bounded, definite-length TLV handling, rather than a complete BER validator.
++The current tag helper handles at most two tag octets; single-item parsing and tag admission do not
++establish that every remaining input byte or every BER tag form has been validated. Use the applet's
++schema and required-field checks in addition to decoding.
++
+ For public, nonsecret nested data, encode the inner elements and use that encoding as the outer value:
+ 
+ ```csharp
+@@ -72,4 +85,3 @@ finally
+     CryptographicOperations.ZeroMemory(privateKeyBytes);
+ }
+ ```
+-
+diff --git a/docs/usage/user-interaction.md b/docs/usage/user-interaction.md
+index 463b4ea474e81b7eb7880994c31b2b49ab3937fc..f0ae2ae1bac0dc9ad150c1d61a3ba30276ed8274 100644
+--- a/docs/usage/user-interaction.md
++++ b/docs/usage/user-interaction.md
+@@ -9,8 +9,9 @@ SDK-to-application callbacks, but they have different contracts:
+   take credentials directly unless their documentation says otherwise.
+ - `IUserPresencePrompt` reports that an operation requires or may require a physical touch. It never
+   supplies a credential and does not report that the user touched the device. Configure it once in
+-  `SessionCreationOptions.UserPresencePrompt` for any applet session or one-shot operation that
+-  accepts session options.
++  `SessionCreationOptions.UserPresencePrompt` for participating applet sessions and one-shot operations.
++  Management and Security Domain paths remain silent; accepting shared session options does not imply
++  that an applet retains or uses the prompt.
+ 
+ ```csharp
+ using Yubico.YubiKit.Cli.Shared.Output;
+@@ -35,6 +36,53 @@ which may contain a relying-party identifier, credential label, or key slot. Ins
+ 
+ ## Request and resolution contract
+ 
++### Acquiring credentials
++
++Keep acquisition and verification in separate scopes. `ConsoleCredentialReader` is a synchronous Core
++reader, while `ICredentialPrompt` is the asynchronous SDK callback contract. A prompt adapter must
++return an exactly sized owned byte buffer and translate the consuming applet's length/encoding rules;
++the generic reader presets are not universal PIN policy.
++
++Interactive Core input uses pooled UTF-16 characters and clears that buffer when reading finishes.
++Its text limits count UTF-16 code units before encoding, rather than Unicode code points or encoded
++bytes. Disallowed characters are ignored interactively; redirected text is rejected if it fails the
++policy. Redirected input uses `Console.ReadLine` and therefore creates an immutable managed string
++that the reader cannot zero. The separate CLI reader has different byte/Rune handling. Choose an input
++path appropriate to the credential's requirements rather than assuming these paths are equivalent.
++
++Hex mode strips spaces, colons, and hyphens and checks `ExpectedByteLength` on decoded bytes. Redirected
++hex does not apply the same text-length/filter path as interactive input. Default UTF-8 conversion uses
++replacement fallback; callers needing strict Unicode validation must select and validate that policy.
++Allowing zero characters is also insufficient to promise a valid empty result: the current pooled
++result owner requires positive allocation length.
++
++Confirmation retains the first entry while reading the second, compares them, clears the second, and
++returns the first owner only on a match. Dispose the returned owner after the complete awaited use,
++including failure. This method borrows an already-open PIV session; its caller owns session disposal:
++
++```csharp
++using Yubico.YubiKit.Core.Credentials;
++using Yubico.YubiKit.Piv;
++
++static async Task ReadAndVerifyPinAsync(
++    IPivSession session, ISecureCredentialReader reader, CancellationToken cancellationToken)
++{
++    using var credential = reader.ReadCredential(
++        CredentialReaderOptions.ForPin(), cancellationToken);
++    if (credential is null)
++        return;
++
++    await session.VerifyPinAsync(credential.Memory, cancellationToken);
++}
++```
++
++The example's six-to-eight ASCII-digit preset is an input choice for that task, not a claim about all
++PIV credential forms. Interactive cancellation is checked while waiting for an available key; queued
++keystrokes and redirected `ReadLine` do not supply the same prompt cancellation responsiveness. Keep
++blocking console reads off a UI dispatcher and use a genuinely asynchronous UI adapter for callbacks.
++
++### Reporting presence
++
+ For each notification, the SDK calls `OnUserPresenceRequestedAsync` before or while the device
+ operation waits. Only after that callback completes successfully does the SDK pair it with
+ `OnUserPresenceResolvedAsync` when the request ends. If the request callback throws, the SDK performs
+@@ -143,7 +191,8 @@ public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, Cance
+   that does not match what they expected.
+ - Write the intent as a lowercase verb phrase, such as `"approve the transfer"`, so it reads naturally after
+   "Touch your YubiKey to", which is how `ConsoleUserPresencePrompt` shows it.
+-- `Intent` is application-supplied display text. The SDK never logs it, and `ToString` omits it.
++- `Intent` is application-supplied display text, and `ToString` omits it. Keep secrets out of it:
++  an application callback can include that text in an exception that reaches a logging provider.
+ 
+ The SDK coordinates each operation through one internal lifecycle handle. A transport can request that
+ handle when it observes a live wait, while the applet layer that understands the complete response resolves
+@@ -224,6 +273,10 @@ Callbacks may run on background threads and must marshal to the application's us
+ dispatcher before touching controls. Dispatch asynchronously and return; do not synchronously wait
+ for the user-interface thread. Prompt callbacks must not make re-entrant calls into the session that
+ raised them, because the session operation is still in progress.
++This includes sync or async disposal: a callback that disposes its own session can wait for the
++operation that is waiting for that callback. Schedule shutdown outside the callback and await the
++complete operation before disposing. The protocol's per-exchange drain does not cover every later
++exchange, parse, or cache update in a public workflow.
+ 
+ Session factories snapshot `SessionCreationOptions`, but the session retains the
+ `IUserPresencePrompt` reference for its lifetime. The caller owns that service and must keep it alive
+diff --git a/docs/v1-to-v2-comparison.md b/docs/v1-to-v2-comparison.md
+index 859a1d2215f39cd327cb720e5cad1d1e168d8c4b..33a7118c1c2775afd3cfd7bce6f321e707329d41 100644
+--- a/docs/v1-to-v2-comparison.md
++++ b/docs/v1-to-v2-comparison.md
+@@ -54,13 +54,13 @@ or replacements for the other codecs.
+ - Discovery models a physical key as one `IYubiKey` when evidence supports
+   grouping its interfaces. `SerialNumber` and tri-state `SameDeviceAs`
+   (`Same`, `Different`, or `Unknown`) support correlation. Ambiguous evidence
+-  conservatively produces separate records rather than a guessed composite;
++  often produces separate records, while PID-completeness grouping retains the complementary-partials bound;
+   see [the discovery guarantees](architecture/device-discovery-guarantees.md).
+ - Within a process, a grouped physical key permits one live connection across
+   its known interfaces, and each connection permits one live session.
+   Overlapping acquisition throws `ConnectionInUseException`; sequential reuse
+-  remains supported. Cross-process contention is out of scope and still
+-  surfaces a platform `SCardException`.
++  remains supported within the known-member scope. Cross-process access follows OS sharing policy;
++  built-in strict-exclusive PC/SC maps a sharing violation to `ConnectionInUseException`.
+ 
+ ### Standard applet session creation
+ 
+@@ -68,7 +68,8 @@ All eight applet sessions now use the same two factory shapes:
+ `IYubiKey.CreateXSessionAsync` for an owned connection and
+ `XSession.CreateAsync` for a borrowed connection. Both accept
+ `SessionCreationOptions`, which carries shared connection, secure-channel,
+-protocol-configuration, firmware-version, and user-presence notification policy. Existing one-shot
++protocol-configuration, firmware-version, and user-presence notification policy. Versions are effective
++session policy, not hardware attestation; major-zero feature checks are optimistic. Existing one-shot
+ conveniences also accept session options before their cancellation token, so
+ callers can apply the same creation policy without opening a session manually.
+ 
+@@ -168,10 +169,14 @@ Not differences at all — v1 never had these:
+ 
+ ## Verified at full parity
+ 
++This heading preserves the historical analysis's capability classification. It is not current
++all-platform runtime, native ABI, secure-channel conformance, or device qualification. Use each module's
++current limitations and the [Native AOT evidence terms](NATIVE-AOT.md#evidence-terms) when planning deployment.
++
+ The 2026-07-21 analysis classified these areas as parity or outright
+ improvements over v1. For discovery, that means the capability is present and
+ improved, not that every platform can always prove how interfaces group:
+-ambiguous evidence deliberately splits rather than guesses. The exact
++ambiguous evidence can split results and PID-completeness can still group complementary partials. The exact
+ platform guarantees and bounds are documented in
+ [device discovery guarantees](architecture/device-discovery-guarantees.md).
+ 
+diff --git a/docs/v2-highlights.md b/docs/v2-highlights.md
+index 64b606d7e5db5c3ae57fcb38cd1e08793cd6b128..26e9c3636ae11e8a61c2390281386f7d9206ffd8 100644
+--- a/docs/v2-highlights.md
++++ b/docs/v2-highlights.md
+@@ -72,14 +72,15 @@ dispose and create a new one instead of restarting. Last-known metadata is not l
+ 
+ `IYubiKey` represents a physical key when discovery has enough evidence to
+ group its interfaces. `SerialNumber` and the tri-state `SameDeviceAs` help you
+-correlate references; when the evidence is ambiguous, discovery splits
+-interfaces rather than guessing.
++correlate references. Ambiguity often splits interfaces, but complementary partial observations from
++same-PID keys can satisfy the grouping heuristic and produce a cross-key composite. Use the
++[discovery bounds](architecture/device-discovery-guarantees.md#g2-the-epistemic-bound) for identity-sensitive work.
+ 
+ Within your process, a grouped physical key admits one live connection, and
+ that connection one live session. Conflicting acquisition throws
+ `ConnectionInUseException` before another applet or transport can disrupt work
+-already in progress. Another process holding the same interface still surfaces
+-an ordinary platform `SCardException`.
++already in progress, within its known-member scope. Cross-process access follows the OS sharing policy;
++built-in strict-exclusive PC/SC maps a sharing violation to `ConnectionInUseException`.
+ 
+ ## One session grammar across applets
+ 
+@@ -119,9 +120,11 @@ x64, and Linux x64. Deeper Management, PIV, and device-monitoring runtime
+ evidence is currently macOS-only; the remaining applets are link-verified but
+ not yet runtime-exercised under Native AOT.
+ 
+-Stable deployments are not a single standalone binary: ship the complete
+-publish output, which includes the platform-specific `Yubico.NativeShims`
+-native library.
++Ship the complete publish output. With NativeShims 1.18.1, Native AOT links the RID-specific static
++shim archive and removes the separate shared shim; non-AOT deployment retains the shared library.
++System libraries and permissions remain deployment prerequisites. The
++[Native AOT guide](NATIVE-AOT.md) separates historical execution, current compatibility metadata,
++native producer/ABI qualification, and remaining protocol/device gaps.
+ 
+ ## Why v2 breaks so much, on purpose
+ 
+diff --git a/src/Core/CLAUDE.md b/src/Core/CLAUDE.md
+index 1b98f97c9ee8bb798530c93600cfec86640cbd4d..02f60f4ca3acf9a460771dcb032277455c37116d 100644
+--- a/src/Core/CLAUDE.md
++++ b/src/Core/CLAUDE.md
+@@ -58,15 +58,23 @@ Configure once at application startup:
+ using Microsoft.Extensions.Logging;
+ using Yubico.YubiKit.Core;
+ 
+-YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
++using var loggerFactory = LoggerFactory.Create(builder =>
+ {
+     builder.AddConsole();
+     builder.SetMinimumLevel(LogLevel.Information);
+ });
++YubiKitLogging.Configure(loggerFactory);
++// Keep this outer scope alive through all SDK operations and resource disposal.
+ ```
+ 
+ If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` once during startup: `YubiKitLogging.Configure(serviceProvider.GetRequiredService<ILoggerFactory>())`.
+ 
++The application owns the supplied factory. Configure before first SDK use: static logger instances
++retain the factory's earlier loggers after replacement. Temporary configuration is process-global,
++not async-flow or parallel-test isolation. Ordinary APDU trace templates log headers/lengths, while
++SELECT logs supplied identifier bytes and exception objects carry their own text. There is no central
++redactor; review payload provenance and provider destinations rather than promising global secrecy.
++
+ ## Critical Patterns
+ 
+ ### Cryptographic catalog
+@@ -107,7 +115,11 @@ An absent `HashAlgorithm` is not proof of a generic operation: Ed25519 has intri
+ 
+ `CoseKeyInfo` in `Core.Cryptography.Cose` contains kty/crv, never an intrinsic alg. Only verified IANA mappings
+ are present (secp256k1 = 8; Brainpool P256/P384/P512 = 256/258/259). Active `Ctap2.Cose.CoseKey` remains open-valued and preserves
+-unknown wire metadata/opaque bytes; PIN/UV profile checks remain strict. OpenPGP-specific legacy 25519 OIDs,
++unknown wire metadata/opaque bytes. PIN/UV key agreement has a separate required protocol profile:
++the current peer helper checks byte-array coordinates and their 32-byte lengths, forces P-256 import,
++and delegates point acceptance to the provider. It does not validate the peer's required kty/crv/alg
++labels or optional-label restrictions. This is a validation gap, not intended forward compatibility;
++correct labels on the platform-generated key do not validate the peer. OpenPGP-specific legacy 25519 OIDs,
+ RSA sizes and slot choices live in OpenPgp; Core must never depend on that module.
+ 
+ To add a variant, append an explicit `KeyType` ID, add curve/key data and relationships, and registered COSE
+@@ -309,7 +321,11 @@ downstream APIs or create competing lifecycle owners.
+ 
+ ### APDU Processing Pipeline
+ 
+-The APDU processing pipeline uses the decorator pattern:
++The APDU processing pipeline composes transmit and response processors. Short mode splits data into
++255-byte chunks; extended mode uses `ApduTransmitter` with the configured complete-command ceiling.
++The current formatters append Le, including zero; zero is not an absent-Le representation. Response
++continuations use the configured remaining instruction and fixed zero CLA/P1/P2/Le. There is no
++automatic `6Cxx` corrected-length retry.
+ 
+ ```
+ ApduCommand
+@@ -318,7 +334,7 @@ ApduCommand
+     ↓
+ [ApduFormatterShort/Extended]  ← Formats for wire protocol
+     ↓
+-ISmartCardConnection.TransmitAsync()
++ISmartCardConnection.TransmitAndReceiveAsync()
+     ↓
+ [ChainedResponseReceiver]   ← Reassembles chained responses
+     ↓
+@@ -346,16 +362,21 @@ Core owns SCP key-parameter types, handshake processing, and the secure PC/SC pr
+ Applet session factories accept the key parameters and establish the channel through the internal
+ `PcscProtocol.InitializeScpAsync` capability; consumers cannot construct the decorator directly.
+ 
+-```csharp
+-// SCP03 - Symmetric keys
+-var scp03Params = new Scp03KeyParameters(keyRef, staticKeys);
++Parameters retain contained owners. `StaticKeys` clones its source spans; `Scp03KeyParameters` retains
++and disposes that exact object. `Scp11KeyParameters` copies the certificate collection but retains its
++key/certificate objects, disposing the OCE private key and certificates while leaving the SD public
++wrapper intact. Record `with` copies share these owners. Keep parameters alive through initialization
++and any reset reuse, and clear source buffers independently. See the complete scoped
++[SCP example](README.md#use-a-secure-channel).
+ 
+-// SCP11b - Public key only (YubiKey authenticates to host)
+-var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey);
+-
+-// SCP11a/c - Mutual authentication with certificates
+-var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oceKeyRef, certChain);
+-```
++The implementation uses a fixed P-256/AES-128 SCP11 profile. Constructor admission alone establishes
++neither a complete profile/trust check nor applet authorization. `IsAuthenticated` reflects protocol
++setup; SCP11b is card-to-host authentication, and a/c setup completion is distinct from the device's
++first protected-command phase. Keep cited editions exact: SCP03 1.1.2 Public Release is distinct from
++1.1.2.6 Public Review, and the inspected SCP11 1.3.0.13 Public Review is distinct from final 1.4.
++Synthetic wire tests do not close empty-command, protected-error/continuation, final-edition, or vendor
++profile qualification. Raw SELECT after SCP remains plain while retaining the graph; use applet
++factories for selection before channel setup, not raw reselect as recovery.
+ 
+ **Key files:**
+ - `Protocols/SmartCard/Scp/` - SCP implementations
+@@ -407,17 +428,9 @@ if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+     // Windows-specific code
+ }
+ 
+-// Safe handles for native resources
+-using var handle = new SafeLibraryHandle(libraryPath);
+-
+-// Platform-specific factory
+-var scanner = SdkPlatformInfo.OperatingSystem switch
+-{
+-    SdkPlatform.Windows => new WindowsDeviceScanner(),
+-    SdkPlatform.MacOS => new MacOSDeviceScanner(),
+-    SdkPlatform.Linux => new LinuxDeviceScanner(),
+-    _ => throw new PlatformNotSupportedException()
+-};
++// Internal contributor fragment: load through the platform-specific library owner.
++using var library = UnmanagedDynamicLibrary.Open(libraryPath);
++// Resolve and finish all calls through its delegates before this scope ends.
+ ```
+ 
+ #### `LibraryImport`, not `DllImport`
+@@ -440,6 +453,12 @@ internal static partial int Foo(string name, [MarshalAs(UnmanagedType.U1)] bool
+ 
+ Why it matters here, beyond style:
+ 
++Generated marshalling still depends on correct native declarations. Match the exact backend header,
++architecture, pointer carrier, and Boolean width; source generation cannot infer the intended ABI.
++Keep Windows LPGUID/PULONG/BOOLEAN issues and Linux LP64 PC/SC PCI qualification separate from the
++choice of import mechanism. A successful build establishes neither installed-producer identity nor
++successful native execution.
++
+ - The marshalling stub is **generated C# you can read and step through**, not IL synthesised by the
+   runtime. Native AOT and trimming see real code — `docs/NATIVE-AOT.md` support depends on it.
+ - The generator **fails the build on signatures it cannot marshal**. `DllImport` accepts the same
+@@ -485,14 +504,12 @@ reappearance as a regression, not as legacy debt:
+ grep -rn "\[DllImport(\|static extern" --include="*.cs" src/ benchmarks/ verification/   # must be empty
+ ```
+ 
+-Two macOS IOKit callback registrations (`IOHIDManagerRegisterDeviceMatchingCallback`,
+-`IOHIDManagerRegisterDeviceRemovalCallback`) take the callback as a bare `IntPtr` rather than a
+-function pointer, because their caller `Transports/Hid/MacOS/MacOSHidDeviceListener.cs` keeps
+-per-instance delegates alive in fields (`_arrivedCallbackDelegate`, `_removedCallbackDelegate`,
+-`_abandonedCallbackDelegates`) and passes `Marshal.GetFunctionPointerForDelegate(...)`. That is
+-deliberate: the listener's context pointer is `IntPtr.Zero`, so an `[UnmanagedCallersOnly]` static
+-would have nowhere to recover `this` from. The delegate fields are load-bearing — the function
+-pointer dies with the delegate. Do not inline them.
++The macOS listener passes static `[UnmanagedCallersOnly]` Cdecl addresses through the `nint` callback
++parameters of the IOKit registrations. Its nonzero context identifies a rooted listener generation;
++callbacks recover that generation through `GCHandle`, not retained per-instance delegate fields.
++Generation cleanup requires actual run-loop/callback exit. A timed-out stop retains its generation;
++partial startup without a worker has separate unresolved cleanup paths. Keep callback acknowledgment,
++root lifetime, and native release distinct when changing this seam.
+ 
+ The `SYSLIB1054` analyzer that suggests this conversion is informational and is **not** configured as
+ an error in `.editorconfig`. A clean build does not mean you used `LibraryImport`.
+@@ -515,13 +532,22 @@ Connections are created via factories:
+ ```csharp
+ // SmartCard connection
+ var connectionFactory = new SmartCardConnectionFactory();
+-using var connection = await connectionFactory.CreateAsync(reader, cancellationToken);
++await using (var connection = await connectionFactory.CreateAsync(reader, cancellationToken))
++{
++    // Finish all borrowed SmartCard work before leaving this scope.
++}
+ 
+-// HID connection
+-var hidFactory = new HidConnectionFactory();
+-using var connection = await hidFactory.CreateAsync(device, cancellationToken);
++// Typed HID connection, after the SmartCard scope ends.
++await using (var connection = await yubiKey.ConnectAsync<IFidoHidConnection>(cancellationToken))
++{
++    // Finish all borrowed FIDO work before leaving this scope.
++}
+ ```
+ 
++This fragment assumes an enumerated `IPcscDevice reader` and `IYubiKey yubiKey`. Direct SmartCard
++factory opens bypass grouped registration: coordinate discovery/monitoring and other connections for
++that entire scope. Prefer typed `IYubiKey.ConnectAsync<TConnection>` for the managed member guard.
++
+ ### Physical Device Model
+ 
+ `IYubiKey` represents **one physical YubiKey**, not a single transport handle. A composite USB key exposes
+@@ -533,7 +559,11 @@ one transport via a documented default order plus an optional `SessionCreationOp
+ initialization failure does not try another interface. Read-only metadata types (`DeviceInfo`, `FormFactor`,
+ `DeviceCapabilities`, `DeviceFlags`, `VersionQualifier`, `VersionQualifierType`) are Core-owned
+ (`Yubico.YubiKit.Core.Devices`); mutating operations stay in Management. Full reference:
+-[Physical Device Model](../../docs/architecture/physical-device-model.md). What grouping of a physical key's interfaces does and does not guarantee - per platform, with every guarantee pinned to a named test - is in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md). Read it before changing `CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver: the merge tiers are an evidence hierarchy that never guesses, and several conservative-looking outcomes are documented bounds with pinning tests, not defects.
++[Physical Device Model](../../docs/architecture/physical-device-model.md). Read
++[Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md) before changing
++`CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver. It distinguishes managed evidence
++rules, complementary-partial cross-key grouping, implementation-only topology choices, and actual
++native/physical qualification. Repeated scans have no expiry that forces ambiguous grouping to heal.
+ 
+ The change feed retains a published object only while its interface and connection sets remain unchanged and
+ fresh known serial evidence does not contradict it. A different known serial on the same interface set proves
+@@ -541,6 +571,10 @@ substitution and emits `DeviceRemoved` for the predecessor followed by `DeviceAd
+ serials never trigger identity-based republication. If no listener event invalidates discovery caches and no scan
+ observes absence, same-interface substitution remains unknowable from cached evidence.
+ 
++PID-completeness grouping also has a complementary-partials bound: two same-PID keys can contribute
++different slots to one composite. Path-bound opening does not verify each slot against that composite's
++serial. Do not equate the grouping heuristic with physical identity attestation.
++
+ `IYubiKey.CachedDeviceInfo` exposes the existing nullable Core `DeviceInfo` snapshot without I/O; its default
+ interface implementation returns `null` for custom implementations. `YubiKeyDevice` delegates directly to
+ `DeviceInfo`, whose getter reads the atomically published `DeviceInfoSnapshot` reference. Do not introduce a
+@@ -552,6 +586,11 @@ and identity contract remain unchanged, even if a newer metadata snapshot omits
+ coverage is in `YubiKeyDeviceTests` (no connection on access, snapshot replacement, default implementations,
+ serial independence) and `SnapshotDiffTests` (retention and replacement isolation).
+ 
++Snapshot replacement preserves previously returned scalar fields, but `ChallengeResponseTimeout` currently
++aliases an input TLV's memory. Read-only access is not independent ownership or post-clear stability.
++Successful serial-less metadata can remain cached; unchanged scans need not retry it. Identity-cache
++PID checks do not extend to the separate metadata cache's member-ID keyed entries.
++
+ Use `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)` when absence is exceptional and
+ `FindFirstOrDefaultAsync` when it is not. They select after one independent fresh `FindAllAsync` operation;
+ they do not wait for insertion, and callers must not treat discovery order as stable. Use the named
+@@ -720,7 +759,9 @@ consumers do not need to preflight them. Major-zero development versions retain
+ 
+ Applet factories snapshot `SessionCreationOptions` without retaining the options object. Secure-channel parameters
+ remain borrowed. A session retains the caller-owned `UserPresencePrompt` service reference for its lifetime but
+-never disposes it; this is the sole retained-service exception.
++never disposes it. Actual applet adoption still matters: Security Domain retains SCP parameters for
++reset; Management and Security Domain do not retain their unused presence prompt. Do not infer the same retained state from the
++shared options shape for every applet.
+ 
+ ## Test Infrastructure
+ 
+@@ -748,20 +789,19 @@ tests/
+ Use `FakeSmartCardConnection` for unit tests:
+ 
+ ```csharp
+-var fakeConnection = new FakeSmartCardConnection();
++using var fakeConnection = new FakeSmartCardConnection();
+ 
+ // Queue expected responses
+-fakeConnection.QueueResponse([0x90, 0x00]); // Success
+-fakeConnection.QueueResponse([0x69, 0x82]); // Security status not satisfied
++fakeConnection.EnqueueResponse(new byte[] { 0x90, 0x00 }); // Success
+ 
+ // Create protocol with fake
+-var protocol = new PcscProtocol(fakeConnection);
++using var protocol = new PcscProtocol(fakeConnection);
+ 
+ // Test
+ var result = await protocol.SelectAsync(ApplicationIds.Piv, CancellationToken.None);
+ 
+ // Verify commands sent
+-Assert.Single(fakeConnection.SentCommands);
++Assert.Single(fakeConnection.TransmittedCommands);
+ ```
+ 
+ ### Discovery hardware contracts
+@@ -786,8 +826,8 @@ public class MyTests : IntegrationTestBase
+     [WithYubiKey]
+     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
+     {
+-        // state.YubiKey is available
+-        await using var connection = await state.YubiKey.ConnectAsync<ISmartCardConnection>();
++        // The placeholder row binds lazily to its first matching device.
++        await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
+         // Test logic
+     }
+ }
+@@ -802,11 +842,9 @@ public class MyTests : IntegrationTestBase
+ await using var connection = await connectionFactory.CreateAsync(reader, ct);
+ await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection, ct);
+ 
+-// Select application
+-await raw.SelectAsync(ApplicationIds.Piv, ct);
+-
+ // Configure for firmware
+ raw.Configure(firmwareVersion);
++await raw.SelectAsync(ApplicationIds.Piv, ct);
+ ```
+ 
+ ### Sending APDUs
+@@ -823,11 +861,19 @@ var command = new ApduCommand
+ };
+ var responseData = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
+ 
+-// Sensitive command (PIN, key material) — caller zeroes source buffer after transmission
++// Separate sensitive-command fragment: caller clears the source even on failure.
+ // ApduCommand is a readonly record struct: it stores a reference, not a clone.
+-var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
+-var response = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
+-CryptographicOperations.ZeroMemory(pinnedPin); // zeroes what command.Data referenced
++try
++{
++    var verify = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
++    var response = await raw.TransmitAndReceiveAsync(verify, throwOnError: false, cancellationToken: ct);
++    try { Console.WriteLine($"SW={response.SW:X4}"); }
++    finally { response.Clear(); }
++}
++finally
++{
++    CryptographicOperations.ZeroMemory(pinnedPin);
++}
+ ```
+ 
+ ### Error Handling
+@@ -835,13 +881,13 @@ CryptographicOperations.ZeroMemory(pinnedPin); // zeroes what command.Data refer
+ ```csharp
+ try
+ {
+-    var response = await protocol.TransmitAndReceiveAsync(command, ct);
++    var response = await raw.TransmitAndReceiveAsync(command, cancellationToken: ct);
+ }
+-catch (ApduException ex) when (ex.StatusWord == 0x6982)
++catch (ApduException ex) when (ex.SW == 0x6982)
+ {
+     // Security status not satisfied - need to authenticate
+ }
+-catch (ApduException ex) when (ex.StatusWord == 0x6A82)
++catch (ApduException ex) when (ex.SW == 0x6A82)
+ {
+     // Application/file not found
+ }
+@@ -849,40 +895,25 @@ catch (ApduException ex) when (ex.StatusWord == 0x6A82)
+ 
+ ## Firmware Version Considerations
+ 
+-```csharp
+-// APDU size limits
+-if (firmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
+-{
+-    // Extended APDUs supported
+-    MaxApduSize = SmartCardMaxApduSizes.Yubikey4;
+-}
+-else
+-{
+-    // Short APDUs only
+-    MaxApduSize = SmartCardMaxApduSizes.Neo;
+-}
++`PcscProtocol.Configure` combines firmware policy, the connection's extended-APDU support, and
++`ProtocolConfiguration.ForceShortApdus`. It uses complete-command constants `Neo`, `Yk4`, and `Yk43`,
++not a 254/2048-byte data rule. Session feature queries describe known-version compatibility; enabled
++capabilities, authorization, provisioning, and actual command success remain applet-specific.
+ 
+-// Feature checks
+-if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_3_0))
+-{
+-    // SCP support available
+-}
+-
+-if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
+-{
+-    // SCP11 protocols available
+-}
+-```
++Major-zero versions, including `0.0.0`, pass optimistic feature checks. Raw HID sessions currently
++retain inherited `0.0.0` even after protocol discovery. A detected, assumed, or overridden effective
++version is not interchangeable with a hardware report, and overrides do not uniformly bypass applet probes.
+ 
+ ## Concurrency Model
+ 
+ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuard`, `DeviceConnectionRegistry`):
+ 
+ - **Protocols refuse overlapping logical exchanges.** `PcscProtocol` (+ SCP wrapper), `FidoHidProtocol`, and `OtpHidProtocol` run each full logical exchange through `ExchangeGuard`. A second operation throws `InvalidOperationException` immediately; sequential awaited operations are unchanged. Disposal atomically closes the guard to new admissions, drains an admitted exchange, and only then tears down protocol/SCP state and any owned connection. Prefer async disposal; synchronous disposal blocks for the same drain and must never be called from inside that operation.
+-- **Cancellation is checked at entry only.** Once an exchange claims the guard, constituent transmits use `CancellationToken.None` so chained APDU, CTAP/OTP frame, and SCP state cannot be stranded.
++- **Constituent I/O is shielded after admission.** SmartCard cancellation is checked at entry; admitted transmits use `CancellationToken.None`. FIDO can request CANCEL after a keep-alive and drain the original response; OTP touch-wait cancellation can attempt a reset. Neither supplies rollback, a completion deadline, or native release proof.
++- **Whole workflows remain caller-owned.** Await complete public operations before another operation or disposal. The guard drains an exchange, not later exchanges, parsing/cache work, or detached callbacks. Never dispose from a callback that the operation must await.
+ - **The guard is protocol-instance scoped.** An SCP wrapper shares its base PC/SC guard, but independently created raw protocol instances over one connection are not coordinated. The supported contract prevents that shape by admitting one `ApplicationSession` per connection; connection-wide raw protocol ownership is a separate API decision.
+-- **Discovery/connection ownership is atomic.** A connection to a grouped physical key claims every known stable member interface ID before native open. A second connection through any member throws `ConnectionInUseException` immediately. Claims are sorted, deduplicated, rolled back on failure, and released only after physical teardown. Standalone records use one-element scopes when discovery cannot prove grouping. Discovery remains per-interface and nonblocking; connections may wait cancellably for active discovery, while waiting connections retain priority. One level down, `ConnectionSessionGuard` allows one live `ApplicationSession` per connection and supports sequential reuse. In-process only — cross-process contention is not covered.
+-- **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently within one finder. A finder owns one atomic evidence epoch containing identity cache, metadata cache, and read scope; transport activity terminally retires that scope and replaces the whole evidence object, so stale completion writes only into unreachable caches and a successor monitor cannot join its predecessor's reads. Superseded reads that have not yet opened their interface fail fast, including queued admission waits behind hung workers. Cache entries also record the PID observed at read time so a hit under a different PID is a miss. Eviction is deliberately not transport-scoped because a composite swap's events can arrive on one transport first, and retained sibling evidence would mix two keys. Within a monitor, absent listener hints degrade staleness detection to scan-observed absence. Public Find calls instead use fresh evidence per invocation and retire their scope on exit — see `docs/architecture/device-discovery-guarantees.md`.
++- **Grouped connection claims are acquired incrementally before native open.** Member IDs are sorted and deduplicated, then claimed one at a time. An active discovery lease on an earlier member can delay checking a later member held by a live connection; cancellation can end that wait first. Encountering a live holder refuses acquisition with `ConnectionInUseException`, and failure rolls back earlier claims in reverse order. This is not a whole-set atomic preflight or an invocation-time refusal guarantee. Built-in PC/SC and macOS/Linux native owners require their route-specific release proof; Windows/custom compatibility disposal does not automatically prove physical teardown. Standalone records use one-element scopes. Discovery remains per-interface and nonblocking, with waiting connections retaining priority. `ConnectionSessionGuard` separately allows one live session per connection and sequential reuse. These are in-process claims, not cross-process exclusion.
++- **Discovery caller waits are budgeted and reads are single-flight.** Identity reads use two seconds per attempt; composite metadata uses three seconds. Underlying work can continue after that wait. One finder owns an atomic evidence epoch containing identity cache, metadata cache, and read scope. Hotplug invalidation replaces the whole epoch and retires queued admissions; active work keeps its native ownership and writes only into the old caches. Identity entries validate the observed PID; successful metadata entries instead use member IDs and lack the equivalent PID check. Successful serial-less metadata can remain cached. Without listener hints, same-slot substitution can stay stale until observed absence. Public Find uses fresh per-call evidence and retires its scope on exit. See [discovery guarantees](../../docs/architecture/device-discovery-guarantees.md).
+ - **Potentially sibling discovery reads do not overlap.** Before worker admission, USB reads take a process-wide PID gate; an unknown USB PID takes all known PID gates atomically. Eligibility checks, complete grants, and releases share one short lock. Ineligible requests await a release notification without reserving any gates, so a pending unknown-PID request cannot spread a held PID's stall to unrelated PIDs, even in a live finder after its caller's budget expires. This conservative policy also serializes distinct same-PID keys, but known different PIDs and NFC remain independent. It changes no merge evidence or public connection claims. `FindYubiKeys` registers in-scope candidates in its read scope for both identity and metadata reads. The granted admission transfers to the discovery registry lease before native open and follows native release, including retained/quarantined built-in owners. Never release it at a bounded wait, cancellation, scope retirement, or merely because failed native disposal completed its task. Queued admission observes epoch retirement without occupying a native worker. `DiscoveryReadSchedulingTests` pins disposal, abandonment, retirement, and independent-PID progress with a live unknown-PID waiter; `PcscDiscoveryLifetimeTests` pins failed native-release retention.
+ - **The monitor is a single owned lifetime with one producer.** `YubiKeyMonitor` owns listeners and sequential
+   scans/publications; `DeviceChangeFeed` owns membership, identity retention, and isolated subscriptions.
+@@ -892,7 +923,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
+ 
+ ## Known Gotchas
+ 
+-1. **APDU Size Limits**: YubiKey Neo uses 254-byte max; YubiKey 4+ uses extended APDUs up to 2048 bytes
++1. **APDU Size Limits**: complete-command constants are `Neo = 1390`, `Yk4 = 2038`, and `Yk43 = 3062`; short-mode data chunks are 255 bytes. These are different units. Transport support and configuration also select framing.
+ 2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; best-effort native finalization is not a substitute for deterministic disposal.
+ 3. **SCP Key Zeroing**: Always zero SCP keys after use; `StaticKeys` implements `IDisposable`
+ 4. **TLV Disposal**: `Tlv` and `DisposableTlvList` must be disposed
+diff --git a/src/Core/README.md b/src/Core/README.md
+index 0b8672e6ff4029163022cf51c9cd9c64901ea6a1..28de9e65670c851e37ed09364e924d9a65cea3ef 100644
+--- a/src/Core/README.md
++++ b/src/Core/README.md
+@@ -9,7 +9,7 @@ comes with it.
+ > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+ > constraints.
+ 
+-## Preview session feature-query migration
++## Session feature queries
+ 
+ `IApplicationSession.IsSupported(feature)` remains public for optional compatibility/UI queries. It evaluates
+ known firmware support, not runtime authentication, device configuration, or guaranteed command success.
+@@ -21,10 +21,14 @@ reported errors rather than calling an enforcement method first.
+ 
+ `ApduResponse` is a sealed reference-type owner, not a value-type record. Its constructors copy their
+ input; `RawData` and `Data` are read-only views of the owned copy. Call `Clear()` after consuming sensitive
+-response material. It zeroes the complete owned response (including status bytes) and all previously
++response material, preferably in `finally`. It zeroes the complete owned response (including status bytes) and all previously
+ obtained views, without changing constructor input. Read/check status before clearing. Aliasing a response
+ shares its owner; there is no default empty response or synthesized value equality.
+ 
++Clearing this owner leaves constructor inputs, transport staging, earlier response fragments, and any
++separate decrypted temporary outside its reach. Clear caller-owned copies separately; this API is not
++an end-to-end erasure guarantee.
++
+ ## Requirements
+ 
+ - .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).
+@@ -63,9 +67,14 @@ foreach (var each in await YubiKeyManager.FindAllAsync())
+ }
+ ```
+ 
+-One `IYubiKey` is one physical YubiKey, even when it exposes several interfaces at once. `SerialNumber` is
+-the durable identity; it is `null` on devices that do not report one, such as the Security Key series.
+-Discovery needs no PIN, touch, or open session. Later snippets assume these directives and a `device` obtained the same way;
++An `IYubiKey` groups the observed interfaces of a physical key when discovery evidence permits.
++Partial observations can split one key or combine complementary slots from same-PID keys; see the
++[grouping bound](../../docs/architecture/device-discovery-guarantees.md#g2-the-epistemic-bound).
++`SerialNumber` is durable identity when reported; it is `null` on devices such as the Security Key series.
++Discovery needs no PIN or touch, but can open short-lived connections and select applets to read metadata.
++Coordinate direct connections and disjoint scoped views before scanning the same key. Later snippets are
++composable fragments: they assume these directives, a `device` obtained the same way, and the typed inputs
++named in each task; they are not one concatenated program.
+ `Yubico.YubiKit.Piv` is referenced only to show an application session.
+ 
+ ## Common operations
+@@ -153,6 +162,14 @@ it does not promise to update discovery metadata. Continue using `device.SerialN
+ identity: its independent contract can retain a known serial even when the latest snapshot omits it.
+ See [cached device metadata](../../docs/usage/device-discovery.md#cached-device-metadata) for details.
+ 
++`DeviceInfo` copies scalar fields when returned, but `ChallengeResponseTimeout` currently retains read-only
++memory backed by the input TLV. A read-only view prevents writes through that view; it does not create
++independent storage or guarantee stability after the backing owner is cleared. Avoid treating the
++whole value as an immutable cache key. Firmware, enabled-capability fields, and transport presence also
++answer different questions: use the applet operation's prerequisites rather than inferring success
++from any one of them. Major-zero firmware versions, including `0.0.0`, pass optimistic SDK feature
++checks; that is compatibility policy, not evidence that hardware implements every feature.
++
+ ### PC/SC sharing policy and migration
+ 
+ Built-in PC/SC connections default to strict `SmartCardSharing.Exclusive`. If another smart-card client
+@@ -206,10 +223,12 @@ another handle can select a different applet and disturb the active session. Pre
+ policy still determines whether other processes can open the card.
+ 
+ Factories snapshot `DefaultSharing` when constructed; changing it does not reconfigure existing factories
+-or connections. Shared and fallback policies permit other PC/SC handles to use card-wide security state,
+-including verified PIV PIN state. `connection.IsExclusive` reports the acquired mode. All built-in modes
+-still request `SCARD_UNPOWER_CARD` on release. PC/SC exclusivity is not an isolation guarantee for HID or
+-custom transports; no-hardware policy tests do not independently prove physical card isolation.
++or connections. Shared and fallback policies allow other PC/SC handles to interact with card-wide applet
++and security state. `connection.IsExclusive` reports the acquired PC/SC sharing mode, not a process-local
++PIN authorization. All built-in modes request `SCARD_UNPOWER_CARD` on release; the request alone proves
++neither an observed power cycle nor cleared PIN state. PC/SC exclusivity is not an isolation guarantee
++for HID or custom transports. Actual cross-process PIV state and physical release need their own
++device/platform evidence.
+ 
+ ### Open an application session
+ 
+@@ -296,7 +315,15 @@ ApduResponse response = await raw.TransmitAndReceiveAsync(
+     new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, requestData),
+     throwOnError: false);
+ 
+-Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
++try
++{
++    Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
++    // Consume response.Data here before clearing its owner.
++}
++finally
++{
++    response.Clear();
++}
+ ```
+ 
+ `RawCtapHidSession` and `RawOtpHidSession` are the HID equivalents, created with
+@@ -356,6 +383,11 @@ the default; the override's responsiveness and native drain depend on its implem
+ the override nor the returned scope automatically inherits the built-in
+ connection's native drain guarantees. End the scope before disposing its connection.
+ 
++The built-in transaction-end failure path currently logs the failure and closes admission; a later
++connection disposal reports the stored error. Scope-disposal completion alone is therefore not a
++universal transaction-success signal. Keep scope end, native completion, disconnect/context release,
++and the final connection disposal outcome distinct when deciding whether to reopen.
++
+ `IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
+ `IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
+ `IHidConnection` owns report I/O; the Windows-only `IWindowsHidReportAccess` is an internal
+@@ -494,15 +526,30 @@ These tests do not attest Linux drivers, native AOT, hardware timing or whole-pl
+ Core owns the SCP key-parameter types; session factories establish the channel from them.
+ 
+ ```csharp
+-using var keys = new StaticKeys(encKey, macKey, dekKey);
+-using var scp = new Scp03KeyParameters(KeyReference.Default, keys);
++using var scp = new Scp03KeyParameters(
++    KeyReference.Default, new StaticKeys(encKey, macKey, dekKey));
+ 
+-await using var raw = await device.CreateRawSmartCardSessionAsync(scp, firmwareVersion);
++await using var session = await device.CreatePivSessionAsync(
++    new SessionCreationOptions { ScpKeyParameters = scp });
++// Perform supported PIV operations here. Session disposal precedes parameter disposal.
+ ```
+ 
+ `Scp03KeyParameters.Default` carries the well-known factory keys for test devices. Manage the keys on the
+ device with `Yubico.YubiKit.SecurityDomain`.
+ 
++The snippet assumes three application-supplied 16-byte source key buffers. `StaticKeys` clones them;
++clear those source buffers separately when no longer needed, including on failure. `Scp03KeyParameters`
++retains and disposes that exact `StaticKeys` object. `Scp11KeyParameters` retains its supplied keys and
++certificate objects, disposing the OCE private key and certificates but not the SD public key. Record
++`with` copies share these contained owners; they are not independent credential lifetimes. Keep one
++clear disposal owner and keep parameters alive through every operation that may reuse them.
++
++SCP protects channel traffic; it supplies no applet PIN, UV, or management authorization. In particular,
++SCP11b authenticates the card to the host. Session `IsAuthenticated` describes protocol setup and should
++not be used as evidence of host authorization or of a later device-side authentication phase. Use
++applet factories for selection before SCP. Raw `SelectAsync` after SCP uses a plain SELECT while retaining
++the existing processor graph; it is not a secure-channel recovery or reauthentication procedure.
++
+ ### Decode Base32 text
+ 
+ `Yubico.YubiKit.Core.Utilities.Base32` is a small shared decoder used by OATH and the CLI. `Decode(encoded)`
+@@ -601,7 +648,8 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
+ - Whoever creates a connection disposes it; use `await using`. A session from a `device.Create...` factory
+   owns the hidden connection it opened. Built-in SmartCard connections request safe shutdown from their
+   finalizer, but finalization is nondeterministic and is not a substitute for disposal.
+-- Sessions refuse overlapping operations. Caller cancellation does not interrupt constituent I/O
++- Protocols refuse overlapping logical exchanges, not complete multi-exchange applet workflows. Await
++  each public operation before starting another or disposing the session. Caller cancellation does not interrupt constituent I/O
+   after admission; FIDO keep-alive or OTP touch-wait cancellation can still end an exchange after
+   protocol-specific cancel or reset handling. A failed partial exchange may require reopening the
+   connection. Native work may not have a bounded completion time.
+@@ -631,14 +679,17 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
+ 
+ ## Security notes
+ 
+-- SCP key material is caller-owned. `StaticKeys` and the `Scp*KeyParameters` types are `IDisposable` and
+-  zero their contents on disposal; zero any source buffers you supplied.
+-- Never embed or log real SCP keys, and disable trace logging in production; APDU traces can contain
+-  sensitive payloads.
++- Dispose SCP parameters and their contained owners as described above; clear source buffers separately.
++- Keep keys and credentials out of diagnostics. Ordinary APDU trace templates record headers and lengths,
++  while SELECT records caller-supplied identifier bytes and exception text has its own provenance.
++  Review providers and output destinations before enabling diagnostics; see [logging](../../docs/LOGGING.md).
+ - `Tlv` and the collection from `TlvHelper.DecodeList` own buffers and must be disposed. The encode helpers
+   do not clear your source buffers or their own returned encodings; for sensitive data, zero both in a
+   `finally`. Full examples: [TLV processing](../../docs/usage/tlv-processing.md).
+-- `ApduCommand` stores a reference to your data, not a copy. Zero the source after transmission.
++- `ApduCommand` stores a reference to your data, not a copy. Keep it unchanged until the original exchange
++  task is terminal, then clear sensitive source bytes. Canceling an outer `WaitAsync` wait does not end
++  the underlying borrow. Dispose outside callbacks and only after the complete workflow has finished;
++  disposing from a callback that the operation awaits can deadlock its own drain.
+ 
+ ## Related
+ 
+diff --git a/src/Core/src/Devices/README.md b/src/Core/src/Devices/README.md
+index b0fd916ac9e684bdad0f098806fdd5b93125e8b2..2c25e3212f438b87f798e44ac5f92cc80fc67d95 100644
+--- a/src/Core/src/Devices/README.md
++++ b/src/Core/src/Devices/README.md
+@@ -25,6 +25,12 @@ normally, which the hosted-singleton pattern relies on) but not another disposal
+ Each manager operation has one signature with optional arguments, not token-only convenience overloads.
+ Generated record equality, copying, printing, and deconstruction are standard record value operations.
+ 
++Change records carry references to published device objects; their generated value operations do not
++freeze metadata at `Revision`. Snapshot replacement preserves earlier scalar values, while
++`DeviceInfo.ChallengeResponseTimeout` currently retains an input-TLV memory alias. The finder also distinguishes
++failed reads from cached successful serial-less metadata, and identity-cache PID validation from the
++metadata cache's member-ID keys. Keep these storage/freshness limits beside consumer snapshot claims.
++
+ - `YubiKeyManager.FindAllAsync(interfaces, cancellationToken)`: fresh scoped discovery with no tracking.
+ - `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)`: selection when absence is exceptional.
+ - `YubiKeyManager.FindFirstOrDefaultAsync(predicate, interfaces, cancellationToken)`: selection when absence is expected.
+diff --git a/src/Core/tests/CLAUDE.md b/src/Core/tests/CLAUDE.md
+index 791650347d18c84b4f4f4322e3efbe03bcab91b0..1de8988287a858a33141a79489fe2d7ab2d70aa7 100644
+--- a/src/Core/tests/CLAUDE.md
++++ b/src/Core/tests/CLAUDE.md
+@@ -39,22 +39,26 @@ tests/
+ Use `FakeSmartCardConnection` to test protocol logic without hardware:
+ 
+ ```csharp
+-var fakeConnection = new FakeSmartCardConnection();
++using var fakeConnection = new FakeSmartCardConnection();
+ 
+ // Queue expected responses
+-fakeConnection.QueueResponse([0x90, 0x00]); // Success
+-fakeConnection.QueueResponse([0x69, 0x82]); // Security status not satisfied
++fakeConnection.EnqueueResponse(new byte[] { 0x90, 0x00 }); // Success
+ 
+ // Create protocol with fake
+-var protocol = new PcscProtocol(fakeConnection);
++using var protocol = new PcscProtocol(fakeConnection);
+ 
+ // Test
+ var result = await protocol.SelectAsync(ApplicationIds.Piv, CancellationToken.None);
+ 
+ // Verify commands sent
+-Assert.Single(fakeConnection.SentCommands);
++Assert.Single(fakeConnection.TransmittedCommands);
+ ```
+ 
++This is a Core unit-test fragment using the internal protocol and fake from
++`Protocols/SmartCard/Apdu/Fakes`. It checks one transmitted SELECT, not device interoperability or
++all response bytes. The synchronous fake disposal updates its counter; its current async disposal
++does not provide that same observation. Keep those test-oracle meanings separate.
++
+ ### Integration Test Base
+ 
+ Integration tests inherit from `IntegrationTestBase` and use `[WithYubiKey]` attribute:
+@@ -66,8 +70,8 @@ public class MyIntegrationTests : IntegrationTestBase
+     [WithYubiKey]
+     public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state)
+     {
+-        // state.YubiKey is available
+-        await using var connection = await state.YubiKey.ConnectAsync<ISmartCardConnection>();
++        // The placeholder row binds lazily to its first matching device.
++        await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
+         // Test logic
+     }
+ }
+@@ -83,8 +87,13 @@ dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Core"
+ dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Core.UnitTests"
+ 
+ # Run integration tests only (requires YubiKey)
+-dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Core.IntegrationTests"
++dotnet toolchain.cs -- test --integration --project Core.IntegrationTests --smoke
+ 
+ # Run specific test class
+ dotnet toolchain.cs -- test --filter "FullyQualifiedName~PcscProtocolTests"
+ ```
++
++Review selected setup and trait requirements before hardware execution. The allow-list is applied
++after live identification; discovery can already have opened a connection to read a serial. Hardware
++fixtures, human-coordinated touch/hotplug/PIN work, and actual native/platform qualification remain
++separate from managed fake assertions and source compilation.

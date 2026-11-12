@@ -336,8 +336,8 @@ public class PcscProtocolTests
 
         // Assert
         Assert.Single(_fakeConnection.TransmittedCommands);
-        // Note: We can't directly inspect the APDU structure from transmitted bytes
-        // but we verified it doesn't throw, which means the command was accepted
+        // This assertion checks command count only; the fake also exposes copied transmitted bytes.
+        // The successful scripted response does not independently verify SELECT header/data encoding.
     }
 
     [Fact]
@@ -400,8 +400,7 @@ public class PcscProtocolTests
         // Act
         protocol.Dispose();
 
-        // Assert - Subsequent operations should fail on disposed connection
-        // (FakeSmartCardConnection throws ObjectDisposedException when disposed)
+        // Assert refusal by the disposed protocol; this does not assert disposal of the borrowed connection.
         await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
         {
             var response = new byte[] { 0x90, 0x00 };

@@ -59,9 +59,9 @@ Their planning-era mode/status is historical; this execution plan and current st
 8. **Fresh final evidence review, freeze and publication.** Reconcile claims, coverage, accepted hashes,
    compiler/current-source/retained-output evidence, qualification limits and restoration. Commit/push
    owned documentation/records and verify remote state. Update the external handoff after archive freeze.
-9. **Close the first sweep and plan selected Pass 2.** Account for every actual module and all nine
-   boundary reviews; prepare selected, re-baselined implementation groups and their verification and
-   documentation-impact re-review plans. Implementation requires its separate scope.
+9. **Close the first sweep and stop.** Account for every actual module and all nine boundary reviews,
+   publish the Core Pass-1 closeout and provide the deferred-finding handoff. Per the user's subsequent
+   clarification, a separate Pass-2 planning or implementation project requires a later request.
 
 ## Mandatory packet contract
 

@@ -255,3 +255,25 @@ The inventory owner is extending exact coverage accounting to all completed fami
 boundary units, keeping read depth and closure status separate. The triage owner is extending the
 ledger-only proposal map to all Core families; accepted finding IDs and editing remain later gates.
 Four additional original USB/GlobalPlatform PDFs are registered without upgrading draft/final claims.
+
+## Reconciled source-investigation coverage
+
+The completed eight families plus Management/CTAP2 returns reconcile **12,022 distinct assigned IDs**:
+10,319 primary and 1,703 shared. Core has **9,020/9,020 dispositions**, external scope has
+**3,002/5,024**, leaving **2,022 external units**. There are no missing, extra or overlapping IDs.
+
+This is disposition coverage, with B4's qualified API-snapshot scope and historical/context outcomes
+preserved. It is not all-member compiler binding, independent review, editing completion or hardware
+qualification. CTAP2's mandatory WebAuthn follow-up remains open; active and unstarted boundaries
+receive no partial credit. The original inventory and prior roll-ups remain preserved as history.
+
+## Source-supported editing released
+
+The full-family map reconciles 103 local IDs into 102 provisional groups. Astra released its
+source-supported documentation facets for fresh, isolated Core editing, with policy/implementation,
+unrun-experiment, qualification and caller-boundary facets still explicit. See
+`triage/editing-release.md`. Initial A/C editors will own disjoint primary source/test documentation;
+the primary source remains unchanged while boundary investigators finish.
+
+The user clarified the stopping point: finish and publish Core Pass 1 with its deferred-finding
+handoff, then stop. No separate Pass-2 planning or implementation work will start in this cycle.

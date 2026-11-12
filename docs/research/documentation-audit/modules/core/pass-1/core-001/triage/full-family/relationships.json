@@ -1,0 +1,127 @@
+{
+  "whole_group_rule": "Same precise mechanism/responsibility only; facet links never erase distinct questions.",
+  "links": [
+    {
+      "locals": [
+        "CORE-B1-C010",
+        "CORE-B3-C006"
+      ],
+      "relation": "whole-group-consolidation",
+      "scope": "Caller ExecutionContext retention policy on normally started rooted threads; per-route evidence retained."
+    },
+    {
+      "locals": [
+        "CORE-B1-C005",
+        "CORE-B4-C001"
+      ],
+      "relation": "nonadditive-family-extension-with-distinct-submechanisms",
+      "scope": "Registered HID failure/release policy. B1 includes arbitrary custom throwing teardown; B4 adds successful managed Dispose with deferred active native borrow. Compound groups retained separately."
+    },
+    {
+      "locals": [
+        "CORE-C-C020",
+        "CORE-B6-C007"
+      ],
+      "relation": "duplicate-contained-owner-facet",
+      "scope": "Exact Scp03/11 contained object retention/disposal and record-clone alias lifetime; B6 owns wire-side documentation. C020 also contains optional-reference and caller-option questions."
+    },
+    {
+      "locals": [
+        "CORE-C-C020",
+        "CORE-B6-C009"
+      ],
+      "relation": "duplicate-constructor-versus-initializer-facet",
+      "scope": "Optional OCE reference and wider constructor shapes are the same referred question; B6 adds actual profile/trust/key roles."
+    },
+    {
+      "locals": [
+        "CORE-C-C008",
+        "CORE-B6-C014"
+      ],
+      "relation": "same-global-logging-policy-claim-with-template-qualification",
+      "scope": "B6 header/length-only ordinary trace narrows C008 initial payload wording. C008 factory retention, temporary scopes and callback exceptions remain separate facets."
+    },
+    {
+      "locals": [
+        "CORE-B1-C011",
+        "CORE-B6-C013"
+      ],
+      "relation": "duplicate-shared-fake-example-correction",
+      "scope": "QueueResponse/SentCommands prose corrected to EnqueueResponse/TransmittedCommands once by SHARED; B6 C013 has other test/fixture concerns."
+    },
+    {
+      "locals": [
+        "CORE-A-C020",
+        "CORE-B4-C008"
+      ],
+      "relation": "shared-missing-historical-Windows-artifact-facet",
+      "scope": "Exact old Windows runtime identity gap; A Rust/watcher claims, B4 current gates and B3 Mac producer evidence remain separate."
+    }
+  ],
+  "explicit_separations": [
+    {
+      "locals": [
+        "CORE-A-C003",
+        "CORE-C-C005",
+        "CORE-C-C006",
+        "CORE-B5-C005",
+        "CORE-B6-C002",
+        "CORE-B4-C007"
+      ],
+      "reason": "Metadata/TLV alias, helper abandoned copies, incoming reports, APDU copies and Windows report-ID staging are different storage owners. Coordinate one memory topology, preserve every copy/failure facet."
+    },
+    {
+      "locals": [
+        "CORE-A-C017",
+        "CORE-B1-C012",
+        "CORE-B4-C001"
+      ],
+      "reason": "USB ProductId metadata-cache validity, member-acquisition precedence and native handle/registration release have different mechanisms; PID/lease vocabulary supplies no merge."
+    },
+    {
+      "locals": [
+        "CORE-B1-C009",
+        "CORE-C-C008",
+        "CORE-B6-C014"
+      ],
+      "reason": "Post-open logger cleanup failure is distinct from payload redaction and logging configuration/template provenance."
+    },
+    {
+      "locals": [
+        "CORE-B3-C001",
+        "CORE-B3-C009",
+        "CORE-B4-C003",
+        "CORE-B4-C006",
+        "CORE-B4-C009"
+      ],
+      "reason": "IOReturn constants, CFNumberType carrier, Windows indirection/Boolean, conditional Linux PCI and backend error mapping have distinct declaration/responsibility scopes."
+    },
+    {
+      "locals": [
+        "CORE-A-C004",
+        "CORE-A-C006",
+        "CORE-C-C010",
+        "CORE-C-C015",
+        "CORE-B5-C003"
+      ],
+      "reason": "Application masks, mathematical key checks, crypto/COSE catalog applicability and CTAPHID INIT capabilities differ in actor and contract."
+    },
+    {
+      "locals": [
+        "CORE-B6-C004",
+        "CORE-B6-C005",
+        "CORE-B6-C011",
+        "CORE-B6-C012"
+      ],
+      "reason": "Mutation/failure latch, instruction-only response exemption, empty-command encryption and protected-response transcript validity remain independent wire/phase requirements."
+    },
+    {
+      "locals": [
+        "CORE-A-C020",
+        "CORE-C-C018",
+        "CORE-B5-C009"
+      ],
+      "reason": "Missing discovery Rust source, ARKG generator and session comparator need separate original provenance. Current Python is not a substitute identity."
+    }
+  ]
+}

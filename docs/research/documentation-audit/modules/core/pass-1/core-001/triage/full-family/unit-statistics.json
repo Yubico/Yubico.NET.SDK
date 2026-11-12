@@ -1,0 +1,460 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "families": {
+    "A": {
+      "assigned_units": 2006,
+      "statuses": {
+        "READ-CLEAN": 1855,
+        "CANDIDATE": 151
+      },
+      "original_family_summary": {
+        "schema": "core-001-A-investigation-checkpoint-v1",
+        "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "packet_sha256": "427fd5833a9a57057a01b556277caf71f5a043820adbe63b0c37485f52712a0c",
+        "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+        "state": "INVESTIGATION-READ-COMPLETE; TRIAGE-AND-INDEPENDENT-REVIEW-PENDING",
+        "primary_files": 91,
+        "primary_lines": 16728,
+        "primary_units": 1630,
+        "shared_units": 376,
+        "primary_status_counts": {
+          "READ-CLEAN": 1501,
+          "CANDIDATE": 129
+        },
+        "shared_status_counts": {
+          "READ-CLEAN": 354,
+          "CANDIDATE": 22
+        },
+        "local_candidates": 21,
+        "accepted_findings": 0,
+        "no_sdk_build_test_formatter_native_device_execution": true,
+        "compiler_shape": "VALID-NOT-CHECKED",
+        "independent_review": "PENDING",
+        "central_records_modified": false,
+        "new_subagents": 0
+      }
+    },
+    "B1": {
+      "assigned_units": 1204,
+      "statuses": {
+        "READ-CLEAN": 1104,
+        "READ-CANDIDATE": 99,
+        "READ-EXCLUSION": 1
+      },
+      "original_family_summary": {
+        "baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+        "primary_files": 49,
+        "primary_lines": 9747,
+        "primary_units": 1078,
+        "shared_units": 126,
+        "total_units": 1204,
+        "statuses": {
+          "READ-CLEAN": 1104,
+          "READ-CANDIDATE": 99,
+          "READ-EXCLUSION": 1
+        },
+        "candidate_groups": 12,
+        "raw_inventory_matches": true,
+        "all_source_equal_to_pin_with_lf_normalization": true,
+        "new_build_test_formatter_native_device_runs": 0,
+        "central_records_modified": false,
+        "scope": "source/assertion investigation and B1-owned records only"
+      }
+    },
+    "B2": {
+      "assigned_units": 1219,
+      "statuses": {
+        "READ-CLEAN": 1187,
+        "READ-CANDIDATE": 31,
+        "READ-EXCLUSION": 1
+      },
+      "original_family_summary": {
+        "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "observed_record_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+        "primary_files": 63,
+        "primary_lines": 11868,
+        "primary_units": 1148,
+        "shared_units": 71,
+        "total_units": 1219,
+        "statuses": {
+          "READ-CLEAN": 1187,
+          "READ-CANDIDATE": 31,
+          "READ-EXCLUSION": 1
+        },
+        "unread": 0,
+        "primary_statuses": {
+          "READ-CLEAN": 1126,
+          "READ-CANDIDATE": 21,
+          "READ-EXCLUSION": 1
+        },
+        "shared_statuses": {
+          "READ-CLEAN": 61,
+          "READ-CANDIDATE": 10
+        },
+        "candidate_groups": 6,
+        "accepted_findings": 0,
+        "sdk_builds_tests_native_device_runs": 0,
+        "meaning": "Manual semantic reads preceded serialization. Identity checks establish preservation, not semantic audit or implementation acceptance."
+      }
+    },
+    "B3": {
+      "assigned_units": 1144,
+      "statuses": {
+        "READ-CANDIDATE": 57,
+        "READ-CLEAN": 1087
+      },
+      "original_family_summary": {
+        "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+        "packet_sha256": "87f2675195fdf101b58055c1353da0d2a8b4e0b57c69293665823a408d7bef2b",
+        "primary_files": 41,
+        "primary_lines": 7636,
+        "primary_units": 1139,
+        "shared_units": 5,
+        "dispositions": {
+          "READ-CANDIDATE": 57,
+          "READ-CLEAN": 1087
+        },
+        "unread": 0,
+        "primary_exclusions": 0,
+        "secondary_handoffs_counted_as_primary": 0,
+        "new_sdk_builds_tests_native_device_formatter_runs": 0,
+        "independent_review": "PENDING"
+      }
+    },
+    "B4": {
+      "assigned_units": 2350,
+      "statuses": {
+        "READ-CANDIDATE": 574,
+        "READ-CLEAN": 1246,
+        "READ-SOURCE-QUALIFIED": 1,
+        "READ-RELATED-CONTEXT": 371,
+        "READ-HISTORICAL-QUALIFIED": 158
+      },
+      "original_family_summary": {
+        "status": "COMPLETE-PINNED-INVESTIGATION",
+        "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "observed_head": "bb94f0884f63f260156227957d4cc112d984e300",
+        "packet_sha256": "5591684535811520dc9cf6e62e32614e66a77cac9ea5353c31ca428920021244",
+        "primary_files": 106,
+        "primary_lines": 14842,
+        "complete_primary_file_dispositions": 106,
+        "complete_primary_file_reads": 105,
+        "scoped_related_context_snapshot_files": 1,
+        "unread_primary_files": 0,
+        "primary_unit_count": 1456,
+        "shared_unit_count": 894,
+        "total_unit_count": 2350,
+        "primary_status_counts": {
+          "READ-CANDIDATE": 397,
+          "READ-CLEAN": 1053,
+          "READ-SOURCE-QUALIFIED": 1,
+          "READ-RELATED-CONTEXT": 5
+        },
+        "shared_status_counts": {
+          "READ-CANDIDATE": 177,
+          "READ-HISTORICAL-QUALIFIED": 158,
+          "READ-CLEAN": 193,
+          "READ-RELATED-CONTEXT": 366
+        },
+        "combined_status_counts": {
+          "READ-CANDIDATE": 574,
+          "READ-CLEAN": 1246,
+          "READ-SOURCE-QUALIFIED": 1,
+          "READ-RELATED-CONTEXT": 371,
+          "READ-HISTORICAL-QUALIFIED": 158
+        },
+        "resolved_checkpoint_outstanding": {
+          "READ-PENDING-CONTEXT": 253,
+          "UNREAD": 1209
+        },
+        "families": [
+          {
+            "family": "benchmarks",
+            "files": 4,
+            "lines": 785,
+            "complete_file_dispositions": 4,
+            "full_file_reads": 4,
+            "unread_paths": []
+          },
+          {
+            "family": "public-api-and-support",
+            "files": 4,
+            "lines": 1537,
+            "complete_file_dispositions": 4,
+            "full_file_reads": 3,
+            "unread_paths": []
+          },
+          {
+            "family": "desktop-pcsc-native",
+            "files": 14,
+            "lines": 1368,
+            "complete_file_dispositions": 14,
+            "full_file_reads": 14,
+            "unread_paths": []
+          },
+          {
+            "family": "native-loading-and-platform-support",
+            "files": 7,
+            "lines": 383,
+            "complete_file_dispositions": 7,
+            "full_file_reads": 7,
+            "unread_paths": []
+          },
+          {
+            "family": "windows-native",
+            "files": 14,
+            "lines": 2070,
+            "complete_file_dispositions": 14,
+            "full_file_reads": 14,
+            "unread_paths": []
+          },
+          {
+            "family": "portable-hid",
+            "files": 14,
+            "lines": 892,
+            "complete_file_dispositions": 14,
+            "full_file_reads": 14,
+            "unread_paths": []
+          },
+          {
+            "family": "keyboard-translators",
+            "files": 10,
+            "lines": 1958,
+            "complete_file_dispositions": 10,
+            "full_file_reads": 10,
+            "unread_paths": []
+          },
+          {
+            "family": "windows-hid-facades",
+            "files": 4,
+            "lines": 591,
+            "complete_file_dispositions": 4,
+            "full_file_reads": 4,
+            "unread_paths": []
+          },
+          {
+            "family": "integration-oracles",
+            "files": 3,
+            "lines": 273,
+            "complete_file_dispositions": 3,
+            "full_file_reads": 3,
+            "unread_paths": []
+          },
+          {
+            "family": "audit-child-hosts",
+            "files": 2,
+            "lines": 206,
+            "complete_file_dispositions": 2,
+            "full_file_reads": 2,
+            "unread_paths": []
+          },
+          {
+            "family": "boundary-inventory-and-contract-oracles",
+            "files": 14,
+            "lines": 2595,
+            "complete_file_dispositions": 14,
+            "full_file_reads": 14,
+            "unread_paths": []
+          },
+          {
+            "family": "windows-native-registration-test",
+            "files": 1,
+            "lines": 53,
+            "complete_file_dispositions": 1,
+            "full_file_reads": 1,
+            "unread_paths": []
+          },
+          {
+            "family": "resilience-static-oracle",
+            "files": 1,
+            "lines": 373,
+            "complete_file_dispositions": 1,
+            "full_file_reads": 1,
+            "unread_paths": []
+          },
+          {
+            "family": "hid-unit-oracles",
+            "files": 5,
+            "lines": 768,
+            "complete_file_dispositions": 5,
+            "full_file_reads": 5,
+            "unread_paths": []
+          },
+          {
+            "family": "external-verification-hosts",
+            "files": 9,
+            "lines": 990,
+            "complete_file_dispositions": 9,
+            "full_file_reads": 9,
+            "unread_paths": []
+          }
+        ],
+        "local_candidate_count": 10,
+        "sdk_builds_tests_native_device_formatter_executions": 0,
+        "identity_failures": [],
+        "note": "106/106 primary files dispositioned; 105 full reads and one whole-file API snapshot reconciled for B4 support/type inventory with explicit non-B4 signature scope. Qualified/context rows are not clean or await-context. Hashes never establish semantic verdicts."
+      }
+    },
+    "B5": {
+      "assigned_units": 932,
+      "statuses": {
+        "READ-CLEAN": 716,
+        "READ-CANDIDATE": 212,
+        "READ-EXCLUSION": 4
+      },
+      "original_family_summary": {
+        "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "observed_head": "bb94f0884f63f260156227957d4cc112d984e300",
+        "packet_sha256": "a35ef40d4e7057660e4a71d00981d6db7f2c0499ceafb08f4f339283666a3a4e",
+        "primary_files": 43,
+        "primary_lines": 8830,
+        "primary_units": 893,
+        "shared_units": 39,
+        "counts": {
+          "READ-CLEAN": 716,
+          "READ-CANDIDATE": 212,
+          "READ-EXCLUSION": 4
+        },
+        "primary_counts": {
+          "READ-CLEAN": 694,
+          "READ-CANDIDATE": 199
+        },
+        "shared_counts": {
+          "READ-EXCLUSION": 4,
+          "READ-CANDIDATE": 13,
+          "READ-CLEAN": 22
+        },
+        "unread": 0,
+        "local_candidates": 9,
+        "accepted_allocations": 0,
+        "clean_nominees": 13,
+        "source_and_range_hashes_match": true,
+        "pinned_normalized_paths_match": 59,
+        "framework_research": "Context7 orientation plus .NETv10.0.0 originals; no runtime experiment",
+        "sdk_builds": 0,
+        "sdk_tests": 0,
+        "native_probes": 0,
+        "device_operations": 0,
+        "formatter_runs": 0,
+        "subagents": 0,
+        "compiler_examples": "UNCOMPILED / VALID-NOT-CHECKED",
+        "independent_review": "PENDING",
+        "completion": "PACKET-INVESTIGATION-HANDOFF-READY; not whole-Core or applet boundary closeout"
+      }
+    },
+    "B6": {
+      "assigned_units": 684,
+      "statuses": {
+        "READ-CONTEXT": 267,
+        "READ-CANDIDATE": 137,
+        "READ-CLEAN": 278,
+        "READ-HISTORICAL-CONTEXT": 2
+      },
+      "original_family_summary": {
+        "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "observed_metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+        "state": "SOURCE-INVESTIGATION-COMPLETE",
+        "primary_files": 50,
+        "primary_lines": 9441,
+        "primary_unit_count": 668,
+        "shared_unit_count": 16,
+        "total_assigned_ids": 684,
+        "unit_dispositions": {
+          "READ-CONTEXT": 267,
+          "READ-CANDIDATE": 137,
+          "READ-CLEAN": 278,
+          "READ-HISTORICAL-CONTEXT": 2
+        },
+        "primary_dispositions": {
+          "READ-CONTEXT": 267,
+          "READ-CANDIDATE": 127,
+          "READ-CLEAN": 274
+        },
+        "shared_dispositions": {
+          "READ-CANDIDATE": 10,
+          "READ-CLEAN": 4,
+          "READ-HISTORICAL-CONTEXT": 2
+        },
+        "unread": 0,
+        "awaiting_context_or_final_triage": 0,
+        "local_concern_groups": 16,
+        "clean_nominees": 16,
+        "accepted_core_ids_allocated": 0,
+        "inherited_keys": 8,
+        "historical_checkpoint": "history/checkpoint-48-files/manifest.json",
+        "qualifications": "Bounded unavailable originals and later independent review/compilation/runtime/platform/device gates are separate from completed source reading.",
+        "new_sdk_execution_count": 0,
+        "writes": "B6 records only"
+      }
+    },
+    "C": {
+      "assigned_units": 1562,
+      "statuses": {
+        "READ-CANDIDATE": 305,
+        "READ-CANDIDATE-CONTEXT": 639,
+        "READ-CLEAN": 611,
+        "READ-HISTORICAL-EXCLUSION": 3,
+        "READ-HISTORICAL-CONTEXT": 4
+      },
+      "original_family_summary": {
+        "baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+        "observed_head": "01a114d4e251e0f52b92f73393fbe1dca5d5c24e",
+        "completion_date_session": "2026-11-12",
+        "completion": "COMPLETE-STATIC-INVESTIGATION; editor/reviewer/acceptance/execution gates remain separate",
+        "packet_sha256": "9ba1809d37186d462f6c554f85766284702e1382fe1b8e9e1cbd4db88d0860d4",
+        "inventory_sha256": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+        "primary_files_read_completely": 104,
+        "primary_file_count": 104,
+        "primary_lines": 17050,
+        "primary_units_read": 1386,
+        "shared_units_read": 176,
+        "selected_source_and_range_checks": 1562,
+        "shared_prose_count": 174,
+        "shared_assignment_count": 176,
+        "count_discrepancy": "All 176 actual JSON IDs retained and read. Inventory owner reconciles prose; C changed no central denominator.",
+        "unit_status_counts": {
+          "READ-CANDIDATE": 305,
+          "READ-CANDIDATE-CONTEXT": 639,
+          "READ-CLEAN": 611,
+          "READ-HISTORICAL-EXCLUSION": 3,
+          "READ-HISTORICAL-CONTEXT": 4
+        },
+        "unit_status_counts_by_assignment": {
+          "primary": {
+            "READ-CANDIDATE": 282,
+            "READ-CANDIDATE-CONTEXT": 554,
+            "READ-CLEAN": 547,
+            "READ-HISTORICAL-EXCLUSION": 3
+          },
+          "shared-read": {
+            "READ-HISTORICAL-CONTEXT": 4,
+            "READ-CANDIDATE": 23,
+            "READ-CANDIDATE-CONTEXT": 85,
+            "READ-CLEAN": 64
+          }
+        },
+        "clean_sample_nominees": 207,
+        "inherited_provenance_rows_dispositioned": 18,
+        "inherited_nonadditive_groups": 13,
+        "local_candidate_groups": 20,
+        "accepted_ids_allocated": 0,
+        "bounded_external_qualifications": [
+          "NIST-FINAL",
+          "RUST-KAT",
+          "ACTUAL-PROVIDERS",
+          "APPLET-PROFILES"
+        ],
+        "independent_review": "PENDING; not performed by this investigator",
+        "docs_editing": "NOT-AUTHORIZED-IN-THIS-PACKET",
+        "builds_tests_formatters_crypto_experiments_native_device_runs": 0,
+        "commits_index_ref_writes_pushes_subagents": 0,
+        "central_records_changed_by_C": false,
+        "checkpoint_provenance": "checkpoint-provenance.json; prior-investigation-C.md"
+      }
+    }
+  },
+  "disjoint_assigned_unit_total": 11101,
+  "meaning": "Investigator source dispositions only. B4 has 105 full-file reads plus one qualified Unshipped snapshot reconciliation; no independent source acceptance or execution."
+}

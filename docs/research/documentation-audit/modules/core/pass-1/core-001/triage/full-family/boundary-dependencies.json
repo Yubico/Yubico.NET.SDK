@@ -1,0 +1,27 @@
+{
+  "mode": "Dependency flags only; all nine returns feed later final triage.",
+  "boundary_candidate_ids_imported": 0,
+  "boundary_units_counted": 0,
+  "inputs": [
+    "boundaries/Management/followup-B4.md",
+    "boundaries/Management/followup-B6.md",
+    "boundaries/Ctap2/followup-B4-B6.md"
+  ],
+  "observations": [
+    {
+      "boundary": "Management",
+      "latest_input": "boundaries/Management/followup-B4.md",
+      "source_followup": "B4 source reconciliation follows completed B6 reconciliation. Earlier B6 addendum OPEN-B4 wording is historical.",
+      "impact": "Empty SCP read/reset and Le/copy/auth-phase questions apply; normal session drain differs from direct concurrent Windows disposal; ordinary Management INS does not invoke later INS82 exemption or public reselect.",
+      "remaining": "Candidate acceptance, independent review, profile/native/device evidence and ready Windows delta; no boundary closure by this ledger."
+    },
+    {
+      "boundary": "Ctap2",
+      "latest_input": "boundaries/Ctap2/followup-B4-B6.md",
+      "source_followup": "Pinned B4/B6 mechanism follow-ups source-reconciled with qualifications.",
+      "impact": "Ordinary CTAP payload has command byte; empty SCP path occurs in remaining commands. Ordinary INS10/C0 avoids direct INS82 exemption. No post-setup factory command proves first protected-command auth phase or actual applet selection survival.",
+      "remaining": "WebAuthn actor/recovery/result dependency, independent acceptance, profile/device/native evidence and ready Windows delta."
+    }
+  ],
+  "rule": "Completed source follow-up is positive dependency evidence, not final adjudication of boundary-local groups or the nine-packet gate."
+}

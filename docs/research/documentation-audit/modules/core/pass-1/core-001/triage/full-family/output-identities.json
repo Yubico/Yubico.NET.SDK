@@ -1,0 +1,18 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "scope": "Owned full-family report and records, excluding this manifest itself; no publication/acceptance seal.",
+  "files": {
+    "triage-full-family.md": "6b8ac53e144eacbed43e0a508c1786b7096d01246b32454e7e05c61ba074e422",
+    "triage/full-family/additional-proposals.tsv": "887517644133f5096327c73b692e20244bfdec7ccb060789073472fa7f1045f4",
+    "triage/full-family/boundary-dependencies.json": "0da4b5c22d27c01a6849078114ec98c9b76d90eefb05192e3812b82fe886d074",
+    "triage/full-family/inherited-links.json": "c6d1e7fae0e33dca904cf9953e20a2e4aafc378b940a325a2eaf71be81042bd2",
+    "triage/full-family/join_records.py": "0eba58636f477b6db6bc6714162508a702417c1b3ce9aea65305425d55bb324e",
+    "triage/full-family/map.json": "ee023021f2fd2586b4d75fc0a488cba2e3bdbb1ea7fdb91a793dbbd8bb4a7dd8",
+    "triage/full-family/preliminary-preservation.json": "bab497632782f882cbc938d41483ad2ebc228a655f6bfc3b4d9f074b858571fb",
+    "triage/full-family/probe-priorities.md": "ba50b9749470b66fc6cf9ea2d54688bf4a777aec60502c8e5352131d018b596e",
+    "triage/full-family/relationships.json": "6ed02ffb72d3b29857b8fea693598ecb165132c05b4ea42e9c190baced362e90",
+    "triage/full-family/rows.md": "a58635f9ec20687e13c46d7316c4cbedd7a46e866710a5d368fbce962b74c1b4",
+    "triage/full-family/unit-statistics.json": "9c52529f093d2077d98b0bf709b8d54635a4d16c0480247d8338372dee8f1e30",
+    "triage/full-family/verification.json": "d8ddc5c2da90a9060cabcf6a745579d16963df88afeda860a0c87f85d3846b20"
+  }
+}

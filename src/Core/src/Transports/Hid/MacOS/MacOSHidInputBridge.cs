@@ -43,7 +43,7 @@ internal sealed unsafe class MacOSHidInputBridge : IMacOSHidInputBridge
         {
             try
             {
-                if (length is 0 or > MacOSFidoHidConnection.MaxInputReportLength)
+                if (length is 0 or > MacOSFidoHidNativeOwner.MaxInputReportLength)
                 {
                     Terminal(HidInputTerminalReason.Fault);
                     return;
@@ -104,7 +104,7 @@ internal sealed unsafe class MacOSHidInputBridge : IMacOSHidInputBridge
         try
         {
             // Native and managed delivery each have a separately bounded queue.
-            _owner = HidInputInterop.HidInputCreate(device, (nuint)size, MacOSFidoHidConnection.ReportCapacity,
+            _owner = HidInputInterop.HidInputCreate(device, (nuint)size, MacOSFidoHidNativeOwner.ReportCapacity,
                 &OnNativeReport, &OnNativeTerminal,
                 GCHandle.ToIntPtr(_context));
         }

@@ -29,9 +29,9 @@ internal sealed class LinuxHidFeatureReportConnection : IHidConnection
     ///     of any acquired native state; neither construction nor its cleanup has a timeout.
     /// </remarks>
     /// <param name="devNode">The hidraw device-node path.</param>
-    /// <param name="api">The borrowed native report seam; this connection does not dispose it.</param>
-    internal LinuxHidFeatureReportConnection(string devNode, ILinuxHidReportApi api) =>
-        _owner = LinuxOtpHidNativeOwner.OpenAsync(devNode, api, CancellationToken.None).GetAwaiter().GetResult();
+    /// <param name="reportApi">The borrowed native report seam; this connection does not dispose it.</param>
+    internal LinuxHidFeatureReportConnection(string devNode, ILinuxHidReportApi reportApi) =>
+        _owner = LinuxOtpHidNativeOwner.OpenAsync(devNode, reportApi, CancellationToken.None).GetAwaiter().GetResult();
 
     /// <summary>Gets the eight-byte GET payload size, excluding the native zero report-ID byte.</summary>
     public int InputReportSize => 8;

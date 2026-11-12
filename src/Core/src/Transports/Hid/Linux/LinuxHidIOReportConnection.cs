@@ -40,19 +40,19 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
 
     /// <summary>Synchronously opens hidraw using a supplied report seam and the shared readiness reactor.</summary>
     /// <param name="devNode">The hidraw device-node path.</param>
-    /// <param name="api">The borrowed native report seam; this connection does not dispose it.</param>
-    internal LinuxHidIOReportConnection(string devNode, ILinuxHidReportApi api)
-        : this(devNode, api, LinuxHidReadReactor.Shared)
+    /// <param name="reportApi">The borrowed native report seam; this connection does not dispose it.</param>
+    internal LinuxHidIOReportConnection(string devNode, ILinuxHidReportApi reportApi)
+        : this(devNode, reportApi, LinuxHidReadReactor.Shared)
     {
     }
 
     /// <summary>Synchronously waits for native open, report-size discovery and input activation.</summary>
     /// <remarks>Failure waits for cleanup of partially acquired native state; there is no constructor timeout.</remarks>
     /// <param name="devNode">The hidraw device-node path.</param>
-    /// <param name="api">The borrowed native report seam; this connection does not dispose it.</param>
-    /// <param name="reactor">The borrowed readiness reactor; disposal removes only this lifetime's registration.</param>
-    internal LinuxHidIOReportConnection(string devNode, ILinuxHidReportApi api, ILinuxHidReadReactor reactor) =>
-        _owner = LinuxFidoHidNativeOwner.OpenAsync(devNode, api, reactor, CancellationToken.None).GetAwaiter().GetResult();
+    /// <param name="reportApi">The borrowed native report seam; this connection does not dispose it.</param>
+    /// <param name="readReactor">The borrowed readiness reactor; disposal removes only this lifetime's registration.</param>
+    internal LinuxHidIOReportConnection(string devNode, ILinuxHidReportApi reportApi, ILinuxHidReadReactor readReactor) =>
+        _owner = LinuxFidoHidNativeOwner.OpenAsync(devNode, reportApi, readReactor, CancellationToken.None).GetAwaiter().GetResult();
 
     /// <summary>Gets the descriptor-derived input payload capacity in bytes, excluding any synthetic report ID.</summary>
     /// <remarks>

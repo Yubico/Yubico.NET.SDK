@@ -1,171 +1,14 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using HidInputInterop = Yubico.YubiKit.Core.Native.MacOS.HidInput.NativeMethods;
 using HidInputResult = Yubico.YubiKit.Core.Native.MacOS.HidInput.HidInputResult;
 using HidInputTerminalReason = Yubico.YubiKit.Core.Native.MacOS.HidInput.HidInputTerminalReason;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
-
-internal interface IHidInputBridge
-{
-    nint CreateDevice(long entryId);
-    void OpenDevice(nint device);
-    int OpenDeviceResult(nint device)
-    {
-        OpenDevice(device);
-        return 0;
-    }
-    int InputSize(nint device);
-    int OutputSize(nint device) => InputSize(device);
-    bool CloseUnstarted(nint device);
-    void ReleaseDevice(nint device);
-    nint CreateInput(nint device, int size, Action<ReadOnlyMemory<byte>> report, Action<int> terminal);
-    int Start(nint owner);
-    void Cancel(nint owner);
-    int WaitShutdown(nint owner);
-    int Destroy(nint owner);
-    void SetReport(nint device, byte[] report);
-}
-
-internal sealed unsafe class NativeHidInputBridge : IHidInputBridge
-{
-    private GCHandle _context;
-    private nint _owner;
-
-    // Native callbacks borrow the context until destroy succeeds.
-    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static void OnNativeReport(nint ctx, nint data, nuint length)
-    {
-        try
-        {
-            ((CallbackState)GCHandle.FromIntPtr(ctx).Target!).Report(data, length);
-        }
-        catch { /* Never throw through the C callback ABI. */ }
-    }
-
-    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static void OnNativeTerminal(nint ctx, int reason)
-    {
-        try
-        {
-            ((CallbackState)GCHandle.FromIntPtr(ctx).Target!).Terminal(reason);
-        }
-        catch { /* Never throw through the C callback ABI. */ }
-    }
-
-    internal sealed class CallbackState(Action<ReadOnlyMemory<byte>> report, Action<int> terminal)
-    {
-        internal void Report(nint data, nuint length)
-        {
-            try
-            {
-                if (length is 0 or > MacOSFidoHidConnection.MaxInputReportLength)
-                {
-                    Terminal(HidInputTerminalReason.Fault);
-                    return;
-                }
-                var copy = new byte[(int)length];
-                try
-                {
-                    Marshal.Copy(data, copy, 0, copy.Length);
-                    Deliver(copy);
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(copy);
-                }
-            }
-            catch { Terminal(HidInputTerminalReason.Fault); }
-        }
-
-        internal void Deliver(ReadOnlyMemory<byte> packet)
-        {
-            try { report(packet); }
-            catch { Terminal(HidInputTerminalReason.Fault); }
-        }
-
-        internal void Terminal(int reason)
-        {
-            try { terminal(reason); }
-            catch { /* Callbacks cannot escape into C, even if terminal delivery faults. */ }
-        }
-    }
-
-    public nint CreateDevice(long entryId) => IOKitDeviceLifetime.Instance.CreateDevice(entryId);
-    public void OpenDevice(nint device) => IOKitDeviceLifetime.Instance.OpenDevice(device);
-    public int OpenDeviceResult(nint device) => IOKitDeviceLifetime.Instance.OpenDeviceResult(device);
-    public int InputSize(nint device) => IOKitDeviceLifetime.Instance.GetIntProperty(device, IOKitHidConstants.MaxInputReportSize);
-    public int OutputSize(nint device) => IOKitDeviceLifetime.Instance.GetIntProperty(device, IOKitHidConstants.MaxOutputReportSize);
-    public bool CloseUnstarted(nint device) => NativeMethods.IOHIDDeviceClose(device, 0) == 0;
-    public void ReleaseDevice(nint device) => IOKitDeviceLifetime.Instance.ReleaseCFObject(device);
-    public void SetReport(nint device, byte[] report)
-    {
-        var status = NativeMethods.IOHIDDeviceSetReport(device, IOKitHidConstants.kIOHidReportTypeOutput, 0, report, report.Length);
-        if (status != 0)
-        {
-            throw new Yubico.YubiKit.Core.Native.PlatformApiException(nameof(NativeMethods.IOHIDDeviceSetReport), status,
-                "Failed to set HID report.");
-        }
-    }
-
-    public nint CreateInput(nint device, int size, Action<ReadOnlyMemory<byte>> report, Action<int> terminal)
-    {
-        // Guard each shim call so Native AOT does not require macOS-only exports on Linux or Windows.
-        if (!OperatingSystem.IsMacOS()) throw new PlatformNotSupportedException();
-        if (_owner != 0 || _context.IsAllocated)
-        {
-            throw new InvalidOperationException("This native input bridge already owns a device.");
-        }
-        _context = GCHandle.Alloc(new CallbackState(report, terminal));
-        try
-        {
-            // Native and managed delivery each have a separately bounded queue.
-            _owner = HidInputInterop.HidInputCreate(device, (nuint)size, MacOSFidoHidConnection.ReportCapacity,
-                &OnNativeReport, &OnNativeTerminal,
-                GCHandle.ToIntPtr(_context));
-        }
-        catch
-        {
-            _context.Free();
-            throw;
-        }
-        if (_owner != 0)
-        {
-            return _owner;
-        }
-        _context.Free();
-        throw new InvalidOperationException("Native_HidInputCreate failed");
-    }
-    public int Start(nint owner) => OperatingSystem.IsMacOS()
-        ? HidInputInterop.HidInputStart(owner)
-        : throw new PlatformNotSupportedException();
-    public void Cancel(nint owner)
-    {
-        if (!OperatingSystem.IsMacOS()) throw new PlatformNotSupportedException();
-        HidInputInterop.HidInputCancel(owner);
-    }
-    public int WaitShutdown(nint owner) => OperatingSystem.IsMacOS()
-        ? HidInputInterop.HidInputWaitShutdown(owner, uint.MaxValue)
-        : throw new PlatformNotSupportedException();
-    public int Destroy(nint owner)
-    {
-        if (!OperatingSystem.IsMacOS()) throw new PlatformNotSupportedException();
-        var result = HidInputInterop.HidInputDestroy(owner);
-        if (result == HidInputResult.Ok)
-        {
-            _context.Free();
-            _owner = 0;
-        }
-        return result;
-    }
-}
 
 internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWakeControl
 {
@@ -181,17 +24,17 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
     internal int OutputReportSize => _owner.OutputReportSize;
     public ConnectionType Type => ConnectionType.HidFido;
 
-    internal static async Task<MacOSFidoHidConnection> OpenAsync(long entryId, IHidInputBridge bridge,
-        CancellationToken cancellationToken, IDisposable? registration = null, Action? beforeSendPublication = null)
+    internal static async Task<MacOSFidoHidConnection> OpenAsync(long entryId, IMacOSHidInputBridge inputBridge,
+        CancellationToken cancellationToken, IDisposable? physicalClaim = null, Action? beforeSendPublication = null)
     {
         Owner owner;
         try
         {
-            owner = new Owner(entryId, bridge, registration, beforeSendPublication);
+            owner = new Owner(entryId, inputBridge, physicalClaim, beforeSendPublication);
         }
         catch
         {
-            registration?.Dispose();
+            physicalClaim?.Dispose();
             throw;
         }
         try
@@ -239,8 +82,8 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
     private sealed class Owner
     {
         private readonly long _entryId;
-        private readonly IHidInputBridge _bridge;
-        private readonly IDisposable? _registration;
+        private readonly IMacOSHidInputBridge _inputBridge;
+        private readonly IDisposable? _physicalClaim;
         private readonly Action? _beforeSendPublication;
         private readonly Lock _sync = new();
         private readonly AutoResetEvent _signal = new(false);
@@ -264,11 +107,11 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
         internal int InputReportSize { get; private set; }
         internal int OutputReportSize { get; private set; }
 
-        internal Owner(long entryId, IHidInputBridge bridge, IDisposable? registration, Action? beforeSendPublication)
+        internal Owner(long entryId, IMacOSHidInputBridge inputBridge, IDisposable? physicalClaim, Action? beforeSendPublication)
         {
             _entryId = entryId;
-            _bridge = bridge;
-            _registration = registration;
+            _inputBridge = inputBridge;
+            _physicalClaim = physicalClaim;
             _beforeSendPublication = beforeSendPublication;
             _root = GCHandle.Alloc(this);
         }
@@ -295,7 +138,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                     _work = null;
                     _stopping = true;
                     Exception? releaseFailure = null;
-                    try { _registration?.Dispose(); }
+                    try { _physicalClaim?.Dispose(); }
                     catch (Exception ex) { releaseFailure = ex; }
                     _root.Free();
                     _signal.Dispose();
@@ -347,7 +190,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                 _ordinaryCompletion?.TrySetException(ex);
                 if (_device == 0)
                 {
-                    try { _registration?.Dispose(); }
+                    try { _physicalClaim?.Dispose(); }
                     catch (Exception releaseFailure) { ex = new AggregateException(ex, releaseFailure); }
                     _root.Free();
                     _closed.TrySetResult();
@@ -360,42 +203,42 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             finally { _signal.Dispose(); }
         }
 
-        internal Task OpenAsync(CancellationToken token)
+        internal Task OpenAsync(CancellationToken cancellationToken)
         {
             var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             _ordinaryCompletion = completion;
             Schedule(() =>
             {
-                if (token.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    completion.TrySetCanceled(token);
+                    completion.TrySetCanceled(cancellationToken);
                     return;
                 }
                 try
                 {
-                    _device = _bridge.CreateDevice(_entryId);
+                    _device = _inputBridge.CreateDevice(_entryId);
                     if (_device == 0)
                     {
                         throw new InvalidOperationException("IOHIDDeviceCreate returned null");
                     }
-                    var openStatus = _bridge.OpenDeviceResult(_device);
+                    var openStatus = _inputBridge.OpenDeviceResult(_device);
                     // IOHIDDeviceClass marks exclusive access as opened even though the call fails.
                     _openAttempted = openStatus is 0 or unchecked((int)0xE00002C5);
                     if (openStatus != 0)
                         throw new InvalidOperationException($"IOHIDDeviceOpen failed: {openStatus:X8}");
-                    var size = _bridge.InputSize(_device);
+                    var size = _inputBridge.InputSize(_device);
                     if (size < FidoPacketSize)
                     {
                         throw new InvalidOperationException("FIDO input report size is smaller than 64");
                     }
                     InputReportSize = size;
-                    OutputReportSize = _bridge.OutputSize(_device);
-                    _input = _bridge.CreateInput(_device, size, Report, Terminal);
+                    OutputReportSize = _inputBridge.OutputSize(_device);
+                    _input = _inputBridge.CreateInput(_device, size, Report, Terminal);
                     if (_input == 0)
                     {
                         throw new InvalidOperationException("Native_HidInputCreate returned null");
                     }
-                    var status = _bridge.Start(_input);
+                    var status = _inputBridge.Start(_input);
                     if (status != HidInputResult.Ok)
                     {
                         throw new InvalidOperationException($"Native_HidInputStart failed: {status}");
@@ -461,7 +304,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             _reader = null;
         }
 
-        private void CancelRead(TaskCompletionSource<ReadOnlyMemory<byte>> reader, CancellationToken token)
+        private void CancelRead(TaskCompletionSource<ReadOnlyMemory<byte>> reader, CancellationToken cancellationToken)
         {
             bool detached;
             lock (_sync)
@@ -475,7 +318,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             }
             if (detached)
             {
-                reader.TrySetCanceled(token);
+                reader.TrySetCanceled(cancellationToken);
             }
         }
 
@@ -486,9 +329,9 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             finally { registration.Dispose(); }
         }
 
-        internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token)
+        internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken)
         {
-            token.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             TaskCompletionSource<ReadOnlyMemory<byte>> reader;
             CancellationTokenRegistration registration;
             var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -511,12 +354,12 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                 _reader = reader;
                 // Register may invoke synchronously for an already-cancelled token.
                 // The lock is reentrant, and the callback only detaches this reader.
-                registration = token.Register(static state =>
+                registration = cancellationToken.Register(static state =>
                 {
                     var (owner, pending, cancellation) =
                         ((Owner, TaskCompletionSource<ReadOnlyMemory<byte>>, CancellationToken))state!;
                     owner.CancelRead(pending, cancellation);
-                }, (this, reader, token));
+                }, (this, reader, cancellationToken));
                 _publicReads.Add(finished.Task);
             }
             // Registration disposal may wait for a callback acquiring _sync.
@@ -532,9 +375,9 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             return publicRead;
         }
 
-        internal Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken token)
+        internal Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken)
         {
-            token.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
             {
@@ -558,12 +401,12 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                 ScheduleLocked(() =>
                 {
                     Exception? failure = null;
-                    bool cancelled = token.IsCancellationRequested;
+                    bool cancelled = cancellationToken.IsCancellationRequested;
                     try
                     {
                         if (!cancelled)
                         {
-                            _bridge.SetReport(_device, copy);
+                            _inputBridge.SetReport(_device, copy);
                         }
                     }
                     catch (Exception ex) { failure = ex; }
@@ -575,7 +418,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                             _active = false;
                         }
                     }
-                    if (cancelled) completion.TrySetCanceled(token);
+                    if (cancelled) completion.TrySetCanceled(cancellationToken);
                     else if (failure is not null) completion.TrySetException(failure);
                     else completion.TrySetResult();
                 });
@@ -631,7 +474,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             {
                 AcknowledgeInputShutdown();
             }
-            var result = _bridge.Destroy(_input);
+            var result = _inputBridge.Destroy(_input);
             if (result != HidInputResult.Ok)
             {
                 throw new InvalidOperationException($"FIDO input destroy failed: {result}");
@@ -640,8 +483,8 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
 
         private void AcknowledgeInputShutdown()
         {
-            _bridge.Cancel(_input);
-            var ack = _bridge.WaitShutdown(_input);
+            _inputBridge.Cancel(_input);
+            var ack = _inputBridge.WaitShutdown(_input);
             // FAULT reports a terminal input error but still proves native quiescence.
             if (ack is not (HidInputResult.Ok or HidInputResult.Fault))
             {
@@ -651,25 +494,25 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
 
         private void ReleaseDevice()
         {
-            if (_openAttempted && !_started && !_bridge.CloseUnstarted(_device))
+            if (_openAttempted && !_started && !_inputBridge.CloseUnstarted(_device))
             {
                 throw new InvalidOperationException("FIDO partial open close failed");
             }
             if (_device != 0)
             {
-                _bridge.ReleaseDevice(_device);
+                _inputBridge.ReleaseDevice(_device);
             }
             _device = 0;
         }
 
         private void CompleteClose()
         {
-            Exception? registrationFailure = null;
-            try { _registration?.Dispose(); }
-            catch (Exception ex) { registrationFailure = ex; }
+            Exception? physicalClaimFailure = null;
+            try { _physicalClaim?.Dispose(); }
+            catch (Exception ex) { physicalClaimFailure = ex; }
             _root.Free();
-            if (registrationFailure is null) _closed.TrySetResult();
-            else _closed.TrySetException(registrationFailure);
+            if (physicalClaimFailure is null) _closed.TrySetResult();
+            else _closed.TrySetException(physicalClaimFailure);
         }
 
         private void FailUnreleased(string message, Exception cause)
@@ -678,9 +521,9 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             var failure = new UnrecoveredConnectionException(message, cause);
             try
             {
-                if (_registration is not null)
+                if (_physicalClaim is not null)
                 {
-                    DeviceConnectionRegistry.MarkUnrecovered(_registration, failure);
+                    DeviceConnectionRegistry.MarkUnrecovered(_physicalClaim, failure);
                 }
             }
             catch (Exception observerFailure)

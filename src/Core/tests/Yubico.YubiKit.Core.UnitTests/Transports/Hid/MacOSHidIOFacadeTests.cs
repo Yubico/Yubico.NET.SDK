@@ -44,7 +44,7 @@ public class MacOSHidIOFacadeTests
         Assert.Equal(1, bridge.ReleaseCount);
     }
 
-    private sealed class Bridge : IHidInputBridge
+    private sealed class Bridge : IMacOSHidInputBridge
     {
         private Action<ReadOnlyMemory<byte>>? _report;
         public int InputSizeValue = 64;

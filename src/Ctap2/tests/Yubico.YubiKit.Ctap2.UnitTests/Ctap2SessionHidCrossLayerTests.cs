@@ -181,7 +181,7 @@ public class Ctap2SessionHidCrossLayerTests
         }
     }
 
-    private sealed class FramedFidoBridge(bool getInfoOnly = false) : IHidInputBridge
+    private sealed class FramedFidoBridge(bool getInfoOnly = false) : IMacOSHidInputBridge
     {
         private Action<ReadOnlyMemory<byte>>? _report;
         private byte[]? _continuation;

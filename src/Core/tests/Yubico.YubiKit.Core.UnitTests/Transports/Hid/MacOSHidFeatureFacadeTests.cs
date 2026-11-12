@@ -111,7 +111,7 @@ public class MacOSHidFeatureFacadeTests
         Assert.Equal(0, native.Releases);
     }
 
-    private sealed class Lifetime : IIOKitDeviceLifetime
+    private sealed class Lifetime : IMacOSHidReportApi
     {
         public bool HoldReport { get; init; }
         public int GetStatus { get; init; }

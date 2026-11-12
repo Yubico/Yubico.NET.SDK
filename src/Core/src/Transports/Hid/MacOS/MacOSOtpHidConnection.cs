@@ -18,12 +18,12 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
     internal int InputReportSize => _owner.InputReportSize;
     internal int OutputReportSize => _owner.OutputReportSize;
 
-    internal static async Task<MacOSOtpHidConnection> OpenAsync(long entryId, IIOKitDeviceLifetime lifetime,
-        CancellationToken cancellationToken, IDisposable? registration = null, bool featureMetadata = false)
+    internal static async Task<MacOSOtpHidConnection> OpenAsync(long entryId, IMacOSHidReportApi reportApi,
+        CancellationToken cancellationToken, IDisposable? physicalClaim = null, bool featureMetadata = false)
     {
         Owner owner;
-        try { owner = new Owner(entryId, lifetime, registration, featureMetadata); }
-        catch { registration?.Dispose(); throw; }
+        try { owner = new Owner(entryId, reportApi, physicalClaim, featureMetadata); }
+        catch { physicalClaim?.Dispose(); throw; }
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -68,8 +68,8 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
     private sealed class Owner
     {
         private readonly long _entryId;
-        private readonly IIOKitDeviceLifetime _lifetime;
-        private readonly IDisposable? _registration;
+        private readonly IMacOSHidReportApi _reportApi;
+        private readonly IDisposable? _physicalClaim;
         private readonly bool _featureMetadata;
         private readonly Lock _sync = new();
         private readonly AutoResetEvent _signal = new(false);
@@ -87,11 +87,11 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
         internal int InputReportSize { get; private set; }
         internal int OutputReportSize { get; private set; }
 
-        internal Owner(long entryId, IIOKitDeviceLifetime lifetime, IDisposable? registration, bool featureMetadata)
+        internal Owner(long entryId, IMacOSHidReportApi reportApi, IDisposable? physicalClaim, bool featureMetadata)
         {
             _entryId = entryId;
-            _lifetime = lifetime;
-            _registration = registration;
+            _reportApi = reportApi;
+            _physicalClaim = physicalClaim;
             _featureMetadata = featureMetadata;
             _root = GCHandle.Alloc(this);
         }
@@ -113,7 +113,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                     _pendingFailure = null;
                     _stopping = true;
                     Exception? releaseFailure = null;
-                    try { _registration?.Dispose(); }
+                    try { _physicalClaim?.Dispose(); }
                     catch (Exception ex) { releaseFailure = ex; }
                     _root.Free();
                     _signal.Dispose();
@@ -181,7 +181,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
             if (_device != 0) FailUnreleased(ex);
             else
             {
-                try { _registration?.Dispose(); }
+                try { _physicalClaim?.Dispose(); }
                 catch (Exception releaseFailure) { ex = new AggregateException(ex, releaseFailure); }
                 _root.Free();
                 _closed.TrySetException(ex);
@@ -195,40 +195,43 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
             return failure;
         }
 
-        internal Task OpenAsync(CancellationToken token)
+        internal Task OpenAsync(CancellationToken cancellationToken)
         {
             var result = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
             {
-                try { ScheduleLocked(() =>
+                try
                 {
-                    if (token.IsCancellationRequested) { result.TrySetCanceled(token); return; }
+                    ScheduleLocked(() =>
+                {
+                    if (cancellationToken.IsCancellationRequested) { result.TrySetCanceled(cancellationToken); return; }
                     try
                     {
-                        _device = _lifetime.CreateDevice(_entryId);
+                        _device = _reportApi.CreateDevice(_entryId);
                         if (_device == 0) throw new InvalidOperationException("IOHIDDeviceCreate returned null.");
-                        var status = _lifetime.OpenDeviceResult(_device);
+                        var status = _reportApi.OpenDeviceResult(_device);
                         // Apple's IOHIDDeviceClass marks both success and exclusive-access as opened.
                         _opened = status == 0 || status == unchecked((int)0xE00002C5);
                         if (status != 0)
                             throw new PlatformApiException("IOHIDDeviceOpen", status, "Failed to open OTP HID device.");
                         if (_featureMetadata)
                         {
-                            InputReportSize = _lifetime.GetIntProperty(_device, IOKitHidConstants.MaxInputReportSize);
-                            OutputReportSize = _lifetime.GetIntProperty(_device, IOKitHidConstants.MaxOutputReportSize);
+                            InputReportSize = _reportApi.GetIntProperty(_device, IOKitHidConstants.MaxInputReportSize);
+                            OutputReportSize = _reportApi.GetIntProperty(_device, IOKitHidConstants.MaxOutputReportSize);
                         }
                         result.TrySetResult();
                     }
                     catch (Exception ex) { result.TrySetException(ex); }
-                }, ex => result.TrySetException(ex)); }
+                }, ex => result.TrySetException(ex));
+                }
                 catch (Exception ex) { result.TrySetException(ex); }
             }
             return result.Task;
         }
 
-        internal Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken token, bool expert = false)
+        internal Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken, bool expert = false)
         {
-            token.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             if (!expert && report.Length != 8) throw new ArgumentException("OTP feature report must be exactly 8 bytes.", nameof(report));
             var result = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
@@ -241,12 +244,12 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                     ScheduleLocked(() =>
                     {
                         Exception? error = null;
-                        bool cancelled = token.IsCancellationRequested;
+                        bool cancelled = cancellationToken.IsCancellationRequested;
                         try
                         {
                             if (!cancelled)
                             {
-                                var status = _lifetime.SetFeatureReport(_device, copy);
+                                var status = _reportApi.SetFeatureReport(_device, copy);
                                 if (status != 0) throw new PlatformApiException("IOHIDDeviceSetReport", status, "Failed to set OTP feature report.");
                             }
                         }
@@ -256,7 +259,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                             CryptographicOperations.ZeroMemory(copy);
                             lock (_sync) _active = false;
                         }
-                        if (cancelled) result.TrySetCanceled(token);
+                        if (cancelled) result.TrySetCanceled(cancellationToken);
                         else if (error is not null) result.TrySetException(error);
                         else result.TrySetResult();
                     }, ex =>
@@ -275,26 +278,28 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
             return result.Task;
         }
 
-        internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token, bool expert = false)
+        internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken, bool expert = false)
         {
-            token.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             var result = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
             byte[]? report = null;
             lock (_sync)
             {
                 Admit();
                 _active = true;
-                try { ScheduleLocked(() =>
+                try
+                {
+                    ScheduleLocked(() =>
                 {
                     Exception? error = null;
-                    bool cancelled = token.IsCancellationRequested;
+                    bool cancelled = cancellationToken.IsCancellationRequested;
                     try
                     {
                         if (!cancelled)
                         {
                             report = new byte[8];
                             long length = report.Length;
-                            var status = _lifetime.GetFeatureReport(_device, report, ref length);
+                            var status = _reportApi.GetFeatureReport(_device, report, ref length);
                             if (status != 0) throw new PlatformApiException("IOHIDDeviceGetReport", status, "Failed to get OTP feature report.");
                             ValidateReportLength(length, expert);
                         }
@@ -306,12 +311,13 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                             CryptographicOperations.ZeroMemory(report);
                         lock (_sync) _active = false;
                     }
-                    CompleteReceive(result, report, error, cancelled, token);
+                    CompleteReceive(result, report, error, cancelled, cancellationToken);
                 }, ex =>
                 {
                     if (report is not null) CryptographicOperations.ZeroMemory(report);
                     result.TrySetException(ex);
-                }); }
+                });
+                }
                 catch
                 {
                     _active = false;
@@ -328,9 +334,9 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
         }
 
         private static void CompleteReceive(TaskCompletionSource<ReadOnlyMemory<byte>> result, byte[]? report,
-            Exception? error, bool cancelled, CancellationToken token)
+            Exception? error, bool cancelled, CancellationToken cancellationToken)
         {
-            if (cancelled) result.TrySetCanceled(token);
+            if (cancelled) result.TrySetCanceled(cancellationToken);
             else if (error is not null) result.TrySetException(error);
             else if (report is null) result.TrySetException(new InvalidOperationException("Native GET returned no report."));
             else result.TrySetResult(report);
@@ -362,13 +368,13 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
             {
                 if (_device != 0)
                 {
-                    if (_opened && !_lifetime.CloseDeviceChecked(_device))
+                    if (_opened && !_reportApi.CloseDeviceChecked(_device))
                         throw new InvalidOperationException("OTP native close was not proven.");
-                    _lifetime.ReleaseCFObject(_device);
+                    _reportApi.ReleaseCFObject(_device);
                     _device = 0;
                 }
                 Exception? releaseError = null;
-                try { _registration?.Dispose(); }
+                try { _physicalClaim?.Dispose(); }
                 catch (Exception ex) { releaseError = ex; }
                 _root.Free();
                 if (releaseError is null) _closed.TrySetResult();
@@ -382,7 +388,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
             var failure = new UnrecoveredConnectionException("macOS OTP native release was not proven", error);
             try
             {
-                if (_registration is not null) DeviceConnectionRegistry.MarkUnrecovered(_registration, failure);
+                if (_physicalClaim is not null) DeviceConnectionRegistry.MarkUnrecovered(_physicalClaim, failure);
             }
             catch (Exception observerError)
             {

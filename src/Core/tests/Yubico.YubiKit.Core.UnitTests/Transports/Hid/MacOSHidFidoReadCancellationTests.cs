@@ -121,7 +121,7 @@ public class MacOSHidFidoReadCancellationTests
         Assert.Equal(1, bridge.ReleaseCount);
     }
 
-    private sealed class ControlledBridge : IHidInputBridge
+    private sealed class ControlledBridge : IMacOSHidInputBridge
     {
         private Action<ReadOnlyMemory<byte>>? _report;
         public readonly TaskCompletionSource AckEntered = new(TaskCreationOptions.RunContinuationsAsynchronously);

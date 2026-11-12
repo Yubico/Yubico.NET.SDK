@@ -16,14 +16,14 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 {
     private readonly MacOSFidoHidConnection _connection;
 
-    public MacOSHidIOReportConnection(long entryId) : this(entryId, new NativeHidInputBridge()) { }
+    public MacOSHidIOReportConnection(long entryId) : this(entryId, new MacOSHidInputBridge()) { }
 
-    internal MacOSHidIOReportConnection(long entryId, IHidInputBridge bridge)
+    internal MacOSHidIOReportConnection(long entryId, IMacOSHidInputBridge inputBridge)
     {
         // This direct report API intentionally blocks the caller while its worker owns native open.
         try
         {
-            _connection = MacOSFidoHidConnection.OpenAsync(entryId, bridge, CancellationToken.None)
+            _connection = MacOSFidoHidConnection.OpenAsync(entryId, inputBridge, CancellationToken.None)
                 .GetAwaiter().GetResult();
         }
         catch (InvalidOperationException ex) when (ex is not UnrecoveredConnectionException)

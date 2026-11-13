@@ -87,7 +87,6 @@ internal static class AuthenticationProtocol
     /// </summary>
     /// <param name="managementKey">The management key bytes. Length must match <paramref name="managementKeyType"/>.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <param name="pool">The pool for this operation's working buffers; defaults to the shared pool.</param>
     /// <exception cref="ArgumentException">Thrown if the management key is the wrong length.</exception>
     /// <exception cref="ApduException">Thrown if authentication fails.</exception>
     /// <remarks>
@@ -103,10 +102,8 @@ internal static class AuthenticationProtocol
         IBackend backend,
         KeyType managementKeyType,
         ReadOnlyMemory<byte> managementKey,
-        CancellationToken cancellationToken = default,
-        ArrayPool<byte>? pool = null)
+        CancellationToken cancellationToken = default)
     {
-        pool ??= ArrayPool<byte>.Shared;
         Logger.LogDebug("PIV: Starting management key authentication with {KeyType}", managementKeyType);
 
         // Validate key length based on management key type
@@ -124,7 +121,7 @@ internal static class AuthenticationProtocol
         int challengeLength = managementKeyType == KeyType.TripleDes ? DesBlockSize : AesBlockSize;
 
 
-        var keyBytes = pool.Rent(expectedKeyLength);
+        var keyBytes = ArrayPool<byte>.Shared.Rent(expectedKeyLength);
         try
         {
             managementKey.CopyTo(keyBytes);
@@ -147,18 +144,18 @@ internal static class AuthenticationProtocol
 
             try
             {
-                decryptedWitness = pool.Rent(challengeLength);
+                decryptedWitness = ArrayPool<byte>.Shared.Rent(challengeLength);
                 DecryptBlock(keyBytes.AsSpan(0, expectedKeyLength), witnessBytes, decryptedWitness.AsSpan(0, challengeLength), managementKeyType);
 
                 // Step 3: Generate our challenge
-                challenge = pool.Rent(challengeLength);
+                challenge = ArrayPool<byte>.Shared.Rent(challengeLength);
                 RandomNumberGenerator.Fill(challenge.AsSpan(0, challengeLength));
 
                 // Step 4: Build and send response with decrypted witness and our challenge
                 // Send: 7C [len] 80 [len] [decrypted witness] 81 [len] [challenge]
                 // Max size: 1 (tag) + 3 (BER len) + 1 (tag) + 3 (BER len) + challengeLength + 1 (tag) + 3 (BER len) + challengeLength
                 int responseSize = AuthenticationHeaderLength + (2 * challengeLength);
-                responseBuffer = pool.Rent(responseSize);
+                responseBuffer = ArrayPool<byte>.Shared.Rent(responseSize);
                 int bytesWritten = BuildAuthResponse(decryptedWitness.AsSpan(0, challengeLength), challenge.AsSpan(0, challengeLength), responseBuffer.AsSpan(0, responseSize));
                 var challengeCommand = new ApduCommand(Cla, InsAuthenticate, algorithmId, KeyReference.Management, responseBuffer.AsMemory(0, bytesWritten));
                 var challengeResponse = await backend.SendAsync(challengeCommand, throwOnError: false, cancellationToken).ConfigureAwait(false);
@@ -168,7 +165,7 @@ internal static class AuthenticationProtocol
                 encryptedChallenge = ParseAndClearAuthResponse(challengeResponse, TagAuthResponse, challengeLength);
 
                 // Encrypt our challenge and compare
-                expectedResponse = pool.Rent(challengeLength);
+                expectedResponse = ArrayPool<byte>.Shared.Rent(challengeLength);
                 EncryptBlock(keyBytes.AsSpan(0, expectedKeyLength), challenge.AsSpan(0, challengeLength), expectedResponse.AsSpan(0, challengeLength), managementKeyType);
 
                 if (!CryptographicOperations.FixedTimeEquals(encryptedChallenge, expectedResponse.AsSpan(0, challengeLength)))
@@ -187,23 +184,23 @@ internal static class AuthenticationProtocol
                 if (decryptedWitness is not null)
                 {
                     CryptographicOperations.ZeroMemory(decryptedWitness.AsSpan(0, challengeLength));
-                    pool.Return(decryptedWitness);
+                    ArrayPool<byte>.Shared.Return(decryptedWitness);
                 }
                 if (challenge is not null)
                 {
                     CryptographicOperations.ZeroMemory(challenge.AsSpan(0, challengeLength));
-                    pool.Return(challenge);
+                    ArrayPool<byte>.Shared.Return(challenge);
                 }
                 if (responseBuffer is not null)
                 {
                     int responseSize = AuthenticationHeaderLength + (2 * challengeLength);
                     CryptographicOperations.ZeroMemory(responseBuffer.AsSpan(0, responseSize));
-                    pool.Return(responseBuffer);
+                    ArrayPool<byte>.Shared.Return(responseBuffer);
                 }
                 if (expectedResponse is not null)
                 {
                     CryptographicOperations.ZeroMemory(expectedResponse.AsSpan(0, challengeLength));
-                    pool.Return(expectedResponse);
+                    ArrayPool<byte>.Shared.Return(expectedResponse);
                 }
             }
         }
@@ -211,7 +208,7 @@ internal static class AuthenticationProtocol
         {
             // Zero sensitive data
             CryptographicOperations.ZeroMemory(keyBytes.AsSpan(0, expectedKeyLength));
-            pool.Return(keyBytes);
+            ArrayPool<byte>.Shared.Return(keyBytes);
         }
     }
 

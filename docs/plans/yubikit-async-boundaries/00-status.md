@@ -22,8 +22,10 @@ C1/C2 is implemented in the consistency follow-up: macOS report seams/bridge and
 native owners occupy matching files; PC/SC connection/owner names are aligned;
 Linux supporting seams are split. The scanner retains 245 sites with 229 unchanged
 identities and 16 one-to-one mappings, without acceptance-status promotion. The
-separately reviewed PIV clearing-test correction (#773) is a verification prerequisite;
-it observes cleanup before pool return rather than reading reused storage afterward.
+separately reviewed PIV test correction (#773) is a verification prerequisite;
+it retains recovery and owned-response clearing assertions without reading command
+storage after pool return. At the user's review request, the original production
+authentication method is restored and no injected-pool test seam is retained.
 The [Mac handoff](../../research/adapter-consistency-macos-handoff.md) records exact
 commands and evidence limits for later execution. The user approved Linux delivery
 now, with Mac native/hardware and a separately prepared native-AOT VM to follow.

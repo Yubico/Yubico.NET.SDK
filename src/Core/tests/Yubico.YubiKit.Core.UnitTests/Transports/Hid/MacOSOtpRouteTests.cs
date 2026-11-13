@@ -21,7 +21,7 @@ public class MacOSOtpRouteTests
             UsagePage = 1,
             Usage = 6
         };
-        var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), otpLifetime: native);
+        var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), macOSReportApi: native);
         var device = new YubiKeyDevice(slot.InterfaceId, smartCard: null, hidFido: null,
             hidOtp: slot, deviceInfo: null);
 
@@ -294,7 +294,7 @@ public class MacOSOtpRouteTests
             UsagePage = 1,
             Usage = 6
         };
-        var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), otpLifetime: native);
+        var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), macOSReportApi: native);
         var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId], TestContext.Current.CancellationToken);
         var opening = slot.OpenRegisteredConnectionAsync(claim, TestContext.Current.CancellationToken);
         Assert.True(DeviceConnectionRegistry.IsInUse(slot.InterfaceId));
@@ -326,7 +326,7 @@ public class MacOSOtpRouteTests
         public void Dispose() => Disposed = true;
     }
 
-    private sealed class Lifetime : IIOKitDeviceLifetime
+    private sealed class Lifetime : IMacOSHidReportApi
     {
         public ManualResetEventSlim AllowOpen { get; } = new(false);
         public ManualResetEventSlim InSet { get; } = new(false);

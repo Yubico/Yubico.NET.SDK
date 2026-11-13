@@ -1,0 +1,1107 @@
+{
+  "captured_utc": "2026-11-13T10:17:57.786541+00:00",
+  "audited_parent": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "incoming_parent": "e322712d609aaf03b9bd1cf2964a99326728866a",
+  "merge_base": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "integration_worktree": "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113",
+  "primary_worktree": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "incoming_change_records": 126,
+  "overlap_records": 19,
+  "incoming_changes": [
+    {
+      "status": "M",
+      "paths": [
+        ".github/workflows/build.yml"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "2026-09-21-yubikit-async-boundaries-ISA.md"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "CLAUDE.md"
+      ],
+      "audited_paths": [
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "docs/SDK-HOUSE-STYLE.md"
+      ],
+      "audited_paths": [
+        "docs/SDK-HOUSE-STYLE.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "docs/architecture/raw-access-tiers.md"
+      ],
+      "audited_paths": [
+        "docs/architecture/raw-access-tiers.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "docs/plans/yubikit-async-boundaries/00-status.md"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "docs/plans/yubikit-async-boundaries/02-architecture.md"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "docs/research/adapter-consistency-macos-handoff.md"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "docs/research/windows-async-native-acceptance.md"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "scripts/toolchain/BuildTargets.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "scripts/toolchain/WindowsHidVerification/PublicationSeal.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "scripts/toolchain/WindowsHidVerification/RequiredNativeChecks.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/CLAUDE.md"
+      ],
+      "audited_paths": [
+        "src/Core/CLAUDE.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/README.md"
+      ],
+      "audited_paths": [
+        "src/Core/README.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Devices/HidConnectionSlot.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Devices/HidConnectionSlot.cs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Native/Windows/HidD/HidD.Interop.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Native/Windows/HidD/HidD.Interop.cs"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Native/Windows/Kernel32/WindowsHidSafeHandle.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidNativeApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReadRegistration.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReadinessNative.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidPollOutcome.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidReadinessNative.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidUdevEvent.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "R078",
+      "paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/IMacOSHidInputBridge.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "R053",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+        "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidNativeOwner.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidInputBridge.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidNativeOwner.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsFidoHidConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsHidInterface.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsHidOverlappedOperation.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsOtpHidConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/ISCardApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/NativeSCardApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/NativeSCardConnectionApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/PcscConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "R056",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+        "src/Core/src/Transports/SmartCard/PcscConnectionNativeOwner.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs"
+      ],
+      "audited_paths": [
+        "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/src/Yubico.YubiKit.Core.csproj"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventLifecycleTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScannerWindowsCompletionTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/CrossLayerAcceptanceTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/adapter-contracts.v1.json"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/core-boundaries.v1.json"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsFidoHidRoutingTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsOtpHidRoutingTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsRoutingApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsRoutingContract.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRecoveryTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoDirectFacadeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoHidNativeOwnerTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoPreparationFailureTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidFeatureReportApiTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidReportApiTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidSafeHandleTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpDirectFacadeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpHidNativeOwnerTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpLifetimeTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsRoutingDirectContract.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscIsolatedProbe.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs"
+      ],
+      "audited_paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs"
+      ]
+    },
+    {
+      "status": "R082",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/UsbSmartCardConnectionTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscContextIsolationTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardConnectionFactoryTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs"
+      ],
+      "audited_paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionWindowsCrossLayerTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/WindowsCtapReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Piv/CLAUDE.md"
+      ],
+      "audited_paths": [
+        "src/Piv/CLAUDE.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Piv/README.md"
+      ],
+      "audited_paths": [
+        "src/Piv/README.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionWindowsCrossLayerTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/EVIDENCE.md"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/Evidence.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/EvidenceGateTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/NativePipeFixture.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/NativeScenarios.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/ObservedReportApi.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/Program.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/PublicationSealTests.cs"
+      ],
+      "audited_paths": []
+    },
+    {
+      "status": "A",
+      "paths": [
+        "verification/WindowsHidRouteVerification/WindowsHidRouteVerification.csproj"
+      ],
+      "audited_paths": []
+    }
+  ],
+  "merge_preview": {
+    "exit_code": 1,
+    "tree": "0d9a3ad551951d4e91e6797ce36709e71f3c6fdd",
+    "conflicts": [
+      "CLAUDE.md",
+      "docs/architecture/raw-access-tiers.md",
+      "src/Core/src/Devices/HidConnectionSlot.cs",
+      "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs",
+      "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs",
+      "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "src/Piv/README.md"
+    ],
+    "scope": "Object-database preview only; no worktree/index merge or acceptance"
+  },
+  "protected_user_files": [
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/audit-v2-closeout-review.md",
+      "bytes": 100083,
+      "sha256": "5d202be1fac5d44639e2397a52fed4012750969f821bb2949e09037ee6e3b59f"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/audit-v2-execution.md",
+      "bytes": 13698,
+      "sha256": "25314620a507cf38ed23c3496830b38c03224f5c96572de3b0931ca2499cf75e"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/audit-v2-jira-traceability.md",
+      "bytes": 9964,
+      "sha256": "fffe230424d3983bf8f6c89ebfee41851bc677e84db4bb89f268820b8a35ea71"
+    },
+    {
+      "path": "/home/rupicola/Code/y/Yubico.Yubikit.NET/mise.toml",
+      "bytes": 22,
+      "sha256": "f7acb0a4b4f38b5ea99bc9310145cfcc93bd74f6ff7bcdde41a21706889bb91d"
+    }
+  ],
+  "audit_product_map_sha256": "2626e78f146a0dc1d28f8604632e33a58891a98a13a5c1cb2b7d9ed90225b14b",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "git-version.stdout.txt",
+      "stdout_sha256": "c9e40977101870d17ec3a0ac1e444ceb5e268d1c0a37d6edd8a5ed477734a53c",
+      "stderr": "git-version.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+        "e322712d609aaf03b9bd1cf2964a99326728866a"
+      ],
+      "exit_code": 0,
+      "stdout": "merge-base.stdout.txt",
+      "stdout_sha256": "e134c05e644aab26fd27c871ed7634f3eca197284b2b5e57bb44373920978350",
+      "stderr": "merge-base.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "rev-list",
+        "--left-right",
+        "--count",
+        "d5d01ef99f1478e4d49911194c17667b2450d2fd...e322712d609aaf03b9bd1cf2964a99326728866a"
+      ],
+      "exit_code": 0,
+      "stdout": "divergence.stdout.txt",
+      "stdout_sha256": "b6de3f938f8939f171343fb464392930e07899daa483e96cfd702f6646413371",
+      "stderr": "divergence.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "log",
+        "--format=%H %P %s",
+        "d5d01ef99f1478e4d49911194c17667b2450d2fd..e322712d609aaf03b9bd1cf2964a99326728866a"
+      ],
+      "exit_code": 0,
+      "stdout": "incoming-log.stdout.txt",
+      "stdout_sha256": "f654ff2770b6647bccf7f2cc2bc532d00dee4a89a930ce551f45e19fa40ea4df",
+      "stderr": "incoming-log.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--name-status",
+        "--find-renames",
+        "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+        "e322712d609aaf03b9bd1cf2964a99326728866a"
+      ],
+      "exit_code": 0,
+      "stdout": "incoming-paths.stdout.txt",
+      "stdout_sha256": "ca5cff8a92fc49d7028f2ce7093146c0d3fd31e7fc6126b061adcf14ba9e2b89",
+      "stderr": "incoming-paths.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--stat",
+        "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+        "e322712d609aaf03b9bd1cf2964a99326728866a"
+      ],
+      "exit_code": 0,
+      "stdout": "incoming-stat.stdout.txt",
+      "stdout_sha256": "2029e229e2470be5f2d836bf54e722c1a0f3bdb144abdb62f86c83b4612fbcf1",
+      "stderr": "incoming-stat.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "gh",
+        "pr",
+        "view",
+        "771",
+        "--repo",
+        "Yubico/Yubico.NET.SDK",
+        "--json",
+        "number,title,state,isDraft,body,baseRefName,headRefName,headRefOid,mergeCommit,mergedAt,updatedAt,url,statusCheckRollup"
+      ],
+      "exit_code": 0,
+      "stdout": "pr-771.stdout.txt",
+      "stdout_sha256": "7bf87c8f77a48ec59afbce7974fd51f7d63b0745e29e26663d6a4f5250760e52",
+      "stderr": "pr-771.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "gh",
+        "pr",
+        "view",
+        "774",
+        "--repo",
+        "Yubico/Yubico.NET.SDK",
+        "--json",
+        "number,title,state,isDraft,body,baseRefName,headRefName,headRefOid,mergeCommit,mergedAt,updatedAt,url,statusCheckRollup"
+      ],
+      "exit_code": 0,
+      "stdout": "pr-774.stdout.txt",
+      "stdout_sha256": "eb0eee024de109afc81c10975c3e5e70dcb5ab8fe7eb270116d3b89594550b74",
+      "stderr": "pr-774.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "merge-tree",
+        "--write-tree",
+        "--name-only",
+        "--messages",
+        "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+        "e322712d609aaf03b9bd1cf2964a99326728866a"
+      ],
+      "exit_code": 1,
+      "stdout": "merge-preview.stdout.txt",
+      "stdout_sha256": "ac78d977902818ad790cebd23faa057b10d586a15b897949a3613d6d308ae3f5",
+      "stderr": "merge-preview.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

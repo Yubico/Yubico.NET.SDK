@@ -18,13 +18,13 @@ internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 {
     private readonly MacOSOtpHidConnection _connection;
 
-    public MacOSHidFeatureReportConnection(long entryId) : this(entryId, IOKitDeviceLifetime.Instance) { }
+    public MacOSHidFeatureReportConnection(long entryId) : this(entryId, MacOSHidReportApi.Instance) { }
 
-    internal MacOSHidFeatureReportConnection(long entryId, IIOKitDeviceLifetime lifetime)
+    internal MacOSHidFeatureReportConnection(long entryId, IMacOSHidReportApi reportApi)
     {
         // The public report API is synchronous; the native open and any partial-open cleanup
         // still belong to the same worker as report I/O and checked shutdown.
-        _connection = MacOSOtpHidConnection.OpenAsync(entryId, lifetime, CancellationToken.None,
+        _connection = MacOSOtpHidConnection.OpenAsync(entryId, reportApi, CancellationToken.None,
             featureMetadata: true).GetAwaiter().GetResult();
     }
 

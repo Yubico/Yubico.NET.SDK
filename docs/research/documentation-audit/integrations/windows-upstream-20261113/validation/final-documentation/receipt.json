@@ -1,0 +1,36 @@
+{
+  "actor": "GPT-6.1 Sol",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "docs-qa",
+    "docs-architecture"
+  ],
+  "candidate_tree": "5dcd089144393515641dd94130b1ecdac92bfeca",
+  "exit_code": 0,
+  "finished_utc": "2026-11-13T11:26:12.194029+00:00",
+  "files": [
+    {
+      "path": "console.txt",
+      "bytes": 1461,
+      "sha256": "289c8cc877a13b955b4b5dc85f8bb47b81113ac06dff93a59b35140621a968dd"
+    },
+    {
+      "path": "toolchain/result.json",
+      "bytes": 585,
+      "sha256": "6e91a55b5606f952cf8fb7a2133d0b119e4f0df18122ab3a013097c83fa8074f"
+    },
+    {
+      "path": "toolchain/result.txt",
+      "bytes": 390,
+      "sha256": "e7c49d9ed76f3681052b01cd7d3fee10d797ae41c47fbdfcc708d4af49764d75"
+    },
+    {
+      "path": "toolchain/run.log",
+      "bytes": 1811,
+      "sha256": "7e605d934d5a4599d3e70fd89ef130a1cdef6c0e0c10ad50a3c9b8c5432e9ff7"
+    }
+  ]
+}

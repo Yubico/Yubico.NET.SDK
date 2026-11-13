@@ -1,0 +1,25 @@
+# dotnet toolchain.cs -- windows-hid-verification-evidence-test
+# started:   2026-11-13 12:18:26 +01:00
+# directory: /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113
+# git:       yubikit-windows-audit-integration-20261113 @ d5d01ef99 (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: windows-hid-verification-evidence-test  (log: artifacts/toolchain/runs/20261113-121826-911-windows-hid-verification-evidence-test/run.log)
+
+▶ target: windows-hid-verification-build
+▶ RUN dotnet build verification/WindowsHidRouteVerification/WindowsHidRouteVerification.csproj -c Release -p:PublishAot=false
+  output: artifacts/toolchain/runs/20261113-121826-911-windows-hid-verification-evidence-test/01-windows-hid-verification-build.log
+
+▶ target: windows-hid-verification-evidence-test
+▶ RUN dotnet verification/WindowsHidRouteVerification/bin/Release/net10.0/WindowsHidRouteVerification.dll --evidence-self-test
+  output: artifacts/toolchain/runs/20261113-121826-911-windows-hid-verification-evidence-test/02-windows-hid-evidence-test.log
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- windows-hid-verification-evidence-test)
+Targets:
+  ✓ windows-hid-verification-build             1.3s
+  ✓ windows-hid-verification-evidence-test     0.1s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121826-911-windows-hid-verification-evidence-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

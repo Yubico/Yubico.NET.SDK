@@ -1,0 +1,11 @@
+{
+  "production_path": "src/Piv/src/Authentication/AuthenticationProtocol.cs",
+  "candidate_blob": "eed0152966b89f8627c4749daa359d2c65b92f59",
+  "incoming_blob": "526c5da214546c1655ab8f36e2f7e95831cfdbf0",
+  "candidate_equals_audited_documentation_bearing_blob": true,
+  "noncomment_lines_equal_incoming_rollback": true,
+  "incoming_response_only_test_path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs",
+  "test_equals_incoming": true,
+  "scope": "Static PIV rollback reconciliation, no pool clearing runtime oracle or physical acceptance",
+  "prior_attempt": "Production comparisons passed; guessed test path omitted Authentication/ and raised FileNotFoundError. Re-ran with discovered actual path; no files changed."
+}

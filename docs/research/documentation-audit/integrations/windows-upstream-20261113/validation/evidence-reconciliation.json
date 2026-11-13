@@ -1,0 +1,366 @@
+{
+  "actor": "GPT-6.1 Sol",
+  "platform": "Linux integration host",
+  "runtime_execution": "none in this reconciliation",
+  "source_files": 1363,
+  "source_fingerprint": "c05c4010789edd3424ec62dc143c68bb3fa3cdc36cacc2eef4069c27d6e82b02",
+  "formatter_membership": [
+    {
+      "command": [
+        "dotnet",
+        "msbuild",
+        "src/Core/src/Yubico.YubiKit.Core.csproj",
+        "-getItem:Compile"
+      ],
+      "included_actual_documents": [
+        "src/Core/src/Devices/RegisteredConnections.cs",
+        "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+        "src/Core/src/Devices/HidConnectionSlot.cs",
+        "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+        "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs",
+        "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs",
+        "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs",
+        "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs",
+        "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs",
+        "src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs",
+        "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs",
+        "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+        "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+        "src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs",
+        "src/Core/src/Native/Windows/HidD/HidD.Interop.cs"
+      ],
+      "evaluated_compile_items": 333
+    },
+    {
+      "command": [
+        "dotnet",
+        "msbuild",
+        "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj",
+        "-getItem:Compile"
+      ],
+      "included_actual_documents": [
+        "verification/LinuxHidRouteVerification/BlockingReportConnection.cs"
+      ],
+      "evaluated_compile_items": 10
+    }
+  ],
+  "inventory": {
+    "source_sites": 245,
+    "operations": 59,
+    "unique_profile_links": 104,
+    "public_required_entries": 31,
+    "public_rows": 31,
+    "status": "documented/outstanding; passing scanner is not native verification",
+    "execution_evidence": "ordinary-unit-suite/toolchain/03-test-Core.UnitTests.log; actual scan explicitly observed, 2236 succeeded, zero failures",
+    "migration": "229 unchanged / 16 mapped is received historical identity mapping, not a new dynamic scan count"
+  },
+  "api_snapshots": [
+    {
+      "path": "src/Core/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/Core/src/PublicAPI.Unshipped.txt",
+      "sha256": "e993cf43c205ac7c8abc62afd1065e5acb16f7c1b7d6b1012f4954abe20dce76"
+    },
+    {
+      "path": "src/Ctap2/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/Ctap2/src/PublicAPI.Unshipped.txt",
+      "sha256": "c50ce758af58fac75685c66fb1bca2355094ecf02b1411008818ced5fe161ef5"
+    },
+    {
+      "path": "src/Management/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/Management/src/PublicAPI.Unshipped.txt",
+      "sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca"
+    },
+    {
+      "path": "src/Oath/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/Oath/src/PublicAPI.Unshipped.txt",
+      "sha256": "6ff0aceee9b2790ead7d04c799fcfaaeb437fffd5b94f8f2e8ce89d04f6ec69e"
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/OpenPgp/src/PublicAPI.Unshipped.txt",
+      "sha256": "6e61a840e34d8de4844df2b62cc003ed0aa42bf971909625bb8dd78449838bdf"
+    },
+    {
+      "path": "src/Piv/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/Piv/src/PublicAPI.Unshipped.txt",
+      "sha256": "47a8ec228596fa558c78ec5e3ac2b6c41de81c1449092b7f01ee0a19127a4ecd"
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+      "sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718"
+    },
+    {
+      "path": "src/WebAuthn/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/WebAuthn/src/PublicAPI.Unshipped.txt",
+      "sha256": "58bf398b569712e8c7fd2cc4331daac4d03eee568e4537c01fcfc1e1f6329c41"
+    },
+    {
+      "path": "src/YubiHsm/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/YubiHsm/src/PublicAPI.Unshipped.txt",
+      "sha256": "c747c2d97a421a88ea1c0bacb66558d3fec954536b33d4b645143705476b08ca"
+    },
+    {
+      "path": "src/YubiOtp/src/PublicAPI.Shipped.txt",
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/YubiOtp/src/PublicAPI.Unshipped.txt",
+      "sha256": "9e930e713f6a10ae8008796c7903df33868949b7875dd1084ee06acea8ffbc47"
+    }
+  ],
+  "api_parent_comparison": "All 20 byte-identical to audited HEAD; incoming differs only by the three accepted Core Base32 public entries.",
+  "incoming_api_diff": "diff --git c/src/Core/src/PublicAPI.Unshipped.txt w/src/Core/src/PublicAPI.Unshipped.txt\nindex aecd8ad8d..e16b5c9b2 100644\n--- c/src/Core/src/PublicAPI.Unshipped.txt\n+++ w/src/Core/src/PublicAPI.Unshipped.txt\n@@ -66,6 +66,9 @@ Yubico.YubiKit.Core.Devices.YubiKeyMonitor\n Yubico.YubiKit.Core.Devices.YubiKeyMonitor.DisposeAsync() -> System.Threading.Tasks.ValueTask\n Yubico.YubiKit.Core.Devices.YubiKeyMonitor.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.Devices.DeviceChange!>!\n \n+Yubico.YubiKit.Core.Utilities.Base32\n+static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded) -> byte[]!\n+static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded, System.Span<byte> destination) -> int\n Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Clear() -> void\n \n Yubico.YubiKit.Core.Abstractions.IApplicationSession\n",
+  "packages": [
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.Core.1.0.0.nupkg",
+      "sha256": "d2beeb75dd0085a1e4f1fe22866b076a1ac5ebb14258bd979312c6844996ac86",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.Core.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.Ctap2.1.0.0.nupkg",
+      "sha256": "ea79c5f5c78cd4db84a49171b5dc58693e433d3c0805ce9cb48c072bcd819292",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.Ctap2.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "38094b395d2eb392765ea581fb6e0dfe49187a3bbd2905510b6a4be6ae37580b"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.Management.1.0.0.nupkg",
+      "sha256": "73553c775c5a8c3fcfb646129f24bb0125c10cd2383a92023de3b25f98d01c61",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.Management.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "73bc1e69e8b940fd7e0618edf4473d3d1e294979861a9a67939198cddb2538f4"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.Oath.1.0.0.nupkg",
+      "sha256": "c3979b0cff0298e53bfa6f9d49f6648e6e83e0e63cff28d4d7823536b6b8cee1",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.Oath.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "90f3674ce3f939f07fe1dc160e0894d490cb3cb334cabc3bc3d20a9afe72f41b"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.OpenPgp.1.0.0.nupkg",
+      "sha256": "47d82742c58c0b24ffa69b24ed42ac51650da70f272a8e0f00d7b0f74420ca22",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.OpenPgp.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "d338553080f85c7fe97b95dad19831bb7aa5e18d48f784fe86b8694d748c2cfd"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.Piv.1.0.0.nupkg",
+      "sha256": "52ba1fc49e2cc474cdbf0824f88d4eea5f2ebe109505c87f98b07c77a165198d",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.Piv.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "21856af4f59d44bd83c204aef7a505c6ffcf0a14b8aa7dfab02d26da22f0eb70"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.SecurityDomain.1.0.0.nupkg",
+      "sha256": "cbfdffcacfbfcb4c23a6312e679745b5761505cabe1e384f13c3348e43235814",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.SecurityDomain.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "854d204ed4b648c436209aba6b87f055a0133b92a458a0b5f597bb8375386b9b"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.WebAuthn.1.0.0.nupkg",
+      "sha256": "49686d3874911c672e7b8fc190da42fe6728dae5e2270b1969b66591c1e4f530",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.WebAuthn.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "6c7ec48109b88969b9c4c330c7b8fc05e32834c5953703323b0ab2366e5a1647"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.YubiHsm.1.0.0.nupkg",
+      "sha256": "bad907e845c27bafcb98e898d402d3f955ed031738045f864b8fbbc2639ab7c6",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.YubiHsm.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "541a09f386cf4040d2062a18634c50c8c9a4559f2f58536bac2f806b9b89cdb4"
+    },
+    {
+      "path": "artifacts/packages/Yubico.YubiKit.YubiOtp.1.0.0.nupkg",
+      "sha256": "1690f83e4a39b2fad05c8483219983f3b0b2227ca8906d19101b8eb0f65f750d",
+      "xml": [
+        "lib/net10.0/Yubico.YubiKit.YubiOtp.xml"
+      ],
+      "readme": [
+        "README.md"
+      ],
+      "readme_sha256": "2c763883c8590fe486807cde76b967e52596f5b9520aa91375ff66d3a6a427cc"
+    }
+  ],
+  "retained_results": [
+    {
+      "label": "verifier-build",
+      "receipt_sha256": "f9460c1d201d7bded315c2433cb9a96770db87d5b8b10e33d6a72a4fa10b530f",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "--",
+        "build",
+        "--project",
+        "Yubico.YubiKit.WindowsMerge20261113.VerifierCompile",
+        "--clean"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 6
+    },
+    {
+      "label": "clean-solution-build",
+      "receipt_sha256": "db4a8cb70967cbff04216f16ada6bcdc89da21fbd32a179162c02b87ce309fb7",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "--",
+        "build",
+        "--clean"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 6
+    },
+    {
+      "label": "ordinary-unit-suite",
+      "receipt_sha256": "27977a65bc02af6494a73887d2d6530459b374beb1dc2ad9e8a07d7c60af6499",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "--",
+        "test",
+        "--filter",
+        "Category!=RequiresHardware&Category!=RequiresUserPresence"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 17
+    },
+    {
+      "label": "portable-evidence",
+      "receipt_sha256": "fb074c7e85d418364ba3649f65647a77c94a32a35d7583b31f9dbb57446ff74e",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "windows-hid-verification-evidence-test"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 6
+    },
+    {
+      "label": "device-event-lifecycle",
+      "receipt_sha256": "38e54b42af832e08dfa2b7db0f3fb941bcfe9364af0edab5bffff88a68539d63",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "--",
+        "test",
+        "--integration",
+        "--project",
+        "Yubico.YubiKit.Core.IntegrationTests",
+        "--filter",
+        "FullyQualifiedName~Yubico.YubiKit.Core.IntegrationTests.Devices.DeviceEventLifecycleTests"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 5
+    },
+    {
+      "label": "complexity-from-audit",
+      "receipt_sha256": "9e14160cc17118befa6d46cea58b5a677a6b8c8c7cd1d9fbd9914806deaf72da",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "--",
+        "complexity",
+        "--complexity-args",
+        "--base d5d01ef99f1478e4d49911194c17667b2450d2fd --json artifacts/windows-merge-complexity-from-audit.json"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 4
+    },
+    {
+      "label": "complexity-from-incoming",
+      "receipt_sha256": "255339f5c1a663c6196ec024750e0f2db1ff9b5e13d1464a0da25bc91567b427",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "--",
+        "complexity",
+        "--complexity-args",
+        "--base e322712d609aaf03b9bd1cf2964a99326728866a --json artifacts/windows-merge-complexity-from-incoming.json"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 4
+    },
+    {
+      "label": "docs-inclusive-pack",
+      "receipt_sha256": "1ba6f0d3a5b5826465b5416e2329da19809e71ea28b22100f090543e3d7aa21c",
+      "command": [
+        "dotnet",
+        "toolchain.cs",
+        "--",
+        "pack",
+        "--include-docs"
+      ],
+      "actor": "GPT-6 Astra",
+      "verified_retained_files": 15
+    }
+  ]
+}

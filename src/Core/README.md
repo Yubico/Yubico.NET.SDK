@@ -357,7 +357,7 @@ even if a new session could otherwise borrow it. See [raw access tiers](../../do
 Direct connection calls are an expert escape hatch. They bypass session and protocol exchange guards;
 do not interleave them with a session or retry on the same connection after an interrupted exchange.
 Keep caller-owned input unchanged until the returned task finishes, then clear sensitive buffers.
-Built-in macOS/Linux HID sends copy reports before native dispatch; custom connections need not. Async method
+Built-in macOS/Linux/Windows HID sends copy reports before native dispatch; custom connections need not. Async method
 names do not guarantee caller-thread responsiveness or an immediate native cancellation.
 
 ```csharp
@@ -401,8 +401,8 @@ and the final connection disposal outcome distinct when deciding whether to reop
 
 `IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
 `IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
-`IHidConnection` owns report I/O; the Windows-only `IWindowsHidReportAccess` is an internal
-report-handle seam. The public direct report access methods `IHidInterface.ConnectToIOReports()` /
+`IHidConnection` provides report I/O; built-in Windows connections delegate native lifetime to
+separate FIDO/OTP owners. The public direct report access methods `IHidInterface.ConnectToIOReports()` /
 `ConnectToFeatureReports()` remain
 synchronous. On macOS, the IO connection blocks the caller while the same persistent FIDO input
 owner used by typed connections opens, receives, sends and shuts down. A six-second read timeout
@@ -426,10 +426,60 @@ The built-in macOS FIDO connection opens asynchronously, initializes its channel
 awaited operation, and receives input through a persistent native owner. Blocking output
 and checked shutdown run on connection-owned execution; an unconfirmed native close retains
 the physical claim. This does not make the public lower-level `IHidConnection` interface
-asynchronous or establish the same execution and drain behavior on Windows/custom HID. Linux uses
-its separate owners described below. See
+asynchronous or establish the same execution and drain behavior for custom HID. Windows and Linux use
+their separate owners described below. See
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
 before using direct report access.
+
+For source navigation, the macOS facades forward to `MacOSFidoHidNativeOwner` and
+`MacOSOtpHidNativeOwner`; `MacOSHidInputBridge` supplies native callback delivery and
+`MacOSHidReportApi` supplies the mechanical IOKit report calls. Portable USB/NFC
+smart-card connections use `PcscConnection` and `PcscConnectionNativeOwner`.
+These are internal organization changes. PR774 reports bounded macOS FIDO and PC/SC JIT/device
+passes at `0f10775cecfb61f74d20851417746a5816863bb7`; raw Mac artifacts were not received on this
+host, so those results remain PR-summary evidence. OTP permission and expert-facade permission/topology
+blocks remain, along with AOT, listener/touch/removal coverage and qualification of this merge candidate.
+See the [received Mac evidence](../../docs/research/documentation-audit/integrations/windows-upstream-20261113/intake-review/report.md#mac-evidence-unavailable-locally-explicitly-pr-summary-only).
+The PC/SC connection logger category follows the new internal `PcscConnection` name;
+its disposed-object diagnostic retains the legacy `UsbSmartCardConnection` string.
+
+### Windows HID connections
+
+Built-in Windows `ConnectAsync<IFidoHidConnection>` / `ConnectAsync<IOtpHidConnection>` and raw-session
+factories now use separate asynchronous native owners. FIDO uses overlapped report completion through
+`ThreadPoolBoundHandle`; OTP uses a connection-owned worker for zero-access open and feature GET/SET.
+Open/metadata and checked shutdown run on the respective worker. Each owner refuses overlapping
+ordinary calls rather than queueing them. Custom HID interfaces keep their compatibility adapters.
+
+Cancellation before dispatch submits no report. After dispatch, FIDO cancellation requests targeted
+native cancellation and waits for completion/retirement; native success may win. OTP waits for the
+blocking call to return and may succeed after cancellation. Neither resets the device protocol.
+Prefer `DisposeAsync`: it drains accepted work and checked cleanup without a fixed completion deadline.
+The grouped-key connection/discovery claim transfers before open and releases only with proven cleanup,
+including failed opens. Unproven close or BCL request preparation retains native ownership and the claim
+while reporting a public fault.
+
+Public direct `ConnectToIOReports()` / `ConnectToFeatureReports()` remain synchronous facades over these
+same owners, with no implicit grouped-key claim. Report calls have no cancellation token. Direct IO and
+feature payload sizes follow the descriptor (excluding the native report-ID byte), and SET must match
+that descriptor exactly; typed FIDO requires 64 bytes and typed OTP eight bytes. Returned data belongs
+to the caller. Public interfaces and raw-access tiers are unchanged.
+
+The Windows implementation checkpoint at `bdac2f4f4224fa0ccf92006971af8659736aa2b1` reports native Windows unit passes,
+59 selected device cases, redirected FIDO-over-CCID GetInfo, and an unsealed JIT
+synthetic-pipe diagnostic. These results retain their original source identity;
+they are not native verification of later consistency edits. AOT/sealed publication
+and physical HID-driver race coverage remain outstanding. Later evidence at
+`0f10775cecfb61f74d20851417746a5816863bb7` retains an unexplained first-FIDO-open failure and the
+original attended WebAuthn result of 17 passed / 1 failed; subsequent focused passes do not erase
+those outcomes. Neither revision's results validate this merge candidate. The separate Linux-hosted
+integration checks cover warning-free compilation, managed unit behavior, portable evidence guards
+and three hardware-free event-lifecycle cases. They do not execute Windows APIs or extend either
+historical platform result. See the [software results](../../docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/summary.md), the
+[bounded acceptance record](../../docs/research/windows-async-native-acceptance.md)
+and the [source-specific integration intake](../../docs/research/documentation-audit/integrations/windows-upstream-20261113/intake-review/report.md#4-received-execution-evidence-and-its-limits).
+
+### Linux HID connections
 
 Public direct Linux HID access remains synchronous: reads and feature ioctls can block their caller.
 The internal report-access boundary preserves caller-length IO and feature SET payloads within
@@ -677,7 +727,7 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
   does not immediately abort the native device protocol. Built-in macOS OTP calls already active at cancellation
   may finish successfully. Do not assume cancellation releases native resources early; await the operation and
   connection disposal. Other HID implementations may have different cancellation behavior.
-- Built-in SmartCard and macOS/Linux HID owners retain their physical-interface claim if native release cannot
+- Built-in SmartCard and macOS/Linux/Windows HID owners retain their physical-interface claim if native release cannot
   be proven; a later managed open throws `UnrecoveredConnectionException` rather than treating the key
   as ordinarily busy. Custom connections do not inherit those native-release guarantees.
 - Discovery serializes USB metadata/identity reads that may target sibling interfaces, including native

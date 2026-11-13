@@ -1,0 +1,51 @@
+{
+  "actor": "GPT-6 Astra",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "--project",
+    "Yubico.YubiKit.WindowsMerge20261113.VerifierCompile",
+    "--clean"
+  ],
+  "started_utc": "2026-11-13T11:15:59.475506+00:00",
+  "finished_utc": "2026-11-13T11:16:13.236656+00:00",
+  "exit_code": 0,
+  "head": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "tracked_changes_after_command": [],
+  "files": [
+    {
+      "path": "console.txt",
+      "bytes": 1931,
+      "sha256": "31b3abae11eaf851f5fb95c6a31191e0d3c244fb36e7731762d722e61d359ffe"
+    },
+    {
+      "path": "toolchain/01-clean-WindowsMerge20261113.VerifierCompile.log",
+      "bytes": 3961,
+      "sha256": "b929e0213473f74c9d5a6dbdc218be224580a687432950521e11d038d104536f"
+    },
+    {
+      "path": "toolchain/02-build-WindowsMerge20261113.VerifierCompile.log",
+      "bytes": 2431,
+      "sha256": "6c728b38aca185dcfc2b5762cfcea91c2b8eb1ad7b5fb0879d51f184eea7dfd6"
+    },
+    {
+      "path": "toolchain/result.json",
+      "bytes": 743,
+      "sha256": "bc10473ca95d1b197135fd4a4b1da48e935226de69e186f4d8119bf5b59b72c8"
+    },
+    {
+      "path": "toolchain/result.txt",
+      "bytes": 468,
+      "sha256": "81f32347979f459f73a208e2db32365d25e8f410a9f7681193c658163fb21f02"
+    },
+    {
+      "path": "toolchain/run.log",
+      "bytes": 2331,
+      "sha256": "8b418850afd88470cfec6ea4de52dbb56e683ae306e96f09ccf4b5a8b24eadee"
+    }
+  ]
+}

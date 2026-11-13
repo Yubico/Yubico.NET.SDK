@@ -30,27 +30,3 @@ internal interface ISCardApi
 
     uint SCardCancel(SCardContext context);
 }
-
-internal sealed class NativeSCardApi : ISCardApi
-{
-    public static NativeSCardApi Instance { get; } = new();
-
-    private NativeSCardApi()
-    {
-    }
-
-    public uint SCardEstablishContext(SCARD_SCOPE scope, out SCardContext context) =>
-        NativeMethods.SCardEstablishContext(scope, out context);
-
-    public uint SCardListReaders(SCardContext context, string[]? groups, out string[] readerNames) =>
-        NativeMethods.SCardListReaders(context, groups, out readerNames);
-
-    public uint SCardGetStatusChange(
-        SCardContext context,
-        int timeout,
-        SCARD_READER_STATE[] readerStates,
-        int readerStatesCount) =>
-        NativeMethods.SCardGetStatusChange(context, timeout, readerStates, readerStatesCount);
-
-    public uint SCardCancel(SCardContext context) => NativeMethods.SCardCancel(context);
-}

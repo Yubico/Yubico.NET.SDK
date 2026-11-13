@@ -1,0 +1,230 @@
+$ dotnet clean Yubico.YubiKit.sln -c Release
+Build started 11/13/2026 12:16:23 PM.
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" on node 1 (Clean target(s)).
+     1>ValidateSolutionConfiguration:
+         Building solution configuration "Release|Any CPU".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/examples/OtpTool/OtpTool.csproj" (2) on node 4 (Clean target(s)).
+     2>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj" (3) on node 3 (Clean target(s)).
+     3>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/examples/PivTool/PivTool.csproj" (4) on node 2 (Clean target(s)).
+     4>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (8:2) on node 4 (Clean target(s)).
+     8>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj" (5) on node 1 (Clean target(s)).
+     5>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj" (12) on node 3 (Clean target(s)).
+    12>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (13) on node 4 (Clean target(s)).
+    13>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj" (14) on node 2 (Clean target(s)).
+    14>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    13>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (13) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/Yubico.YubiKit.Core.csproj" (10:8) on node 2 (Clean target(s)).
+    10>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/refint/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Release/net10.0/ref/Yubico.YubiKit.Core.dll".
+    10>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj" (16) on node 4 (Clean target(s)).
+    16>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    13>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj" (Clean target(s)).
+     8>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj" (Clean target(s)).
+    12>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj" (12) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" (11:5) on node 4 (Clean target(s)).
+    11>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj" (18) on node 2 (Clean target(s)).
+    18>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj" (22) on node 3 (Clean target(s)).
+    22>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj" (26) on node 4 (Clean target(s)).
+    26>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj" (28) on node 2 (Clean target(s)).
+    28>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    22>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj" (22) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" (15:3) on node 3 (Clean target(s)).
+    15>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/src/Yubico.YubiKit.Oath.csproj" (17:4) on node 1 (Clean target(s)).
+    17>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    15>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj" (Clean target(s)).
+    28>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj" (28) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (6:4) on node 3 (Clean target(s)).
+     6>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.Y.4E81C14A.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/refint/Yubico.YubiKit.Ctap2.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/Yubico.YubiKit.Ctap2.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Release/net10.0/ref/Yubico.YubiKit.Ctap2.dll".
+     6>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj" (36) on node 2 (Clean target(s)).
+    36>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    28>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj" (Clean target(s)).
+  11:5>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" (11:5) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/Yubico.YubiKit.Management.csproj" (9:5) on node 3 (Clean target(s)).
+     9>CoreClean:
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.deps.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Core.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.AssemblyReference.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfoInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.AssemblyInfo.cs".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.csproj.CoreCompileInputs.cache".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.sourcelink.json".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.Y.4CE3D1A9.Up2Date".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/refint/Yubico.YubiKit.Management.dll".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.xml".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/Yubico.YubiKit.Management.pdb".
+         Deleting file "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Release/net10.0/ref/Yubico.YubiKit.Management.dll".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" (21) on node 12 (Clean target(s)).
+    21>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    36>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj" (36) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/src/Yubico.YubiKit.Piv.csproj" (7:4) on node 2 (Clean target(s)).
+     7>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (23) on node 7 (Clean target(s)).
+    23>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     9>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/Yubico.YubiKit.Management.csproj" (Clean target(s)).
+     7>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/src/Yubico.YubiKit.Piv.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj" (20) on node 20 (Clean target(s)).
+    20>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/examples/OathTool/OathTool.csproj" (19) on node 18 (Clean target(s)).
+    19>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj" (27) on node 16 (Clean target(s)).
+    27>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj" (37) on node 4 (Clean target(s)).
+    37>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (24) on node 5 (Clean target(s)).
+    24>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj" (30) on node 13 (Clean target(s)).
+    30>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    17>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/src/Yubico.YubiKit.Oath.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/examples/ManagementTool/ManagementTool.csproj" (25) on node 9 (Clean target(s)).
+    25>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj" (39) on node 3 (Clean target(s)).
+    39>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Cli/YkTool/Yubico.YubiKit.Cli.YkTool.csproj" (32) on node 11 (Clean target(s)).
+    32>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    11>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj" (Clean target(s)).
+    39>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj" (Clean target(s)).
+    16>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj" (Clean target(s)).
+    12>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (29) on node 10 (Clean target(s)).
+    29>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    37>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj" (Clean target(s)).
+    22>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj" (Clean target(s)).
+    26>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj" (34) on node 15 (Clean target(s)).
+    34>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj" (41) on node 2 (Clean target(s)).
+    41>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    41>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj" (Clean target(s)).
+    36>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj" (31) on node 8 (Clean target(s)).
+    31>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    14>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj" (35) on node 14 (Clean target(s)).
+    35>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj" (33) on node 19 (Clean target(s)).
+    33>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    23>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj" (Clean target(s)).
+    27>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj" (Clean target(s)).
+    30>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/examples/FidoTool/FidoTool.csproj" (38) on node 17 (Clean target(s)).
+    38>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    24>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj" (43) on node 1 (Clean target(s)).
+    43>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj" (42) on node 12 (Clean target(s)).
+    42>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    43>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj" (Clean target(s)).
+    33>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj" (Clean target(s)).
+    31>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj" (Clean target(s)).
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (40) on node 6 (Clean target(s)).
+    40>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+    35>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj" (Clean target(s)).
+    29>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj" (Clean target(s)).
+     4>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Piv/examples/PivTool/PivTool.csproj" (Clean target(s)).
+     2>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/examples/OtpTool/OtpTool.csproj" (Clean target(s)).
+    19>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/examples/OathTool/OathTool.csproj" (Clean target(s)).
+    42>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj" (Clean target(s)).
+    18>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj" (Clean target(s)).
+    25>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/examples/ManagementTool/ManagementTool.csproj" (Clean target(s)).
+    20>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj" (Clean target(s)).
+    32>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Cli/YkTool/Yubico.YubiKit.Cli.YkTool.csproj" (Clean target(s)).
+    38>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/examples/FidoTool/FidoTool.csproj" (Clean target(s)).
+    21>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj" (Clean target(s)).
+    40>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj" (Clean target(s)).
+     3>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj" (Clean target(s)).
+     5>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj" (Clean target(s)).
+    34>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/Yubico.YubiKit.sln" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.15

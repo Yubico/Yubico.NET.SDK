@@ -1,0 +1,32 @@
+$ dotnet clean docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj -c Release
+Build started 11/13/2026 12:16:03 PM.
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" (2:2) on node 1 (Clean target(s)).
+     2>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     1>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj" (1) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj" (3:2) on node 2 (Clean target(s)).
+     3>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+   2:2>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" (2:2) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/Yubico.YubiKit.Core.csproj" (4:3) on node 1 (Clean target(s)).
+     4>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     4>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/Yubico.YubiKit.Core.csproj" (Clean target(s)).
+   2:2>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" (2:2) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (6:3) on node 3 (Clean target(s)).
+     6>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+   2:2>Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" (2:2) is building "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/Yubico.YubiKit.Management.csproj" (5:3) on node 4 (Clean target(s)).
+     5>CoreClean:
+         Creating directory "obj/Release/net10.0/".
+     6>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj" (Clean target(s)).
+     5>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/Yubico.YubiKit.Management.csproj" (Clean target(s)).
+     2>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj" (Clean target(s)).
+     3>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj" (Clean target(s)).
+     1>Done Building Project "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.37

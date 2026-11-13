@@ -1,0 +1,10 @@
+$ dotnet run --project src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.15)
+
+
+Test run summary: Passed! - /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.UnitTests.dll (net10.0|x64)
+  total: 209
+  failed: 0
+  succeeded: 209
+  skipped: 0
+  duration: 757ms

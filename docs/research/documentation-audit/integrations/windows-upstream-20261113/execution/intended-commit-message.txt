@@ -1,0 +1,9 @@
+feat(core): integrate Windows native owners with the audited SDK
+
+Merge the received Windows HID and adapter-consistency delivery with the
+published audit history. Preserve audited runtime corrections and frozen
+records; reconcile current ownership guidance and source-bound software evidence.
+
+Complexity-Justification: HidConnectionSlot.OpenBuiltInConnectionAsync: Keep the six platform/transport routes and their claim transfer visible in one flat switch; cyclomatic 12, cognitive 1, with no additional lifecycle state machine.
+Complexity-Justification: WindowsFidoHidNativeOwner.CompleteRequest: Keep cancellation/error reconciliation, exact retirement, owned-buffer clearing, and actual public task publication together so their ordering remains auditable.
+Complexity-Justification: WindowsFidoHidNativeOwner.Advance: Keep the submit-return/completion join and once-only worker cancellation in one state transition method; these branches encode the frozen independent native observations.

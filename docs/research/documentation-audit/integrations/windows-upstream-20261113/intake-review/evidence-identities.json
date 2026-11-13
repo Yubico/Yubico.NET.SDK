@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only intake identities and retained-evidence observations; not execution, signed attestation, merge acceptance or platform closure",
+  "date": "2026-11-13",
+  "audited_parent": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "incoming_parent": "e322712d609aaf03b9bd1cf2964a99326728866a",
+  "merge_base": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "incoming_parents": [
+    "f99cf78fe90b257653aa0a3de60bbffe896b34fb",
+    "13fdf43019ce78f340a47c8484f97c12d3d18409"
+  ],
+  "incoming_and_pr774_head_tree": "6278bebdc13fba19726fb255c67e58155392f7a2",
+  "incoming_commit_count_from_merge_base": 36,
+  "incoming_change_records_from_intake": 126,
+  "pr_capture_utc": "2026-11-13T10:17:57.786541+00:00",
+  "capture_files": [
+    { "path": "../intake/summary.json", "sha256": "31c0bf6b31910216ad141aab83991f86d2c7f1c641255decd804adafbc5c0aaf" },
+    { "path": "../intake/pr-771.stdout.txt", "sha256": "7bf87c8f77a48ec59afbce7974fd51f7d63b0745e29e26663d6a4f5250760e52", "head": "bdac2f4f4224fa0ccf92006971af8659736aa2b1", "state": "MERGED", "merged_at": "2026-11-13T10:01:16Z", "reported_successful_check_runs": 12 },
+    { "path": "../intake/pr-774.stdout.txt", "sha256": "eb0eee024de109afc81c10975c3e5e70dcb5ab8fe7eb270116d3b89594550b74", "head": "13fdf43019ce78f340a47c8484f97c12d3d18409", "state": "MERGED", "merged_at": "2026-11-13T10:01:18Z", "reported_successful_check_runs": 13 }
+  ],
+  "incoming_git_show_sha256": {
+    "docs/research/windows-async-native-acceptance.md": "631ce9d32958007560e6a15f679f8dd66a065abb13140b37b4348b632a166915",
+    "docs/research/adapter-consistency-macos-handoff.md": "36337971ac77860c64b77b6d9aafc28825eb78822f007774c23b37a66332fc70",
+    "docs/plans/yubikit-async-boundaries/00-status.md": "a86ff96cabde210698eb888ce5342188e7ece91ba70f3badca590830c2dd6096",
+    "2026-09-21-yubikit-async-boundaries-ISA.md": "74d949f89e3f36f78a74c51164abb812af41c2af6697db83c9ca737f5688e409",
+    "scripts/toolchain/BuildTargets.cs": "78a47dbe23c6e5f7d5026721dc39da5cca3713828af10f29975e138c6e8c4552",
+    "verification/WindowsHidRouteVerification/EVIDENCE.md": "65d695dd7ad0e00d6f8cf756deb53cb5bb4f952a0a2e37c84b3be7da076d7b2c"
+  },
+  "piv_authentication_protocol_blob_at_merge_base_and_incoming": "526c5da214546c1655ab8f36e2f7e95831cfdbf0",
+  "local_job_report_root": "/home/rupicola/.local/share/windows-sdk/jobs",
+  "local_job_reports_read": [
+    { "id": "d49f259548214758af46d5385cc3422a", "file": "job-report.json", "sha256": "a209b31005df5e572b4a22300d9739f677dd73170953163f80f9162350154d95", "native_exit": 0, "counts_executed_failed_skipped_warnings": [2210, 0, 3, 0], "product_commit_from_target_and_source_after": "bdac2f4f4224fa0ccf92006971af8659736aa2b1" },
+    { "id": "5e570107f0b84bb399086613a80886bc", "file": "job-report.json", "sha256": "1bc583cd9951348d0aaee6d24e906538d66cc39edd78794576bb6a9c9e9fd478", "native_exit": 0, "counts_executed_failed_skipped_warnings": [2210, 0, 3, 0], "product_commit": "0f10775cecfb61f74d20851417746a5816863bb7" },
+    { "id": "2a7c41d0d0c0402ebf812a46f42b76e2", "file": "job-report.json", "sha256": "c2677e0d48563fe88e9ecc67e2f90a92f5ed9d047cde79d13087389a49ccb97c", "native_exit": 1, "counts_executed_failed_skipped_warnings": [28, 1, 0, 0], "product_commit": "0f10775cecfb61f74d20851417746a5816863bb7", "method_log_read": "windows-results/toolchain-logs/01-test-Core.IntegrationTests.log", "retained_finding": "First FIDO open TaskCanceledException before second-open assertion; not fixed by later passing comparisons" },
+    { "id": "91b16adfa0414214801feaf48f1b2a2a", "file": "job-report.json", "sha256": "e734a1f654c29682c5215c5450d2b2fe4636430ae9350c4920946db47007bdc3", "native_exit": 1, "counts_executed_failed_skipped_warnings": [18, 1, 0, 0], "product_commit": "0f10775cecfb61f74d20851417746a5816863bb7", "method_log_read": "windows-results/toolchain-logs/01-test-WebAuthn.IntegrationTests.log", "retained_finding": "WithoutTouch expected exception absent; aggregate remains 17 passed / 1 failed despite individual ceremony passes" },
+    { "id": "5c3c37cf35fc4248b5d484841db41f2b", "file": "job-report.json", "sha256": "e38b70b32d32d1eafd9d1a40e270b392fcead73af9d8ab463ee4788009db456f", "native_exit": 0, "counts_executed_failed_skipped_warnings": [null, null, null, null], "product_commit_from_source": "0f10775cecfb61f74d20851417746a5816863bb7", "scope": "Exec result; scenario counts come from separate retained verifier evidence, not xUnit report fields" },
+    { "id": "daf18a7e92a74110b251016d50d75485", "file": "job-report.json", "sha256": "440938c9e49c67570285d3b8f3b3eea783c350b3253a88e37380485b9685cdcb", "native_exit": 0, "counts_executed_failed_skipped_warnings": [1, 0, 0, 0], "product_commit_from_source_after": "0f10775cecfb61f74d20851417746a5816863bb7", "scope": "Standard-token RDP SmartCard, not Windows WebAuthn API-channel proof" },
+    { "id": "464d5c1e1ecd45f78b7b35332c79de77", "file": "job-report.json", "sha256": "88781241a45ee22115c85bb740626bc8e7d120e2a88cdb4395d63d4446cab25a", "native_exit": 0, "counts_executed_failed_skipped_warnings": [5, 0, 80, 0], "product_commit_from_source_after": "0f10775cecfb61f74d20851417746a5816863bb7", "scope": "Standard-token RDP SmartCard; 80 skips are not accepted cases" }
+  ],
+  "product_snapshot_identities": {
+    "bdac_console": "52ecb539bbb03151a1e8aa66eaabf1cfe3633f1ae9e1cb3b3b2e2189d66b7c8a",
+    "0f107_console": "d677fb5c7a0e602a0a18511de01c35a511e46c7f094a9a8e2ec2f48de4db0c2c",
+    "0f107_later_redirected": "fb70a23b9afc526da733c59631bdc0faca0cedfbefbf416f707527a1957a75ed"
+  },
+  "local_unsealed_jit_bundles_read_and_hash_checked": [
+    {
+      "root": "/home/rupicola/.local/share/yubikit-work-evidence/pr771-console-003/unsealed-jit-79c73f7ed683458a97a70a25eed850c4",
+      "product_commit_from_diagnostic": "bdac2f4f4224fa0ccf92006971af8659736aa2b1",
+      "diagnostic_sha256": "fdca073db1a955faeeb7812a3d198e5174bf311f16dff2b2d7401c2f5be5579b",
+      "summary_path": "evidence/jit/summary.json",
+      "summary_sha256": "66cbae03d04417f88a6bec4c32cf16cf64b0075ec190e8139bba0586568e471a",
+      "documents_read": 11,
+      "scenario_checks": 44,
+      "coordinator_checks": 21,
+      "all_documents_passed_and_checks_true": true,
+      "all_document_artifact_maps_equal": true,
+      "published_files_checked": 207,
+      "hash_or_membership_mismatches": 0,
+      "aot_attempted": false,
+      "publication_verifier_diagnostic_exits": [0, 0, 0]
+    },
+    {
+      "root": "/home/rupicola/.local/share/yubikit-work-evidence/pr774-console-008/unsealed-jit-5c3c37cf35fc4248b5d484841db41f2b/unsealed-jit-0f10775ce-20261112T173813068Z-6b9963fa65e24311adcfb1cf0a85d368",
+      "product_commit_from_diagnostic": "0f10775cecfb61f74d20851417746a5816863bb7",
+      "diagnostic_sha256": "cdd3e686c619c8a8f9eac85b3dc19fda1234943ccf006d1cfd099b11dd02b4c0",
+      "summary_path": "evidence/jit/summary.json",
+      "summary_sha256": "7a49d76261dd6bc9b93b3ef8857df8046436825085c10433b1153024d2c8ab5b",
+      "documents_read": 11,
+      "scenario_checks": 44,
+      "coordinator_checks": 21,
+      "all_documents_passed_and_checks_true": true,
+      "all_document_artifact_maps_equal": true,
+      "published_files_checked": 207,
+      "hash_or_membership_mismatches": 0,
+      "aot_attempted": false,
+      "publication_verifier_diagnostic_exits": [0, 0, 0]
+    }
+  ],
+  "jit_scope": "Historical unsealed JIT kernel/BCL synthetic-pipe evidence; not HID-driver/device, raw immediate-success attribution, allocator failure, combined publication seal or Native AOT acceptance",
+  "mac_raw_directory_checked": "/home/rupicola/.local/share/yubikit-work-evidence/pr774-macos-001",
+  "mac_raw_directory_available": false,
+  "mac_evidence_authority_here": "PR774 body only; reported FIDO/PCSC passes at 0f10775ce, OTP permission/expert topology blocks and loaded-image-path gap retained",
+  "not_reread_as_raw": [
+    "All constituents of PR771's 59-device-case summary",
+    "All constituents of PR774's original 40-execution hardware selection",
+    "Later focused WithoutTouch pass and isolated first-open timing/comparison jobs without named IDs in the captured PR body",
+    "PR774 final-head local software run and all raw Mac reports"
+  ],
+  "validation_execution_this_intake": false,
+  "native_device_crypto_execution_this_intake": false,
+  "git_mutation_or_subagents_this_intake": false,
+  "no_additive_test_total": true
+}

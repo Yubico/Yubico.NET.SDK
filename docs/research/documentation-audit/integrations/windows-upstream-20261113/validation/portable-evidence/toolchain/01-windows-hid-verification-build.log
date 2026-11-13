@@ -1,0 +1,12 @@
+$ dotnet build verification/WindowsHidRouteVerification/WindowsHidRouteVerification.csproj -c Release -p:PublishAot=false
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/WindowsHidRouteVerification/WindowsHidRouteVerification.csproj (in 203 ms).
+  1 of 2 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  WindowsHidRouteVerification -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/WindowsHidRouteVerification/bin/Release/net10.0/WindowsHidRouteVerification.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.12

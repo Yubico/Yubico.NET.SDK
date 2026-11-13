@@ -139,9 +139,9 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,
         CancellationToken cancellationToken = default)
     {
-        var connection = new UsbSmartCardConnection(
+        var connection = new PcscConnection(
             smartCardDevice,
-            api: _api,
+            connectionApi: _api,
             sharing: _sharing);
 
         await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
@@ -153,12 +153,12 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
         IDisposable registration,
         CancellationToken cancellationToken)
     {
-        UsbSmartCardConnection connection;
+        PcscConnection connection;
         try
         {
-            connection = new UsbSmartCardConnection(
+            connection = new PcscConnection(
                 smartCardDevice,
-                api: _api,
+                connectionApi: _api,
                 sharing: _sharing,
                 released: registration.Dispose,
                 unrecovered: failure => DeviceConnectionRegistry.MarkUnrecovered(registration, failure));

@@ -1,0 +1,6 @@
+RESULT: PASSED  (dotnet toolchain.cs -- complexity --complexity-args "--base e322712d609aaf03b9bd1cf2964a99326728866a --json artifacts/windows-merge-complexity-from-incoming.json")
+Targets:
+  ✓ complexity     1.8s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121835-836-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

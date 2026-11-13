@@ -48,6 +48,26 @@ The user's separate Windows CCID/HID concurrency work remains unready/unreviewed
 **Stopping point reached: publish Core Pass 1, deliver the deferred findings, then stop.** No separate
 Pass-2 planning or implementation project is authorized.
 
+## Windows integration successor — verified software candidate
+
+The subsequent [Windows integration packet](integrations/windows-upstream-20261113/intake-review/report.md)
+receives upstream `e322712d609aaf03b9bd1cf2964a99326728866a` against audited parent
+`d5d01ef99f1478e4d49911194c17667b2450d2fd`. The merge is applied in the isolated
+`yubikit-windows-audit-integration-20261113` worktree. Independent source and documentation reviews
+accepted the resolved product tree without Critical or Important findings. The
+[software results](integrations/windows-upstream-20261113/validation/summary.md) record a clean solution
+build, 4,620 ordinary unit executions across 13 projects with five existing skips, portable evidence
+guards, three additional hardware-free lifecycle cases, scoped formatting and ten docs-inclusive local
+packages. Compiler/analyzer warnings and test failures were zero. Final evidence/publication approval
+and remote identity are separate gates in the [handoff](integrations/windows-upstream-20261113/handoff.md).
+The original checkout stays untouched; only the successor integration branch is a publication target.
+
+The [successor finding map](integrations/windows-upstream-20261113/deferred-findings-successor.md)
+records affected original IDs without changing the frozen Core001 findings. The Windows handoff
+status above describes the published Pass-1 checkpoint, not the later received delivery. Historical
+platform results keep their source and fixture limits; neither their receipt nor this software
+integration changes the Pass-1 counts, PIV physical deferrals or F9 preservation requirements.
+
 ## Verified integration baseline — preserved prior milestone
 
 [Integration records](integrations/core-upstream-20261111/closeout.md) preserve 17 resolved conflicts,

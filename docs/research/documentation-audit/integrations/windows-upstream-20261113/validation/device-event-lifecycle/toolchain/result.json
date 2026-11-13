@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Core.IntegrationTests --filter FullyQualifiedName~Yubico.YubiKit.Core.IntegrationTests.Devices.DeviceEventLifecycleTests",
+  "started": "2026-11-13T12:18:28.7389090+01:00",
+  "durationSeconds": 4.8,
+  "runDirectory": "artifacts/toolchain/runs/20261113-121828-738-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 4.7,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Core.IntegrationTests",
+      "outcome": "passed",
+      "reason": "3 executed, 0 skipped",
+      "executed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121828-738-test/01-test-Core.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

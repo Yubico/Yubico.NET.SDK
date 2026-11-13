@@ -1,0 +1,15 @@
+{
+  "actor": "GPT-6 Astra",
+  "explicit_paths": [
+    "CLAUDE.md",
+    "docs/architecture/raw-access-tiers.md",
+    "src/Piv/README.md",
+    "src/Core/CLAUDE.md",
+    "src/Core/README.md",
+    "docs/SDK-HOUSE-STYLE.md",
+    "src/Piv/CLAUDE.md",
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/research/documentation-audit/core.md"
+  ],
+  "unmerged_entries": 0
+}

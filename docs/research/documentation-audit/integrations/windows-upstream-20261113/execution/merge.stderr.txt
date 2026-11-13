@@ -1,0 +1,7 @@
+Recorded preimage for 'CLAUDE.md'
+Recorded preimage for 'docs/architecture/raw-access-tiers.md'
+Recorded preimage for 'src/Core/src/Devices/HidConnectionSlot.cs'
+Recorded preimage for 'src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs'
+Recorded preimage for 'src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs'
+Recorded preimage for 'src/Core/src/Transports/SmartCard/PcscNativeResources.cs'
+Recorded preimage for 'src/Piv/README.md'

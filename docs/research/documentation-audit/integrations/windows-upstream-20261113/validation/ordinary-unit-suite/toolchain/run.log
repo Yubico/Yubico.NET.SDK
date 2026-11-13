@@ -1,0 +1,108 @@
+# dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence"
+# started:   2026-11-13 12:16:53 +01:00
+# directory: /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113
+# git:       yubikit-windows-audit-integration-20261113 @ d5d01ef99 (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261113-121653-430-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Cli.Commands.UnitTests ===
+▶ RUN dotnet run --project src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/01-test-Cli.Commands.UnitTests.log
+✓ PASS (48 executed, 1 skipped)
+
+=== Testing: Cli.Shared.UnitTests ===
+▶ RUN dotnet run --project src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Yubico.YubiKit.Cli.Shared.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/02-test-Cli.Shared.UnitTests.log
+✓ PASS (78 executed, 0 skipped)
+
+=== Testing: Core.UnitTests ===
+▶ RUN dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/03-test-Core.UnitTests.log
+✓ PASS (2236 executed, 4 skipped)
+
+=== Testing: Ctap2.UnitTests ===
+▶ RUN dotnet run --project src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/04-test-Ctap2.UnitTests.log
+✓ PASS (498 executed, 0 skipped)
+
+=== Testing: Management.UnitTests ===
+▶ RUN dotnet run --project src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/05-test-Management.UnitTests.log
+✓ PASS (96 executed, 0 skipped)
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/06-test-Oath.UnitTests.log
+✓ PASS (436 executed, 0 skipped)
+
+=== Testing: OpenPgp.UnitTests ===
+▶ RUN dotnet run --project src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/07-test-OpenPgp.UnitTests.log
+✓ PASS (193 executed, 0 skipped)
+
+=== Testing: Piv.UnitTests ===
+▶ RUN dotnet run --project src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/08-test-Piv.UnitTests.log
+✓ PASS (289 executed, 0 skipped)
+
+=== Testing: PublicApi.UnitTests ===
+▶ RUN dotnet run --project src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/09-test-PublicApi.UnitTests.log
+✓ PASS (25 executed, 0 skipped)
+
+=== Testing: SecurityDomain.UnitTests ===
+▶ RUN dotnet run --project src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/10-test-SecurityDomain.UnitTests.log
+✓ PASS (50 executed, 0 skipped)
+
+=== Testing: WebAuthn.UnitTests ===
+▶ RUN dotnet run --project src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/11-test-WebAuthn.UnitTests.log
+✓ PASS (371 executed, 0 skipped)
+
+=== Testing: YubiHsm.UnitTests ===
+▶ RUN dotnet run --project src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/12-test-YubiHsm.UnitTests.log
+✓ PASS (91 executed, 0 skipped)
+
+=== Testing: YubiOtp.UnitTests ===
+▶ RUN dotnet run --project src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261113-121653-430-test/13-test-YubiOtp.UnitTests.log
+✓ PASS (209 executed, 0 skipped)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                      79.0s
+Projects (test):
+  ✓ PASS      Cli.Commands.UnitTests    48 executed, 1 skipped
+  ✓ PASS      Cli.Shared.UnitTests      78 executed, 0 skipped
+  ✓ PASS      Core.UnitTests            2236 executed, 4 skipped
+  ✓ PASS      Ctap2.UnitTests           498 executed, 0 skipped
+  ✓ PASS      Management.UnitTests      96 executed, 0 skipped
+  ✓ PASS      Oath.UnitTests            436 executed, 0 skipped
+  ✓ PASS      OpenPgp.UnitTests         193 executed, 0 skipped
+  ✓ PASS      Piv.UnitTests             289 executed, 0 skipped
+  ✓ PASS      PublicApi.UnitTests       25 executed, 0 skipped
+  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped
+  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped
+  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped
+  ✓ PASS      YubiOtp.UnitTests         209 executed, 0 skipped
+Totals: projects: 13 passed, 0 failed, 0 with no tests executed; tests: 4620 executed, 0 failed, 5 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121653-430-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

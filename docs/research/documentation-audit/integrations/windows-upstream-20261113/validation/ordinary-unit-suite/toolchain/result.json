@@ -1,0 +1,169 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+  "started": "2026-11-13T12:16:53.4300814+01:00",
+  "durationSeconds": 79.1,
+  "runDirectory": "artifacts/toolchain/runs/20261113-121653-430-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 79,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Cli.Commands.UnitTests",
+      "outcome": "passed",
+      "reason": "48 executed, 1 skipped",
+      "executed": 48,
+      "failed": 0,
+      "skipped": 1,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/01-test-Cli.Commands.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Cli.Shared.UnitTests",
+      "outcome": "passed",
+      "reason": "78 executed, 0 skipped",
+      "executed": 78,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/02-test-Cli.Shared.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Core.UnitTests",
+      "outcome": "passed",
+      "reason": "2236 executed, 4 skipped",
+      "executed": 2236,
+      "failed": 0,
+      "skipped": 4,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/03-test-Core.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Ctap2.UnitTests",
+      "outcome": "passed",
+      "reason": "498 executed, 0 skipped",
+      "executed": 498,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/04-test-Ctap2.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Management.UnitTests",
+      "outcome": "passed",
+      "reason": "96 executed, 0 skipped",
+      "executed": 96,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/05-test-Management.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "passed",
+      "reason": "436 executed, 0 skipped",
+      "executed": 436,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/06-test-Oath.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "OpenPgp.UnitTests",
+      "outcome": "passed",
+      "reason": "193 executed, 0 skipped",
+      "executed": 193,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/07-test-OpenPgp.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Piv.UnitTests",
+      "outcome": "passed",
+      "reason": "289 executed, 0 skipped",
+      "executed": 289,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/08-test-Piv.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "PublicApi.UnitTests",
+      "outcome": "passed",
+      "reason": "25 executed, 0 skipped",
+      "executed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/09-test-PublicApi.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "SecurityDomain.UnitTests",
+      "outcome": "passed",
+      "reason": "50 executed, 0 skipped",
+      "executed": 50,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/10-test-SecurityDomain.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "WebAuthn.UnitTests",
+      "outcome": "passed",
+      "reason": "371 executed, 0 skipped",
+      "executed": 371,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/11-test-WebAuthn.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "YubiHsm.UnitTests",
+      "outcome": "passed",
+      "reason": "91 executed, 0 skipped",
+      "executed": 91,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/12-test-YubiHsm.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "YubiOtp.UnitTests",
+      "outcome": "passed",
+      "reason": "209 executed, 0 skipped",
+      "executed": 209,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261113-121653-430-test/13-test-YubiOtp.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

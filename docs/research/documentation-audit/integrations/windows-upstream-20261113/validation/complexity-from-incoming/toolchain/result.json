@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- complexity --complexity-args \"--base e322712d609aaf03b9bd1cf2964a99326728866a --json artifacts/windows-merge-complexity-from-incoming.json\"",
+  "started": "2026-11-13T12:18:35.8361200+01:00",
+  "durationSeconds": 1.9,
+  "runDirectory": "artifacts/toolchain/runs/20261113-121835-836-complexity",
+  "targets": [
+    {
+      "name": "complexity",
+      "status": "passed",
+      "durationSeconds": 1.8,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

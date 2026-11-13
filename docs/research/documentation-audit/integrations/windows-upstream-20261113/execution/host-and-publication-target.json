@@ -1,0 +1,52 @@
+{
+  "utc": "2026-11-13T11:11:46.600328+00:00",
+  "actor": "GPT-6 Astra",
+  "platform": "Linux-7.2.15-1-omarchy-x86_64-with-glibc2.44",
+  "commands": [
+    {
+      "command": [
+        "dotnet",
+        "--info"
+      ],
+      "stdout": ".NET SDK:\n Version:           10.0.404\n Commit:            2ab2854867\n Workload version:  10.0.400-manifests.ad9f6d83\n MSBuild version:   18.9.15+2ab285486\n\nRuntime Environment:\n OS Name:     omarchy\n OS Version:  4.5.0\n OS Platform: Linux\n RID:         linux-x64\n Base Path:   /home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/\n\n.NET workloads installed:\nThere are no installed workloads to display.\nConfigured to use workload sets when installing new manifests.\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\n\nHost:\n  Version:      10.0.15\n  Architecture: x64\n  Commit:       8e0f8ed231\n\n.NET SDKs installed:\n  9.0.320 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.401 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.403 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n  10.0.404 [/home/rupicola/.local/share/mise/dotnet-root/sdk]\n\n.NET runtimes installed:\n  Microsoft.AspNetCore.App 9.0.22 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.12 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.14 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.15 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.AspNetCore.App]\n  Microsoft.NETCore.App 9.0.22 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.12 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.14 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.15 [/home/rupicola/.local/share/mise/dotnet-root/shared/Microsoft.NETCore.App]\n\nOther architectures found:\n  None\n\nEnvironment variables:\n  DOTNET_MULTILEVEL_LOOKUP                 [0]\n  DOTNET_ROOT                              [/home/rupicola/.local/share/mise/dotnet-root]\n\nglobal.json file:\n  /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/global.json\n\nLearn more:\n  https://aka.ms/dotnet/info\n\nDownload .NET:\n  https://aka.ms/dotnet/download\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "--version"
+      ],
+      "stdout": "git version 2.56.0\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "stdout": "https://github.com/Yubico/Yubico.NET.SDK.git\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "ls-remote",
+        "--heads",
+        "origin",
+        "refs/heads/yubikit",
+        "refs/heads/yubikit-docs-audit",
+        "refs/heads/yubikit-windows-audit-integration-20261113"
+      ],
+      "stdout": "e322712d609aaf03b9bd1cf2964a99326728866a\trefs/heads/yubikit\nd5d01ef99f1478e4d49911194c17667b2450d2fd\trefs/heads/yubikit-docs-audit\n",
+      "stderr": "",
+      "exit_code": 0
+    }
+  ],
+  "publication_branch": "yubikit-windows-audit-integration-20261113",
+  "original_audit_checkout": "preserved at d5d01ef99; publish successor branch without changing original checkout"
+}

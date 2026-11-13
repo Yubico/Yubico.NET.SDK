@@ -1,0 +1,42 @@
+The dotnet runtime version is '10.0.15'.
+Formatting code files in workspace '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj'.
+Loading workspace.
+Duplicate source file '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj'
+Duplicate source file '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj'
+Duplicate source file '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/PublicAPI.Shipped.txt' in project '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/Yubico.YubiKit.Management.csproj'
+Duplicate source file '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/PublicAPI.Unshipped.txt' in project '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/Yubico.YubiKit.Management.csproj'
+Project LinuxHidRouteVerification is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/.editorconfig'.
+Project LinuxHidRouteVerification is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project LinuxHidRouteVerification is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/LinuxHidRouteVerification/obj/Debug/net10.0/LinuxHidRouteVerification.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/obj/Debug/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.404/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/obj/Debug/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 1537ms.
+Determining formattable files.
+Skipping referenced project 'Yubico.YubiKit.Core'.
+Skipping referenced project 'Yubico.YubiKit.Ctap2'.
+Skipping referenced project 'Yubico.YubiKit.Management'.
+Complete in 131ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 5 analyzers on LinuxHidRouteVerification.
+Complete in 2091ms.
+Analysis complete in 2091ms.
+Running Analyzer Reference analysis.
+Determining diagnostics...
+Running 156 analyzers on LinuxHidRouteVerification.
+Complete in 1030ms.
+Analysis complete in 1030ms.
+Complete in 3548ms.
+Writing formatting report to: '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-linux-verifier/report.json'.
+Formatted 0 of 13 files.
+Format complete in 5221ms.

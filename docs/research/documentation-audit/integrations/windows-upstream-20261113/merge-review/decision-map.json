@@ -1,0 +1,134 @@
+{
+  "status": "preparation-only-not-applied",
+  "audited_parent": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "incoming_parent": "e322712d609aaf03b9bd1cf2964a99326728866a",
+  "natural_merge_base": "5746e72ed9a848d08b5782ddde025aa4a4b522ef",
+  "preview_tree": "0d9a3ad551951d4e91e6797ce36709e71f3c6fdd",
+  "incoming_change_records": 126,
+  "audit_product_records": 363,
+  "overlap_records": 19,
+  "recorded_conflict_paths": 9,
+  "observed_unmerged_index_entries": 0,
+  "rules": [
+    "Preserve incoming approved behavior and audited runtime corrections; no blanket ours/theirs choice.",
+    "Relocate truthful audited qualifications to live owners; retire obsolete wording and dead classes.",
+    "No public name, named parameter, runtime help or assertion changes beyond incoming approved delta.",
+    "Frozen Core Pass 1 and prior integration records remain byte-exact.",
+    "No build, test, native, device, crypto, formatter, Git mutation, merge or subagent action in preparation."
+  ],
+  "overlaps": [
+    {
+      "paths": ["CLAUDE.md"],
+      "conflict": true,
+      "resolution": "Keep audited guide; substitute incoming live Windows seam vocabulary while retaining adjacent corrected APDU and non-generic Management descriptions."
+    },
+    {
+      "paths": ["docs/SDK-HOUSE-STYLE.md"],
+      "conflict": false,
+      "resolution": "Keep incoming adapter roles/layout and audited example, named-token, readiness/provenance and whole-workflow qualifications."
+    },
+    {
+      "paths": ["docs/architecture/raw-access-tiers.md"],
+      "conflict": true,
+      "resolution": "Keep audited raw/protocol/SCP/memory/workflow qualifications and incoming Windows owners/direct-facade/terminal-wake behavior; narrow obsolete Windows compatibility warning to custom fallback; reconcile historical versus final registry scope."
+    },
+    {
+      "paths": ["src/Core/CLAUDE.md"],
+      "conflict": false,
+      "resolution": "Keep both deltas; repair clean-merged concurrency bullet that still groups built-in Windows with custom compatibility disposal. Preserve incremental grouped admission and wait/release distinctions."
+    },
+    {
+      "paths": ["src/Core/README.md"],
+      "conflict": false,
+      "resolution": "Keep incoming live owners/Windows sections and audited examples, monitor/logger caveats, sharing/provenance and actual-oracle limits; retain approved logger-category rename and intentional legacy disposed-object string."
+    },
+    {
+      "paths": ["src/Core/src/Devices/HidConnectionSlot.cs"],
+      "conflict": true,
+      "resolution": "Keep incoming executable routing, fresh per-open APIs and factory failure release; retain audited inline-call warning for custom interfaces only."
+    },
+    {
+      "paths": ["src/Core/src/Native/Windows/HidD/HidD.Interop.cs"],
+      "conflict": false,
+      "resolution": "Keep new byte-return/uint-length imports and precise remaining old Bool/signed-short ABI qualification; no unrelated ABI implementation."
+    },
+    {
+      "paths": ["src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs"],
+      "conflict": true,
+      "resolution": "Accept deletion. Map payload/report-ID and independent-storage qualifications to new report API seams and facades; retire obsolete lack-of-drain contract for the deleted seam.",
+      "new_owners": ["src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs", "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs"]
+    },
+    {
+      "paths": ["src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs"],
+      "conflict": true,
+      "resolution": "Accept deletion. Preserve operation-specific access, permission/metadata and copy-provenance qualifications at live APIs/owners/facades; retire old synchronous null-OVERLAPPED, unchecked-close, metadata fallback and GC-staging descriptions.",
+      "new_owners": ["src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs", "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs", "src/Core/src/Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs", "src/Core/src/Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs"]
+    },
+    {
+      "paths": ["src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs", "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs"],
+      "conflict": true,
+      "resolution": "Keep incoming implementation-only layout and audited poll-lease comment. Move interface qualifications to extracted ILinuxHidEventSource; do not duplicate enum/record/interface declarations.",
+      "new_owners": ["src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs", "src/Core/src/Transports/Hid/Linux/LinuxHidPollOutcome.cs", "src/Core/src/Transports/Hid/Linux/LinuxHidUdevEvent.cs", "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs"]
+    },
+    {
+      "paths": ["src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs", "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs"],
+      "conflict": true,
+      "resolution": "Keep incoming renamed interface with audited seam-not-drain and persistent pin/root remarks. Remove obsolete embedded implementation; migrate implementation composition/non-seizing qualifications to MacOSHidReportApi.",
+      "new_owners": ["src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs", "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs"]
+    },
+    {
+      "paths": ["src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs"],
+      "conflict": false,
+      "resolution": "Keep incoming seam names and audited expert GET8/padded-short versus typed exact8, supported SET and worker/close drain remarks."
+    },
+    {
+      "paths": ["src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs"],
+      "conflict": false,
+      "resolution": "Keep incoming bridge name and audited descriptor metadata versus fixed64/zero-prefixed65 input, terminal other lengths, supported SET and six-second reader-detach remarks."
+    },
+    {
+      "paths": ["src/Core/src/Transports/SmartCard/PcscNativeResources.cs"],
+      "conflict": true,
+      "resolution": "Use incoming connectionApi/_connectionApi/NativeOwner names and audited requested-UNPOWER-not-observed-power/PIN comment. Preserve checked disconnect then context release."
+    },
+    {
+      "paths": ["src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs"],
+      "conflict": false,
+      "resolution": "Keep PcscConnection and connectionApi call sites plus audited sharing/coexistence qualification and scoped examples. No policy/default/retry change."
+    },
+    {
+      "paths": ["src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs"],
+      "conflict": false,
+      "resolution": "Keep incoming construction names and audited held-transmit-not-held-native-end and failed-end/release-distinction XML. Assertions and test names otherwise unchanged."
+    },
+    {
+      "paths": ["src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs"],
+      "conflict": false,
+      "resolution": "Keep incoming types and approved NativeOwner test rename with audited policy/request-only and no physical isolation/power/PIN oracle wording."
+    },
+    {
+      "paths": ["src/Piv/CLAUDE.md"],
+      "conflict": false,
+      "resolution": "Keep audited guide plus incoming owned-response capture and no pool-clearing runtime oracle paragraph. No injected pool seam or authentication runtime change."
+    },
+    {
+      "paths": ["src/Piv/README.md"],
+      "conflict": true,
+      "resolution": "Keep complete audited guide and qualified selectors; add incoming focused PIN-only recovery/owned-response test command with qualified project selector and truthful no pre-return pooled-command oracle limitation. Preserve physical deferrals."
+    }
+  ],
+  "clean_hazard_paths": [
+    "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs",
+    "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs",
+    "src/Core/CLAUDE.md",
+    "docs/architecture/connection-ownership-and-contention.md",
+    "src/Core/src/Devices/RegisteredConnections.cs",
+    "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+    "verification/LinuxHidRouteVerification/BlockingReportConnection.cs"
+  ],
+  "accept_incoming_piv_test_blob": "6176c0a815844c365159f79d55fcd6573ba94455",
+  "piv_test_blob_note": "Resolved with git rev-parse incoming_parent:src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs; this identity is not authority to strengthen its oracle.",
+  "piv_human_instruction": "Byte-original rollback instruction receipt belongs to parent evidence intake; do not reconstruct a quote or reintroduce pool seam.",
+  "validation": "Future authorized managed build, focused unit/API/inventory/cross-layer checks only; see decision-map.md for actual oracles and separate native/hardware deferrals.",
+  "acceptance_claims": []
+}

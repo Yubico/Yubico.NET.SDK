@@ -1,0 +1,16 @@
+53221b33d77ae04e5cf017b27ca728ae5305926a
+feat(core): route Windows HID through native owners
+
+Transfer registry and discovery claims before Windows open with fresh per-acquisition API factories. Replace direct synchronous report adapters with draining native-owner facades and remove unused report-access wrappers. Add controlled routing, raw-session, factory-failure, disposal and quarantine coverage.
+
+Complexity-Justification: HidConnectionSlot.OpenBuiltInConnectionAsync: Keep the six platform/transport routes and their claim transfer visible in one flat switch; cyclomatic 12, cognitive 1, with no additional lifecycle state machine.
+
+4b0575d8f032c8c72377b80278e5be7dddfd20bb
+feat(core): add Windows FIDO managed native owner
+
+Add an injected overlapped report owner, thin typed facade, and controlled lifetime tests. Keep native acceptance and routing integration separate.
+
+Complexity-Justification: WindowsFidoHidNativeOwner.CompleteRequest: Keep cancellation/error reconciliation, exact retirement, owned-buffer clearing, and actual public task publication together so their ordering remains auditable.
+
+Complexity-Justification: WindowsFidoHidNativeOwner.Advance: Keep the submit-return/completion join and once-only worker cancellation in one state transition method; these branches encode the frozen independent native observations.
+

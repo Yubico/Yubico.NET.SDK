@@ -1,0 +1,47 @@
+{
+  "actor": "GPT-6 Astra",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "windows-hid-verification-evidence-test"
+  ],
+  "started_utc": "2026-11-13T11:18:26.648479+00:00",
+  "finished_utc": "2026-11-13T11:18:28.436754+00:00",
+  "exit_code": 0,
+  "head": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "tracked_changes_after_command": [],
+  "files": [
+    {
+      "path": "console.txt",
+      "bytes": 1286,
+      "sha256": "c834c50f566651268793426488d7c509f4a9258d52dc9e1faf7d491c8bb1ea73"
+    },
+    {
+      "path": "toolchain/01-windows-hid-verification-build.log",
+      "bytes": 784,
+      "sha256": "5bf166bc41180ba5357e27b748926647f10e076b608dce6d03089ac85ab2364f"
+    },
+    {
+      "path": "toolchain/02-windows-hid-evidence-test.log",
+      "bytes": 2177,
+      "sha256": "a2e2c16284e7c19dc1bbb88b9efef7d183084ab2679e13d4f6351448a89bda55"
+    },
+    {
+      "path": "toolchain/result.json",
+      "bytes": 655,
+      "sha256": "961135feddc3be8ee769da05ac511d03499d77e4d95a8853e0077fd6acd65c9d"
+    },
+    {
+      "path": "toolchain/result.txt",
+      "bytes": 458,
+      "sha256": "a20225d0442a29cc95864eee117571754e75fbd045c5dee03d01ecfb65099b88"
+    },
+    {
+      "path": "toolchain/run.log",
+      "bytes": 1649,
+      "sha256": "83f9a253365bfc99dca0205a90bd180f0b9312cb9998c721b03658a46f3d3440"
+    }
+  ]
+}

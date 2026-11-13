@@ -267,7 +267,7 @@ internal sealed class SharedDeviceInfoRead
             // START a new open against hardware its evidence no longer names.
             ThrowIfSuperseded(scope, key, epoch);
 
-            // Discovery creates and disposes this connection. Built-in PC/SC and macOS/Linux HID owners
+            // Discovery creates and disposes this connection. Built-in PC/SC and Windows/macOS/Linux HID owners
             // take the exact discovery registration before native open, including failed/late opens.
             // Resolve the published composite's selected member just as for a direct slot read. Set transfer
             // before invoking the owner: a throw or disposal diagnostic is not permission to release twice.

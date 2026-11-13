@@ -171,6 +171,40 @@ are not part of the SDK surface.
 
 For multi-transport modules, a backend adapter can be appropriate when it removes transport branching from every operation. The backend should stay narrow and mechanical.
 
+## Native Adapter Roles And Layout
+
+Use a finite role vocabulary without imposing a universal class hierarchy:
+
+- `<Platform>HidInterface` identifies an OS report interface and selects its route.
+- `<Platform>FidoHidConnection` / `<Platform>OtpHidConnection` forward typed operations and enforce local packet contracts.
+- `<Platform><Protocol>HidNativeOwner` names the admission, native lifetime, shutdown and physical-claim authority.
+- `I<Platform>HidReportApi` / `<Platform>HidReportApi` name mechanical native report operations and resource handling subordinate to that owner. A separate feature-report seam is appropriate when its execution contract differs, as on Windows.
+- Request storage, readiness reactors and input bridges retain mechanism-specific names and responsibilities; they are not competing connection schedulers.
+
+Keep native declarations and ABI types under `src/Core/src/Native/{Windows,MacOS,Linux,Desktop}/`;
+managed HID behavior under `src/Core/src/Transports/Hid/{Windows,MacOS,Linux}/`; and portable
+PC/SC behavior under `src/Core/src/Transports/SmartCard/`. Prefer one independently meaningful
+primary type per matching file, with small private helpers nested. Do not split DTOs or add layers
+solely for symmetry. Audit open, operations, cancellation/completion and shutdown/release in that order.
+
+Use `physicalClaim`, `cancellationToken`, `reportApi`, `inputBridge`, `readReactor`, `nativeResources`,
+`reportId`, `payload`, `bytesTransferred` and `expectedReportLength` where those meanings apply.
+Keep shutdown request, native completion, input quiescence and proven native release distinct.
+Preserve native ABI spellings, public parameter contracts and existing cross-platform `IO` facade spelling.
+The consistency follow-up names the macOS input bridge `MacOSHidInputBridge`, its mechanical
+report seam `MacOSHidReportApi`, and its extracted lifetime authorities
+`MacOSFidoHidNativeOwner` / `MacOSOtpHidNativeOwner`. Portable USB/NFC PC/SC connections use
+`PcscConnection`, backed by `PcscConnectionNativeOwner` and `PcscNativeResources`.
+These internal names do not change the public `PscsConnectionKind` or
+`DesktopSmartCardDeviceListener` contracts. Mechanical moves and structural extractions retain
+separate review and evidence. The Windows checkpoint at
+`bdac2f4f4224fa0ccf92006971af8659736aa2b1` and the later Windows/macOS results at
+`0f10775cecfb61f74d20851417746a5816863bb7` retain their tested-source limits. The received Mac
+results are PR-summary-only on this host; OTP permission and expert-facade permission/topology blocks
+remain. Windows first-open and mixed ceremony outcomes, sealed/AOT and HID-driver gaps also remain
+explicit. None of these results validates the combined audit/upstream candidate. See the
+[integration evidence review](research/documentation-audit/integrations/windows-upstream-20261113/intake-review/report.md#4-received-execution-evidence-and-its-limits).
+
 ## SmartCard And APDU Style
 
 SmartCard modules should use Core APDU infrastructure directly:

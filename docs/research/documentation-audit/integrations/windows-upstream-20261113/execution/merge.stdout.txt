@@ -1,0 +1,28 @@
+Auto-merging CLAUDE.md
+CONFLICT (content): Merge conflict in CLAUDE.md
+Auto-merging docs/SDK-HOUSE-STYLE.md
+Auto-merging docs/architecture/raw-access-tiers.md
+CONFLICT (content): Merge conflict in docs/architecture/raw-access-tiers.md
+Auto-merging src/Core/CLAUDE.md
+Auto-merging src/Core/README.md
+Auto-merging src/Core/src/Devices/HidConnectionSlot.cs
+CONFLICT (content): Merge conflict in src/Core/src/Devices/HidConnectionSlot.cs
+Auto-merging src/Core/src/Native/Windows/HidD/HidD.Interop.cs
+CONFLICT (modify/delete): src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs deleted in e322712d609aaf03b9bd1cf2964a99326728866a and modified in HEAD.  Version HEAD of src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs left in tree.
+CONFLICT (modify/delete): src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs deleted in e322712d609aaf03b9bd1cf2964a99326728866a and modified in HEAD.  Version HEAD of src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs left in tree.
+Auto-merging src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs
+CONFLICT (content): Merge conflict in src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs
+Auto-merging src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs
+CONFLICT (content): Merge conflict in src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs
+Auto-merging src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs
+Auto-merging src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
+Auto-merging src/Core/src/Transports/SmartCard/PcscNativeResources.cs
+CONFLICT (content): Merge conflict in src/Core/src/Transports/SmartCard/PcscNativeResources.cs
+Auto-merging src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs
+Auto-merging src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs
+Auto-merging src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs
+Auto-merging src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs
+Auto-merging src/Piv/CLAUDE.md
+Auto-merging src/Piv/README.md
+CONFLICT (content): Merge conflict in src/Piv/README.md
+Automatic merge failed; fix conflicts and then commit the result.

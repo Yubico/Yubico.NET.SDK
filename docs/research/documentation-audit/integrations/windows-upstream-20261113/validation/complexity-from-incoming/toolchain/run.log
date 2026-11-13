@@ -1,0 +1,69 @@
+# dotnet toolchain.cs -- complexity --complexity-args "--base e322712d609aaf03b9bd1cf2964a99326728866a --json artifacts/windows-merge-complexity-from-incoming.json"
+# started:   2026-11-13 12:18:35 +01:00
+# directory: /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113
+# git:       yubikit-windows-audit-integration-20261113 @ d5d01ef99 (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: complexity  (log: artifacts/toolchain/runs/20261113-121835-836-complexity/run.log)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs --base e322712d609aaf03b9bd1cf2964a99326728866a --json artifacts/windows-merge-complexity-from-incoming.json
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs e322712d609aaf03b9bd1cf2964a99326728866a
+  files        415
+  methods      188
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    14    23  unchanged  Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader.ReadCredentialCore
+                         src/Core/src/Credentials/ConsoleCredentialReader.cs:212-294
+    17    21  unchanged  Yubico.YubiKit.Piv.DataObjects.AdminData.TryDecode
+                         src/Piv/src/DataObjects/AdminData.cs:156-243
+    17    18  unchanged  Yubico.YubiKit.WebAuthn.Client.CredentialFilter.SelectAsync
+                         src/WebAuthn/src/Client/CredentialFilter.cs:54-150
+    13    18  unchanged  Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.ListenerThreadProc
+                         src/Core/src/Transports/SmartCard/DesktopSmartCardDeviceListener.cs:216-280
+    12    18  unchanged  Yubico.YubiKit.Core.Utilities.Tlv.ParseData
+                         src/Core/src/Utilities/Tlv.cs:203-265
+    17    16  unchanged  Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.DecodeInternal
+                         src/Ctap2/src/Credentials/MakeCredentialResponse.cs:160-265
+    11    15  unchanged  Yubico.YubiKit.Core.Devices.CompositeDeviceMerger.MergeSamePidBySerialWithDeduction
+                         src/Core/src/Devices/CompositeDeviceMerger.cs:293-357
+    19    14  unchanged  Yubico.YubiKit.Oath.CredentialData.ParseUri
+                         src/Oath/src/CredentialData.cs:135-246
+    15    14  unchanged  Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.Encode
+                         src/Ctap2/src/Extensions/Shared/ExtensionBuilder.cs:344-423
+    11    12  unchanged  Yubico.YubiKit.Core.Devices.YubiKeyMonitor.RunAsync
+                         src/Core/src/Devices/YubiKeyMonitor.cs:136-181
+    12    11  unchanged  Yubico.YubiKit.Oath.OathSession.ValidateAsync
+                         src/Oath/src/OathSession.cs:699-779
+    12    11  unchanged  Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpProcessor.TransmitAsync
+                         src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs:58-186
+    16     9  unchanged  Yubico.YubiKit.OpenPgp.OpenPgpSession.GetUserPresenceContextAsync
+                         src/OpenPgp/src/OpenPgpSession.cs:327-378
+    14     9  unchanged  Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.TryParse
+                         src/WebAuthn/src/Client/WebAuthnOrigin.cs:75-130
+    14     7  unchanged  Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpState.Scp11InitAsync
+                         src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs:51-163
+    11     7  unchanged  Yubico.YubiKit.Ctap2.Backend.HidBackend.SendCborAsync
+                         src/Ctap2/src/Backend/HidBackend.cs:46-120
+    11     7  unchanged  Yubico.YubiKit.Ctap2.Backend.SmartCardBackend.SendCborAsync
+                         src/Ctap2/src/Backend/SmartCardBackend.cs:69-152
+
+17 of 188 methods exceed a threshold: 0 need action (new or worse), 17 are existing debt.
+Existing debt only: simplifying these methods is welcome but optional.
+
+JSON written to /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/artifacts/windows-merge-complexity-from-incoming.json
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- complexity --complexity-args "--base e322712d609aaf03b9bd1cf2964a99326728866a --json artifacts/windows-merge-complexity-from-incoming.json")
+Targets:
+  ✓ complexity     1.8s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121835-836-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

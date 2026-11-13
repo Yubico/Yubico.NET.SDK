@@ -1,0 +1,3 @@
+$ dotnet pack src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj -c Release --no-build -o /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/artifacts/packages   
+  Successfully created package '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/artifacts/packages/Yubico.YubiKit.YubiOtp.1.0.0.nupkg'.
+  Successfully created package '/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/artifacts/packages/Yubico.YubiKit.YubiOtp.1.0.0.snupkg'.

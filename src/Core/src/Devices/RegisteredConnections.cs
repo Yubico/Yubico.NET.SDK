@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     quarantines it. The FIDO and OTP compatibility wrappers release it after the attempt even when inner
 ///     disposal throws. Every sync or async caller observes the shared outcome, rather than a new attempt.
 ///     Inner disposal completion is not independent proof that concurrent native calls have drained.
-///     Built-in macOS/Linux HID connections instead transfer the registration directly to their native owner.
+///     Built-in Windows/macOS/Linux HID connections instead transfer the registration directly to their native owner.
 /// </summary>
 internal sealed class RegisteredSmartCardConnection(
     ISmartCardConnection inner,

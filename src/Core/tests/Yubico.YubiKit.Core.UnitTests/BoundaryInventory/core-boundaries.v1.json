@@ -2,6 +2,80 @@
   "version": 1,
   "families": [
     {
+      "path": "Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "reviewOwner": "Core maintainers",
+      "rationale": "Retained synchronous expert IO facade drains the independent FIDO native owner without a timeout.",
+      "evidence": ["WindowsHidIOReportConnection constructor/GetReport/SetReport; WindowsFidoDirectFacadeTests holds native last use and checked close beneath the actual facade. Managed evidence only."],
+      "status": ["documented", "implemented", "outstanding"],
+      "entries": [
+        "WindowsHidIOReportConnection#525C2106723E#sync-boundary#Constructor waits for owner-directed open and metadata, including checked failed-open cleanup. Direct opens acquire no grouped claim.",
+        "GetReport#DBBE818A3360#sync-boundary#Caller waits for descriptor-sized input through accepted overlapped completion and retirement; cancellation is not native release proof.",
+        "SetReport#D5A5E4BAA664#sync-boundary#Caller waits for exact descriptor-sized output through submit return and callback resource last use; the independent owner retains staging until retirement."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+      "reviewOwner": "Core maintainers",
+      "rationale": "Retained synchronous expert feature facade drains the separate OTP worker without a timeout.",
+      "evidence": ["WindowsHidFeatureReportConnection constructor/GetReport/SetReport; WindowsOtpDirectFacadeTests holds feature return and checked close beneath the actual facade. Managed evidence only."],
+      "status": ["documented", "implemented", "outstanding"],
+      "entries": [
+        "WindowsHidFeatureReportConnection#1F33B2649FC3#sync-boundary#Constructor waits for zero-desired-access open and metadata on the owner worker, including checked failed-open cleanup.",
+        "GetReport#F12A75B4A9D2#sync-boundary#Caller waits for synchronous feature GET on the owner worker; native staging survives through return and successful caller payload storage is separate.",
+        "SetReport#E20A59A54665#sync-boundary#Caller waits for exact descriptor-sized feature SET and staging cleanup after native return; no cancellation or timeout detaches accepted work."
+      ]
+    },
+    {
+      "path": "Native/Windows/HidD/HidD.Interop.cs", "reviewOwner": "Core maintainers",
+      "rationale": "New byte-returning HID BOOLEAN imports are synchronous boundaries. The independent Windows FIDO and OTP owners direct acquisition and checked release; declaration coverage is not Windows native verification.",
+      "evidence": ["Native/Windows/HidD/HidD.Interop.cs:GetHidFeature/SetHidFeature/GetHidPreparsedData/FreeHidPreparsedData; Transports/Hid/Windows/WindowsHidFeatureReportApi.cs:Open/Transfer/ReleaseResources and WindowsHidReportApi.cs:Open/ReleasePreparsedData retain explicit handle references and record partial metadata ownership."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "FreeHidPreparsedData#9FA06925D621#sync-boundary#Synchronous metadata release used by both native APIs on their original owner workers after report drain. Failed free is not full native-release proof even if the handle closes; no cancellation or retry releases the retained claim.",
+        "GetHidFeature#C3E1DB785748#sync-boundary#OTP worker performs synchronous HidD GET through Transfer with a retained SafeHandle and pinned private descriptor-sized report. Cancellation after dispatch cannot detach it; success supplies no actual byte count. Native staging is cleared after return and successful payload escapes separately.",
+        "GetHidPreparsedData#640769142049#sync-boundary#Synchronous descriptor acquisition on either original native worker, with the handle reference retained and returned preparsed pointer stored before success inspection. Failed or canceled open still requires checked cleanup; token completion is not release evidence.",
+        "SetHidFeature#84E4F91B963A#sync-boundary#OTP worker performs synchronous HidD SET through Transfer, borrowing the owned report-ID-zero array and retained SafeHandle through return. Pre-dispatch cancellation submits nothing; accepted success wins late cancellation and staging is cleared before operation completion."
+      ]
+    },
+    {
+      "path": "Native/Windows/Kernel32/Kernel32.Interop.cs", "reviewOwner": "Core maintainers",
+      "rationale": "Explicit raw-handle Windows imports support the independent FIDO overlapped and OTP synchronous native owners. Import invocation is synchronous even when accepted I/O completes later; Windows driver and JIT/AOT callback-tail acceptance remain pending.",
+      "evidence": ["Native/Windows/Kernel32/Kernel32.Interop.cs:CancelIoEx/CloseHidHandle/CreateHidFile and pointer ReadFile/WriteFile overloads; Native/Windows/Kernel32/WindowsHidSafeHandle.cs:CloseOnce/ReleaseHandle/CloseNative records actual release. Transports/Hid/Windows/WindowsHidReportApi.cs:Open/Submit/Cancel/Retire/CloseOnce; WindowsHidFeatureReportApi.cs:Open uses zero desired access."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "CancelIoEx#C932FC471486#sync-boundary#Original FIDO worker requests cancellation for the exact accepted OVERLAPPED only after Submit returns. Success or ERROR_NOT_FOUND is not terminal evidence; retain pointer, report and handle until callback resource last use. Other errors stop admission but do not authorize early release.",
+        "CloseHidHandle#78118050AA89#sync-boundary#WindowsHidSafeHandle synchronously records actual CloseHandle success after owner-directed drain and reference release. Managed IsClosed, pending references, failed close or completed shutdown are not release proof; uncertain native lifetime retains the original owner and claim without retry.",
+        "CreateHidFile#18A41F695C3B#sync-boundary#Synchronous CreateFileW runs on the original native worker: FIDO requests read/write plus OVERLAPPED; OTP uses zero desired access and NORMAL flags. Preallocated SafeHandle records acquisition before later fallible setup. Opening cancellation waits for checked cleanup and ends authority at atomic success publication.",
+        "ReadFile#2DDA30B7D5F0#sync-boundary#FIDO worker submits a pointer-based read using ThreadPoolBoundHandle-owned OVERLAPPED and pinned private input storage. Immediate TRUE and IO_PENDING both require the real callback under default completion modes; rejection requires Submit return before retirement. Cancellation cannot detach accepted storage; typed input requires exactly 65 native bytes and report ID zero.",
+        "WriteFile#1BB8749BD701#sync-boundary#FIDO worker submits a pointer-based write over its copied report-ID-zero output. Accepted immediate or pending writes join Submit return with callback resource last use before BCL retirement, zeroing and task completion; cancellation/not-found cannot substitute for completion. Allocation-only failure faults the operation but retains uncertain BCL resources."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs", "reviewOwner": "Core maintainers",
+      "rationale": "Independent rooted W1 FIDO lifetime: one original worker directs open, submission, cancellation, retirement and checked close; callbacks only record and signal. Routing and Windows-native acceptance are separate work.",
+      "evidence": ["Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs:Start/Drain/Dispose/Advance/CompleteRequest/FailPreparation; WindowsFidoHidConnection.cs:Dispose delegates to this synchronous drain. WindowsHidReportApi.cs:Submit/OnCompleted and WindowsHidOverlappedOperation.cs:Complete define the BCL callback resource-last-use handoff, not physical callback-stack return."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "Dispose#77AFDAAEBA04#sync-boundary#Synchronous Dispose rejects original-worker self-wait, then blocks on the same shutdown task as asynchronous disposal. Accepted I/O must join Submit return and callback resource last use before checked close; missing completion can hold this caller indefinitely. A preparation-only fault can complete shutdown exceptionally while retaining BCL resources, owner root and claim.",
+        "Drain#06CADF27FC43#worker#AutoResetEvent.WaitOne parks only the original worker for work, cancellation or completion signals. One request owns the slot; cancellation and terminal wake merely request CancelIoEx after submission returns. No timeout, replacement worker or force close supplies missing completion evidence. Preparation failure before dispatch clears payload and faults public work while retaining uncertain allocation resources without Retire/Close.",
+        "Start#88B50FCA3DCD#worker#Already-suppressed execution-context branch starts the sole background FIDO worker after rooting and claim transfer. It owns all native API calls and one ordinary request slot; this is not per-operation offload. Failure to start releases only the never-acquired lifetime.",
+        "Start#5B47DFD43C09#worker#Alternative branch suppresses execution-context flow around the same sole worker start; mutually exclusive with the first Start site. Native completion uses the BCL callback recorder, not application continuations; success publication retires opening-token authority and native-release proof controls claim release."
+      ]
+    },
+    {
+      "path": "Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs", "reviewOwner": "Core maintainers",
+      "rationale": "Independent W3 zero-access OTP worker owns synchronous feature GET/SET and checked close. Cancellation cannot abandon dispatched native work; source classification and managed evidence do not establish Windows native acceptance or public factory routing.",
+      "evidence": ["Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs:OpenAsync/StartOpen/WorkLoop/Send/Receive/Dispose/Close; WindowsOtpHidConnection.cs:OpenAsync enforces native feature length 9 and Dispose forwards synchronous drain. WindowsHidFeatureReportApi.cs:Open/Transfer/ReleaseResources preserves zero-access open, synchronous borrowing and checked release."],
+      "status": ["documented", "outstanding"],
+      "entries": [
+        "Dispose#77E7955F510A#sync-boundary#Synchronous Dispose rejects worker self-wait and blocks on shared shutdown after any admitted feature call returns and checked close runs. A held GET/SET can hold disposal indefinitely; cancellation does not detach the native call. Unproven release faults shutdown while retaining the root and original claim.",
+        "OpenAsync#B3C85413316E#async-blocked#Owner-construction failure synchronously calls the transferred IDisposable physical claim before this task-returning method can return. No worker or native acquisition exists yet, but interface-dispatched claim cleanup cost is unresolved; constructor and release errors are preserved together. This exceptional dispatch gap is not an ordinary native-open offload.",
+        "StartOpen#5ADD14FA5090#worker#Already-suppressed context branch starts one rooted background OTP worker with its opening action installed. This original worker owns zero-access open, synchronous feature calls and checked close; one ordinary slot has no backlog or per-call Task.Run.",
+        "StartOpen#8ADCC2CC694E#worker#Alternative branch suppresses execution-context flow around the same worker start, mutually exclusive with the first Start site. Thread-start failure releases the never-acquired claim; opening cancellation loses authority atomically at success publication. No replacement worker cleans up a held native call.",
+        "WorkLoop#FAF3B18D7C74#worker#AutoResetEvent.WaitOne parks the original OTP worker between admitted actions. GET/SET borrow only owned framed arrays through native return; pre-dispatch cancellation submits nothing and late cancellation cannot detach accepted work. Worker failure terminalizes pending public tasks and attempts checked close on this same worker; unproven release retains the rooted claim."
+      ]
+    },
+    {
       "path": "Transports/Hid/Linux/LinuxHidReadReactor.cs", "reviewOwner": "Core maintainers",
       "rationale": "", "evidence": ["docs/research/linux-read-reactor.md; LinuxHidReadReactorTests exercises recoverable published admission, late quiescence, owner-worker reference release, held retirement without replacement/pool jobs, and real Linux eventfd/poll. RetireWake closes only the private local eventfd after poll exits; Linux v6.12 fs/eventfd.c release has no driver wait or flush."],
       "status": ["documented", "outstanding"],
@@ -26,7 +100,7 @@
     {
       "path": "Native/Desktop/SCard/SCard.Interop.cs", "reviewOwner": "Core maintainers",
       "rationale": "The SCard shim entry point executes on the calling thread; PC/SC operations, particularly status change, connect, transaction and transmit, may wait for a resource manager or card. The managed worker routing and native implementation require separate evidence.",
-      "evidence": ["Native/Desktop/SCard/SCard.Interop.cs declares each NativeShims SCard entry point; Transports/SmartCard/PcscConnectionNativeState.cs:65-104 routes built-in connection work to a worker."],
+      "evidence": ["Native/Desktop/SCard/SCard.Interop.cs declares each NativeShims SCard entry point; Transports/SmartCard/PcscConnectionNativeOwner.cs routes built-in connection work to a worker."],
       "status": ["documented", "outstanding"],
       "entries": ["SCardBeginTransaction#48576F7B43B8", "SCardCancel#0FB09674B2D8", "SCardConnect#27CC39ACF304", "SCardDisconnect#C5CEA6343D45", "SCardEndTransaction#AA8D462A9DF6", "SCardEstablishContext#1878C927A95C", "SCardGetStatusChange#A1F14E0D40E5", "SCardListReaders#A41618EF9580", "SCardReconnect#F62853BC0889", "SCardReleaseContext#615CF747982F", "SCardTransmit#3EFD6F084FC6"]
     },
@@ -68,7 +142,7 @@
     {
       "path": "Native/MacOS/IOKitFramework/IOKitHid.Interop.cs", "reviewOwner": "Core maintainers",
       "rationale": "IOKit HID device/manager creation, report I/O, run-loop scheduling, callback registration and release are synchronous native entries; get/set report may block. Callback delivery and listener teardown need separate review.",
-      "evidence": ["Native/MacOS/IOKitFramework/IOKitHid.Interop.cs declares device and manager operations and native callback registration; Transports/Hid/MacOS/IIOKitDeviceLifetime.cs:186-195 forwards device callback registration. MacOSHidDeviceListener.Listen opens the scheduled manager on its worker; Cleanup closes it after callbacks return; failed close retains manager and callback context."],
+      "evidence": ["Native/MacOS/IOKitFramework/IOKitHid.Interop.cs declares device and manager operations and native callback registration; Transports/Hid/MacOS/MacOSHidReportApi.cs forwards device callback registration. MacOSHidDeviceListener.Listen opens the scheduled manager on its worker; Cleanup closes it after callbacks return; failed close retains manager and callback context."],
       "status": ["documented", "outstanding"],
       "entries": ["IOHIDDeviceClose#C7E42FEEC46B", "IOHIDDeviceCreate#27EFE0C115DA", "IOHIDDeviceGetProperty#0E3E0064B9D0", "IOHIDDeviceGetReport#054AFB1ECF80", "IOHIDDeviceGetService#EE6F5F66648B", "IOHIDDeviceOpen#BF0F983FEE5D", "IOHIDDeviceRegisterInputReportCallback#36CD98F7C260", "IOHIDDeviceRegisterRemovalCallback#735AEA45BC5F", "IOHIDDeviceScheduleWithRunLoop#F2BC49F83D04", "IOHIDDeviceSetReport#E5C03E8562A3", "IOHIDDeviceUnscheduleFromRunLoop#1B2E2F3DBE33", "IOHIDManagerClose#9C95C22FB9DF", "IOHIDManagerCopyDevices#19989DF0FA20", "IOHIDManagerCreate#C43A7CDC7A9C", "IOHIDManagerOpen#D5B15C335A1B", "IOHIDManagerRegisterDeviceMatchingCallback#F716446B73D3", "IOHIDManagerRegisterDeviceRemovalCallback#AF59CBE9D09D", "IOHIDManagerScheduleWithRunLoop#08B4D54D6516", "IOHIDManagerSetDeviceMatching#2470DECB5A83", "IOHIDManagerUnscheduleFromRunLoop#925EE5EB662B"]
     },
@@ -224,16 +298,28 @@
       ]
     },
     {
-      "path": "Transports/Hid/MacOS/IIOKitDeviceLifetime.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/MacOS/IIOKitDeviceLifetime.cs:186-195 passes report/removal function pointers to IOKit."],
+      "path": "Transports/Hid/MacOS/MacOSHidReportApi.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/Hid/MacOS/MacOSHidReportApi.cs RegisterInputReportCallback/RegisterRemovalCallback pass report/removal function pointers to IOKit; extracted from IIOKitDeviceLifetime.cs without changing the reviewed callback roles."],
       "status": ["documented", "outstanding"],
-      "entries": ["RegisterInputReportCallback#1DF7E546868B#callback#The device-lifetime layer registers native input-report callback and must retain its report buffer/delegate until unregister and native drain.", "RegisterRemovalCallback#81FE92FA4A7E#callback#The device-lifetime layer registers the native removal callback; callback lifetime and teardown are not verified by this declaration."]
+      "entries": ["RegisterInputReportCallback#B07FD91A92A2#callback#The mechanical report API registers native input-report callback; the owning lifetime must retain its report buffer/delegate until unregister and native drain.", "RegisterRemovalCallback#18CC4752CAA4#callback#The mechanical report API registers the native removal callback; callback lifetime and teardown are not verified by this declaration."]
     },
     {
       "path": "Transports/Hid/MacOS/MacOSFidoHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/MacOS/MacOSFidoHidConnection.cs:199-212 drains shutdown on synchronous Dispose; :257-292 creates and waits on the native worker."],
+      "evidence": ["Transports/Hid/MacOS/MacOSFidoHidConnection.cs Dispose drains shutdown synchronously; worker and callback sites retain their original review roles in the extracted native owner and input bridge families."],
       "status": ["documented", "outstanding"],
-      "entries": ["Dispose#D103CAB33183#sync-boundary#Synchronous Dispose blocks on shutdown and rejects self-drain from the native worker; DisposeAsync separately awaits it.", "ScheduleLocked#A207D2CA0F3C#worker#Dedicated macOS FIDO worker starts lazily to own output, input-owner startup and teardown, not on the SendAsync caller.", "WorkLoop#22A4476685FA#worker#AutoResetEvent.WaitOne parks the dedicated FIDO worker until queued work or shutdown signals it; it does not block a caller thread.", "OnNativeReport#22AAD7A24115#callback#UnmanagedCallersOnly OnNativeReport address is passed into the native HID input owner; its callback context must remain rooted until destruction.", "OnNativeTerminal#A3E0FA9D632E#callback#UnmanagedCallersOnly OnNativeTerminal address is passed into the native HID input owner; callback exceptions are contained before crossing back to native.", "CreateInput#7961EBEBD01E#callback#CreateInput passes both unmanaged callback pointers and a rooted callback-state context through HidInputInterop into Native_HidInputCreate; teardown must drain before freeing the context."]
+      "entries": ["Dispose#D103CAB33183#sync-boundary#Synchronous Dispose blocks on shutdown and rejects self-drain from the native worker; DisposeAsync separately awaits it."]
+    },
+    {
+      "path": "Transports/Hid/MacOS/MacOSFidoHidNativeOwner.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/Hid/MacOS/MacOSFidoHidNativeOwner.cs ScheduleLocked/WorkLoop retain the worker startup and parking sites extracted from MacOSFidoHidConnection.Owner; original review remains outstanding."],
+      "status": ["documented", "outstanding"],
+      "entries": ["ScheduleLocked#F4C2E89B1946#worker#Dedicated macOS FIDO worker starts lazily to own output, input-owner startup and teardown, not on the SendAsync caller.", "WorkLoop#ABE2F6605455#worker#AutoResetEvent.WaitOne parks the dedicated FIDO worker until queued work or shutdown signals it; it does not block a caller thread."]
+    },
+    {
+      "path": "Transports/Hid/MacOS/MacOSHidInputBridge.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/Hid/MacOS/MacOSHidInputBridge.cs CreateInput/OnNativeReport/OnNativeTerminal retain the native callback registration and addresses extracted from NativeHidInputBridge in MacOSFidoHidConnection.cs; original review remains outstanding."],
+      "status": ["documented", "outstanding"],
+      "entries": ["OnNativeReport#04FBCFF113E0#callback#UnmanagedCallersOnly OnNativeReport address is passed into the native HID input owner; its callback context must remain rooted until destruction.", "OnNativeTerminal#1B0FC39810A5#callback#UnmanagedCallersOnly OnNativeTerminal address is passed into the native HID input owner; callback exceptions are contained before crossing back to native.", "CreateInput#5D0534FD231A#callback#CreateInput passes both unmanaged callback pointers and a rooted callback-state context through HidInputInterop into Native_HidInputCreate; teardown must drain before freeing the context."]
     },
     {
       "path": "Transports/Hid/MacOS/MacOSHidDeviceListener.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -245,19 +331,25 @@
       "path": "Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs:17-39 synchronously waits on worker-owned open, reports, and checked shutdown."],
       "status": ["documented", "outstanding"],
-      "entries": ["GetReport#FEE38F1FF2B1#sync-boundary#Expert GET blocks its caller until the OTP worker completes native input; no public cancellation token.", "MacOSHidFeatureReportConnection#460FDCC00D7E#sync-boundary#Expert constructor blocks its caller on worker-owned open and checked partial-open cleanup.", "SetReport#D180C800261A#sync-boundary#Expert SET blocks its caller on worker-owned native output; accepted work drains before checked shutdown."]
+      "entries": ["GetReport#FEE38F1FF2B1#sync-boundary#Expert GET blocks its caller until the OTP worker completes native input; no public cancellation token.", "MacOSHidFeatureReportConnection#E9370FE3F6A2#sync-boundary#Expert constructor blocks its caller on worker-owned open and checked partial-open cleanup.", "SetReport#D180C800261A#sync-boundary#Expert SET blocks its caller on worker-owned native output; accepted work drains before checked shutdown."]
     },
     {
       "path": "Transports/Hid/MacOS/MacOSHidIOReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Transports/Hid/MacOS/MacOSHidIOReportConnection.cs:21-59 synchronously waits on the persistent FIDO input owner; native callback roots and checked release belong to that owner."],
       "status": ["documented", "outstanding"],
-      "entries": ["GetReport#7BEB08180D77#sync-boundary#Synchronous six-second input wait on the modern owner; timeout detaches this reader without stopping native input.", "MacOSHidIOReportConnection#1CF28ED6B80C#sync-boundary#Synchronous constructor waits for worker-owned native open and checked partial-open cleanup.", "SetReport#9F7E8DC9278F#sync-boundary#Synchronous output waits for worker-owned native send; accepted output drains before checked shutdown."]
+      "entries": ["GetReport#7BEB08180D77#sync-boundary#Synchronous six-second input wait on the modern owner; timeout detaches this reader without stopping native input.", "MacOSHidIOReportConnection#1916CB6E9926#sync-boundary#Synchronous constructor waits for worker-owned native open and checked partial-open cleanup.", "SetReport#9F7E8DC9278F#sync-boundary#Synchronous output waits for worker-owned native send; accepted output drains before checked shutdown."]
     },
     {
       "path": "Transports/Hid/MacOS/MacOSOtpHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/MacOS/MacOSOtpHidConnection.cs:47-59 uses synchronous or async shutdown; :91-126 owns a dedicated signaled worker."],
+      "evidence": ["Transports/Hid/MacOS/MacOSOtpHidConnection.cs Dispose/DisposeAsync retain synchronous or async shutdown; the dedicated signaled worker sites moved to MacOSOtpHidNativeOwner."],
       "status": ["documented", "outstanding"],
-      "entries": ["Dispose#408F96F9BB38#sync-boundary#Synchronous OTP Dispose blocks until native shutdown and rejects self-drain from the worker; DisposeAsync awaits instead.", "ScheduleLocked#B6104B4522DE#worker#Starts the dedicated macOS OTP worker lazily for native report and checked shutdown work.", "WorkLoop#153D258F073D#worker#WaitOne parks the dedicated OTP worker for queued work; it is not a caller-thread async entry point."]
+      "entries": ["Dispose#408F96F9BB38#sync-boundary#Synchronous OTP Dispose blocks until native shutdown and rejects self-drain from the worker; DisposeAsync awaits instead."]
+    },
+    {
+      "path": "Transports/Hid/MacOS/MacOSOtpHidNativeOwner.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/Hid/MacOS/MacOSOtpHidNativeOwner.cs ScheduleLocked/WorkLoop retain the dedicated signaled worker sites extracted from MacOSOtpHidConnection.Owner; original review remains outstanding."],
+      "status": ["documented", "outstanding"],
+      "entries": ["ScheduleLocked#3314D9D8FD37#worker#Starts the dedicated macOS OTP worker lazily for native report and checked shutdown work.", "WorkLoop#DC453B084F9E#worker#WaitOne parks the dedicated OTP worker for queued work; it is not a caller-thread async entry point."]
     },
     {
       "path": "Transports/SmartCard/DesktopSmartCardDeviceListener.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -272,16 +364,16 @@
       "entries": ["FindAllAsync#12804DA1B39A#worker#LongRunning requests a dedicated worker for synchronous SCard enumeration, not native nonblocking I/O.", "FindAllAsync#CDC8DC0BFB5B#worker#StartNew executes FindAll on a worker; waiting callers can cancel but an in-flight resource-manager call may persist."]
     },
     {
-      "path": "Transports/SmartCard/PcscConnectionNativeState.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/SmartCard/PcscConnectionNativeState.cs:45-104 configures the worker and sync transaction boundary; :305-309 parks the worker; :578-599 drains transaction end."],
+      "path": "Transports/SmartCard/PcscConnectionNativeOwner.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/SmartCard/PcscConnectionNativeOwner.cs constructor/BeginTransaction configure the worker and sync transaction boundary; RunWorkerLoop parks the worker; TransactionScope.Dispose drains transaction end. Renamed from PcscConnectionNativeState without changing original review roles."],
       "status": ["documented", "outstanding"],
-      "entries": ["BeginTransaction#95F593740F1A#sync-boundary#Synchronous BeginTransaction blocks for worker-owned native transaction start and rejects worker self-wait.", "PcscConnectionNativeState#34E7C124BA29#worker#Constructor sets a default Thread.Start delegate for the lazily created native PC/SC worker; injected starter can override it.", "RunWorkerLoop#478E15851B48#worker#WaitOne parks the dedicated PC/SC native worker until queued work or shutdown arrives, not a public async caller.", "Dispose#1B602AA0DF37#sync-boundary#TransactionScope.Dispose blocks for worker-owned end-transaction completion and rejects worker self-wait; DisposeAsync awaits."]
+      "entries": ["BeginTransaction#66D534D5F4CA#sync-boundary#Synchronous BeginTransaction blocks for worker-owned native transaction start and rejects worker self-wait.", "PcscConnectionNativeOwner#6655D819AC0B#worker#Constructor sets a default Thread.Start delegate for the lazily created native PC/SC worker; injected starter can override it.", "RunWorkerLoop#6F112A5C1760#worker#WaitOne parks the dedicated PC/SC native worker until queued work or shutdown arrives, not a public async caller.", "Dispose#CB9564BBE050#sync-boundary#TransactionScope.Dispose blocks for worker-owned end-transaction completion and rejects worker self-wait; DisposeAsync awaits."]
     },
     {
-      "path": "Transports/SmartCard/UsbSmartCardConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/SmartCard/UsbSmartCardConnection.cs:148 synchronously waits for the shutdown task."],
+      "path": "Transports/SmartCard/PcscConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/SmartCard/PcscConnection.cs Dispose synchronously waits for the shutdown task; renamed from UsbSmartCardConnection with the original review role retained."],
       "status": ["documented", "outstanding"],
-      "entries": ["Dispose#E4D9D84DFF7F#sync-boundary#Synchronous connection Dispose blocks for worker shutdown and native release proof; an async caller should use DisposeAsync."]
+      "entries": ["Dispose#AEAEA10143BA#sync-boundary#Synchronous connection Dispose blocks for worker shutdown and native release proof; an async caller should use DisposeAsync."]
     },
     {
       "path": "Credentials/ConsoleCredentialReader.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -291,9 +383,9 @@
     },
     {
       "path": "Devices/HidConnectionSlot.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/HidConnectionSlot.cs OpenRawConnectionAsync selects native-owning asynchronous macOS/Linux FIDO/OTP connections first; only Windows/custom IHidInterface fallback calls ConnectToIOReports or ConnectToFeatureReports before Task.FromResult. L5 changes routing, not these two fallback invocation identities."],
+      "evidence": ["Devices/HidConnectionSlot.cs OpenRawConnectionAsync selects native-owning asynchronous macOS/Linux/Windows FIDO/OTP connections first; only custom IHidInterface fallback calls ConnectToIOReports or ConnectToFeatureReports before Task.FromResult. This corrects the historical Windows/custom description; these two fallback invocation identities are unchanged."],
       "status": ["documented", "outstanding"],
-      "entries": ["OpenRawConnectionAsync#2D6CDB08BA90#async-blocked#Windows/custom feature-report fallback opens synchronously through IHidInterface before task return; built-in Linux OTP now bypasses this adapter and transfers its claim to the L4 owner.", "OpenRawConnectionAsync#ABE529EA2920#async-blocked#Windows/custom IO-report fallback opens synchronously through IHidInterface before Task.FromResult; built-in Linux FIDO now bypasses this adapter and transfers its claim to the L3 owner."]
+      "entries": ["OpenRawConnectionAsync#2D6CDB08BA90#async-blocked#Custom feature-report fallback opens synchronously through IHidInterface before task return; built-in macOS/Linux/Windows OTP bypasses this adapter and transfers its claim to its native owner.", "OpenRawConnectionAsync#ABE529EA2920#async-blocked#Custom IO-report fallback opens synchronously through IHidInterface before Task.FromResult; built-in macOS/Linux/Windows FIDO bypasses this adapter and transfers its claim to its native owner."]
     },
     {
       "path": "Protocols/Fido/Hid/IFidoHidProtocol.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -324,6 +416,12 @@
       "evidence": ["Sessions/RawSmartCardSession.cs task-returning SelectAsync and TransmitAndReceiveAsync forward to ISmartCardProtocol before return."],
       "status": ["documented", "outstanding"],
       "entries": ["SelectAsync#7C5F60065E32#async-blocked#Raw smart-card select dispatches to the protocol interface before returning; external implementations may do synchronous setup.", "TransmitAndReceiveAsync#D7F0B8100F07#async-blocked#Raw smart-card transmission dispatches to an interface before task return; task signature alone does not prove call-entry nonblocking."]
+    },
+    {
+      "path": "Transports/Hid/Windows/WindowsHidReportApi.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/Hid/Windows/WindowsHidReportApi.cs Open binds the overlapped handle; Submit supplies OnCompleted and pins request storage; Retire frees only after the owner's submit-return/callback-last-use join. Managed owner/API implementation is present; real Windows JIT/AOT completion and driver evidence remain pending."],
+      "status": ["documented", "implemented", "outstanding"],
+      "entries": ["Open#748B86D2B2FE#worker#BindHandle associates the acquired HID handle with runtime completion tracking on the FIDO owner worker; bind failure does not prove native release.", "Retire#352A09311CAC#worker#FreeNativeOverlapped releases runtime-owned request storage on the worker after submit return plus rejection or callback resource last use; unexpected free failure retains uncertain state without retry.", "Submit#49720AA967E1#callback#UnsafeAllocateNativeOverlapped registers OnCompleted with request state and pinned report storage on the owner worker; accepted immediate and pending I/O both require completion observation before retirement. Preparation failure proves no dispatch but not BCL resource release."]
     },
     {
       "path": "Transports/Hid/Windows/WindowsHidDeviceListener.cs", "reviewOwner": "Core maintainers", "rationale": "",

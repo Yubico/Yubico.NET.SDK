@@ -1,0 +1,22 @@
+$ dotnet test src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~Yubico.YubiKit.Core.IntegrationTests.Devices.DeviceEventLifecycleTests"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Core.IntegrationTests -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.dll
+Test run for /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.15)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Core.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.Core.IntegrationTests
+[xUnit.net 00:00:00.11]   Starting:    Yubico.YubiKit.Core.IntegrationTests
+[xUnit.net 00:00:00.16]   Finished:    Yubico.YubiKit.Core.IntegrationTests
+  Passed Yubico.YubiKit.Core.IntegrationTests.Devices.DeviceEventLifecycleTests.Lifecycle_TransientFragmentAddedThenRemoved_DoesNotResurrectObject [11 ms]
+  Passed Yubico.YubiKit.Core.IntegrationTests.Devices.DeviceEventLifecycleTests.Lifecycle_RemovedObjectAddedAgain_IsRejected [< 1 ms]
+  Passed Yubico.YubiKit.Core.IntegrationTests.Devices.DeviceEventLifecycleTests.Lifecycle_EqualValuedSuccessorWithDifferentReference_IsAllowed [< 1 ms]
+
+Test Run Successful.
+Total tests: 3
+     Passed: 3
+ Total time: 0.5072 Seconds

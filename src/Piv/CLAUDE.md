@@ -179,6 +179,12 @@ Key generation and import keep required domain inputs positional while policy mo
 ## Test Infrastructure
 
 Unit tests should use fake SmartCard protocol/connection seams where possible to assert APDU/TLV bytes and parser behavior without hardware.
+`PivPinOnlyModeSessionTests` retains independently owned response storage for clearing
+assertions. Never retain pooled command views for assertions after authentication completes:
+the original shared-pool implementation has already returned that storage. These tests cover
+recovery behavior and response clearing, not pre-return clearing of pooled command buffers.
+There is no injected pool or runtime observation seam for the latter; inspect its `finally`
+cleanup directly rather than adding a late-memory assertion that can read another renter's data.
 User-presence tests use a recording `IUserPresencePrompt` and fake SmartCard responses; they assert
 policy basis, PIV slot scope, request/resolution pairing, callback failure behavior, and that
 metadata already loaded by an operation is not fetched again.

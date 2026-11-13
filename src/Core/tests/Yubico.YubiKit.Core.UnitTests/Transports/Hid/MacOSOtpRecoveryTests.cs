@@ -55,7 +55,7 @@ public class MacOSOtpRecoveryTests
         }
     }
 
-    private sealed class TouchThenDataLifetime : IIOKitDeviceLifetime, IDisposable
+    private sealed class TouchThenDataLifetime : IMacOSHidReportApi, IDisposable
     {
         private readonly Queue<byte[]> _reads = new();
         private int _readCount;

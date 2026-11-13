@@ -1,0 +1,86 @@
+{
+  "actor": "GPT-6 Astra",
+  "reason": ".editorconfig insert_final_newline=false; remove only patch-introduced final LF, preserve source resolver report as predecessor",
+  "files": [
+    {
+      "path": "src/Core/src/Devices/RegisteredConnections.cs",
+      "before_sha256": "a9456f2c65b5fde1d2d7baccadb9dcbaf4ee3f354fab8e13341670324c0e885a",
+      "after_sha256": "508470f4a6056383a601bbbb8ec33726401e15c1da76f9c8d12e1379785365bb"
+    },
+    {
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "before_sha256": "6fc663283e11019485345f4b702e50a0d59d7014cca306cdb95254b6ce6209e2",
+      "after_sha256": "0cdb54e69e5e22b7f5dec0b7987262d37683d7f2306d634ec15e18c34c653559"
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "before_sha256": "f3f5bfdb61b41ba9f85b0252672aa13028c0a32607a476ab049d615b0e02dc81",
+      "after_sha256": "953cfc6cbfb24e8aec88e67cb728541e43e9ff676950e40e067d0e3afab15185"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "before_sha256": "fd190b2438ef98e31ec42040ca4800c75670cddcd87c7b75a493b12426ab1e68",
+      "after_sha256": "49301b100e1b3babe0f284d38641d2e96320b5874d47f29fdb0fb9f27798eebe"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs",
+      "before_sha256": "0bf5f8f1f3f0105e790851b1d86a6774ac004bae798e8555017fe60d86f91707",
+      "after_sha256": "85db0398078e5f75ed195ab0c03d4c3bbf1599cbb20bf7db67c343e786d31b13"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs",
+      "before_sha256": "01303fb68bb73f9c5ca704a17ffba9a31d3d465b4251904e1792c07eaa08410b",
+      "after_sha256": "b216009b7fa1692794df33bb8c1c5a32df7de7280ca341ebb477425d572d0c7a"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs",
+      "before_sha256": "5a245f409bdca58848b56eee44777cb37c10844b62a44ebf1c3d745473465d53",
+      "after_sha256": "720c0c241d1e2ce980fe2bea2d0eea5307862a6d566aeb45142b6a1fb467c2cb"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs",
+      "before_sha256": "deb7517608fa98a9ea937d327e70677a299a5f4ec9d81aa0ba49a903f9603406",
+      "after_sha256": "abe683bc35b16479ec6a7a3eaabe5e096147633699f39798757b65b375e1f250"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs",
+      "before_sha256": "41acad03e3e696cb0eafac73e43818883bd8fa19bad8ec07ddb2dc2bab7be064",
+      "after_sha256": "097006fbf75c192c09bf70bc959525e90c7f1e1a9cd71750b7e0f9fe26718af4"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs",
+      "before_sha256": "d51ca95706f35ac756a69cba1f2345d3b92f91b37df397996fa3e20a849f87b7",
+      "after_sha256": "9bc5d712e86e3860fd4a6891fbf65acffc7f25c24f55d9f3d7dc02eff337ac88"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs",
+      "before_sha256": "aa8938cb94b3f05800d1bf8e75c57fcf37b462ede974152c9fa983eb63b4f2c8",
+      "after_sha256": "3e6eaceef4606f092a364bd078916bf02b66934f047d494ba54432c7c66dafda"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+      "before_sha256": "71dbb8cf99e9b7fdf0bccbe47a0a20cb9ccde6787cda366857cd777987f589ae",
+      "after_sha256": "5f819b08b6bc27b95e41569f20be6c4ffd39044a7345756a58c400c84d8f92b5"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "before_sha256": "409d2dc4631e036a3dfcec4877c9af44c134537671c8740f5fa5331666e3d123",
+      "after_sha256": "859384afc1e7644fa638049cc133a3a7ef213307622b2131da3da4657035bb72"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs",
+      "before_sha256": "ebba1ce849828d962e422eebd02a73ac2420f25d5aea3a4b2a73375cf40359b8",
+      "after_sha256": "89605c70419d39dfd056b97b75f269b51985d4e40552936ca492f32316fad020"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "before_sha256": "8bdc36dc9d6c3d91dee40e53da899805f82783c044c9288118697d105b17e333",
+      "after_sha256": "5a25c7d620b4764eef47dc168bdcaf98c80859d1957b26083b8ba5ff8d1bf687"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/BlockingReportConnection.cs",
+      "before_sha256": "8f1bea02ecefd860c20e27bebb5e2d5f336099c142a38321d1e9044ca74ac43c",
+      "after_sha256": "f56ffe74defa6514c2f4d6c460f5f4029ed0c6c39914ff3c95ddab682a55c59b"
+    }
+  ]
+}

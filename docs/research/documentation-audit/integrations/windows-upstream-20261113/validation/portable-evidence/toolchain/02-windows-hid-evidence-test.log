@@ -1,0 +1,46 @@
+$ dotnet verification/WindowsHidRouteVerification/bin/Release/net10.0/WindowsHidRouteVerification.dll --evidence-self-test
+PASS evidence-gate/complete-child
+PASS evidence-gate/missing-check
+PASS evidence-gate/duplicate-check
+PASS evidence-gate/wrong-scenario
+PASS evidence-gate/wrong-runtime
+PASS evidence-gate/false-check
+PASS evidence-gate/unexpected-check
+PASS evidence-gate/empty-checks
+PASS evidence-gate/failed-status
+PASS evidence-gate/required-scenarios
+PASS evidence-gate/missing-scenario
+PASS evidence-gate/empty-scenarios
+PASS evidence-gate/duplicate-scenario
+PASS evidence-gate/unexpected-scenario
+PASS evidence-gate/complete-summary
+PASS evidence-gate/missing-summary-check
+PASS evidence-gate/zero-native-summary
+PASS native-summary/requested-runtime-kind
+PASS evidence-gate/writer-incomplete-exit
+PASS evidence-gate/writer-incomplete-status
+PASS metadata-default/ordinary-construction-queries-hid-metadata
+PASS evidence-gate/writer-incomplete-child
+PASS metadata-default/metadata-failure-handle-released
+PASS evidence-gate/writer-complete-child
+Portable child evidence gates: 21 executed, 0 failed; no native APIs invoked.
+PASS publication-gate/sealed-fixture
+PASS publication-gate/timestamp-preserved-source-drift
+PASS publication-gate/artifact-mutation-before-execution
+PASS publication-gate/missing-artifact
+PASS publication-gate/extra-artifact
+PASS publication-gate/stale-source-revision
+PASS publication-gate/source-status-drift
+PASS publication-gate/loaded-stale-manifest
+PASS publication-gate/runtime-relative-paths
+PASS publication-gate/runtime-sealed-prefix
+PASS publication-gate/runtime-slash-normalization
+PASS publication-gate/runtime-hash-mismatch
+PASS publication-gate/runtime-missing-artifacts
+PASS publication-gate/runtime-extra-artifact
+PASS publication-gate/runtime-duplicate-artifact
+PASS publication-gate/runtime-kind-mismatch
+PASS publication-gate/aot-runtime-identity
+PASS publication-gate/fresh-intermediates-for-preserved-source-time
+PASS publication-gate/cleanup-only-owned-intermediates
+Portable publication gates: 19 executed, 0 failed; synthetic files only. Fixtures: artifacts/w1-reviewfix/seal-tests/d1ac6d4d69714d0caf4d0f9940dc079a

@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- docs-qa docs-architecture",
+  "started": "2026-11-13T12:26:11.4879879+01:00",
+  "durationSeconds": 0.7,
+  "runDirectory": "artifacts/toolchain/runs/20261113-122611-487-docs-qa+docs-architecture",
+  "targets": [
+    {
+      "name": "docs-qa",
+      "status": "passed",
+      "durationSeconds": 0.3,
+      "error": null
+    },
+    {
+      "name": "docs-architecture",
+      "status": "passed",
+      "durationSeconds": 0.3,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

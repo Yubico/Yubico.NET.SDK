@@ -14,6 +14,7 @@
 
 using System.Diagnostics;
 using Xunit.Abstractions;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
@@ -46,7 +47,12 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public Task DisposeAsync()
+    {
+        // xUnit also runs cleanup after an assertion fails, preserving the decisive event order.
+        output.WriteLine(_log.ToString());
+        return Task.CompletedTask;
+    }
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
@@ -60,6 +66,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         await using var monitor = await YubiKeyManager.CreateMonitorAsync(watching.Token);
         // Capture the checkpoint before the pump can record initial replay.
         var initialCheckpoint = _log.CreateCheckpoint();
+        output.WriteLine($"[initial discovery] checkpoint={initialCheckpoint}");
         var enumerator = monitor.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
         var firstMove = enumerator.MoveNextAsync();
         var pump = Task.Run(
@@ -89,11 +96,13 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         for (var cycle = 1; cycle <= Cycles; cycle++)
         {
             var removalCheckpoint = _log.CreateCheckpoint();
+            output.WriteLine($"[cycle {cycle} removal] checkpoint={removalCheckpoint}");
             Prompt($"Cycle {cycle} of {Cycles}. Remove one YubiKey now.");
             var removed = await ExpectAsync<DeviceRemoved>(removalCheckpoint, $"cycle {cycle} removal");
 
             await Task.Delay(TimeSpan.FromSeconds(2));
             var insertionCheckpoint = _log.CreateCheckpoint();
+            output.WriteLine($"[cycle {cycle} insertion] checkpoint={insertionCheckpoint}");
             Prompt("Reinsert the same YubiKey now.");
             var added = await ExpectAsync<DeviceAdded>(insertionCheckpoint, $"cycle {cycle} insertion");
 
@@ -117,12 +126,10 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             // rather than assuming a fixed count: whatever left must have come back, and nothing else moved.
             Assert.True(removedDevices.Count >= 1 && removedDevices.Count == addedDevices.Count,
                 $"cycle {cycle}: {removedDevices.Count} removed vs {addedDevices.Count} added; expected a matched pair per device:{Environment.NewLine}{_log}");
-            Assert.All(removedDevices, device => Assert.DoesNotContain(device, addedDevices));
+            AssertNoRemovedObjectReadded(_log.Since(initialCheckpoint));
             foreach (var reinserted in addedDevices.Where(a => a.SerialNumber is not null))
                 Assert.Contains(removedDevices, r => r.SerialNumber == reinserted.SerialNumber);
         }
-
-        output.WriteLine(_log.ToString());
 
         // Owned disposal must complete healthy streams normally. Overflow or another pump fault is
         // a real lifetime failure, not an outcome to swallow after the hotplug assertions passed.
@@ -150,6 +157,21 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
     private void Prompt(string message) => OperatorCue.Announce(message, output.WriteLine);
 
+    internal static void AssertNoRemovedObjectReadded(IEnumerable<DeviceChange> changes)
+    {
+        // Transient views may be added and then removed in a single hotplug window.
+        // Only the reverse ordering violates the retired-object lifetime contract.
+        var retired = new HashSet<IYubiKey>(ReferenceEqualityComparer.Instance);
+        foreach (var change in changes)
+        {
+            if (change is DeviceRemoved removed)
+                retired.Add(removed.Device);
+            else if (change is DeviceAdded added)
+                Assert.False(retired.Contains(added.Device),
+                    $"revision {added.Revision}: re-added a retired object '{added.Device.DeviceId}'");
+        }
+    }
+
     /// <summary>
     /// Records every event and lets the test await the next one of a given kind.
     /// </summary>
@@ -161,7 +183,8 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     private sealed class EventLog
     {
         private readonly Lock _gate = new();
-        private readonly List<(TimeSpan At, DeviceChange Event)> _entries = [];
+        private readonly List<(TimeSpan At, DeviceChange Event, string Description)> _entries = [];
+        private readonly Dictionary<IYubiKey, int> _referenceIds = new(ReferenceEqualityComparer.Instance);
         private readonly Stopwatch _clock = Stopwatch.StartNew();
 
         private Func<DeviceChange, bool>? _awaited;
@@ -173,7 +196,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
             lock (_gate)
             {
-                _entries.Add((_clock.Elapsed, value));
+                _entries.Add((_clock.Elapsed, value, Describe(value)));
 
                 if (_pending is not null && _awaited is not null && _awaited(value))
                 {
@@ -184,6 +207,31 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             }
 
             _ = toComplete?.TrySetResult(value);
+        }
+
+        // Called under _gate. Snapshot metadata now: retained objects may be updated later.
+        private string Describe(DeviceChange value)
+        {
+            IYubiKey? device = value switch
+            {
+                DeviceAdded added => added.Device,
+                DeviceRemoved removed => removed.Device,
+                DeviceUpdated updated => updated.Device,
+                _ => null
+            };
+            var header = $"{value.GetType().Name} revision={value.Revision}";
+            if (device is null)
+                return header;
+
+            if (!_referenceIds.TryGetValue(device, out var referenceId))
+            {
+                referenceId = _referenceIds.Count + 1;
+                _referenceIds.Add(device, referenceId);
+            }
+
+            return $"{header} ref={referenceId} id='{device.DeviceId}' " +
+                   $"connections={device.AvailableConnections} serial={device.SerialNumber?.ToString() ?? "null"} " +
+                   $"metadata={device.CachedDeviceInfo is not null}";
         }
 
         /// <summary>
@@ -266,8 +314,8 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         {
             lock (_gate)
             {
-                var lines = _entries.Select(e =>
-                    $"  {e.At.TotalSeconds,7:0.000}s  {e.Event}");
+                var lines = _entries.Select((e, sequence) =>
+                    $"  seq={sequence} {e.At.TotalSeconds,7:0.000}s  {e.Description}");
 
                 return $"Device event timeline ({_entries.Count} events):{Environment.NewLine}" +
                        string.Join(Environment.NewLine, lines);

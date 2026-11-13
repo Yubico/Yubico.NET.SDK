@@ -1,0 +1,228 @@
+# Windows Refactor Integration Plan
+
+**Goal:** Receive the merged Windows HID and adapter-consistency work, then integrate it with the published Core audit while preserving both histories and their evidence.
+
+**Architecture:** Use an isolated branch from the published audit tip and a two-parent merge of the pinned v2 upstream tip. Resolve code and documentation together at renamed/extracted ownership boundaries; retain frozen audit packets and source-specific platform evidence unchanged. Sol performs detailed intake, reconciliation, review and execution through publication; Astra orchestrates. The earlier Astra validation batch remains its own capture-time execution evidence.
+
+**Tech Stack:** Git; .NET 10 / C# 14; the repository's `toolchain.cs`; Windows HID/BCL completion APIs, macOS IOKit, Linux hidraw and portable PC/SC adapters.
+
+---
+
+## Pinned preparation checkpoint
+
+- Audited parent: `d5d01ef99f1478e4d49911194c17667b2450d2fd` on `yubikit-docs-audit`.
+- Incoming parent: `e322712d609aaf03b9bd1cf2964a99326728866a`, fetched from `origin/yubikit`.
+- Natural merge base: `5746e72ed9a848d08b5782ddde025aa4a4b522ef`.
+- Delivery: merged PR771 (`bdac2f4f4…`) and stacked PR774 (`13fdf4301…`); both heads are ancestors of the incoming tip.
+- Divergence: 39 commits unique to the audited history and 36 unique to upstream.
+- Incoming net delta: 126 change records; 19 overlap the audit's accepted product paths.
+- Object-only merge preview: nine conflict paths. No working-tree/index merge has run.
+- Working branch: `yubikit-windows-audit-integration-20261113`.
+- Worktree: `/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113`.
+- Records (`RUN` below): `docs/research/documentation-audit/integrations/windows-upstream-20261113/`.
+
+The recorded merge-preview tree preserves the frozen module/record archives and prior Core integration.
+The original checkout remains on the published audit tip with its four original untracked user files.
+Sol's completed [receive report](../research/documentation-audit/integrations/windows-upstream-20261113/intake-review/report.md)
+and its identity ledger supply the source/evidence and validation-lane inputs. The completed
+[conflict map](../research/documentation-audit/integrations/windows-upstream-20261113/merge-review/decision-map.md)
+and [coordinator decisions](../research/documentation-audit/integrations/windows-upstream-20261113/coordinator-decisions.md)
+complete preparation. Their recommendations still require review against the actual resolved candidate.
+
+## Execution checkpoint
+
+The coordinator has now applied the pinned merge without committing. The preparation records above
+remain capture-time history; their statements that no working-tree merge had run are not the current
+checkout state. Source and documentation resolution proceed under separate ownership, and the
+coordinator retains index and validation authority at that checkpoint.
+
+The user's subsequent assignment transfers exclusive product/index/software/publication execution to
+GPT-6.1 Sol; Astra orchestrates only. The serialized Astra batch has completed and released the worktree.
+Bounded software results are retained; final prose, source/inventory/API/package reconciliation and
+scoped formatting are complete. Final docs checks, fresh independent evidence/publication review and
+the authorized normal merge/push remain the next checkpoints.
+
+The documentation resolution and ten clean-overlap dispositions are recorded in
+[documentation resolution](../research/documentation-audit/integrations/windows-upstream-20261113/execution/documentation-resolution.md).
+The additive [deferred-finding map](../research/documentation-audit/integrations/windows-upstream-20261113/deferred-findings-successor.md)
+preserves original Core001 identities and distinguishes replaced Windows implementation facets from
+still-open custom-provider, ABI, workflow, platform and PIV qualifications. Neither document grants
+runtime closure or reports a new validation pass. Independent candidate review and all post-merge
+validation results remain pending until the coordinator records them.
+
+## Task 1: Receive the delivery and evidence
+
+**Files:** `RUN/intake/`, `RUN/intake-review/`.
+
+1. Retain the fetch result, exact parents/base, commit graph, changed paths and PR771/774 API responses.
+2. Read the actual incoming status, native acceptance and adapter-consistency handoffs at the pinned commit.
+3. Join each reported result to its tested head/snapshot and scenario. Keep overlapping case counts separate.
+4. Inspect specifically referenced local reports when available; distinguish verified raw evidence from PR-summary-only or remote-Mac evidence.
+5. Record a finished intake report with the actual shipping delta, caller impacts, validation commands and remaining qualification limits.
+
+Important distinctions: the PRs are merged, while portions of their bodies retain earlier draft/pending-review wording. Windows evidence at `bdac2f4f4…` and `0f10775c…`, macOS evidence at `0f10775c…`, and the final documentation/PIV revision `13fdf4301…` are different checkpoints. The merged commit is not automatically a fresh run of all those lanes.
+
+The incoming merge tree equals the final PR774 head tree. Receive this ancestry once; both PR API
+records name the same merge object. The locally inspected Windows evidence preserves the unexplained
+first-FIDO-open failure and the original attended WebAuthn aggregate of 17 passed / 1 failed. Each of
+the two unsealed JIT bundles independently has 10 scenarios / 65 checks and a verified 207-file artifact
+map. These are historical source-bound kernel/BCL pipe results, not sealed/AOT or HID-driver acceptance.
+Mac raw artifacts are unavailable locally; the reported FIDO/PCSC passes remain PR-summary-only here.
+Mac OTP permission/expert-topology blocks and the other recorded platform gaps remain explicit.
+
+## Task 2: Reconcile conflict and rename decisions
+
+**Files:** `RUN/merge-review/`, the exact affected source/doc paths below.
+
+1. Compare complete base/ours/theirs units for each of the nine conflicts.
+2. Inspect clean merges on all 19 overlapping change records and the extraction/rename edges.
+3. Find active references to retired names; distinguish active guidance/tests/registries from immutable historical evidence.
+4. Assign each resolution a source-backed intent and exclusive editor owner.
+5. Produce a complete decision map before applying a working-tree merge.
+
+| Conflict | Required reconciliation |
+| --- | --- |
+| `CLAUDE.md` | Preserve accepted audit guidance and incorporate the incoming adapter conventions. |
+| `docs/architecture/raw-access-tiers.md` | Explain Windows owners/direct facades and renamed adapters without losing borrowing, cancellation or release qualifications. |
+| `src/Core/src/Devices/HidConnectionSlot.cs` | Preserve incoming Windows routes and the audit branch's actual discovery/ownership behavior. |
+| `src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs` | Map applicable audited contracts to the new report/feature seams; do not resurrect a retired abstraction merely to retain comments. |
+| `src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs` | Reconcile deletion with the new Windows APIs and owner/facade responsibilities. |
+| `src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs` | Carry the reviewed no-event/error/wake qualifications through the split. |
+| `src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs` | Preserve the distinction between native operations, managed composition and owner-controlled drain. |
+| `src/Core/src/Transports/SmartCard/PcscNativeResources.cs` | Reconcile extracted native APIs with checked release and failure cleanup. |
+| `src/Piv/README.md` | Retain complete reviewed examples and integrate current PC/SC/policy context. |
+
+Also inspect PC/SC `UsbSmartCardConnection` → `PcscConnection` and native-owner renames, the macOS FIDO/OTP owner extraction, Linux interface/event/registration splits, and the incoming PIV test-pool rollback. Public names such as `PscsConnectionKind`, compatibility diagnostics and named parameters are deliberate compatibility surfaces.
+
+### Required clean-merge followthrough
+
+The completed map also identifies these nonconflicting recipients and references:
+
+- `src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs`: carry the audited null-receive, attempted-wake and fake-loop evidence limits out of the old combined file.
+- `src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs`: retain the managed-composition/status-handling and non-seizing qualifications at the extracted implementation.
+- `src/Core/CLAUDE.md` and `src/Core/src/Native/Windows/HidD/HidD.Interop.cs`: distinguish built-in Windows owners from custom compatibility, and new byte-return imports from residual older ABI declarations.
+- `docs/architecture/connection-ownership-and-contention.md`: replace obsolete Windows wrapper/no-wake descriptions with owner-directed completion, retirement and checked release.
+- `src/Core/src/Devices/RegisteredConnections.cs` and `SharedDeviceInfoRead.cs`: include Windows in built-in owner-transfer commentary without changing the existing selection code.
+- `verification/LinuxHidRouteVerification/BlockingReportConnection.cs`: narrow the blocking-provider explanation to custom providers/test contrast.
+
+The ten clean overlap records in the decision map must each receive a finished disposition. Historical
+mapping entries, frozen host injections and published audit records are excluded from rename cleanup.
+
+## Task 3: Form the isolated merge candidate
+
+**Files:** Only the approved product/document paths and new `RUN/` records; frozen audit directories are read-only.
+
+1. Recheck both pinned parents and clean tracked/index state in the isolated worktree.
+2. Preserve the completed intake/decision records before source edits.
+3. Run the normal two-parent merge, without committing:
+
+   ```bash
+   git merge --no-ff --no-commit e322712d609aaf03b9bd1cf2964a99326728866a
+   ```
+
+4. Resolve each conflict according to the accepted decision map. Use disjoint Sol ownership for C# and shared narrative paths; the coordinator owns the index.
+5. Record before/after blobs and rationale, including nonconflicting adaptations required by moved types.
+6. Reconcile active Core/shared/applet boundary documentation. Keep original frozen audit findings and historical test reports byte-exact.
+
+Do not use a blanket ours/theirs choice, rebase published audit history, or close a deferred finding merely because its file changed. Runtime differences must be attributable to the merged delivery or a necessary, reviewed integration adaptation.
+
+## Task 4: Independently review the candidate
+
+**Files:** New `RUN/review/` records and the resolved diff against both parents.
+
+1. Use a fresh Sol reviewer separate from the resolver.
+2. Check both-parent runtime intent, new/extracted owner lifetimes, public API/named-parameter compatibility, cleanup/cancellation boundaries and current citations.
+3. Verify that accepted audit explanations remain correct at their new owning declarations.
+4. Review the PIV rollback against the captured published handoff and committed source: preserve the restored production method and do not claim withdrawn pre-return pool assertions. Private/unpublished human review text is not an extra receive prerequisite.
+5. Resolve required corrections and preserve predecessor reviews.
+
+## Task 5: Run bounded post-merge regression checks
+
+**Files:** New `RUN/validation/` records; home-backed runtime output outside frozen packets.
+
+Use the `domain-build` and `domain-test` skills. Confirm each target/selector against the incoming toolchain before execution. Serialize builds, tests and captures in the worktree and retain logs before toolchain rotation.
+
+The PR's completed Linux-hosted validation remains evidence for its own revision. This task checks
+our resolved, combined tree; it is not a repeat Linux platform-acceptance campaign. Reuse prior
+evidence at its recorded scope and avoid separately replaying focused suites already covered by the
+ordinary unit run unless a failure or a specific resolution warrants investigation.
+
+1. Capture the integrated source and exact project/test selection.
+2. Run a clean full solution build:
+
+   ```bash
+   dotnet toolchain.cs -- build --clean
+   ```
+
+3. Run the hardware-free unit lane:
+
+   ```bash
+   dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence"
+   ```
+
+4. Run the incoming portable Windows evidence guards. Inspect the boundary-inventory results from
+   the full unit suite; do not automatically rerun those same cases as a second acceptance total:
+
+   ```bash
+   dotnet toolchain.cs windows-hid-verification-evidence-test
+   ```
+
+   Intake confirmed that the portable evidence target builds the standalone Windows verifier and runs
+   21 child/coordinator plus 19 publication guards without Windows API execution. It does not publish
+   or run the separate JIT/AOT native pipe lane. Also run the newly added hardware-free event-order
+   assertions explicitly, because their assembly is outside the default unit selection:
+
+   ```bash
+   dotnet toolchain.cs -- test --integration --project Core.IntegrationTests \
+     --filter "FullyQualifiedName~DeviceEventLifecycleTests"
+   ```
+
+   Retain the expected three-case source selection and inspect actual executed/skipped totals. Do not
+   broaden this command into a whole hardware integration assembly run.
+
+   A separate `resilience --fast` or focused diagnostic rerun is conditional: use it when the actual
+   merge resolution changes lifetime/recovery behavior or an observed failure needs that evidence.
+   Merely receiving already-reviewed runtime commits is not a reason to duplicate every PR test lane.
+
+5. Validate current documentation, architecture mappings and complexity:
+
+   ```bash
+   dotnet toolchain.cs -- docs-qa docs-architecture complexity \
+     --complexity-args "--base d5d01ef99f1478e4d49911194c17667b2450d2fd"
+   ```
+
+6. Check actual formatter membership on changed source paths and classify inherited formatting findings without changing unrelated imports or declarations.
+7. Compile changed or rename-dependent examples/verification projects using their real contexts. Do not automatically replay the entire Core001 example campaign. Reuse existing validation methods only where applicable; old Core001 input profiles remain historical and must not be relabeled as proofs of this new runtime source.
+8. Reconcile API snapshots, source/profile registries, declared synchronous boundaries and test counts. Derive counts from the integrated results rather than adding overlapping historical suites.
+9. Run docs-inclusive packaging and the applicable repository publication checks before any push.
+
+Require zero compiler/analyzer warnings and failures. Preserve any failure and its source identity. Carry upstream complexity justifications only for unchanged reviewed methods; new integration changes need their own rationale.
+
+## Task 6: Keep platform evidence bounded
+
+1. Map incoming Windows and macOS results to the tested source and the actual paths exercised.
+2. Retain the unexplained Windows first-open failure and the original mixed ceremony outcomes.
+3. Keep unsealed JIT pipe checks distinct from HID-driver races, physical tests and sealed Native AOT execution.
+4. Retain macOS OTP permission/single-key topology blocks and any unperformed native/AOT/listener work.
+5. Propose additional platform runs only where the integrated delta requires them and the relevant environment is ready.
+
+No device reset, touch, hotplug, credential operation, permission change, linker installation or VM manipulation is part of preparation. PIV physical deferrals and private/attestation preservation remain in force.
+
+## Task 7: Establish the successor baseline and handoff
+
+1. Obtain fresh final integration/evidence review at the exact candidate source.
+2. Verify frozen archives and original user-file identities, resolved index state and exact staged scope.
+3. Commit the reviewed two-parent integration and new records, preserving both histories.
+4. Publish and verify the agreed integration checkpoint; promote the audited branch only after the candidate passes its gates.
+5. Record the new baseline and focused documentation-impact/deferred-finding map. The original Core Pass-1 archive remains immutable and retains its original source pin.
+
+The next implementation pass across deferred Core/applet findings is a separate task. This integration may resolve, supersede or re-scope particular findings, but those changes require explicit evidence and decisions.
+
+## Preparation handoff (historical)
+
+**Preparation is complete.** Fetch, exact parent pins, worktree isolation, object-only reconnaissance,
+delivery/evidence intake, conflict/rename recommendations and coordinator adjudication are recorded.
+At that checkpoint, the next step was controlled merge execution in this worktree, followed by
+independent candidate review and the specified validation lanes. The execution checkpoint above
+records the subsequently applied merge. This preparation handoff supplies no build/test result,
+integration commit or platform acceptance.

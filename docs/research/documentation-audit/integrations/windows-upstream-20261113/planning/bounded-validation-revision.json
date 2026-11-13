@@ -1,0 +1,8 @@
+{
+  "scope": "User-requested clarification: post-merge regression checks, reuse prior PR evidence; no repeat platform-acceptance campaign",
+  "previous_plan_sha256": "5076f5bda877125a3d5f6cf5dbe870df3f9eb0a28f1833c61cdab5ef7cbcc05a",
+  "updated_plan_sha256": "3f47dcac19410621ea19c8a0dfb6a2fc034dfae5c4aa48e1b1d94d9bf36a1b26",
+  "snapshot": "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/2026-11-13-windows-refactor-integration-bounded-validation.md.snapshot",
+  "source_merge_executed": false,
+  "build_or_test_executed": false
+}

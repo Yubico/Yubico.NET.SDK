@@ -1,0 +1,550 @@
+{
+  "tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "parents": [
+    "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+    "e322712d609aaf03b9bd1cf2964a99326728866a"
+  ],
+  "changed_paths": [
+    {
+      "path": ".github/workflows/build.yml",
+      "sha256": "24dcc5b8695ee3b318d092ab39dd546af99466dc0ec3d22010c95772f84bc4a1"
+    },
+    {
+      "path": "2026-09-21-yubikit-async-boundaries-ISA.md",
+      "sha256": "74d949f89e3f36f78a74c51164abb812af41c2af6697db83c9ca737f5688e409"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "93b24692c2c9ad11e13f9c349a30eff650e6285430fb80d3b1aeb14f47050e5d"
+    },
+    {
+      "path": "docs/SDK-HOUSE-STYLE.md",
+      "sha256": "663e99227a44510ba41e53a6ebc4814a908e80dc7f71c7f1d677d3959e596344"
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "sha256": "0083ebf979adb94f867fd212f6c9939256508ba4e74ebb9cb4da47b45be1d6cc"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "sha256": "0b858ea6a107cb0de9c2675cc651fbb7d690714d712575dc6dc93e83970ceb94"
+    },
+    {
+      "path": "docs/plans/yubikit-async-boundaries/00-status.md",
+      "sha256": "a86ff96cabde210698eb888ce5342188e7ece91ba70f3badca590830c2dd6096"
+    },
+    {
+      "path": "docs/plans/yubikit-async-boundaries/02-architecture.md",
+      "sha256": "b7a2558dc4e3500d447d0f18b6f98f65746ee649a48d99737d1eaae73f61efdc"
+    },
+    {
+      "path": "docs/research/adapter-consistency-macos-handoff.md",
+      "sha256": "36337971ac77860c64b77b6d9aafc28825eb78822f007774c23b37a66332fc70"
+    },
+    {
+      "path": "docs/research/documentation-audit/core.md",
+      "sha256": "0005a8f685de25051697a1f1ccc9f0a68fde3775cdeb6461c4d76fed3039023f"
+    },
+    {
+      "path": "docs/research/windows-async-native-acceptance.md",
+      "sha256": "631ce9d32958007560e6a15f679f8dd66a065abb13140b37b4348b632a166915"
+    },
+    {
+      "path": "scripts/toolchain/BuildTargets.cs",
+      "sha256": "78a47dbe23c6e5f7d5026721dc39da5cca3713828af10f29975e138c6e8c4552"
+    },
+    {
+      "path": "scripts/toolchain/WindowsHidVerification/PublicationSeal.cs",
+      "sha256": "762b0bce9c86b9327ae13e73128ccf9d587a916b8d39ef92fd41c3c517d697de"
+    },
+    {
+      "path": "scripts/toolchain/WindowsHidVerification/RequiredNativeChecks.cs",
+      "sha256": "003c9e182df313de462e4b8679b28d7c1a8c3143db9ee84dc000247065b360dd"
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "sha256": "df004bbc0467f1c52d5a032c001afe86bf8a4af211f5bd2d5e42bf245e5a2200"
+    },
+    {
+      "path": "src/Core/README.md",
+      "sha256": "c1094cdb9da28d7a9e234c48302b8c50e5554108de99973bde9ef12899f1b964"
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "sha256": "953cfc6cbfb24e8aec88e67cb728541e43e9ff676950e40e067d0e3afab15185"
+    },
+    {
+      "path": "src/Core/src/Devices/RegisteredConnections.cs",
+      "sha256": "508470f4a6056383a601bbbb8ec33726401e15c1da76f9c8d12e1379785365bb"
+    },
+    {
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "sha256": "0cdb54e69e5e22b7f5dec0b7987262d37683d7f2306d634ec15e18c34c653559"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "sha256": "5a25c7d620b4764eef47dc168bdcaf98c80859d1957b26083b8ba5ff8d1bf687"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "sha256": null
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "sha256": null
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "sha256": "736821f2e8796d42985444edad53ce4706d5eddcdeeec48702f732974c9c069b"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Kernel32/WindowsHidSafeHandle.cs",
+      "sha256": "41a0c253d4aca5558669aab34de30837f515b0f85fe820694ca4b694bad14781"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs",
+      "sha256": "85db0398078e5f75ed195ab0c03d4c3bbf1599cbb20bf7db67c343e786d31b13"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidNativeApi.cs",
+      "sha256": "c16d56cf897034ed1acbf7a0b5ca6da63c1d2cafda11c38714a52a2c7b1fa0ba"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs",
+      "sha256": "be133e2f056a514293f573420136f09ea91338afaa935f23c6db7cdb4243fc27"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadRegistration.cs",
+      "sha256": "82592d4e85011e44e01ed82340ff93db0a59abdd3b583a553e50d2412dc40cc7"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadinessNative.cs",
+      "sha256": "fa8354d00ad0509d24cd35574a8309669e96568b59c8401f74f091abed2707c4"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+      "sha256": "748cbc1f8e9a75fc228bbff575f3c9ca29ea86e5062fae1d10118685cb1ab85c"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "sha256": null
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs",
+      "sha256": "cbdaf16f158c4ed27ed6351c4eebad2a4530b060cdea47f770f0bcb0a52624c5"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "sha256": "17254e08152ca4e51fc81bd60404f32533ebb5ccdf56860c044fdb10ab1a3d2e"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidPollOutcome.cs",
+      "sha256": "78072a0b062ec3eecf3e7dd12fd3b54167718cf1f8263f589478b1bbf1cd47af"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadinessNative.cs",
+      "sha256": "192a618f8d4ef92fd7e1466612b3d7b0fbacce1888af6f5f7959d46078c1c616"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidUdevEvent.cs",
+      "sha256": "9554bf1388c98d163fdd1705360ebe0d6d6a3abd914cc064a6c530eefa17fb73"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs",
+      "sha256": "b216009b7fa1692794df33bb8c1c5a32df7de7280ca341ebb477425d572d0c7a"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "sha256": null
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IMacOSHidInputBridge.cs",
+      "sha256": "a0ef89e030aca0ac04513eab876ee6de9f96fb04ef17276445b70900c6e11772"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs",
+      "sha256": "720c0c241d1e2ce980fe2bea2d0eea5307862a6d566aeb45142b6a1fb467c2cb"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "sha256": "85681a7df76abc6453eb463d9fc204b991a2204f18ab4beddb4a3b1455ff8092"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidNativeOwner.cs",
+      "sha256": "1fcdedcb8794ec96772d0c42d0a3ef4fae9bc7b3d3a74cc8998e26d97cecae04"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "sha256": "61b294cc9ffb37faa03c3198014887de32222a1c672c678700a1d8ebdafc582a"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "sha256": "fdcdc90fa4d874dc7c99e38fb2aa3b6872e36a2e96662850d4de4f41dfb9ea24"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidInputBridge.cs",
+      "sha256": "712f3297df08f9d5a04afc39c1312d7f07adb9cdc5ab66f5416081e2bdedd075"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs",
+      "sha256": "abe683bc35b16479ec6a7a3eaabe5e096147633699f39798757b65b375e1f250"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "sha256": "73f4f660e755061f9772db593617393427eff4d7e49d6a5555399328ec4e629f"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidNativeOwner.cs",
+      "sha256": "bfc00e3271c9fd69b7dc152f513e6c103b4ed3c66be1a1c9dbb9dab3f40ec12e"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs",
+      "sha256": "097006fbf75c192c09bf70bc959525e90c7f1e1a9cd71750b7e0f9fe26718af4"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs",
+      "sha256": "9bc5d712e86e3860fd4a6891fbf65acffc7f25c24f55d9f3d7dc02eff337ac88"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsFidoHidConnection.cs",
+      "sha256": "f63a84eaec068f13174b1301ded01d715870500699fd47b3a538b0f0b8fb696d"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs",
+      "sha256": "08654594324dd2cfa51b11f4e8d8953cf0cb9457a172144679d82fe2ba314538"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs",
+      "sha256": "3e6eaceef4606f092a364bd078916bf02b66934f047d494ba54432c7c66dafda"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+      "sha256": "5f819b08b6bc27b95e41569f20be6c4ffd39044a7345756a58c400c84d8f92b5"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "sha256": "859384afc1e7644fa638049cc133a3a7ef213307622b2131da3da4657035bb72"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidInterface.cs",
+      "sha256": "6cebaff8a71f9027a27e3fc47f1a909068084ee23218ea30323e375c92f1946f"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidOverlappedOperation.cs",
+      "sha256": "0e91caf07148d3d590398e82aabb63fa673ffb9f92f1db0c97abac90170d924a"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs",
+      "sha256": "89605c70419d39dfd056b97b75f269b51985d4e40552936ca492f32316fad020"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsOtpHidConnection.cs",
+      "sha256": "a127ef4770667a004570a211e135679d3c109dd266f4bd4098d980f8bdfc0448"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs",
+      "sha256": "0a15c01b145a6e2c580532acc44f0e38f96ab5f03205fb5b3f1346887f7104af"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISCardApi.cs",
+      "sha256": "dc1c3f9ed6e54d55ca85e9d2102ec42905c0ca6b86c64a5a0b5427d638838785"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs",
+      "sha256": "75b283684c157c30e7333e484b7fe14e928770a525ba17bca3498d9a2bbab45e"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/NativeSCardApi.cs",
+      "sha256": "0f644fdfa25eccb12a826859ccb0d7806430cebc6660bdbf91172ad0b35fe7d3"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/NativeSCardConnectionApi.cs",
+      "sha256": "4de101f3b6c8cfbf64fa97821ee77f68dfad5b96ae1b956e6c7485f4237fa943"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnection.cs",
+      "sha256": "a09454d845aa46e83f9113e4cd84c5cf3a9ecf25122f93dda8e795e9d8aaa61d"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeOwner.cs",
+      "sha256": "3de540b2f304489117bf7216ca0c56fd540c8429a64e9a5e05a3f2639ba76602"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "sha256": null
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "sha256": "49301b100e1b3babe0f284d38641d2e96320b5874d47f29fdb0fb9f27798eebe"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "sha256": "e2150a83494f8afab98be940b26ee27cefd9efeba5742c13fba2022d30c8c1df"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+      "sha256": null
+    },
+    {
+      "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sha256": "051ebc7cbc083b3de48f10e6a2e555888527b6007c3f84e092415c9d2bfcf59c"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs",
+      "sha256": "31865edfe128d420e0753e93fa343fa7533d9e5f91c2d1434630da009fe2d8df"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventLifecycleTests.cs",
+      "sha256": "53df0fc769551525980a2d419cf2a4faf80b3b7d7763660c334e39ee4f3a3f3b"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "sha256": "10765b58347bdd3f196ac09f7b53f62fd5d78013344d596ddd69fcc72f0d1ed5"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs",
+      "sha256": "4ebc905b3edaebb9de5aff0c703443728df9c06ce6ba20ff5bf0f39417863e4d"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+      "sha256": "3cb51947fc28bada5804146f127db4fed42fd833e5afa5626396125b1f875dfa"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs",
+      "sha256": "fa911cd6de5e9b38305d21abc5f29bb35283c5ecce73f9fafcbdeb245a0e710e"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScannerWindowsCompletionTests.cs",
+      "sha256": "9c004c885b8ba7d867b41825408ebc939237faa4a1c138000460f2f90663d122"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/CrossLayerAcceptanceTests.cs",
+      "sha256": "620d57a4160d3236168dc7b4576078e9eeb242fa7f5e7bc064d7761b2798fab4"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "sha256": "4d9e513203dd1319d5ad7bbc04549a2bf1c48b03ad561dabc13b4e771096490a"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+      "sha256": "4164977f0e3614f4f5342133119e01d9523d38faf094eb974c8d57f7f14f9542"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+      "sha256": "4f49c7c18a5890d296c2ab8ac25f359a934c74e59cc496dc4d054a574b594db0"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md",
+      "sha256": "db8711c8011f0716f4e9c346b28638c3160752f20df189077a9b0b04d0749991"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "sha256": "c36106b66e152fde322871e95206d383bf4e8c8c19984b535f189ff0762766e6"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/adapter-contracts.v1.json",
+      "sha256": "e69a66ec3d7607df62d209e3e47c668b12013d56189936b965713630be49dadd"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/core-boundaries.v1.json",
+      "sha256": "d41f29d5ee84c07467dda854854b0ccde99ab40dc1db561024253d08b1ae59b0"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsFidoHidRoutingTests.cs",
+      "sha256": "188f5857823f1384f575b26d69599d81cd20759d19538624185126398fa3069d"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsOtpHidRoutingTests.cs",
+      "sha256": "b3aff638c940cd355368ddfedd2d665e2582f837978dcc0dd086716b6d6b0d44"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsRoutingApi.cs",
+      "sha256": "a7c3a4a5c3ad84fd05a318d51144fdba322aa6d5ad4da193d45b0a6fa645af9e"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsRoutingContract.cs",
+      "sha256": "a1a861e1a3402fc9939d5a2047ae7cf6e381c37946d0ec45c385f3acaebbf186"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+      "sha256": "0677b1d6bdc8831ee7ebda7c0d5d8e872bbbce6205822aaf8f0f9fc6f8c927ca"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+      "sha256": "4d6d2564a7544b8f9e2354559b30a9c012e14a631fa50a15ef4ecf0e2dd5173a"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+      "sha256": "b0bca6cf6b20b11f3ef8cb7720fcda2d16d541d54c9a42aefe561ca078490139"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+      "sha256": "f2e9abe5b682802fdc262dccc77dbc6aa05768bf05e80970e7c20a8da58ab241"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "sha256": "7b096081577eff2434cc6331781298647bf7390d6563debac2d40626e3981531"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "sha256": "bcba24524de5fa5f84d5acd967f3978b8d3d8470cc265074c5af5ab5bd37b738"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "sha256": "c5b462e1aa46f5d17476769d9c6c063591b6975e68a794d4b27d2f8352be7460"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRecoveryTests.cs",
+      "sha256": "b78dd10768fbefc7cc5a0b47bbd56269dcd7ab38881d6e669e2683d190a18b0d"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "sha256": "d11fc681a0c77e6c5013dd5cd403688345e7ff3205e3c8341d709da16176aba6"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoDirectFacadeTests.cs",
+      "sha256": "c2e8458d15cd8309bd0558b5ddf6ffd0b60a944bb9fe6203a3e5752bc6d5e276"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoHidNativeOwnerTests.cs",
+      "sha256": "b36b13f78171e0ca2597744b0509751ad61072bbbccb503099154ad5018053ec"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoPreparationFailureTests.cs",
+      "sha256": "928bbc6b2373d62fea4c8873aa02a8bb31b003c7227e8d01ed3f85f617a2b1c3"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidFeatureReportApiTests.cs",
+      "sha256": "ae50e5de5ea7b671cdcfead1d5f0857655cbfab7d4aecd06d7387de906461d34"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidReportApiTests.cs",
+      "sha256": "9e907150cb69f354b503a4966aa1ff81a608dcd7402d8968c0654cbb30ccb9da"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidSafeHandleTests.cs",
+      "sha256": "d7dfe1ff1bde6563107ab0a0a3bd49d6f57e2a2167742ae3ba1d72763cbbcb87"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpDirectFacadeTests.cs",
+      "sha256": "cb9d5408c45298575512ecde4e0b2ef8f96a042a030abe8f25d16b35a1a96696"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpHidNativeOwnerTests.cs",
+      "sha256": "3248bff38c3f11d892e161a9ef63d0fac9f6367ca79e5052897f8ba39774b1a7"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpLifetimeTests.cs",
+      "sha256": "205fde4974ebb3557a8e5942b30ba1b3303d32454f4df1819081aee6c76e6101"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpReportApi.cs",
+      "sha256": "4fa01dc8496813a366fb26da6739ae71f1ca5634845776d5e989e9b232d30ec8"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsRoutingDirectContract.cs",
+      "sha256": "71717bc79ce3cc0ac3b29ad652af4e520c059965d619258a2e2af1fd0c078bdd"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+      "sha256": "3ffb4d366803a34bc6905e66ac577582cbfaabc8276e046df9aa6ca53ef9a7df"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscIsolatedProbe.cs",
+      "sha256": "aaa9c3d390121ed56845f39187272cabf7910c49a384390c201ce4c8352d2625"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "sha256": "d3e803697bfaa8cbf89e6d1ccb1acb1a83dad0560fb80fe88c49f83c4b7f5d0f"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionTests.cs",
+      "sha256": "15e8e4580ad094dad6e47d8419528a72a341c9d120e3aa303a4cd6f364200921"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscContextIsolationTests.cs",
+      "sha256": "4c6a6e098dffea8d6ed1e87706829d1ce7f24c8b5b155428f32d7a3f151cb72d"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardConnectionFactoryTests.cs",
+      "sha256": "89600d81d187beec08119017c0a8be4422acfd14b0e588c5d7bb2fb8fdcbf5ab"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "sha256": "b7980de61ec9469a6a31cccdb1c43a6cd8a128344f82cfbde2de569c436845dc"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/UsbSmartCardConnectionTests.cs",
+      "sha256": null
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs",
+      "sha256": "eb50986d65c69f9a3103f337c8f41b91ccda92a2a3357cc0fb6538caaa2e03d7"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionWindowsCrossLayerTests.cs",
+      "sha256": "82ba4371f8c93daa9970f589ec8563846724bd90372c76cb121ed3dbfd9bbe23"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/WindowsCtapReportApi.cs",
+      "sha256": "f2d5f054a76ec4c2e71c67a21a34cd0e32a9a284346baae106b634f98c662154"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "sha256": "09e27044c705fe0c308617f100919c14d7d607261b020e99d20bdd559e4a5744"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "sha256": "f5571de62ffb8894eb12b828077ed219b8581ca575276b83088f0152955e2cae"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs",
+      "sha256": "70bd8487aa589835b992bc02d03097cd62321e427276a3dd4dcdf4502b5e8ef6"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionWindowsCrossLayerTests.cs",
+      "sha256": "ff29840e9e5075aab0fa310dd10a30c3f60a480c2d8a328a579a259091e84471"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/BlockingReportConnection.cs",
+      "sha256": "f56ffe74defa6514c2f4d6c460f5f4029ed0c6c39914ff3c95ddab682a55c59b"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/EVIDENCE.md",
+      "sha256": "65d695dd7ad0e00d6f8cf756deb53cb5bb4f952a0a2e37c84b3be7da076d7b2c"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/Evidence.cs",
+      "sha256": "d41fbdcef0841eae69d59434b12087d01fda394d00363ee37afe8ce8fdf97108"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/EvidenceGateTests.cs",
+      "sha256": "de0a3d709ef795b77d87dee39dd733260b6e19061d58a7d468e726bc14e5df80"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/NativePipeFixture.cs",
+      "sha256": "aea2925a934a26f7f0d2c1cca06cfccdcc420e7fcb40f3735fb51bc75db6f13a"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/NativeScenarios.cs",
+      "sha256": "1a8d41c4eedee648052197ac6f9e0977426fd7f2aeb0cb749f5f4977022972b4"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/ObservedReportApi.cs",
+      "sha256": "03206984369e4d59db39ef7c53a0b4b1529ee4cbe96c7fd29f551fb9c8d8584e"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/Program.cs",
+      "sha256": "b8f536ac81751137b06e44ece05dbac873a6135bf13fbb433499071488c470ea"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/PublicationSealTests.cs",
+      "sha256": "7999862c824a0e5dbf84c975d4c21b45724bb1baf2148c0d2149de2535c4fd43"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/WindowsHidRouteVerification.csproj",
+      "sha256": "fa882b99e6fc8c0bdc772bcb3144812dfcef317034d1b079a6e8151fac38288d"
+    }
+  ],
+  "scope": "Resolved product tree before integration records are staged"
+}

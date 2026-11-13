@@ -18,11 +18,30 @@ using System.Runtime.InteropServices;
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
 // ABI findings: native HidD_* returns BOOLEAN (one byte), unlike Kernel32 ReadFile/WriteFile's
-// four-byte BOOL. The Bool annotations below remain pending a separate correction. Native HIDP_CAPS
-// fields are unsigned 16-bit values; short preserves width but not values above 32767, including lengths.
+// four-byte BOOL. The older Bool-return imports below remain pending a separate correction; the
+// GetHid*/SetHid*/FreeHid* declarations already return byte. Native HIDP_CAPS fields are unsigned
+// 16-bit values stored here as short; the new report APIs reinterpret them as ushort. Other consumers
+// still need separate review for values above 32767, including lengths.
 // No architecture-specific runtime failure is established by these declaration comparisons alone.
 internal static partial class NativeMethods
 {
+    // Synchronous feature calls borrow the pinned array; the caller retains the handle explicitly.
+    [LibraryImport(Libraries.Hid, EntryPoint = "HidD_GetFeature", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial byte GetHidFeature(nint handle, byte[] report, uint reportLength);
+
+    [LibraryImport(Libraries.Hid, EntryPoint = "HidD_SetFeature", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial byte SetHidFeature(nint handle, byte[] report, uint reportLength);
+
+    // HID BOOLEAN is one byte (unlike Kernel32 BOOL). The caller retains the handle explicitly.
+    [LibraryImport(Libraries.Hid, EntryPoint = "HidD_GetPreparsedData", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial byte GetHidPreparsedData(nint handle, out nint preparsedData);
+
+    [LibraryImport(Libraries.Hid, EntryPoint = "HidD_FreePreparsedData", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial byte FreeHidPreparsedData(nint preparsedData);
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct HIDD_ATTRIBUTES

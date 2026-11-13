@@ -118,9 +118,12 @@ Prefer the applet/raw convenience factories or an explicit result owner with ses
 
 `DisposalGate` sequences connection teardown before registry release. Built-in native owners distinguish
 terminal managed work, drained references, and proven physical release; unknown release retains the
-claim. A custom connection's successful `Dispose` supplies only that implementation's guarantee, and
-the pinned Windows HID compatibility route can defer actual SafeHandle close while native work holds
-a reference. Do not equate every managed disposal return with native release. Disposal runs
+claim. Built-in Windows FIDO waits for native completion and request retirement before checked close;
+its OTP owner waits for admitted feature calls to return before checked close. Their factory and
+discovery routes transfer the original claim before native acquisition, and only the owner may release
+it after proven cleanup. A bounded discovery wait or a public operation fault is not release proof.
+A custom connection's successful `Dispose` supplies only that implementation's guarantee.
+Do not equate every managed disposal return with native release. Disposal runs
 once; all sync and async disposal callers observe the same completion and exception. Sessions have no
 finalizer recovery. Some built-in connections request best-effort native finalizer cleanup; it is not a
 guarantee of timely teardown or lease release. A leaked connection can retain the physical-device lease
@@ -218,8 +221,11 @@ What the drain leaves behind differs by protocol:
 - If a FIDO HID exchange is admitted when disposal begins on the built-in macOS/Linux connection, disposal
   terminally wakes that connection's input so the drain cannot wait indefinitely for a report. The wake
   does not dispose the connection, but it may leave it unusable, even when the exchange finishes
-  concurrently with the wake. Windows/custom compatibility connections receive no equivalent wake, and their drain waits
-  for the exchange's native I/O.
+  concurrently with the wake.
+- On built-in Windows FIDO, a terminal wake requests shutdown of the native owner. The owner still
+  waits for native completion, request retirement and checked close; the wake is not release proof.
+  Custom compatibility connections receive no equivalent SDK-owned wake, and their drain depends on
+  the custom implementation's report I/O.
 
 Treat a FIDO HID disposal that began while an exchange was active like a failed partial exchange: dispose
 and reopen the connection instead of creating another session over it.
@@ -236,8 +242,10 @@ the deliberate tradeoff for never abandoning a stateful exchange halfway through
 
 - macOS FIDO opens remain non-seizing (`kIOHIDOptionsTypeNone`); the registry, not a platform seize
   option, owns in-process admission.
-- Windows OTP HID feature reports use `DESIRED_ACCESS.NONE`; keyboard collections reject ordinary
-  read/write access.
+- Windows OTP HID feature reports use `DESIRED_ACCESS.NONE`, preserving access to keyboard collections
+  that can reject ordinary read/write opens. Zero desired access is not a universal permission bypass:
+  device ACLs, collection/driver behavior, the host token and existing handles' sharing policies still
+  govern open and feature-I/O success. Metadata acquisition alone does not prove feature access.
 - Windows FIDO HID read/write access may require elevation under the host's access policy. Enumeration
   metadata alone does not establish that a report handle can be opened or used.
 - Cross-process PC/SC contention is not converted into an SDK transport retry.

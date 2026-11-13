@@ -1,0 +1,40 @@
+{
+  "actor": "GPT-6 Astra",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "complexity",
+    "--complexity-args",
+    "--base e322712d609aaf03b9bd1cf2964a99326728866a --json artifacts/windows-merge-complexity-from-incoming.json"
+  ],
+  "started_utc": "2026-11-13T11:18:35.584757+00:00",
+  "finished_utc": "2026-11-13T11:18:37.748690+00:00",
+  "exit_code": 0,
+  "head": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "tracked_changes_after_command": [],
+  "files": [
+    {
+      "path": "console.txt",
+      "bytes": 4111,
+      "sha256": "28cd0a0969ace85ca35147fd3eb5515d212eb3d36104a79078a3f8134c7ee91d"
+    },
+    {
+      "path": "toolchain/result.json",
+      "bytes": 565,
+      "sha256": "32aa0f4f865b0baf8801e6d20fd4776bbda2e5c84b362959bb573ca35ca8f9fb"
+    },
+    {
+      "path": "toolchain/result.txt",
+      "bytes": 449,
+      "sha256": "c93dd347ac8a4cbe01bada1948c58e95948d1c0d038860f59889f8a9a0b88556"
+    },
+    {
+      "path": "toolchain/run.log",
+      "bytes": 4575,
+      "sha256": "03f8eb8dc27ef7fd42bc09f02994a863db0fa3f9d0c84d6824ec19d725934c19"
+    }
+  ]
+}

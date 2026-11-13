@@ -1,0 +1,1839 @@
+{
+  "actor": "GPT-6.1 Sol",
+  "status": "prepared, awaiting independent review; no commit/push",
+  "product_tree_after_final_docs": "5dcd089144393515641dd94130b1ecdac92bfeca",
+  "product_paths": 135,
+  "packet_paths_excluding_manifest": 165,
+  "receipt_entries_verified_against_staged_bytes": 67,
+  "preserved_preparation_paths": [
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/.gitattributes",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/coordinator-decisions.md",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/preparation-verification.json",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/plan-location.md",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/git-version.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/git-version.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-base.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-base.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/divergence.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/divergence.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-log.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-log.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-paths.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-paths.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-stat.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-stat.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-771.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-771.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-774.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-774.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-preview.stdout.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-preview.stderr.txt",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/summary.json",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/preservation.json",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake-review/report.md",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake-review/evidence-identities.json",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/decision-map.md",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/decision-map.json",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/input-identities.md",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/proposed-ownership.md",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/2026-11-13-windows-refactor-integration.md.snapshot",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/2026-11-13-windows-refactor-integration-bounded-validation.md.snapshot",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/bounded-validation-revision.json"
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/build.yml",
+      "sha256": "24dcc5b8695ee3b318d092ab39dd546af99466dc0ec3d22010c95772f84bc4a1",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "2dbbeaff7e3366add01077721bdb04ec84507f6e"
+    },
+    {
+      "path": "2026-09-21-yubikit-async-boundaries-ISA.md",
+      "sha256": "74d949f89e3f36f78a74c51164abb812af41c2af6697db83c9ca737f5688e409",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "0b9db0a879689cb76877e533fad4125d35377b7c"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "93b24692c2c9ad11e13f9c349a30eff650e6285430fb80d3b1aeb14f47050e5d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d6b4c67eb77c5c6bf9474cfe3ebbe382d92be5a9"
+    },
+    {
+      "path": "docs/SDK-HOUSE-STYLE.md",
+      "sha256": "663e99227a44510ba41e53a6ebc4814a908e80dc7f71c7f1d677d3959e596344",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9697e619e307c63d99c2391d03c8271cd3680bc0"
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "sha256": "0083ebf979adb94f867fd212f6c9939256508ba4e74ebb9cb4da47b45be1d6cc",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9c2c32a2982cd75db924467ea209cb35a715953b"
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "sha256": "34cea318b49fc6a426e292967904d8274c93af2785faba12a05bb7a0f70bd8bf",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c802a8c9526d7bcbcef8d4a1d203fd51f28e6493"
+    },
+    {
+      "path": "docs/plans/yubikit-async-boundaries/00-status.md",
+      "sha256": "a86ff96cabde210698eb888ce5342188e7ece91ba70f3badca590830c2dd6096",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "1e0fb3e2bef7a34e1bcc096e397129ce7fea9973"
+    },
+    {
+      "path": "docs/plans/yubikit-async-boundaries/02-architecture.md",
+      "sha256": "b7a2558dc4e3500d447d0f18b6f98f65746ee649a48d99737d1eaae73f61efdc",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "4aa4ab0149aa52cb93afb3c3f1a7fe03d8613b12"
+    },
+    {
+      "path": "docs/research/adapter-consistency-macos-handoff.md",
+      "sha256": "36337971ac77860c64b77b6d9aafc28825eb78822f007774c23b37a66332fc70",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "0e682fab8b051cd18b5affb9e109e5034826cbef"
+    },
+    {
+      "path": "docs/research/documentation-audit/core.md",
+      "sha256": "90061ba3743d795168075a6468d845ee9eef0d26bc4fef937c188cad2f625c13",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d560802933f112d9318f7f99a7681c6651f54324"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/.gitattributes",
+      "sha256": "2fd2d730a144d56a144de4a16ea0f4a05cf23c4928a67ff94c9d6fcb26ae01da",
+      "kind": "integration-record",
+      "git_blob_oid": "6c3c787495842abd099aaa00c270186e19c11518"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/coordinator-decisions.md",
+      "sha256": "9e01a1c47c4556418f7898e4752d79688eb800742f6b54b4335c328a2a0023c5",
+      "kind": "integration-record",
+      "git_blob_oid": "0a16cc71abf45ae865a214c844484aacf4649d77"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/deferred-findings-successor.md",
+      "sha256": "7af060c11d92a253a9bc12e98845a3942d382cf89ddb77a8e5c5620068948a59",
+      "kind": "integration-record",
+      "git_blob_oid": "70a3993e4e3eb2693ef4aca44f7c71332f7e1a42"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/candidate-before-validation.json",
+      "sha256": "9107d9bc0362058d63a664c5f28f676c5d71c9abc8aeff92b2608a4754f8c82b",
+      "kind": "integration-record",
+      "git_blob_oid": "a45bd6c0be1a02b50fa427359e127544d25f33d9"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/capture-command.py",
+      "sha256": "bcc42ba1fea1943148910584df2b764c4952d2e92165f3070b07e1557e5bf810",
+      "kind": "integration-record",
+      "git_blob_oid": "f8c5397666f8ed71654b4b2a61db7225c07782d0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/capture-directory-collision.md",
+      "sha256": "61879f7844fc7409a3b3eae3fc8992cb22e4063236dadf5dea3552a3bce14e12",
+      "kind": "integration-record",
+      "git_blob_oid": "c19124694b829f9e521ce712551eb001e01ae12b"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/check-final-docs.py",
+      "sha256": "4000d05ca0bba89bf6d7a029f7b7cd26adafd1ce9247f6699d9be484b625f3bc",
+      "kind": "integration-record",
+      "git_blob_oid": "86f263d9734ac9da14398b801569f2bfbd33cddb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/documentation-resolution.md",
+      "sha256": "089c3d0f6b39df7982c78c6d4726ac6a93a7d633866b29a6c85f20119b4a0744",
+      "kind": "integration-record",
+      "git_blob_oid": "067a7da629bd66872bf6a8013ad015317ff140ae"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/documentation-staging.json",
+      "sha256": "20a37f3db8fbf3e574df804115a1e5b0c7f307819ce92287a1b4dcf8e4a372db",
+      "kind": "integration-record",
+      "git_blob_oid": "816d83ffb1c95dcc057c34be05997cfc513392c6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/final-candidate-preservation.json",
+      "sha256": "feec539a45537ad8f02838e9239e116cccfa7429651a7659eda46862ba51410f",
+      "kind": "integration-record",
+      "git_blob_oid": "9c6bc4c905b9d7915c60b582483cd37be73461fb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/final-plan-snapshot.md",
+      "sha256": "8327b1b05f4a891d73641c04775f1e8eaf5643efb14e196eb46e38ebb8b8770f",
+      "kind": "integration-record",
+      "git_blob_oid": "934c3dfeb771586733699bea789cb6ae95500053"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/host-and-publication-target.json",
+      "sha256": "676f10ae8cb52c535f2a188b906c649e7f0e6a28f94d11ad27e48b58971aa492",
+      "kind": "integration-record",
+      "git_blob_oid": "a7c326f1d3081e5d95b1756442b7690135aea35d"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/incoming-complexity-justifications.txt",
+      "sha256": "cc3303271ca7605fe0196668a1407cd01f1964a87955497a2a619d7af458d521",
+      "kind": "integration-record",
+      "git_blob_oid": "25c5c91f27c1b8ca26f0f19a70c7913cf6faf31f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/intended-commit-message.txt",
+      "sha256": "0bb4e6e88c95e1466f48396c3eadec3b0f35e69a71a51d753c1cfe65531f1b5b",
+      "kind": "integration-record",
+      "git_blob_oid": "7ed6a481afc66cdbbcb0579ffbb87a0e369a9837"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/log-retention-correction.json",
+      "sha256": "d9f1f03725a98eb04766c548747edff88dfcc76c8bbef1bd64c6120316c91b3d",
+      "kind": "integration-record",
+      "git_blob_oid": "fe17479b18cbd1e507f2f5913b470d154e4b9684"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/log-retention-preservation.json",
+      "sha256": "feec539a45537ad8f02838e9239e116cccfa7429651a7659eda46862ba51410f",
+      "kind": "integration-record",
+      "git_blob_oid": "9c6bc4c905b9d7915c60b582483cd37be73461fb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/merge-start-preservation.json",
+      "sha256": "feec539a45537ad8f02838e9239e116cccfa7429651a7659eda46862ba51410f",
+      "kind": "integration-record",
+      "git_blob_oid": "9c6bc4c905b9d7915c60b582483cd37be73461fb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/merge.stderr.txt",
+      "sha256": "b2f07f4745f814e0fc074d21d8d1a46f1d13808a138489a0a135c2a69bb4774d",
+      "kind": "integration-record",
+      "git_blob_oid": "69c59f8ac1319e3e928483e9bf44fc4eee8d95b4"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/merge.stdout.txt",
+      "sha256": "78e6e7e52f59b3a46888cd101e01f71d804971f48413b0349c28e7b6f8455e1a",
+      "kind": "integration-record",
+      "git_blob_oid": "9750069feea79f3c20255b7d284e517f9379b878"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/piv-rollback-reconciliation.json",
+      "sha256": "b7603181938160fc059d12f0ea7e10a5ccba2fbcb1e22b8f19c1e74ee95377e1",
+      "kind": "integration-record",
+      "git_blob_oid": "9919fb787b4262c81d691b93b093e965bccc6fd2"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/pre-merge.json",
+      "sha256": "6112b7a517ff42f97e7903df35fc0849bb0da25e86cd0fa7d76ce67f6d37fc54",
+      "kind": "integration-record",
+      "git_blob_oid": "e3a162ce0f4afa42779445607b437f80b1500873"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/prepare-publication.py",
+      "sha256": "a02e36af8d238e7a3a1ce364acc4b4f22420e721f858841712eaa1029fa40042",
+      "kind": "integration-record",
+      "git_blob_oid": "2a724add8c7ced9a21c37c6546cfe9ad2cf7afec"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/publication-manifest-before-log-retention.json",
+      "sha256": "2e0651bca9cb2696929ba239ed250ffc940c0b4d043fa132dc9d97bc2df0f5a1",
+      "kind": "integration-record",
+      "git_blob_oid": "3f0d3bbc5c71551f6dcf93883fb33c111c42ca7a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/reconcile-evidence.py",
+      "sha256": "49a730e8033434e4e8d66def1b11045d12fd170f109294604d36fc10ebd5d1fa",
+      "kind": "integration-record",
+      "git_blob_oid": "232a72d957021b0050eb407a689ae56b5517e82d"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/retain-receipt-logs.py",
+      "sha256": "63a9109a26e66a20bf2f51945a6562c02dd614998aa98dae9af151952cea877c",
+      "kind": "integration-record",
+      "git_blob_oid": "687b1b78548c5d18deedf0152f9ebeba89a6e37f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/review-adjudication.md",
+      "sha256": "5d06bcdc0547f3e8581e9a990377c2a9a1542926d3aa11ec4f1b55210c19611c",
+      "kind": "integration-record",
+      "git_blob_oid": "c1ae1cf7b5c4f2c73c2f2917761ffaa97a8ddbe6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/snapshot-candidate.py",
+      "sha256": "8845cc78f3fe3a9615818a6269b3742a63452fb3723e8a77aa4e9913cca43c33",
+      "kind": "integration-record",
+      "git_blob_oid": "669625c0e07099351a371ae588d717bc4cc452e8"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/source-resolution.md",
+      "sha256": "eb66131e19288058d4e5102ccfbe4c550f714fc931bf055aecab8f8b7910f3e6",
+      "kind": "integration-record",
+      "git_blob_oid": "e6b71bcd828b7fcb4f824c3c32adbb29651cc97e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/source-staging.json",
+      "sha256": "79cca2302938a1bb180dabf1a80211150b2d9040b6ffc8cbd030425f6466bec3",
+      "kind": "integration-record",
+      "git_blob_oid": "1c064287220b018015302fd76ca75b8bf02121c5"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/staged-diff-check.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/staged-scope.json",
+      "sha256": "096f0359bbd0203359dcbd3a37eab0f5d15506aa982be987a2d78232abd2d363",
+      "kind": "integration-record",
+      "git_blob_oid": "743d3fa90c10c9109b909bc1b3044a53dd80ef4b"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/staging-assumption-corrections.md",
+      "sha256": "34947a356f9630ae3f041df91eee9abdc1128eba5a0049a7efa23450fa0a642d",
+      "kind": "integration-record",
+      "git_blob_oid": "39685936b6d35f9729a8c6ff8b2ca758e6439d8c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/summarize-validation.py",
+      "sha256": "00259e52dbda3c4a1478b31b34025512044e022687ecbbc3101eef3f41fe4fb1",
+      "kind": "integration-record",
+      "git_blob_oid": "9ff41f4368ed31a39156cbfd481d5e02c3d0fdd6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/terminal-newline-correction.json",
+      "sha256": "791f42da01ec24211b120a42fc62757ec266569e8ff9d4066a4ce2f35b22a515",
+      "kind": "integration-record",
+      "git_blob_oid": "bf28af1539902e891d8c077a6e9ddd30e0801be1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/unmerged-before.txt",
+      "sha256": "d7ab9e4eec11b6678dbfb662aab5027709bc9a161c08fe684cd0883ed7e14b88",
+      "kind": "integration-record",
+      "git_blob_oid": "57cb8cd77439a8b8a091094e5f93bc9d531f54f0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/validation-preflight.md",
+      "sha256": "4ed2890857d5a9356622ed3909485c768fb976c7580aa31d4896352675acf1cb",
+      "kind": "integration-record",
+      "git_blob_oid": "244d2a3e9215850c838bdceca397ac1445cb5361"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/verify-format.py",
+      "sha256": "00348c9da9beb646387bb7eb9751c2cd2adab19ae8e34742306b0d435a9e43c7",
+      "kind": "integration-record",
+      "git_blob_oid": "0a8410242c830ef4ea258cdd282151588b745750"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/execution/verify-preservation.py",
+      "sha256": "924c1e42963f26f29350eff888b799f6a9a961d954701d8f430a9f02f508a3ea",
+      "kind": "integration-record",
+      "git_blob_oid": "0653889e4af8e62383c2c0c7a8ac1c3e2048c9d2"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/handoff.md",
+      "sha256": "7a64cd4a0ba415136d00d9343ac92cfc21851639b202c61eb25cba1a8ad70e9c",
+      "kind": "integration-record",
+      "git_blob_oid": "6a20c26cb8aff4ab7ee15eb98913c1aa5f84221a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake-review/evidence-identities.json",
+      "sha256": "00d82d8e1912ec984d6c028be72da2a2812cb89aa92c047ef4c43c1e79b3df87",
+      "kind": "integration-record",
+      "git_blob_oid": "ae3b9b825cf482d3eb0f4fd19a7a5eea1e3368a7"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake-review/report.md",
+      "sha256": "ab593a5b7ad02cff985fd395e21b2d666daa11d35e148a1d1d3de6f500875bc6",
+      "kind": "integration-record",
+      "git_blob_oid": "a86d1a1085d1b1c6f4042ec25e2b817f713c44f5"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/divergence.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/divergence.stdout.txt",
+      "sha256": "b6de3f938f8939f171343fb464392930e07899daa483e96cfd702f6646413371",
+      "kind": "integration-record",
+      "git_blob_oid": "db5baa88564a46715870b009c31379ac65113713"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/git-version.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/git-version.stdout.txt",
+      "sha256": "c9e40977101870d17ec3a0ac1e444ceb5e268d1c0a37d6edd8a5ed477734a53c",
+      "kind": "integration-record",
+      "git_blob_oid": "91dc52924d8450ce1057561cac297a368a9759b4"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-log.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-log.stdout.txt",
+      "sha256": "f654ff2770b6647bccf7f2cc2bc532d00dee4a89a930ce551f45e19fa40ea4df",
+      "kind": "integration-record",
+      "git_blob_oid": "02a107729cea9426c4176359f049a89ced491dde"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-paths.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-paths.stdout.txt",
+      "sha256": "ca5cff8a92fc49d7028f2ce7093146c0d3fd31e7fc6126b061adcf14ba9e2b89",
+      "kind": "integration-record",
+      "git_blob_oid": "27cf342be98665ec5f2709c9e47eaf66f7c7d04c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-stat.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/incoming-stat.stdout.txt",
+      "sha256": "2029e229e2470be5f2d836bf54e722c1a0f3bdb144abdb62f86c83b4612fbcf1",
+      "kind": "integration-record",
+      "git_blob_oid": "a1466b46e76afd8d5dfda2ebc760246bde386637"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-base.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-base.stdout.txt",
+      "sha256": "e134c05e644aab26fd27c871ed7634f3eca197284b2b5e57bb44373920978350",
+      "kind": "integration-record",
+      "git_blob_oid": "3c739bc9969477c24203a83f2236fef826264837"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-preview.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/merge-preview.stdout.txt",
+      "sha256": "ac78d977902818ad790cebd23faa057b10d586a15b897949a3613d6d308ae3f5",
+      "kind": "integration-record",
+      "git_blob_oid": "0312d5be237f301628edd0cb0d8d7714a55d366e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-771.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-771.stdout.txt",
+      "sha256": "7bf87c8f77a48ec59afbce7974fd51f7d63b0745e29e26663d6a4f5250760e52",
+      "kind": "integration-record",
+      "git_blob_oid": "89183cd5e26015d89cbebd0eae8fa8321c81fd93"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-774.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "integration-record",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/pr-774.stdout.txt",
+      "sha256": "eb0eee024de109afc81c10975c3e5e70dcb5ab8fe7eb270116d3b89594550b74",
+      "kind": "integration-record",
+      "git_blob_oid": "552a484d3562d055c59c1f0b6e13ced5462c3f9a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/preservation.json",
+      "sha256": "296004744d5984cda632cb2e8b52e4c0a05d40b4a9c85879a972ea0cc3a643f9",
+      "kind": "integration-record",
+      "git_blob_oid": "a3adb08c55517d8ef705c0dba75c94b96928c305"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/intake/summary.json",
+      "sha256": "31c0bf6b31910216ad141aab83991f86d2c7f1c641255decd804adafbc5c0aaf",
+      "kind": "integration-record",
+      "git_blob_oid": "f8ceb9e7ab2111801a0720c7981f8dc7c00d7f3e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/decision-map.json",
+      "sha256": "341101efe836d830060480d9f988a5adffb5b9ea48bde44dd85a0d34876263bc",
+      "kind": "integration-record",
+      "git_blob_oid": "022d52795edcaa3d528d737d6e9a7eed1877e9f8"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/decision-map.md",
+      "sha256": "c7eee0a07729843b480f86e300c180ff7b456ec2f7fc3cb004e7b2a5b44ee60c",
+      "kind": "integration-record",
+      "git_blob_oid": "6ef93f9fd683dee8d116016e63ec1735732ee743"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/input-identities.md",
+      "sha256": "caa914c05ae906dbd37c350772e984c2dc3f3c18584d66e2386e25b574259c9a",
+      "kind": "integration-record",
+      "git_blob_oid": "7569db7bb52bdb2c6c2a5c6e52caabdc6033b0ad"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/merge-review/proposed-ownership.md",
+      "sha256": "fc1f343bef61a0f442887a0a933ad983dcc0fe981e2dd4ae59725f056274d1d1",
+      "kind": "integration-record",
+      "git_blob_oid": "7098149d8141c3dfe25341b417be233f4a780791"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/plan-location.md",
+      "sha256": "6b456ed3ef665ed19888f9daea21e12c7ca2c7add65256cb98400a0d92c0243f",
+      "kind": "integration-record",
+      "git_blob_oid": "d36726c01b55677bd926bc08f4dc3d38c7be5c53"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/2026-11-13-windows-refactor-integration-bounded-validation.md.snapshot",
+      "sha256": "3f47dcac19410621ea19c8a0dfb6a2fc034dfae5c4aa48e1b1d94d9bf36a1b26",
+      "kind": "integration-record",
+      "git_blob_oid": "a9af3dcc812caccffee755b6354ce86d82b17b50"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/2026-11-13-windows-refactor-integration.md.snapshot",
+      "sha256": "5076f5bda877125a3d5f6cf5dbe870df3f9eb0a28f1833c61cdab5ef7cbcc05a",
+      "kind": "integration-record",
+      "git_blob_oid": "3acb9c68f4daf9ab79571cfe8abfe4aea96e19a4"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/bounded-validation-revision.json",
+      "sha256": "f2be50a9d221d91e60ad8442f3d9c15d24bc4082ae8f29c7abb977846c39b6d0",
+      "kind": "integration-record",
+      "git_blob_oid": "ecb51323ad208cf03e87ceb58f0a32990054d52a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/planning/execution-plan.md.snapshot",
+      "sha256": "5bea09dc8e3ba4292edae846a0c383ae40bafb135dd1ecac7203f377c7d9061c",
+      "kind": "integration-record",
+      "git_blob_oid": "dc771c06d441272dabeadfb86bd752a601727f6f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/preparation-verification.json",
+      "sha256": "11b2742af40cace16208d3911a34f503b2548bb80c25f7d2ec4484e013770a2e",
+      "kind": "integration-record",
+      "git_blob_oid": "b4f12eba342853353ad8e83502ec3eb57be14d0c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/review/documentation-review.md",
+      "sha256": "edb2e46f03baa1fa28b663c377f7aa5ad3548580c4d36988d6e19c1243b40aec",
+      "kind": "integration-record",
+      "git_blob_oid": "9beb50fa6d05f8bd74b7c7fe5a830d84784dacce"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/review/final-publication-review.md",
+      "sha256": "0517e6c69c6401bdb2ccabcb8dc548886bfdfc76742e8aea471ad27223bc50d3",
+      "kind": "integration-record",
+      "git_blob_oid": "5a9d82882c541e086f044cc63f178ac3abc43498"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/review/source-review.md",
+      "sha256": "82490bbe7ef6374cdca67fb41523ab7120dbd25c06b3b97dd11a9770c37ea003",
+      "kind": "integration-record",
+      "git_blob_oid": "d662e0a908a27ffe7197139428dc87da3f61b8b2"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/status.md",
+      "sha256": "7ec80ea446c872b349f77a51498b1697e75a2c891050ee2f3bf5c04a61ff249c",
+      "kind": "integration-record",
+      "git_blob_oid": "d5fc94ce5651844fb6702c0dda2238628763b1d4"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/console.txt",
+      "sha256": "9968c07e9178cd9f5e4784b0b74c5fa7ce50da7010bfbda5cf1ec43530d46503",
+      "kind": "integration-record",
+      "git_blob_oid": "65a1af32d517fac85e9e3e86cf7f71840949a0bb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/receipt.json",
+      "sha256": "db4a8cb70967cbff04216f16ada6bcdc89da21fbd32a179162c02b87ce309fb7",
+      "kind": "integration-record",
+      "git_blob_oid": "e988fc29d33bb32c00be06f3b1d99ecf91da5352"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/01-clean.log",
+      "sha256": "ffee4d7cce45a85d594cb5fa999d58462f5aafd70d40107453f53c61a35460ad",
+      "kind": "integration-record",
+      "git_blob_oid": "466396e190199f3dd35d075f091904adf92bc92e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/02-build.log",
+      "sha256": "b6437ec74413075394295161aa681c3f8dde6e5748091b715a6e36135dcf6b9c",
+      "kind": "integration-record",
+      "git_blob_oid": "1d423d65347a01a13c2ac07b0f055500acda883a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/result.json",
+      "sha256": "3a9872221fed1b66b604e95f9d1f1a094936bfaf9c0cdc85759b516b5a5aafc8",
+      "kind": "integration-record",
+      "git_blob_oid": "f5c670302e18f694cba618abf168ef122cbe1ba9"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/result.txt",
+      "sha256": "0752927837b3c7ab63de472cff384d17d38b8015c90ab849f8cde84a505fed97",
+      "kind": "integration-record",
+      "git_blob_oid": "df5e6808a56d57efe0adaa42d95024644fe3b15f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/run.log",
+      "sha256": "753404fecea296644503733bb74584817cc40cc712b7b9b37e9e616938e5b2ee",
+      "kind": "integration-record",
+      "git_blob_oid": "e759c02e56c634ac94f6ac9a2acfa631c3154cdb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/console.txt",
+      "sha256": "9d1171f86fbf1ae199a1a68c994aca8a7d12c8b13a783690678ff7dedfdd4097",
+      "kind": "integration-record",
+      "git_blob_oid": "c8bb622d85cf8d2372cd64826204aba431ab85e5"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/receipt.json",
+      "sha256": "9e14160cc17118befa6d46cea58b5a677a6b8c8c7cd1d9fbd9914806deaf72da",
+      "kind": "integration-record",
+      "git_blob_oid": "a00a11c2d0ed6c58188b9d931ce63d2f084876f7"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/toolchain/result.json",
+      "sha256": "29e7407e00b8a38001b59b625210d734862301b7561a204a0699f1f09cd00c37",
+      "kind": "integration-record",
+      "git_blob_oid": "85a77be998bb8b537d7f187b1f96ee5a7c0e833d"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/toolchain/result.txt",
+      "sha256": "418eadd96d37dcd2701dc2e05fb34928752c14d1a5aa3cf9693a3c0810bef0f1",
+      "kind": "integration-record",
+      "git_blob_oid": "4c3e9fdeab9a530a3ada04ce11ab21755fb3c520"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/toolchain/run.log",
+      "sha256": "7e480cda8f844afd7ff5fba580f35b1b76a13153e9962065bf5e53edaa444c52",
+      "kind": "integration-record",
+      "git_blob_oid": "67cf04afd55160a2711459116f1552caf0243ebb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/console.txt",
+      "sha256": "28cd0a0969ace85ca35147fd3eb5515d212eb3d36104a79078a3f8134c7ee91d",
+      "kind": "integration-record",
+      "git_blob_oid": "e820a84a83fee51688bc264d6e8b99338ac87ecc"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/receipt.json",
+      "sha256": "255339f5c1a663c6196ec024750e0f2db1ff9b5e13d1464a0da25bc91567b427",
+      "kind": "integration-record",
+      "git_blob_oid": "a2e033a496f4de8dbfe74e9095dd89faef292819"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/toolchain/result.json",
+      "sha256": "32aa0f4f865b0baf8801e6d20fd4776bbda2e5c84b362959bb573ca35ca8f9fb",
+      "kind": "integration-record",
+      "git_blob_oid": "32122da258509afe6d31086200c93386c3cef1d8"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/toolchain/result.txt",
+      "sha256": "c93dd347ac8a4cbe01bada1948c58e95948d1c0d038860f59889f8a9a0b88556",
+      "kind": "integration-record",
+      "git_blob_oid": "d6ef861b34b96e32d2b65e196ee283621d412073"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/toolchain/run.log",
+      "sha256": "03f8eb8dc27ef7fd42bc09f02994a863db0fa3f9d0c84d6824ec19d725934c19",
+      "kind": "integration-record",
+      "git_blob_oid": "6c86fdf08f4f8490c77f614657bc1cc6d06a3cb7"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/console.txt",
+      "sha256": "657ea2fe52f9b2795fe453b8f7e38f4d74486e59c04aebd9af4c23eab98d2cac",
+      "kind": "integration-record",
+      "git_blob_oid": "b4ec8a374185bbd1fcab5f9877b73ff079de4252"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/receipt.json",
+      "sha256": "38e54b42af832e08dfa2b7db0f3fb941bcfe9364af0edab5bffff88a68539d63",
+      "kind": "integration-record",
+      "git_blob_oid": "a8d2e29eeec00105e10516e4e3f87eac38b22c06"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/01-test-Core.IntegrationTests.log",
+      "sha256": "8bf914cbb446f5b1c27d75cfdd0191b5d142e6740e92a5d297eb7b803588fc01",
+      "kind": "integration-record",
+      "git_blob_oid": "a43f43fd71dd41ff0a29bbe2ad5bd1a978b90396"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/result.json",
+      "sha256": "c4d296f2fb2523d9c1a578c0a07cdbd5c83e77d9811b4ebc245e03e9b95331e8",
+      "kind": "integration-record",
+      "git_blob_oid": "2f2c44d0f9bfd110a67826d8402c83f688384e37"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/result.txt",
+      "sha256": "faa39d58492e9e6b7662127085720a6d13551f825f3a74098923224ad34372ab",
+      "kind": "integration-record",
+      "git_blob_oid": "7c882950ebe4c4bf337a4a69c89fdfd3282ae87b"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/run.log",
+      "sha256": "ce2553568b090a347b78943a1db167f16af6fb6fb3aac0d4e504014413156eda",
+      "kind": "integration-record",
+      "git_blob_oid": "f39386b3e2fe146be3c63efbeb4d2b739b7957a6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/console.txt",
+      "sha256": "a66d290288e213f11ab23e1ff3a74ba1e72cbdfc09922f294313a109d7dabbe0",
+      "kind": "integration-record",
+      "git_blob_oid": "827e4dae57c88abab0dcfeb95fb742dcb492f3d7"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "sha256": "1ba6f0d3a5b5826465b5416e2329da19809e71ea28b22100f090543e3d7aa21c",
+      "kind": "integration-record",
+      "git_blob_oid": "22629f4f019dfef87c6b8636dd02aaf9d50190f1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/01-build.log",
+      "sha256": "2cf4cbe9be90e5b50cb4708a252294ce72cb6634ef9d59bc919c3cb6cffd8d69",
+      "kind": "integration-record",
+      "git_blob_oid": "378f3e1ae3aee17769e98043017081bbc5543719"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/02-pack-Core.log",
+      "sha256": "f70cc74ad4ec72bbee89f289f724a611fba6cd8d5be67d7c02a04bb2a81a3f48",
+      "kind": "integration-record",
+      "git_blob_oid": "c38432b78be85836a51952a4f9f73984cd095a67"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/03-pack-Ctap2.log",
+      "sha256": "2bbfab81e398267f10d01eb13d096a53265acbad4cb4eb84a3501a7e96de96db",
+      "kind": "integration-record",
+      "git_blob_oid": "8e6bc61314e53c79fcf89c021c4c0272692229b9"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/04-pack-Management.log",
+      "sha256": "1a9ad46a9202bbb5106c65a387ae0f26aee9d2bfe0fecb4803fbd33184d4307f",
+      "kind": "integration-record",
+      "git_blob_oid": "6ed890088aed68a288f292a9f23223080e00a574"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/05-pack-Oath.log",
+      "sha256": "a80350e46a85a2fc2f163f2e8122b124d5b6206324e37a28795724c2e52c5600",
+      "kind": "integration-record",
+      "git_blob_oid": "7b7228183878ef698bbf6b99e8854a05eab4684b"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/06-pack-OpenPgp.log",
+      "sha256": "afa3dfd6bde870a4f7596507b2d552ed6a4e9a8387804ec9b5f4ea15f5d66639",
+      "kind": "integration-record",
+      "git_blob_oid": "eb974deeba832a21dd087ec8ab0c02ef95265a11"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/07-pack-Piv.log",
+      "sha256": "4c66aa33bffb9d5cc5b428a1aa3756e5d9fc831290940219283f91e60c0b5727",
+      "kind": "integration-record",
+      "git_blob_oid": "d011a6e0eba0b18e1a727e42787d90bf0e6aa8b5"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/08-pack-SecurityDomain.log",
+      "sha256": "c340983819da6feece6b7a96eb3dcbc222541f55a9c2960422b0cfac225c1b83",
+      "kind": "integration-record",
+      "git_blob_oid": "1f185f6d4d2fd9ed2ba57b8d7fb0baa9112d2226"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/09-pack-WebAuthn.log",
+      "sha256": "fbf8fb9cffa80572020885b35f6a59501d8bb02c7119058ff378ac19ca6672b4",
+      "kind": "integration-record",
+      "git_blob_oid": "978424861c2f0c6407380386ed5306d2d46392f9"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/10-pack-YubiHsm.log",
+      "sha256": "152617585f5917c57b20f608632a38704d394fcbf9499444d558b5a3f533f7cb",
+      "kind": "integration-record",
+      "git_blob_oid": "3b604cdfe594adeb0c4bf36eff17ccfd7d224b25"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/11-pack-YubiOtp.log",
+      "sha256": "d77683cb0dc2f91bf52a6e92d74c330a4d21b5a438bff40710e033953a3ae686",
+      "kind": "integration-record",
+      "git_blob_oid": "d041c051304e06bd23d66ee9936769b06f2f8f89"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/result.json",
+      "sha256": "c58afe8ee9cdbb607075e8cb81be9104c413a0f737870ec09a65990916ed1765",
+      "kind": "integration-record",
+      "git_blob_oid": "483782b22a8ab8ad6c8f7d69f0f4d305886e821f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/result.txt",
+      "sha256": "6e63d71630c95ea59f2e51af542f78f9453a6e42d7e54033efae7280bcfd8081",
+      "kind": "integration-record",
+      "git_blob_oid": "1443d94a8d4d0ee2ae5b7bd276fec095b10dd85a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/run.log",
+      "sha256": "c49b31f82e3df5bf77c658d60d5347cd06d2b0ad9a8e0a8705d5fb51a080aab5",
+      "kind": "integration-record",
+      "git_blob_oid": "d3193e1021c58b345569c00d6f92fc9cea19d041"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/evidence-reconciliation.json",
+      "sha256": "677443d245f70cb56233aa439073f86d8e18d4b670c71a65da24e628b39fd993",
+      "kind": "integration-record",
+      "git_blob_oid": "e134ec3c20f75e2dafbe4ccb8e5620b43fa42241"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/example-selection-final.json",
+      "sha256": "44ed012e4b48a986d47bdfb63bad6a6af68885090f440b08498874fa3fd11e9f",
+      "kind": "integration-record",
+      "git_blob_oid": "24f5fb6eb447e5775eacb86f8b0bc744df785f96"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/console.txt",
+      "sha256": "289c8cc877a13b955b4b5dc85f8bb47b81113ac06dff93a59b35140621a968dd",
+      "kind": "integration-record",
+      "git_blob_oid": "33fb5ba5fe07b30c92dea9569225030b47b596d0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/receipt.json",
+      "sha256": "f1cf856526487bcfd406689947f412672d27133be4c38a926e0231e95406db30",
+      "kind": "integration-record",
+      "git_blob_oid": "aebbc05bb983f1ff92d682486ae7c294e2391eee"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/toolchain/result.json",
+      "sha256": "6e91a55b5606f952cf8fb7a2133d0b119e4f0df18122ab3a013097c83fa8074f",
+      "kind": "integration-record",
+      "git_blob_oid": "8f80a563bd34c3ffefb0681233fe497cfc4e8c8a"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/toolchain/result.txt",
+      "sha256": "e7c49d9ed76f3681052b01cd7d3fee10d797ae41c47fbdfcc708d4af49764d75",
+      "kind": "integration-record",
+      "git_blob_oid": "2730cefa1209f469e7e8b12a428db3348f9224ba"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/toolchain/run.log",
+      "sha256": "7e605d934d5a4599d3e70fd89ef130a1cdef6c0e0c10ad50a3c9b8c5432e9ff7",
+      "kind": "integration-record",
+      "git_blob_oid": "799215f0b8c3f733a1d0b129d6ec79353d0ecce5"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-core/console.txt",
+      "sha256": "9ba513652fc0114960811685e4d050d872dd7582d19fbcd23c7884669c3503ea",
+      "kind": "integration-record",
+      "git_blob_oid": "ecd82cfe36a740bdff8f4a289ae775991453cd48"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-core/receipt.json",
+      "sha256": "a0f757b753ff2ec78be75cf7bb49212e2b8cd7fa746653694ea91af118b658e4",
+      "kind": "integration-record",
+      "git_blob_oid": "2542446397eea984d2f48b21ceda04850aed5954"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-core/report.json",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "kind": "integration-record",
+      "git_blob_oid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-linux-verifier/console.txt",
+      "sha256": "5b04c65744d4f6116f497d4428ded45c994b641810ff88bbd0fb52b7d2d8bb01",
+      "kind": "integration-record",
+      "git_blob_oid": "2607a260b93a5d6cb477412e9319d8563598c63c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-linux-verifier/receipt.json",
+      "sha256": "8e18bd4fcca8e874837452fa888338e6d57405520ed1b77606bfbdc911cc4fd2",
+      "kind": "integration-record",
+      "git_blob_oid": "de79e404c03513678cf9331ae930945636544dc1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-linux-verifier/report.json",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "kind": "integration-record",
+      "git_blob_oid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/console.txt",
+      "sha256": "4f831e858c28454a6934a87f5ddf0a1508dc255538698ede85d89e33e42cfab9",
+      "kind": "integration-record",
+      "git_blob_oid": "a946c36f0c39c67f8e6d752b5eabcc9d87f7bcc0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "sha256": "27977a65bc02af6494a73887d2d6530459b374beb1dc2ad9e8a07d7c60af6499",
+      "kind": "integration-record",
+      "git_blob_oid": "8f911e22611087fbe00bc17c4f88e62b4e85a9a3"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/01-test-Cli.Commands.UnitTests.log",
+      "sha256": "f546b92dc3e5dfedd28ebd3ce88e628001095014ab6c4fadaf150b7003fc2a07",
+      "kind": "integration-record",
+      "git_blob_oid": "fdb7feec196782494c4e56e0119956e92ceab7e8"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/02-test-Cli.Shared.UnitTests.log",
+      "sha256": "d8617e8544862d06126fd31822578ada7edcedee66d74eb3af180f510491615e",
+      "kind": "integration-record",
+      "git_blob_oid": "cfbee4dd3287aea8a66fdd6abaca974004cd41d1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/03-test-Core.UnitTests.log",
+      "sha256": "ab7960076e85c4fb168508228fc32518c250caaafc52e8dd1bc046274eb2b63b",
+      "kind": "integration-record",
+      "git_blob_oid": "9819d341826fcb6323734cc1b9b8a7227cd152d0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/04-test-Ctap2.UnitTests.log",
+      "sha256": "d379d8ea10f4b72d945752856a6be6e58e4f8e64bec5bc21902e1063f3052ffb",
+      "kind": "integration-record",
+      "git_blob_oid": "6cc5e1e1e5763caa8ee858337fbb7865b34f1385"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/05-test-Management.UnitTests.log",
+      "sha256": "51c8e6391f1a4ebe261aa08bcf1610b0360802d6ea1658b9c78ba2252c9b91c3",
+      "kind": "integration-record",
+      "git_blob_oid": "1b568b40e7e135fd11f6d4e54156608565ea74ac"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/06-test-Oath.UnitTests.log",
+      "sha256": "6c8c3515affdc7e32dc70b9f9c62a0d10e12b12d2acd582131f9c668a8197f62",
+      "kind": "integration-record",
+      "git_blob_oid": "a935c1875e7d08c82c2c820601540d9ca60416ef"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/07-test-OpenPgp.UnitTests.log",
+      "sha256": "df8cd723e7a353d39a4293f60265ce9d5fbd6adfa7be4d811637345d7de67685",
+      "kind": "integration-record",
+      "git_blob_oid": "083ded5809450dc42e34eb841ad733df0cfdcd51"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/08-test-Piv.UnitTests.log",
+      "sha256": "af11ce843c21c88fd0d31335050521a017c2f24ea4a0d8d59a11398ccbe7cf5a",
+      "kind": "integration-record",
+      "git_blob_oid": "58fc47cf9e5dd84dc146de8f4e2f7c940ff2ebda"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/09-test-PublicApi.UnitTests.log",
+      "sha256": "a846767fac3f29c3c11dc0e25dc4a83a66f50c76f09aa13881894b15e9e0d8e6",
+      "kind": "integration-record",
+      "git_blob_oid": "928e514248b6e5ac5acd8b813150efe8d020fe74"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/10-test-SecurityDomain.UnitTests.log",
+      "sha256": "4c713450399b398291541b895fe0cc6b0151253c3b26685e34eb1e8f4f2e3e69",
+      "kind": "integration-record",
+      "git_blob_oid": "121e5e11b5aeadf7007319cba96df90a37bbc7c6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/11-test-WebAuthn.UnitTests.log",
+      "sha256": "6793c83d4587583fd48893ff1fdbfbbea0c2a3dc8c08b73a5efc180c66b5cd16",
+      "kind": "integration-record",
+      "git_blob_oid": "e945e43e3a21048bfe5034308763bb7316080744"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/12-test-YubiHsm.UnitTests.log",
+      "sha256": "e5faed95a215e7c810f9860faabac204c46fe15ba6187b67718b0b6a110a5434",
+      "kind": "integration-record",
+      "git_blob_oid": "00d74a513a26fc33f47895d26aafe886fc43b3fe"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/13-test-YubiOtp.UnitTests.log",
+      "sha256": "a94562e92a4dca65693ed7a9c8d8fa12014a3b62312eef3805c42b962f65f52b",
+      "kind": "integration-record",
+      "git_blob_oid": "f443b902a01c17902046b6c69bb71a235694908e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/result.json",
+      "sha256": "7ad7c00a4902e975c659f98e1b5667fd657a3db08ed8ce898a91088e21020018",
+      "kind": "integration-record",
+      "git_blob_oid": "f354b51cabfeae01f8cfe80c1e12cc4b9fc2ce8e"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/result.txt",
+      "sha256": "262fc0a2b047ecb08fb156633d0e207cc74239e3549c28451484f29f7f124fc1",
+      "kind": "integration-record",
+      "git_blob_oid": "31e27031438297d57002feba6b5b9de3b10cc223"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/run.log",
+      "sha256": "69439632872ba7d38d83b30d938e039f235f9475cdbce04aad2588b2f7debf88",
+      "kind": "integration-record",
+      "git_blob_oid": "22b5ba6b7fd31a92ecbb7ae3e9bb6d60759807b1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/console.txt",
+      "sha256": "c834c50f566651268793426488d7c509f4a9258d52dc9e1faf7d491c8bb1ea73",
+      "kind": "integration-record",
+      "git_blob_oid": "6c89c3b16fd3ecf400cfd9bce8876540a31c2532"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/receipt.json",
+      "sha256": "fb074c7e85d418364ba3649f65647a77c94a32a35d7583b31f9dbb57446ff74e",
+      "kind": "integration-record",
+      "git_blob_oid": "07c21eda6221be2153bf95e9c9a1b1809c6f0558"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/01-windows-hid-verification-build.log",
+      "sha256": "5bf166bc41180ba5357e27b748926647f10e076b608dce6d03089ac85ab2364f",
+      "kind": "integration-record",
+      "git_blob_oid": "72bce68b06d5d3abc3ec456dbd2298434b8d29f0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/02-windows-hid-evidence-test.log",
+      "sha256": "a2e2c16284e7c19dc1bbb88b9efef7d183084ab2679e13d4f6351448a89bda55",
+      "kind": "integration-record",
+      "git_blob_oid": "b7b24cb0f3b1ce64d4081d60369872f3b241768f"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/result.json",
+      "sha256": "961135feddc3be8ee769da05ac511d03499d77e4d95a8853e0077fd6acd65c9d",
+      "kind": "integration-record",
+      "git_blob_oid": "ecd1ec3d0ef205513f1de1db2ce3f5953a83f95c"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/result.txt",
+      "sha256": "a20225d0442a29cc95864eee117571754e75fbd045c5dee03d01ecfb65099b88",
+      "kind": "integration-record",
+      "git_blob_oid": "258c903169a2feeecf159491f780d2f4f4c66fe1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/run.log",
+      "sha256": "83f9a253365bfc99dca0205a90bd180f0b9312cb9998c721b03658a46f3d3440",
+      "kind": "integration-record",
+      "git_blob_oid": "cf954539bf60971dcbd00b68d375d3f4a1ab9b38"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/reconciliation-predecessor-failure.md",
+      "sha256": "3efad82c206fd1672cca929597e672a6d5352baa78187e40d794c3608fcd7e99",
+      "kind": "integration-record",
+      "git_blob_oid": "e5ca4c1252f483bb207ea59e0fdc7c536d749efb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/retained-windows-merge-complexity-from-audit.json",
+      "sha256": "6e9d86b281c51f28c46cbce70e0de13d6d821bfca43f0b601c94e4f3357de5e8",
+      "kind": "integration-record",
+      "git_blob_oid": "e84ed6f8b9d144f26c5589190a0cd2b327796cc1"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/retained-windows-merge-complexity-from-incoming.json",
+      "sha256": "dd012fb28c916d9cdcad8cee302488be4832024827103208c4e79fe8cb18da4d",
+      "kind": "integration-record",
+      "git_blob_oid": "e2404a97dd45fec2152c2c45a8ccf185b9f790f7"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/select-examples.py",
+      "sha256": "04a5442d97d609f99a5bd8718d4e8eea74a55de42a3635a02ff7a75ddb057aec",
+      "kind": "integration-record",
+      "git_blob_oid": "8cef3e09d4bc0edeb6d48f1e9370a3393a3f6194"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/summary.md",
+      "sha256": "0c17a3b8c5adea46546c8f259451a2e28b30adc24ff54195202ae48887a50358",
+      "kind": "integration-record",
+      "git_blob_oid": "cbe7d1f0dcb7a03274900e508a4b2ad0675690a4"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/console.txt",
+      "sha256": "31b3abae11eaf851f5fb95c6a31191e0d3c244fb36e7731762d722e61d359ffe",
+      "kind": "integration-record",
+      "git_blob_oid": "cfb3a2340ca6f5664618e60beffd06e4a167ea96"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/receipt.json",
+      "sha256": "f9460c1d201d7bded315c2433cb9a96770db87d5b8b10e33d6a72a4fa10b530f",
+      "kind": "integration-record",
+      "git_blob_oid": "60d3e1d66159d4df5f5950a921b0146942e54555"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/01-clean-WindowsMerge20261113.VerifierCompile.log",
+      "sha256": "b929e0213473f74c9d5a6dbdc218be224580a687432950521e11d038d104536f",
+      "kind": "integration-record",
+      "git_blob_oid": "d7eede89edd7cfbb5024098eced20d562897e4ee"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/02-build-WindowsMerge20261113.VerifierCompile.log",
+      "sha256": "6c728b38aca185dcfc2b5762cfcea91c2b8eb1ad7b5fb0879d51f184eea7dfd6",
+      "kind": "integration-record",
+      "git_blob_oid": "8657c27da5406cca0946755c6d4b2bb1928604ec"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/result.json",
+      "sha256": "bc10473ca95d1b197135fd4a4b1da48e935226de69e186f4d8119bf5b59b72c8",
+      "kind": "integration-record",
+      "git_blob_oid": "e0f80dbda9c89fa4490f131c3e82ce24fb2e38b6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/result.txt",
+      "sha256": "81f32347979f459f73a208e2db32365d25e8f410a9f7681193c658163fb21f02",
+      "kind": "integration-record",
+      "git_blob_oid": "4a5f337860ef08dd180501e58ff6a8cc04d248e6"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/run.log",
+      "sha256": "8b418850afd88470cfec6ea4de52dbb56e683ae306e96f09ccf4b5a8b24eadee",
+      "kind": "integration-record",
+      "git_blob_oid": "10b413fbff0fb2fa03e10f60aae817dac844db72"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj",
+      "sha256": "cc8c75e515a925e11fe720827592aeb5532d5cc69f6e57fb01a53b4e814eef97",
+      "kind": "integration-record",
+      "git_blob_oid": "8a94f06ea96adde64fd88e4668f66c42b2049da5"
+    },
+    {
+      "path": "docs/research/windows-async-native-acceptance.md",
+      "sha256": "631ce9d32958007560e6a15f679f8dd66a065abb13140b37b4348b632a166915",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d63f3cb03ef24808e65cd402acff519b90bb33d5"
+    },
+    {
+      "path": "scripts/toolchain/BuildTargets.cs",
+      "sha256": "78a47dbe23c6e5f7d5026721dc39da5cca3713828af10f29975e138c6e8c4552",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "f868db867dc8087e827a4c26b75555d67571f275"
+    },
+    {
+      "path": "scripts/toolchain/WindowsHidVerification/PublicationSeal.cs",
+      "sha256": "762b0bce9c86b9327ae13e73128ccf9d587a916b8d39ef92fd41c3c517d697de",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9ff8321785504d4172c7e600efd7019d4ebb0ed7"
+    },
+    {
+      "path": "scripts/toolchain/WindowsHidVerification/RequiredNativeChecks.cs",
+      "sha256": "003c9e182df313de462e4b8679b28d7c1a8c3143db9ee84dc000247065b360dd",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "ede197619ae05c0abeab17dade72b565db0fdcc1"
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "sha256": "277ddaa7564b67e7e7580bacbaea8e4cf6c98417b313e5c4b2ef153c1ff6c80b",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "8aa28228ca58e073274ff339ae8862335bf01622"
+    },
+    {
+      "path": "src/Core/README.md",
+      "sha256": "24551ebd59cffb82cc890777cc0e7f1bed87651e729843ee85fc299a1a80e395",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "5a3d17bc1b0efb46dabac5887add668edd8b7288"
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "sha256": "953cfc6cbfb24e8aec88e67cb728541e43e9ff676950e40e067d0e3afab15185",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "509ad548adec23ab7d5dd38f0b802e4acf6ccdd9"
+    },
+    {
+      "path": "src/Core/src/Devices/RegisteredConnections.cs",
+      "sha256": "508470f4a6056383a601bbbb8ec33726401e15c1da76f9c8d12e1379785365bb",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c952d46eaeb555cc309f99289b8f501c46cf75e8"
+    },
+    {
+      "path": "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+      "sha256": "0cdb54e69e5e22b7f5dec0b7987262d37683d7f2306d634ec15e18c34c653559",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "72fd8b9da4d90aca08757a53feddc0305785ee35"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "sha256": "5a25c7d620b4764eef47dc168bdcaf98c80859d1957b26083b8ba5ff8d1bf687",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9dee9fee3dd70fe993ac8322a05c947e2288b65f"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "sha256": null,
+      "kind": "product-or-incoming-tooling"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "sha256": null,
+      "kind": "product-or-incoming-tooling"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+      "sha256": "736821f2e8796d42985444edad53ce4706d5eddcdeeec48702f732974c9c069b",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "e57c367551a90698632a4a8c4525175c15ba77ec"
+    },
+    {
+      "path": "src/Core/src/Native/Windows/Kernel32/WindowsHidSafeHandle.cs",
+      "sha256": "41a0c253d4aca5558669aab34de30837f515b0f85fe820694ca4b694bad14781",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "0e8a3abf9249526a4138595fdb703ffbc2780b45"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs",
+      "sha256": "85db0398078e5f75ed195ab0c03d4c3bbf1599cbb20bf7db67c343e786d31b13",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "5447d33e655535ea6e995beb8b02e9ae12ab4d65"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidNativeApi.cs",
+      "sha256": "c16d56cf897034ed1acbf7a0b5ca6da63c1d2cafda11c38714a52a2c7b1fa0ba",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "98a5d1a3a16a0c8036d71da1f8328f8f5900d3ff"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadReactor.cs",
+      "sha256": "be133e2f056a514293f573420136f09ea91338afaa935f23c6db7cdb4243fc27",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "fafa8ec118e721e433a4b8831a0dc79da20dc182"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadRegistration.cs",
+      "sha256": "82592d4e85011e44e01ed82340ff93db0a59abdd3b583a553e50d2412dc40cc7",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "452ad8405bcb3676a2ff8a6ae678c9d5a9537a74"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReadinessNative.cs",
+      "sha256": "fa8354d00ad0509d24cd35574a8309669e96568b59c8401f74f091abed2707c4",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "1a1727946b87317100fde5d94229b4a2e08c485c"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs",
+      "sha256": "748cbc1f8e9a75fc228bbff575f3c9ca29ea86e5062fae1d10118685cb1ab85c",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "937a5b5c2356f1a21c97dfad2186fe2d218afaa1"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "sha256": null,
+      "kind": "product-or-incoming-tooling"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidFeatureReportConnection.cs",
+      "sha256": "cbdaf16f158c4ed27ed6351c4eebad2a4530b060cdea47f770f0bcb0a52624c5",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "1614ff507114d661aef65434dde6c868294557d5"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidIOReportConnection.cs",
+      "sha256": "17254e08152ca4e51fc81bd60404f32533ebb5ccdf56860c044fdb10ab1a3d2e",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "7f24b68823772e5ccfa0788da659e4896d374e32"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidPollOutcome.cs",
+      "sha256": "78072a0b062ec3eecf3e7dd12fd3b54167718cf1f8263f589478b1bbf1cd47af",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "70de3ee1af3920ccedd173ccd4600f59774b9a36"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidReadinessNative.cs",
+      "sha256": "192a618f8d4ef92fd7e1466612b3d7b0fbacce1888af6f5f7959d46078c1c616",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "692dba3dde80f0a26160d0e2225f9508c1159c77"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidUdevEvent.cs",
+      "sha256": "9554bf1388c98d163fdd1705360ebe0d6d6a3abd914cc064a6c530eefa17fb73",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "6b816f8cb094bc133a7f888ee8c51c8be46ddc5a"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs",
+      "sha256": "b216009b7fa1692794df33bb8c1c5a32df7de7280ca341ebb477425d572d0c7a",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "44af90a114084d5af6b8a3e209f38f6adebccd06"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "sha256": null,
+      "kind": "product-or-incoming-tooling"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IMacOSHidInputBridge.cs",
+      "sha256": "a0ef89e030aca0ac04513eab876ee6de9f96fb04ef17276445b70900c6e11772",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "f18037465cb0311fc3b5514cae6fe0316164b753"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs",
+      "sha256": "720c0c241d1e2ce980fe2bea2d0eea5307862a6d566aeb45142b6a1fb467c2cb",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d4a6b54308a7fbae7183f74da1d8af0de3b20d22"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
+      "sha256": "85681a7df76abc6453eb463d9fc204b991a2204f18ab4beddb4a3b1455ff8092",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "02ff5bf9d1b5b8d555c9ab4d27bc87341494fd90"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSFidoHidNativeOwner.cs",
+      "sha256": "1fcdedcb8794ec96772d0c42d0a3ef4fae9bc7b3d3a74cc8998e26d97cecae04",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "baa29e764a1af77b2a0d308283a0a3abcda5c964"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "sha256": "61b294cc9ffb37faa03c3198014887de32222a1c672c678700a1d8ebdafc582a",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "780e2b70244eaafb7754850c930fd9dc8a8d9a10"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "sha256": "fdcdc90fa4d874dc7c99e38fb2aa3b6872e36a2e96662850d4de4f41dfb9ea24",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "1032836ac22d71aedc0781098f929af20ae7745b"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidInputBridge.cs",
+      "sha256": "712f3297df08f9d5a04afc39c1312d7f07adb9cdc5ab66f5416081e2bdedd075",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "aec4d55db229b73a597d735c1d6c70e716ab7225"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs",
+      "sha256": "abe683bc35b16479ec6a7a3eaabe5e096147633699f39798757b65b375e1f250",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "1fe68323fb5a0ead42041e9741e73c28f2858e4d"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+      "sha256": "73f4f660e755061f9772db593617393427eff4d7e49d6a5555399328ec4e629f",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "01165e5f5ba91787071f50e1158ea370b6608bc5"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSOtpHidNativeOwner.cs",
+      "sha256": "bfc00e3271c9fd69b7dc152f513e6c103b4ed3c66be1a1c9dbb9dab3f40ec12e",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "4ba18efe4a84c2f1003bd23d6cf8edf4d143ae68"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs",
+      "sha256": "097006fbf75c192c09bf70bc959525e90c7f1e1a9cd71750b7e0f9fe26718af4",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "fa64e0defe7a4fb3a44b712b4c7f091bf843dbc7"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs",
+      "sha256": "9bc5d712e86e3860fd4a6891fbf65acffc7f25c24f55d9f3d7dc02eff337ac88",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "95daf0f468bc5370a3d2d0bcb0949435d22e896f"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsFidoHidConnection.cs",
+      "sha256": "f63a84eaec068f13174b1301ded01d715870500699fd47b3a538b0f0b8fb696d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "4f088dc0a6c37e5b215593133071e89b936b4c37"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs",
+      "sha256": "08654594324dd2cfa51b11f4e8d8953cf0cb9457a172144679d82fe2ba314538",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "30eaba07553eb6cda7de95d1ae63b8a9ffa5a542"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs",
+      "sha256": "3e6eaceef4606f092a364bd078916bf02b66934f047d494ba54432c7c66dafda",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d3a2d7e4ee734e4dfc0183a5eef11414aefc4780"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+      "sha256": "5f819b08b6bc27b95e41569f20be6c4ffd39044a7345756a58c400c84d8f92b5",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "33ededcabd9a8259974d5a077becdd065e2de4cc"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+      "sha256": "859384afc1e7644fa638049cc133a3a7ef213307622b2131da3da4657035bb72",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d03a4569f375aa097b6366fe1db8e1b63c12ba7d"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidInterface.cs",
+      "sha256": "6cebaff8a71f9027a27e3fc47f1a909068084ee23218ea30323e375c92f1946f",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "ade9ae916d7ea7615b5eeed5fa7ce74c979deaef"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidOverlappedOperation.cs",
+      "sha256": "0e91caf07148d3d590398e82aabb63fa673ffb9f92f1db0c97abac90170d924a",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9d5be3e4d1b86c547dcf4f047a9c60e24bdd9714"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs",
+      "sha256": "89605c70419d39dfd056b97b75f269b51985d4e40552936ca492f32316fad020",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "daa4a9491ea07f5422cfa40b824c80ad375fd8f3"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsOtpHidConnection.cs",
+      "sha256": "a127ef4770667a004570a211e135679d3c109dd266f4bd4098d980f8bdfc0448",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "4c45fe2df1e40282eaf5efadb629291b348b4342"
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs",
+      "sha256": "0a15c01b145a6e2c580532acc44f0e38f96ab5f03205fb5b3f1346887f7104af",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "71549b6c008228aa07e7f6efe2899916930b9ce6"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISCardApi.cs",
+      "sha256": "dc1c3f9ed6e54d55ca85e9d2102ec42905c0ca6b86c64a5a0b5427d638838785",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d494cb4fa5af192ca25f7b0754e02a1b55f93b57"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs",
+      "sha256": "75b283684c157c30e7333e484b7fe14e928770a525ba17bca3498d9a2bbab45e",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "450861f53c8f989d4087ea73b4f42ca2f3cc7068"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/NativeSCardApi.cs",
+      "sha256": "0f644fdfa25eccb12a826859ccb0d7806430cebc6660bdbf91172ad0b35fe7d3",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "dbdb55bfe3c9d499a851d16ca574cd714deaa87e"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/NativeSCardConnectionApi.cs",
+      "sha256": "4de101f3b6c8cfbf64fa97821ee77f68dfad5b96ae1b956e6c7485f4237fa943",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "53f4b57202f1decdc2685179aa2b746cd36c59f7"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnection.cs",
+      "sha256": "a09454d845aa46e83f9113e4cd84c5cf3a9ecf25122f93dda8e795e9d8aaa61d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "e93218de903b3fcee8ece773fa204f7b6d8ca373"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeOwner.cs",
+      "sha256": "3de540b2f304489117bf7216ca0c56fd540c8429a64e9a5e05a3f2639ba76602",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "72803271e74425dc404aa0eba883c2d4b873fe1e"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs",
+      "sha256": null,
+      "kind": "product-or-incoming-tooling"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "sha256": "49301b100e1b3babe0f284d38641d2e96320b5874d47f29fdb0fb9f27798eebe",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "e8baf22fc9ba63b6dbe256b142322b02bd37de39"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "sha256": "e2150a83494f8afab98be940b26ee27cefd9efeba5742c13fba2022d30c8c1df",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "8005c3c21f995229be71b616d8335e9a6b3953f5"
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+      "sha256": null,
+      "kind": "product-or-incoming-tooling"
+    },
+    {
+      "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "sha256": "051ebc7cbc083b3de48f10e6a2e555888527b6007c3f84e092415c9d2bfcf59c",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "cffa7ba09e449110430b58449063e1f1bb7a876c"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventHotPlugTests.cs",
+      "sha256": "31865edfe128d420e0753e93fa343fa7533d9e5f91c2d1434630da009fe2d8df",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "073596e6925aa92958e3e1d280443d8f8905c3f1"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Devices/DeviceEventLifecycleTests.cs",
+      "sha256": "53df0fc769551525980a2d419cf2a4faf80b3b7d7763660c334e39ee4f3a3f3b",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "e1cdac4453016c91d4a886cc774481b933d663db"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+      "sha256": "10765b58347bdd3f196ac09f7b53f62fd5d78013344d596ddd69fcc72f0d1ed5",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "94409ee6879972e5d39ef66e01eb7bd57fcea4b7"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs",
+      "sha256": "4ebc905b3edaebb9de5aff0c703443728df9c06ce6ba20ff5bf0f39417863e4d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "b2faf2886ba6288ed4d7c9c7236a76d877b8fd92"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+      "sha256": "3cb51947fc28bada5804146f127db4fed42fd833e5afa5626396125b1f875dfa",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "968fa9fd33bffebe6224bab9ff58204484147514"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs",
+      "sha256": "fa911cd6de5e9b38305d21abc5f29bb35283c5ecce73f9fafcbdeb245a0e710e",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9f5140641148d595431140ec64e40b98101bffbf"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScannerWindowsCompletionTests.cs",
+      "sha256": "9c004c885b8ba7d867b41825408ebc939237faa4a1c138000460f2f90663d122",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c9ac9166f825efaa22228a40a742b93d3c9dcb7a"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/CrossLayerAcceptanceTests.cs",
+      "sha256": "620d57a4160d3236168dc7b4576078e9eeb242fa7f5e7bc064d7761b2798fab4",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "cdb82ef6348187512977697e5467fab17f4c3a77"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+      "sha256": "4d9e513203dd1319d5ad7bbc04549a2bf1c48b03ad561dabc13b4e771096490a",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d69d07972f0cdf7165019108de9008472ba2b4a9"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+      "sha256": "4164977f0e3614f4f5342133119e01d9523d38faf094eb974c8d57f7f14f9542",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "6b3fba81f54a3bc52cc1229a1beabac7978cf051"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+      "sha256": "4f49c7c18a5890d296c2ab8ac25f359a934c74e59cc496dc4d054a574b594db0",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "61c5cd9658e792b529d9e601123253c477d9da13"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md",
+      "sha256": "db8711c8011f0716f4e9c346b28638c3160752f20df189077a9b0b04d0749991",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "52c3150d7abf32a7ab2dac8eab4db02da92e8011"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+      "sha256": "c36106b66e152fde322871e95206d383bf4e8c8c19984b535f189ff0762766e6",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "a791b90be9889ab5d9ec1c3fa67496284fcf3785"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/adapter-contracts.v1.json",
+      "sha256": "e69a66ec3d7607df62d209e3e47c668b12013d56189936b965713630be49dadd",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "1059c33c91227a338e247d8c14ff07e00c4c36f2"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/core-boundaries.v1.json",
+      "sha256": "d41f29d5ee84c07467dda854854b0ccde99ab40dc1db561024253d08b1ae59b0",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "5b84a987c772360cb450788554e59eb29fccd04e"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsFidoHidRoutingTests.cs",
+      "sha256": "188f5857823f1384f575b26d69599d81cd20759d19538624185126398fa3069d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "138f57c79c724bc734f08c03fcbf1a9fb2a2ee8e"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsOtpHidRoutingTests.cs",
+      "sha256": "b3aff638c940cd355368ddfedd2d665e2582f837978dcc0dd086716b6d6b0d44",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "0edac32412580ef6f26803b60a50d9ec421de290"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsRoutingApi.cs",
+      "sha256": "a7c3a4a5c3ad84fd05a318d51144fdba322aa6d5ad4da193d45b0a6fa645af9e",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "2a13f63499b5b42fc2cd7c1183279801cecda28a"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/WindowsRoutingContract.cs",
+      "sha256": "a1a861e1a3402fc9939d5a2047ae7cf6e381c37946d0ec45c385f3acaebbf186",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "dffb43dcf91d1f064b6e609f1cf52160a277cd06"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidConnectionLifetimeTests.cs",
+      "sha256": "0677b1d6bdc8831ee7ebda7c0d5d8e872bbbce6205822aaf8f0f9fc6f8c927ca",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "7010af7731d15dc927702f2056c15b97fd558543"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureCompatibilityTests.cs",
+      "sha256": "4d6d2564a7544b8f9e2354559b30a9c012e14a631fa50a15ef4ecf0e2dd5173a",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "4313f2b53ea09d86a919c1187fdf2abb763c947a"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFeatureFacadeTests.cs",
+      "sha256": "b0bca6cf6b20b11f3ef8cb7720fcda2d16d541d54c9a42aefe561ca078490139",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "226910d138ac7daa599a09bdfb119ee6814b391d"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoReadCancellationTests.cs",
+      "sha256": "f2e9abe5b682802fdc262dccc77dbc6aa05768bf05e80970e7c20a8da58ab241",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "2644e8c5da0d4e2f3f9593a629693aa232c26f9a"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidFidoRouteLifetimeTests.cs",
+      "sha256": "7b096081577eff2434cc6331781298647bf7390d6563debac2d40626e3981531",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "48b6a4fe8e8391f206e237190571c711fd741d03"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOCompatibilityTests.cs",
+      "sha256": "bcba24524de5fa5f84d5acd967f3978b8d3d8470cc265074c5af5ab5bd37b738",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "0bc87fe46f94b611b9181ae92742cd6554b5bcc0"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSHidIOFacadeTests.cs",
+      "sha256": "c5b462e1aa46f5d17476769d9c6c063591b6975e68a794d4b27d2f8352be7460",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "f16a5f1638e28d2f905c6e3f84a0d0013f219a30"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRecoveryTests.cs",
+      "sha256": "b78dd10768fbefc7cc5a0b47bbd56269dcd7ab38881d6e669e2683d190a18b0d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c5ba383493d17c83e52a3f1cf42b2917418a6d93"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/MacOSOtpRouteTests.cs",
+      "sha256": "d11fc681a0c77e6c5013dd5cd403688345e7ff3205e3c8341d709da16176aba6",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "96bc9458379c31f980a536c86eb46aa03f6d1ac8"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoDirectFacadeTests.cs",
+      "sha256": "c2e8458d15cd8309bd0558b5ddf6ffd0b60a944bb9fe6203a3e5752bc6d5e276",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "34de819fae34a9a6bbdaaf28344e7b259cb4e954"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoHidNativeOwnerTests.cs",
+      "sha256": "b36b13f78171e0ca2597744b0509751ad61072bbbccb503099154ad5018053ec",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "57a7ded9eba93f7a902674a6b2c1bc48ec2ade51"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsFidoPreparationFailureTests.cs",
+      "sha256": "928bbc6b2373d62fea4c8873aa02a8bb31b003c7227e8d01ed3f85f617a2b1c3",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "10d2279e8a1ce39821f1afebc9ce68cbda65ac96"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidFeatureReportApiTests.cs",
+      "sha256": "ae50e5de5ea7b671cdcfead1d5f0857655cbfab7d4aecd06d7387de906461d34",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "64eec6c62304067a3f5f88b280dad676857b4341"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidReportApiTests.cs",
+      "sha256": "9e907150cb69f354b503a4966aa1ff81a608dcd7402d8968c0654cbb30ccb9da",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "050c46bd8342a8d00664f797b1b6ca0b5a5c8330"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsHidSafeHandleTests.cs",
+      "sha256": "d7dfe1ff1bde6563107ab0a0a3bd49d6f57e2a2167742ae3ba1d72763cbbcb87",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "339533f507fe3d5d527b277017860143d68b48d8"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpDirectFacadeTests.cs",
+      "sha256": "cb9d5408c45298575512ecde4e0b2ef8f96a042a030abe8f25d16b35a1a96696",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "14e371ce38c1dab9fdff1f529fbc8327b2bf8dab"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpHidNativeOwnerTests.cs",
+      "sha256": "3248bff38c3f11d892e161a9ef63d0fac9f6367ca79e5052897f8ba39774b1a7",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9251f74b9d7bd720224aca07746aa0fe1775877d"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpLifetimeTests.cs",
+      "sha256": "205fde4974ebb3557a8e5942b30ba1b3303d32454f4df1819081aee6c76e6101",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "65d305c1d7944db3f7e4d688aec1271e74feba12"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsOtpReportApi.cs",
+      "sha256": "4fa01dc8496813a366fb26da6739ae71f1ca5634845776d5e989e9b232d30ec8",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "dc24a375b4de72653c166d777d912ff10b9d1e95"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/Windows/WindowsRoutingDirectContract.cs",
+      "sha256": "71717bc79ce3cc0ac3b29ad652af4e520c059965d619258a2e2af1fd0c078bdd",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d2a130ba3de62f0a4857041024847d9d7eb223f5"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+      "sha256": "3ffb4d366803a34bc6905e66ac577582cbfaabc8276e046df9aa6ca53ef9a7df",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "b6b7a9fe06d286bd09605ec92c981da9ed79ac24"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/Fakes/PcscIsolatedProbe.cs",
+      "sha256": "aaa9c3d390121ed56845f39187272cabf7910c49a384390c201ce4c8352d2625",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c9cf3904844d613fc611804cee033b71a42cc713"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "sha256": "d3e803697bfaa8cbf89e6d1ccb1acb1a83dad0560fb80fe88c49f83c4b7f5d0f",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c4d1f2ba4fd432eda18a7c23550f187d661f9a54"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionTests.cs",
+      "sha256": "15e8e4580ad094dad6e47d8419528a72a341c9d120e3aa303a4cd6f364200921",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "53b94a09ce1ea9becaf04acbf2b176ffbd06c8db"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscContextIsolationTests.cs",
+      "sha256": "4c6a6e098dffea8d6ed1e87706829d1ce7f24c8b5b155428f32d7a3f151cb72d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c811a51d586e5a7f5eb98849dd11a20e2b32efc5"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardConnectionFactoryTests.cs",
+      "sha256": "89600d81d187beec08119017c0a8be4422acfd14b0e588c5d7bb2fb8fdcbf5ab",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "41c29a02bbe41574348ff877c2f332e759b1ff48"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "sha256": "b7980de61ec9469a6a31cccdb1c43a6cd8a128344f82cfbde2de569c436845dc",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d8d6d3566e6216742374d84a9c066c3a1439bb7f"
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/UsbSmartCardConnectionTests.cs",
+      "sha256": null,
+      "kind": "product-or-incoming-tooling"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionHidCrossLayerTests.cs",
+      "sha256": "eb50986d65c69f9a3103f337c8f41b91ccda92a2a3357cc0fb6538caaa2e03d7",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "9c0bb0f0c9eacda51b23dbedead907fc6546d132"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Ctap2SessionWindowsCrossLayerTests.cs",
+      "sha256": "82ba4371f8c93daa9970f589ec8563846724bd90372c76cb121ed3dbfd9bbe23",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "194339113be77393bd29cdce6af69ba66e623be2"
+    },
+    {
+      "path": "src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/WindowsCtapReportApi.cs",
+      "sha256": "f2d5f054a76ec4c2e71c67a21a34cd0e32a9a284346baae106b634f98c662154",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "05e9595a68a15d39925e22ebd2d250b7442f95cd"
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "sha256": "09e27044c705fe0c308617f100919c14d7d607261b020e99d20bdd559e4a5744",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "5cb84b9e13d8fdd325f7178053dd6b8c19abb240"
+    },
+    {
+      "path": "src/Piv/README.md",
+      "sha256": "f5571de62ffb8894eb12b828077ed219b8581ca575276b83088f0152955e2cae",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "e410b20cd284702963996d3927851c74c37d3991"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Authentication/PivPinOnlyModeSessionTests.cs",
+      "sha256": "70bd8487aa589835b992bc02d03097cd62321e427276a3dd4dcdf4502b5e8ef6",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "6176c0a815844c365159f79d55fcd6573ba94455"
+    },
+    {
+      "path": "src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/YubiOtpSessionWindowsCrossLayerTests.cs",
+      "sha256": "ff29840e9e5075aab0fa310dd10a30c3f60a480c2d8a328a579a259091e84471",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "7f3385ecfbd8add24b39ecea232a77e4e49589f6"
+    },
+    {
+      "path": "verification/LinuxHidRouteVerification/BlockingReportConnection.cs",
+      "sha256": "f56ffe74defa6514c2f4d6c460f5f4029ed0c6c39914ff3c95ddab682a55c59b",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "37199a88ab75c71a38642b2306ce696b20e0fb93"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/EVIDENCE.md",
+      "sha256": "65d695dd7ad0e00d6f8cf756deb53cb5bb4f952a0a2e37c84b3be7da076d7b2c",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "b4c54d9ba72b0da1d3a5702067d5512ffb7ab4f7"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/Evidence.cs",
+      "sha256": "d41fbdcef0841eae69d59434b12087d01fda394d00363ee37afe8ce8fdf97108",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "04a3f3cc64fcbe84da2e8318e4300946413fb3d3"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/EvidenceGateTests.cs",
+      "sha256": "de0a3d709ef795b77d87dee39dd733260b6e19061d58a7d468e726bc14e5df80",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "b8de32b15d31305b5b266073a652beaa0ef95df7"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/NativePipeFixture.cs",
+      "sha256": "aea2925a934a26f7f0d2c1cca06cfccdcc420e7fcb40f3735fb51bc75db6f13a",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "d0f70e3f7545ba11713f2b47165bb80d9b7f547f"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/NativeScenarios.cs",
+      "sha256": "1a8d41c4eedee648052197ac6f9e0977426fd7f2aeb0cb749f5f4977022972b4",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "ce03a0af95e08e78c6246ac6eb971e8bad3135ff"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/ObservedReportApi.cs",
+      "sha256": "03206984369e4d59db39ef7c53a0b4b1529ee4cbe96c7fd29f551fb9c8d8584e",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "060a283a28ebd50f479832f85d5c67599ac4985c"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/Program.cs",
+      "sha256": "b8f536ac81751137b06e44ece05dbac873a6135bf13fbb433499071488c470ea",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "cddaed28b2cc7da63ea433b5a27423319cc782ae"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/PublicationSealTests.cs",
+      "sha256": "7999862c824a0e5dbf84c975d4c21b45724bb1baf2148c0d2149de2535c4fd43",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "a8f44ffc0a5f442fe0ecda5df88110e91b032256"
+    },
+    {
+      "path": "verification/WindowsHidRouteVerification/WindowsHidRouteVerification.csproj",
+      "sha256": "fa882b99e6fc8c0bdc772bcb3144812dfcef317034d1b079a6e8151fac38288d",
+      "kind": "product-or-incoming-tooling",
+      "git_blob_oid": "c8a7700540006f0829fb4e01041fd1a67bba1c55"
+    }
+  ],
+  "self_reference": "This manifest excludes itself; its reviewed blob and final tree are pinned by the review checkpoint."
+}

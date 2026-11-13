@@ -1,0 +1,105 @@
+{
+  "actor": "GPT-6 Astra",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "test",
+    "--filter",
+    "Category!=RequiresHardware&Category!=RequiresUserPresence"
+  ],
+  "started_utc": "2026-11-13T11:16:53.143931+00:00",
+  "finished_utc": "2026-11-13T11:18:12.570804+00:00",
+  "exit_code": 0,
+  "head": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "tracked_changes_after_command": [],
+  "files": [
+    {
+      "path": "console.txt",
+      "bytes": 6915,
+      "sha256": "4f831e858c28454a6934a87f5ddf0a1508dc255538698ede85d89e33e42cfab9"
+    },
+    {
+      "path": "toolchain/01-test-Cli.Commands.UnitTests.log",
+      "bytes": 837,
+      "sha256": "f546b92dc3e5dfedd28ebd3ce88e628001095014ab6c4fadaf150b7003fc2a07"
+    },
+    {
+      "path": "toolchain/02-test-Cli.Shared.UnitTests.log",
+      "bytes": 619,
+      "sha256": "d8617e8544862d06126fd31822578ada7edcedee66d74eb3af180f510491615e"
+    },
+    {
+      "path": "toolchain/03-test-Core.UnitTests.log",
+      "bytes": 4636,
+      "sha256": "ab7960076e85c4fb168508228fc32518c250caaafc52e8dd1bc046274eb2b63b"
+    },
+    {
+      "path": "toolchain/04-test-Ctap2.UnitTests.log",
+      "bytes": 591,
+      "sha256": "d379d8ea10f4b72d945752856a6be6e58e4f8e64bec5bc21902e1063f3052ffb"
+    },
+    {
+      "path": "toolchain/05-test-Management.UnitTests.log",
+      "bytes": 619,
+      "sha256": "51c8e6391f1a4ebe261aa08bcf1610b0360802d6ea1658b9c78ba2252c9b91c3"
+    },
+    {
+      "path": "toolchain/06-test-Oath.UnitTests.log",
+      "bytes": 39333,
+      "sha256": "6c8c3515affdc7e32dc70b9f9c62a0d10e12b12d2acd582131f9c668a8197f62"
+    },
+    {
+      "path": "toolchain/07-test-OpenPgp.UnitTests.log",
+      "bytes": 603,
+      "sha256": "df8cd723e7a353d39a4293f60265ce9d5fbd6adfa7be4d811637345d7de67685"
+    },
+    {
+      "path": "toolchain/08-test-Piv.UnitTests.log",
+      "bytes": 579,
+      "sha256": "af11ce843c21c88fd0d31335050521a017c2f24ea4a0d8d59a11398ccbe7cf5a"
+    },
+    {
+      "path": "toolchain/09-test-PublicApi.UnitTests.log",
+      "bytes": 613,
+      "sha256": "a846767fac3f29c3c11dc0e25dc4a83a66f50c76f09aa13881894b15e9e0d8e6"
+    },
+    {
+      "path": "toolchain/10-test-SecurityDomain.UnitTests.log",
+      "bytes": 643,
+      "sha256": "4c713450399b398291541b895fe0cc6b0151253c3b26685e34eb1e8f4f2e3e69"
+    },
+    {
+      "path": "toolchain/11-test-WebAuthn.UnitTests.log",
+      "bytes": 609,
+      "sha256": "6793c83d4587583fd48893ff1fdbfbbea0c2a3dc8c08b73a5efc180c66b5cd16"
+    },
+    {
+      "path": "toolchain/12-test-YubiHsm.UnitTests.log",
+      "bytes": 601,
+      "sha256": "e5faed95a215e7c810f9860faabac204c46fe15ba6187b67718b0b6a110a5434"
+    },
+    {
+      "path": "toolchain/13-test-YubiOtp.UnitTests.log",
+      "bytes": 603,
+      "sha256": "a94562e92a4dca65693ed7a9c8d8fa12014a3b62312eef3805c42b962f65f52b"
+    },
+    {
+      "path": "toolchain/result.json",
+      "bytes": 4875,
+      "sha256": "7ad7c00a4902e975c659f98e1b5667fd657a3db08ed8ce898a91088e21020018"
+    },
+    {
+      "path": "toolchain/result.txt",
+      "bytes": 1404,
+      "sha256": "262fc0a2b047ecb08fb156633d0e207cc74239e3549c28451484f29f7f124fc1"
+    },
+    {
+      "path": "toolchain/run.log",
+      "bytes": 7313,
+      "sha256": "69439632872ba7d38d83b30d938e039f235f9475cdbce04aad2588b2f7debf88"
+    }
+  ]
+}

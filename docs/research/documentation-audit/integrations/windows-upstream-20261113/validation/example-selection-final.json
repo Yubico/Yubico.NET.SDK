@@ -1,0 +1,372 @@
+{
+  "baseline": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "scope": "19 overlap records, live recipients and ownership diagram; accepted Full wrappers read-only",
+  "paths": [
+    {
+      "path": "CLAUDE.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 14,
+      "current_bodies": 14,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "5585c11e200aca5ec94e79cc3e860c7b2334937fa0dda7fea922b885d4805d52",
+        "ca62e60f143c007cd487b2da87eeb5bbf4b638b9f54779c7547ab11701f07146",
+        "d555511a9c56869ffd3524ad49b23019ce102be2b79e6c62b085b42911e13e4b",
+        "b67eaec390e6b6ab3314e05d036b0354d23e9ba77c4d581aa26dafea799c2562",
+        "f8be2100558e9bac4b7bb6ebe0bb04960c03cd5a741ad959887ba57f886ded47",
+        "7a339ac3ab481cdb4304e314b022ce957d7ec9c57ddebd2826fbf47fdeaa57d1",
+        "081d389812cb6970faf98a1cf411653de38a1dddb8ee1eee6a4a4527ab2fddc6",
+        "2f3bd012f14224605c97d3c7271ef1e61d4453a3eef970e8b7c1981772971b4c",
+        "d73a67968a044473a28f47045d34a3ed0bd410569a47d4ed39e10a37ce5b5b77",
+        "97d68e7349dda8a52698fea3583ce8d2106511e0d6d59b84b9b7dbbbe5a2e34b",
+        "639c31818db6756a352f8ab9a13e5b9d4830bba8fae6f203801171856a82f518",
+        "0b45a961044085951da4ada152bf365ce60e5c5aa9ea6c8029d8ece8b41ae5ba",
+        "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+        "e3d15741589aef444b49e3f9f6b7f5e64f1c960d7bf7d9fd511adc2362fe99f8"
+      ]
+    },
+    {
+      "path": "docs/SDK-HOUSE-STYLE.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 2,
+      "current_bodies": 2,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "6160f29207e7e7370a6a12fcb6e1cc586db363e54edbe092bb72d13fb3927edc",
+        "cc6f3316a8f20fddcbdff46c2b4ab2f684620281c0e3291ff1cfbbe620e3c1c4"
+      ]
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 2,
+      "current_bodies": 2,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "4bd1b010a2da6e3e4f0bee1ddf84e8bfaa65137ac166e6b371614ce1a71fedeb",
+        "cb54fc3cc72ea01631d28b4a2aa98590dba644739f7aa7a33139647deb56e32a"
+      ]
+    },
+    {
+      "path": "docs/architecture/raw-access-tiers.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 8,
+      "current_bodies": 8,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "d70cb2ba21c45b2bce6196d1fc064592c1bf991890afd532333032f6da860f4e",
+        "318e1d600007d9682a330cd9ee0ab8fb02fa9031bc36b3b37edbc4c4732ccc36",
+        "7802e5691c3bbc08c8f15780d5ea0df01626bd9cd0d3546dfd8951b1a03ecf6d",
+        "b2298d166d6a76d130750ebed9ab3775d271b2679426f79fe2252c924a8ca415",
+        "d3f9d4e02bf88ccf779784dcd47f1599056155e59afb8bb6529198cd729764e1",
+        "d1ebf13f8409ed7cf58cd2a24008902092e1d5d5403af8744b51332f33877f0f",
+        "7266cb92059a1d070c5e5647f0f4624a083274111ca545dc275f5ac51ca4d534",
+        "048e4a43422e260a9df70e5e85b7e1576cb644c625850265b5811e1ca4e311d5"
+      ]
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 11,
+      "current_bodies": 11,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "669781836d5dffcea7052514a95495e41281b405160df51f41d8ddc0cd1a96ec",
+        "f12a2e7a18a82a438eb1cf371f6352f0deac45927a4ae4431c79c4cd161d0d0c",
+        "448b2a9499bbadab4fd43316fc90ceed808f18e448724287ccf8e42693839a64",
+        "3cce9b9410ea5188207e82b974fe994934fc625197807738b7c040b42365d5bc",
+        "0e0fcdfc9f45d3660a0e31818d3d010e28832ab68de38554c6bcb73db13ebe87",
+        "74909e967f37c93632b55a8beb81090841f0aa01980e32510efbe5a6d974950e",
+        "7a507550ece36cf33e51f2514fd7a144ac3c8da463e20186a07ab97450a8b59d",
+        "224a07e7330b7cfc799d8233b5b2b70abd0c0c9e40af3205c60f10107b479a82",
+        "d611fb0bebac6a7e54de7e2c72fbc6f0b9349a3ed2ad23101a85cd6a3499b563",
+        "e1b1be9987d4c8251fc901db65ac3ae478b6258e5e89047e81d3e5107fdfc356",
+        "28c9d1f3bc7c9482b9cab7f9ced3952497485ac07ed4cef09f2ac2967d8fdae2"
+      ]
+    },
+    {
+      "path": "src/Core/README.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 15,
+      "current_bodies": 15,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "2d787d65101738f9812ba6917a9268a5ccfb33162ab707227327f7be66a9c253",
+        "36919ee52199f01ea271cafc2533cc8079ec8b4e760a86a02f10198c2479ff36",
+        "a95ce875742421cc42117b44eb2ccb969602f325fafcbd4124b8e7299396db2b",
+        "2b6e0220f981b623808a9e780598f1d86f68f75b7dbc22ab5367a6096a9541a9",
+        "e2481dca75a02fadb2ec4ab663637e2620e9ff59fc24dfaf90ffca1008e27f70",
+        "0d56c201fac75500480d0ac95b22f0dfec46ef4ed24109398868276348a12215",
+        "77a17b31fd3ec5a57d222afaa33c2904fcca5892caeb19a2f40269c15890ea87",
+        "dcd0265322dd87993b13f72d8481f427e31027d830580327d059abf0847e5ad2",
+        "c31e086f65b6cbc2bde8f4b894e43f26b4635eb4acd326d4e4620ad526c2c30a",
+        "8c3b4fcdfdc4ac88785fe8266a3c50446ad13fe6664bc4b8718394c8c5853aab",
+        "e45ae4556cc41529328df3ecf52d8769ae8d6b865f10d99c8e096f22863f4c2d",
+        "744f8c40491ae45f9f101952255069175e6571aa44fd7a553469fc645fe562d3",
+        "8ee8a3d71d43af85137353a7a1401c2143915a045caa45143989191b781e7f2a",
+        "3d6bac3b865c0139280c8ce6afbcadad70179d0cb082474667e13daa3ecefa19",
+        "20081e49e3d8a92f868059ac2d3120cacd656586065aa64a5bde2572848c7b08"
+      ]
+    },
+    {
+      "path": "src/Core/src/Devices/HidConnectionSlot.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+      "exists": false,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+      "exists": false,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidEventSource.cs",
+      "exists": false,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidPollOutcome.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxHidUdevEvent.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs",
+      "exists": false,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsOtpHidNativeOwner.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/SmartCardConnectionFactory.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 2,
+      "current_bodies": 2,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "7921c23728582143ca64c92eccde49a2af3425db4ff2554e536d39f0c83890dc",
+        "c01c00fe0a0d16c6606ad1f813788a95d04e8d213cdf4876be09790c0a88f59f"
+      ]
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/SmartCardSharingTests.cs",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 0,
+      "current_bodies": 0,
+      "body_sequences_equal": true,
+      "current_body_sha256": []
+    },
+    {
+      "path": "src/Piv/CLAUDE.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 4,
+      "current_bodies": 4,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "0af477e01e3a221a1fa69d8a02ab34dbd010dddad8d0f8aa3e5b51587c01ee5c",
+        "e700a69044060c5758652c2fa9760bd10c840c2f3f2f23c5365078fe7cb47d14",
+        "83cdf478ae14d6ba3440ab3626acdb2a5b41afc9d148e37f3757121e75429259",
+        "4464f14bda4ed114d1cbbb0c3994bc0af74fab338095a7eb6ee9ba5a756d213e"
+      ]
+    },
+    {
+      "path": "src/Piv/README.md",
+      "exists": true,
+      "unresolved_marker": false,
+      "baseline_bodies": 8,
+      "current_bodies": 8,
+      "body_sequences_equal": true,
+      "current_body_sha256": [
+        "207b4faf9f255923887b5bd96189d155c974fb304bbf836a2de307d6754e942d",
+        "5984cd4646d56a9960eec8f0bf2ed5dc825b6d45b12bc441af0391c270d35315",
+        "399e078e67ea215e2a7b8278156501559f2aab4c983769bee1161bf7e617130a",
+        "103e840c132a11514d5eb311163470add49d4ca27ba7ff272905154a08b79abb",
+        "bcc54c0acd350e75df97a2de3ca16fd64247245ca5f6dba6a7d0cfecaaa93818",
+        "2339fa6f1c979845e14b4fd8c8c949effb1f7bf146d33bc224771773567570cd",
+        "ca8fe727d322c778aabf304fd3260fb21de2c9619067f783b11892536be2b6ae",
+        "f0255a5d67fbf9956f2e67a1a9b16be868f0b2bb985edd5e8c0f231bba31d2f1"
+      ]
+    }
+  ],
+  "changed_example_paths": [],
+  "accepted_wrapper_rename_candidates": [],
+  "execution": "none; no compilation claim; unresolved source blocks release"
+}

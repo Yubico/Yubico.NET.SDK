@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "scope": "Preparation records and unchanged checkout only; integration remains unexecuted",
+  "evidence_anchors": 20,
+  "overlap_decisions": 19,
+  "preview_conflicts": 9,
+  "local_markdown_links": "resolved",
+  "head": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "tracked_changes": 0,
+  "staged_changes": 0,
+  "unmerged_entries": 0,
+  "protected_user_files": 4,
+  "plan_sha256": "5076f5bda877125a3d5f6cf5dbe870df3f9eb0a28f1833c61cdab5ef7cbcc05a",
+  "completed_reports": {
+    "intake-review/report.md": "ab593a5b7ad02cff985fd395e21b2d666daa11d35e148a1d1d3de6f500875bc6",
+    "intake-review/evidence-identities.json": "00d82d8e1912ec984d6c028be72da2a2812cb89aa92c047ef4c43c1e79b3df87",
+    "merge-review/decision-map.md": "c7eee0a07729843b480f86e300c180ff7b456ec2f7fc3cb004e7b2a5b44ee60c",
+    "merge-review/decision-map.json": "341101efe836d830060480d9f988a5adffb5b9ea48bde44dd85a0d34876263bc",
+    "merge-review/input-identities.md": "caa914c05ae906dbd37c350772e984c2dc3f3c18584d66e2386e25b574259c9a",
+    "merge-review/proposed-ownership.md": "fc1f343bef61a0f442887a0a933ad983dcc0fe981e2dd4ae59725f056274d1d1",
+    "coordinator-decisions.md": "9e01a1c47c4556418f7898e4752d79688eb800742f6b54b4335c328a2a0023c5"
+  }
+}

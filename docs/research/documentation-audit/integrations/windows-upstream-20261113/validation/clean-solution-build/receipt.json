@@ -1,0 +1,49 @@
+{
+  "actor": "GPT-6 Astra",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "build",
+    "--clean"
+  ],
+  "started_utc": "2026-11-13T11:16:23.066896+00:00",
+  "finished_utc": "2026-11-13T11:16:43.482248+00:00",
+  "exit_code": 0,
+  "head": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "tracked_changes_after_command": [],
+  "files": [
+    {
+      "path": "console.txt",
+      "bytes": 1448,
+      "sha256": "9968c07e9178cd9f5e4784b0b74c5fa7ce50da7010bfbda5cf1ec43530d46503"
+    },
+    {
+      "path": "toolchain/01-clean.log",
+      "bytes": 32354,
+      "sha256": "ffee4d7cce45a85d594cb5fa999d58462f5aafd70d40107453f53c61a35460ad"
+    },
+    {
+      "path": "toolchain/02-build.log",
+      "bytes": 14452,
+      "sha256": "b6437ec74413075394295161aa681c3f8dde6e5748091b715a6e36135dcf6b9c"
+    },
+    {
+      "path": "toolchain/result.json",
+      "bytes": 681,
+      "sha256": "3a9872221fed1b66b604e95f9d1f1a094936bfaf9c0cdc85759b516b5a5aafc8"
+    },
+    {
+      "path": "toolchain/result.txt",
+      "bytes": 406,
+      "sha256": "0752927837b3c7ab63de472cff384d17d38b8015c90ab849f8cde84a505fed97"
+    },
+    {
+      "path": "toolchain/run.log",
+      "bytes": 1786,
+      "sha256": "753404fecea296644503733bb74584817cc40cc712b7b9b37e9e616938e5b2ee"
+    }
+  ]
+}

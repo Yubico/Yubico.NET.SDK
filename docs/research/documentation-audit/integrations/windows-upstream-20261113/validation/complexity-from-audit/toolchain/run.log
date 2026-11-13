@@ -1,0 +1,44 @@
+# dotnet toolchain.cs -- complexity --complexity-args "--base d5d01ef99f1478e4d49911194c17667b2450d2fd --json artifacts/windows-merge-complexity-from-audit.json"
+# started:   2026-11-13 12:18:33 +01:00
+# directory: /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113
+# git:       yubikit-windows-audit-integration-20261113 @ d5d01ef99 (uncommitted changes)
+# runtime:   .NET 10.0.15 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: complexity  (log: artifacts/toolchain/runs/20261113-121833-826-complexity/run.log)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs --base d5d01ef99f1478e4d49911194c17667b2450d2fd --json artifacts/windows-merge-complexity-from-audit.json
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs d5d01ef99f1478e4d49911194c17667b2450d2fd
+  files        48
+  methods      252
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    15    18  new        Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidNativeOwner.CompleteRequest
+                         src/Core/src/Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs:291-320
+    14    14  new        Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidNativeOwner.Advance
+                         src/Core/src/Transports/Hid/Windows/WindowsFidoHidNativeOwner.cs:249-289
+    12     1  worse      Yubico.YubiKit.Core.Devices.HidConnectionSlot.OpenBuiltInConnectionAsync  (was 10/1)
+                         src/Core/src/Devices/HidConnectionSlot.cs:122-144
+
+3 of 252 methods exceed a threshold: 3 need action (new or worse), 0 are existing debt.
+For each method that needs action, simplify it or add to the commit message:
+  Complexity-Justification: WindowsFidoHidNativeOwner.CompleteRequest: <why this complexity is warranted>
+  Complexity-Justification: WindowsFidoHidNativeOwner.Advance: <why this complexity is warranted>
+  Complexity-Justification: HidConnectionSlot.OpenBuiltInConnectionAsync: <why this complexity is warranted>
+
+JSON written to /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/artifacts/windows-merge-complexity-from-audit.json
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- complexity --complexity-args "--base d5d01ef99f1478e4d49911194c17667b2450d2fd --json artifacts/windows-merge-complexity-from-audit.json")
+Targets:
+  ✓ complexity     1.6s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121833-826-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

@@ -1,0 +1,24 @@
+{
+  "actor": "GPT-6 Astra",
+  "explicit_paths": [
+    "src/Core/src/Devices/RegisteredConnections.cs",
+    "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+    "src/Core/src/Devices/HidConnectionSlot.cs",
+    "src/Core/src/Transports/SmartCard/PcscNativeResources.cs",
+    "src/Core/src/Transports/Hid/Linux/ILinuxHidEventSource.cs",
+    "src/Core/src/Transports/Hid/Linux/LinuxUdevHidEventSource.cs",
+    "src/Core/src/Transports/Hid/MacOS/IMacOSHidReportApi.cs",
+    "src/Core/src/Transports/Hid/MacOS/MacOSHidReportApi.cs",
+    "src/Core/src/Transports/Hid/Windows/IWindowsHidFeatureReportApi.cs",
+    "src/Core/src/Transports/Hid/Windows/IWindowsHidReportApi.cs",
+    "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportApi.cs",
+    "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+    "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+    "src/Core/src/Transports/Hid/Windows/WindowsHidReportApi.cs",
+    "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+    "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+    "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+    "verification/LinuxHidRouteVerification/BlockingReportConnection.cs"
+  ],
+  "purpose": "Resolve source index entries and stage authorized source followthrough"
+}

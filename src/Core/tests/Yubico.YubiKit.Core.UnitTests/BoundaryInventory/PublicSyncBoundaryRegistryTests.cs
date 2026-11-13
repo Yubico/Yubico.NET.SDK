@@ -6,12 +6,20 @@ public class PublicSyncBoundaryRegistryTests
     public void Supported_synchronous_entries_resolve_to_public_contracts_and_scoped_owners()
     {
         var rows = PublicSyncBoundaryRegistry.Rows;
-        // Upstream's 15 entries (no static manager shutdown) plus eight Linux entries.
-        Assert.Equal(23, rows.Length);
+        // Upstream's 15 entries plus eight Linux and eight Windows entries.
+        Assert.Equal(31, rows.Length);
         Assert.Empty(PublicSyncBoundaryRegistry.Validate(rows));
     }
 
     [Theory]
+    [InlineData("windows input open")]
+    [InlineData("windows input get")]
+    [InlineData("windows input set")]
+    [InlineData("windows input dispose")]
+    [InlineData("windows feature open")]
+    [InlineData("windows feature get")]
+    [InlineData("windows feature set")]
+    [InlineData("windows feature dispose")]
     [InlineData("linux input open")]
     [InlineData("linux input get")]
     [InlineData("linux input set")]
@@ -20,12 +28,38 @@ public class PublicSyncBoundaryRegistryTests
     [InlineData("linux feature get")]
     [InlineData("linux feature set")]
     [InlineData("linux feature dispose")]
-    public void Removing_Linux_public_reachability_fails_closed(string entry)
+    public void Removing_Linux_or_Windows_public_reachability_fails_closed(string entry)
     {
         var rows = PublicSyncBoundaryRegistry.Rows;
         Assert.Single(rows, row => row.Entry == entry);
         Assert.Contains($"missing entry: {entry} (found 0)",
             PublicSyncBoundaryRegistry.Validate(rows.Where(row => row.Entry != entry)));
+    }
+
+    [Theory]
+    [InlineData("windows input open")]
+    [InlineData("windows input get")]
+    [InlineData("windows input set")]
+    [InlineData("windows input dispose")]
+    [InlineData("windows feature open")]
+    [InlineData("windows feature get")]
+    [InlineData("windows feature set")]
+    [InlineData("windows feature dispose")]
+    public void Windows_documented_gap_cannot_replace_behavioral_evidence(string entry)
+    {
+        var rows = PublicSyncBoundaryRegistry.Rows;
+        Assert.Single(rows, row => row.Entry == entry);
+        Assert.Contains($"stale evidence: {entry}", PublicSyncBoundaryRegistry.Validate(
+            rows.Select(row => row.Entry == entry ? row with { Evidence = "No held-native Windows dispose" } : row)));
+    }
+
+    [Fact]
+    public void Non_Windows_documented_gap_remains_allowed()
+    {
+        var rows = PublicSyncBoundaryRegistry.Rows;
+        Assert.Single(rows, row => row.Entry == "listener stop");
+        Assert.Empty(PublicSyncBoundaryRegistry.Validate(rows.Select(row => row.Entry == "listener stop"
+            ? row with { Evidence = "No held-native listener stop evidence" } : row)));
     }
 
     [Fact]
@@ -44,6 +78,8 @@ public class PublicSyncBoundaryRegistryTests
     [InlineData("TODO")]
     [InlineData("unverified evidence")]
     [InlineData("FakeClass.FakeTest")]
+    [InlineData("WindowsRoutingDirectContract.SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome")]
+    [InlineData("WindowsFidoDirectFacadeTests.StaleMethod")]
     public void Unsupported_bare_or_stale_evidence_fails_closed(string evidence)
     {
         var rows = PublicSyncBoundaryRegistry.Rows;

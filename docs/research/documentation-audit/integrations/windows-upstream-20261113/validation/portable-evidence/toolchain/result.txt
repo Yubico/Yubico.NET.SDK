@@ -1,0 +1,7 @@
+RESULT: PASSED  (dotnet toolchain.cs -- windows-hid-verification-evidence-test)
+Targets:
+  ✓ windows-hid-verification-build             1.3s
+  ✓ windows-hid-verification-evidence-test     0.1s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121826-911-windows-hid-verification-evidence-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

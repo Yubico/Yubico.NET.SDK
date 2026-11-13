@@ -852,9 +852,9 @@ public class PcscConnectionLifetimeTests
     {
         var expected = new InvalidOperationException("worker start failed");
         var releasedCalls = 0;
-        var connection = new UsbSmartCardConnection(
+        var connection = new PcscConnection(
             new PcscDevice { ReaderName = $"start-failure-{Guid.NewGuid():N}", Atr = null },
-            api: new ControlledSCardConnectionApi(),
+            connectionApi: new ControlledSCardConnectionApi(),
             released: () => Interlocked.Increment(ref releasedCalls),
             startWorker: _ => throw expected);
 
@@ -875,9 +875,9 @@ public class PcscConnectionLifetimeTests
     {
         var expected = new InvalidOperationException("release observer failed");
         var api = new ControlledSCardConnectionApi();
-        var connection = new UsbSmartCardConnection(
+        var connection = new PcscConnection(
             new PcscDevice { ReaderName = $"observer-failure-{Guid.NewGuid():N}", Atr = null },
-            api: api,
+            connectionApi: api,
             released: () => throw expected);
         await connection.InitializeAsync(Ct);
 
@@ -896,9 +896,9 @@ public class PcscConnectionLifetimeTests
         var expected = new InvalidOperationException("terminal worker failure");
         var releasedCalls = 0;
         var api = new ControlledSCardConnectionApi();
-        var connection = new UsbSmartCardConnection(
+        var connection = new PcscConnection(
             new PcscDevice { ReaderName = $"terminal-worker-failure-{Guid.NewGuid():N}", Atr = null },
-            api: api,
+            connectionApi: api,
             released: () => Interlocked.Increment(ref releasedCalls),
             workerLoopStarting: () => throw expected);
 
@@ -918,9 +918,9 @@ public class PcscConnectionLifetimeTests
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static WeakReference OpenAndDropDirectConnection(ControlledSCardConnectionApi api)
     {
-        var connection = new UsbSmartCardConnection(
+        var connection = new PcscConnection(
             new PcscDevice { ReaderName = $"direct-drop-{Guid.NewGuid():N}", Atr = null },
-            api: api);
+            connectionApi: api);
         connection.InitializeAsync(Ct).AsTask().GetAwaiter().GetResult();
         return new WeakReference(connection);
     }
@@ -930,9 +930,9 @@ public class PcscConnectionLifetimeTests
         ControlledSCardConnectionApi api,
         TaskCompletionSource released)
     {
-        var connection = new UsbSmartCardConnection(
+        var connection = new PcscConnection(
             new PcscDevice { ReaderName = $"uninitialized-drop-{Guid.NewGuid():N}", Atr = null },
-            api: api,
+            connectionApi: api,
             released: released.SetResult);
         return new WeakReference(connection);
     }

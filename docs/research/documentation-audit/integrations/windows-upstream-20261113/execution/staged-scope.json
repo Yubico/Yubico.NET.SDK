@@ -1,0 +1,18 @@
+{
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "product_changed_paths": 135,
+  "extra_paths_outside_incoming": [
+    "docs/architecture/connection-ownership-and-contention.md",
+    "docs/research/documentation-audit/core.md",
+    "src/Core/src/Devices/RegisteredConnections.cs",
+    "src/Core/src/Devices/SharedDeviceInfoRead.cs",
+    "verification/LinuxHidRouteVerification/BlockingReportConnection.cs"
+  ],
+  "extra_paths_match_approved_followthrough": true,
+  "frozen_staged_roots_unchanged": [
+    "docs/research/documentation-audit/modules",
+    "docs/research/documentation-audit/records",
+    "docs/research/documentation-audit/integrations/core-upstream-20261111",
+    "docs/research/documentation-audit/integrations/piv-pr745-20261105"
+  ]
+}

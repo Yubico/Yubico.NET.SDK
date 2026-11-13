@@ -1,0 +1,9 @@
+RESULT: PASSED  (dotnet toolchain.cs -- pack --include-docs)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      2.0s
+  ✓ pack                       7.8s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121838-054-pack/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

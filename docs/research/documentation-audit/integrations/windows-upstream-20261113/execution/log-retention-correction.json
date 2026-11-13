@@ -1,0 +1,489 @@
+{
+  "actor": "GPT-6.1 Sol",
+  "scope": "evidence packaging only; no runtime, formatter or product edits",
+  "predecessor_tree": "7e8b4b40111b65231470a06207cf9700f12f7015",
+  "predecessor_manifest_sha256": "2e0651bca9cb2696929ba239ed250ffc940c0b4d043fa132dc9d97bc2df0f5a1",
+  "review_sha256": "0517e6c69c6401bdb2ccabcb8dc548886bfdfc76742e8aea471ad27223bc50d3",
+  "force_added_exact_paths": [
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/01-clean.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/02-build.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/01-test-Core.IntegrationTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/01-build.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/02-pack-Core.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/03-pack-Ctap2.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/04-pack-Management.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/05-pack-Oath.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/06-pack-OpenPgp.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/07-pack-Piv.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/08-pack-SecurityDomain.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/09-pack-WebAuthn.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/10-pack-YubiHsm.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/11-pack-YubiOtp.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/01-test-Cli.Commands.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/02-test-Cli.Shared.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/03-test-Core.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/04-test-Ctap2.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/05-test-Management.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/06-test-Oath.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/07-test-OpenPgp.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/08-test-Piv.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/09-test-PublicApi.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/10-test-SecurityDomain.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/11-test-WebAuthn.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/12-test-YubiHsm.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/13-test-YubiOtp.UnitTests.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/01-windows-hid-verification-build.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/02-windows-hid-evidence-test.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/run.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/01-clean-WindowsMerge20261113.VerifierCompile.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/02-build-WindowsMerge20261113.VerifierCompile.log",
+    "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/run.log"
+  ],
+  "all_receipt_entries_staged_verified": [
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/console.txt",
+      "bytes": 1448,
+      "sha256": "9968c07e9178cd9f5e4784b0b74c5fa7ce50da7010bfbda5cf1ec43530d46503"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/01-clean.log",
+      "bytes": 32354,
+      "sha256": "ffee4d7cce45a85d594cb5fa999d58462f5aafd70d40107453f53c61a35460ad"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/02-build.log",
+      "bytes": 14452,
+      "sha256": "b6437ec74413075394295161aa681c3f8dde6e5748091b715a6e36135dcf6b9c"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/result.json",
+      "bytes": 681,
+      "sha256": "3a9872221fed1b66b604e95f9d1f1a094936bfaf9c0cdc85759b516b5a5aafc8"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/result.txt",
+      "bytes": 406,
+      "sha256": "0752927837b3c7ab63de472cff384d17d38b8015c90ab849f8cde84a505fed97"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/clean-solution-build/toolchain/run.log",
+      "bytes": 1786,
+      "sha256": "753404fecea296644503733bb74584817cc40cc712b7b9b37e9e616938e5b2ee"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/console.txt",
+      "bytes": 2242,
+      "sha256": "9d1171f86fbf1ae199a1a68c994aca8a7d12c8b13a783690678ff7dedfdd4097"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/toolchain/result.json",
+      "bytes": 562,
+      "sha256": "29e7407e00b8a38001b59b625210d734862301b7561a204a0699f1f09cd00c37"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/toolchain/result.txt",
+      "bytes": 446,
+      "sha256": "418eadd96d37dcd2701dc2e05fb34928752c14d1a5aa3cf9693a3c0810bef0f1"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-audit/toolchain/run.log",
+      "bytes": 2703,
+      "sha256": "7e480cda8f844afd7ff5fba580f35b1b76a13153e9962065bf5e53edaa444c52"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/console.txt",
+      "bytes": 4111,
+      "sha256": "28cd0a0969ace85ca35147fd3eb5515d212eb3d36104a79078a3f8134c7ee91d"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/toolchain/result.json",
+      "bytes": 565,
+      "sha256": "32aa0f4f865b0baf8801e6d20fd4776bbda2e5c84b362959bb573ca35ca8f9fb"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/toolchain/result.txt",
+      "bytes": 449,
+      "sha256": "c93dd347ac8a4cbe01bada1948c58e95948d1c0d038860f59889f8a9a0b88556"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/complexity-from-incoming/toolchain/run.log",
+      "bytes": 4575,
+      "sha256": "03f8eb8dc27ef7fd42bc09f02994a863db0fa3f9d0c84d6824ec19d725934c19"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/console.txt",
+      "bytes": 1763,
+      "sha256": "657ea2fe52f9b2795fe453b8f7e38f4d74486e59c04aebd9af4c23eab98d2cac"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/01-test-Core.IntegrationTests.log",
+      "bytes": 2225,
+      "sha256": "8bf914cbb446f5b1c27d75cfdd0191b5d142e6740e92a5d297eb7b803588fc01"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/result.json",
+      "bytes": 1036,
+      "sha256": "c4d296f2fb2523d9c1a578c0a07cdbd5c83e77d9811b4ebc245e03e9b95331e8"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/result.txt",
+      "bytes": 699,
+      "sha256": "faa39d58492e9e6b7662127085720a6d13551f825f3a74098923224ad34372ab"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/device-event-lifecycle/toolchain/run.log",
+      "bytes": 2252,
+      "sha256": "ce2553568b090a347b78943a1db167f16af6fb6fb3aac0d4e504014413156eda"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/console.txt",
+      "bytes": 4264,
+      "sha256": "a66d290288e213f11ab23e1ff3a74ba1e72cbdfc09922f294313a109d7dabbe0"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/01-build.log",
+      "bytes": 8058,
+      "sha256": "2cf4cbe9be90e5b50cb4708a252294ce72cb6634ef9d59bc919c3cb6cffd8d69"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/02-pack-Core.log",
+      "bytes": 467,
+      "sha256": "f70cc74ad4ec72bbee89f289f724a611fba6cd8d5be67d7c02a04bb2a81a3f48"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/03-pack-Ctap2.log",
+      "bytes": 471,
+      "sha256": "2bbfab81e398267f10d01eb13d096a53265acbad4cb4eb84a3501a7e96de96db"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/04-pack-Management.log",
+      "bytes": 491,
+      "sha256": "1a9ad46a9202bbb5106c65a387ae0f26aee9d2bfe0fecb4803fbd33184d4307f"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/05-pack-Oath.log",
+      "bytes": 467,
+      "sha256": "a80350e46a85a2fc2f163f2e8122b124d5b6206324e37a28795724c2e52c5600"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/06-pack-OpenPgp.log",
+      "bytes": 479,
+      "sha256": "afa3dfd6bde870a4f7596507b2d552ed6a4e9a8387804ec9b5f4ea15f5d66639"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/07-pack-Piv.log",
+      "bytes": 463,
+      "sha256": "4c66aa33bffb9d5cc5b428a1aa3756e5d9fc831290940219283f91e60c0b5727"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/08-pack-SecurityDomain.log",
+      "bytes": 507,
+      "sha256": "c340983819da6feece6b7a96eb3dcbc222541f55a9c2960422b0cfac225c1b83"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/09-pack-WebAuthn.log",
+      "bytes": 483,
+      "sha256": "fbf8fb9cffa80572020885b35f6a59501d8bb02c7119058ff378ac19ca6672b4"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/10-pack-YubiHsm.log",
+      "bytes": 479,
+      "sha256": "152617585f5917c57b20f608632a38704d394fcbf9499444d558b5a3f533f7cb"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/11-pack-YubiOtp.log",
+      "bytes": 479,
+      "sha256": "d77683cb0dc2f91bf52a6e92d74c330a4d21b5a438bff40710e033953a3ae686"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/result.json",
+      "bytes": 795,
+      "sha256": "c58afe8ee9cdbb607075e8cb81be9104c413a0f737870ec09a65990916ed1765"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/result.txt",
+      "bytes": 449,
+      "sha256": "6e63d71630c95ea59f2e51af542f78f9453a6e42d7e54033efae7280bcfd8081"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/docs-inclusive-pack/toolchain/run.log",
+      "bytes": 4608,
+      "sha256": "c49b31f82e3df5bf77c658d60d5347cd06d2b0ad9a8e0a8705d5fb51a080aab5"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/console.txt",
+      "bytes": 1461,
+      "sha256": "289c8cc877a13b955b4b5dc85f8bb47b81113ac06dff93a59b35140621a968dd"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/toolchain/result.json",
+      "bytes": 585,
+      "sha256": "6e91a55b5606f952cf8fb7a2133d0b119e4f0df18122ab3a013097c83fa8074f"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/toolchain/result.txt",
+      "bytes": 390,
+      "sha256": "e7c49d9ed76f3681052b01cd7d3fee10d797ae41c47fbdfcc708d4af49764d75"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/final-documentation/toolchain/run.log",
+      "bytes": 1811,
+      "sha256": "7e605d934d5a4599d3e70fd89ef130a1cdef6c0e0c10ad50a3c9b8c5432e9ff7"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/console.txt",
+      "bytes": 6915,
+      "sha256": "4f831e858c28454a6934a87f5ddf0a1508dc255538698ede85d89e33e42cfab9"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/01-test-Cli.Commands.UnitTests.log",
+      "bytes": 837,
+      "sha256": "f546b92dc3e5dfedd28ebd3ce88e628001095014ab6c4fadaf150b7003fc2a07"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/02-test-Cli.Shared.UnitTests.log",
+      "bytes": 619,
+      "sha256": "d8617e8544862d06126fd31822578ada7edcedee66d74eb3af180f510491615e"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/03-test-Core.UnitTests.log",
+      "bytes": 4636,
+      "sha256": "ab7960076e85c4fb168508228fc32518c250caaafc52e8dd1bc046274eb2b63b"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/04-test-Ctap2.UnitTests.log",
+      "bytes": 591,
+      "sha256": "d379d8ea10f4b72d945752856a6be6e58e4f8e64bec5bc21902e1063f3052ffb"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/05-test-Management.UnitTests.log",
+      "bytes": 619,
+      "sha256": "51c8e6391f1a4ebe261aa08bcf1610b0360802d6ea1658b9c78ba2252c9b91c3"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/06-test-Oath.UnitTests.log",
+      "bytes": 39333,
+      "sha256": "6c8c3515affdc7e32dc70b9f9c62a0d10e12b12d2acd582131f9c668a8197f62"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/07-test-OpenPgp.UnitTests.log",
+      "bytes": 603,
+      "sha256": "df8cd723e7a353d39a4293f60265ce9d5fbd6adfa7be4d811637345d7de67685"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/08-test-Piv.UnitTests.log",
+      "bytes": 579,
+      "sha256": "af11ce843c21c88fd0d31335050521a017c2f24ea4a0d8d59a11398ccbe7cf5a"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/09-test-PublicApi.UnitTests.log",
+      "bytes": 613,
+      "sha256": "a846767fac3f29c3c11dc0e25dc4a83a66f50c76f09aa13881894b15e9e0d8e6"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/10-test-SecurityDomain.UnitTests.log",
+      "bytes": 643,
+      "sha256": "4c713450399b398291541b895fe0cc6b0151253c3b26685e34eb1e8f4f2e3e69"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/11-test-WebAuthn.UnitTests.log",
+      "bytes": 609,
+      "sha256": "6793c83d4587583fd48893ff1fdbfbbea0c2a3dc8c08b73a5efc180c66b5cd16"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/12-test-YubiHsm.UnitTests.log",
+      "bytes": 601,
+      "sha256": "e5faed95a215e7c810f9860faabac204c46fe15ba6187b67718b0b6a110a5434"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/13-test-YubiOtp.UnitTests.log",
+      "bytes": 603,
+      "sha256": "a94562e92a4dca65693ed7a9c8d8fa12014a3b62312eef3805c42b962f65f52b"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/result.json",
+      "bytes": 4875,
+      "sha256": "7ad7c00a4902e975c659f98e1b5667fd657a3db08ed8ce898a91088e21020018"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/result.txt",
+      "bytes": 1404,
+      "sha256": "262fc0a2b047ecb08fb156633d0e207cc74239e3549c28451484f29f7f124fc1"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/ordinary-unit-suite/toolchain/run.log",
+      "bytes": 7313,
+      "sha256": "69439632872ba7d38d83b30d938e039f235f9475cdbce04aad2588b2f7debf88"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/console.txt",
+      "bytes": 1286,
+      "sha256": "c834c50f566651268793426488d7c509f4a9258d52dc9e1faf7d491c8bb1ea73"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/01-windows-hid-verification-build.log",
+      "bytes": 784,
+      "sha256": "5bf166bc41180ba5357e27b748926647f10e076b608dce6d03089ac85ab2364f"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/02-windows-hid-evidence-test.log",
+      "bytes": 2177,
+      "sha256": "a2e2c16284e7c19dc1bbb88b9efef7d183084ab2679e13d4f6351448a89bda55"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/result.json",
+      "bytes": 655,
+      "sha256": "961135feddc3be8ee769da05ac511d03499d77e4d95a8853e0077fd6acd65c9d"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/result.txt",
+      "bytes": 458,
+      "sha256": "a20225d0442a29cc95864eee117571754e75fbd045c5dee03d01ecfb65099b88"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/portable-evidence/toolchain/run.log",
+      "bytes": 1649,
+      "sha256": "83f9a253365bfc99dca0205a90bd180f0b9312cb9998c721b03658a46f3d3440"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/console.txt",
+      "bytes": 1931,
+      "sha256": "31b3abae11eaf851f5fb95c6a31191e0d3c244fb36e7731762d722e61d359ffe"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/01-clean-WindowsMerge20261113.VerifierCompile.log",
+      "bytes": 3961,
+      "sha256": "b929e0213473f74c9d5a6dbdc218be224580a687432950521e11d038d104536f"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/02-build-WindowsMerge20261113.VerifierCompile.log",
+      "bytes": 2431,
+      "sha256": "6c728b38aca185dcfc2b5762cfcea91c2b8eb1ad7b5fb0879d51f184eea7dfd6"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/result.json",
+      "bytes": 743,
+      "sha256": "bc10473ca95d1b197135fd4a4b1da48e935226de69e186f4d8119bf5b59b72c8"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/result.txt",
+      "bytes": 468,
+      "sha256": "81f32347979f459f73a208e2db32365d25e8f410a9f7681193c658163fb21f02"
+    },
+    {
+      "receipt": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/receipt.json",
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-build/toolchain/run.log",
+      "bytes": 2331,
+      "sha256": "8b418850afd88470cfec6ea4de52dbb56e683ae306e96f09ccf4b5a8b24eadee"
+    }
+  ],
+  "ignored_audit": {
+    "before_count": 69,
+    "other_evidence_omissions": [],
+    "excluded_generated_paths": [
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/LinuxHidRouteVerification",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/LinuxHidRouteVerification.deps.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/LinuxHidRouteVerification.runtimeconfig.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/MacOSHidRouteVerification",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/MacOSHidRouteVerification.deps.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/MacOSHidRouteVerification.runtimeconfig.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.deps.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.dll",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.pdb",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.xml",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.AssemblyInfo.cs",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.AssemblyInfoInputs.cache",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.GeneratedMSBuildEditorConfig.editorconfig",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.GlobalUsings.g.cs",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.assets.cache",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj.CoreCompileInputs.cache",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj.FileListAbsolute.txt",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.dll",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.pdb",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.sourcelink.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.xml",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/ref/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.dll",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Release/net10.0/refint/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.dll",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj.nuget.dgspec.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj.nuget.g.props",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj.nuget.g.targets",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/project.assets.json",
+      "docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/obj/project.nuget.cache"
+    ]
+  },
+  "self_reference": "Final tree and refreshed manifest identity belong to the external rereview checkpoint."
+}

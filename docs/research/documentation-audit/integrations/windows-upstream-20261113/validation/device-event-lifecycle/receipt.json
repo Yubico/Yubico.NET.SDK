@@ -1,0 +1,48 @@
+{
+  "actor": "GPT-6 Astra",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "toolchain.cs",
+    "--",
+    "test",
+    "--integration",
+    "--project",
+    "Yubico.YubiKit.Core.IntegrationTests",
+    "--filter",
+    "FullyQualifiedName~Yubico.YubiKit.Core.IntegrationTests.Devices.DeviceEventLifecycleTests"
+  ],
+  "started_utc": "2026-11-13T11:18:28.484390+00:00",
+  "finished_utc": "2026-11-13T11:18:33.514842+00:00",
+  "exit_code": 0,
+  "head": "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "tracked_changes_after_command": [],
+  "files": [
+    {
+      "path": "console.txt",
+      "bytes": 1763,
+      "sha256": "657ea2fe52f9b2795fe453b8f7e38f4d74486e59c04aebd9af4c23eab98d2cac"
+    },
+    {
+      "path": "toolchain/01-test-Core.IntegrationTests.log",
+      "bytes": 2225,
+      "sha256": "8bf914cbb446f5b1c27d75cfdd0191b5d142e6740e92a5d297eb7b803588fc01"
+    },
+    {
+      "path": "toolchain/result.json",
+      "bytes": 1036,
+      "sha256": "c4d296f2fb2523d9c1a578c0a07cdbd5c83e77d9811b4ebc245e03e9b95331e8"
+    },
+    {
+      "path": "toolchain/result.txt",
+      "bytes": 699,
+      "sha256": "faa39d58492e9e6b7662127085720a6d13551f825f3a74098923224ad34372ab"
+    },
+    {
+      "path": "toolchain/run.log",
+      "bytes": 2252,
+      "sha256": "ce2553568b090a347b78943a1db167f16af6fb6fb3aac0d4e504014413156eda"
+    }
+  ]
+}

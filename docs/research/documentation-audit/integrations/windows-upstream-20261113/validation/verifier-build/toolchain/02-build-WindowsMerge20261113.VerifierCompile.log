@@ -1,0 +1,20 @@
+$ dotnet build docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/Yubico.YubiKit.Core.csproj (in 289 ms).
+  Restored /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj (in 299 ms).
+  Restored /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.csproj (in 289 ms).
+  Restored /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj (in 289 ms).
+  Restored /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/Yubico.YubiKit.Management.csproj (in 289 ms).
+  Restored /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj (in 301 ms).
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  MacOSHidRouteVerification -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/MacOSHidRouteVerification/bin/Release/net10.0/MacOSHidRouteVerification.dll
+  LinuxHidRouteVerification -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/verification/LinuxHidRouteVerification/bin/Release/net10.0/LinuxHidRouteVerification.dll
+  Yubico.YubiKit.WindowsMerge20261113.VerifierCompile -> /home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/verifier-compile/src/bin/Release/net10.0/Yubico.YubiKit.WindowsMerge20261113.VerifierCompile.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:08.14

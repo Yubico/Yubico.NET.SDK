@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "frozen_roots": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1",
+      "files": 5226,
+      "sha256": "6939f308bca6f97573f8a9e79145c2d27b464c62ef2924c161832b94f629ece0"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/core-upstream-20261111",
+      "files": 8326,
+      "sha256": "5afe057c26475840f0c2c9775ab4c8dfd0e02f92f1d517533c06b896b236d0fb"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/piv-pr745-20261105",
+      "files": 114,
+      "sha256": "3afc466bbd3a937107a27af1ff7fa3d0baf866450f3a47d509cb9d860071cbe7"
+    }
+  ],
+  "protected_user_files": 4,
+  "original_checkout": "unchanged at published audit parent"
+}

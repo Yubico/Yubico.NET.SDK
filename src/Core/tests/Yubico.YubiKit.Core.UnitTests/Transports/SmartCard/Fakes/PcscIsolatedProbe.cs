@@ -80,7 +80,7 @@ internal static class PcscIsolatedProbe
 
         if (waitFailure is not null)
             ExceptionDispatchInfo.Capture(waitFailure).Throw();
-        Assert.True(process.ExitCode == 0, $"Isolated probe failed. Output: {artifactPath}");
+        Assert.True(process.ExitCode == 0, $"Isolated probe failed. ExitCode: {process.ExitCode}. Output: {artifactPath}");
         Assert.Contains($"PROBE-COMPLETE:{probe}", output, StringComparison.Ordinal);
         var outputLines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         Assert.Contains("total: 1", outputLines);

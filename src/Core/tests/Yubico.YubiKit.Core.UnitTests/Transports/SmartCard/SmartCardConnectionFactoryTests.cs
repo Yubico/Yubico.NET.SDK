@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging.Abstractions;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -84,7 +83,7 @@ public class SmartCardConnectionFactoryTests
             Atr = null
         };
 
-        var actual = Assert.Throws<InvalidOperationException>(() => new UsbSmartCardConnection(pcscDevice));
+        var actual = Assert.Throws<InvalidOperationException>(() => new PcscConnection(pcscDevice));
 
         Assert.Same(failure, actual);
         Assert.Equal(1, loggerFactory.CreateCalls);

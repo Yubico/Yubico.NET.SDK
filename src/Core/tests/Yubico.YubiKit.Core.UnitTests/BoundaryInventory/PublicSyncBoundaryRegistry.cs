@@ -11,6 +11,14 @@ internal static class PublicSyncBoundaryRegistry
     // Independent of the rows: removing an entry cannot silently reduce the supported scope.
     private static readonly (string Entry, string PublicType, string PublicSymbol, string Owner, string Symbol)[] Required =
     [
+        ("windows input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToIOReports"),
+        ("windows input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "GetReport"),
+        ("windows input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "SetReport"),
+        ("windows input dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "Dispose"),
+        ("windows feature open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToFeatureReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToFeatureReports"),
+        ("windows feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "GetReport"),
+        ("windows feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "SetReport"),
+        ("windows feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "Dispose"),
         ("linux input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToIOReports"),
         ("linux input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "GetReport"),
         ("linux input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "SetReport"),
@@ -27,10 +35,10 @@ internal static class PublicSyncBoundaryRegistry
         ("feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "GetReport"),
         ("feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "SetReport"),
         ("feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "Dispose"),
-        ("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransaction"),
+        ("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransaction"),
         ("smart async default", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync"),
-        ("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "Dispose"),
-        ("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose"),
+        ("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "Dispose"),
+        ("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "Dispose"),
         ("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start"),
         ("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop"),
         ("HID scan dispatch", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync")
@@ -39,6 +47,14 @@ internal static class PublicSyncBoundaryRegistry
     // These are reachability links, not assertions of native drain. Behavioral evidence is run separately.
     internal static readonly PublicSyncBoundaryRow[] Rows =
     [
+        new("windows input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToIOReports", "WindowsFidoDirectFacadeTests.Constructor_HeldOpenOrFailedOpenCleanupBlocksOnIndependentOwner"),
+        new("windows input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "GetReport", "WindowsFidoDirectFacadeTests.DirectReports_DescriptorSizedPayloadAndNativeZeroFramingSurviveDispose"),
+        new("windows input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "SetReport", "WindowsFidoDirectFacadeTests.DirectCall_HeldNativeLastUseBlocksCallerAndSharedDisposal"),
+        new("windows input dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "Dispose", "WindowsFidoDirectFacadeTests.SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome"),
+        new("windows feature open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToFeatureReports", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidInterface", "ConnectToFeatureReports", "WindowsOtpDirectFacadeTests.Constructor_HeldOpenOrFailedOpenCleanupBlocksOnIndependentOwner"),
+        new("windows feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "GetReport", "WindowsOtpDirectFacadeTests.DirectReports_DescriptorSizedPayloadAndNativeZeroFramingSurviveDispose"),
+        new("windows feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "SetReport", "WindowsOtpDirectFacadeTests.DirectCall_HeldNativeLastUseBlocksCallerAndSharedDisposal"),
+        new("windows feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "Dispose", "WindowsOtpDirectFacadeTests.SyncDispose_HeldReportAndCheckedClose_DrainsBeforeReturningSharedOutcome"),
         new("linux input open", "Yubico.YubiKit.Core.Transports.Hid.IHidInterface", "ConnectToIOReports", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidInterface", "ConnectToIOReports", "LinuxDirectFacadeAcceptanceTests.InputOpen_MetadataFailureClosesPartialOwner"),
         new("linux input get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "GetReport", "LinuxFidoHidConnectionTests.DirectFacade_DescriptorSizesAndArbitraryOutputLengthSurviveSharedOwner"),
         new("linux input set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxHidIOReportConnection", "SetReport", "LinuxDirectFacadeAcceptanceTests.InputSet_HeldWriteBlocksSyncCallerAndDrainsBeforeClose"),
@@ -55,10 +71,10 @@ internal static class PublicSyncBoundaryRegistry
         new("feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "GetReport", "MacOSHidFeatureFacadeTests.NativeGetError_IsPreservedAndPartialBufferCleared"),
         new("feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "SetReport", "MacOSHidFeatureCompatibilityTests.PendingExpertSetDrainsBeforeAsyncDispose_AndConcurrentDisposeSharesClose"),
         new("feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "Dispose", "MacOSHidFeatureCompatibilityTests.UnprovenCloseRetainsNativeObjectAndSharesFailure"),
-        new("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransaction", "PcscConnectionLifetimeTests.BuiltInPcscConnection_ConcurrentBeginWhileFirstIsHeld_IsRefusedBeforeSecondSubmission"),
+        new("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransaction", "PcscConnectionLifetimeTests.BuiltInPcscConnection_ConcurrentBeginWhileFirstIsHeld_IsRefusedBeforeSecondSubmission"),
         new("smart async default", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", "PcscConnectionLifetimeTests.AsyncTransaction_ExternalDefaultFallback_BlocksCallerUntilSynchronousBeginReturns"),
-        new("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_TransactionEndAndShutdownDuringTransmit_AreOrderedAndCoalesced"),
-        new("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_SynchronousDispose_DrainsHeldNativeTransmitBeforeReleasingContext"),
+        new("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_TransactionEndAndShutdownDuringTransmit_AreOrderedAndCoalesced"),
+        new("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_SynchronousDispose_DrainsHeldNativeTransmitBeforeReleasingContext"),
         new("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start", "MacOSHidListenerLifetimeTests.Start_RegistersAndSchedulesBeforeOpen_ThenRunsAndClosesBeforeRelease"),
         new("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", "MacOSHidListenerLifetimeTests.CallbackSelfStop_DoesNotJoinItself_AndDrainsBeforeRelease"),
         // Task.Run is a per-call dispatch, not a bounded executor or a cancellable native operation.
@@ -69,7 +85,7 @@ internal static class PublicSyncBoundaryRegistry
     {
         var rows = input.ToArray();
         var errors = new List<string>();
-        var core = typeof(UsbSmartCardConnection).Assembly;
+        var core = typeof(PcscConnection).Assembly;
         foreach (var (Entry, PublicType, PublicSymbol, Owner, Symbol) in Required)
         {
             var matches = rows.Where(row => row.Entry == Entry).ToArray();
@@ -91,7 +107,8 @@ internal static class PublicSyncBoundaryRegistry
                 errors.Add($"missing internal owner symbol: {row.Entry}");
             if (publicType is not null && ownerType is not null && !publicType.IsAssignableFrom(ownerType))
                 errors.Add($"owner does not implement public contract: {row.Entry}");
-            if (!HasEvidence(row.Evidence))
+            // Use the canonical requirement, not caller-editable row metadata, for Windows' no-gap policy.
+            if (!HasEvidence(row.Evidence, Owner.StartsWith("Yubico.YubiKit.Core.Transports.Hid.Windows.", StringComparison.Ordinal)))
                 errors.Add($"stale evidence: {row.Entry}");
         }
         foreach (var row in rows.Where(row => !Required.Any(item => item.Entry == row.Entry)))
@@ -103,10 +120,10 @@ internal static class PublicSyncBoundaryRegistry
         type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
             .Any(candidate => candidate.Name == method);
 
-    private static bool HasEvidence(string evidence)
+    private static bool HasEvidence(string evidence, bool requiresBehavioralEvidence)
     {
         if (evidence.StartsWith("No held-native ", StringComparison.Ordinal))
-            return true;
+            return !requiresBehavioralEvidence;
 
         var separator = evidence.LastIndexOf('.');
         if (separator <= 0 || separator == evidence.Length - 1)
@@ -114,7 +131,7 @@ internal static class PublicSyncBoundaryRegistry
 
         var testType = typeof(PublicSyncBoundaryRegistryTests).Assembly.GetTypes()
             .SingleOrDefault(type => type.Name == evidence[..separator]);
-        return testType?.GetMethod(evidence[(separator + 1)..])?.GetCustomAttributes<FactAttribute>()
+        return testType is { IsAbstract: false } && testType.GetMethod(evidence[(separator + 1)..])?.GetCustomAttributes<FactAttribute>()
             .Any(AdapterContractRegistry.IsRunnable) == true;
     }
 }

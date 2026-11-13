@@ -1,0 +1,7 @@
+RESULT: PASSED  (dotnet toolchain.cs -- docs-qa docs-architecture)
+Targets:
+  ✓ docs-qa               0.3s
+  ✓ docs-architecture     0.3s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-122611-487-docs-qa+docs-architecture/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

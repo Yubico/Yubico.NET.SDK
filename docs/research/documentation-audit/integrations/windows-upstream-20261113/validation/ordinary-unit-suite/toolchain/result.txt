@@ -1,0 +1,22 @@
+RESULT: PASSED  (dotnet toolchain.cs -- test --filter "Category!=RequiresHardware&Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                      79.0s
+Projects (test):
+  ✓ PASS      Cli.Commands.UnitTests    48 executed, 1 skipped
+  ✓ PASS      Cli.Shared.UnitTests      78 executed, 0 skipped
+  ✓ PASS      Core.UnitTests            2236 executed, 4 skipped
+  ✓ PASS      Ctap2.UnitTests           498 executed, 0 skipped
+  ✓ PASS      Management.UnitTests      96 executed, 0 skipped
+  ✓ PASS      Oath.UnitTests            436 executed, 0 skipped
+  ✓ PASS      OpenPgp.UnitTests         193 executed, 0 skipped
+  ✓ PASS      Piv.UnitTests             289 executed, 0 skipped
+  ✓ PASS      PublicApi.UnitTests       25 executed, 0 skipped
+  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped
+  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped
+  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped
+  ✓ PASS      YubiOtp.UnitTests         209 executed, 0 skipped
+Totals: projects: 13 passed, 0 failed, 0 with no tests executed; tests: 4620 executed, 0 failed, 5 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261113-121653-430-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

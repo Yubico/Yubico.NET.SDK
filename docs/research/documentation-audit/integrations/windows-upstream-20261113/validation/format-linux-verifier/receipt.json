@@ -1,0 +1,23 @@
+{
+  "actor": "GPT-6.1 Sol",
+  "platform": "Linux integration host",
+  "command": [
+    "dotnet",
+    "format",
+    "verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj",
+    "--verify-no-changes",
+    "--no-restore",
+    "--include",
+    "verification/LinuxHidRouteVerification/BlockingReportConnection.cs",
+    "--report",
+    "/home/rupicola/Code/y/yubikit-windows-audit-integration-20261113/docs/research/documentation-audit/integrations/windows-upstream-20261113/validation/format-linux-verifier/report.json",
+    "--verbosity",
+    "diagnostic"
+  ],
+  "exit_code": 0,
+  "includes": [
+    "verification/LinuxHidRouteVerification/BlockingReportConnection.cs"
+  ],
+  "candidate_tree": "05d4409729dd81c7717c99a15a2697d49eb10906",
+  "finished_utc": "2026-11-13T11:20:31.011691+00:00"
+}

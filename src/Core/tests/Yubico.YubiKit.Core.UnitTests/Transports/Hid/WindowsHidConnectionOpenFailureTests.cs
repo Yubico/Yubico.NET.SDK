@@ -12,43 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Native.Windows.HidD;
 using Yubico.YubiKit.Core.Transports.Hid.Windows;
+using Yubico.YubiKit.Core.UnitTests.Devices;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
 
 /// <summary>
 ///     A constructor that acquires a native handle and then throws leaves nothing for the caller to dispose:
 ///     the object never finishes construction, so no <c>using</c>, <c>finally</c>, or factory <c>catch</c> can
-///     reach it. Both Windows HID connections open the device first and then open the report path, so a failing
-///     report open must dispose the device itself.
+///     reach it. Both Windows HID facades delegate acquisition to their native owner, so a failing
+///     constructor must await that owner's checked cleanup before propagating the open failure.
 /// </summary>
 /// <remarks>
 ///     Found by cross-vendor review of commit <c>6289c774</c>, which changed the feature-report open path.
-///     The device is faked, so these run on every platform and need no Windows hardware.
+///     Only the native API is faked, so these run on every platform and need no Windows hardware.
 /// </remarks>
 public class WindowsHidConnectionOpenFailureTests
 {
     [Fact]
     public void FeatureReportConnection_WhenFeatureOpenThrows_DisposesTheDevice()
     {
-        var device = new ThrowingWindowsHidReportAccess(throwOnFeatureOpen: true);
+        var device = new WindowsRoutingApi { OpenError = new InvalidOperationException("feature open"), Length = 9 };
 
         Assert.Throws<InvalidOperationException>(
-            () => new WindowsHidFeatureReportConnection(device));
+            () => new WindowsHidFeatureReportConnection("feature", device));
 
-        Assert.True(device.WasDisposed, "the device handle leaked: the failing constructor never disposed it");
+        Assert.Equal(1, device.Closes);
     }
 
     [Fact]
     public void IOReportConnection_WhenIOOpenThrows_DisposesTheDevice()
     {
-        var device = new ThrowingWindowsHidReportAccess(throwOnIOOpen: true);
+        var device = new WindowsRoutingApi { OpenError = new InvalidOperationException("IO open") };
 
         Assert.Throws<InvalidOperationException>(
-            () => new WindowsHidIOReportConnection(device));
+            () => new WindowsHidIOReportConnection("io", device));
 
-        Assert.True(device.WasDisposed, "the device handle leaked: the failing constructor never disposed it");
+        Assert.Equal(1, device.Closes);
     }
 
     /// <summary>
@@ -58,44 +58,12 @@ public class WindowsHidConnectionOpenFailureTests
     [Fact]
     public void FeatureReportConnection_WhenOpenSucceeds_DoesNotDisposeTheDevice()
     {
-        var device = new ThrowingWindowsHidReportAccess();
+        var device = new WindowsRoutingApi { Length = 9 };
 
-        var connection = new WindowsHidFeatureReportConnection(device);
+        using var connection = new WindowsHidFeatureReportConnection("feature", device);
 
-        Assert.False(device.WasDisposed);
+        Assert.Equal(0, device.Closes);
         // HidD lengths include the report ID byte; the connection exposes payload-only sizes.
-        Assert.Equal(device.FeatureReportByteLength - 1, connection.InputReportSize);
-    }
-
-    private sealed class ThrowingWindowsHidReportAccess(bool throwOnFeatureOpen = false, bool throwOnIOOpen = false)
-        : IWindowsHidReportAccess
-    {
-        public bool WasDisposed { get; private set; }
-
-        public string DevicePath => @"\\?\fake-hid-path";
-        public short Usage => 0x06;
-        public short UsagePage => 0x01;
-        public short InputReportByteLength => 65;
-        public short OutputReportByteLength => 65;
-        public short FeatureReportByteLength => 9;
-
-        public void OpenIOConnection()
-        {
-            if (throwOnIOOpen)
-                throw new InvalidOperationException("simulated IO report open failure");
-        }
-
-        public void OpenFeatureConnection()
-        {
-            if (throwOnFeatureOpen)
-                throw new InvalidOperationException("simulated feature report open failure");
-        }
-
-        public byte[] GetFeatureReport() => new byte[FeatureReportByteLength];
-        public void SetFeatureReport(byte[] buffer) { }
-        public byte[] GetInputReport() => new byte[InputReportByteLength];
-        public void SetOutputReport(byte[] buffer) { }
-
-        public void Dispose() => WasDisposed = true;
+        Assert.Equal(device.Length - 1, connection.InputReportSize);
     }
 }

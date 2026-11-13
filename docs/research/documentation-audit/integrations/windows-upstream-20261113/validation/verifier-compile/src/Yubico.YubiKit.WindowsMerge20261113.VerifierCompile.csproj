@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Compile the real, existing friend assemblies; never execute their entry points. -->
+    <ProjectReference Include="../../../../../../../../verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj"
+                      ReferenceOutputAssembly="false" AdditionalProperties="PublishAot=false" />
+    <ProjectReference Include="../../../../../../../../verification/LinuxHidRouteVerification/LinuxHidRouteVerification.csproj"
+                      ReferenceOutputAssembly="false" AdditionalProperties="PublishAot=false" />
+  </ItemGroup>
+</Project>

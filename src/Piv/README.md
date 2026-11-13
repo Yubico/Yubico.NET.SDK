@@ -208,14 +208,16 @@ when multiple devices are connected. Picker labels reuse discovery metadata, not
 ## Maintainer verification
 
 For maintainers, run unit tests with `dotnet toolchain.cs -- test --project Piv`.
-To run the hardware-free authentication cleanup and pool-reuse cases specifically:
+To run the hardware-free PIN-only recovery and owned-response clearing cases specifically:
 
 ```bash
-dotnet toolchain.cs -- test --project Piv --filter "FullyQualifiedName~AuthenticationProtocolTests"
+dotnet toolchain.cs -- test --project Piv --filter "FullyQualifiedName~PivPinOnlyModeSessionTests"
 ```
 
-These cases check clearing before pooled storage is returned, across successful,
-rejected, mismatched and canceled exchanges for Triple-DES and AES management keys.
+These cases retain response-clearing and recovery assertions. They do not check pooled
+command buffers after return: that memory can already belong to another renter. The
+production authentication implementation is unchanged; pre-return pooled-buffer clearing
+has no direct runtime assertion in this fixture.
 
 On an explicitly allowlisted
 dedicated test key, run smoke with `dotnet toolchain.cs -- test --integration --project Piv --smoke`, then full

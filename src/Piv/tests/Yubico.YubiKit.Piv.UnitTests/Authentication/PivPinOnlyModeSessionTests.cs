@@ -233,7 +233,7 @@ public class PivPinOnlyModeSessionTests
         public async Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true, CancellationToken cancellationToken = default)
         {
             // Responses own non-pooled storage. Command payload storage is returned to the pool
-            // before recovery completes; AuthenticationProtocolTests checks it at Return instead.
+            // before recovery completes, so its clearing cannot be asserted through a retained view.
             var response = await backend.SendAsync(command, throwOnError, cancellationToken);
             if (command.Ins == 0x87)
                 _responses.Add(response.RawData);
